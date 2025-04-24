@@ -1,0 +1,18 @@
+view swiper swiper-item {
+    box-sizing: border-box;  // 内边距放到边框内
+}
+
+// 背景色渐变
+.pageBackground {
+    background: linear-gradient(to bottom, transparent, #fff 400rpx), linear-gradient(to right, #beecd8 20%, #f4e2d8);
+    min-height: 80vh;
+}
+
+.loadingLayout {
+    padding: 30rpx 0;
+}
+
+// 安全区，主要是针对手机home键上方的区域
+.safe-area-inset-bottom{
+	height: env(safe-area-inset-bottom);
+}
