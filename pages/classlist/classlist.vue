@@ -125,7 +125,7 @@
     onPullDownRefresh(() => {
         console.log("onPullDownRefresh");
         classList.value = [];
-        uni.removeStorageSync("storgClassList")
+        uni.removeStorageSync("wallList")
 
         getClassList();
 

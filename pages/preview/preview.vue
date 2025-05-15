@@ -110,6 +110,9 @@
                 </view>
             </view>
         </uni-popup>
+        
+        <!-- <custom-ad-interstitial ref="adInterstitialRef"></custom-ad-interstitial> -->
+        
     </view>
 </template>
 
@@ -204,7 +207,11 @@
     }
 
     // 点击下载
+    const adInterstitialRef = ref(null);
     const clickDownload = () => {
+        // 弹出广告
+        // adInterstitialRef.value.show();
+        
         // #ifdef H5
         uni.showModal({
             content: "请长按或右键菜单保存壁纸",

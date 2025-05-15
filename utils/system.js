@@ -2,10 +2,12 @@ const SYSTEM_INFO = uni.getSystemInfoSync();
 // const SYSTEM_INFO = uni.getAppBaseInfo();
 
 export const getStatusBarHeight = () => {
+    // 状态栏高度
     return SYSTEM_INFO.statusBarHeight || 0;
 }
 
 export const getTitleBarHeight = () => {
+    // 小程序胶囊按钮高度
     if (uni.getMenuButtonBoundingClientRect) {
         let {top, height} = uni.getMenuButtonBoundingClientRect();
         return height + (top - getStatusBarHeight()) * 2;

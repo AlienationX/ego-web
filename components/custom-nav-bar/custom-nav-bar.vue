@@ -26,7 +26,7 @@
     
     defineProps({
         title: {
-           type: String,
+            type: String,
             default: "壁纸"
         }
     })

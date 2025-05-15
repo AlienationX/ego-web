@@ -70,14 +70,10 @@
             </view>
         </view>
         
-        <!-- <view class="content">
-            <view class="ad-view">
-              <ad adpid="1111111111" @load="onload" @close="onclose" @error="onerror"></ad>
-            </view>
-        </view> -->
-          
+        <custom-ad-banner></custom-ad-banner>
+
     </view>
-    
+
 </template>
 
 <script setup>
@@ -284,14 +280,5 @@
                 }
             }
         }
-        
-        .content {
-            background-color: #DBDBDB;
-            padding: 10px;
-            .ad-view {
-              background-color: #FFFFFF;
-              margin-bottom: 10px;
-            }
-          }
     }
 </style>

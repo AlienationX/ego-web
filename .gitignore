@@ -1,4 +1,6 @@
 
 .DS_Store
+.hbuilderx
 
-unpackage/*
+uni_modules
+unpackage

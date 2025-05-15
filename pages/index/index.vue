@@ -43,7 +43,7 @@
         </view>
 
         <view class="select">
-            <common-title>
+            <index-title>
                 <template #name>每日推荐</template>
                 <template #custom>
                     <view class="date">
@@ -54,7 +54,7 @@
                         </view>
                     </view>
                 </template>
-            </common-title>
+            </index-title>
             <view class="content">
                 <scroll-view scroll-x>
                     <view class="box" v-for="item in randomList" :key="item.id" @click="goPriview(item.id)">
@@ -65,17 +65,17 @@
         </view>
 
         <view class="theme">
-            <common-title>
+            <index-title>
                 <template #name>专题精选</template>
                 <template #custom>
                     <navigator url="/pages/classify/classify" open-type="reLaunch" class="more">更多+</navigator>
                 </template>
-            </common-title>
+            </index-title>
 
             <view class="content">
                 <!-- :item="item",第一个item是和组件绑定传参，第二个item是for循环遍历的值-->
-                <theme-item v-for="item in classifyList" :key="item.id" :item="item"></theme-item>
-                <theme-item :isMore="true"></theme-item>
+                <index-item v-for="item in classifyList" :key="item.id" :item="item"></index-item>
+                <index-item :isMore="true"></index-item>
             </view>
         </view>
 
@@ -87,6 +87,7 @@
         ref
     } from "vue";
     import {
+        onPullDownRefresh,
         onShareAppMessage,
         onShareTimeline
     } from "@dcloudio/uni-app"
@@ -151,14 +152,27 @@
     }
 
     getBanner();
-    getRandom();
     getNotice();
+    getRandom();
     getClassify();
+    
+    // 下拉刷新
+    onPullDownRefresh(() => {
+        console.log("onPullDownRefresh");
+        
+        // getBanner();
+        // getNotice();
+        getRandom();
+        // getClassify();
+    
+        // uni.hideNavigationBarLoading();
+        uni.stopPullDownRefresh();
+    })
 
     //分享给好友
     onShareAppMessage((e) => {
         return {
-            title: "本我壁纸-ego，好看的手机壁纸",
+            title: "本我壁纸，好看的手机壁纸应用",
             path: "/pages/index/index"
         }
     })
@@ -166,7 +180,7 @@
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: "本我壁纸-ego，好看的手机壁纸"
+            title: "本我壁纸，好看的手机壁纸应用"
         }
     })
 </script>
@@ -258,6 +272,7 @@
 
                 .button {
                     border: 0;
+                    font-size: 28rpx;
                     color: #28b389;
                 }
 

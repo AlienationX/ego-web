@@ -1,13 +1,13 @@
 // const BASE_URL = 'http://localhost:8000/wallpaper/api';
-// const BASE_URL = 'http://43.142.93.172:8000/wallpaper/api';
-const BASE_URL = 'https://1328701250-04vntoft6c.ap-beijing.tencentscf.com/wallpaper/api';
-
+// const BASE_URL = 'https://1328701250-04vntoft6c.ap-beijing.tencentscf.com/wallpaper/api';
+const BASE_URL = 'https://49touviwp7.execute-api.eu-north-1.amazonaws.com/dev/wallpaper/api';
 
 function request(config = {}) {
     let {
         url,
         data = {},
         method = "GET",
+        timeout =  10000,  // 10秒
         header = {}
     } = config
 
@@ -26,15 +26,17 @@ function request(config = {}) {
                 if (res.data.code === 200) {
                     resolve(res.data) // 只有状态为200才是请求真正成功
                 } else {
+                    // 白色模态框
                     uni.showModal({
                         title: "错误提示",
-                        content: res.data.errMsg,
+                        content: res.data.message,
                         showCancel: false
                     })
-                    uni.showToast({
-                        title: res.data.errMsg,
-                        icon: "none"
-                    })
+                    // 灰色透明框
+                    // uni.showToast({
+                    //     title: res.data.message,
+                    //     icon: "none"
+                    // })
                     reject(res.data) // 强制接口报错
                 }
             },
