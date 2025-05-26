@@ -40,8 +40,8 @@
                     "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
                 ],
                 "abiFilters" : [ "arm64-v8a", "x86" ],
-                "minSdkVersion" : 30,
-                "targetSdkVersion" : 30
+                "minSdkVersion" : 21,
+                "targetSdkVersion" : 21
             },
             /* ios打包配置 */
             "ios" : {
@@ -100,7 +100,8 @@
         "appid" : "wx74c392f8525b9268",
         "setting" : {
             "urlCheck" : false,
-            "minified" : true
+            "minified" : true,
+            "es6" : false
         },
         "usingComponents" : true
     },

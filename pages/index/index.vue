@@ -47,6 +47,9 @@
                 <template #name>每日推荐</template>
                 <template #custom>
                     <view class="date">
+                        <navigator class="button" url="/pages/test/ad-inter">ad1</navigator>
+                        <navigator class="button" url="/pages/test/ad-rewarded">ad2</navigator>
+                        
                         <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
                         <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
                         <view class="text">
@@ -74,8 +77,8 @@
 
             <view class="content">
                 <!-- :item="item",第一个item是和组件绑定传参，第二个item是for循环遍历的值-->
-                <index-item v-for="item in classifyList" :key="item.id" :item="item"></index-item>
-                <index-item :isMore="true"></index-item>
+                <classify-item v-for="item in classifyList" :key="item.id" :item="item"></classify-item>
+                <classify-item :isMore="true"></classify-item>
             </view>
         </view>
 
@@ -97,6 +100,8 @@
         apiGetNotice,
         apiGetClassify
     } from "@/api/wallpaper.js";
+    import { picurlHandle } from "@/utils/common.js";
+    import { PICS_BASE_URL } from "@/common/config.js";
 
     const bannerList = ref([]);
     const randomList = ref([]);
@@ -105,25 +110,19 @@
 
     const getBanner = async () => {
         let res = await apiGetBanner();
-        bannerList.value = res.data;
-    }
-
-    const getRandom = async () => {
-        let res = await apiGetDayRandom();
-        // classList.value = wallList.map(item => {
+        // bannerList.value = res.data.map(item => {
         //     // 增加picurl字段，存储大图的url地址
         //     return {
         //         ...item,
         //         picurl: item.smallPicurl.replace("_small.webp", ".jpg")
         //     }
         // })
-        randomList.value = res.data.map(item => {
-            // 增加smallPicurl字段，存储小图的url地址
-            return {
-                ...item,
-                smallPicurl: item.picurl.replace(".jpg", "_small.webp")
-            }
-        });
+        bannerList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));
+    }
+
+    const getRandom = async () => {
+        let res = await apiGetDayRandom();
+        randomList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));
     }
 
     const getNotice = async () => {
@@ -137,7 +136,7 @@
         let res = await apiGetClassify({
             select: true
         });
-        classifyList.value = res.data;
+        classifyList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));;
     }
 
     const goPriview = (id) => {

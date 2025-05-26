@@ -16,6 +16,13 @@ export const useProfileStore = defineStore(
         });
         const message = ref('');
         const showAd = ref(true);
+        
+        // 记录本次使用的下载次数
+        const downloadCnt = ref(0);
+        const downloadCntAdd = () => {
+          downloadCnt.value++
+          console.log("已下载次数", downloadCnt.value);
+        }
 
         async function getUserInfo() {
             
@@ -93,7 +100,7 @@ export const useProfileStore = defineStore(
             removeToken();
         }
 
-        return { token, userinfo, privilege, message, getUserInfo, getPrivilege, login, logout };
+        return { token, userinfo, privilege, message, showAd, downloadCnt, downloadCntAdd, getUserInfo, getPrivilege, login, logout };
     }
     // {
     //     persist: {

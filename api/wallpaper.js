@@ -1,5 +1,4 @@
 // const BASE_URL = 'http://localhost:8000/wallpaper/api';
-// const BASE_URL = 'https://1328701250-04vntoft6c.ap-beijing.tencentscf.com/wallpaper/api';
 const BASE_URL = 'https://49touviwp7.execute-api.eu-north-1.amazonaws.com/dev/wallpaper/api';
 
 function request(config = {}) {
@@ -7,13 +6,13 @@ function request(config = {}) {
         url,
         data = {},
         method = "GET",
-        timeout =  10000,  // 10秒
+        // timeout =  10000,  // 10秒
         header = {}
     } = config
 
     url = BASE_URL + url;
     header['Access-Key'] = "secret-insecure-88hefbf6c!mrv5x(xa4swy-h3y41f()(8xh6syj(xi&m!!h$#b";
-    header['token'] = "secret...xzcvsdfall;akdl;fasdfadsfgasd";
+    header['Token'] = "secret...xzcvsdfall;akdl;fasdfadsfgasd";
 
     return new Promise((resolve, reject) => {
         uni.request({

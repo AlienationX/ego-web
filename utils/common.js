@@ -17,13 +17,19 @@ export function compareTimestamp(timestamp) {
     }
 }
 
-export function addSmallPicurl(item) {
-    // wall数据增加额外字段，前端处理，减少后端流量消耗
-    // 增加smallPicurl字段，存储小图的url地址
+export function picurlHandle(item, prefix) { 
+    // 1. 给 url 字段添加前缀。wall数据增加额外字段，前端处理，减少后端流量消耗
+    const prefixedUrl = `${prefix}/${item.picurl}`;
+    
+    // 2. 生成 smallPicurl 存储小图片（基于添加前缀后的完整 URL）
+    const smallPicurl = prefixedUrl.replace('.jpg', '_small.webp');
+
+    // 返回新对象（保留原字段(覆盖原字段) + 新增字段）
     return {
         ...item,
-        smallPicurl: item.picurl.replace(".jpg", "_small.webp")
-    }
+        picurl: prefixedUrl,  // 覆盖原始的picurl数据
+        smallPicurl
+    };
 }
 
 export function gotoHome() {

@@ -77,14 +77,35 @@
 		    }
 		},
 		{
-		    "path" : "pages/test/test",
+		    "path" : "pages/test/cssgrid",
 		    "style" : 
 		    {
 		        "navigationBarTitleText" : ""
 		    }
 		},
 		{
-		    "path" : "pages/test/cssgrid",
+		    "path" : "pages/test/ad-inter",
+		    "style" : 
+		    {
+		        "navigationBarTitleText" : ""
+		    }
+		},
+		{
+		    "path" : "pages/test/ad-rewarded",
+		    "style" : 
+		    {
+		        "navigationBarTitleText" : ""
+		    }
+		},
+        {
+            "path" : "pages/test/test1",
+            "style" : 
+            {
+                "navigationBarTitleText" : ""
+            }
+        },
+		{
+		    "path" : "pages/test/test2",
 		    "style" : 
 		    {
 		        "navigationBarTitleText" : ""

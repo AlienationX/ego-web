@@ -4,12 +4,13 @@
             <uni-load-more status="loading"></uni-load-more>
         </view>
 
-        <view class="content">
+        <!-- <view class="content">
             <navigator :url="'/pages/preview/preview?id='+item.id" class="item" v-for="item in classList"
                 :key="item.id">
                 <image :src="item.smallPicurl" mode="aspectFill"></image>
             </navigator>
-        </view>
+        </view> -->
+        <window-view :classList="classList"></window-view>
 
         <view class="loadingLayout" v-if="classList.length || noData">
             <uni-load-more :status="noData?'noMore':'loading'"></uni-load-more>
@@ -38,8 +39,9 @@
     } from "@/api/wallpaper.js";
     import {
         gotoHome,
-        addSmallPicurl
+        picurlHandle
     } from "@/utils/common.js";
+    import { PICS_BASE_URL } from "@/common/config.js";
 
     const classList = ref([]);
     const noData = ref(false);
@@ -52,9 +54,9 @@
 
     const getClassList = async () => {
         let res = await apiGetClassList(queryParams);
-
+        
         // 增加缩略图samllPicurl字段
-        let fullData = res.data.map(item => addSmallPicurl(item))
+        let fullData = res.data.map(item => picurlHandle(item, PICS_BASE_URL))
           
         // // 两表关联增加 classify_name 用来显示
         // let classRes = await apiGetClassify();
@@ -153,22 +155,6 @@
 
 <style lang="scss" scoped>
     .layout {
-        .content {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10rpx;
-            padding: 10rpx;
-
-            .item {
-                height: 440rpx;
-
-                image {
-                    width: 100%;
-                    height: 100%;
-                    display: block;
-                    border-radius: 10rpx;
-                }
-            }
-        }
+        
     }
 </style>

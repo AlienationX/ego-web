@@ -1,8 +1,13 @@
 <template>
     <view class="classLayout pageBackground">
         <custom-nav-bar title="分类"></custom-nav-bar>
+        
+        <!-- <view class="loadingLayout" v-if="!classifyList.length">
+            <uni-load-more status="loading"></uni-load-more>
+        </view> -->
+        
         <view class="classify">
-            <theme-item v-for="item in classifyList" :key="item.id" :item="item"></theme-item>
+            <classify-item v-for="item in classifyList" :key="item.id" :item="item"></classify-item>
         </view>
     </view>
 </template>
@@ -14,6 +19,8 @@
     import {
         apiGetClassify
     } from "@/api/wallpaper.js";
+    import { picurlHandle } from "@/utils/common.js";
+    import { PICS_BASE_URL } from "@/common/config.js";
 
     const classifyList = ref([]);
 
@@ -22,19 +29,7 @@
             // 该参数无效，接口默认就是显示全部分类
             pageSize: 30
         });
-        classifyList.value = res.data;
-    }
-
-    const onload = () => {
-        console.log("onload");
-    }
-
-    const onclose = (e) => {
-        console.log("onclose: " + e.detail);
-    }
-
-    const onerror = (e) => {
-        console.log("onerror: " + e.detail.errCode + " message:: " + e.detail.errMsg);
+        classifyList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));
     }
 
     getClassify()

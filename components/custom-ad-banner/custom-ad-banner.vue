@@ -40,11 +40,10 @@
 <style lang="scss" scoped>
     .content {
         background-color: #DBDBDB;
-        padding: 10px;
+        padding: 20rpx;
 
         .ad-view {
             background-color: #FFFFFF;
-            margin-bottom: 10px;
         }
     }
 </style>

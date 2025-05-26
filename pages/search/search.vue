@@ -49,16 +49,19 @@
                     </button>
                 </view>
                 <view class="right" @click="onChange">
-                    <uni-icons :type="view" size="18" color="#28b389"></uni-icons>
+                    <uni-icons :type="settingStore.switchViewIcon" size="18" color="#28b389"></uni-icons>
                 </view>
             </view>
 
-            <view class="list">
+            <!-- <view class="list">
                 <navigator :url="`/pages/preview/preview?id=${item.id}`" class="item" v-for="item in classList"
                     :key="item.id">
                     <image :src="item.smallPicurl" mode="aspectFill"></image>
                 </navigator>
-            </view>
+            </view> -->
+            <window-view v-if=" settingStore.options.view === 'window' " :classList="classList"></window-view>
+            <waterfall-view v-else :classList="classList"></waterfall-view>
+            
             <view class="loadingLayout" v-if="noData || classList.length">
                 <uni-load-more :status="noData?'noMore':'loading'" />
             </view>
@@ -86,8 +89,14 @@
         apiSearchData
     } from "@/api/wallpaper.js"
     import {
-        addSmallPicurl
+        picurlHandle
     } from "@/utils/common.js";
+    import {PICS_BASE_URL} from "@/common/config.js";
+    
+    import {
+        useSettingStore
+    } from '@/stores/setting.js';
+    const settingStore = useSettingStore();
 
     //查询参数
     const queryParams = ref({
@@ -174,7 +183,7 @@
         uni.showLoading()
         try {
             let res = await apiSearchData(queryParams.value);
-            let fullData = res.data.map(item => addSmallPicurl(item))
+            let fullData = res.data.map(item => picurlHandle(item, PICS_BASE_URL))
             // pendingList.value.value = [...pendingList.value.value, ...fullData];
             pendingList.value.push(...fullData)
             classList.value = [...pendingList.value]
@@ -196,8 +205,6 @@
 
 
     const useFilter = () => {
-
-        const view = ref("list")
 
         const onRecommend = () => {
             init(queryParams.value.keyword, showWordBoard.value, noResult.value, [...pendingList.value]);
@@ -233,13 +240,11 @@
         }
 
         const onChange = () => {
-            view.value = view.value === "list" ? "map-filled" : "list"
-            uni.setStorageSync("view", view.value === "list" ? "list" : "flow")
-            console.log(view.value);
+            settingStore.options.view = settingStore.options.view === "window" ? "waterfall" : "window";
+            uni.setStorageSync("view", settingStore.options.view)
         }
 
         return {
-            view,
             onRecommend,
             onSroce,
             onDateSort,
@@ -402,25 +407,7 @@
                 align-items: center;
 
                 uni-icons {
-                    padding-right: 14rpx;
-                }
-            }
-        }
-
-        .list {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10rpx;
-            padding: 10rpx;
-
-            .item {
-                height: 440rpx;
-
-                image {
-                    width: 100%;
-                    height: 100%;
-                    display: block;
-                    border-radius: 10rpx;
+                    padding-right: 20rpx;
                 }
             }
         }

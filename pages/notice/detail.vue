@@ -1,5 +1,9 @@
 <template>
     <view class="layout">
+        <view class="loadingLayout" v-if="Object.keys(detail).length === 0">
+            <uni-load-more status="loading"></uni-load-more>
+        </view>
+        
         <view class="title">
             <view class="tag" v-if="detail.select">
                 <uni-tag text="置顶" type="error" inverted></uni-tag>

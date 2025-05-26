@@ -129,6 +129,11 @@
     import {
         getStatusBarHeight
     } from "@/utils/system.js";
+    
+    import {
+        useProfileStore
+    } from '@/stores/profile.js';
+    const profileStore = useProfileStore();
 
     const classList = ref([]);
     const wallList = uni.getStorageSync("wallList") || [];
@@ -209,6 +214,9 @@
     // 点击下载
     const adInterstitialRef = ref(null);
     const clickDownload = () => {
+        
+        profileStore.downloadCntAdd()
+        
         // 弹出广告
         // adInterstitialRef.value.show();
         
