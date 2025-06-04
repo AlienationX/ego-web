@@ -110,11 +110,18 @@
 		    {
 		        "navigationBarTitleText" : ""
 		    }
+		},
+		{
+		    "path" : "pages/subject/subject",
+		    "style" : 
+		    {
+		        "navigationBarTitleText" : "专题"
+		    }
 		}
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "本我壁纸-ego",
+		"navigationBarTitleText": "本我壁纸",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},

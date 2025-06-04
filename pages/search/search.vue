@@ -1,7 +1,7 @@
 <template>
     <view class="layout">
         <view class="search">
-            <uni-search-bar @confirm="onSearch" @cancel="onClear" @clear="onClear" focus placeholder="搜索"
+            <uni-search-bar @confirm="onSearch" @cancel="onClear" @clear="onClear" focus placeholder="搜索" cancelButton="none"
                 v-model="queryParams.keyword">
             </uni-search-bar>
         </view>
@@ -98,18 +98,20 @@
     } from '@/stores/setting.js';
     const settingStore = useSettingStore();
 
-    //查询参数
+    // 查询参数
     const queryParams = ref({
         pageNum: 1,
         pageSize: 12,
         keyword: "",
         sortord: ""
     })
+    // 上一次的关键字
+    const lastKeyword = ref("");
 
-    //搜索历史词
+    // 搜索历史词
     const searchHistory = ref(uni.getStorageSync("searchHistory") || []);
 
-    //热门搜索词
+    // 热门搜索词
     const recommendList = ref(["美女", "帅哥", "宠物", "卡通"]);
 
     // 没有单词板
@@ -148,8 +150,18 @@
     const onSearch = () => {
         searchHistory.value = [...new Set([queryParams.value.keyword, ...searchHistory.value])].slice(0, 10);
         uni.setStorageSync("searchHistory", searchHistory.value);
+        
+        // 如果上次的关键字和当前关键字不同，则清空之前的数据
+        if (lastKeyword.value !== queryParams.value.keyword) {
+           dateSortAsc.value = true;
+           pendingList.value = []
+           uni.removeStorageSync("wallList");
+        }
+        
         init(queryParams.value.keyword);
         searchData();
+        
+        lastKeyword.value = queryParams.value.keyworkd;
     }
 
     //点击清除按钮

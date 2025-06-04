@@ -138,7 +138,7 @@
     //分享给好友
     onShareAppMessage((e) => {
         return {
-            title: "本我壁纸-ego: " + pageName,
+            title: "本我壁纸: " + pageName,
             path: "/pages/classlist/classlist?id=" + queryParams.classid + "&name=" + pageName
         }
     })
@@ -147,7 +147,7 @@
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: "本我壁纸-ego: " + pageName,
+            title: "本我壁纸: " + pageName,
             // query: "id=" + queryParams.classid + "&name=" + pageName
         }
     })

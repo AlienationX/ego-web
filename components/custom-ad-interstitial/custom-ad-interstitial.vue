@@ -36,7 +36,7 @@
     }
     
     const onerror = (e) => {
-        console.log("onerror: " + e.detail.code + " message:: " + e.detail.errMsg, e);
+        console.log("onerror: ad-interstitial " + e.detail.code + " message:: " + e.detail.errMsg, e);
     }
     
     const show = () => {

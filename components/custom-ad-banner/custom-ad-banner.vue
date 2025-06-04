@@ -30,17 +30,17 @@
         console.log("onload", e);
     }
     const onclose = (e) => {
-        console.log("onclose: " + e.detail);
+        console.log("onclose: " + e.detail, e);
     }
     const onerror = (e) => {
-        console.log("onerror: " + e.detail.errMsg.errCode + " message:: " + e.detail.errMsg.errMsg);
+        console.log("onerror: ad-banner " + e.detail.errMsg.errCode + " message:: " + e.detail.errMsg.errMsg, e);
     }
 </script>
 
 <style lang="scss" scoped>
     .content {
-        background-color: #DBDBDB;
-        padding: 20rpx;
+        // background-color: #DBDBDB;
+        padding: 0 32rpx;
 
         .ad-view {
             background-color: #FFFFFF;

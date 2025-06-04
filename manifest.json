@@ -41,7 +41,7 @@
                 ],
                 "abiFilters" : [ "arm64-v8a", "x86" ],
                 "minSdkVersion" : 21,
-                "targetSdkVersion" : 21
+                "targetSdkVersion" : ""
             },
             /* ios打包配置 */
             "ios" : {

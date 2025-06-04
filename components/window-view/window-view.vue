@@ -4,10 +4,10 @@
             <template v-for="(item, idx) in classList" :key="item.id">
 
                 <navigator :url="`/pages/preview/preview?id=${item.id}`" class="item">
-                    <image :src="item.smallPicurl" mode="aspectFill"></image>
+                    <image :src="item.smallPicurl" mode="aspectFill" class="img"></image>
                 </navigator>
                 <!-- 每12个图片后插入广告 -->
-                <view v-if="(idx + 1) % 12 === 0" class="ad-row">
+               <view v-if="(idx + 1) % 12 === 0" class="ad-row">
                     <custom-ad-banner></custom-ad-banner>
                 </view>
 
@@ -42,7 +42,7 @@
             .item {
                 height: 440rpx;
 
-                image {
+                .img {
                     width: 100%;
                     height: 100%;
                     display: block;
@@ -52,9 +52,10 @@
 
             .ad-row {
                 grid-column: 1 / -1;
-                margin: 10rpx 0;
+                width: 100%;
                 display: flex;
                 justify-content: center;
+                align-items: center;
             }
         }
 

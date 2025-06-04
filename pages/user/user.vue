@@ -1,5 +1,5 @@
 <template>
-    <view class="userLayout pageBackground">
+    <view class="layout pageBackground">
         <view :style="{height: getNavBarHeight() + 'px'}"></view>
         <view class="userInfo">
             <view class="avator">
@@ -196,7 +196,9 @@
 </script>
 
 <style lang="scss" scoped>
-    .userLayout {
+    .layout {
+        height: 100%;
+        
         .userInfo {
             display: flex;
             align-items: center;

@@ -45,7 +45,7 @@
     
     const onerror = (e) => {
         // 广告加载失败
-        console.log("onaderror: ", e.detail);
+        console.log("onaderror: ad-rewarded-video ", e.detail);
     }
 </script>
 

@@ -55,7 +55,7 @@
                             <view class="label">分类：</view>
                             <view class="value classify">{{currentInfo.classify_name}}</view>
                         </view>
-                        <view class="row">
+                        <view class="row" v-if="currentInfo.publisher">
                             <view class="label">发布者：</view>
                             <view class="value classify">{{currentInfo.publisher}}</view>
                             <!-- <view class="value classify">{{currentInfo.nickname}}</view> -->
@@ -67,8 +67,8 @@
                                 <text class="score">{{currentInfo.score}}分</text>
                             </view>
                         </view>
-                        <view class="row">
-                            <view class="label">摘要：</view>
+                        <view class="row" v-if="currentInfo.description">
+                            <view class="label">描述：</view>
                             <view class="value" selectable>{{currentInfo.description}}</view>
                         </view>
                         <view class="row">
@@ -215,10 +215,19 @@
     const adInterstitialRef = ref(null);
     const clickDownload = () => {
         
+        // 弹出广告，除以5余1的直接下载，除以5的整数倍弹出 激励视频广告，其他弹出 插屏广告-半屏
+        // 重启应用，重新计算
         profileStore.downloadCntAdd()
+        if (profileStore.downloadCnt % 5 === 1) {
+            console.log("直接下载");
+        } else if (profileStore.downloadCnt % 5 === 0) {
+            console.log("弹出 激励视频广告");
+            adRewardedRideoRef.value.show();
+        } else {
+            console.log("弹出 插屏广告-半屏");
+            adInterstitialRef.value.show();
+        }
         
-        // 弹出广告
-        // adInterstitialRef.value.show();
         
         // #ifdef H5
         uni.showModal({
@@ -331,7 +340,7 @@
     onShareAppMessage((e) => {
         // 读取缓存数据的话需要增加type=share，分享到的用户就可以不读缓存，直接读取数据库数据
         return {
-            title: "本我壁纸-ego",
+            title: "本我壁纸",
             path: "/pages/preview/preview?id=" + currentId.value + "&type=share"
         }
     })
@@ -340,7 +349,7 @@
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: "本我壁纸-ego",
+            title: "本我壁纸",
             query: "id=" + currentId.value + "&type=share"
         }
     })

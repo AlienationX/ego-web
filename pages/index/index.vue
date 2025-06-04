@@ -47,8 +47,8 @@
                 <template #name>每日推荐</template>
                 <template #custom>
                     <view class="date">
-                        <navigator class="button" url="/pages/test/ad-inter">ad1</navigator>
-                        <navigator class="button" url="/pages/test/ad-rewarded">ad2</navigator>
+                        <!-- <navigator class="button" url="/pages/test/ad-inter">ad1</navigator>
+                        <navigator class="button" url="/pages/test/ad-rewarded">ad2</navigator> -->
                         
                         <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
                         <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
@@ -66,15 +66,36 @@
                 </scroll-view>
             </view>
         </view>
-
-        <view class="theme">
+        
+        <!-- <view class="select">
             <index-title>
                 <template #name>专题精选</template>
+                <template #custom>
+                    <view class="date">
+                        <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
+                        <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
+                        <view class="text">
+                            <uni-dateformat :date="Date.now()" format="dd日"></uni-dateformat>
+                        </view>
+                    </view>
+                </template>
+            </index-title>
+            <view class="content">
+                <scroll-view scroll-x>
+                    <view class="box" v-for="item in randomList" :key="item.id" @click="goPriview(item.id)">
+                        <image :src="item.smallPicurl" mode="aspectFill"></image>
+                    </view>
+                </scroll-view>
+            </view>
+        </view> -->
+
+        <view class="classify">
+            <index-title>
+                <template #name>分类推荐</template>
                 <template #custom>
                     <navigator url="/pages/classify/classify" open-type="reLaunch" class="more">更多+</navigator>
                 </template>
             </index-title>
-
             <view class="content">
                 <!-- :item="item",第一个item是和组件绑定传参，第二个item是for循环遍历的值-->
                 <classify-item v-for="item in classifyList" :key="item.id" :item="item"></classify-item>
@@ -310,8 +331,12 @@
                 }
             }
         }
+        
+        .subject {
+            
+        }
 
-        .theme {
+        .classify {
             padding: 50rpx 0;
 
             .more {

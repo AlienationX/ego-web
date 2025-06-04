@@ -119,12 +119,13 @@
             background: #fff;
             border-radius: 10rpx;
             overflow: hidden;
-            box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+            // box-shadow: 0 8rpx 32rpx rgba(40, 179, 137, 0.18);
+            box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
 
             /* 让 custom-waterfalls-flow 渲染的图片也有圆角 */
-            ::v-deep image {
+            ::v-deep .img {
                 border-radius: 10rpx !important;
                 display: block;
                 width: 100%;
