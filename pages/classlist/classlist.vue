@@ -13,7 +13,7 @@
         <window-view :classList="classList"></window-view>
 
         <view class="loadingLayout" v-if="classList.length || noData">
-            <uni-load-more :status="noData?'noMore':'loading'"></uni-load-more>
+            <uni-load-more :status="noData ? 'noMore' : 'loading'"></uni-load-more>
         </view>
 
         <!-- 安全区域，主要针对手机上的home键上方的区域 -->
@@ -22,26 +22,11 @@
 </template>
 
 <script setup>
-    import {
-        ref
-    } from "vue";
-    import {
-        onLoad,
-        onUnload,
-        onReachBottom,
-        onPullDownRefresh,
-        onShareAppMessage,
-        onShareTimeline
-    } from "@dcloudio/uni-app";
-    import {
-        apiGetClassList,
-        apiGetClassify
-    } from "@/api/wallpaper.js";
-    import {
-        gotoHome,
-        picurlHandle
-    } from "@/utils/common.js";
-    import { PICS_BASE_URL } from "@/common/config.js";
+    import { ref } from 'vue';
+    import { onLoad, onUnload, onReachBottom, onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+    import { apiGetClassList, apiGetClassify } from '@/api/wallpaper.js';
+    import { gotoHome, picurlHandle } from '@/utils/common.js';
+    import { PICS_BASE_URL } from '@/common/config.js';
 
     const classList = ref([]);
     const noData = ref(false);
@@ -51,13 +36,12 @@
         pageSize: 12
     };
 
-
     const getClassList = async () => {
         let res = await apiGetClassList(queryParams);
-        
+
         // 增加缩略图samllPicurl字段
-        let fullData = res.data.map(item => picurlHandle(item, PICS_BASE_URL))
-          
+        let fullData = res.data.map((item) => picurlHandle(item, PICS_BASE_URL));
+
         // // 两表关联增加 classify_name 用来显示
         // let classRes = await apiGetClassify();
         // // 1. 将listA转换为Map，键为classid，值为对象
@@ -69,15 +53,15 @@
         // })
 
         // classList.value = [...classList.value, ...res.data];
-        classList.value.push(...fullData); // 推荐该方法，不用重新赋值        
+        classList.value.push(...fullData); // 推荐该方法，不用重新赋值
 
         if (queryParams.pageSize > res.data.length) {
             noData.value = true;
         }
 
         // 缓存数据
-        uni.setStorageSync("wallList", classList.value);
-    }
+        uni.setStorageSync('wallList', classList.value);
+    };
 
     // 分享需要使用该值
     let pageName;
@@ -86,15 +70,12 @@
         // 页面加载完毕后，获取id。比较慢，推荐使用获取页面参数，可以在setup中直接使用
         // OnLoad要完于setup执行
 
-        let {
-            id,
-            name
-        } = e;
+        let { id, name } = e;
 
         // 如果bug进入没有参数的页面，默认返回首页，不关键
         if (!id) {
             gotoHome();
-            return
+            return;
         }
 
         queryParams.classify_id = parseInt(id);
@@ -105,13 +86,12 @@
         // 动态设置分类列表的title
         uni.setNavigationBarTitle({
             title: name
-        })
-    })
+        });
+    });
 
     onUnload(() => {
-        uni.removeStorageSync("wallList")
-    })
-
+        uni.removeStorageSync('wallList');
+    });
 
     // 触底加载更多
     onReachBottom(() => {
@@ -121,40 +101,38 @@
         // 实现触底加载更多
         queryParams.pageNum++;
         getClassList();
-    })
+    });
 
     // 下拉刷新
     onPullDownRefresh(() => {
-        console.log("onPullDownRefresh");
+        console.log('onPullDownRefresh');
         classList.value = [];
-        uni.removeStorageSync("wallList")
+        uni.removeStorageSync('wallList');
 
         getClassList();
 
         // uni.hideNavigationBarLoading();
         uni.stopPullDownRefresh();
-    })
+    });
 
     //分享给好友
     onShareAppMessage((e) => {
         return {
-            title: "本我壁纸: " + pageName,
-            path: "/pages/classlist/classlist?id=" + queryParams.classid + "&name=" + pageName
-        }
-    })
-
+            title: '本我壁纸: ' + pageName,
+            path: '/pages/classlist/classlist?id=' + queryParams.classid + '&name=' + pageName
+        };
+    });
 
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: "本我壁纸: " + pageName,
+            title: '本我壁纸: ' + pageName
             // query: "id=" + queryParams.classid + "&name=" + pageName
-        }
-    })
+        };
+    });
 </script>
 
 <style lang="scss" scoped>
     .layout {
-        
     }
 </style>

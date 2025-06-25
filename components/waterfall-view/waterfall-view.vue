@@ -76,6 +76,9 @@
         })
         return arr
     })
+    
+    console.log("classList", props.classList);
+    console.log("new arr", listWithAds.value);
 
     const onImageClick = (item) => {
         if (!item.isAd) {

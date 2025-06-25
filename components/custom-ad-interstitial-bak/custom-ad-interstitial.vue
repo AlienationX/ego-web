@@ -1,5 +1,6 @@
 <template>
     <view>
+        
         <!-- #ifndef MP-WEIXIN -->
         <!-- adpid="1111111113" 此广告位标识仅在HBuilderX标准基座中有效，仅用于测试 -->
         <ad-interstitial v-if="showAd" ref="adInterstitialRef" :adpid="adpid" :loadnext="false"
@@ -7,6 +8,7 @@
             <view v-if="error">{{error}}</view>
         </ad-interstitial>
         <!-- #endif -->
+        
     </view>
 </template>
 
@@ -28,15 +30,15 @@
     const adInterstitialRef = ref(null);
 
     const onload = (e) => {
-        console.log("onload", e);
+        console.log("ad-interstitial onload", e);
     }
     
     const onclose = (e) => {
-        console.log("onclose: " + e.detail, e);
+        console.log("ad-interstitial onclose: " + e.detail, e);
     }
     
     const onerror = (e) => {
-        console.log("onerror: ad-interstitial " + e.detail.code + " message:: " + e.detail.errMsg, e);
+        console.log("ad-interstitial onerror: " + e.detail.code + " message:: " + e.detail.errMsg, e);
     }
     
     const show = () => {

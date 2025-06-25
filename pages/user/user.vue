@@ -1,14 +1,17 @@
 <template>
     <view class="layout pageBackground">
-        <view :style="{height: getNavBarHeight() + 'px'}"></view>
+        <view :style="{ height: getNavBarHeight() + 'px' }"></view>
         <view class="userInfo">
-            <view class="avator">
+            <view class="avater">
                 <image src="/common/images/pics/default_avatar.svg" mode="aspectFill"></image>
             </view>
-            <view class="ip">{{userinfo.IP}}</view>
-            <view class="address" v-if="userinfo.address">来自于
-                {{ userinfo.address.region || userinfo.address.city || userinfo.address.province || userinfo.address.country || "未知"}}
+            <view class="ip">{{ userinfo.IP }}</view>
+            <view class="address" v-if="userinfo.address">
+                来自于
+                {{ userinfo.address.region || userinfo.address.city || userinfo.address.province || userinfo.address.country || '未知' }}
             </view>
+
+            <navigator url="/pages/login/login">Login</navigator>
         </view>
 
         <view class="section" v-if="false">
@@ -17,12 +20,12 @@
                     <view class="left">
                         <uni-icons :type="item.left_icon" size="20" color="#28b389"></uni-icons>
                         <view class="text">
-                            {{item.left_text}}
+                            {{ item.left_text }}
                         </view>
                     </view>
                     <view class="right">
                         <view class="text">
-                            {{item.right_text}}
+                            {{ item.right_text }}
                         </view>
                         <uni-icons :type="item.right_icon" size="15"></uni-icons>
                     </view>
@@ -36,12 +39,12 @@
                     <view class="left">
                         <uni-icons :type="item.left_icon" size="20" color="#28b389"></uni-icons>
                         <view class="text">
-                            {{item.left_text}}
+                            {{ item.left_text }}
                         </view>
                     </view>
                     <view class="right">
                         <view class="text">
-                            {{item.right_text}}
+                            {{ item.right_text }}
                         </view>
                         <uni-icons :type="item.right_icon" size="15" color="#aaa"></uni-icons>
                     </view>
@@ -57,148 +60,144 @@
                     <view class="left">
                         <uni-icons :type="item.left_icon" size="20" color="#28b389"></uni-icons>
                         <view class="text">
-                            {{item.left_text}}
+                            {{ item.left_text }}
                         </view>
                     </view>
                     <view class="right">
                         <view class="text">
-                            {{item.right_text}}
+                            {{ item.right_text }}
                         </view>
                         <uni-icons :type="item.right_icon" size="15" color="#aaa"></uni-icons>
                     </view>
                 </view>
             </view>
         </view>
-        
+
         <custom-ad-banner></custom-ad-banner>
-
+        <custom-ad-banner></custom-ad-banner>
+        <custom-ad-banner></custom-ad-banner>
     </view>
-
 </template>
 
 <script setup>
-    import {
-        ref,
-        reactive
-    } from "vue";
-    import {
-        apiGetUserInfo
-    } from "@/api/wallpaper.js";
-    import {
-        getNavBarHeight
-    } from "@/utils/system.js";
+    import { ref, reactive } from 'vue';
+    import { apiGetUserInfo } from '@/api/wallpaper.js';
+    import { getNavBarHeight } from '@/utils/system.js';
 
-    const userinfo = ref({})
+    const userinfo = ref({});
     const getUserInfo = async () => {
-        let id = parseInt("1")
+        let id = parseInt('1');
         let res = await apiGetUserInfo(id);
         userinfo.value = res.data;
-    }
+    };
     getUserInfo();
 
     const toMyFavorite = () => {
-        console.log("toMyFavorite");
-    }
+        console.log('toMyFavorite');
+    };
 
     const toMyDownload = () => {
-        console.log("toMyDownload");
-    }
+        console.log('toMyDownload');
+    };
 
     const toMyScore = () => {
-        console.log("toMyScore");
-    }
+        console.log('toMyScore');
+    };
 
     const toFAQ = () => {
         uni.navigateTo({
-            url: "/pages/notice/detail?id=2&name=常见问题"
-        })
-    }
+            url: '/pages/notice/detail?id=2&name=常见问题'
+        });
+    };
 
     const toSubscribe = () => {
         uni.navigateTo({
-            url: "/pages/notice/detail?id=1&name=订阅更新"
-        })
-    }
+            url: '/pages/notice/detail?id=1&name=订阅更新'
+        });
+    };
 
     const onService = () => {
-        console.log("onService");
-    }
+        console.log('onService');
+    };
 
     const onFeedback = () => {
-        console.log("onFeedback");
-    }
+        console.log('onFeedback');
+    };
 
     const onExit = () => {
-        console.log("onExit");
-    }
+        console.log('onExit');
+    };
 
-    const appMenus = reactive([{
-            left_icon: "heart-filled",
-            left_text: "我的收藏",
-            right_text: "12",
-            right_icon: "forward",
+    const appMenus = reactive([
+        {
+            left_icon: 'heart-filled',
+            left_text: '我的收藏',
+            right_text: '12',
+            right_icon: 'forward',
             click: toMyFavorite
         },
         {
-            left_icon: "download-filled",
-            left_text: "我的下载",
-            right_text: "3",
-            right_icon: "forward",
+            left_icon: 'download-filled',
+            left_text: '我的下载',
+            right_text: '3',
+            right_icon: 'forward',
             click: toMyDownload
         },
         {
-            left_icon: "star-filled",
-            left_text: "我的评分",
-            right_text: "",
-            right_icon: "forward",
+            left_icon: 'star-filled',
+            left_text: '我的评分',
+            right_text: '',
+            right_icon: 'forward',
             click: toMyScore
-        },
-    ])
+        }
+    ]);
 
-
-    const sysMenus = reactive([{
-            left_icon: "vip-filled",
-            left_text: "订阅更新",
-            right_text: "",
-            right_icon: "right",
+    const sysMenus = reactive([
+        {
+            left_icon: 'vip-filled',
+            left_text: '订阅更新',
+            right_text: '',
+            right_icon: 'right',
             click: toSubscribe
         },
         {
-            left_icon: "help-filled",
-            left_text: "常见问题",
-            right_text: "",
-            right_icon: "right",
+            left_icon: 'help-filled',
+            left_text: '常见问题',
+            right_text: '',
+            right_icon: 'right',
             click: toFAQ
         },
         {
-            left_icon: "chatboxes-filled",
-            left_text: "联系客服",
-            right_text: "",
-            right_icon: "right",
+            left_icon: 'chatboxes-filled',
+            left_text: '联系客服',
+            right_text: '',
+            right_icon: 'right',
             click: onService
         },
         {
-            left_icon: "chat-filled",
-            left_text: "反馈意见",
-            right_text: "",
-            right_icon: "right",
+            left_icon: 'chat-filled',
+            left_text: '反馈意见',
+            right_text: '',
+            right_icon: 'right',
             click: onFeedback
-        },
-    ])
+        }
+    ]);
 
-    const exitMenus = reactive([{
-        left_icon: "gear-filled",
-        left_text: "退出登录",
-        right_text: "退出当前账号",
-        right_icon: "",
-        click: onExit
-    }])
+    const exitMenus = reactive([
+        {
+            left_icon: 'gear-filled',
+            left_text: '退出登录',
+            right_text: '退出当前账号',
+            right_icon: '',
+            click: onExit
+        }
+    ]);
 </script>
 
 <style lang="scss" scoped>
     .layout {
         height: 100%;
-        
+
         .userInfo {
             display: flex;
             align-items: center;
@@ -207,7 +206,7 @@
             padding: 50rpx 0 20rpx;
             min-height: 320rpx;
 
-            .avator {
+            .avater {
                 width: 160rpx;
                 height: 160rpx;
                 border-radius: 50%;
@@ -258,7 +257,6 @@
                             padding-left: 20rpx;
                             color: #666;
                         }
-
                     }
 
                     .right {

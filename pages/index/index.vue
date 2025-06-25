@@ -47,8 +47,8 @@
                 <template #name>每日推荐</template>
                 <template #custom>
                     <view class="date">
-                        <!-- <navigator class="button" url="/pages/test/ad-inter">ad1</navigator>
-                        <navigator class="button" url="/pages/test/ad-rewarded">ad2</navigator> -->
+                        <!-- <navigator class="button" style="padding-right: 20rpx;" url="/pages/test/ad-inter">ad1</navigator> -->
+                        <!-- <navigator class="button" url="/pages/test/ad-rewarded">ad2</navigator> -->
                         
                         <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
                         <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
@@ -315,6 +315,8 @@
                         height: 430rpx;
                         display: inline-block;
                         margin-right: 15rpx;
+                        box-shadow: 0 16rpx 32rpx rgba(40, 179, 137, 0.18); // 增加阴影
+                        
 
                         image {
                             width: 100%;

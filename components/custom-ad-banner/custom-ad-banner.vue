@@ -1,14 +1,16 @@
 <template>
     <view>
+        
         <!-- #ifndef MP-WEIXIN -->
         <view v-show="showAd" class="content">
             <!-- adpid="1111111111" 此广告位标识仅在HBuilderX标准基座中有效，仅用于测试 -->
             <!-- 广告后台申请的广告位(adpid)需要自定义基座/云打包/本地打包后生效 -->
             <view class="ad-view">
-                <ad :adpid="adpid" @load="onload" @close="onclose" @error="onerror"></ad>
+                <ad :adpid="adpid" @load="onload" @close="onclose" @error="onerror" width="750rpx"></ad>
             </view>
         </view>
         <!-- #endif -->
+        
     </view>
 </template>
 
@@ -21,19 +23,19 @@
     })
 
     import {
-        useProfileStore
-    } from '@/stores/profile.js';
-    const profileStore = useProfileStore();
-    const showAd = profileStore.showAd;
+        useUserStore
+    } from '@/stores/user.js';
+    const userStore = useUserStore();
+    const showAd = userStore.showAd;
 
     const onload = (e) => {
-        console.log("onload", e);
+        console.log("ad-banner onload", e);
     }
     const onclose = (e) => {
-        console.log("onclose: " + e.detail, e);
+        console.log("ad-banner onclose: " + e.detail, e);
     }
     const onerror = (e) => {
-        console.log("onerror: ad-banner " + e.detail.errMsg.errCode + " message:: " + e.detail.errMsg.errMsg, e);
+        console.log("ad-banner onerror: " + e.detail.errMsg.errCode + " message:: " + e.detail.errMsg.errMsg, e);
     }
 </script>
 

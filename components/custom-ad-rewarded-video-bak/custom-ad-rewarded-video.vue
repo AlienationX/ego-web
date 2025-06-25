@@ -1,5 +1,6 @@
 <template>
     <view>
+        
         <!-- #ifndef MP-WEIXIN -->
         <!-- adpid="1507000689" 此广告位标识仅在HBuilderX标准基座中有效，仅用于测试 -->
         <view v-if="showAd" class="content">
@@ -10,6 +11,7 @@
             </ad-rewarded-video>
         </view>
         <!-- #endif -->
+        
     </view>
 </template>
 
@@ -28,7 +30,7 @@
     const showAd = profileStore.showAd;
 
     const onload = (e) => {
-        console.log('广告数据加载成功');
+        console.log("ad-rewarded-video onload: ", e);
     }
 
     const onclose = (e) => {
@@ -36,16 +38,16 @@
         // 用户点击了【关闭广告】按钮
         if (detail && detail.isEnded) {
             // 正常播放结束
-            console.log("onadclose " + detail.isEnded);
+            console.log("ad-rewarded-video onclose: succeed", detail.isEnded, e);
         } else {
             // 播放中途退出
-            console.log("onadclose " + detail.isEnded);
+            console.log("ad-rewarded-video onclose: failure",detail.isEnded, e);
         }
     }
     
     const onerror = (e) => {
         // 广告加载失败
-        console.log("onaderror: ad-rewarded-video ", e.detail);
+        console.log("ad-rewarded-video onerror: ", e.detail);
     }
 </script>
 

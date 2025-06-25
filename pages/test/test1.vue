@@ -7,8 +7,7 @@
 
         <!-- 布局容器 -->
         <div ref="containerRef" :class="['layout-container', { 'waterfall-mode': isWaterfall }]">
-            <div v-for="(item, index) in images" :key="index" :style="isWaterfall ? item.position : ''"
-                class="image-item">
+            <div v-for="(item, index) in images" :key="index" :style="isWaterfall ? item.position : ''" class="image-item">
                 <img :src="item.url" @load="isWaterfall && updateLayout(index)" :class="{ 'grid-img': !isWaterfall }" />
             </div>
         </div>
@@ -16,12 +15,7 @@
 </template>
 
 <script setup>
-    import {
-        ref,
-        onMounted,
-        onUnmounted,
-        nextTick
-    } from 'vue';
+    import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 
     // 1. 图片数据（20张不同尺寸图片）
     // const images = ref(
@@ -33,20 +27,19 @@
     //   }))
     // );
 
-    const images = ref([])
+    const images = ref([]);
 
     for (let i = 0; i < 30; i++) {
-        let width = 200 + Math.floor(Math.random() * 10) * 50
-        let height = 300 - Math.floor(Math.random() * 10) * 20
+        let width = 200 + Math.floor(Math.random() * 10) * 50;
+        let height = 300 - Math.floor(Math.random() * 10) * 20;
         let obj = {
             url: `https://picsum.photos/${width}/${height}?random=${i}`,
             width: width,
             height: height,
             position: {}
-        }
+        };
         images.value.push(obj); // 将对象添加到数组中
     }
-
 
     // 2. 布局状态
     const isWaterfall = ref(false);

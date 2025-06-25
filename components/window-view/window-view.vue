@@ -6,9 +6,14 @@
                 <navigator :url="`/pages/preview/preview?id=${item.id}`" class="item">
                     <image :src="item.smallPicurl" mode="aspectFill" class="img"></image>
                 </navigator>
+                
                 <!-- 每12个图片后插入广告 -->
-               <view v-if="(idx + 1) % 12 === 0" class="ad-row">
+                <view v-if="(idx + 1) % 12 === 0" class="ad-row">
                     <custom-ad-banner></custom-ad-banner>
+                    <!-- <image :src="item.smallPicurl" mode="aspectFill" class="img"></image> -->
+                    <!-- view class="ad-view">
+                        <ad :adpid="1760125998"></ad>
+                    </view> -->
                 </view>
 
             </template>
@@ -28,6 +33,19 @@
             }])
         }
     })
+    
+    // import {ref, nextTick} from "vue";
+    // import {onLoad} from "@dcloudio/uni-app";
+    
+    // const adBannerRef=ref(null);
+    
+    // onLoad(() => {
+    //     // 等待 DOM 渲染完成
+    //     nextTick(() => {
+    //         const height = adBannerRef.value.offsetHeight; // 获取高度（单位：px）
+    //         console.log("div 高度:", height);
+    //     });
+    // });
 </script>
 
 <style lang="scss" scoped>

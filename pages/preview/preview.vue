@@ -7,10 +7,10 @@
         </swiper>
 
         <view class="mask" v-if="maskState">
-            <view class="goBack" :style="{top: getGoBackButtonTop()+'px'}" @click="goBack">
+            <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
                 <uni-icons type="back" color="#fff" size="20"></uni-icons>
             </view>
-            <view class="count">{{currentIndex + 1}} / {{classList.length}}</view>
+            <view class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
             <view class="time">
                 <uni-dateformat :date="new Date()" format="hh:mm"></uni-dateformat>
             </view>
@@ -24,7 +24,7 @@
                 </view>
                 <view class="box" @click="openScore">
                     <uni-icons type="star" size="28"></uni-icons>
-                    <view class="text">{{currentInfo.score}}分</view>
+                    <view class="text">{{ currentInfo.score }}分</view>
                 </view>
                 <view class="box" @click="clickDownload">
                     <uni-icons type="download" size="24"></uni-icons>
@@ -38,9 +38,7 @@
             <view class="infoPopup">
                 <view class="popHeader">
                     <view></view>
-                    <view class="title">
-                        壁纸信息
-                    </view>
+                    <view class="title">壁纸信息</view>
                     <view class="close">
                         <uni-icons type="closeempty" size="18" color="#999" @click="closeInfo"></uni-icons>
                     </view>
@@ -49,40 +47,38 @@
                     <view class="content">
                         <view class="row">
                             <view class="label">壁纸ID：</view>
-                            <view class="value" selectable>{{currentInfo.id}}</view>
+                            <view class="value" selectable>{{ currentInfo.id }}</view>
                         </view>
                         <view class="row" v-if="currentInfo.classify_name">
                             <view class="label">分类：</view>
-                            <view class="value classify">{{currentInfo.classify_name}}</view>
+                            <view class="value classify">{{ currentInfo.classify_name }}</view>
                         </view>
                         <view class="row" v-if="currentInfo.publisher">
                             <view class="label">发布者：</view>
-                            <view class="value classify">{{currentInfo.publisher}}</view>
+                            <view class="value classify">{{ currentInfo.publisher }}</view>
                             <!-- <view class="value classify">{{currentInfo.nickname}}</view> -->
                         </view>
                         <view class="row">
                             <view class="label">评分：</view>
                             <view class="value rateBox">
                                 <uni-rate readonly touchable :value="currentInfo.score"></uni-rate>
-                                <text class="score">{{currentInfo.score}}分</text>
+                                <text class="score">{{ currentInfo.score }}分</text>
                             </view>
                         </view>
                         <view class="row" v-if="currentInfo.description">
                             <view class="label">描述：</view>
-                            <view class="value" selectable>{{currentInfo.description}}</view>
+                            <view class="value" selectable>{{ currentInfo.description }}</view>
                         </view>
                         <view class="row">
                             <view class="label">标签：</view>
                             <view class="value tabs">
                                 <view class="tab" v-for="tab in currentInfo.tabs_list" :key="tab">
-                                    {{tab}}
+                                    {{ tab }}
                                 </view>
                             </view>
                         </view>
 
-                        <view class="copyright">
-                            声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。
-                        </view>
+                        <view class="copyright">声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。</view>
                     </view>
                 </scroll-view>
             </view>
@@ -92,9 +88,7 @@
             <view class="scorePopup">
                 <view class="popHeader">
                     <view></view>
-                    <view class="title">
-                        壁纸评分
-                    </view>
+                    <view class="title">壁纸评分</view>
                     <view class="close">
                         <uni-icons type="closeempty" size="18" color="#999" @click="closeScore"></uni-icons>
                     </view>
@@ -102,7 +96,7 @@
 
                 <view class="content">
                     <uni-rate v-model="userScore" allowHalf></uni-rate>
-                    <text class="text">{{userScore}}分</text>
+                    <text class="text">{{ userScore }}分</text>
                 </view>
 
                 <view class="footer">
@@ -110,41 +104,27 @@
                 </view>
             </view>
         </uni-popup>
-        
-        <!-- <custom-ad-interstitial ref="adInterstitialRef"></custom-ad-interstitial> -->
-        
     </view>
 </template>
 
 <script setup>
-    import {
-        ref,
-        computed
-    } from "vue";
-    import {
-        onLoad,
-        onShareAppMessage,
-        onShareTimeline
-    } from "@dcloudio/uni-app";
-    import {
-        getStatusBarHeight
-    } from "@/utils/system.js";
-    
-    import {
-        useProfileStore
-    } from '@/stores/profile.js';
-    const profileStore = useProfileStore();
+    import { ref, computed } from 'vue';
+    import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+    import { getStatusBarHeight } from '@/utils/system.js';
+    import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
+
+    import { useUserStore } from '@/stores/user.js';
+    const userStore = useUserStore();
 
     const classList = ref([]);
-    const wallList = uni.getStorageSync("wallList") || [];
-    classList.value = wallList.map(item => {
+    const wallList = uni.getStorageSync('wallList') || [];
+    classList.value = wallList.map((item) => {
         // 增加tabs_list字段，将字符串转换成数组
         return {
             ...item,
-            tabs_list: item.tabs.split(",")
-        }
-    })
-
+            tabs_list: item.tabs.split(',')
+        };
+    });
 
     // 返回按钮高度
     const getGoBackButtonTop = () => {
@@ -152,50 +132,49 @@
             return 15;
         }
         return getStatusBarHeight();
-    }
+    };
     const goBack = () => {
         uni.navigateBack({
             success: () => {},
             fail: (err) => {
                 // 返回失败，直接跳转回首页
                 uni.reLaunch({
-                    url: "/pages/index/index"
-                })
+                    url: '/pages/index/index'
+                });
             }
         });
-    }
-
+    };
 
     // 遮罩状态
     const maskState = ref(true);
     const maskChange = () => {
-        maskState.value = !maskState.value
-    }
+        maskState.value = !maskState.value;
+    };
 
     // 点击信息弹窗
     const infoPopup = ref(null);
     const openInfo = () => {
         infoPopup.value.open();
-    }
+    };
     const closeInfo = () => {
         infoPopup.value.close();
-    }
+    };
 
     // 点击评分弹窗
     const scorePopup = ref(null);
     const userScore = ref(0);
     const openScore = () => {
-        console.log("test open score");
+        console.log('test open score');
         // userScore.value = currentInfo.value.userScore || 0;
         // scorePopup.value.open();
-    }
+    };
     const closeScore = () => {
         scorePopup.value.close();
-    }
+    };
     const submitScore = () => {
         // TODO
         // 接口获取用户评分，没有评分的用户默认为0分
-        // userScore.value = 
+        // userScore.value =
         // let userid = ...  // 获取用户id
         // let {classid, _id: wallId} = currentInfo.value;  // 获取分类id和图片id
         // 然后调用接口请求进行增删改等操作
@@ -203,42 +182,44 @@
         console.log(userScore.value);
         // 图片信息增加用户当前评分
         classList.value[currentIndex.value].userScore = userScore.value;
-        uni.setStorageSync("wallList", classList.value);
+        uni.setStorageSync('wallList', classList.value);
         uni.showToast({
-            title: "评分成功",
-            icon: "none"
-        })
+            title: '评分成功',
+            icon: 'none'
+        });
         closeScore();
-    }
+    };
 
     // 点击下载
-    const adInterstitialRef = ref(null);
+    // const adInterstitialRef = ref(null);
+
+    const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
+    const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
     const clickDownload = () => {
-        
         // 弹出广告，除以5余1的直接下载，除以5的整数倍弹出 激励视频广告，其他弹出 插屏广告-半屏
         // 重启应用，重新计算
-        profileStore.downloadCntAdd()
-        if (profileStore.downloadCnt % 5 === 1) {
-            console.log("直接下载");
-        } else if (profileStore.downloadCnt % 5 === 0) {
-            console.log("弹出 激励视频广告");
-            adRewardedRideoRef.value.show();
+        userStore.downloadCntAdd();
+        if (userStore.downloadCnt % 5 === 1) {
+            console.log('直接下载');
+            showRewardedVideoAd();
+        } else if (userStore.downloadCnt % 5 === 0) {
+            console.log('弹出 激励视频广告');
+            showRewardedVideoAd();
         } else {
-            console.log("弹出 插屏广告-半屏");
-            adInterstitialRef.value.show();
+            console.log('弹出 插屏广告-半屏');
+            showInterstitialAd();
         }
-        
-        
+
         // #ifdef H5
         uni.showModal({
-            content: "请长按或右键菜单保存壁纸",
+            content: '请长按或右键菜单保存壁纸',
             showCancel: false
-        })
+        });
         // #endif
 
         // #ifndef H5
         uni.showLoading({
-            title: "下载中...",
+            title: '下载中...',
             mask: true
         });
 
@@ -249,55 +230,51 @@
                     filePath: res.path,
                     success: (res) => {
                         uni.showToast({
-                            title: "保存成功，请到相册查看",
-                            icon: "none"
-                        })
+                            title: '保存成功，请到相册查看',
+                            icon: 'none'
+                        });
                     },
-                    fail: err => {
+                    fail: (err) => {
                         if (err.errMsg == 'saveImageToPhotosAlbum:fail cancel') {
                             uni.showToast({
                                 title: '保存失败，请重新点击下载',
-                                icon: "none"
-                            })
+                                icon: 'none'
+                            });
                             return;
                         }
                         uni.showModal({
-                            title: "授权提示",
-                            content: "需要授权保存相册",
-                            success: res => {
+                            title: '授权提示',
+                            content: '需要授权保存相册',
+                            success: (res) => {
                                 if (res.confirm) {
                                     uni.openSetting({
                                         success: (setting) => {
-                                            console.log(
-                                                setting);
-                                            if (setting
-                                                .authSetting[
-                                                    'scope.writePhotosAlbum'
-                                                ]) {
+                                            console.log(setting);
+                                            if (setting.authSetting['scope.writePhotosAlbum']) {
                                                 uni.showToast({
-                                                    title: "获取授权成功",
-                                                    icon: "none"
-                                                })
+                                                    title: '获取授权成功',
+                                                    icon: 'none'
+                                                });
                                             } else {
                                                 uni.showToast({
-                                                    title: "获取权限失败",
-                                                    icon: "none"
-                                                })
+                                                    title: '获取权限失败',
+                                                    icon: 'none'
+                                                });
                                             }
                                         }
-                                    })
+                                    });
                                 }
                             }
-                        })
+                        });
                     },
                     complete: () => {
                         uni.hideLoading();
                     }
-                })
+                });
             }
-        })
+        });
         // #endif
-    }
+    };
 
     // 图片节流
     const readImgs = ref([]);
@@ -317,42 +294,49 @@
     const currentIndex = ref(0);
     const currentInfo = ref({});
     onLoad((e) => {
-        currentId.value = e.id
-        if (e.type === "share") {
+        currentId.value = e.id;
+        if (e.type === 'share') {
             // TODO
-            console.log("分享页接收到的用户需要发送api请求，自己获取数据");
+            console.log('分享页接收到的用户需要发送api请求，自己获取数据');
             // let res = apiDetailWall({id: currentId.value});
             // classList.value = res.data;
         }
-        currentIndex.value = classList.value.findIndex(item => item.id === parseInt(currentId.value));
+        currentIndex.value = classList.value.findIndex((item) => item.id === parseInt(currentId.value));
         currentInfo.value = classList.value[currentIndex.value];
         readImgsFun();
-    })
+
+        createInterstitialAd(); // 创建插屏广告
+        createRewardedVideoAd(); // 创建激励视频广告
+    });
+
+    onUnload(() => {
+        destroyInterstitialAd(); // 销毁插屏广告
+        destroyRewardedVideoAd(); // 销毁激励广告
+    });
 
     // 滑动事件，变化当前数字
     const swiperChange = (e) => {
         currentIndex.value = e.detail.current;
         currentInfo.value = classList.value[currentIndex.value];
         readImgsFun();
-    }
+    };
 
     //分享给好友
     onShareAppMessage((e) => {
         // 读取缓存数据的话需要增加type=share，分享到的用户就可以不读缓存，直接读取数据库数据
         return {
-            title: "本我壁纸",
-            path: "/pages/preview/preview?id=" + currentId.value + "&type=share"
-        }
-    })
-
+            title: '本我壁纸',
+            path: '/pages/preview/preview?id=' + currentId.value + '&type=share'
+        };
+    });
 
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: "本我壁纸",
-            query: "id=" + currentId.value + "&type=share"
-        }
-    })
+            title: '本我壁纸',
+            query: 'id=' + currentId.value + '&type=share'
+        };
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -372,7 +356,7 @@
         }
 
         .mask {
-            &>view {
+            & > view {
                 // goBack\count\time\date\footer都需要绝对定位，统一在这里设
                 position: absolute;
                 width: fit-content;
@@ -533,7 +517,7 @@
                     .copyright {
                         font-size: 28rpx;
                         padding: 20rpx;
-                        background: #F6F6F6;
+                        background: #f6f6f6;
                         color: #666;
                         border-radius: 10rpx;
                         margin: 20rpx 0;
@@ -556,7 +540,7 @@
                 align-items: center;
 
                 .text {
-                    color: #FFCA3E;
+                    color: #ffca3e;
                     padding-left: 10rpx;
                     width: 80rpx;
                     line-height: 1em;

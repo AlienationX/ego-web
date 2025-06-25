@@ -1,8 +1,8 @@
 <template>
     <view class="layout">
-        <view class="search">
-            <uni-search-bar @confirm="onSearch" @cancel="onClear" @clear="onClear" focus placeholder="搜索" cancelButton="none"
-                v-model="queryParams.keyword">
+        <view class="search" v-show="showSearch">
+            <uni-search-bar @confirm="onSearch" @cancel="onClear" @clear="onClear" focus placeholder="搜索"
+                cancelButton="none" v-model="queryParams.keyword">
             </uni-search-bar>
         </view>
 
@@ -59,9 +59,12 @@
                     <image :src="item.smallPicurl" mode="aspectFill"></image>
                 </navigator>
             </view> -->
-            <window-view v-if=" settingStore.options.view === 'window' " :classList="classList"></window-view>
-            <waterfall-view v-else :classList="classList"></waterfall-view>
-            
+
+            <window-view :classList="classList"></window-view>
+
+            <!-- <window-view v-if=" settingStore.options.view === 'window' " :classList="classList"></window-view>
+            <waterfall-view v-else :classList="classList"></waterfall-view> -->
+
             <view class="loadingLayout" v-if="noData || classList.length">
                 <uni-load-more :status="noData?'noMore':'loading'" />
             </view>
@@ -77,7 +80,8 @@
 
 <script setup>
     import {
-        ref
+        ref,
+        nextTick
     } from "vue";
     import {
         onLoad,
@@ -91,8 +95,10 @@
     import {
         picurlHandle
     } from "@/utils/common.js";
-    import {PICS_BASE_URL} from "@/common/config.js";
-    
+    import {
+        PICS_BASE_URL
+    } from "@/common/config.js";
+
     import {
         useSettingStore
     } from '@/stores/setting.js';
@@ -150,17 +156,17 @@
     const onSearch = () => {
         searchHistory.value = [...new Set([queryParams.value.keyword, ...searchHistory.value])].slice(0, 10);
         uni.setStorageSync("searchHistory", searchHistory.value);
-        
+
         // 如果上次的关键字和当前关键字不同，则清空之前的数据
         if (lastKeyword.value !== queryParams.value.keyword) {
-           dateSortAsc.value = true;
-           pendingList.value = []
-           uni.removeStorageSync("wallList");
+            dateSortAsc.value = true;
+            pendingList.value = []
+            uni.removeStorageSync("wallList");
         }
-        
+
         init(queryParams.value.keyword);
         searchData();
-        
+
         lastKeyword.value = queryParams.value.keyworkd;
     }
 
@@ -278,7 +284,41 @@
         queryParams.value.pageNum++
         searchData();
     })
-    
+
+    const searchHeight = ref(0);
+    onLoad(() => {
+        
+        // 等待 DOM 渲染完成
+        nextTick(() => {
+            
+            uni.createSelectorQuery()
+                .select('.search')
+                .boundingClientRect(rect => {
+                    if (rect) {
+                        searchHeight.value = rect.height;
+                        // 你可以在这里做后续处理，比如设置 filter 的 top
+                        console.log('search高度:', searchHeight.value)
+                        // 第一种方式使用v-bind方式在css处绑定：v-bind 语法仅在 <style scoped> 并配合 <script setup> 的 CSS 变量时有效
+                        // 第二种方式使用內联style样式绑定：<view class="filter" :style="{top: searchHeight + 'px'}">
+                    }
+                })
+                .exec();
+
+            uni.createSelectorQuery()
+                .select('div.uni-page-head')
+                .boundingClientRect(rect => {
+                    if (rect) {
+                        searchHeight.value = rect.height;
+                        // 你可以在这里做后续处理，比如设置 filter 的 top
+                        console.log('uni-page-head高度:', searchHeight.value)
+                        // 第一种方式使用v-bind方式在css处绑定：v-bind 语法仅在 <style scoped> 并配合 <script setup> 的 CSS 变量时有效
+                        // 第二种方式使用內联style样式绑定：<view class="filter" :style="{top: searchHeight + 'px'}">
+                    }
+                })
+                .exec();
+        });
+    });
+
     //关闭页面
     onUnload(() => {
         uni.removeStorageSync("wallList");
@@ -286,7 +326,7 @@
 
 
     // 返回到顶部的代码
-    const useBackToTop = ()=> {
+    const useBackToTop = () => {
         // 控制返回顶部按钮的显示
         const showBackToTop = ref(false);
         // 返回顶部
@@ -296,18 +336,29 @@
                 duration: 300 // 滚动动画持续时间
             });
         };
-        
-        return {showBackToTop, scrollToTop};
+
+        return {
+            showBackToTop,
+            scrollToTop
+        };
     }
-    const {showBackToTop, scrollToTop} = useBackToTop();
-    
-    
+    const {
+        showBackToTop,
+        scrollToTop
+    } = useBackToTop();
+
+
     // 监听滚动事件
-    onPageScroll((e) => {
-        // console.log(e.scrollTop, showBackToTop.value);
-        showBackToTop.value = e.scrollTop > 200; // 当滚动距离超过200px时显示按钮
-    });
+    const showSearch = ref(true);
+    let lastScrollTop = 0;
+    let lastDirection = 'up'; // 记录上一次滚动方向
     
+    onPageScroll((e) => {
+        // TODO 向下浏览：隐藏搜索框，固定筛选器，向上浏览：固定搜索栏，固定筛选器
+        
+        showBackToTop.value = e.scrollTop > 200;  // 当滚动距离超过200px时显示按钮
+    });
+
 </script>
 
 <style lang="scss" scoped>
@@ -319,6 +370,13 @@
             /* 与筛选器颜色一致 */
             // border-bottom: 1rpx solid #e0e0e0;
             // box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: #ffffff;
+            // /* 可选：加阴影提升层次 */
+            // box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.06);
         }
 
         .topTitle {
@@ -371,7 +429,7 @@
 
         .filter {
             position: sticky;
-            top: 0;
+            top: v-bind('searchHeight + "px"');
             z-index: 10;
             background-color: #ffffff;
             display: flex;
@@ -379,7 +437,7 @@
             align-items: center;
             padding: 2rpx 8rpx;
             border-top: 1rpx solid #e0e0e0;
-            // box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.06);
 
             .left {
                 display: flex;

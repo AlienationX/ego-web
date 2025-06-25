@@ -1,5 +1,7 @@
 const SYSTEM_INFO = uni.getSystemInfoSync();
-// const SYSTEM_INFO = uni.getAppBaseInfo();
+const APP_INFO = uni.getAppBaseInfo();
+console.log(SYSTEM_INFO, "system_info");
+console.log(APP_INFO, "app_info");
 
 export const getStatusBarHeight = () => {
     // 状态栏高度
