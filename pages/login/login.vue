@@ -11,20 +11,13 @@
 <script setup>
     import { apiPostLoginByWechat } from '@/api/wallpaper.js';
     import { useUserStore } from '@/stores/user';
-    
-    const userStore = useUserStore()
+
+    const userStore = useUserStore();
 
     const loginByWechat = () => {
         let avatarUrl = '';
         let nickName = '';
         let code = '';
-
-        uni.getProvider({
-            service: 'oauth',
-            success: function (res) {
-                console.log(res, 'getProvider'); // ['qq', 'univerify']
-            }
-        });
 
         uni.getUserInfo({
             // provider: 'weixin',
@@ -66,12 +59,13 @@
 
                 (async () => {
                     // 模拟异步操作
-                    const res = await apiPostLoginByWechat({
+                    let res = await apiPostLoginByWechat({
                         code
                     });
-                    console.log(res);
-                    let {access, refresh} = res.data;
-                    userStore.setToken(access, refresh)
+                    console.log("api result data >>>", res);
+                    let { access, refresh } = res.data;
+                    userStore.setToken(access, refresh);
+                    userStore.setUserInfo();
                 })();
             }
         });

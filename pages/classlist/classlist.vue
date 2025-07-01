@@ -1,8 +1,6 @@
 <template>
     <view class="layout">
-        <view class="loadingLayout" v-if="!classList.length && !noData">
-            <uni-load-more status="loading"></uni-load-more>
-        </view>
+        <query-panel v-if="classList.length" @onQuery="onQuery" />
 
         <!-- <view class="content">
             <navigator :url="'/pages/preview/preview?id='+item.id" class="item" v-for="item in classList"
@@ -12,9 +10,11 @@
         </view> -->
         <window-view :classList="classList"></window-view>
 
-        <view class="loadingLayout" v-if="classList.length || noData">
+        <view class="loadingLayout" v-if="noData || isRunning">
             <uni-load-more :status="noData ? 'noMore' : 'loading'"></uni-load-more>
         </view>
+
+        <back-to-top ref="backToTopRef"></back-to-top>
 
         <!-- 安全区域，主要针对手机上的home键上方的区域 -->
         <view class="safe-area-inset-bottom"></view>
@@ -22,54 +22,104 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
-    import { onLoad, onUnload, onReachBottom, onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+    import { ref, reactive } from 'vue';
+    import { onLoad, onUnload, onReachBottom, onPullDownRefresh, onPageScroll, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { apiGetClassList, apiGetClassify } from '@/api/wallpaper.js';
-    import { gotoHome, picurlHandle } from '@/utils/common.js';
+    import { gotoHome, handlePicUrl } from '@/utils/common.js';
     import { PICS_BASE_URL } from '@/common/config.js';
 
-    const classList = ref([]);
+    const backToTopRef = ref(null);
+
+    // 正在执行
+    const isRunning = ref(false);
+    // 没有更多
     const noData = ref(false);
 
-    const queryParams = {
+    // 搜索结果最终展示列表
+    const classList = ref([]);
+    // 搜索结果临时列表，主要是为了解决 filter 按钮切换导致 图片列表 有1秒的空白的问题
+    const pendingList = ref([]);
+
+    // UniApp 会将 URL 中的参数自动注入到 props
+    const props = defineProps({
+        id: String, // 分类id
+        name: String // 分类名称
+    });
+
+    // 动态设置分类列表的title
+    uni.setNavigationBarTitle({
+        title: props.name
+    });
+
+    const queryParams = ref({
+        classify_id: parseInt(props.id),
         pageNum: 1,
-        pageSize: 12
+        pageSize: 12,
+        // keyword: '',
+        sortord: ''
+    });
+
+    const init = (sortord = '', resetClassList = new Array()) => {
+        queryParams.value = {
+            classify_id: parseInt(props.id),
+            pageNum: 1,
+            pageSize: 12,
+            // keyword: keyword,
+            sortord: sortord
+        };
+        noData.value = false;
+        classList.value = resetClassList;
     };
 
     const getClassList = async () => {
-        let res = await apiGetClassList(queryParams);
+        try {
+            uni.showLoading(); // 屏幕中间黑方框中间转圈效果
+            isRunning.value = true;
 
-        // 增加缩略图samllPicurl字段
-        let fullData = res.data.map((item) => picurlHandle(item, PICS_BASE_URL));
+            let res = await apiGetClassList(queryParams.value);
 
-        // // 两表关联增加 classify_name 用来显示
-        // let classRes = await apiGetClassify();
-        // // 1. 将listA转换为Map，键为classid，值为对象
-        // const classMap = new Map(classRes.data.map(item => [item.id, item]));
-        // // 2. 遍历listB，通过Map关联数据
-        // fullData = fullData.map(item => {
-        //   const matchedClass = classMap.get(item.classify_id);
-        //   return { ...item, classify_name:matchedClass.name };
-        // })
+            // 增加缩略图samllPicurl字段
+            let fullData = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
 
-        // classList.value = [...classList.value, ...res.data];
-        classList.value.push(...fullData); // 推荐该方法，不用重新赋值
+            // // 两表关联增加 classify_name 用来显示
+            // let classRes = await apiGetClassify();
+            // // 1. 将listA转换为Map，键为classid，值为对象
+            // const classMap = new Map(classRes.data.map(item => [item.id, item]));
+            // // 2. 遍历listB，通过Map关联数据
+            // fullData = fullData.map(item => {
+            //   const matchedClass = classMap.get(item.classify_id);
+            //   return { ...item, classify_name:matchedClass.name };
+            // })
 
-        if (queryParams.pageSize > res.data.length) {
-            noData.value = true;
+            // classList.value = [...classList.value, ...res.data];
+            // classList.value.push(...fullData); // 推荐该方法，不用重新赋值
+            pendingList.value.push(...fullData);
+            classList.value = [...pendingList.value];
+
+            isRunning.value = false;
+            if (queryParams.value.pageSize > res.data.length) noData.value = true;
+
+            // 缓存数据
+            uni.setStorageSync('wallList', classList.value);
+        } finally {
+            uni.hideLoading();
         }
-
-        // 缓存数据
-        uni.setStorageSync('wallList', classList.value);
     };
 
-    // 分享需要使用该值
-    let pageName;
+    // 传递给query-panel的方法，供子组件调用
+    const onQuery = (sortord) => {
+        // order by 字段：random / score / date_asc /date_desc
+        init(sortord, [...pendingList.value]);
+        pendingList.value = [];
+        getClassList();
+        backToTopRef.value.scrollToTop();
+    };
 
     onLoad((e) => {
         // 页面加载完毕后，获取id。比较慢，推荐使用获取页面参数，可以在setup中直接使用
-        // OnLoad要完于setup执行
+        // OnLoad要晚于setup执行
 
+        // console.log('解析url传入的参数，比如：?id=5&name=明星美女', e);
         let { id, name } = e;
 
         // 如果bug进入没有参数的页面，默认返回首页，不关键
@@ -78,15 +128,7 @@
             return;
         }
 
-        queryParams.classify_id = parseInt(id);
         getClassList();
-
-        pageName = name;
-
-        // 动态设置分类列表的title
-        uni.setNavigationBarTitle({
-            title: name
-        });
     });
 
     onUnload(() => {
@@ -99,7 +141,7 @@
         if (noData.value) return;
 
         // 实现触底加载更多
-        queryParams.pageNum++;
+        queryParams.value.pageNum++;
         getClassList();
     });
 
@@ -115,19 +157,23 @@
         uni.stopPullDownRefresh();
     });
 
+    onPageScroll((e) => {
+        backToTopRef.value.showBackToTop = e.scrollTop > 200; // 当滚动距离超过200px时显示按钮
+    });
+
     //分享给好友
     onShareAppMessage((e) => {
         return {
-            title: '本我壁纸: ' + pageName,
-            path: '/pages/classlist/classlist?id=' + queryParams.classid + '&name=' + pageName
+            title: '本我壁纸: ' + props.name,
+            path: '/pages/classlist/classlist?id=' + queryParams.value.classify_id + '&name=' + props.name
         };
     });
 
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: '本我壁纸: ' + pageName
-            // query: "id=" + queryParams.classid + "&name=" + pageName
+            title: '本我壁纸: ' + props.name
+            // query: "id=" + queryParams.value.classify_id + "&name=" + props.name
         };
     });
 </script>

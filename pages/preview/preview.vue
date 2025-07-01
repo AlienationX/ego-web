@@ -196,20 +196,6 @@
     const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
     const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
     const clickDownload = () => {
-        // 弹出广告，除以5余1的直接下载，除以5的整数倍弹出 激励视频广告，其他弹出 插屏广告-半屏
-        // 重启应用，重新计算
-        userStore.downloadCntAdd();
-        if (userStore.downloadCnt % 5 === 1) {
-            console.log('直接下载');
-            showRewardedVideoAd();
-        } else if (userStore.downloadCnt % 5 === 0) {
-            console.log('弹出 激励视频广告');
-            showRewardedVideoAd();
-        } else {
-            console.log('弹出 插屏广告-半屏');
-            showInterstitialAd();
-        }
-
         // #ifdef H5
         uni.showModal({
             content: '请长按或右键菜单保存壁纸',
@@ -218,6 +204,20 @@
         // #endif
 
         // #ifndef H5
+        // 弹出广告，除以5余1的直接下载，除以5的整数倍弹出 激励视频广告，其他弹出 插屏广告-半屏
+        // 重启应用，重新计算
+        userStore.downloadCntAdd();
+        if (userStore.downloadCnt % 5 === 1) {
+            console.log('直接下载');
+            // showRewardedVideoAd();
+        } else if (userStore.downloadCnt % 5 === 0) {
+            console.log('弹出 激励视频广告');
+            showRewardedVideoAd();
+        } else {
+            console.log('弹出 插屏广告-半屏');
+            showInterstitialAd();
+        }
+
         uni.showLoading({
             title: '下载中...',
             mask: true

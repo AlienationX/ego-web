@@ -17,7 +17,7 @@ export function compareTimestamp(timestamp) {
     }
 }
 
-export function picurlHandle(item, prefix) { 
+export function handlePicUrl(item, prefix) { 
     // 1. 给 url 字段添加前缀。wall数据增加额外字段，前端处理，减少后端流量消耗
     const prefixedUrl = `${prefix}/${item.picurl}`;
     

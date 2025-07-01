@@ -1,14 +1,17 @@
 import { defineStore } from 'pinia';
 import { ref, reactive, computed } from 'vue';
 
-export const useSettingStore = defineStore(
-    'setting',
+export const useSettingsStore = defineStore(
+    'settings',
     () => {
+        const installBanner = ref(true); // PWA安装应用的按钮提示条，判断是否已安装决定是否显示
+
         const options = reactive({
             view: 'window',
-            
+
             // vuetify项目的配置，后续修改
             theme: 'light',
+            language: 'zh-CN',
 
             navBarFlat: false, // 导航栏扁平效果
             navBarBehavior: [], // 导航栏行为设置
@@ -23,18 +26,16 @@ export const useSettingStore = defineStore(
             showSideBarSetting: false, // 弹出侧边栏的设置界面(全屏对话框)
 
             refresh: false,
-            firstLogin: false,
+            firstLogin: false
 
             // TODO 多个primary等颜色的默认值
         });
-        
+
         // 窗口视图和瀑布流视图的切换
         const switchViewIcon = computed(() => (options.view === 'window' ? 'map-filled' : 'list'));
-        
+
         // 通过theme计算主题切换按钮的图标
         const switchIcon = computed(() => (options.theme === 'light' ? 'mdi-weather-night' : 'mdi-weather-sunny'));
-
-        const installBanner = ref(true); // PWA安装应用的按钮提示条，判断是否已安装决定是否显示
 
         return { options, switchViewIcon, switchIcon, installBanner };
     },
@@ -45,7 +46,7 @@ export const useSettingStore = defineStore(
             // 存储位置，默认 localStorage，还支持sessionStorage，cookie比较复杂
             // storage: sessionStorage,
             // 指定存储的内容
-            paths: ['options'],
-        },
+            paths: ['options']
+        }
     }
 );

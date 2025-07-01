@@ -1,4 +1,7 @@
+// ifdef APP-PLUS || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
+
 export const useAdIntersititial = () => {
+    // #ifdef APP-PLUS
     const adOption = {
         // 1111111113 HBuilder基座的测试广告位
         // 1129226586 正式的广告位
@@ -16,11 +19,11 @@ export const useAdIntersititial = () => {
             // this.loading = false;
             console.log('use ad-interstitial onload', e);
         });
-        interstitialAd.onClose((e) => {
+        interstitialAd.onClose(() => {
             // 用户点击了关闭或返回键(仅Android有返回键)
-            console.log('use ad-interstitial onclose', e);
+            console.log('use ad-interstitial onclose');
         });
-        interstitialAd.onError((err) => {
+        interstitialAd.onError((e) => {
             // this.loading = false;
             console.log('use ad-interstitial onerror', e);
         });
@@ -48,9 +51,19 @@ export const useAdIntersititial = () => {
         showInterstitialAd,
         destroyInterstitialAd
     };
+    // #endif
+
+    // #ifndef APP-PLUS
+    return {
+        createInterstitialAd: function () {},
+        showInterstitialAd: function () {},
+        destroyInterstitialAd: function () {}
+    };
+    // #endif
 };
 
 export const useAdRewardedVideo = () => {
+    // #ifdef APP-PLUS
     const adOption = {
         // 1507000689 HBuilder基座的测试广告位
         // 1892019135 正式的广告位
@@ -88,7 +101,7 @@ export const useAdRewardedVideo = () => {
                 console.log('use ad-rewarded-video onclose: abort' + detail.isEnded, e);
             }
         });
-        rewardedVideolAd.onError((err) => {
+        rewardedVideolAd.onError((e) => {
             // this.loading = false;
             console.log('use ad-rewarded-video onerror', e);
             rewardedVideolAd.load(); // 加载失败，手动再次拉取广告
@@ -117,4 +130,13 @@ export const useAdRewardedVideo = () => {
         showRewardedVideoAd,
         destroyRewardedVideoAd
     };
+    // #endif
+    
+    // #ifndef APP-PLUS
+    return {
+        createRewardedVideoAd: function () {},
+        showRewardedVideoAd: function () {},
+        destroyRewardedVideoAd: function () {}
+    };
+    // #endif
 };

@@ -3,20 +3,15 @@
         <custom-nav-bar title="推荐"></custom-nav-bar>
 
         <view class="banner">
-            <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay
-                circular>
-
+            <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
                 <swiper-item v-for="item in bannerList" :key="item.id">
-
-                    <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram"
-                        :app-id="item.appid">
+                    <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram" :app-id="item.appid">
                         <image :src="item.picurl" mode="aspectFill"></image>
                     </navigator>
 
                     <navigator v-else :url="`/pages/classlist/classlist?${item.url}`">
                         <image :src="item.picurl" mode="aspectFill"></image>
                     </navigator>
-
                 </swiper-item>
             </swiper>
         </view>
@@ -31,7 +26,7 @@
                 <swiper vertical interval="1500" duration="300" autoplay circular>
                     <swiper-item v-for="item in noticeList" :key="item.id">
                         <navigator :url="`/pages/notice/detail?id=${item.id}`">
-                            {{item.title}}
+                            {{ item.title }}
                         </navigator>
                     </swiper-item>
                 </swiper>
@@ -49,7 +44,7 @@
                     <view class="date">
                         <!-- <navigator class="button" style="padding-right: 20rpx;" url="/pages/test/ad-inter">ad1</navigator> -->
                         <!-- <navigator class="button" url="/pages/test/ad-rewarded">ad2</navigator> -->
-                        
+
                         <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
                         <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
                         <view class="text">
@@ -66,7 +61,7 @@
                 </scroll-view>
             </view>
         </view>
-        
+
         <!-- <view class="select">
             <index-title>
                 <template #name>专题精选</template>
@@ -102,33 +97,21 @@
                 <classify-item :isMore="true"></classify-item>
             </view>
         </view>
-
     </view>
 </template>
 
 <script setup>
-    import {
-        ref
-    } from "vue";
-    import {
-        onPullDownRefresh,
-        onShareAppMessage,
-        onShareTimeline
-    } from "@dcloudio/uni-app"
-    import {
-        apiGetBanner,
-        apiGetDayRandom,
-        apiGetNotice,
-        apiGetClassify
-    } from "@/api/wallpaper.js";
-    import { picurlHandle } from "@/utils/common.js";
-    import { PICS_BASE_URL } from "@/common/config.js";
+    import { ref } from 'vue';
+    import { onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+    import { apiGetBanner, apiGetDayRandom, apiGetNotice, apiGetClassify } from '@/api/wallpaper.js';
+    import { handlePicUrl } from '@/utils/common.js';
+    import { PICS_BASE_URL } from '@/common/config.js';
 
     const bannerList = ref([]);
     const randomList = ref([]);
     const noticeList = ref([]);
     const classifyList = ref([]);
-
+    
     const getBanner = async () => {
         let res = await apiGetBanner();
         // bannerList.value = res.data.map(item => {
@@ -138,71 +121,71 @@
         //         picurl: item.smallPicurl.replace("_small.webp", ".jpg")
         //     }
         // })
-        bannerList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));
-    }
+        bannerList.value = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+    };
 
     const getRandom = async () => {
         let res = await apiGetDayRandom();
-        randomList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));
-    }
+        randomList.value = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+    };
 
     const getNotice = async () => {
         let res = await apiGetNotice({
             select: true
         });
         noticeList.value = res.data;
-    }
+    };
 
     const getClassify = async () => {
         let res = await apiGetClassify({
             select: true
         });
-        classifyList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));;
-    }
+        classifyList.value = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+    };
 
     const goPriview = (id) => {
-        uni.setStorageSync("wallList", randomList.value);
+        uni.setStorageSync('wallList', randomList.value);
         uni.navigateTo({
-            url: "/pages/preview/preview?id=" + id
-        })
-    }
+            url: '/pages/preview/preview?id=' + id
+        });
+    };
 
     const refreshRandom = () => {
         getRandom();
-    }
+    };
 
     getBanner();
     getNotice();
     getRandom();
     getClassify();
-    
+
     // 下拉刷新
     onPullDownRefresh(() => {
-        console.log("onPullDownRefresh");
-        
+        console.log('onPullDownRefresh');
+
         // getBanner();
         // getNotice();
         getRandom();
         // getClassify();
-    
+
         // uni.hideNavigationBarLoading();
         uni.stopPullDownRefresh();
-    })
+    });
 
     //分享给好友
     onShareAppMessage((e) => {
         return {
-            title: "本我壁纸，好看的手机壁纸应用",
-            path: "/pages/index/index"
-        }
-    })
+            title: '本我壁纸，好看的手机壁纸应用',
+            path: '/pages/index/index'
+        };
+    });
 
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: "本我壁纸，好看的手机壁纸应用"
-        }
-    })
+            title: '本我壁纸，好看的手机壁纸应用'
+        };
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -232,7 +215,6 @@
                     }
                 }
             }
-
         }
 
         .notice {
@@ -316,7 +298,6 @@
                         display: inline-block;
                         margin-right: 15rpx;
                         box-shadow: 0 16rpx 32rpx rgba(40, 179, 137, 0.18); // 增加阴影
-                        
 
                         image {
                             width: 100%;
@@ -329,13 +310,11 @@
                     .box:last-child {
                         margin-right: 30rpx;
                     }
-
                 }
             }
         }
-        
+
         .subject {
-            
         }
 
         .classify {

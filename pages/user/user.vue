@@ -5,16 +5,20 @@
             <view class="avater">
                 <image src="/common/images/pics/default_avatar.svg" mode="aspectFill"></image>
             </view>
-            <view class="ip">{{ userinfo.IP }}</view>
-            <view class="address" v-if="userinfo.address">
-                来自于
-                {{ userinfo.address.region || userinfo.address.city || userinfo.address.province || userinfo.address.country || '未知' }}
+            
+            <view v-if="userStore.userinfo.id">
+                <view class="name">{{ useUserStore.userinfo.nickname }}</view>
+                <view class="address" v-if="useUserStore.userinfo.region">
+                    来自于 {{ useUserStore.userinfo.region }}
+                    <!-- {{ userinfo.address.region || userinfo.address.city || userinfo.address.province || userinfo.address.country || '未知' }} -->
+                </view>
             </view>
-
-            <navigator url="/pages/login/login">Login</navigator>
+            <view v-else class="name">
+                <navigator url="/pages/login/login">Login</navigator>
+            </view>
         </view>
 
-        <view class="section" v-if="false">
+        <view class="section" v-if="userStore.userinfo.id">
             <view class="list">
                 <view class="row" v-for="item in appMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
@@ -54,7 +58,7 @@
             </view>
         </view>
 
-        <view class="section" v-if="false">
+        <view class="section" v-if="userStore.userinfo.id">
             <view class="list">
                 <view class="row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
@@ -81,16 +85,10 @@
 
 <script setup>
     import { ref, reactive } from 'vue';
-    import { apiGetUserInfo } from '@/api/wallpaper.js';
     import { getNavBarHeight } from '@/utils/system.js';
+    import { useUserStore } from '@/stores/user.js';
 
-    const userinfo = ref({});
-    const getUserInfo = async () => {
-        let id = parseInt('1');
-        let res = await apiGetUserInfo(id);
-        userinfo.value = res.data;
-    };
-    getUserInfo();
+    const userStore = useUserStore();
 
     const toMyFavorite = () => {
         console.log('toMyFavorite');
@@ -125,7 +123,7 @@
     };
 
     const onExit = () => {
-        console.log('onExit');
+        userStore.clearUserData();
     };
 
     const appMenus = reactive([
@@ -218,7 +216,7 @@
                 }
             }
 
-            .ip {
+            .name {
                 font-size: 44rpx;
                 color: #333;
                 padding: 40rpx 0 5rpx;

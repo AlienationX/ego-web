@@ -19,7 +19,7 @@
     import {
         apiGetClassify
     } from "@/api/wallpaper.js";
-    import { picurlHandle } from "@/utils/common.js";
+    import { handlePicUrl } from "@/utils/common.js";
     import { PICS_BASE_URL } from "@/common/config.js";
 
     const classifyList = ref([]);
@@ -29,7 +29,7 @@
             // 该参数无效，接口默认就是显示全部分类
             pageSize: 30
         });
-        classifyList.value = res.data.map(item => picurlHandle(item, PICS_BASE_URL));
+        classifyList.value = res.data.map(item => handlePicUrl(item, PICS_BASE_URL));
     }
 
     getClassify()

@@ -1,9 +1,7 @@
 <template>
     <view class="layout">
         <view class="search" v-show="showSearch">
-            <uni-search-bar @confirm="onSearch" @cancel="onClear" @clear="onClear" focus placeholder="搜索"
-                cancelButton="none" v-model="queryParams.keyword">
-            </uni-search-bar>
+            <uni-search-bar @confirm="onSearch" @cancel="onClear" @clear="onClear" focus placeholder="搜索" cancelButton="none" v-model="queryParams.keyword"></uni-search-bar>
         </view>
 
         <view v-show="showWordBoard">
@@ -15,7 +13,7 @@
                     </view>
                 </view>
                 <view class="tabs">
-                    <view class="tab" v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">{{tab}}</view>
+                    <view class="tab" v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">{{ tab }}</view>
                 </view>
             </view>
 
@@ -24,7 +22,7 @@
                     <view class="text">热门搜索</view>
                 </view>
                 <view class="tabs">
-                    <view class="tab" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">{{tab}}</view>
+                    <view class="tab" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">{{ tab }}</view>
                 </view>
             </view>
         </view>
@@ -35,23 +33,35 @@
         </view>
 
         <view v-show="classList.length">
-            <view class="filter">
+            <!-- <view class="filter">
                 <view class="left">
-                    <button size="mini" plain :class="{ active: activeButton === 'recommend' }"
-                        @click="onRecommend">推荐</button>
+                    <button size="mini" plain :class="{ active: activeButton === 'recommend' }" @click="onRecommend">推荐</button>
                     <button size="mini" plain :class="{ active: activeButton === 'score' }" @click="onSroce">评分</button>
                     <button size="mini" plain :class="{ active: activeButton === 'date' }" @click="onDateSort">
                         发布日期
                         <view class="icon" v-if="activeButton === 'date'">
-                            <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="14"
-                                color="#28b389"></uni-icons>
+                            <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="14" color="#28b389"></uni-icons>
                         </view>
                     </button>
                 </view>
                 <view class="right" @click="onChange">
-                    <uni-icons :type="settingStore.switchViewIcon" size="18" color="#28b389"></uni-icons>
+                    <uni-icons :type="settingsStore.switchViewIcon" size="18" color="#28b389"></uni-icons>
                 </view>
-            </view>
+            </view> -->
+
+            <!-- 自定义组件，传入多个值的参考例子 -->
+            <!-- <FilterBar
+                :activeButton="activeButton"
+                :dateSortAsc="dateSortAsc"
+                :switchViewIcon="settingsStore.switchViewIcon"
+                :top="searchHeight + 'px'"
+                @recommend="onRecommend"
+                @score="onSroce"
+                @dateSort="onDateSort"
+                @change="onChange"
+            /> -->
+
+            <query-panel ref="queryPanelRef" :top="searchHeight + 'px'" @onQuery="onQuery" />
 
             <!-- <view class="list">
                 <navigator :url="`/pages/preview/preview?id=${item.id}`" class="item" v-for="item in classList"
@@ -62,63 +72,44 @@
 
             <window-view :classList="classList"></window-view>
 
-            <!-- <window-view v-if=" settingStore.options.view === 'window' " :classList="classList"></window-view>
+            <!-- <window-view v-if=" settingsStore.options.view === 'window' " :classList="classList"></window-view>
             <waterfall-view v-else :classList="classList"></waterfall-view> -->
 
             <view class="loadingLayout" v-if="noData || classList.length">
-                <uni-load-more :status="noData?'noMore':'loading'" />
-            </view>
-
-            <!-- 返回顶部按钮 -->
-            <view v-if="showBackToTop" class="backToTop" @click="scrollToTop">
-                <uni-icons type="up" size="18" color="#ffffff"></uni-icons>
+                <uni-load-more :status="noData ? 'noMore' : 'loading'" />
             </view>
         </view>
 
+        <back-to-top ref="backToTopRef"></back-to-top>
+        <custom-ad-banner v-if="!noResult && !classList.length"></custom-ad-banner>
     </view>
 </template>
 
 <script setup>
-    import {
-        ref,
-        nextTick
-    } from "vue";
-    import {
-        onLoad,
-        onUnload,
-        onReachBottom,
-        onPageScroll
-    } from "@dcloudio/uni-app";
-    import {
-        apiSearchData
-    } from "@/api/wallpaper.js"
-    import {
-        picurlHandle
-    } from "@/utils/common.js";
-    import {
-        PICS_BASE_URL
-    } from "@/common/config.js";
+    import { ref, nextTick } from 'vue';
+    import { onLoad, onUnload, onReachBottom, onPageScroll } from '@dcloudio/uni-app';
+    import { apiSearchData } from '@/api/wallpaper.js';
+    import { handlePicUrl } from '@/utils/common.js';
+    import { PICS_BASE_URL } from '@/common/config.js';
 
-    import {
-        useSettingStore
-    } from '@/stores/setting.js';
-    const settingStore = useSettingStore();
+    const queryPanelRef = ref(null); // 创建子组件query_panel的引用
+    const backToTopRef = ref(null);
 
     // 查询参数
     const queryParams = ref({
         pageNum: 1,
         pageSize: 12,
-        keyword: "",
-        sortord: ""
-    })
+        keyword: '',
+        sortord: ''
+    });
     // 上一次的关键字
-    const lastKeyword = ref("");
+    const lastKeyword = ref('');
 
     // 搜索历史词
-    const searchHistory = ref(uni.getStorageSync("searchHistory") || []);
+    const searchHistory = ref(uni.getStorageSync('searchHistory') || []);
 
     // 热门搜索词
-    const recommendList = ref(["美女", "帅哥", "宠物", "卡通"]);
+    const recommendList = ref(['美女', '帅哥', '宠物', '卡通']);
 
     // 没有单词板
     const showWordBoard = ref(true);
@@ -132,81 +123,75 @@
     // 搜索结果临时列表，主要是为了解决 filter 按钮切换导致 图片列表 有1秒的空白的问题
     const pendingList = ref([]);
 
-    // 筛选条的激活按钮
-    const activeButton = ref("");
-    // 筛选条的时间排序按钮
-    const dateSortAsc = ref(true);
-
     const init = (keyword = '', resetShowWordBoard = true, resetNoResult = false, resetClassList = new Array()) => {
         queryParams.value = {
             pageNum: 1,
             pageSize: 12,
             keyword: keyword,
-            sortord: ""
+            sortord: ''
         };
         showWordBoard.value = resetShowWordBoard;
         noResult.value = resetNoResult;
         noData.value = false;
         classList.value = resetClassList;
-
-        activeButton.value = "";
-    }
+    };
 
     //点击搜索
     const onSearch = () => {
         searchHistory.value = [...new Set([queryParams.value.keyword, ...searchHistory.value])].slice(0, 10);
-        uni.setStorageSync("searchHistory", searchHistory.value);
+        uni.setStorageSync('searchHistory', searchHistory.value);
 
         // 如果上次的关键字和当前关键字不同，则清空之前的数据
         if (lastKeyword.value !== queryParams.value.keyword) {
-            dateSortAsc.value = true;
-            pendingList.value = []
-            uni.removeStorageSync("wallList");
+            queryPanelRef.value.reset(); // 重置查询面板
+            pendingList.value = [];
+            uni.removeStorageSync('wallList');
         }
 
         init(queryParams.value.keyword);
         searchData();
 
         lastKeyword.value = queryParams.value.keyworkd;
-    }
+    };
 
     //点击清除按钮
     const onClear = () => {
         init();
-        dateSortAsc.value = true;
-        pendingList.value = []
-        uni.removeStorageSync("wallList");
-    }
+        queryPanelRef.value.reset(); // 重置查询面板
+        pendingList.value = [];
+        uni.removeStorageSync('wallList');
+    };
 
     //点击标签进行搜索
     const clickTab = (value) => {
         init(value);
         onSearch();
-    }
+    };
 
     //点击清空搜索记录
     const removeHistory = () => {
         uni.showModal({
-            title: "是否清空历史搜索？",
-            success: res => {
+            title: '是否清空历史搜索？',
+            success: (res) => {
                 if (res.confirm) {
-                    uni.removeStorageSync("searchHistory");
-                    searchHistory.value = []
+                    uni.removeStorageSync('searchHistory');
+                    searchHistory.value = [];
                 }
             }
-        })
-    }
+        });
+    };
 
     const searchData = async () => {
-        uni.showLoading()
         try {
-            let res = await apiSearchData(queryParams.value);
-            let fullData = res.data.map(item => picurlHandle(item, PICS_BASE_URL))
-            // pendingList.value.value = [...pendingList.value.value, ...fullData];
-            pendingList.value.push(...fullData)
-            classList.value = [...pendingList.value]
+            uni.showLoading(); // 屏幕中间黑方框中间转圈效果
 
-            uni.setStorageSync("wallList", pendingList.value);
+            let res = await apiSearchData(queryParams.value);
+            let fullData = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+            // pendingList.value.value = [...pendingList.value.value, ...fullData];
+            pendingList.value.push(...fullData);
+            classList.value = [...pendingList.value];
+
+            uni.setStorageSync('wallList', pendingList.value);
 
             if (queryParams.value.pageSize > res.data.length) noData.value = true;
             if (res.data.length === 0 && pendingList.value.length === 0) {
@@ -217,87 +202,37 @@
                 noResult.value = false;
             }
         } finally {
-            uni.hideLoading()
+            uni.hideLoading();
         }
-    }
+    };
 
-
-    const useFilter = () => {
-
-        const onRecommend = () => {
-            init(queryParams.value.keyword, showWordBoard.value, noResult.value, [...pendingList.value]);
-            queryParams.value.sortord = "random"
-            activeButton.value = "recommend";
-            dateSortAsc.value = true; // 重置箭头默认向上，不显示
-
-            pendingList.value = []
-            searchData()
-            scrollToTop()
-        }
-
-        const onSroce = () => {
-            init(queryParams.value.keyword, showWordBoard.value, noResult.value, [...pendingList.value]);
-            queryParams.value.sortord = "score"
-            activeButton.value = "score";
-            dateSortAsc.value = true; // 重置箭头默认向上，不显示
-
-            pendingList.value = []
-            searchData()
-            scrollToTop()
-        }
-
-        const onDateSort = () => {
-            init(queryParams.value.keyword, showWordBoard.value, noResult.value, [...pendingList.value]);
-            queryParams.value.sortord = !dateSortAsc.value === true ? "date_asc" : "date_desc"
-            activeButton.value = "date"; // 点击，箭头取反
-            dateSortAsc.value = !dateSortAsc.value;
-
-            pendingList.value = []
-            searchData()
-            scrollToTop()
-        }
-
-        const onChange = () => {
-            settingStore.options.view = settingStore.options.view === "window" ? "waterfall" : "window";
-            uni.setStorageSync("view", settingStore.options.view)
-        }
-
-        return {
-            onRecommend,
-            onSroce,
-            onDateSort,
-            onChange
-        };
-    }
-
-    const {
-        view,
-        onRecommend,
-        onSroce,
-        onDateSort,
-        onChange
-    } = useFilter();
+    // 传递给query-panel的方法，供子组件调用
+    const onQuery = (sortord) => {
+        init(queryParams.value.keyword, showWordBoard.value, noResult.value, [...pendingList.value]);
+        queryParams.value.sortord = sortord; // order by 字段：random / score / date_asc /date_desc
+        pendingList.value = [];
+        searchData();
+        backToTopRef.value.scrollToTop();
+    };
 
     //触底加载更多
     onReachBottom(() => {
         if (noData.value) return;
-        queryParams.value.pageNum++
+        queryParams.value.pageNum++;
         searchData();
-    })
+    });
 
     const searchHeight = ref(0);
     onLoad(() => {
-        
         // 等待 DOM 渲染完成
         nextTick(() => {
-            
             uni.createSelectorQuery()
                 .select('.search')
-                .boundingClientRect(rect => {
+                .boundingClientRect((rect) => {
                     if (rect) {
                         searchHeight.value = rect.height;
                         // 你可以在这里做后续处理，比如设置 filter 的 top
-                        console.log('search高度:', searchHeight.value)
+                        console.log('search高度:', searchHeight.value);
                         // 第一种方式使用v-bind方式在css处绑定：v-bind 语法仅在 <style scoped> 并配合 <script setup> 的 CSS 变量时有效
                         // 第二种方式使用內联style样式绑定：<view class="filter" :style="{top: searchHeight + 'px'}">
                     }
@@ -306,11 +241,11 @@
 
             uni.createSelectorQuery()
                 .select('div.uni-page-head')
-                .boundingClientRect(rect => {
+                .boundingClientRect((rect) => {
                     if (rect) {
                         searchHeight.value = rect.height;
                         // 你可以在这里做后续处理，比如设置 filter 的 top
-                        console.log('uni-page-head高度:', searchHeight.value)
+                        console.log('uni-page-head高度:', searchHeight.value);
                         // 第一种方式使用v-bind方式在css处绑定：v-bind 语法仅在 <style scoped> 并配合 <script setup> 的 CSS 变量时有效
                         // 第二种方式使用內联style样式绑定：<view class="filter" :style="{top: searchHeight + 'px'}">
                     }
@@ -321,49 +256,22 @@
 
     //关闭页面
     onUnload(() => {
-        uni.removeStorageSync("wallList");
-    })
+        uni.removeStorageSync('wallList');
+    });
 
-
-    // 返回到顶部的代码
-    const useBackToTop = () => {
-        // 控制返回顶部按钮的显示
-        const showBackToTop = ref(false);
-        // 返回顶部
-        const scrollToTop = () => {
-            uni.pageScrollTo({
-                scrollTop: 0,
-                duration: 300 // 滚动动画持续时间
-            });
-        };
-
-        return {
-            showBackToTop,
-            scrollToTop
-        };
-    }
-    const {
-        showBackToTop,
-        scrollToTop
-    } = useBackToTop();
-
-
-    // 监听滚动事件
+    // TODO 监听滚动事件，向下滚动隐藏搜索框显示查询面板，向上滚动显示搜索框和查询面板
     const showSearch = ref(true);
     let lastScrollTop = 0;
     let lastDirection = 'up'; // 记录上一次滚动方向
-    
+
     onPageScroll((e) => {
         // TODO 向下浏览：隐藏搜索框，固定筛选器，向上浏览：固定搜索栏，固定筛选器
-        
-        showBackToTop.value = e.scrollTop > 200;  // 当滚动距离超过200px时显示按钮
+        backToTopRef.value.showBackToTop = e.scrollTop > 200; // 当滚动距离超过200px时显示按钮
     });
-
 </script>
 
 <style lang="scss" scoped>
     .layout {
-
         .search {
             padding: 0 10rpx;
             // background-color: #f8f8f8;
@@ -402,7 +310,7 @@
             padding-top: 20rpx;
 
             .tab {
-                background: #F4F4F4;
+                background: #f4f4f4;
                 font-size: 28rpx;
                 color: #333;
                 padding: 10rpx 28rpx;
@@ -424,82 +332,6 @@
             .text {
                 font-size: 26rpx;
                 color: #999;
-            }
-        }
-
-        .filter {
-            position: sticky;
-            top: v-bind('searchHeight + "px"');
-            z-index: 10;
-            background-color: #ffffff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 2rpx 8rpx;
-            border-top: 1rpx solid #e0e0e0;
-            box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.06);
-
-            .left {
-                display: flex;
-
-                button {
-                    // background-color: #f4f4f4;
-                    // color: #333;
-                    font-size: 28rpx;
-                    padding: 10rpx 20rpx;
-                    border: none;
-                    border-radius: 20rpx;
-                    cursor: pointer;
-                    margin-right: 10rpx;
-                    display: flex;
-                    align-items: center;
-                    gap: 5rpx;
-                    transition: background-color 0.3s ease, color 0.3s ease;
-
-                    // &:hover {
-                    //     background-color: #e0e0e0;
-                    // }
-
-                    &.active {
-                        // background-color: #ffffff;
-                        color: #28b389;
-                        /* 激活状态文字颜色为绿色 */
-                    }
-
-                    .icon {
-                        font-size: 24rpx;
-                    }
-                }
-            }
-
-            .right {
-                display: flex;
-                align-items: center;
-
-                uni-icons {
-                    padding-right: 20rpx;
-                }
-            }
-        }
-
-        .backToTop {
-            position: fixed;
-            bottom: 60rpx;
-            right: 30rpx;
-            width: 80rpx;
-            height: 80rpx;
-            background-color: #28b389;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            z-index: 1000;
-            transition: opacity 0.3s ease;
-
-            &:hover {
-                background-color: #1e8a6d;
             }
         }
     }
