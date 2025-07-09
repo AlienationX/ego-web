@@ -1,7 +1,5 @@
+import { API_BASE_URL } from '@/common/config';
 import { useUserStore } from '@/stores/user.js';
-
-const API_BASE_URL = 'http://localhost:8000/wallpaper/api';
-// const API_BASE_URL = 'https://49touviwp7.execute-api.eu-north-1.amazonaws.com/dev/wallpaper/api';
 
 // 发送 request 请求函数，如果token过期，刷新后再次发送 request 请求
 export const request = (config = {}) => {
@@ -52,7 +50,7 @@ const sendRequest = (config = {}) => {
                 ...config.header
             },
             success: (res) => {
-                if (res.data.code === 200) {
+                if (res.data.code === 200 || res.data.code === 201) {
                     resolve(res.data);
                 } else if (res.data.code === 401) {
                     reject(res.data); // 这里的reject会被外层catch捕获

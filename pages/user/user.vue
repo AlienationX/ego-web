@@ -14,7 +14,8 @@
                 </view>
             </view>
             <view v-else class="name">
-                <navigator url="/pages/login/login">Login</navigator>
+                本我壁纸
+                <!-- <navigator url="/pages/login/login">Login</navigator> -->
             </view>
         </view>
 
@@ -217,7 +218,7 @@
             }
 
             .name {
-                font-size: 44rpx;
+                font-size: 38rpx;
                 color: #333;
                 padding: 40rpx 0 5rpx;
             }

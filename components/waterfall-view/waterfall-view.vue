@@ -1,15 +1,13 @@
 <template>
     <view class="layout">
-        <custom-waterfalls-flow :value="classList" imageKey="smallPicurl" :column="columnCount" :columnSpace="1"
-            @imageClick="onImageClick">
-
+        <custom-waterfalls-flow :value="newClassList" imageKey="smallPicurl" :column="columnCount" :columnSpace="1" @imageClick="onImageClick">
             <!-- #ifdef MP-WEIXIN -->
             <template v-for="(item, index) in classList" :key="item._key">
                 <view v-if="!item.isAd" class="card" :slot="'slot' + index">
                     <view class="card-content">
                         <text class="title">{{ item.description }}</text>
                         <view class="score">
-                            <uni-icons type="star-filled" size="18" color="#f7cc5b"</uni-icons>
+                            <uni-icons type="star-filled" size="18" color="#f7cc5b"></uni-icons>
                             <text class="price">{{ item.score }}</text>
                         </view>
                     </view>
@@ -27,7 +25,7 @@
                     <view class="card-content">
                         <text class="title">{{ item.description }}</text>
                         <view class="score">
-                            <uni-icons type="star-filled" size="18" color="#f7cc5b"</uni-icons>
+                            <uni-icons type="star-filled" size="18" color="#f7cc5b"></uni-icons>
                             <text class="price">{{ item.score }}</text>
                         </view>
                     </view>
@@ -38,78 +36,103 @@
                 </view>
             </template>
             <!-- #endif -->
-
         </custom-waterfalls-flow>
     </view>
 </template>
 
 <script setup>
-    import {
-        ref,
-        computed,
-        onMounted
-    } from 'vue'
+    import { ref, computed, watch, onMounted, toRef, toRefs } from 'vue';
 
     const props = defineProps({
         classList: {
             type: Array,
             default: () => []
         }
-    })
+    });
+
+    console.log('1: classList', props);
+    console.log('1: classList', props.classList);
+
+    const classListRef = toRef(props, 'classList');
+    // const { classListRef } = toRefs(props);
+    console.log('1: classList', classListRef.value);
+    
+    const newClassList = ref();
+    
+    // 监听变化（包括初始值和后续更新）
+    watch(
+      () => props.classList,
+      (newVal) => {
+        console.log('watch: props.classList 更新为：', newVal); 
+        console.log('watch: props.classList', props.classList);
+        console.log('watch: classListRef.value', classListRef.value);
+        
+        newClassList.value = newVal;
+        console.log("newClassList", newClassList.value);
+      },
+      { immediate: true } // 初始化时立即执行
+    );
 
     // 生成带广告的列表
     const listWithAds = computed(() => {
-        const arr = []
-        let adCount = 0
+        const arr = [];
+        let adCount = 0;
         props.classList.forEach((item, idx) => {
             arr.push({
                 ...item,
                 _key: String(item.id)
-            })
+            });
             if ((idx + 1) % 12 === 0) {
-                adCount++
+                adCount++;
                 arr.push({
                     isAd: true,
                     _key: 'ad-' + adCount
-                })
+                });
             }
-        })
-        return arr
-    })
+        });
+        console.log('2: classList', props.classList);
+        console.log('2: classListRef', classListRef.value);
+        console.log('2: new arr', arr);
+        return arr;
+    });
+
     
-    console.log("classList", props.classList);
-    console.log("new arr", listWithAds.value);
 
     const onImageClick = (item) => {
         if (!item.isAd) {
             uni.navigateTo({
                 url: `/pages/preview/preview?id=${item.id}`
-            })
+            });
         }
-    }
+    };
 
     // 动态计算列值
-    const columnCount = ref(3)
+    const columnCount = ref(3);
     const calcColumn = () => {
-        let width = uni.getSystemInfoSync().windowWidth
+        let width = uni.getSystemInfoSync().windowWidth;
         if (width >= 1440) {
-            columnCount.value = 6
+            columnCount.value = 6;
         } else if (width >= 1080) {
-            columnCount.value = 5
+            columnCount.value = 5;
         } else if (width >= 720) {
-            columnCount.value = 4
+            columnCount.value = 4;
         } else {
-            columnCount.value = 3
+            columnCount.value = 3;
         }
-    }
+    };
 
     onMounted(() => {
-        calcColumn()
+        calcColumn();
         if (typeof window !== 'undefined') {
             // 增加监听窗口大小变化事件，resize触发计算列值函数
-            window.addEventListener('resize', calcColumn)
+            window.addEventListener('resize', calcColumn);
         }
-    })
+        
+        
+        console.log('on: classList', props);
+        console.log('on: classList', props.classList);
+        console.log('on: classList', classListRef.value);
+    });
 </script>
 
 <style lang="scss" scoped>

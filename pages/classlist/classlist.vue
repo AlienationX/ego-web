@@ -10,6 +10,9 @@
         </view> -->
         <window-view :classList="classList"></window-view>
 
+        <!-- <window-view v-if="settingsStore.options.view === 'window'" :classList="classList"></window-view>
+        <waterfall-view v-else :classList="classList"></waterfall-view> -->
+
         <view class="loadingLayout" v-if="noData || isRunning">
             <uni-load-more :status="noData ? 'noMore' : 'loading'"></uni-load-more>
         </view>
@@ -26,7 +29,9 @@
     import { onLoad, onUnload, onReachBottom, onPullDownRefresh, onPageScroll, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { apiGetClassList, apiGetClassify } from '@/api/wallpaper.js';
     import { gotoHome, handlePicUrl } from '@/utils/common.js';
-    import { PICS_BASE_URL } from '@/common/config.js';
+    import { useSettingsStore } from '@/stores/settings.js';
+
+    const settingsStore = useSettingsStore();
 
     const backToTopRef = ref(null);
 
@@ -79,7 +84,7 @@
             let res = await apiGetClassList(queryParams.value);
 
             // 增加缩略图samllPicurl字段
-            let fullData = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+            let fullData = res.data.map((item) => handlePicUrl(item));
 
             // // 两表关联增加 classify_name 用来显示
             // let classRes = await apiGetClassify();

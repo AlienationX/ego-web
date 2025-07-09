@@ -42,8 +42,8 @@
                 <template #name>每日推荐</template>
                 <template #custom>
                     <view class="date">
-                        <!-- <navigator class="button" style="padding-right: 20rpx;" url="/pages/test/ad-inter">ad1</navigator> -->
-                        <!-- <navigator class="button" url="/pages/test/ad-rewarded">ad2</navigator> -->
+                        <navigator class="button" style="padding-right: 20rpx;" url="/pages/access/access">Access</navigator>
+                        <navigator class="button" url="/pages/login/login">Login</navigator>
 
                         <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
                         <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
@@ -105,7 +105,6 @@
     import { onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { apiGetBanner, apiGetDayRandom, apiGetNotice, apiGetClassify } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
-    import { PICS_BASE_URL } from '@/common/config.js';
 
     const bannerList = ref([]);
     const randomList = ref([]);
@@ -121,18 +120,16 @@
         //         picurl: item.smallPicurl.replace("_small.webp", ".jpg")
         //     }
         // })
-        bannerList.value = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+        bannerList.value = res.data.map((item) => handlePicUrl(item));
     };
 
     const getRandom = async () => {
         let res = await apiGetDayRandom();
-        randomList.value = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+        randomList.value = res.data.map((item) => handlePicUrl(item));
     };
 
     const getNotice = async () => {
-        let res = await apiGetNotice({
-            select: true
-        });
+        let res = await apiGetNotice();
         noticeList.value = res.data;
     };
 
@@ -140,7 +137,7 @@
         let res = await apiGetClassify({
             select: true
         });
-        classifyList.value = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+        classifyList.value = res.data.map((item) => handlePicUrl(item));
     };
 
     const goPriview = (id) => {
@@ -246,6 +243,10 @@
                     height: 100%;
 
                     &-item {
+                        display: flex;
+                        align-items: center;
+                        justify-content: left;
+                        
                         height: 100%;
                         font-size: 30rpx;
                         color: #666;
@@ -297,7 +298,7 @@
                         height: 430rpx;
                         display: inline-block;
                         margin-right: 15rpx;
-                        box-shadow: 0 16rpx 32rpx rgba(40, 179, 137, 0.18); // 增加阴影
+                        // box-shadow: 0 16rpx 32rpx rgba(40, 179, 137, 0.18); // 增加阴影，无效
 
                         image {
                             width: 100%;

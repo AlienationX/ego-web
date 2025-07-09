@@ -10,10 +10,9 @@
                 </view>
             </button>
         </view>
-        <view class="right" @click="onChange">
+        <!-- <view class="right" @click="onChange">
             <uni-icons :type="settingsStore.switchViewIcon" size="18" color="#28b389"></uni-icons>
-            <uni-icons :type="settingsStore.switchViewIcon" size="18" color="#28b389"></uni-icons>
-        </view>
+        </view> -->
     </view>
 </template>
 
@@ -91,6 +90,7 @@
 
         .left {
             display: flex;
+            height: 64rpx;
 
             button {
                 font-size: 28rpx;
@@ -105,6 +105,7 @@
 
                 &.active {
                     color: #28b389;
+                    font-weight: bold;
                 }
                 .icon {
                     font-size: 24rpx;

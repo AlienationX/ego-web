@@ -1,9 +1,9 @@
 <template>
     <view class="layout">
         <view class="navbar">
-            <view class="statusBar" :style="{height: getStatusBarHeight() + 'px'}"></view>
-            <view class="titleBar" :style="{height: getTitleBarHeight() + 'px', marginLeft: getLeftIconWidth() + 'px'}">
-                <view class="title">{{title}}</view>
+            <view class="statusBar" :style="{ height: getStatusBarHeight() + 'px' }"></view>
+            <view class="titleBar" :style="{ height: getTitleBarHeight() + 'px', marginLeft: getLeftIconWidth() + 'px' }">
+                <view class="title">{{ title }}</view>
                 <navigator url="/pages/search/search" class="search">
                     <uni-icons class="icon" type="search" color="#888" size="18"></uni-icons>
                     <text class="text">搜索</text>
@@ -12,24 +12,19 @@
         </view>
 
         <!-- 该区域是为了把内容顶到navbar下面，因为navbar是绝对定位 -->
-        <view class="fill" :style="{height: getNavBarHeight() + 'px'}"></view>
+        <view class="fill" :style="{ height: getNavBarHeight() + 'px' }"></view>
     </view>
 </template>
 
 <script setup>
-    import {
-        getStatusBarHeight,
-        getTitleBarHeight,
-        getNavBarHeight,
-        getLeftIconWidth
-    } from "@/utils/system.js"
-    
+    import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth } from '@/utils/system.js';
+
     defineProps({
         title: {
             type: String,
-            default: "壁纸"
+            default: '壁纸'
         }
-    })
+    });
 </script>
 
 <style lang="scss" scoped>
@@ -82,6 +77,7 @@
             }
         }
 
-        .fill {}
+        .fill {
+        }
     }
 </style>

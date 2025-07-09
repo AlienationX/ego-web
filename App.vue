@@ -1,14 +1,18 @@
 <script>
+    import { writeAccessLog } from '@/utils/system.js';
+
     export default {
         onLaunch: function () {
             console.log('App Launch');
 
-            uni.getProvider({
-                service: 'oauth',
-                success: function (res) {
-                    console.log(res, 'getProvider'); // ['weixin', qq', 'univerify']
-                }
-            });
+            // uni.getProvider({
+            //     service: 'oauth',
+            //     success: function (res) {
+            //         console.log(res, 'getProvider'); // ['weixin', qq', 'univerify']
+            //     }
+            // });
+
+            writeAccessLog();
 
             // #ifndef MP
             console.log(process.env); // 小程序不支持

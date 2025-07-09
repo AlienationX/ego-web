@@ -77,8 +77,9 @@
                                 </view>
                             </view>
                         </view>
-
                         <view class="copyright">声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。</view>
+
+                        <custom-ad-banner></custom-ad-banner>
                     </view>
                 </scroll-view>
             </view>

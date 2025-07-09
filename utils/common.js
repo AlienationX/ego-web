@@ -1,3 +1,5 @@
+import { PICS_BASE_URL } from '@/common/config.js';
+
 export function compareTimestamp(timestamp) {
     const currentTime = new Date().getTime();
     const timeDiff = currentTime - timestamp;
@@ -17,32 +19,32 @@ export function compareTimestamp(timestamp) {
     }
 }
 
-export function handlePicUrl(item, prefix) { 
+export function handlePicUrl(item, prefix = PICS_BASE_URL) {
     // 1. 给 url 字段添加前缀。wall数据增加额外字段，前端处理，减少后端流量消耗
     const prefixedUrl = `${prefix}/${item.picurl}`;
-    
+
     // 2. 生成 smallPicurl 存储小图片（基于添加前缀后的完整 URL）
     const smallPicurl = prefixedUrl.replace('.jpg', '_small.webp');
 
     // 返回新对象（保留原字段(覆盖原字段) + 新增字段）
     return {
         ...item,
-        picurl: prefixedUrl,  // 覆盖原始的picurl数据
+        picurl: prefixedUrl, // 覆盖原始的picurl数据
         smallPicurl
     };
 }
 
 export function gotoHome() {
     uni.showModal({
-        title: "提示",
-        content: "页面有误将返回首页",
+        title: '提示',
+        content: '页面有误将返回首页',
         showCancel: false,
         success: (res) => {
             if (res.confirm) {
                 uni.reLaunch({
-                    url: "/pages/index/index"
-                })
+                    url: '/pages/index/index'
+                });
             }
         }
-    })
+    });
 }

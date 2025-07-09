@@ -1,5 +1,13 @@
 import { request } from '@/api/request.js';
 
+export const apiPostAccess = (data = {}) => {
+    return request({
+        url: '/access/',
+        data,
+        method: 'POST'
+    });
+};
+
 export const apiGetBanner = () => {
     return request({
         url: '/banner/'
@@ -12,16 +20,8 @@ export const apiGetDayRandom = () => {
     });
 };
 
-export const apiGetNotice = (data = {}) => {
+export const apiGetNotice = (data = {}, id = '') => {
     return request({
-        url: '/notice/',
-        data
-    });
-};
-
-export const apiGetNoticeDetail = (data = {}, id = '') => {
-    return request({
-        // 多一个id的判断，其实可以统一成一个接口
         url: id ? `/notice/${id}/` : '/notice/',
         data
     });
@@ -52,7 +52,6 @@ export const apiSearchData = (data = {}) => {
 };
 
 export const apiPostLoginByWechat = (data = {}) => {
-    // 图片评分接口，该接口根据ip验证是否已经打过分了
     return request({
         url: '/login/wechat/',
         data,
@@ -60,6 +59,7 @@ export const apiPostLoginByWechat = (data = {}) => {
     });
 };
 
+// 不使用，暂时注释
 // export const apiGetUserInfo = (id = '') => {
 //     return request({
 //         url: `/user/${id}/`
@@ -72,7 +72,7 @@ export const apiGetProfile = () => {
     });
 };
 
-// test
+// demo
 export const apiGetSetupScore = (data = {}) => {
     // 图片评分接口，该接口根据ip验证是否已经打过分了
     return request({

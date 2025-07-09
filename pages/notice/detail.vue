@@ -3,18 +3,18 @@
         <view class="loadingLayout" v-if="Object.keys(detail).length === 0">
             <uni-load-more status="loading"></uni-load-more>
         </view>
-        
+
         <view class="title">
             <view class="tag" v-if="detail.select">
                 <uni-tag text="置顶" type="error" inverted></uni-tag>
             </view>
             <view class="font">
-                {{detail.title}}
+                {{ detail.title }}
             </view>
         </view>
         <view class="info">
             <view class="item">
-                {{detail.author}}
+                {{ detail.author }}
             </view>
             <view class="item">
                 <uni-dateformat :date="detail.publish_date" format="yyyy/MM/dd"></uni-dateformat>
@@ -22,7 +22,6 @@
         </view>
 
         <view class="content">
-
             <!-- 内置组件，可以显示html格式 -->
             <rich-text :nodes="detail.content"></rich-text>
 
@@ -30,46 +29,46 @@
             <!-- <mp-html :content="detail.content"></mp-html> -->
         </view>
 
-        <view class="count" v-if="detail.view_count">
-            阅读 {{detail.view_count}}
-        </view>
+        <view class="count" v-if="detail.view_count">阅读 {{ detail.view_count }}</view>
     </view>
 </template>
 
 <script setup>
-    import {
-        ref
-    } from "vue";
-    import {
-        apiGetNotice,
-        apiGetNoticeDetail
-    } from "@/api/wallpaper.js";
-    import {
-        onLoad
-    } from "@dcloudio/uni-app";
+    import { ref, toRefs } from 'vue';
+    import { apiGetNotice } from '@/api/wallpaper.js';
+    import { onLoad } from '@dcloudio/uni-app';
 
-    const detail = ref({})
+    // UniApp 会将 URL 中的参数自动注入到 props
+    const props = defineProps({
+        id: String, // 公告id
+        name: String // 公告title
+    });
+
+    // const { id:noticeId, name:noticeName } = toRefs(props);
+    const { id, name } = toRefs(props);
+
+    const detail = ref({});
 
     const getNoticeDetail = async () => {
-        let res = await apiGetNoticeDetail({}, noticeid)
+        let res = await apiGetNotice({}, id.value);
         detail.value = res.data;
 
         // 如果title存在，则设置navigation bar title
-        if (name !== undefined) {
+        if (name.value !== undefined) {
             uni.setNavigationBarTitle({
-                title: name
-            })
+                title: name.value
+            });
         }
-    }
+    };
 
-    let noticeid;
-    let name;
+    // let noticeId;
+    // let noticeName;
     onLoad((e) => {
         // console.log(e);
-        noticeid = parseInt(e.id)
-        name = e.name
-        getNoticeDetail()
-    })
+        // noticeId = parseInt(e.id);
+        // noticeName = e.name;
+        getNoticeDetail();
+    });
 </script>
 
 <style lang="scss" scoped>

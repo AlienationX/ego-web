@@ -72,8 +72,8 @@
 
             <window-view :classList="classList"></window-view>
 
-            <!-- <window-view v-if=" settingsStore.options.view === 'window' " :classList="classList"></window-view>
-            <waterfall-view v-else :classList="classList"></waterfall-view> -->
+            <!-- <window-view v-if="settingsStore.options.view === 'window'" :classList="classList"></window-view>
+            <waterfall-view1 v-else :classList="classList"></waterfall-view1> -->
 
             <view class="loadingLayout" v-if="noData || classList.length">
                 <uni-load-more :status="noData ? 'noMore' : 'loading'" />
@@ -90,7 +90,9 @@
     import { onLoad, onUnload, onReachBottom, onPageScroll } from '@dcloudio/uni-app';
     import { apiSearchData } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
-    import { PICS_BASE_URL } from '@/common/config.js';
+    import { useSettingsStore } from '@/stores/settings.js';
+
+    const settingsStore = useSettingsStore();
 
     const queryPanelRef = ref(null); // 创建子组件query_panel的引用
     const backToTopRef = ref(null);
@@ -186,7 +188,7 @@
             uni.showLoading(); // 屏幕中间黑方框中间转圈效果
 
             let res = await apiSearchData(queryParams.value);
-            let fullData = res.data.map((item) => handlePicUrl(item, PICS_BASE_URL));
+            let fullData = res.data.map((item) => handlePicUrl(item));
             // pendingList.value.value = [...pendingList.value.value, ...fullData];
             pendingList.value.push(...fullData);
             classList.value = [...pendingList.value];
