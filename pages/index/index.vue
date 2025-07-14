@@ -42,8 +42,8 @@
                 <template #name>每日推荐</template>
                 <template #custom>
                     <view class="date">
-                        <navigator class="button" style="padding-right: 20rpx;" url="/pages/access/access">Access</navigator>
-                        <navigator class="button" url="/pages/login/login">Login</navigator>
+                        <!-- <navigator class="button" style="padding-right: 20rpx" url="/pages/access/access">Access</navigator>
+                        <navigator class="button" url="/pages/login/login">Login</navigator> -->
 
                         <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
                         <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
@@ -110,7 +110,7 @@
     const randomList = ref([]);
     const noticeList = ref([]);
     const classifyList = ref([]);
-    
+
     const getBanner = async () => {
         let res = await apiGetBanner();
         // bannerList.value = res.data.map(item => {
@@ -189,16 +189,16 @@
     .homeLayout {
         .banner {
             width: 750rpx;
-            padding: 30rpx 0;
+            padding: 20rpx 0;
 
             swiper {
                 width: 750rpx;
-                height: 340rpx;
+                height: 360rpx;
 
                 &-item {
                     width: 100%;
                     height: 100%;
-                    padding: 0 30rpx;
+                    padding: 20rpx 30rpx;
 
                     navigator {
                         width: 100%;
@@ -208,6 +208,9 @@
                             width: 100%;
                             height: 100%;
                             border-radius: 10rpx;
+                            // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
+                            // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
+                            box-shadow: 0 0 20rpx rgba(0, 0, 0, 0.65);
                         }
                     }
                 }
@@ -216,12 +219,15 @@
 
         .notice {
             width: 690rpx;
-            height: 80rpx;
+            height: 72rpx;
             line-height: 80rpx;
             background: #f9f9f9;
             margin: 0 auto;
             border-radius: 80rpx;
             display: flex;
+            // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
+            // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
+            box-shadow: 0 0px 6rpx rgba(0, 0, 0, 0.25);
 
             .left {
                 width: 140rpx;
@@ -246,13 +252,17 @@
                         display: flex;
                         align-items: center;
                         justify-content: left;
-                        
+
                         height: 100%;
                         font-size: 30rpx;
                         color: #666;
                         overflow: hidden;
                         white-space: nowrap;
                         text-overflow: ellipsis;
+                    }
+
+                    navigator {
+                        width: 100%;
                     }
                 }
             }
@@ -287,7 +297,7 @@
 
             .content {
                 width: 720rpx;
-                margin-top: 30rpx;
+                margin-top: 28rpx;
                 margin-left: 30rpx;
 
                 scroll-view {
@@ -296,14 +306,18 @@
                     .box {
                         width: 200rpx;
                         height: 430rpx;
-                        display: inline-block;
+                        display: inline-flex;
+                        justify-content: center; /* 水平居中 */
+                        align-items: center; /* 垂直居中 */
                         margin-right: 15rpx;
-                        // box-shadow: 0 16rpx 32rpx rgba(40, 179, 137, 0.18); // 增加阴影，无效
 
                         image {
-                            width: 100%;
-                            height: 100%;
-                            border-radius: 10rpx;
+                            width: 95%;
+                            height: 98%;
+                            border-radius: 24rpx;
+                            // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
+                            // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
+                            box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.85);
                         }
                     }
 

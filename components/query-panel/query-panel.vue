@@ -6,7 +6,7 @@
             <button size="mini" plain :class="{ active: activeButton === 'date' }" @click="onDateSort">
                 发布日期
                 <view class="icon" v-if="activeButton === 'date'">
-                    <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="14" color="#28b389"></uni-icons>
+                    <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="14" color="#ffffff"></uni-icons>
                 </view>
             </button>
         </view>
@@ -45,25 +45,25 @@
         dateSortAsc.value = true; // 重置箭头默认向上，不显示
         emit('onQuery', 'random'); // 第一个参数为执行的函数，第二个参数是传入的参数值
     }
-    
+
     function onScore() {
         activeButton.value = 'score';
         dateSortAsc.value = true; // 重置箭头默认向上，不显示
         emit('onQuery', 'score');
     }
-    
+
     function onDateSort() {
         activeButton.value = 'date';
         dateSortAsc.value = !dateSortAsc.value;
         const sortord = dateSortAsc.value ? 'date_asc' : 'date_desc';
         emit('onQuery', sortord);
     }
-    
+
     function onChange() {
         settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
         uni.setStorageSync('view', settingsStore.options.view);
     }
-    
+
     function reset() {
         activeButton.value = '';
         dateSortAsc.value = true;
@@ -86,25 +86,31 @@
         align-items: center;
         padding: 2rpx 8rpx;
         border-top: 1rpx solid #e0e0e0;
-        box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.06);
+        // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
+        // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
+        box-shadow: 0 0 8rpx rgba(0, 0, 0, 0.25);
 
         .left {
             display: flex;
-            height: 64rpx;
+            height: 48rpx;
+            padding: 12rpx 12rpx;
 
             button {
-                font-size: 28rpx;
-                padding: 10rpx 20rpx;
+                padding: 0rpx 20rpx;
+                background-color: #f8f8f8;
+                // font-weight: bold;
+
                 border: none;
-                border-radius: 20rpx;
+                border-radius: 40rpx;
                 margin-right: 10rpx;
                 display: flex;
                 align-items: center;
-                gap: 5rpx;
-                transition: background-color 0.3s ease, color 0.3s ease;
+                // gap: 5rpx;
+                // transition: background-color 0.3s ease, color 0.3s ease;
 
                 &.active {
-                    color: #28b389;
+                    color: #ffffff;
+                    background-color: #28b389;
                     font-weight: bold;
                 }
                 .icon {

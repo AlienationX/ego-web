@@ -210,6 +210,7 @@
                 height: 160rpx;
                 border-radius: 50%;
                 overflow: hidden;
+                box-shadow: 0 0 12rpx rgba(0, 0, 0, 0.1);
 
                 image {
                     width: 100%;
@@ -234,7 +235,7 @@
             margin: 50rpx auto;
             border: 1rpx solid #eee;
             border-radius: 10rpx;
-            box-shadow: 0 0 30rpx rgba(0, 0, 0, 0.05);
+            box-shadow: 0 0 12rpx rgba(0, 0, 0, 0.1);
 
             .list {
                 .row {

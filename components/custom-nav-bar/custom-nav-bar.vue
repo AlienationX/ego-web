@@ -65,6 +65,7 @@
                     font-size: 28rpx;
                     display: flex;
                     align-items: center;
+                    box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.25);
 
                     .icon {
                         margin-left: 5rpx;

@@ -40,17 +40,21 @@
         .list {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10rpx;
-            padding: 10rpx;
+            gap: 20rpx;
+            padding: 20rpx;
 
             .item {
                 height: 440rpx;
+                border-radius: 24rpx;
+                // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
+                // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
+                box-shadow: 0 0 8rpx rgba(0, 0, 0, 0.85);
 
                 .img {
                     width: 100%;
                     height: 100%;
                     display: block;
-                    border-radius: 10rpx;
+                    border-radius: 24rpx;
                 }
             }
 

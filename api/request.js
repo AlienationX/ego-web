@@ -10,7 +10,7 @@ export const request = (config = {}) => {
             resolve(await sendRequest(config));
         } catch (error) {
             // 捕获到token过期的401错误，Token 过期时自动刷新并重试
-            console.log('-----------', error);
+            console.log('retry request ----------->', error);
             if (error.code === 401 || error.statusCode === 401) {
                 await refreshToken();
                 try {

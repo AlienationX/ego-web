@@ -1,8 +1,19 @@
 <template>
     <view class="layout">
         <view class="search" v-show="showSearch">
-            <uni-search-bar @confirm="onSearch" @cancel="onClear" @clear="onClear" focus placeholder="搜索" cancelButton="none" v-model="queryParams.keyword"></uni-search-bar>
+            <!-- <uni-icons class="btn" type="back" size="22" color="#616d80" @click="goBack"></uni-icons> -->
+            <uni-search-bar
+                class="bar"
+                @confirm="onSearch"
+                @cancel="onClear"
+                @clear="onClear"
+                focus
+                placeholder="搜索"
+                cancelButton="none"
+                v-model="queryParams.keyword"
+            ></uni-search-bar>
         </view>
+        
 
         <view v-show="showWordBoard">
             <view class="history" v-if="searchHistory.length">
@@ -91,6 +102,7 @@
     import { apiSearchData } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
     import { useSettingsStore } from '@/stores/settings.js';
+    import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth } from '@/utils/system.js';
 
     const settingsStore = useSettingsStore();
 
@@ -217,6 +229,13 @@
         backToTopRef.value.scrollToTop();
     };
 
+    const goBack = () => {
+        uni.navigateBack();
+        // uni.switchTab({
+        //     url: '/pages/index/index'
+        // });
+    };
+
     //触底加载更多
     onReachBottom(() => {
         if (noData.value) return;
@@ -277,16 +296,24 @@
         .search {
             padding: 0 10rpx;
             // background-color: #f8f8f8;
-            /* 与筛选器颜色一致 */
-            // border-bottom: 1rpx solid #e0e0e0;
-            // box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
-
             position: sticky;
             top: 0;
             z-index: 20;
             background: #ffffff;
             // /* 可选：加阴影提升层次 */
-            // box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.06);
+            // box-shadow: 0 0 8rpx rgba(0, 0, 0, 0.25);
+
+            display: flex;
+            justify-content: left;
+            align-items: center;
+
+            .btn {
+                margin-left: 8rpx;
+            }
+
+            .bar {
+                width: 100%;
+            }
         }
 
         .topTitle {
