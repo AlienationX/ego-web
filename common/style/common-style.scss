@@ -1,5 +1,5 @@
 view swiper swiper-item {
-    box-sizing: border-box;  // 内边距放到边框内
+    box-sizing: border-box; // 内边距放到边框内
 }
 
 // 背景色渐变
@@ -9,10 +9,15 @@ view swiper swiper-item {
 }
 
 .loadingLayout {
-    padding: 30rpx 0;
+    padding: 20rpx 0;
 }
 
 // 安全区，主要是针对手机home键上方的区域
-.safe-area-inset-bottom{
-	height: env(safe-area-inset-bottom);
+.safe-area-inset-bottom {
+    height: env(safe-area-inset-bottom);
+}
+
+
+.container-background {
+    background: #f4e2d8;
 }

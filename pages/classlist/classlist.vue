@@ -8,12 +8,17 @@
                 <image :src="item.smallPicurl" mode="aspectFill"></image>
             </navigator>
         </view> -->
-        <window-view :classList="classList"></window-view>
-
+        
+        <!-- <window-view :classList="classList"></window-view> -->
+    
+        <!-- 使用v-if切换会重新渲染 waterfall-view 并返回到顶部，所以封装到一个组件中 pics-view -->
         <!-- <window-view v-if="settingsStore.options.view === 'window'" :classList="classList"></window-view>
         <waterfall-view v-else :classList="classList"></waterfall-view> -->
-
-        <view class="loadingLayout" v-if="noData || isRunning">
+        
+        
+        <pics-view :classList="classList"></pics-view>
+        
+        <view class="loadingLayout" v-show="noData || isRunning">
             <uni-load-more :status="noData ? 'noMore' : 'loading'"></uni-load-more>
         </view>
 
@@ -33,6 +38,7 @@
 
     const settingsStore = useSettingsStore();
 
+    const picsViewRef = ref(null);
     const backToTopRef = ref(null);
 
     // 正在执行
@@ -49,11 +55,6 @@
     const props = defineProps({
         id: String, // 分类id
         name: String // 分类名称
-    });
-
-    // 动态设置分类列表的title
-    uni.setNavigationBarTitle({
-        title: props.name
     });
 
     const queryParams = ref({
@@ -101,7 +102,7 @@
             pendingList.value.push(...fullData);
             classList.value = [...pendingList.value];
 
-            isRunning.value = false;
+            // isRunning.value = false;
             if (queryParams.value.pageSize > res.data.length) noData.value = true;
 
             // 缓存数据
@@ -121,8 +122,12 @@
     };
 
     onLoad((e) => {
-        // 页面加载完毕后，获取id。比较慢，推荐使用获取页面参数，可以在setup中直接使用
-        // OnLoad要晚于setup执行
+        // 页面加载时，获取id。比较慢，推荐使用获取页面参数，可以在setup中直接使用
+
+        // OnLoad要晚于setup执行,但是setup有时执行太快，所以在这里动态设置分类列表的title
+        uni.setNavigationBarTitle({
+            title: props.name
+        });
 
         // console.log('解析url传入的参数，比如：?id=5&name=明星美女', e);
         let { id, name } = e;

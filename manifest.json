@@ -2,8 +2,8 @@
     "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
     "description" : "致力于打造一款极简易用的壁纸浏览产品。",
-    "versionName" : "1.0.9",
-    "versionCode" : 109,
+    "versionName" : "1.1.1",
+    "versionCode" : 111,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -42,8 +42,8 @@
                     "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
                 ],
                 "abiFilters" : [ "arm64-v8a", "x86" ],
-                "minSdkVersion" : 21,
-                "targetSdkVersion" : 34
+                "minSdkVersion" : 24,
+                "targetSdkVersion" : 35
             },
             /* ios打包配置 */
             "ios" : {

@@ -7,6 +7,7 @@
             </view>
             <!-- 更新标签可以去掉 -->
             <view class="tab" v-if="compareTimestamp(item.updateTime)">{{ compareTimestamp(item.updateTime) }}前更新</view>
+            <uni-icons class="vip" v-show="item.is_locked" type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
         </navigator>
 
         <!-- 跳转到tabbar页面，open-type需要设置为reLaunch -->
@@ -60,7 +61,7 @@
 
             .mask {
                 width: 100%;
-                height: 70rpx;
+                height: 64rpx;
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -71,7 +72,7 @@
                 justify-content: center;
                 backdrop-filter: blur(20rpx);
                 font-weight: 600;
-                font-size: 30rpx;
+                font-size: 26rpx;
             }
 
             .tab {
@@ -84,6 +85,12 @@
                 font-size: 22rpx;
                 padding: 6rpx 14rpx;
                 border-radius: 0 0 20rpx 0;
+            }
+            
+            .vip {
+                position: absolute;
+                top: 0;
+                right: 4rpx;
             }
         }
 

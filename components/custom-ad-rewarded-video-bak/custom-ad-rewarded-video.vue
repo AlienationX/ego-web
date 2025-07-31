@@ -1,55 +1,70 @@
 <template>
-    <view>
-        
-        <!-- #ifndef MP-WEIXIN -->
-        <!-- adpid="1507000689" 此广告位标识仅在HBuilderX标准基座中有效，仅用于测试 -->
-        <view v-if="showAd" class="content">
-            <ad-rewarded-video :adpid="adpid" :loadnext="true" v-slot:default="{loading, error}" @load="onload"
-                @close="onclose" @error="onerror">
-                <button :disabled="loading" :loading="loading">显示广告</button>
-                <view v-if="error">{{error}}</view>
-            </ad-rewarded-video>
-        </view>
-        <!-- #endif -->
-        
-    </view>
+    <uni-popup class="popup" ref="popup" type="center">
+        <image class="img"></image>
+        <uni-icons class="close" type="clear" size="32" @click="close"></uni-icons>
+        <text class="txt">Unlock This Wallpaper</text>
+        <button class="btn" @click="onWatch">Watch An Ads</button>
+    </uni-popup>
 </template>
 
 <script setup>
-    defineProps({
-        adpid: {
-            type: String,
-            default: "1892019135", // 1892019135
-        }
-    })
+    import { onLoad, onUnload } from '@dcloudio/uni-app';
+    import { useAdRewardedVideo } from '@/hooks/useAd.js';
 
-    import {
-        useProfileStore
-    } from '@/stores/profile.js';
-    const profileStore = useProfileStore();
-    const showAd = profileStore.showAd;
-
-    const onload = (e) => {
-        console.log("ad-rewarded-video onload: ", e);
-    }
-
-    const onclose = (e) => {
-        const detail = e.detail
-        // 用户点击了【关闭广告】按钮
-        if (detail && detail.isEnded) {
-            // 正常播放结束
-            console.log("ad-rewarded-video onclose: succeed", detail.isEnded, e);
-        } else {
-            // 播放中途退出
-            console.log("ad-rewarded-video onclose: failure",detail.isEnded, e);
-        }
+    const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
+    
+    const popup = ref(null);
+    const show = ()=> {
+        popup.value.show();
     }
     
-    const onerror = (e) => {
-        // 广告加载失败
-        console.log("ad-rewarded-video onerror: ", e.detail);
+    const close = ()=> {
+        popup.value.close();
     }
+
+    const onWatch = () => {
+        showRewardedVideoAd();
+    };
+
+    onLoad((e) => {
+        createRewardedVideoAd(); // 创建激励视频广告
+    });
+
+    onUnload(() => {
+        destroyRewardedVideoAd(); // 销毁激励视频广告
+    });
+    
+    // 暴露方法给父组件
+    defineExpose({
+        show
+    });
 </script>
 
 <style lang="scss" scoped>
+    .popup {
+        border-radius: 24rpx;
+        position: relative;
+
+        .img {
+        }
+        .close {
+            position: absolute;
+            top: 4rpx;
+            right: 4rpx;
+        }
+        .txt {
+            font-weight: bold;
+            font-size: 42rpx;
+        }
+        .btn {
+            font-size: 28rpx;
+            color: #ffffff;
+            background-color: #28b389;
+            // font-weight: bold;
+            padding: 0rpx 20rpx;
+
+            border: none;
+            border-radius: 40rpx;
+        }
+    }
 </style>

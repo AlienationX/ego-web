@@ -55,17 +55,25 @@ const sendRequest = (config = {}) => {
                 } else if (res.data.code === 401) {
                     reject(res.data); // 这里的reject会被外层catch捕获
                 } else {
-                    uni.showModal({
-                        title: '错误提示',
-                        content: res.data.message || res.data || res,
-                        showCancel: false
-                    });
+                    if (res.data.code === undefined) {
+                        uni.showModal({
+                            title: '服务器错误提示',
+                            content: 'Internal Server Error (500)',
+                            showCancel: false
+                        });
+                    } else {
+                        uni.showModal({
+                            title: '错误提示' + res.data.code,
+                            content: res.data.message || res.data || res,
+                            showCancel: false
+                        });
+                    }
                     reject(res.data);
                 }
             },
             fail: (err) => {
                 uni.showToast({
-                    title: JSON.stringify(err),
+                    title: 'Internal Server Error: ' + JSON.stringify(err),
                     icon: 'none'
                 });
                 reject(err);

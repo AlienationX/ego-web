@@ -19,15 +19,17 @@
             </view>
             <view class="footer">
                 <view class="box" @click="openInfo">
-                    <uni-icons type="info" size="28"></uni-icons>
+                    <uni-icons type="info-filled" size="28"></uni-icons>
                     <view class="text">信息</view>
                 </view>
                 <view class="box" @click="openScore">
-                    <uni-icons type="star" size="28"></uni-icons>
+                    <uni-icons type="star-filled" size="28"></uni-icons>
                     <view class="text">{{ currentInfo.score }}分</view>
                 </view>
                 <view class="box" @click="clickDownload">
-                    <uni-icons type="download" size="24"></uni-icons>
+                    <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
+                    <uni-icons v-else type="download-filled" size="28"></uni-icons>
+                    
                     <view class="text">下载</view>
                 </view>
             </view>
@@ -105,6 +107,8 @@
                 </view>
             </view>
         </uni-popup>
+        
+        <prompt-ad-box ref="adPopup"></prompt-ad-box>
     </view>
 </template>
 
@@ -113,6 +117,7 @@
     import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { getStatusBarHeight } from '@/utils/system.js';
     import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
+    import { downloadPic } from "@/common/core.js";
 
     import { useUserStore } from '@/stores/user.js';
     const userStore = useUserStore();
@@ -190,6 +195,9 @@
         });
         closeScore();
     };
+    
+    // 点击下载弹窗观看广告
+    const adPopup = ref(null);
 
     // 点击下载
     // const adInterstitialRef = ref(null);
@@ -197,83 +205,93 @@
     const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
     const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
     const clickDownload = () => {
-        // #ifdef H5
+        // #ifdef WEB
         uni.showModal({
             content: '请长按或右键菜单保存壁纸',
             showCancel: false
         });
         // #endif
 
-        // #ifndef H5
+        // #ifndef WEB
         // 弹出广告，除以5余1的直接下载，除以5的整数倍弹出 激励视频广告，其他弹出 插屏广告-半屏
         // 重启应用，重新计算
-        userStore.downloadCntAdd();
-        if (userStore.downloadCnt % 5 === 1) {
-            console.log('直接下载');
-            // showRewardedVideoAd();
-        } else if (userStore.downloadCnt % 5 === 0) {
-            console.log('弹出 激励视频广告');
-            showRewardedVideoAd();
+        // userStore.downloadCntAdd();
+        // if (userStore.downloadCnt % 5 === 1) {
+        //     console.log('直接下载');
+        //     // showRewardedVideoAd();
+        // } else if (userStore.downloadCnt % 5 === 0) {
+        //     console.log('弹出 激励视频广告');
+        //     showRewardedVideoAd();
+        // } else {
+        //     console.log('弹出 插屏广告-半屏');
+        //     showInterstitialAd();
+        // }
+        
+        if (currentInfo.value.is_locked) {
+            // 弹出观看视频提示框
+            adPopup.value.open()
+            downloadPic(currentInfo.value.picurl)
         } else {
-            console.log('弹出 插屏广告-半屏');
+            // 展示插屏广告，之后下载图片
             showInterstitialAd();
+            downloadPic(currentInfo.value.picurl)
         }
 
-        uni.showLoading({
-            title: '下载中...',
-            mask: true
-        });
+        // uni.showLoading({
+        //     title: '下载中...',
+        //     mask: true
+        // });
 
-        uni.getImageInfo({
-            src: currentInfo.value.picurl,
-            success: (res) => {
-                uni.saveImageToPhotosAlbum({
-                    filePath: res.path,
-                    success: (res) => {
-                        uni.showToast({
-                            title: '保存成功，请到相册查看',
-                            icon: 'none'
-                        });
-                    },
-                    fail: (err) => {
-                        if (err.errMsg == 'saveImageToPhotosAlbum:fail cancel') {
-                            uni.showToast({
-                                title: '保存失败，请重新点击下载',
-                                icon: 'none'
-                            });
-                            return;
-                        }
-                        uni.showModal({
-                            title: '授权提示',
-                            content: '需要授权保存相册',
-                            success: (res) => {
-                                if (res.confirm) {
-                                    uni.openSetting({
-                                        success: (setting) => {
-                                            console.log(setting);
-                                            if (setting.authSetting['scope.writePhotosAlbum']) {
-                                                uni.showToast({
-                                                    title: '获取授权成功',
-                                                    icon: 'none'
-                                                });
-                                            } else {
-                                                uni.showToast({
-                                                    title: '获取权限失败',
-                                                    icon: 'none'
-                                                });
-                                            }
-                                        }
-                                    });
-                                }
-                            }
-                        });
-                    },
-                    complete: () => {
-                        uni.hideLoading();
-                    }
-                });
-            }
-        });
+        // uni.getImageInfo({
+        //     src: currentInfo.value.picurl,
+        //     success: (res) => {
+        //         uni.saveImageToPhotosAlbum({
+        //             filePath: res.path,
+        //             success: (res) => {
+        //                 uni.showToast({
+        //                     title: '保存成功，请到相册查看',
+        //                     icon: 'none'
+        //                 });
+        //             },
+        //             fail: (err) => {
+        //                 if (err.errMsg == 'saveImageToPhotosAlbum:fail cancel') {
+        //                     uni.showToast({
+        //                         title: '保存失败，请重新点击下载',
+        //                         icon: 'none'
+        //                     });
+        //                     return;
+        //                 }
+        //                 uni.showModal({
+        //                     title: '授权提示',
+        //                     content: '需要授权保存相册',
+        //                     success: (res) => {
+        //                         if (res.confirm) {
+        //                             uni.openSetting({
+        //                                 success: (setting) => {
+        //                                     console.log(setting);
+        //                                     if (setting.authSetting['scope.writePhotosAlbum']) {
+        //                                         uni.showToast({
+        //                                             title: '获取授权成功',
+        //                                             icon: 'none'
+        //                                         });
+        //                                     } else {
+        //                                         uni.showToast({
+        //                                             title: '获取权限失败',
+        //                                             icon: 'none'
+        //                                         });
+        //                                     }
+        //                                 }
+        //                             });
+        //                         }
+        //                     }
+        //                 });
+        //             },
+        //             complete: () => {
+        //                 uni.hideLoading();
+        //             }
+        //         });
+        //     }
+        // });
         // #endif
     };
 
@@ -312,7 +330,7 @@
 
     onUnload(() => {
         destroyInterstitialAd(); // 销毁插屏广告
-        destroyRewardedVideoAd(); // 销毁激励广告
+        destroyRewardedVideoAd(); // 销毁激励视频广告
     });
 
     // 滑动事件，变化当前数字

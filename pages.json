@@ -71,12 +71,6 @@
             }
         },
         {
-            "path": "pages/test/cssgrid",
-            "style": {
-                "navigationBarTitleText": ""
-            }
-        },
-        {
             "path": "pages/test/ad-inter",
             "style": {
                 "navigationBarTitleText": ""
@@ -89,13 +83,19 @@
             }
         },
         {
-            "path": "pages/test/test1",
+            "path": "pages/test/waterfall-view",
             "style": {
                 "navigationBarTitleText": ""
             }
         },
         {
             "path": "pages/test/test2",
+            "style": {
+                "navigationBarTitleText": ""
+            }
+        },
+        {
+            "path": "pages/test/test3",
             "style": {
                 "navigationBarTitleText": ""
             }
@@ -110,6 +110,13 @@
             "path": "pages/login/login",
             "style": {
                 "navigationBarTitleText": "登录"
+            }
+        },
+        {
+            "path" : "pages/demo-view/demo-view",
+            "style" : 
+            {
+                "navigationBarTitleText" : "视图切换"
             }
         }
     ],

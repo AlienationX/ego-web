@@ -102,7 +102,7 @@
 
 <script setup>
     import { ref } from 'vue';
-    import { onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+    import { onLoad, onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { apiGetBanner, apiGetDayRandom, apiGetNotice, apiGetClassify } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
 
@@ -151,10 +151,12 @@
         getRandom();
     };
 
-    getBanner();
-    getNotice();
-    getRandom();
-    getClassify();
+    onLoad(() => {
+        getBanner();
+        getNotice();
+        getRandom();
+        getClassify();
+    });
 
     // 下拉刷新
     onPullDownRefresh(() => {
@@ -226,8 +228,7 @@
             border-radius: 80rpx;
             display: flex;
             // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
-            // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
-            box-shadow: 0 0px 6rpx rgba(0, 0, 0, 0.25);
+            box-shadow: 0 0px 6rpx rgba(0, 0, 0, 0.05);
 
             .left {
                 width: 140rpx;

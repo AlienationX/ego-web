@@ -7,7 +7,9 @@ export const useSettingsStore = defineStore(
         const installBanner = ref(true); // PWA安装应用的按钮提示条，判断是否已安装决定是否显示
 
         const options = reactive({
-            view: 'window',
+            view: 'window',  // window / waterfall
+            column: 3,
+            width: 100,  // 窗口宽度，用来计算瀑布流每列的宽度
 
             // vuetify项目的配置，后续修改
             theme: 'light',

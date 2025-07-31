@@ -81,10 +81,12 @@
                 </navigator>
             </view> -->
 
-            <window-view :classList="classList"></window-view>
+            <!-- <window-view :classList="classList"></window-view> -->
 
             <!-- <window-view v-if="settingsStore.options.view === 'window'" :classList="classList"></window-view>
             <waterfall-view1 v-else :classList="classList"></waterfall-view1> -->
+            
+            <pics-view :classList="classList"></pics-view>
 
             <view class="loadingLayout" v-if="noData || classList.length">
                 <uni-load-more :status="noData ? 'noMore' : 'loading'" />

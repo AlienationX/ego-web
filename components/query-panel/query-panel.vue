@@ -10,9 +10,20 @@
                 </view>
             </button>
         </view>
-        <!-- <view class="right" @click="onChange">
-            <uni-icons :type="settingsStore.switchViewIcon" size="18" color="#28b389"></uni-icons>
-        </view> -->
+        <view class="right">
+            <!-- 直接使用，可以指定样式，比如修改颜色 -->
+            <!-- <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" /></svg> -->
+
+            <view class="num" @click="onChangeColumn">
+                <image v-if="settingsStore.options.column === 3" src="/common/icons/numeric-3-box.svg"></image>
+                <image v-else src="/common/icons/numeric-2-box.svg"></image>
+            </view>
+
+            <view class="icon" @click="onChangeView">
+                <image v-if="settingsStore.options.view === 'window'" src="/common/icons/view-grid.svg"></image>
+                <image v-else src="/common/icons/view-dashboard.svg"></image>
+            </view>
+        </view>
     </view>
 </template>
 
@@ -59,9 +70,12 @@
         emit('onQuery', sortord);
     }
 
-    function onChange() {
+    function onChangeColumn() {
+        settingsStore.options.column = settingsStore.options.column === 3 ? 2 : 3;
+    }
+
+    function onChangeView() {
         settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
-        uni.setStorageSync('view', settingsStore.options.view);
     }
 
     function reset() {
@@ -113,6 +127,7 @@
                     background-color: #28b389;
                     font-weight: bold;
                 }
+
                 .icon {
                     font-size: 24rpx;
                 }
@@ -121,10 +136,25 @@
 
         .right {
             display: flex;
+            justify-content: center;
             align-items: center;
+            gap: 10rpx;
 
-            uni-icons {
-                padding-right: 28rpx;
+            .num {
+                width: 44rpx;
+                height: 44rpx;
+            }
+
+            .icon {
+                margin-right: 20rpx;
+                width: 40rpx;
+                height: 40rpx;
+                fill: #28b389;
+            }
+
+            image {
+                width: 100%;
+                height: 100%;
             }
         }
     }

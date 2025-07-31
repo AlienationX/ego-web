@@ -1,165 +1,183 @@
 <template>
-    <view class="layout">
-        <custom-waterfalls-flow :value="newClassList" imageKey="smallPicurl" :column="columnCount" :columnSpace="1" @imageClick="onImageClick">
-            <!-- #ifdef MP-WEIXIN -->
-            <template v-for="(item, index) in classList" :key="item._key">
-                <view v-if="!item.isAd" class="card" :slot="'slot' + index">
-                    <view class="card-content">
-                        <text class="title">{{ item.description }}</text>
-                        <view class="score">
-                            <uni-icons type="star-filled" size="18" color="#f7cc5b"></uni-icons>
-                            <text class="price">{{ item.score }}</text>
-                        </view>
-                    </view>
-                </view>
-                <view v-else class="card ad-card" :slot="'slot' + index">
-                    <custom-ad-banner></custom-ad-banner>
-                    <!-- <text>广告位</text> -->
-                </view>
-            </template>
-            <!-- #endif -->
+    <!-- 布局容器 -->
+    <view class="container" ref="containerRef">
 
-            <!-- #ifndef MP-WEIXIN -->
-            <template v-slot:default="item">
-                <view v-if="!item.isAd" class="card">
-                    <view class="card-content">
-                        <text class="title">{{ item.description }}</text>
-                        <view class="score">
-                            <uni-icons type="star-filled" size="18" color="#f7cc5b"></uni-icons>
-                            <text class="price">{{ item.score }}</text>
-                        </view>
-                    </view>
+        <view class="box" :style="item.position" v-for="item in images" :key="item.id">
+            <image class="img" :src="item.smallPicurl" @load="(e) => updateLayout(e, item.id)" mode="widthFix"></image>
+            
+            <!-- <view class="card-content">
+                <text class="title">{{ item.description }}</text>
+                <view class="score">
+                    <uni-icons type="star-filled" size="18" color="#f7cc5b"></uni-icons>
+                    <text class="price">{{ item.score }}</text>
                 </view>
-                <view v-else class="card ad-card">
-                    <custom-ad-banner></custom-ad-banner>
-                    <!-- <text>广告位</text> -->
-                </view>
-            </template>
-            <!-- #endif -->
-        </custom-waterfalls-flow>
+            </view> -->
+        </view>
     </view>
 </template>
 
 <script setup>
-    import { ref, computed, watch, onMounted, toRef, toRefs } from 'vue';
+    import { ref, onMounted, onUnmounted, nextTick, watch, computed, getCurrentInstance } from 'vue';
+    import { onLoad, onUnload, onReady } from '@dcloudio/uni-app';
+    import { useSettingsStore } from '@/stores/settings.js';
+    const settingsStore = useSettingsStore();
 
     const props = defineProps({
         classList: {
             type: Array,
-            default: () => []
+            default: () => [
+                {
+                    id: '0',
+                    smallPicurl: '/common/images/logo_Obsidian_Light_Raw.png',
+                    description: '默认描述',
+                    score: 0
+                }
+            ]
         }
     });
-
-    console.log('1: classList', props);
-    console.log('1: classList', props.classList);
-
-    const classListRef = toRef(props, 'classList');
-    // const { classListRef } = toRefs(props);
-    console.log('1: classList', classListRef.value);
     
-    const newClassList = ref();
+    const images = ref([]);
     
-    // 监听变化（包括初始值和后续更新）
-    watch(
-      () => props.classList,
-      (newVal) => {
-        console.log('watch: props.classList 更新为：', newVal); 
-        console.log('watch: props.classList', props.classList);
-        console.log('watch: classListRef.value', classListRef.value);
-        
-        newClassList.value = newVal;
-        console.log("newClassList", newClassList.value);
-      },
-      { immediate: true } // 初始化时立即执行
-    );
-
-    // 生成带广告的列表
-    const listWithAds = computed(() => {
-        const arr = [];
-        let adCount = 0;
-        props.classList.forEach((item, idx) => {
-            arr.push({
-                ...item,
-                _key: String(item.id)
-            });
-            if ((idx + 1) % 12 === 0) {
-                adCount++;
-                arr.push({
-                    isAd: true,
-                    _key: 'ad-' + adCount
-                });
-            }
-        });
-        console.log('2: classList', props.classList);
-        console.log('2: classListRef', classListRef.value);
-        console.log('2: new arr', arr);
-        return arr;
-    });
-
+    // 计算扩展后的数据
+    const extendItems = (items) => {
+      return items.map(item => ({
+        ...item,
+        width: 0,
+        height: 0,
+        position: {}
+      }))
+    }
     
+    // 监听原始数据变化
+    watch(() => props.classList, (newItems, oldItems) => {
+      console.log('原始数据变化，更新扩展项', newItems, oldItems)
+      const listIds = new Set(oldItems.map(item => item.id))
+      const addItems = newItems.filter(item => !listIds.has(item.id))
+      images.value = [...oldItems, ...addItems]
+    }, { deep: true })
+    
+    // watch(() => props.classList, (newItems) => {
+    //   console.log('原始数据变化，更新扩展项', newItems)
+    //   images.value = extendItems(newItems)
+    // }, { deep: true })
 
-    const onImageClick = (item) => {
-        if (!item.isAd) {
-            uni.navigateTo({
-                url: `/pages/preview/preview?id=${item.id}`
-            });
-        }
-    };
+    console.log("images >>>", images.value);
 
-    // 动态计算列值
+    const containerRef = ref(null);
+    const containerWidth = ref(0);
     const columnCount = ref(3);
-    const calcColumn = () => {
-        let width = uni.getSystemInfoSync().windowWidth;
-        if (width >= 1440) {
-            columnCount.value = 6;
-        } else if (width >= 1080) {
-            columnCount.value = 5;
-        } else if (width >= 720) {
-            columnCount.value = 4;
-        } else {
-            columnCount.value = 3;
-        }
+    const columnHeights = ref(new Array(columnCount.value).fill(0));
+    const gap = 10; // 元素间距
+
+    // 组件中不支持onReady，onReady是页面Page的生命周期函数，组件只能使用onMounted
+    onMounted(() => {
+        console.log('onMount...');
+
+        // #ifdef MP
+        const query = uni.createSelectorQuery().in(getCurrentInstance());
+        console.log(query);
+        query
+            .select('#containerRef')
+            .boundingClientRect((res) => {
+                if (res) {
+                    containerWidth.value = res.width;
+                    console.log('容器宽度:', res.width);
+                } else {
+                    console.log('容器宽度: error');
+                }
+            })
+            .exec();
+        // #endif
+
+        // #ifndef MP
+        // view好像必须使用 $el 才能获取到宽度
+        containerWidth.value = containerRef.value.$el.clientWidth;
+        // #endif
+    });
+
+    const columnWidth = computed(() => {
+        // if (settingsStore.options.column === 3) {
+            
+        // }else {
+            
+        // }
+        return (containerWidth.value - (columnCount.value - 1) * gap) / columnCount.value;
+    });
+
+    const updateLayout = (e, id) => {
+        // 获取图片的原始尺寸，页可以使用img.onload获取设置
+        console.log('e', e);
+        console.log('index', id);
+
+        const width = e.detail.width;
+        const height = e.detail.height;
+        console.log(width, height, columnWidth.value);
+
+        const scaledHeight = (height * columnWidth.value) / width;
+        const minHeight = Math.min(...columnHeights.value);
+        const colIndex = columnHeights.value.indexOf(minHeight);
+        console.log(scaledHeight, minHeight, colIndex);
+
+        const item = images.value.find((item) => item.id === id);
+        item.width = width;
+        item.height = height;
+        item.position = {
+            width: `${columnWidth.value}px`,
+            height: `${scaledHeight}px`,
+            left: `${colIndex * (columnWidth.value + gap)}px`,
+            top: `${columnHeights.value[colIndex]}px`
+        };
+        console.log(item);
+        console.log(columnHeights.value);
+
+        columnHeights.value[colIndex] += scaledHeight + gap;
+
+        console.log(images.value);
+        console.log(columnHeights.value);
     };
 
-    onMounted(() => {
-        calcColumn();
-        if (typeof window !== 'undefined') {
-            // 增加监听窗口大小变化事件，resize触发计算列值函数
-            window.addEventListener('resize', calcColumn);
-        }
-        
-        
-        console.log('on: classList', props);
-        console.log('on: classList', props.classList);
-        console.log('on: classList', classListRef.value);
-    });
+    // // 5. 窗口变化监听
+    // // #ifndef MP
+    // const resizeObserver = new ResizeObserver(() => {
+    //     calculateLayout();
+    // });
+
+    // onMounted(() => {
+    //     // calculateLayout();
+    //     resizeObserver.observe(containerRef.value);
+    // });
+
+    // onUnmounted(() => {
+    //     resizeObserver.disconnect();
+    // });
+    // // #endif
+
+    // onMounted(() => {
+    //     nextTick(() => calculateLayout());
+
+    // });
 </script>
 
 <style lang="scss" scoped>
-    .layout {
-        padding: 10rpx;
+    .container {
+        // margin: 20px;
+        position: relative;
+        // min-height: 100vh;
+        // width: 500px;
 
-        .card {
-            position: relative;
-            margin-bottom: 4rpx;
-            background: #fff;
-            border-radius: 10rpx;
-            overflow: hidden;
-            // box-shadow: 0 8rpx 32rpx rgba(40, 179, 137, 0.18);
-            box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
+        .box {
+            position: absolute;
+            transition: all 0.3s ease;
 
-            /* 让 custom-waterfalls-flow 渲染的图片也有圆角 */
-            ::v-deep .img {
-                border-radius: 10rpx !important;
-                display: block;
+            .img {
                 width: 100%;
+                height: 100%;
+                // display: block;
             }
-
+            
             .card-content {
-                padding: 10rpx 8rpx 8rpx 8rpx;
-
+            //     padding: 10rpx 8rpx 8rpx 8rpx;
+            
                 .title {
                     font-size: 24rpx;
                     color: #333;
@@ -168,7 +186,7 @@
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                 }
-
+            
                 .price {
                     color: #28b389;
                     font-size: 30rpx;
@@ -176,18 +194,6 @@
                     margin-top: 6rpx;
                 }
             }
-        }
-
-        .ad-card {
-            min-height: 120rpx;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #fff;
-            border-radius: 10rpx;
-            box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
-            margin-bottom: 4rpx;
-            /* 保证和图片卡片宽度一致 */
         }
     }
 </style>

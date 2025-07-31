@@ -5,14 +5,19 @@
         <button @click="">手机号登录</button>
         <button @click="">Google</button>
         <button @click="">Apple</button>
+        <text>{{ msg }}</text>
     </view>
 </template>
 
 <script setup>
+    import { ref } from 'vue';
+    import { onLoad } from '@dcloudio/uni-app';
     import { apiPostLoginByWechat } from '@/api/wallpaper.js';
     import { useUserStore } from '@/stores/user';
 
     const userStore = useUserStore();
+
+    const msg = ref('');
 
     const loginByWechat = () => {
         let avatarUrl = '';
@@ -62,7 +67,7 @@
                     let res = await apiPostLoginByWechat({
                         code
                     });
-                    console.log("api result data >>>", res);
+                    console.log('api result data >>>', res);
                     let { access, refresh } = res.data;
                     userStore.setToken(access, refresh);
                     userStore.setUserInfo();
@@ -70,6 +75,17 @@
             }
         });
     };
+
+    onLoad(() => {
+        uni.getProvider({
+            service: 'oauth',
+            success: function (res) {
+                console.log(res, 'getProvider'); // ['weixin', qq', 'univerify']
+                msg.value = res;
+            }
+        });
+        console.log('onLoad');
+    });
 </script>
 
 <style lang="scss" scoped></style>
