@@ -1,11 +1,12 @@
 <template>
     <view>
-        <!-- #ifdef MP-TOUTIAO -->
+        <!-- #ifdef APP -->
+        <!-- 微信小程序广告插件未申请成功，暂时屏蔽 -->
         <view v-if="showAd" class="content">
             <!-- adpid="1111111111" 此广告位标识仅在HBuilderX标准基座中有效，仅用于测试 -->
             <!-- 广告后台申请的广告位(adpid)需要自定义基座/云打包/本地打包后生效 -->
             <view class="ad-view">
-                <ad :adpid="adpid" @load="onload" @close="onclose" @error="onerror" width="750rpx"></ad>
+                <ad :adpid="adpid" @load="onload" @close="onclose" @error="onerror"></ad>
             </view>
         </view>
         <!-- #endif -->
@@ -38,7 +39,7 @@
 <style lang="scss" scoped>
     .content {
         // background-color: #DBDBDB;
-        padding: 0 32rpx;
+        // padding: 0rpx 30rpx 20rpx;
 
         .ad-view {
             background-color: #ffffff;

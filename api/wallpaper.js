@@ -51,6 +51,20 @@ export const apiSearchData = (data = {}) => {
     });
 };
 
+export const apiPostIncrementViews = (id = '') => {
+    return request({
+        url: `/wall/${id}/increment_views/`,
+        method: 'POST'
+    });
+};
+
+export const apiPostIncrementDownloads = (id = '') => {
+    return request({
+        url: `/wall/${id}/increment_downloads/`,
+        method: 'POST'
+    });
+};
+
 export const apiPostLoginByWechat = (data = {}) => {
     return request({
         url: '/login/wechat/',

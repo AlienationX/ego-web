@@ -1,8 +1,8 @@
 // ifdef APP-PLUS || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
-import { downloadPic } from "@/common/core.js";
+import { downloadPic } from '@/common/core.js';
 
 export const useAdIntersititial = () => {
-    // #ifdef MP-TOUTIAO
+    // #ifdef APP
     const adOption = {
         // 1111111113 HBuilder基座的测试广告位
         // 1129226586 正式的广告位
@@ -54,7 +54,7 @@ export const useAdIntersititial = () => {
     };
     // #endif
 
-    // #ifndef MP-TOUTIAO
+    // #ifndef APP
     return {
         createInterstitialAd: function () {},
         showInterstitialAd: function () {},
@@ -64,7 +64,7 @@ export const useAdIntersititial = () => {
 };
 
 export const useAdRewardedVideo = () => {
-    // #ifdef MP-TOUTIAO
+    // #ifdef APP
     const adOption = {
         // 1507000689 HBuilder基座的测试广告位
         // 1892019135 正式的广告位
@@ -76,6 +76,7 @@ export const useAdRewardedVideo = () => {
         }
     };
 
+    let picurl = '';
     const rewardedVideoAd = uni.createRewardedVideoAd(adOption);
 
     const createRewardedVideoAd = () => {
@@ -90,46 +91,64 @@ export const useAdRewardedVideo = () => {
         });
         rewardedVideoAd.onClose((e) => {
             // 用户点击了关闭或返回键(仅Android有返回键)
-            console.log('use ad-rewarded-video onclose', e);
+            console.log('use ad-rewarded-video onclose', e, picurl);
 
-            const detail = e.detail;
             // 用户点击了【关闭广告】按钮
-            if (detail && detail.isEnded) {
+            if (e.isEnded) {
                 // 正常播放结束
-                console.log('use ad-rewarded-video onclose: success' + detail.isEnded, e);
+                downloadPic(picurl);
             } else {
                 // 播放中途退出
-                console.log('use ad-rewarded-video onclose: abort' + detail.isEnded, e);
+                uni.showToast({
+                    title: 'Cannot download without watching the Ad completely.',
+                    icon: 'none',
+                    duration: 3000
+                });
             }
         });
         rewardedVideoAd.onError((e) => {
             // this.loading = false;
-            console.log('use ad-rewarded-video onerror', e);
+            uni.showToast({
+                title: 'Ad loading failed. Please try again later.',
+                icon: 'none',
+                duration: 3000
+            });
             rewardedVideoAd.load(); // 加载失败，手动再次拉取广告
         });
     };
 
-    const showRewardedVideoAd = () => {
+    const showRewardedVideoAd = (inputPicurl) => {
         // 调用 interstitialAd.show()，如果数据正在加载中不会显示广告，加载成功后才显示
         // 在数据没有加载成功时，需要防止用户频繁点击显示广告
         // if (this.loading == true) {
         //     return
         // }
-        // this.loading = true;
+        // uni.showLoading({
+        //     title: 'Loading...',
+        //     mask: true
+        // });
+
         rewardedVideoAd
             .show()
             .then(() => {
-                // this.loading = false;
+                picurl = inputPicurl;
             })
             .catch(() => {
                 // show失败的话 重新load获取
                 rewardedVideoAd
                     .load()
-                    .then(() => rewardedVideoAd.show())
+                    .then(() =>
+                        rewardedVideoAd.show().then(() => {
+                            picurl = inputPicurl;
+                        })
+                    )
                     .catch((err) => {
-                        console.log('激励视频 广告显示失败');
+                        console.log('激励视频 广告显示失败！为了不影响用户体验，直接下载！');
+                        downloadPic(inputPicurl);
                     });
             });
+
+        // uni.hideLoading();
     };
 
     const destroyRewardedVideoAd = () => {
@@ -144,7 +163,7 @@ export const useAdRewardedVideo = () => {
     };
     // #endif
 
-    // #ifndef MP-TOUTIAO
+    // #ifndef APP
     return {
         createRewardedVideoAd: function () {},
         showRewardedVideoAd: function () {},

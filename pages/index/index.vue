@@ -1,6 +1,6 @@
 <template>
     <view class="homeLayout pageBackground">
-        <custom-nav-bar title="推荐"></custom-nav-bar>
+        <custom-search-bar :title="$t('index.title')"></custom-search-bar>
 
         <view class="banner">
             <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
@@ -19,7 +19,7 @@
         <view class="notice">
             <view class="left">
                 <uni-icons type="sound-filled" size="20" color="#28b389"></uni-icons>
-                <text class="text">公告</text>
+                <text class="text">{{ $t('index.notice') }}</text>
             </view>
 
             <view class="center">
@@ -39,21 +39,25 @@
 
         <view class="select">
             <index-title>
-                <template #name>每日推荐</template>
+                <template #name>{{ $t('index.dailyRecommend') }}</template>
                 <template #custom>
                     <view class="date">
                         <!-- <navigator class="button" style="padding-right: 20rpx" url="/pages/access/access">Access</navigator>
                         <navigator class="button" url="/pages/login/login">Login</navigator> -->
 
-                        <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
+                        <button class="button" size="mini" @click="refreshRandom" plain>{{ $t('common.refresh') }}</button>
                         <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
                         <view class="text">
-                            <uni-dateformat :date="Date.now()" format="dd日"></uni-dateformat>
+                            <!-- <uni-dateformat :date="Date.now()" locale='en' format="dd日"></uni-dateformat> -->
+                            {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
                         </view>
                     </view>
                 </template>
             </index-title>
+
             <view class="content">
+                <rotate-loading v-if="!randomList.length" style="height: 100%"></rotate-loading>
+
                 <scroll-view scroll-x>
                     <view class="box" v-for="item in randomList" :key="item.id" @click="goPriview(item.id)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
@@ -61,6 +65,28 @@
                 </scroll-view>
             </view>
         </view>
+        
+        <!-- <view class="select">
+            <index-title>
+                <template #name>{{ $t('index.dailyRecommend') }}</template>
+                <template #custom>
+                    <view class="text">
+                        {{ $t('common.more') }}+
+                    </view>
+                        <uni-icons type="arrow-right" size="18" color="#28b389"></uni-icons>
+                </template>
+            </index-title>
+            
+            <view class="content">
+                <rotate-loading v-if="!randomList.length" style="height: 100%"></rotate-loading>
+        
+                <scroll-view scroll-x>
+                    <view class="box" v-for="item in randomList" :key="item.id" @click="goPriview(item.id)">
+                        <image :src="item.smallPicurl" mode="aspectFill"></image>
+                    </view>
+                </scroll-view>
+            </view>
+        </view> -->
 
         <!-- <view class="select">
             <index-title>
@@ -86,17 +112,22 @@
 
         <view class="classify">
             <index-title>
-                <template #name>分类推荐</template>
+                <template #name>{{ $t('index.categoryRecommend') }}</template>
                 <template #custom>
-                    <navigator url="/pages/classify/classify" open-type="reLaunch" class="more">更多+</navigator>
+                    <navigator url="/pages/classify/classify" open-type="reLaunch" class="more">{{ $t('common.more') }}+</navigator>
                 </template>
             </index-title>
-            <view class="content">
+
+            <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
+
+            <view class="content" v-if="classifyList.length">
                 <!-- :item="item",第一个item是和组件绑定传参，第二个item是for循环遍历的值-->
                 <classify-item v-for="item in classifyList" :key="item.id" :item="item"></classify-item>
                 <classify-item :isMore="true"></classify-item>
             </view>
         </view>
+
+        <custom-ad-banner style="padding: 0 30rpx 30rpx"></custom-ad-banner>
     </view>
 </template>
 
@@ -110,6 +141,8 @@
     const randomList = ref([]);
     const noticeList = ref([]);
     const classifyList = ref([]);
+
+    // console.log("xxxx", $t('index.title'));
 
     const getBanner = async () => {
         let res = await apiGetBanner();
@@ -298,15 +331,17 @@
 
             .content {
                 width: 720rpx;
+                height: 430rpx;
                 margin-top: 28rpx;
                 margin-left: 30rpx;
 
                 scroll-view {
                     white-space: nowrap;
+                    height: 100%;
 
                     .box {
                         width: 200rpx;
-                        height: 430rpx;
+                        height: 100%;
                         display: inline-flex;
                         justify-content: center; /* 水平居中 */
                         align-items: center; /* 垂直居中 */
@@ -336,17 +371,18 @@
         .classify {
             padding: 50rpx 0;
 
-            .more {
-                font-size: 28rpx;
-                color: #888;
-            }
-
             .content {
                 margin-top: 30rpx;
                 padding: 0 30rpx;
                 display: grid;
                 gap: 15rpx;
                 grid-template-columns: repeat(3, 1fr);
+            }
+
+            .more {
+                font-size: 28rpx;
+                // color: #888;
+                color: $uni-text-color-grey;
             }
         }
     }

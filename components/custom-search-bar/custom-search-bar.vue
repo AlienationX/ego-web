@@ -2,11 +2,11 @@
     <view class="layout">
         <view class="navbar">
             <view class="statusBar" :style="{ height: getStatusBarHeight() + 'px' }"></view>
-            <view class="titleBar" :style="{ height: getTitleBarHeight() + 'px', marginLeft: getLeftIconWidth() + 'px' }">
+            <view class="titleBar" :style="{ height: getTitleBarHeight() + 'px', marginLeft: getLeftIconWidth() + 'px', marginRight: getRightIconWidth() + 'px' }">
                 <view class="title">{{ title }}</view>
                 <navigator url="/pages/search/search" class="search">
                     <uni-icons class="icon" type="search" color="#888" size="18"></uni-icons>
-                    <text class="text">搜索</text>
+                    <text class="text">{{ $t('common.search') }}</text>
                 </navigator>
             </view>
         </view>
@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-    import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth } from '@/utils/system.js';
+    import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth, getRightIconWidth } from '@/utils/system.js';
 
     defineProps({
         title: {
@@ -46,6 +46,7 @@
                 // border: 1rpx solid green;
                 display: flex;
                 align-items: center;
+                justify-content: space-between;
                 padding: 0 30rpx;
 
                 .title {
@@ -56,16 +57,16 @@
 
                 .search {
                     width: 220rpx;
-                    height: 50rpx;
+                    height: 58rpx;
                     background: rgba(255, 255, 255, 0.4);
-                    border: 1px solid #fff;
+                    // border: 1px solid #fff;
                     border-radius: 60rpx;
                     margin-left: 30rpx;
                     color: #999;
                     font-size: 28rpx;
                     display: flex;
                     align-items: center;
-                    box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.25);
+                    // box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.25);
 
                     .icon {
                         margin-left: 5rpx;
@@ -75,6 +76,10 @@
                         padding-left: 10rpx;
                     }
                 }
+            }
+
+            .capsule {
+                width: 60rpx;
             }
         }
 

@@ -2,8 +2,8 @@
     "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
     "description" : "致力于打造一款极简易用的壁纸浏览产品。",
-    "versionName" : "1.1.1",
-    "versionCode" : 111,
+    "versionName" : "1.1.4",
+    "versionCode" : 114,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -43,7 +43,8 @@
                 ],
                 "abiFilters" : [ "arm64-v8a", "x86" ],
                 "minSdkVersion" : 24,
-                "targetSdkVersion" : 35
+                "targetSdkVersion" : 35,
+                "excludePermissions" : []
             },
             /* ios打包配置 */
             "ios" : {
@@ -58,7 +59,15 @@
             },
             /* SDK配置 */
             "sdkConfigs" : {
-                "ad" : {},
+                "ad" : {
+                    "gg" : {},
+                    "pg" : {},
+                    "unity" : {},
+                    "liftoff" : {},
+                    "inmobi" : {},
+                    "ironsource" : {},
+                    "mintegral" : {}
+                },
                 "oauth" : {
                     "weixin" : {
                         "appid" : "wx74c392f8525b9268",

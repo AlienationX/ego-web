@@ -1,14 +1,21 @@
 <template>
     <view class="classLayout pageBackground">
-        <custom-nav-bar title="分类"></custom-nav-bar>
+        <custom-search-bar :title="$t('category.title')"></custom-search-bar>
 
         <!-- <view class="loadingLayout" v-if="!classifyList.length">
             <uni-load-more status="loading"></uni-load-more>
         </view> -->
-
+        
+        <view v-if="!classifyList.length">
+            <rotate-loading style="min-height: 60vh;" ></rotate-loading>
+        </view>
+        
         <view class="classify">
             <classify-item v-for="item in classifyList" :key="item.id" :item="item"></classify-item>
         </view>
+        
+        <custom-ad-banner style="padding: 0rpx 30rpx 30rpx"></custom-ad-banner>
+        
     </view>
 </template>
 

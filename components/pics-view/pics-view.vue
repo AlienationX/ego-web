@@ -2,25 +2,27 @@
     <!-- <view :class="['container', { 'waterfall-mode': isWaterfall }]" ref="containerRef"> -->
     <view class="container" ref="containerRef">
         <view class="layout" :style="styles.layout">
-            <navigator class="box" :style="[styles.box, isWaterfall ? item.position : '']" v-for="item in images" :key="item.id" :url="`/pages/preview/preview?id=${item.id}`">
-                <image :class="['img', { loaded: item.loaded, shadow: item.loaded }]" :style="styles.img" :src="item.smallPicurl" :mode="imageMode" lazy-load></image>
-                <uni-icons
-                    :class="['lock', { loaded: item.loaded }]"
-                    :style="styles.lock"
-                    v-show="item.is_locked && item.loaded"
-                    type="locked-filled"
-                    :size="lockedSize"
-                    color="#F9E9B5"
-                ></uni-icons>
+            <template v-for="(item, idx) in images" :key="item.id">
+                <navigator class="box" :style="[styles.box, isWaterfall ? item.position : '']" :url="`/pages/preview/preview?id=${item.id}`">
+                    <image :class="['img', { loaded: item.loaded, shadow: item.loaded }]" :style="styles.img" :src="item.smallPicurl" :mode="imageMode" lazy-load></image>
+                    <view :class="['lock', { loaded: item.loaded }]" :style="styles.lock">
+                        <uni-icons v-if="item.is_locked && item.loaded" type="locked-filled" :size="lockedSize" color="#F9E9B5"></uni-icons>
+                    </view>
 
-                <!-- <view class="card-content">
+                    <!-- <view class="card-content" v-if="isWaterfall">
                     <text class="title">{{ item.description }}</text>
                     <view class="score">
                         <uni-icons type="star-filled" size="18" color="#f7cc5b"></uni-icons>
                         <text class="star">{{ item.score }}</text>
                     </view>
                 </view> -->
-            </navigator>
+                </navigator>
+
+                <!-- TODO 每12个图片后插入广告，但是不显示，存在bug -->
+                <!-- <view v-if="(idx + 1) % 12 === 0" class="ad-row">
+                    <custom-ad-banner></custom-ad-banner>
+                </view> -->
+            </template>
         </view>
     </view>
 </template>
@@ -169,7 +171,7 @@
                 transition: 'grid-template-columns 0.8s ease' // 过度动画，使布局变化更加平滑
             };
             stylesObj.box = {
-                height: '560rpx',
+                height: settingsStore.options.column === 3 ? '480rpx' : '560rpx',
                 position: 'relative'
             };
         } else {
@@ -396,10 +398,10 @@
                     opacity: 0;
                     transform: scale(0.85);
                     transition: opacity 0.5s ease 0.2s, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s;
-                }
 
-                &:hover {
-                    transform: scale(1.02);
+                    &:hover {
+                        transform: scale(1.02);
+                    }
                 }
 
                 .shadow {
@@ -411,7 +413,8 @@
                     // top: v-bind('styles.lock.top');
                     // right: v-bind('styles.lock.right');
                     opacity: 0;
-                    transition: opacity 0.8s ease 1s;
+                    transform: scale(0.85);
+                    transition: opacity 0.5s ease 0.4s, transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s;
                 }
 
                 .loaded {
@@ -422,9 +425,14 @@
                 .card-content {
                     // padding: 10rpx 8rpx 8rpx 8rpx;
 
+                    position: absolute;
+                    bottom: 5rpx;
+                    left: 5rpx;
+
                     .title {
                         font-size: 24rpx;
-                        color: #333;
+                        // color: #333;
+                        color: whitesmoke;
                         display: -webkit-box;
                         -webkit-line-clamp: 2;
                         -webkit-box-orient: vertical;
@@ -440,6 +448,14 @@
                         }
                     }
                 }
+            }
+
+            .ad-row {
+                grid-column: 1 / -1;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
             }
         }
     }

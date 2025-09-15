@@ -38,7 +38,7 @@ const sendRequest = (config = {}) => {
 
     const userStore = useUserStore();
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {        
         uni.request({
             url: config.url.startsWith('http') ? config.url : API_BASE_URL + config.url,
             data: config.data || {},

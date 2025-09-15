@@ -1,10 +1,10 @@
 <template>
     <view class="queryPanel" :style="{ top: top }">
         <view class="left">
-            <button size="mini" plain :class="{ active: activeButton === 'recommend' }" @click="onRecommend">推荐</button>
-            <button size="mini" plain :class="{ active: activeButton === 'score' }" @click="onScore">评分</button>
+            <button size="mini" plain :class="{ active: activeButton === 'recommend' }" @click="onRecommend">{{ $t('common.recommend') }}</button>
+            <button size="mini" plain :class="{ active: activeButton === 'score' }" @click="onScore">{{ $t('common.score') }}</button>
             <button size="mini" plain :class="{ active: activeButton === 'date' }" @click="onDateSort">
-                发布日期
+                {{ $t('common.publishDate') }}
                 <view class="icon" v-if="activeButton === 'date'">
                     <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="14" color="#ffffff"></uni-icons>
                 </view>

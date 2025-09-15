@@ -1,0 +1,59 @@
+{
+    "tabbar.index": "推荐", // tarbar的变量设置不能嵌套
+    "tabbar.category": "分类",
+    "tabbar.user": "我的",
+    "common": {
+        "appName": "本我壁纸",
+        "more": "更多",
+        "refresh": "刷新",
+        "month": "月",
+        "day": "日",
+        "search": "搜索",
+        "information": "信息",
+        "download": "下载",
+        "points": "分",
+        "recommend": "推荐",
+        "score": "评分",
+        "publishDate": "发布日期"
+    },
+    "index": {
+        "title": "推荐",
+        "notice": "公告",
+        "dailyRecommend": "每日推荐",
+        "categoryRecommend": "分类推荐"
+    },
+    "category": {
+        "title": "分类"
+    },
+    "user": {
+        "profile": {
+            "myFavorite": "我的收藏",
+            "myDownload": "我的下载",
+            "myScore": "我的评分",
+            "subscription": "订阅更新",
+            "question": "常见问题",
+            "support": "联系客服",
+            "feedback": "反馈意见",
+            "settings": "设置",
+            "exit": "退出",
+            "exitText": "退出当前账号"
+        },
+        "settings": {
+            "language": "语言",
+            "chinese": "中文",
+            "english": "英语",
+            "theme": "主题",
+            "light": "明亮",
+            "dark": "暗黑"
+        }
+    },
+    "message": {
+        "copyrightStatement": "声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。",
+        "saveSuccessful": "保存成功，请到相册查看",
+        "saveFailed": "保存失败，请重新点击下载",
+        "downloading": "下载中...",
+        "loading": "加载中...",
+        "adText": "需要观看视频广告解锁该壁纸",
+        "adPrompt": "观看视频广告"
+    }
+}

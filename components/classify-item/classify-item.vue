@@ -15,7 +15,7 @@
             <image class="pic" src="/static/images/more.jpg" mode="aspectFill"></image>
             <view class="mask">
                 <uni-icons type="more-filled" size="34" color="#fff"></uni-icons>
-                <view class="text">更多</view>
+                <view class="text">{{ $t('common.more') }}</view>
             </view>
         </navigator>
     </view>
@@ -65,7 +65,7 @@
                 position: absolute;
                 bottom: 0;
                 left: 0;
-                background: rgba(0, 0, 0, 0.2);
+                background: rgba(0, 0, 0, 0.5);
                 color: #fff;
                 display: flex;
                 align-items: center;

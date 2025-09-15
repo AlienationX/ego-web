@@ -12,25 +12,26 @@
             </view>
             <view class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
             <view class="time">
-                <uni-dateformat :date="new Date()" format="hh:mm"></uni-dateformat>
+                <!-- <uni-dateformat :date="new Date()" format="hh:mm"></uni-dateformat> -->
+                {{ new Date().getHours().toString().padStart(2, '0') }}:{{ new Date().getMinutes().toString().padStart(2, '0') }}
             </view>
             <view class="date">
-                <uni-dateformat :date="new Date()" format="MM月dd日"></uni-dateformat>
+                <!-- <uni-dateformat :date="new Date()" format="MM月dd日"></uni-dateformat> -->
+                {{ (new Date().getMonth() + 1).toString().padStart(2, '0') }}/{{ new Date().getDate().toString().padStart(2, '0') }}
             </view>
             <view class="footer">
                 <view class="box" @click="openInfo">
                     <uni-icons type="info-filled" size="28"></uni-icons>
-                    <view class="text">信息</view>
+                    <view class="text">{{ $t('common.information') }}</view>
                 </view>
                 <view class="box" @click="openScore">
                     <uni-icons type="star-filled" size="28"></uni-icons>
-                    <view class="text">{{ currentInfo.score }}分</view>
+                    <view class="text">{{ currentInfo.score }}</view>
                 </view>
                 <view class="box" @click="clickDownload">
                     <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
                     <uni-icons v-else type="download-filled" size="28"></uni-icons>
-                    
-                    <view class="text">下载</view>
+                    <view class="text">{{ $t('common.download') }}</view>
                 </view>
             </view>
         </view>
@@ -64,9 +65,17 @@
                             <view class="label">评分：</view>
                             <view class="value rateBox">
                                 <uni-rate readonly touchable :value="currentInfo.score"></uni-rate>
-                                <text class="score">{{ currentInfo.score }}分</text>
+                                <text class="score">{{ currentInfo.score }}</text>
                             </view>
                         </view>
+                        <!-- <view class="row">
+                            <view class="label">预览：</view>
+                            <view class="value">{{ currentInfo.views }}</view>
+                        </view>
+                        <view class="row">
+                            <view class="label">下载：</view>
+                            <view class="value">{{ currentInfo.downloads }}</view>
+                        </view> -->
                         <view class="row" v-if="currentInfo.description">
                             <view class="label">描述：</view>
                             <view class="value" selectable>{{ currentInfo.description }}</view>
@@ -81,7 +90,7 @@
                         </view>
                         <view class="copyright">声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。</view>
 
-                        <custom-ad-banner></custom-ad-banner>
+                        <custom-ad-banner style="padding: 0 0 !important"></custom-ad-banner>
                     </view>
                 </scroll-view>
             </view>
@@ -107,8 +116,8 @@
                 </view>
             </view>
         </uni-popup>
-        
-        <prompt-ad-box ref="adPopup"></prompt-ad-box>
+
+        <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
     </view>
 </template>
 
@@ -117,7 +126,8 @@
     import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { getStatusBarHeight } from '@/utils/system.js';
     import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
-    import { downloadPic } from "@/common/core.js";
+    import { downloadPic } from '@/common/core.js';
+    import { apiPostIncrementViews, apiPostIncrementDownloads } from '@/api/wallpaper.js';
 
     import { useUserStore } from '@/stores/user.js';
     const userStore = useUserStore();
@@ -131,6 +141,18 @@
             tabs_list: item.tabs.split(',')
         };
     });
+
+    // views字段值+1，请求太频繁，labmda次数不够用，暂时搁置
+    const incrementViews = async (id) => {
+        // let res = await apiPostIncrementViews(id);
+        // console.log('increment views', res);
+    };
+
+    // views字段值+1
+    const incrementDownloads = async (id) => {
+        let res = await apiPostIncrementDownloads(id);
+        // console.log('increment downloads', res);
+    };
 
     // 返回按钮高度
     const getGoBackButtonTop = () => {
@@ -195,15 +217,12 @@
         });
         closeScore();
     };
-    
+
     // 点击下载弹窗观看广告
     const adPopup = ref(null);
 
-    // 点击下载
-    // const adInterstitialRef = ref(null);
-
     const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
-    const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
+    // const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
     const clickDownload = () => {
         // #ifdef WEB
         uni.showModal({
@@ -226,72 +245,21 @@
         //     console.log('弹出 插屏广告-半屏');
         //     showInterstitialAd();
         // }
-        
+
         if (currentInfo.value.is_locked) {
             // 弹出观看视频提示框
-            adPopup.value.open()
-            downloadPic(currentInfo.value.picurl)
+            adPopup.value.open();
+            // downloadPic(currentInfo.value.picurl)
         } else {
             // 展示插屏广告，之后下载图片
+            createInterstitialAd(); // 创建插屏广告
             showInterstitialAd();
-            downloadPic(currentInfo.value.picurl)
+            destroyInterstitialAd(); // 销毁插屏广告
+            
+            downloadPic(currentInfo.value.picurl);
+            
+            incrementDownloads(currentInfo.value.id);
         }
-
-        // uni.showLoading({
-        //     title: '下载中...',
-        //     mask: true
-        // });
-
-        // uni.getImageInfo({
-        //     src: currentInfo.value.picurl,
-        //     success: (res) => {
-        //         uni.saveImageToPhotosAlbum({
-        //             filePath: res.path,
-        //             success: (res) => {
-        //                 uni.showToast({
-        //                     title: '保存成功，请到相册查看',
-        //                     icon: 'none'
-        //                 });
-        //             },
-        //             fail: (err) => {
-        //                 if (err.errMsg == 'saveImageToPhotosAlbum:fail cancel') {
-        //                     uni.showToast({
-        //                         title: '保存失败，请重新点击下载',
-        //                         icon: 'none'
-        //                     });
-        //                     return;
-        //                 }
-        //                 uni.showModal({
-        //                     title: '授权提示',
-        //                     content: '需要授权保存相册',
-        //                     success: (res) => {
-        //                         if (res.confirm) {
-        //                             uni.openSetting({
-        //                                 success: (setting) => {
-        //                                     console.log(setting);
-        //                                     if (setting.authSetting['scope.writePhotosAlbum']) {
-        //                                         uni.showToast({
-        //                                             title: '获取授权成功',
-        //                                             icon: 'none'
-        //                                         });
-        //                                     } else {
-        //                                         uni.showToast({
-        //                                             title: '获取权限失败',
-        //                                             icon: 'none'
-        //                                         });
-        //                                     }
-        //                                 }
-        //                             });
-        //                         }
-        //                     }
-        //                 });
-        //             },
-        //             complete: () => {
-        //                 uni.hideLoading();
-        //             }
-        //         });
-        //     }
-        // });
         // #endif
     };
 
@@ -324,13 +292,15 @@
         currentInfo.value = classList.value[currentIndex.value];
         readImgsFun();
 
-        createInterstitialAd(); // 创建插屏广告
-        createRewardedVideoAd(); // 创建激励视频广告
+        incrementViews(currentInfo.value.id);
+
+        // createInterstitialAd(); // 创建插屏广告
+        // createRewardedVideoAd(); // 创建激励视频广告
     });
 
     onUnload(() => {
-        destroyInterstitialAd(); // 销毁插屏广告
-        destroyRewardedVideoAd(); // 销毁激励视频广告
+        // destroyInterstitialAd(); // 销毁插屏广告
+        // destroyRewardedVideoAd(); // 销毁激励视频广告
     });
 
     // 滑动事件，变化当前数字
@@ -338,6 +308,8 @@
         currentIndex.value = e.detail.current;
         currentInfo.value = classList.value[currentIndex.value];
         readImgsFun();
+
+        incrementViews(currentInfo.value.id);
     };
 
     //分享给好友
@@ -445,13 +417,13 @@
                     // vue深度选择器，强制使用css修改图标颜色
                     :deep() {
                         .uni-icons {
-                            color: $text-font-color-2 !important;
+                            // color: $wp-font-color-2 !important;
                         }
                     }
 
                     .text {
                         font-size: 26rpx;
-                        color: $text-font-color-2;
+                        // color: $wp-font-color-2;
                     }
                 }
             }
@@ -463,7 +435,7 @@
             align-items: center;
 
             .title {
-                color: $text-font-color-2;
+                color: $wp-font-color-2;
                 font-size: 28rpx;
             }
 
@@ -491,7 +463,7 @@
                         line-height: 1.7em; // 行高
 
                         .label {
-                            color: $text-font-color-3;
+                            color: $wp-font-color-3;
                             width: 140rpx;
                             text-align: right;
                             font-size: 30rpx;
@@ -503,7 +475,7 @@
                         }
 
                         .classify {
-                            color: $brand-theme-color;
+                            color: $wp-theme-color;
                         }
 
                         .rateBox {
@@ -512,7 +484,7 @@
 
                             .score {
                                 font-size: 30rpx;
-                                color: $text-font-color-2;
+                                color: $wp-font-color-2;
                                 padding-left: 10rpx;
                             }
                         }
@@ -522,10 +494,10 @@
                             flex-wrap: wrap;
 
                             .tab {
-                                color: $brand-theme-color;
+                                color: $wp-theme-color;
                                 font-size: 22rpx;
                                 padding: 10rpx 30rpx;
-                                border: 1rpx solid $brand-theme-color;
+                                border: 1rpx solid $wp-theme-color;
                                 border-radius: 40rpx;
                                 line-height: 1em;
                                 margin: 0 10rpx 10rpx 0;

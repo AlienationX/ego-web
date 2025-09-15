@@ -21,6 +21,7 @@
 
         .name {
             font-size: 40rpx;
+            color: $uni-text-color;
         }
     }
 </style>

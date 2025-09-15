@@ -14,9 +14,13 @@
 
             writeAccessLog();
 
+            console.log(import.meta.env);
+            console.log(import.meta.env.VITE_SOME_KEY); // "123"
+            console.log(import.meta.env.VUE_APP_DEBUG_MODE); // TODO 未显示，如何加载
+
             // #ifndef MP
             console.log(process.env); // 小程序不支持
-            console.log(process.env.VUE_APP_API_BASE);
+            console.log(process.env.VUE_APP_DEBUG_MODE);
             // #endif
         },
 

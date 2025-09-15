@@ -1,11 +1,14 @@
 <template>
     <view class="layout pageBackground">
-        <view :style="{ height: getNavBarHeight() + 'px' }"></view>
+        <view class="panel" :style="{ height: getNavBarHeight() + 'px' }">
+            <!-- <image class="settings" src="/common/icons/cog.svg" @click="toSettings"></image> -->
+        </view>
+
         <view class="userInfo">
             <view class="avater">
                 <image src="/common/images/pics/default_avatar.svg" mode="aspectFill"></image>
             </view>
-            
+
             <view v-if="userStore.userinfo.id">
                 <view class="name">{{ useUserStore.userinfo.nickname }}</view>
                 <view class="address" v-if="useUserStore.userinfo.region">
@@ -14,7 +17,7 @@
                 </view>
             </view>
             <view v-else class="name">
-                本我壁纸
+                {{ $t('common.appName') }}
                 <!-- <navigator url="/pages/login/login">Login</navigator> -->
             </view>
         </view>
@@ -78,18 +81,22 @@
             </view>
         </view>
 
-        <custom-ad-banner></custom-ad-banner>
-        <custom-ad-banner></custom-ad-banner>
-        <custom-ad-banner></custom-ad-banner>
+        <custom-ad-banner style="padding: 0rpx 30rpx 30rpx"></custom-ad-banner>
     </view>
 </template>
 
 <script setup>
-    import { ref, reactive } from 'vue';
+    import { ref, reactive, computed } from 'vue';
     import { getNavBarHeight } from '@/utils/system.js';
     import { useUserStore } from '@/stores/user.js';
+    import { useI18n } from 'vue-i18n';
+    const { t } = useI18n();
 
     const userStore = useUserStore();
+
+    const toSettings = () => {
+        uni.navigateTo({ url: '/pages/settings/settings' });
+    };
 
     const toMyFavorite = () => {
         console.log('toMyFavorite');
@@ -127,66 +134,73 @@
         userStore.clearUserData();
     };
 
-    const appMenus = reactive([
+    const appMenus = computed(() => [
         {
             left_icon: 'heart-filled',
-            left_text: '我的收藏',
+            left_text: t('user.profile.myFavorite'),
             right_text: '12',
             right_icon: 'forward',
             click: toMyFavorite
         },
         {
             left_icon: 'download-filled',
-            left_text: '我的下载',
+            left_text: t('user.profile.myDownload'),
             right_text: '3',
             right_icon: 'forward',
             click: toMyDownload
         },
         {
             left_icon: 'star-filled',
-            left_text: '我的评分',
+            left_text: t('user.profile.myScore'),
             right_text: '',
             right_icon: 'forward',
             click: toMyScore
         }
     ]);
 
-    const sysMenus = reactive([
+    const sysMenus = computed(() => [
         {
             left_icon: 'vip-filled',
-            left_text: '订阅更新',
+            left_text: t('user.profile.subscription'),
             right_text: '',
             right_icon: 'right',
             click: toSubscribe
         },
         {
             left_icon: 'help-filled',
-            left_text: '常见问题',
+            left_text: t('user.profile.question'),
             right_text: '',
             right_icon: 'right',
             click: toFAQ
         },
         {
             left_icon: 'chatboxes-filled',
-            left_text: '联系客服',
+            left_text: t('user.profile.support'),
             right_text: '',
             right_icon: 'right',
             click: onService
         },
         {
             left_icon: 'chat-filled',
-            left_text: '反馈意见',
+            left_text: t('user.profile.feedback'),
             right_text: '',
             right_icon: 'right',
             click: onFeedback
+        },
+        {
+            left_icon: 'gear-filled',
+            left_text: t('user.profile.settings'),
+            right_text: '',
+            right_icon: 'right',
+            click: toSettings
         }
     ]);
 
-    const exitMenus = reactive([
+    const exitMenus = computed(() => [
         {
             left_icon: 'gear-filled',
-            left_text: '退出登录',
-            right_text: '退出当前账号',
+            left_text: t('user.profile.exit'),
+            right_text: t('user.profile.exitText'),
             right_icon: '',
             click: onExit
         }
@@ -196,6 +210,18 @@
 <style lang="scss" scoped>
     .layout {
         height: 100%;
+
+        .panel {
+            display: flex;
+            align-items: center;
+            justify-content: right;
+            padding: 10rpx 20rpx;
+
+            .settings {
+                width: 56rpx;
+                height: 56rpx;
+            }
+        }
 
         .userInfo {
             display: flex;

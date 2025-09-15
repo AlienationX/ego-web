@@ -35,14 +35,38 @@ export const getLeftIconWidth = () => {
     // #endif
 };
 
+export const getRightIconWidth = () => {
+    // #ifdef MP-WEIXIN
+    // 微信小程序头部右侧的胶囊按钮显示问题
+    // 深度结构，两层
+    let { width } = uni.getMenuButtonBoundingClientRect();
+    return parseInt(width);
+    // #endif
+
+    // #ifndef MP-WEIXIN
+    return 0;
+    // #endif
+};
+
 export const writeAccessLog = async () => {
     console.log(SYSTEM_INFO, 'system_info');
     console.log(APP_INFO, 'app_info');
 
+    // 不统计web，主要是用来测试
+    if (SYSTEM_INFO.uniPlatform === 'web') return;
+
+    // 无法测试，只能打正式包时必须勾选 渠道包，才能通过 plus.runtime.channel 获取
+    // console.log('runtime', plus.runtime.channel);
+    // console.log('channel', plus.runtime.channel);
+    let channel = '';
+    // #ifdef APP
+    channel = plus.runtime.channel;
+    // #endif
+
     let data = {
         // 如果是app，用来区分 android 和 ios
         platform: SYSTEM_INFO.uniPlatform === 'app' ? SYSTEM_INFO.platform : SYSTEM_INFO.uniPlatform,
-        channel: '',
+        channel: channel,
         remark: JSON.stringify(SYSTEM_INFO)
     };
 

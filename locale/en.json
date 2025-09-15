@@ -1,0 +1,60 @@
+{
+    "tabbar.index": "Home", // tarbar的变量设置不能嵌套
+    "tabbar.category": "Category",
+    "tabbar.user": "Profile",
+    "common": {
+        "appName": "Ego Wallpapers",
+        "more": "More",
+        "refresh": "refresh",
+        "month": "Month",
+        "day": "Day",
+        "search": "Search",
+        "information": "Information",
+        "download": "Download",
+        "points": "Points",
+        "recommend": "Recommend",
+        "score": "Score",
+        "publishDate": "Date"
+    },
+    "index": {
+        "title": "Recommend",
+        "notice": "Notice",
+        "dailyRecommend": "Daily Recommend",
+        "categoryRecommend": "Category Recommend"
+
+    },
+    "category": {
+        "title": "Category"
+    },
+    "user": {
+        "profile": {
+            "myFavorite": "My Favorite",
+            "myDownload": "My Download",
+            "myScore": "My Score",
+            "subscription": "Subscription",
+            "question": "FAQ",
+            "support": "Support",
+            "feedback": "Feedback",
+            "settings": "Settings",
+            "exit": "Exit",
+            "exitText": "Exit the current account"
+        },
+        "settings": {
+            "language": "Language",
+            "chinese": "Chinese",
+            "english": "English",
+            "theme": "Theme",
+            "light": "Light",
+            "dark": "Dark"
+        }
+    },
+    "message": {
+        "copyrightStatement": "声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。",
+        "saveSuccessful": "Save successful. Please go to the album to view.",
+        "saveFailed": "Save failed. Please try again.",
+        "downloading": "Downloading...",
+        "loading": "Loading...",
+        "adText": "Unlock This Wallpaper",
+        "adPrompt": "Watch An Ads"
+    }
+}

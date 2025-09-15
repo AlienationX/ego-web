@@ -1,23 +1,28 @@
 import App from './App';
 
-// #ifndef VUE3
-import Vue from 'vue';
-import './uni.promisify.adaptor';
-Vue.config.productionTip = false;
-App.mpType = 'app';
-const app = new Vue({
-    ...App
-});
-app.$mount();
-// #endif
+// 多语言配置。如何需要设置tabbar的变量，文件夹必须是locale，不能是locales
+import en from './locale/en.json';
+import zhHans from './locale/zh-Hans.json';
+const messages = {
+    en,
+    'zh-Hans': zhHans
+};
 
-// #ifdef VUE3
+let i18nConfig = {
+    locale: uni.getStorageSync('lang') || uni.getLocale() || 'en', // 获取已设置的语言
+    globalInjection: true, // 全局注入 $t 方法
+    messages
+};
+
 import { createSSRApp } from 'vue';
+import { createI18n } from 'vue-i18n';
 import * as Pinia from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 
+const i18n = createI18n(i18nConfig);
 export function createApp() {
     const app = createSSRApp(App);
+    
     const pinia = Pinia.createPinia();
     // 添加持久化插件
     pinia.use(
@@ -35,10 +40,10 @@ export function createApp() {
             }
         })
     );
+    app.use(i18n);
     app.use(pinia);
     return {
         app,
         Pinia // 此处必须将 Pinia 返回
     };
 }
-// #endif
