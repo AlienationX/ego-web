@@ -1,6 +1,6 @@
 <template>
     <view class="classLayout pageBackground">
-        <custom-search-bar :title="$t('category.title')"></custom-search-bar>
+        <nav-bar :title="$t('category.title')"></nav-bar>
 
         <!-- <view class="loadingLayout" v-if="!classifyList.length">
             <uni-load-more status="loading"></uni-load-more>
@@ -11,7 +11,7 @@
         </view>
         
         <view class="classify">
-            <classify-item v-for="item in classifyList" :key="item.id" :item="item"></classify-item>
+            <classify-item v-for="item in classifyComputed" :key="item.id" :item="item"></classify-item>
         </view>
         
         <custom-ad-banner style="padding: 0rpx 30rpx 30rpx"></custom-ad-banner>
@@ -20,11 +20,17 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
+    import { ref, computed } from 'vue';
     import { apiGetClassify } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
 
     const classifyList = ref([]);
+    const classifyComputed = computed(() => {
+        return classifyList.value.map((item) => ({
+            ...item,
+            name: uni.getLocale() === 'en' ? item.name_en : item.name
+        }));
+    });
 
     const getClassify = async () => {
         let res = await apiGetClassify({
@@ -39,7 +45,7 @@
 
 <style lang="scss" scoped>
     .classify {
-        padding: 30rpx;
+        padding: 20rpx 30rpx 30rpx;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 15rpx;

@@ -14,9 +14,16 @@ export const apiGetBanner = () => {
     });
 };
 
-export const apiGetDayRandom = () => {
+export const apiGetRandomDay = () => {
     return request({
         url: '/wall/random/'
+    });
+};
+
+export const apiGetRandomRecommend = (data = {}) => {
+    return request({
+        url: '/wall/random_recommend/',
+        data
     });
 };
 

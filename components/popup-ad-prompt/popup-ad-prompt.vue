@@ -3,7 +3,7 @@
         <view class="box">
             <uni-icons class="close" type="clear" size="32" @click="close"></uni-icons>
             <image class="pic" src="/common/images/pics/ad_album.svg" mode="heightFix"></image>
-            <view class="txt">Unlock This Wallpaper</view>
+            <view class="txt">{{ $t('message.adText') }}</view>
             <button class="btn" @click="onWatch">{{ $t('message.adPrompt') }}</button>
         </view>
     </uni-popup>

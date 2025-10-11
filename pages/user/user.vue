@@ -26,7 +26,7 @@
             <view class="list">
                 <view class="row" v-for="item in appMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <uni-icons :type="item.left_icon" size="20" color="#28b389"></uni-icons>
+                        <uni-icons :type="item.left_icon" size="24" color="#28b389"></uni-icons>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -35,7 +35,7 @@
                         <view class="text">
                             {{ item.right_text }}
                         </view>
-                        <uni-icons :type="item.right_icon" size="15"></uni-icons>
+                        <uni-icons :type="item.right_icon" size="18"></uni-icons>
                     </view>
                 </view>
             </view>
@@ -45,7 +45,7 @@
             <view class="list">
                 <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <uni-icons :type="item.left_icon" size="20" color="#28b389"></uni-icons>
+                        <uni-icons :type="item.left_icon" size="24" color="#28b389"></uni-icons>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -54,7 +54,7 @@
                         <view class="text">
                             {{ item.right_text }}
                         </view>
-                        <uni-icons :type="item.right_icon" size="15" color="#aaa"></uni-icons>
+                        <uni-icons :type="item.right_icon" size="18" color="#aaa"></uni-icons>
                     </view>
                     <button v-if="item.left_text === '联系客服'" open-type="contact"></button>
                     <button v-if="item.left_text === '反馈意见'" open-type="feedback"></button>

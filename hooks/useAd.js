@@ -1,4 +1,5 @@
 // ifdef APP-PLUS || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
+import { useI18n } from 'vue-i18n';
 import { downloadPic } from '@/common/core.js';
 
 export const useAdIntersititial = () => {
@@ -10,6 +11,7 @@ export const useAdIntersititial = () => {
     };
 
     const interstitialAd = uni.createInterstitialAd(adOption);
+    const { t, locale } = useI18n();
 
     const createInterstitialAd = () => {
         // 广告实例创建成功后默认会执行一次 load，加载广告数据

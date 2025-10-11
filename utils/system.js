@@ -14,7 +14,7 @@ export const getTitleBarHeight = () => {
         let { top, height } = uni.getMenuButtonBoundingClientRect();
         return height + (top - getStatusBarHeight()) * 2;
     } else {
-        return 40;
+        return 48;
     }
 };
 

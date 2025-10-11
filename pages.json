@@ -128,6 +128,7 @@
         }
     ],
     "globalStyle": {
+        "rpxCalcMaxDeviceWidth": 1444,   // rpx 进行缩放计算的最大设备宽度（单位 px），默认 960
         "navigationBarTextStyle": "black",
         "navigationBarTitleText": "本我壁纸",
         "navigationBarBackgroundColor": "#F8F8F8",

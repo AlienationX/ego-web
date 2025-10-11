@@ -1,10 +1,13 @@
 <template>
-    <view class="common-title">
-        <view class="name">
-            <slot name="name"></slot>
+    <view class="container">
+        <view class="back">
+            
         </view>
-        <view class="custom">
-            <slot name="custom"></slot>
+        <view class="title">
+            <slot name="title"></slot>
+        </view>
+        <view class="menuBtn">
+            <slot name="menuBtn"></slot>
         </view>
     </view>
 </template>
@@ -13,13 +16,17 @@
 </script>
 
 <style lang="scss" scoped>
-    .common-title {
+    .container {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 0 30rpx;
+        
+        .title {
+            
+        }
 
-        .name {
+        .menuBtn {
             font-size: 34rpx;
             font-weight: bold;
             color: $uni-text-color;

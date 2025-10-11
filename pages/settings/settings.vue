@@ -22,6 +22,7 @@
 
 <script setup>
     import { ref, reactive, computed } from 'vue';
+    import { onLoad } from '@dcloudio/uni-app';
     import { useI18n } from 'vue-i18n';
     import { useSettingsStore } from '@/stores/settings.js';
 
@@ -34,6 +35,10 @@
         uni.setLocale(currentLanguage);
         uni.setStorageSync('lang', currentLanguage);
         locale.value = currentLanguage;
+
+        uni.setNavigationBarTitle({
+            title: titleText.value
+        });
     };
 
     const swithTheme = () => {
@@ -41,6 +46,7 @@
     };
 
     // 必须使用computed定义，否则切换语言后t函数不会更新
+    const titleText = computed(() => t('user.profile.settings'));
     const settings = computed(() => [
         {
             left_icon: '/common/icons/translate.svg',
@@ -57,6 +63,12 @@
             click: swithTheme
         }
     ]);
+
+    onLoad((e) => {
+        uni.setNavigationBarTitle({
+            title: titleText.value
+        });
+    });
 </script>
 
 <style lang="scss" scoped>

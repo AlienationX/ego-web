@@ -1,6 +1,6 @@
 <template>
     <view class="homeLayout pageBackground">
-        <custom-search-bar :title="$t('index.title')"></custom-search-bar>
+        <nav-bar :title="$t('index.title')"></nav-bar>
 
         <view class="banner">
             <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
@@ -56,37 +56,36 @@
             </index-title>
 
             <view class="content">
-                <rotate-loading v-if="!randomList.length" style="height: 100%"></rotate-loading>
-
+                <rotate-loading v-if="!randomDailyList.length" style="height: 100%"></rotate-loading>
                 <scroll-view scroll-x>
-                    <view class="box" v-for="item in randomList" :key="item.id" @click="goPriview(item.id)">
+                    <view class="box" v-for="item in randomDailyList" :key="item.id" @click="goPriview(item.id, randomDailyList)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
                     </view>
                 </scroll-view>
             </view>
         </view>
-        
-        <!-- <view class="select">
+
+        <view class="select" v-for="classify in randomRecommendComputed" :key="classify.id">
             <index-title>
-                <template #name>{{ $t('index.dailyRecommend') }}</template>
+                <template #name>{{ classify.name }}</template>
                 <template #custom>
-                    <view class="text">
-                        {{ $t('common.more') }}+
-                    </view>
-                        <uni-icons type="arrow-right" size="18" color="#28b389"></uni-icons>
+                    <navigator class="box" :url="'/pages/classlist/classlist?id=' + classify.id + '&name=' + classify.name">
+                        <!-- <view class="text">{{ $t('common.seeAll') }}</view> -->
+                        <!-- <uni-icons class="text" type="arrow-right" size="22" color="#999" @click="goClassList(classify.id, classify.name)"></uni-icons> -->
+                        <button size="mini" plain class="btn" :class="{ active: false }">{{ $t('common.seeAll') }}</button>
+                    </navigator>
                 </template>
             </index-title>
-            
+
             <view class="content">
-                <rotate-loading v-if="!randomList.length" style="height: 100%"></rotate-loading>
-        
+                <rotate-loading v-if="!classify" style="height: 100%"></rotate-loading>
                 <scroll-view scroll-x>
-                    <view class="box" v-for="item in randomList" :key="item.id" @click="goPriview(item.id)">
+                    <view class="box" v-for="item in classify.data" :key="item.id" @click="goPriview(item.id, classify.data)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
                     </view>
                 </scroll-view>
             </view>
-        </view> -->
+        </view>
 
         <!-- <view class="select">
             <index-title>
@@ -122,7 +121,7 @@
 
             <view class="content" v-if="classifyList.length">
                 <!-- :item="item",第一个item是和组件绑定传参，第二个item是for循环遍历的值-->
-                <classify-item v-for="item in classifyList" :key="item.id" :item="item"></classify-item>
+                <classify-item v-for="item in classifyComputed" :key="item.id" :item="item"></classify-item>
                 <classify-item :isMore="true"></classify-item>
             </view>
         </view>
@@ -132,17 +131,30 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
+    import { ref, computed } from 'vue';
     import { onLoad, onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
-    import { apiGetBanner, apiGetDayRandom, apiGetNotice, apiGetClassify } from '@/api/wallpaper.js';
+    import { apiGetBanner, apiGetRandomDay, apiGetRandomRecommend, apiGetNotice, apiGetClassify } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
 
     const bannerList = ref([]);
-    const randomList = ref([]);
+    const randomDailyList = ref([]);
+    const randomRecommendList = ref([]);
     const noticeList = ref([]);
     const classifyList = ref([]);
 
-    // console.log("xxxx", $t('index.title'));
+    const randomRecommendComputed = computed(() => {
+        return randomRecommendList.value.map((item) => ({
+            ...item,
+            name: uni.getLocale() === 'en' ? item.name_en : item.name
+        }));
+    });
+    
+    const classifyComputed = computed(() => {
+        return classifyList.value.map((item) => ({
+            ...item,
+            name: uni.getLocale() === 'en' ? item.name_en : item.name
+        }));
+    });
 
     const getBanner = async () => {
         let res = await apiGetBanner();
@@ -157,8 +169,18 @@
     };
 
     const getRandom = async () => {
-        let res = await apiGetDayRandom();
-        randomList.value = res.data.map((item) => handlePicUrl(item));
+        let res = await apiGetRandomDay();
+        randomDailyList.value = res.data.map((item) => handlePicUrl(item));
+    };
+
+    const getRandomRecommend = async () => {
+        let res = await apiGetRandomRecommend({ classify_ids: '30,62,2,3,10,12' });
+        randomRecommendList.value = res.data.map((classify) => {
+            return {
+                ...classify,
+                data: classify.data.map((item) => handlePicUrl(item))
+            };
+        });
     };
 
     const getNotice = async () => {
@@ -173,8 +195,8 @@
         classifyList.value = res.data.map((item) => handlePicUrl(item));
     };
 
-    const goPriview = (id) => {
-        uni.setStorageSync('wallList', randomList.value);
+    const goPriview = (id, data) => {
+        uni.setStorageSync('wallList', data);
         uni.navigateTo({
             url: '/pages/preview/preview?id=' + id
         });
@@ -182,12 +204,14 @@
 
     const refreshRandom = () => {
         getRandom();
+        getRandomRecommend();
     };
 
     onLoad(() => {
         getBanner();
         getNotice();
         getRandom();
+        getRandomRecommend();
         getClassify();
     });
 
@@ -198,6 +222,7 @@
         // getBanner();
         // getNotice();
         getRandom();
+        getRandomRecommend();
         // getClassify();
 
         // uni.hideNavigationBarLoading();
@@ -207,7 +232,7 @@
     //分享给好友
     onShareAppMessage((e) => {
         return {
-            title: '本我壁纸，好看的手机壁纸应用',
+            title: '本我壁纸 - 探索壁纸，亦探索自我',
             path: '/pages/index/index'
         };
     });
@@ -215,7 +240,7 @@
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: '本我壁纸，好看的手机壁纸应用'
+            title: '本我壁纸 - 探索壁纸，亦探索自我'
         };
     });
 </script>
@@ -224,7 +249,7 @@
     .homeLayout {
         .banner {
             width: 750rpx;
-            padding: 20rpx 0;
+            padding: 0 0 16rpx;
 
             swiper {
                 width: 750rpx;
@@ -310,7 +335,7 @@
         }
 
         .select {
-            padding-top: 50rpx;
+            padding: 30rpx 0 0 0;
 
             .date {
                 color: #28b389;
@@ -328,10 +353,34 @@
                     font-size: 28rpx;
                 }
             }
+            
+            // .text {
+            //     margin-left: 5rpx;
+            //     color: $uni-text-color-grey;;
+            //     font-size: 24rpx;
+            // }
+            .btn {
+                padding: 0rpx 16rpx;
+                background-color: $uni-bg-color-grey;
+                height: 42rpx;
+                
+                border: none;
+                border-radius: 40rpx;
+                display: flex;
+                align-items: center;
+                // gap: 5rpx;
+                // transition: background-color 0.3s ease, color 0.3s ease;
+                
+                &.active {
+                    color: #ffffff;
+                    background-color: $wp-theme-color;
+                //     font-weight: bold;
+                }
+            }
 
             .content {
                 width: 720rpx;
-                height: 430rpx;
+                height: 520rpx;
                 margin-top: 28rpx;
                 margin-left: 30rpx;
 
@@ -340,7 +389,7 @@
                     height: 100%;
 
                     .box {
-                        width: 200rpx;
+                        width: 240rpx;
                         height: 100%;
                         display: inline-flex;
                         justify-content: center; /* 水平居中 */
@@ -369,7 +418,7 @@
         }
 
         .classify {
-            padding: 50rpx 0;
+            padding: 30rpx 0;
 
             .content {
                 margin-top: 30rpx;
@@ -381,7 +430,6 @@
 
             .more {
                 font-size: 28rpx;
-                // color: #888;
                 color: $uni-text-color-grey;
             }
         }

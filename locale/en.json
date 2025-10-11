@@ -5,9 +5,10 @@
     "common": {
         "appName": "Ego Wallpapers",
         "more": "More",
-        "refresh": "refresh",
+        "refresh": "Refresh",
         "month": "Month",
         "day": "Day",
+        "seeAll": "See All",
         "search": "Search",
         "information": "Information",
         "download": "Download",
@@ -49,7 +50,7 @@
         }
     },
     "message": {
-        "copyrightStatement": "声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。",
+        "copyrightStatement": "Declaration: This image is from the internet. If there is any infringement, please copy the wallpaper ID and relevant proof and send them to the email 735003439@qq.com. The administrator will delete the infringing wallpaper to protect your rights.",
         "saveSuccessful": "Save successful. Please go to the album to view.",
         "saveFailed": "Save failed. Please try again.",
         "downloading": "Downloading...",
