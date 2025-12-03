@@ -1,9 +1,9 @@
 {
     "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
-    "description" : "致力于打造一款极简易用的壁纸浏览产品。",
-    "versionName" : "1.1.4",
-    "versionCode" : 114,
+    "description" : "探索壁纸，亦探索自我。",
+    "versionName" : "1.1.6",
+    "versionCode" : 116,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -39,7 +39,8 @@
                     "<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
                     "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
                     "<uses-feature android:name=\"android.hardware.camera\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
+                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>",
+                    "<uses-permission android:name=\"com.google.android.gms.permission.AD_ID\"/>"
                 ],
                 "abiFilters" : [ "arm64-v8a", "x86" ],
                 "minSdkVersion" : 24,
@@ -60,17 +61,18 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "bz" : {},
-                    "fl" : {},
-                    "jl" : {},
-                    "yt" : {},
                     "gg" : {},
                     "pg" : {},
+                    "bz" : {},
                     "unity" : {},
                     "liftoff" : {},
                     "inmobi" : {},
                     "ironsource" : {},
-                    "mintegral" : {}
+                    "mintegral" : {},
+                    "fl" : {},
+                    "jl" : {},
+                    "yt" : {},
+                    "applovin" : {}
                 },
                 "oauth" : {
                     "weixin" : {

@@ -15,7 +15,10 @@
         "points": "Points",
         "recommend": "Recommend",
         "score": "Score",
-        "publishDate": "Date"
+        "publishDate": "Date",
+        "hotSearch": "Hot search",
+        "recentSearch": "Recnet search",
+        "noResult": "Sorry, it's empty here."
     },
     "index": {
         "title": "Recommend",
@@ -25,7 +28,8 @@
 
     },
     "category": {
-        "title": "Category"
+        "title": "Category",
+        "desc": "Explore more beautiful wallpaper categories"
     },
     "user": {
         "profile": {
@@ -38,7 +42,8 @@
             "feedback": "Feedback",
             "settings": "Settings",
             "exit": "Exit",
-            "exitText": "Exit the current account"
+            "exitText": "Exit the current account",
+            "appDesc": "Discover more beautiful wallpapers"
         },
         "settings": {
             "language": "Language",
@@ -57,5 +62,26 @@
         "loading": "Loading...",
         "adText": "Unlock This Wallpaper",
         "adPrompt": "Watch An Ads"
+    },
+    "feedback": {
+        "title": "Feedback",
+        "type": "Feedback Type",
+        "typeBug": "Bug Report",
+        "typeSuggestion": "Feature Suggestion",
+        "typeOther": "Other",
+        "content": "Feedback Content",
+        "contentPlaceholder": "Please enter your feedback (at least 10 characters)",
+        "contact": "Contact Information",
+        "contactPlaceholder": "Please enter your contact information (optional)",
+        "submit": "Submit Feedback",
+        "submitting": "Submitting...",
+        "submitSuccess": "Feedback submitted successfully",
+        "submitFailed": "Failed to submit feedback. Please try again later",
+        "contentRequired": "Please enter feedback content",
+        "contentMinLength": "Feedback content must be at least 10 characters",
+        "images": "Screenshots (Optional)",
+        "addImage": "Add Image",
+        "imageTip": "{count} selected, max {max} images",
+        "maxImagesReached": "Maximum {max} images allowed"
     }
 }

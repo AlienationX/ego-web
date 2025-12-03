@@ -1,5 +1,9 @@
 <template>
     <view class="layout">
+        <menu-bar>
+            <template #title>{{ t('user.profile.settings') }}</template>
+        </menu-bar>
+        
         <view class="list">
             <view class="row" v-for="item in settings" :key="item.left_text" @click="item.click">
                 <view class="left">
@@ -21,8 +25,7 @@
 </template>
 
 <script setup>
-    import { ref, reactive, computed } from 'vue';
-    import { onLoad } from '@dcloudio/uni-app';
+    import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
     import { useSettingsStore } from '@/stores/settings.js';
 
@@ -36,27 +39,22 @@
         uni.setStorageSync('lang', currentLanguage);
         locale.value = currentLanguage;
 
-        uni.setNavigationBarTitle({
-            title: titleText.value
-        });
     };
 
     const swithTheme = () => {
         settingsStore.options.theme = settingsStore.options.theme === 'light' ? 'dark' : 'light';
     };
 
-    // 必须使用computed定义，否则切换语言后t函数不会更新
-    const titleText = computed(() => t('user.profile.settings'));
     const settings = computed(() => [
         {
-            left_icon: '/common/icons/translate.svg',
+            left_icon: '/static/icons/translate.svg',
             left_text: t('user.settings.language'),
             right_text: uni.getLocale() === 'en' ? t('user.settings.english') : t('user.settings.chinese'),
             right_icon: 'forward',
             click: swithLanguage
         },
         {
-            left_icon: '/common/icons/theme-light-dark.svg',
+            left_icon: '/static/icons/theme-light-dark.svg',
             left_text: t('user.settings.theme'),
             right_text: settingsStore.options.theme === 'light' ? t('user.settings.light') : t('user.settings.dark'),
             right_icon: 'forward',
@@ -64,30 +62,34 @@
         }
     ]);
 
-    onLoad((e) => {
-        uni.setNavigationBarTitle({
-            title: titleText.value
-        });
-    });
 </script>
 
 <style lang="scss" scoped>
     .layout {
+        background-color: #f5f5f5;
+        min-height: 100vh;
+        
         .list {
+            padding: 20rpx 0;
+            
             .row {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 padding: 0 30rpx;
                 height: 100rpx;
-                border-bottom: 1rpx solid #eee;
                 position: relative;
                 background: #fff;
-
-                // &:last-child {border-bottom: 0;}  // 去掉最底下的边框
+                margin-bottom: 20rpx;
+                
+                &:last-child {
+                    margin-bottom: 0;
+                }
+                
                 .left {
                     display: flex;
                     align-items: center;
+                    
                     .icon {
                         width: 44rpx;
                         height: 44rpx;
@@ -95,7 +97,8 @@
 
                     .text {
                         padding-left: 20rpx;
-                        color: #666;
+                        color: #333;
+                        font-size: 32rpx;
                     }
                 }
 
@@ -105,7 +108,8 @@
 
                     .text {
                         font-size: 28rpx;
-                        color: #aaa;
+                        color: #999;
+                        margin-right: 12rpx;
                     }
                 }
 

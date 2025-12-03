@@ -26,13 +26,13 @@
     const showAd = userStore.showAd;
 
     const onload = (e) => {
-        console.log('ad-banner onload', e);
+        // console.log('ad-banner onload', e);
     };
     const onclose = (e) => {
-        console.log('ad-banner onclose: ' + e.detail, e);
+        // console.log('ad-banner onclose: ' + e.detail, e);
     };
     const onerror = (e) => {
-        console.log('ad-banner onerror: ' + e.detail.errMsg.errCode + ' message:: ' + e.detail.errMsg.errMsg, e);
+        // console.log('ad-banner onerror: ' + e.detail.errMsg.errCode + ' message:: ' + e.detail.errMsg.errMsg, e);
     };
 </script>
 

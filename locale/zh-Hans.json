@@ -15,7 +15,10 @@
         "points": "分",
         "recommend": "推荐",
         "score": "评分",
-        "publishDate": "发布日期"
+        "publishDate": "发布日期",
+        "hotSearch": "热门搜索",
+        "recentSearch": "最近搜索",
+        "noResult": "抱歉，没有找到您想要的搜索结果"
     },
     "index": {
         "title": "推荐",
@@ -24,7 +27,8 @@
         "categoryRecommend": "分类推荐"
     },
     "category": {
-        "title": "分类"
+        "title": "分类",
+        "desc": "探索更多精美壁纸分类"
     },
     "user": {
         "profile": {
@@ -37,7 +41,8 @@
             "feedback": "反馈意见",
             "settings": "设置",
             "exit": "退出",
-            "exitText": "退出当前账号"
+            "exitText": "退出当前账号",
+            "appDesc": "发现更多精美壁纸"
         },
         "settings": {
             "language": "语言",
@@ -56,5 +61,26 @@
         "loading": "加载中...",
         "adText": "需要观看视频广告解锁该壁纸",
         "adPrompt": "观看视频广告"
+    },
+    "feedback": {
+        "title": "反馈意见",
+        "type": "反馈类型",
+        "typeBug": "Bug反馈",
+        "typeSuggestion": "功能建议",
+        "typeOther": "其他",
+        "content": "反馈内容",
+        "contentPlaceholder": "请输入您的反馈内容（至少10个字符）",
+        "contact": "联系方式",
+        "contactPlaceholder": "请输入您的联系方式（选填）",
+        "submit": "提交反馈",
+        "submitting": "提交中...",
+        "submitSuccess": "反馈提交成功",
+        "submitFailed": "反馈提交失败，请稍后重试",
+        "contentRequired": "请输入反馈内容",
+        "contentMinLength": "反馈内容至少需要10个字符",
+        "images": "截图（选填）",
+        "addImage": "添加图片",
+        "imageTip": "已选择 {count} 张，最多可上传 {max} 张",
+        "maxImagesReached": "最多只能上传 {max} 张图片"
     }
 }

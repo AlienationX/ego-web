@@ -1,45 +1,68 @@
 <template>
-    <view class="layout pageBackground">
-        <view class="panel" :style="{ height: getNavBarHeight() + 'px' }">
-            <!-- <image class="settings" src="/common/icons/cog.svg" @click="toSettings"></image> -->
-        </view>
-
-        <view class="userInfo">
+    <view class="layout">
+        <view class="userInfo" :class="{ 'not-logged-in': !userStore.userinfo.id }" :style="{ paddingTop: (getStatusBarHeight() + 20) + 'px' }">
+            <!-- 装饰性背景 -->
+            <view class="decorative-bg">
+                <view class="bg-circle circle-1"></view>
+                <view class="bg-circle circle-2"></view>
+                <view class="bg-circle circle-3"></view>
+            </view>
+            
             <view class="avater">
                 <image src="/common/images/pics/default_avatar.svg" mode="aspectFill"></image>
+                <view class="avatar-ring"></view>
             </view>
 
-            <view v-if="userStore.userinfo.id">
-                <view class="name">{{ useUserStore.userinfo.nickname }}</view>
-                <view class="address" v-if="useUserStore.userinfo.region">
-                    来自于 {{ useUserStore.userinfo.region }}
-                    <!-- {{ userinfo.address.region || userinfo.address.city || userinfo.address.province || userinfo.address.country || '未知' }} -->
+            <view v-if="userStore.userinfo.id" class="user-details">
+                <view class="name">{{ userStore.userinfo.nickname }}</view>
+                <view class="address" v-if="userStore.userinfo.region">
+                    <uni-icons type="location" size="14" color="#999"></uni-icons>
+                    <text>{{ userStore.userinfo.region }}</text>
                 </view>
             </view>
-            <view v-else class="name">
-                {{ $t('common.appName') }}
-                <!-- <navigator url="/pages/login/login">Login</navigator> -->
+            <view v-else class="not-logged-in-content">
+                <view class="app-name">{{ $t('common.appName') }}</view>
+                <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
             </view>
         </view>
 
-        <view class="section" v-if="userStore.userinfo.id">
-            <view class="list">
-                <view class="row" v-for="item in appMenus" :key="item.left_text" @click="item.click">
-                    <view class="left">
-                        <uni-icons :type="item.left_icon" size="24" color="#28b389"></uni-icons>
-                        <view class="text">
-                            {{ item.left_text }}
-                        </view>
-                    </view>
-                    <view class="right">
-                        <view class="text">
-                            {{ item.right_text }}
-                        </view>
-                        <uni-icons :type="item.right_icon" size="18"></uni-icons>
-                    </view>
+        <!-- 统计卡片 -->
+        <view class="stats-section">
+            <view class="stats-card heart-card" @click="toMyFavorite">
+                <view class="card-bg"></view>
+                <view class="stats-icon heart">
+                    <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
                 </view>
+                <view class="stats-content">
+                    <view class="stats-number">{{ userStore.userinfo.id ? '12' : '0' }}</view>
+                    <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
+                </view>
+                <view class="card-decoration decoration-1"></view>
+            </view>
+            <view class="stats-card download-card" @click="toMyDownload">
+                <view class="card-bg"></view>
+                <view class="stats-icon download">
+                    <uni-icons type="download-filled" size="32" color="#28b389"></uni-icons>
+                </view>
+                <view class="stats-content">
+                    <view class="stats-number">{{ userStore.userinfo.id ? '3' : '0' }}</view>
+                    <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
+                </view>
+                <view class="card-decoration decoration-2"></view>
+            </view>
+            <view class="stats-card star-card" @click="toMyScore">
+                <view class="card-bg"></view>
+                <view class="stats-icon star">
+                    <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
+                </view>
+                <view class="stats-content">
+                    <view class="stats-number">{{ userStore.userinfo.id ? '8' : '0' }}</view>
+                    <view class="stats-label">{{ t('user.profile.myScore') }}</view>
+                </view>
+                <view class="card-decoration decoration-3"></view>
             </view>
         </view>
+
 
         <view class="section">
             <view class="list">
@@ -56,17 +79,17 @@
                         </view>
                         <uni-icons :type="item.right_icon" size="18" color="#aaa"></uni-icons>
                     </view>
-                    <button v-if="item.left_text === '联系客服'" open-type="contact"></button>
-                    <button v-if="item.left_text === '反馈意见'" open-type="feedback"></button>
+                    <button v-if="item.left_text === t('user.profile.support')" open-type="contact"></button>
+                    <!-- <button v-if="item.left_text === t('user.profile.feedback')" open-type="feedback"></button> -->
                 </view>
             </view>
         </view>
 
-        <view class="section" v-if="userStore.userinfo.id">
+        <view class="section exit-section" v-if="userStore.userinfo.id">
             <view class="list">
-                <view class="row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
+                <view class="row exit-row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <uni-icons :type="item.left_icon" size="20" color="#28b389"></uni-icons>
+                        <uni-icons :type="item.left_icon" size="20" color="#ff6b6b"></uni-icons>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -75,7 +98,6 @@
                         <view class="text">
                             {{ item.right_text }}
                         </view>
-                        <uni-icons :type="item.right_icon" size="15" color="#aaa"></uni-icons>
                     </view>
                 </view>
             </view>
@@ -87,7 +109,7 @@
 
 <script setup>
     import { ref, reactive, computed } from 'vue';
-    import { getNavBarHeight } from '@/utils/system.js';
+    import { getStatusBarHeight } from '@/utils/system.js';
     import { useUserStore } from '@/stores/user.js';
     import { useI18n } from 'vue-i18n';
     const { t } = useI18n();
@@ -127,7 +149,7 @@
     };
 
     const onFeedback = () => {
-        console.log('onFeedback');
+        uni.navigateTo({ url: '/pages/feedback/feedback' });
     };
 
     const onExit = () => {
@@ -209,59 +231,284 @@
 
 <style lang="scss" scoped>
     .layout {
-        height: 100%;
-
-        .panel {
-            display: flex;
-            align-items: center;
-            justify-content: right;
-            padding: 10rpx 20rpx;
-
-            .settings {
-                width: 56rpx;
-                height: 56rpx;
-            }
-        }
+        background-color: #f5f5f5;
+        min-height: 100vh;
 
         .userInfo {
             display: flex;
             align-items: center;
             justify-content: top;
             flex-direction: column;
-            padding: 50rpx 0 20rpx;
+            padding: 0 0 50rpx;
             min-height: 320rpx;
+            background: #fff;
+            margin-bottom: 20rpx;
+            position: relative;
+            overflow: hidden;
+
+            &.not-logged-in {
+                background: #f5f5f5;
+            }
+
+            .decorative-bg {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                pointer-events: none;
+
+                .bg-circle {
+                    position: absolute;
+                    border-radius: 50%;
+                    opacity: 0.05;
+                    background: linear-gradient(135deg, #28b389 0%, #20a078 100%);
+                }
+
+                .circle-1 {
+                    width: 300rpx;
+                    height: 300rpx;
+                    top: -100rpx;
+                    right: -50rpx;
+                }
+
+                .circle-2 {
+                    width: 200rpx;
+                    height: 200rpx;
+                    bottom: -50rpx;
+                    left: -30rpx;
+                }
+
+                .circle-3 {
+                    width: 150rpx;
+                    height: 150rpx;
+                    top: 50%;
+                    left: 20%;
+                }
+            }
 
             .avater {
                 width: 160rpx;
                 height: 160rpx;
                 border-radius: 50%;
                 overflow: hidden;
-                box-shadow: 0 0 12rpx rgba(0, 0, 0, 0.1);
+                position: relative;
+                z-index: 1;
+                border: 4rpx solid #fff;
+                box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
 
                 image {
                     width: 100%;
                     height: 100%;
                 }
+
+                .avatar-ring {
+                    position: absolute;
+                    top: -4rpx;
+                    left: -4rpx;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    border: 4rpx solid transparent;
+                    border-top-color: #28b389;
+                    border-right-color: #ff6b9d;
+                    animation: rotate 3s linear infinite;
+                }
+            }
+
+            .user-details {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
             }
 
             .name {
-                font-size: 38rpx;
+                font-size: 40rpx;
                 color: #333;
-                padding: 40rpx 0 5rpx;
+                font-weight: 600;
+                padding: 40rpx 0 8rpx;
             }
 
             .address {
+                display: flex;
+                align-items: center;
+                gap: 8rpx;
                 font-size: 28rpx;
-                color: #aaa;
+                color: #999;
+            }
+
+            .not-logged-in-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding-top: 40rpx;
+            }
+
+            .app-name {
+                font-size: 40rpx;
+                color: #333;
+                font-weight: 600;
+                padding-bottom: 12rpx;
+            }
+
+            .app-desc {
+                font-size: 28rpx;
+                color: #999;
+            }
+        }
+
+        .stats-section {
+            display: flex;
+            gap: 20rpx;
+            padding: 0 30rpx;
+            margin-bottom: 30rpx;
+
+            .stats-card {
+                flex: 1;
+                background: #fff;
+                border-radius: 20rpx;
+                padding: 35rpx 20rpx;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s;
+                box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+
+                &:active {
+                    transform: translateY(-4rpx) scale(0.98);
+                    box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.12);
+                }
+
+                .card-bg {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                }
+
+                .card-decoration {
+                    position: absolute;
+                    width: 120rpx;
+                    height: 120rpx;
+                    border-radius: 50%;
+                    opacity: 0.08;
+                    pointer-events: none;
+                }
+
+                &.heart-card {
+                    .card-bg {
+                        background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(255, 107, 157, 0.05) 100%);
+                    }
+                    .decoration-1 {
+                        background: #ff6b9d;
+                        top: -30rpx;
+                        right: -30rpx;
+                    }
+                }
+
+                &.download-card {
+                    .card-bg {
+                        background: linear-gradient(135deg, rgba(40, 179, 137, 0.1) 0%, rgba(40, 179, 137, 0.05) 100%);
+                    }
+                    .decoration-2 {
+                        background: #28b389;
+                        bottom: -30rpx;
+                        left: -30rpx;
+                    }
+                }
+
+                &.star-card {
+                    .card-bg {
+                        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
+                    }
+                    .decoration-3 {
+                        background: #ffc107;
+                        top: -20rpx;
+                        left: -20rpx;
+                    }
+                }
+
+                &:active .card-bg {
+                    opacity: 1;
+                }
+
+                .stats-icon {
+                    width: 90rpx;
+                    height: 90rpx;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 24rpx;
+                    position: relative;
+                    z-index: 1;
+                    transition: all 0.3s;
+
+                    &.heart {
+                        background: linear-gradient(135deg, rgba(255, 107, 157, 0.15) 0%, rgba(255, 107, 157, 0.08) 100%);
+                        box-shadow: 0 4rpx 12rpx rgba(255, 107, 157, 0.2);
+                    }
+
+                    &.download {
+                        background: linear-gradient(135deg, rgba(40, 179, 137, 0.15) 0%, rgba(40, 179, 137, 0.08) 100%);
+                        box-shadow: 0 4rpx 12rpx rgba(40, 179, 137, 0.2);
+                    }
+
+                    &.star {
+                        background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.08) 100%);
+                        box-shadow: 0 4rpx 12rpx rgba(255, 193, 7, 0.2);
+                    }
+                }
+
+                &:active .stats-icon {
+                    transform: scale(1.1);
+                }
+
+                .stats-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    position: relative;
+                    z-index: 1;
+
+                    .stats-number {
+                        font-size: 42rpx;
+                        font-weight: 700;
+                        background: linear-gradient(135deg, #333 0%, #666 100%);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                        margin-bottom: 10rpx;
+                        line-height: 1.2;
+                    }
+
+                    .stats-label {
+                        font-size: 24rpx;
+                        color: #999;
+                        font-weight: 500;
+                    }
+                }
+            }
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
             }
         }
 
         .section {
-            width: 690rpx;
-            margin: 50rpx auto;
-            border: 1rpx solid #eee;
-            border-radius: 10rpx;
-            box-shadow: 0 0 12rpx rgba(0, 0, 0, 0.1);
+            margin-bottom: 20rpx;
+            padding: 0 30rpx;
 
             .list {
                 .row {
@@ -270,18 +517,29 @@
                     align-items: center;
                     padding: 0 30rpx;
                     height: 100rpx;
-                    border-bottom: 1rpx solid #eee;
                     position: relative;
                     background: #fff;
+                    margin-bottom: 20rpx;
+                    border-radius: 16rpx;
+                    transition: all 0.3s;
+                    
+                    &:active {
+                        opacity: 0.8;
+                        transform: scale(0.99);
+                    }
+                    
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
 
-                    // &:last-child {border-bottom: 0;}  // 去掉最底下的边框
                     .left {
                         display: flex;
                         align-items: center;
 
                         .text {
                             padding-left: 20rpx;
-                            color: #666;
+                            color: #333;
+                            font-size: 32rpx;
                         }
                     }
 
@@ -291,7 +549,8 @@
 
                         .text {
                             font-size: 28rpx;
-                            color: #aaa;
+                            color: #999;
+                            margin-right: 12rpx;
                         }
                     }
 
@@ -305,6 +564,15 @@
                     }
                 }
             }
+
+            &.exit-section {
+                .row.exit-row {
+                    .left .text {
+                        color: #ff6b6b;
+                    }
+                }
+            }
         }
     }
 </style>
+

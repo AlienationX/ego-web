@@ -1,5 +1,4 @@
 // ifdef APP-PLUS || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
-import { useI18n } from 'vue-i18n';
 import { downloadPic } from '@/common/core.js';
 
 export const useAdIntersititial = () => {
@@ -10,8 +9,8 @@ export const useAdIntersititial = () => {
         adpid: '1129226586'
     };
 
+    let picurl = '';
     const interstitialAd = uni.createInterstitialAd(adOption);
-    const { t, locale } = useI18n();
 
     const createInterstitialAd = () => {
         // 广告实例创建成功后默认会执行一次 load，加载广告数据
@@ -20,19 +19,20 @@ export const useAdIntersititial = () => {
 
         interstitialAd.onLoad((e) => {
             // this.loading = false;
-            console.log('use ad-interstitial onload', e);
+            // console.log('use ad-interstitial onload', e);
         });
         interstitialAd.onClose(() => {
             // 用户点击了关闭或返回键(仅Android有返回键)
-            console.log('use ad-interstitial onclose');
+            // console.log('use ad-interstitial onclose');
+            downloadPic(picurl);
         });
         interstitialAd.onError((e) => {
             // this.loading = false;
-            console.log('use ad-interstitial onerror', e);
+            // console.log('use ad-interstitial onerror', e);
         });
     };
 
-    const showInterstitialAd = () => {
+    const showInterstitialAd = (inputPicurl) => {
         // 调用 interstitialAd.show()，如果数据正在加载中不会显示广告，加载成功后才显示
         // 在数据没有加载成功时，需要防止用户频繁点击显示广告
         // if (this.loading == true) {
@@ -41,6 +41,7 @@ export const useAdIntersititial = () => {
         // this.loading = true;
         interstitialAd.show().then(() => {
             // this.loading = false;
+            picurl = inputPicurl;
         });
     };
 
@@ -88,12 +89,12 @@ export const useAdRewardedVideo = () => {
 
         rewardedVideoAd.onLoad((e) => {
             // this.loading = false;
-            console.log('use ad-rewarded-video onload', e);
+            // console.log('use ad-rewarded-video onload', e);
             // 当激励视频被关闭时，默认预载下一条数据，加载完成时仍然触发 `onLoad` 事件
         });
         rewardedVideoAd.onClose((e) => {
             // 用户点击了关闭或返回键(仅Android有返回键)
-            console.log('use ad-rewarded-video onclose', e, picurl);
+            // console.log('use ad-rewarded-video onclose', e, picurl);
 
             // 用户点击了【关闭广告】按钮
             if (e.isEnded) {
@@ -146,7 +147,6 @@ export const useAdRewardedVideo = () => {
                     )
                     .catch((err) => {
                         console.log('激励视频 广告显示失败！为了不影响用户体验，直接下载！');
-                        downloadPic(inputPicurl);
                     });
             });
 

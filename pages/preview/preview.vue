@@ -91,7 +91,9 @@
                         <!-- <view class="copyright">{{ $t('message.copyrightStatement') }}</view> -->
                         <view class="copyright">声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。</view>
 
-                        <custom-ad-banner style="padding: 0 0 !important"></custom-ad-banner>
+                        <view v-show="displayAd" class="ad-row">
+                            <custom-ad-banner></custom-ad-banner>
+                        </view>
                     </view>
                 </scroll-view>
             </view>
@@ -124,6 +126,7 @@
 
 <script setup>
     import { ref, computed } from 'vue';
+    import { useI18n } from 'vue-i18n';
     import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { getStatusBarHeight } from '@/utils/system.js';
     import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
@@ -132,6 +135,8 @@
 
     import { useUserStore } from '@/stores/user.js';
     const userStore = useUserStore();
+    
+    const { t, locale } = useI18n();
 
     const classList = ref([]);
     const wallList = uni.getStorageSync('wallList') || [];
@@ -182,11 +187,16 @@
 
     // 点击信息弹窗
     const infoPopup = ref(null);
+    const displayAd = ref(false);
     const openInfo = () => {
         infoPopup.value.open();
+        displayAd.value = true;
+        console.log(displayAd.value);
     };
     const closeInfo = () => {
         infoPopup.value.close();
+        displayAd.value = false;
+        console.log(displayAd.value);
     };
 
     // 点击评分弹窗
@@ -254,11 +264,9 @@
         } else {
             // 展示插屏广告，之后下载图片
             createInterstitialAd(); // 创建插屏广告
-            showInterstitialAd();
+            showInterstitialAd(currentInfo.value.picurl);
             destroyInterstitialAd(); // 销毁插屏广告
-            
-            downloadPic(currentInfo.value.picurl);
-            
+
             incrementDownloads(currentInfo.value.id);
         }
         // #endif
@@ -514,6 +522,11 @@
                         border-radius: 10rpx;
                         margin: 20rpx 0;
                         line-height: 1.6em;
+                    }
+
+                    .ad-row {
+                        // width: 100%;
+                        // height: 100%;
                     }
                 }
             }

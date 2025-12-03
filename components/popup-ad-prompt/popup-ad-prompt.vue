@@ -23,7 +23,6 @@
     // views字段值+1
     const incrementDownloads = async (id) => {
         let res = await apiPostIncrementDownloads(id);
-        console.log('increment downloads', res);
     };
 
     const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
@@ -40,7 +39,7 @@
     const onWatch = () => {
         close();
         uni.showLoading({
-            title: 'Loading...',
+            title: 'Downloading...',
             mask: true
         });
 

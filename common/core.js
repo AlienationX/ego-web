@@ -1,4 +1,5 @@
 export const downloadPic = (picurl) => {
+    // 多语言的t不能在js中直接使用，只能在vue文件的setup方法中使用。这里只能当作参数传递进来使用
     uni.showLoading({
         title: '下载中...',
         mask: true

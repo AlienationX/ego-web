@@ -93,6 +93,15 @@ export const apiGetProfile = () => {
     });
 };
 
+export const apiPostFeedback = (data = {}) => {
+    // 提交反馈接口
+    return request({
+        url: '/feedback/',
+        data,
+        method: 'POST'
+    });
+};
+
 // demo
 export const apiGetSetupScore = (data = {}) => {
     // 图片评分接口，该接口根据ip验证是否已经打过分了

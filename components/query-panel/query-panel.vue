@@ -91,10 +91,11 @@
 
 <style lang="scss" scoped>
     .queryPanel {
-        position: sticky;
-        // top: v-bind('searchHeight + "px"');
-        z-index: 10;
-        background-color: #ffffff;
+        position: fixed;
+        left: 0;
+        right: 0;
+        z-index: 99;
+        background-color: #f5f5f5;
         display: flex;
         justify-content: space-between;
         align-items: center;

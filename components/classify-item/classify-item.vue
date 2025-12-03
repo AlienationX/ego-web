@@ -17,7 +17,7 @@
                 <uni-icons type="more-filled" size="34" color="#fff"></uni-icons>
                 <view class="text">{{ $t('common.more') }}</view>
             </view>
-        </navigator>
+        </navigator>     
     </view>
 </template>
 

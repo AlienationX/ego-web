@@ -1,7 +1,7 @@
 <template>
     <!-- 返回顶部按钮 -->
     <view v-if="showBackToTop" class="backToTop" @click="scrollToTop">
-        <uni-icons type="up" size="18" color="#ffffff"></uni-icons>
+        <uni-icons type="up" size="24" color="#ffffff"></uni-icons>
     </view>
 </template>
 

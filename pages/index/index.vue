@@ -65,7 +65,7 @@
             </view>
         </view>
 
-        <view class="select" v-for="classify in randomRecommendComputed" :key="classify.id">
+        <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
             <index-title>
                 <template #name>{{ classify.name }}</template>
                 <template #custom>
@@ -84,6 +84,10 @@
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
                     </view>
                 </scroll-view>
+            </view>
+
+            <view v-if="idx % 3 === 0">
+                <custom-ad-banner style="padding: 30rpx 30rpx 0"></custom-ad-banner>
             </view>
         </view>
 
@@ -148,7 +152,7 @@
             name: uni.getLocale() === 'en' ? item.name_en : item.name
         }));
     });
-    
+
     const classifyComputed = computed(() => {
         return classifyList.value.map((item) => ({
             ...item,
@@ -353,7 +357,7 @@
                     font-size: 28rpx;
                 }
             }
-            
+
             // .text {
             //     margin-left: 5rpx;
             //     color: $uni-text-color-grey;;
@@ -363,18 +367,18 @@
                 padding: 0rpx 16rpx;
                 background-color: $uni-bg-color-grey;
                 height: 42rpx;
-                
+
                 border: none;
                 border-radius: 40rpx;
                 display: flex;
                 align-items: center;
                 // gap: 5rpx;
                 // transition: background-color 0.3s ease, color 0.3s ease;
-                
+
                 &.active {
                     color: #ffffff;
                     background-color: $wp-theme-color;
-                //     font-weight: bold;
+                    //     font-weight: bold;
                 }
             }
 

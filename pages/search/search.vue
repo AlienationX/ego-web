@@ -18,7 +18,7 @@
         <view v-show="showWordBoard">
             <view class="history" v-if="searchHistory.length">
                 <view class="topTitle">
-                    <view class="text">最近搜索</view>
+                    <view class="text">{{ $t('common.recentSearch') }}</view>
                     <view class="icon" @click="removeHistory">
                         <uni-icons type="trash" size="25"></uni-icons>
                     </view>
@@ -30,7 +30,7 @@
 
             <view class="recommend">
                 <view class="topTitle">
-                    <view class="text">热门搜索</view>
+                    <view class="text">{{ $t('common.hotSearch') }}</view>
                 </view>
                 <view class="tabs">
                     <view class="tab" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">{{ tab }}</view>
@@ -40,7 +40,7 @@
 
         <view v-if="noResult" class="noResult">
             <image class="empty-image" src="/common/images/pics/NoImages.svg" mode="aspectFit"></image>
-            <text class="text">抱歉，没有找到您想要的搜索结果</text>
+            <text class="text">{{ $t('common.noResult') }}</text>
         </view>
 
         <view v-show="classList.length">
@@ -94,7 +94,7 @@
         </view>
 
         <back-to-top ref="backToTopRef"></back-to-top>
-        <custom-ad-banner v-if="!noResult && !classList.length"></custom-ad-banner>
+        <custom-ad-banner v-if="!noResult && !classList.length" style="padding: 30rpx;"></custom-ad-banner>
     </view>
 </template>
 

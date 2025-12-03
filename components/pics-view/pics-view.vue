@@ -19,9 +19,10 @@
                 </navigator>
 
                 <!-- TODO 每12个图片后插入广告，但是不显示，存在bug -->
-                <!-- <view v-if="(idx + 1) % 12 === 0" class="ad-row">
+                <view v-if="(idx + 1) % 12 === 0" class="ad-row">
                     <custom-ad-banner></custom-ad-banner>
-                </view> -->
+                </view>
+                
             </template>
         </view>
     </view>
@@ -242,7 +243,7 @@
     const updateSize = (e, id) => {
         // 获取图片的原始尺寸，页可以使用img.onload获取设置
         // console.log('e', e);
-        console.log('------', 'id', id);
+        // console.log('------', 'id', id);
 
         const width = e.detail.width;
         const height = e.detail.height;
@@ -453,9 +454,9 @@
             .ad-row {
                 grid-column: 1 / -1;
                 width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
+                // display: flex;
+                // justify-content: center;
+                // align-items: center;
             }
         }
     }

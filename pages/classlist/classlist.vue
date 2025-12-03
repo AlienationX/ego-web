@@ -1,6 +1,13 @@
 <template>
     <view class="layout">
-        <query-panel v-if="classList.length" @onQuery="onQuery" />
+        <menu-bar>
+            <template #title>{{ props.name || '分类列表' }}</template>
+        </menu-bar>
+        
+        <query-panel v-if="classList.length" @onQuery="onQuery" :top="queryPanelTop" />
+        
+        <!-- query-panel 占位区域，避免内容被遮挡 -->
+        <view class="query-panel-placeholder" v-if="classList.length" :style="{ height: placeholderHeight + 'px' }"></view>
 
         <!-- <view class="content">
             <navigator :url="'/pages/preview/preview?id='+item.id" class="item" v-for="item in classList"
@@ -14,7 +21,6 @@
         <!-- 使用v-if切换会重新渲染 waterfall-view 并返回到顶部，所以封装到一个组件中 pics-view -->
         <!-- <window-view v-if="settingsStore.options.view === 'window'" :classList="classList"></window-view>
         <waterfall-view v-else :classList="classList"></waterfall-view> -->
-        
         
         <pics-view :classList="classList"></pics-view>
         
@@ -30,16 +36,31 @@
 </template>
 
 <script setup>
-    import { ref, reactive } from 'vue';
+    import { ref, reactive, computed } from 'vue';
     import { onLoad, onUnload, onReachBottom, onPullDownRefresh, onPageScroll, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { apiGetClassList, apiGetClassify } from '@/api/wallpaper.js';
     import { gotoHome, handlePicUrl } from '@/utils/common.js';
     import { useSettingsStore } from '@/stores/settings.js';
+    import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 
     const settingsStore = useSettingsStore();
 
     const picsViewRef = ref(null);
     const backToTopRef = ref(null);
+
+    // query-panel 的 top 位置，固定在 menu-bar 下方
+    const queryPanelTop = computed(() => {
+        return getNavBarHeight() + 'px';
+    });
+
+    // query-panel 的高度（padding: 2rpx 8rpx, left height: 48rpx, left padding: 12rpx 12rpx）
+    // 总高度 = 2 + 12 + 48 + 12 + 2 = 76rpx ≈ 38px
+    const queryPanelHeight = 38;
+    
+    // 占位区域总高度 = menu-bar 高度 + query-panel 高度
+    const placeholderHeight = computed(() => {
+        return getNavBarHeight() + queryPanelHeight;
+    });
 
     // 正在执行
     const isRunning = ref(false);
@@ -102,13 +123,13 @@
             pendingList.value.push(...fullData);
             classList.value = [...pendingList.value];
 
-            // isRunning.value = false;
             if (queryParams.value.pageSize > res.data.length) noData.value = true;
 
             // 缓存数据
             uni.setStorageSync('wallList', classList.value);
         } finally {
             uni.hideLoading();
+            isRunning.value = false;
         }
     };
 
@@ -123,11 +144,6 @@
 
     onLoad((e) => {
         // 页面加载时，获取id。比较慢，推荐使用获取页面参数，可以在setup中直接使用
-
-        // OnLoad要晚于setup执行,但是setup有时执行太快，所以在这里动态设置分类列表的title
-        uni.setNavigationBarTitle({
-            title: props.name
-        });
 
         // console.log('解析url传入的参数，比如：?id=5&name=明星美女', e);
         let { id, name } = e;
@@ -165,6 +181,7 @@
 
         // uni.hideNavigationBarLoading();
         uni.stopPullDownRefresh();
+        isRunning.value = false;
     });
 
     onPageScroll((e) => {
@@ -190,5 +207,11 @@
 
 <style lang="scss" scoped>
     .layout {
+        background-color: #f5f5f5;
+        min-height: 100vh;
+    }
+
+    .query-panel-placeholder {
+        width: 100%;
     }
 </style>
