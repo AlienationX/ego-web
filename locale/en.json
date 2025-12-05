@@ -43,7 +43,8 @@
             "settings": "Settings",
             "exit": "Exit",
             "exitText": "Exit the current account",
-            "appDesc": "Discover more beautiful wallpapers"
+            "appDesc": "Discover more beautiful wallpapers",
+            "login": "Login"
         },
         "settings": {
             "language": "Language",
@@ -83,5 +84,76 @@
         "addImage": "Add Image",
         "imageTip": "{count} selected, max {max} images",
         "maxImagesReached": "Maximum {max} images allowed"
+    },
+    "guide": {
+        "skip": "Skip",
+        "enter": "Get Started",
+        "page1": {
+            "title": "Discover Beautiful Wallpapers",
+            "desc": "Massive HD wallpapers updated daily\nFind your unique style"
+        },
+        "page2": {
+            "title": "Browse by Category",
+            "desc": "Rich category tags\nQuickly find your favorite wallpaper types"
+        },
+        "page3": {
+            "title": "Personal Collection",
+            "desc": "Save your favorite wallpapers\nBuild your exclusive wallpaper library"
+        }
+    },
+    "login": {
+        "title": "Login",
+        "login": "Login",
+        "register": "Register",
+        "usernamePlaceholder": "Username or Email",
+        "emailPlaceholder": "Email Address",
+        "passwordPlaceholder": "Password",
+        "confirmPasswordPlaceholder": "Confirm Password",
+        "rememberMe": "Remember Me",
+        "forgotPassword": "Forgot Password?",
+        "forgotPasswordTip": "Please contact customer service to retrieve your password",
+        "loggingIn": "Logging in...",
+        "registering": "Registering...",
+        "fillAllFields": "Please fill in all fields",
+        "loginSuccess": "Login successful",
+        "loginFailed": "Login failed, please check your credentials",
+        "registerSuccess": "Registration successful",
+        "registerFailed": "Registration failed, please try again later",
+        "usernameError": "Username must be at least 3 characters",
+        "emailError": "Please enter a valid email address",
+        "passwordError": "Password must be at least 6 characters",
+        "confirmPasswordError": "Passwords do not match",
+        "or": "OR",
+        "socialLogin": "Social Login",
+        "wechat": "WeChat",
+        "google": "Google",
+        "apple": "Apple",
+        "wechatLoginFailed": "WeChat login failed",
+        "googleLoginTip": "Google login coming soon",
+        "appleLoginTip": "Apple login coming soon"
+    },
+    "membership": {
+        "title": "Membership",
+        "benefits": "Member Benefits",
+        "benefit1": "Ad-free experience",
+        "benefit2": "Unlimited HD wallpaper downloads",
+        "benefit3": "Exclusive VIP wallpaper library",
+        "benefit4": "Early access to new features",
+        "monthly": "Monthly",
+        "quarterly": "Quarterly",
+        "yearly": "Yearly",
+        "monthlyPeriod": "1 Month",
+        "quarterlyPeriod": "3 Months",
+        "yearlyPeriod": "12 Months",
+        "quarterlySavings": "Save ¥6",
+        "yearlySavings": "Save ¥48",
+        "recommended": "Recommended",
+        "purchase": "Purchase Now",
+        "purchaseTip": "Takes effect immediately, supports auto-renewal",
+        "selectCardFirst": "Please select a membership plan first",
+        "confirmPurchase": "Confirm Purchase",
+        "confirmContent": "Confirm purchase {title} for ¥{price}?",
+        "processing": "Processing...",
+        "purchaseSuccess": "Purchase successful"
     }
 }

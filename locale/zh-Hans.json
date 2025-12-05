@@ -42,7 +42,8 @@
             "settings": "设置",
             "exit": "退出",
             "exitText": "退出当前账号",
-            "appDesc": "发现更多精美壁纸"
+            "appDesc": "发现更多精美壁纸",
+            "login": "登录"
         },
         "settings": {
             "language": "语言",
@@ -82,5 +83,76 @@
         "addImage": "添加图片",
         "imageTip": "已选择 {count} 张，最多可上传 {max} 张",
         "maxImagesReached": "最多只能上传 {max} 张图片"
+    },
+    "guide": {
+        "skip": "跳过",
+        "enter": "立即体验",
+        "page1": {
+            "title": "发现精美壁纸",
+            "desc": "海量高清壁纸，每日更新\n发现属于你的独特风格"
+        },
+        "page2": {
+            "title": "分类浏览",
+            "desc": "丰富的分类标签\n快速找到你喜欢的壁纸类型"
+        },
+        "page3": {
+            "title": "个性化收藏",
+            "desc": "收藏喜欢的壁纸\n打造专属你的壁纸库"
+        }
+    },
+    "login": {
+        "title": "登录",
+        "login": "登录",
+        "register": "注册",
+        "usernamePlaceholder": "请输入用户名或邮箱",
+        "emailPlaceholder": "请输入邮箱地址",
+        "passwordPlaceholder": "请输入密码",
+        "confirmPasswordPlaceholder": "请再次输入密码",
+        "rememberMe": "记住我",
+        "forgotPassword": "忘记密码？",
+        "forgotPasswordTip": "请联系客服找回密码",
+        "loggingIn": "登录中...",
+        "registering": "注册中...",
+        "fillAllFields": "请填写完整信息",
+        "loginSuccess": "登录成功",
+        "loginFailed": "登录失败，请检查账号密码",
+        "registerSuccess": "注册成功",
+        "registerFailed": "注册失败，请稍后重试",
+        "usernameError": "用户名至少3个字符",
+        "emailError": "请输入有效的邮箱地址",
+        "passwordError": "密码至少6个字符",
+        "confirmPasswordError": "两次密码输入不一致",
+        "or": "或",
+        "socialLogin": "第三方登录",
+        "wechat": "微信",
+        "google": "Google",
+        "apple": "Apple",
+        "wechatLoginFailed": "微信登录失败",
+        "googleLoginTip": "Google登录功能开发中",
+        "appleLoginTip": "Apple登录功能开发中"
+    },
+    "membership": {
+        "title": "会员购买",
+        "benefits": "会员特权",
+        "benefit1": "无广告体验，畅享纯净浏览",
+        "benefit2": "无限下载高清壁纸",
+        "benefit3": "专属VIP壁纸库",
+        "benefit4": "优先体验新功能",
+        "monthly": "月卡",
+        "quarterly": "季卡",
+        "yearly": "年卡",
+        "monthlyPeriod": "1个月",
+        "quarterlyPeriod": "3个月",
+        "yearlyPeriod": "12个月",
+        "quarterlySavings": "节省¥6",
+        "yearlySavings": "节省¥48",
+        "recommended": "推荐",
+        "purchase": "立即购买",
+        "purchaseTip": "购买后立即生效，支持自动续费",
+        "selectCardFirst": "请先选择会员套餐",
+        "confirmPurchase": "确认购买",
+        "confirmContent": "确认购买 {title}，价格 ¥{price}？",
+        "processing": "处理中...",
+        "purchaseSuccess": "购买成功"
     }
 }

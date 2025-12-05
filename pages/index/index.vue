@@ -299,7 +299,7 @@
                 justify-content: center;
 
                 .text {
-                    color: #28b389;
+                    color: $wp-theme-color;
                     font-weight: 600;
                     font-size: 28rpx;
                 }
@@ -349,7 +349,7 @@
                 .button {
                     border: 0;
                     font-size: 28rpx;
-                    color: #28b389;
+                    color: $wp-theme-color;
                 }
 
                 .text {

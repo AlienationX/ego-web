@@ -111,7 +111,7 @@
         padding: 0 30rpx 30rpx;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 15rpx;
+        gap: 30rpx;
         background: transparent;
     }
 

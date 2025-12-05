@@ -31,7 +31,7 @@
         right: 30rpx;
         width: 80rpx;
         height: 80rpx;
-        background-color: #28b389;
+        background-color: $wp-theme-color;
         border-radius: 50%;
         display: flex;
         justify-content: center;

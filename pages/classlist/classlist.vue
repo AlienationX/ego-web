@@ -59,7 +59,7 @@
     
     // 占位区域总高度 = menu-bar 高度 + query-panel 高度
     const placeholderHeight = computed(() => {
-        return getNavBarHeight() + queryPanelHeight;
+        return queryPanelHeight;
     });
 
     // 正在执行

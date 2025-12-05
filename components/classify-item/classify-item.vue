@@ -46,8 +46,8 @@
 <style lang="scss" scoped>
     .themeItem {
         .box {
-            height: 340rpx;
-            border-radius: 20rpx;
+            height: 360rpx;
+            border-radius: 15rpx;
             overflow: hidden;
             position: relative;
             // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */

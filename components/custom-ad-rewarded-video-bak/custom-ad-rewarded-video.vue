@@ -59,7 +59,7 @@
         .btn {
             font-size: 28rpx;
             color: #ffffff;
-            background-color: #28b389;
+            background-color: $wp-theme-color;
             // font-weight: bold;
             padding: 0rpx 20rpx;
 

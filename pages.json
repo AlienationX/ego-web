@@ -1,6 +1,14 @@
 {
     "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
         {
+            "path": "pages/guide/guide",
+            "style": {
+                "navigationBarTitleText": "引导页",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/index/index",
             "style": {
                 "navigationBarTitleText": "首页",
@@ -110,7 +118,8 @@
         {
             "path": "pages/login/login",
             "style": {
-                "navigationBarTitleText": "登录"
+                "navigationBarTitleText": "登录",
+                "navigationStyle": "custom"
             }
         },
         {
@@ -132,6 +141,13 @@
             "path": "pages/feedback/feedback",
             "style": {
                 "navigationBarTitleText": "反馈",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/membership/membership",
+            "style": {
+                "navigationBarTitleText": "会员购买",
                 "navigationStyle": "custom"
             }
         }

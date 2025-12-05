@@ -6,8 +6,8 @@
                 <view class="bg-circle circle-1"></view>
                 <view class="bg-circle circle-2"></view>
                 <view class="bg-circle circle-3"></view>
-            </view>
-            
+        </view>
+
             <view class="avater">
                 <image src="/common/images/pics/default_avatar.svg" mode="aspectFill"></image>
                 <view class="avatar-ring"></view>
@@ -23,6 +23,7 @@
             <view v-else class="not-logged-in-content">
                 <view class="app-name">{{ $t('common.appName') }}</view>
                 <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
+                <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
             </view>
         </view>
 
@@ -30,35 +31,35 @@
         <view class="stats-section">
             <view class="stats-card heart-card" @click="toMyFavorite">
                 <view class="card-bg"></view>
-                <view class="stats-icon heart">
-                    <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
-                </view>
-                <view class="stats-content">
+                <view class="stats-row">
+                    <view class="stats-icon heart">
+                        <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
+                    </view>
                     <view class="stats-number">{{ userStore.userinfo.id ? '12' : '0' }}</view>
-                    <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
                 </view>
+                <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
                 <view class="card-decoration decoration-1"></view>
-            </view>
+                        </view>
             <view class="stats-card download-card" @click="toMyDownload">
                 <view class="card-bg"></view>
-                <view class="stats-icon download">
-                    <uni-icons type="download-filled" size="32" color="#28b389"></uni-icons>
-                </view>
-                <view class="stats-content">
+                <view class="stats-row">
+                    <view class="stats-icon download">
+                        <uni-icons type="download-filled" size="32" color="#28b389"></uni-icons>
+                    </view>
                     <view class="stats-number">{{ userStore.userinfo.id ? '3' : '0' }}</view>
-                    <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
                 </view>
+                <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
                 <view class="card-decoration decoration-2"></view>
-            </view>
+                        </view>
             <view class="stats-card star-card" @click="toMyScore">
                 <view class="card-bg"></view>
-                <view class="stats-icon star">
-                    <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
-                </view>
-                <view class="stats-content">
+                <view class="stats-row">
+                    <view class="stats-icon star">
+                        <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
+                    </view>
                     <view class="stats-number">{{ userStore.userinfo.id ? '8' : '0' }}</view>
-                    <view class="stats-label">{{ t('user.profile.myScore') }}</view>
                 </view>
+                <view class="stats-label">{{ t('user.profile.myScore') }}</view>
                 <view class="card-decoration decoration-3"></view>
             </view>
         </view>
@@ -116,6 +117,10 @@
 
     const userStore = useUserStore();
 
+    const toLogin = () => {
+        uni.navigateTo({ url: '/pages/login/login' });
+    };
+
     const toSettings = () => {
         uni.navigateTo({ url: '/pages/settings/settings' });
     };
@@ -140,7 +145,7 @@
 
     const toSubscribe = () => {
         uni.navigateTo({
-            url: '/pages/notice/detail?id=1&name=订阅更新'
+            url: '/pages/membership/membership'
         });
     };
 
@@ -180,13 +185,17 @@
         }
     ]);
 
+    const toMembership = () => {
+        uni.navigateTo({ url: '/pages/membership/membership' });
+    };
+
     const sysMenus = computed(() => [
         {
             left_icon: 'vip-filled',
             left_text: t('user.profile.subscription'),
             right_text: '',
             right_icon: 'right',
-            click: toSubscribe
+            click: toMembership
         },
         {
             left_icon: 'help-filled',
@@ -263,7 +272,7 @@
                     position: absolute;
                     border-radius: 50%;
                     opacity: 0.05;
-                    background: linear-gradient(135deg, #28b389 0%, #20a078 100%);
+                    background: linear-gradient(135deg, $wp-theme-color 0%, darken($wp-theme-color, 8%) 100%);
                 }
 
                 .circle-1 {
@@ -311,7 +320,7 @@
                     height: 100%;
                     border-radius: 50%;
                     border: 4rpx solid transparent;
-                    border-top-color: #28b389;
+                    border-top-color: $wp-theme-color;
                     border-right-color: #ff6b9d;
                     animation: rotate 3s linear infinite;
                 }
@@ -355,6 +364,32 @@
             .app-desc {
                 font-size: 28rpx;
                 color: #999;
+                margin-bottom: 40rpx;
+            }
+
+            .login-btn {
+                margin-top: 20rpx;
+                width: 300rpx;
+                height: 80rpx;
+                background: $wp-theme-color;
+                color: #fff;
+                font-size: 32rpx;
+                font-weight: 600;
+                border-radius: 40rpx;
+                border: none;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s;
+
+                &:active {
+                    background: darken($wp-theme-color, 5%);
+                    transform: scale(0.95);
+                }
+
+                &::after {
+                    border: none;
+                }
             }
         }
 
@@ -368,10 +403,9 @@
                 flex: 1;
                 background: #fff;
                 border-radius: 20rpx;
-                padding: 35rpx 20rpx;
+                padding: 30rpx 20rpx 24rpx;
                 display: flex;
                 flex-direction: column;
-                align-items: center;
                 position: relative;
                 overflow: hidden;
                 transition: all 0.3s;
@@ -414,10 +448,10 @@
 
                 &.download-card {
                     .card-bg {
-                        background: linear-gradient(135deg, rgba(40, 179, 137, 0.1) 0%, rgba(40, 179, 137, 0.05) 100%);
+                        background: linear-gradient(135deg, rgba($wp-theme-color, 0.1) 0%, rgba($wp-theme-color, 0.05) 100%);
                     }
                     .decoration-2 {
-                        background: #28b389;
+                        background: $wp-theme-color;
                         bottom: -30rpx;
                         left: -30rpx;
                     }
@@ -438,14 +472,23 @@
                     opacity: 1;
                 }
 
+                .stats-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 16rpx;
+                    position: relative;
+                    z-index: 1;
+                }
+
                 .stats-icon {
-                    width: 90rpx;
-                    height: 90rpx;
+                    width: 64rpx;
+                    height: 64rpx;
                     border-radius: 50%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    margin-bottom: 24rpx;
+                    flex-shrink: 0;
                     position: relative;
                     z-index: 1;
                     transition: all 0.3s;
@@ -456,8 +499,8 @@
                     }
 
                     &.download {
-                        background: linear-gradient(135deg, rgba(40, 179, 137, 0.15) 0%, rgba(40, 179, 137, 0.08) 100%);
-                        box-shadow: 0 4rpx 12rpx rgba(40, 179, 137, 0.2);
+                        background: linear-gradient(135deg, rgba($wp-theme-color, 0.15) 0%, rgba($wp-theme-color, 0.08) 100%);
+                        box-shadow: 0 4rpx 12rpx rgba($wp-theme-color, 0.2);
                     }
 
                     &.star {
@@ -470,29 +513,27 @@
                     transform: scale(1.1);
                 }
 
-                .stats-content {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
+                .stats-number {
+                    font-size: 40rpx;
+                    font-weight: 700;
+                    background: linear-gradient(135deg, #333 0%, #666 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    line-height: 1.2;
+                    flex: 1;
+                    text-align: right;
+                    padding-right: 8rpx;
+                }
+
+                .stats-label {
+                    font-size: 24rpx;
+                    color: #999;
+                    font-weight: 500;
+                    text-align: right;
                     position: relative;
                     z-index: 1;
-
-                    .stats-number {
-                        font-size: 42rpx;
-                        font-weight: 700;
-                        background: linear-gradient(135deg, #333 0%, #666 100%);
-                        -webkit-background-clip: text;
-                        -webkit-text-fill-color: transparent;
-                        background-clip: text;
-                        margin-bottom: 10rpx;
-                        line-height: 1.2;
-                    }
-
-                    .stats-label {
-                        font-size: 24rpx;
-                        color: #999;
-                        font-weight: 500;
-                    }
+                    margin-top: 4rpx;
                 }
             }
         }

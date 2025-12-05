@@ -80,6 +80,22 @@ export const apiPostLoginByWechat = (data = {}) => {
     });
 };
 
+export const apiPostLogin = (data = {}) => {
+    return request({
+        url: '/login/',
+        data,
+        method: 'POST'
+    });
+};
+
+export const apiPostRegister = (data = {}) => {
+    return request({
+        url: '/register/',
+        data,
+        method: 'POST'
+    });
+};
+
 // 不使用，暂时注释
 // export const apiGetUserInfo = (id = '') => {
 //     return request({

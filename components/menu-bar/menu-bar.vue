@@ -13,11 +13,11 @@
                 </view>
             </view>
 
-            <view class="right">
+            <!-- <view class="right">
                 <view class="menu" @click="toggleMenu">
                     <uni-icons type="more-filled" size="20" color="#666"></uni-icons>
                 </view>
-            </view>
+            </view> -->
         </view>
     </view>
     
@@ -136,11 +136,11 @@
                         transform: scale(0.95);
                     }
                 }
+                }
             }
         }
-    }
 
-    .fill {
+        .fill {
         // 占位区域，避免内容被导航栏遮挡
         width: 100%;
     }

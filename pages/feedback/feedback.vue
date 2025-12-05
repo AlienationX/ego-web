@@ -287,26 +287,28 @@
                         display: flex;
                         gap: 20rpx;
                         flex-wrap: wrap;
+                        justify-content: flex-start;
                         
                         .type-item {
-                            flex: 1;
-                            min-width: 180rpx;
-                            padding: 24rpx 30rpx;
+                            padding: 12rpx 24rpx;
                             text-align: center;
-                            border-radius: 16rpx;
-                            font-size: 28rpx;
+                            border-radius: 40rpx;
+                            font-size: 26rpx;
                             color: #666;
-                            background: #fff;
+                            background: #e8e8e8;
+                            border: 2rpx solid transparent;
                             transition: all 0.3s;
+                            white-space: nowrap;
                             
                             &:active {
-                                transform: scale(0.98);
+                                opacity: 0.8;
                             }
                             
                             &.active {
-                                background: #28b389;
                                 color: #fff;
-                                font-weight: 500;
+                                background: $wp-theme-color;
+                                border-color: $wp-theme-color;
+                                font-weight: 600;
                             }
                         }
                     }
@@ -314,16 +316,18 @@
                     .textarea {
                         width: 100%;
                         min-height: 320rpx;
-                        padding: 24rpx;
-                        border-radius: 16rpx;
+                        padding: 20rpx 0;
+                        border-radius: 0;
                         font-size: 28rpx;
                         color: #333;
-                        background: #fff;
+                        background: transparent;
+                        border-bottom: 2rpx solid #e0e0e0;
                         box-sizing: border-box;
                         line-height: 1.8;
+                        transition: all 0.3s;
                         
                         &:focus {
-                            background: #fff;
+                            border-bottom-color: $wp-theme-color;
                         }
                     }
                     
@@ -337,19 +341,21 @@
                     .input {
                         width: 100%;
                         min-height: 88rpx;
-                        padding: 24rpx;
-                        border-radius: 16rpx;
+                        padding: 20rpx 0;
+                        border-radius: 0;
                         font-size: 28rpx;
                         color: #333;
-                        background: #fff;
+                        background: transparent;
+                        border-bottom: 2rpx solid #e0e0e0;
                         box-sizing: border-box;
                         position: relative;
                         z-index: 2;
                         -webkit-user-select: text;
                         user-select: text;
+                        transition: all 0.3s;
                         
                         &:focus {
-                            background: #fff;
+                            border-bottom-color: $wp-theme-color;
                         }
                     }
                     
@@ -363,8 +369,9 @@
                                 position: relative;
                                 width: 200rpx;
                                 height: 200rpx;
-                                border-radius: 16rpx;
+                                border-radius: 0;
                                 overflow: hidden;
+                                border: 2rpx solid #e0e0e0;
                                 
                                 .image-preview {
                                     width: 100%;
@@ -378,7 +385,7 @@
                                     width: 48rpx;
                                     height: 48rpx;
                                     background: rgba(0, 0, 0, 0.6);
-                                    border-radius: 50%;
+                                    border-radius: 0;
                                     display: flex;
                                     align-items: center;
                                     justify-content: center;
@@ -388,13 +395,13 @@
                             .image-add {
                                 width: 200rpx;
                                 height: 200rpx;
-                                border-radius: 16rpx;
-                                background: #fff;
+                                border-radius: 0;
+                                background: transparent;
                                 display: flex;
                                 flex-direction: column;
                                 align-items: center;
                                 justify-content: center;
-                                border: 2rpx dashed #ddd;
+                                border: 2rpx solid #e0e0e0;
                                 
                                 .add-text {
                                     margin-top: 12rpx;
@@ -403,7 +410,8 @@
                                 }
                                 
                                 &:active {
-                                    background: #f8f8f8;
+                                    border-color: $wp-theme-color;
+                                    background: rgba($wp-theme-color, 0.05);
                                 }
                             }
                         }
@@ -423,22 +431,20 @@
                         width: 100%;
                         height: 96rpx;
                         line-height: 96rpx;
-                        background: #28b389;
+                        background: $wp-theme-color;
                         color: #fff;
                         font-size: 32rpx;
-                        font-weight: 500;
-                        border-radius: 16rpx;
+                        font-weight: 600;
+                        border-radius: 48rpx;
                         border: none;
                         
                         &:active {
                             opacity: 0.9;
-                            transform: scale(0.99);
                         }
                         
                         &:disabled {
                             background: #d0d0d0;
                             opacity: 1;
-                            transform: none;
                         }
                         
                         &::after {

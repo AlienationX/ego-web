@@ -111,22 +111,28 @@
             padding: 12rpx 12rpx;
 
             button {
-                padding: 0rpx 20rpx;
-                background-color: #f8f8f8;
-                // font-weight: bold;
-
-                border: none;
+                padding: 12rpx 24rpx;
+                text-align: center;
                 border-radius: 40rpx;
+                font-size: 26rpx;
+                color: #666;
+                background: #e8e8e8;
+                border: 2rpx solid transparent;
+                transition: all 0.3s;
+                white-space: nowrap;
                 margin-right: 10rpx;
                 display: flex;
                 align-items: center;
-                // gap: 5rpx;
-                // transition: background-color 0.3s ease, color 0.3s ease;
+
+                &:active {
+                    opacity: 0.8;
+                }
 
                 &.active {
-                    color: #ffffff;
-                    background-color: #28b389;
-                    font-weight: bold;
+                    color: #fff;
+                    background: $wp-theme-color;
+                    border-color: $wp-theme-color;
+                    font-weight: 600;
                 }
 
                 .icon {
@@ -150,7 +156,7 @@
                 margin-right: 20rpx;
                 width: 40rpx;
                 height: 40rpx;
-                fill: #28b389;
+                fill: $wp-theme-color;
             }
 
             image {

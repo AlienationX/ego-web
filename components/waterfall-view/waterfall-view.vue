@@ -188,7 +188,7 @@
                 }
             
                 .price {
-                    color: #28b389;
+                    color: $wp-theme-color;
                     font-size: 30rpx;
                     font-weight: bold;
                     margin-top: 6rpx;

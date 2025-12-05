@@ -99,7 +99,7 @@
             .btn {
                 font-size: 32rpx;
                 color: #ffffff;
-                background-color: #28b389;
+                background-color: $wp-theme-color;
                 font-weight: bold;
                 margin: 20rpx 20rpx;
                 width: 100%;

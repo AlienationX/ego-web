@@ -85,7 +85,7 @@
                 &:last-child {
                     margin-bottom: 0;
                 }
-                
+
                 .left {
                     display: flex;
                     align-items: center;
