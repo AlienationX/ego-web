@@ -56,6 +56,11 @@
                             "applinks:static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com"
                         ]
                     }
+                },
+                "infoPlist" : {
+                    "NSPhotoLibraryUsageDescription" : "为了上传反馈图片，需要访问您的相册权限",
+                    "NSPhotoLibraryAddUsageDescription" : "为了保存反馈图片，需要访问您的相册权限",
+                    "NSCameraUsageDescription" : "为了拍摄反馈图片，需要访问您的相机权限"
                 }
             },
             /* SDK配置 */

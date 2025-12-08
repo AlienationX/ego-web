@@ -83,7 +83,11 @@
         "images": "Screenshots (Optional)",
         "addImage": "Add Image",
         "imageTip": "{count} selected, max {max} images",
-        "maxImagesReached": "Maximum {max} images allowed"
+        "maxImagesReached": "Maximum {max} images allowed",
+        "permissionTitle": "Need Photo Library Access",
+        "permissionContent": "To upload feedback images, we need access to your photo library. Please enable photo library permission in Settings.",
+        "goToSettings": "Go to Settings",
+        "imageSelectFailed": "Failed to select image"
     },
     "guide": {
         "skip": "Skip",

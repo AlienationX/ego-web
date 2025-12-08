@@ -82,7 +82,11 @@
         "images": "截图（选填）",
         "addImage": "添加图片",
         "imageTip": "已选择 {count} 张，最多可上传 {max} 张",
-        "maxImagesReached": "最多只能上传 {max} 张图片"
+        "maxImagesReached": "最多只能上传 {max} 张图片",
+        "permissionTitle": "需要访问相册",
+        "permissionContent": "为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。",
+        "goToSettings": "去设置",
+        "imageSelectFailed": "选择图片失败"
     },
     "guide": {
         "skip": "跳过",

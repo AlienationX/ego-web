@@ -148,8 +148,14 @@
             return;
         }
 
+        // 直接选择图片，系统会自动处理权限请求
+        selectImage(remaining);
+    };
+
+    // 选择图片的具体实现
+    const selectImage = (count) => {
         uni.chooseImage({
-            count: remaining,
+            count: count,
             sizeType: ['compressed'], // 压缩图片
             sourceType: ['camera', 'album'], // 可以从相机或相册选择
             success: (res) => {
@@ -158,6 +164,74 @@
             },
             fail: (err) => {
                 console.error('选择图片失败:', err);
+                // 处理权限被拒绝的情况
+                // #ifdef APP-PLUS
+                // App 端：检查是否是权限问题
+                const errMsg = err.errMsg || '';
+                if (errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
+                    uni.showModal({
+                        title: t('feedback.permissionTitle') || '需要访问相册',
+                        content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                        confirmText: t('feedback.goToSettings') || '去设置',
+                        cancelText: t('common.cancel') || '取消',
+                        success: (res) => {
+                            if (res.confirm) {
+                                // App 端打开系统设置
+                                // #ifdef APP-PLUS
+                                if (typeof plus !== 'undefined' && plus.runtime) {
+                                    plus.runtime.openURL('app-settings:');
+                                } else {
+                                    // 如果 plus 不可用，尝试使用 uni.openSetting（小程序端）
+                                    uni.openSetting();
+                                }
+                                // #endif
+                            }
+                        }
+                    });
+                } else {
+                    uni.showToast({
+                        title: t('feedback.imageSelectFailed') || '选择图片失败',
+                        icon: 'none'
+                    });
+                }
+                // #endif
+                
+                // #ifdef MP
+                // 小程序端：使用 openSetting
+                if (err.errMsg && (err.errMsg.includes('permission') || err.errMsg.includes('权限'))) {
+                    uni.showModal({
+                        title: t('feedback.permissionTitle') || '需要访问相册',
+                        content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                        confirmText: t('feedback.goToSettings') || '去设置',
+                        cancelText: t('common.cancel') || '取消',
+                        success: (res) => {
+                            if (res.confirm) {
+                                uni.openSetting({
+                                    success: (settingRes) => {
+                                        if (settingRes.authSetting['scope.album']) {
+                                            // 权限已开启，重新选择图片
+                                            selectImage(count);
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    uni.showToast({
+                        title: t('feedback.imageSelectFailed') || '选择图片失败',
+                        icon: 'none'
+                    });
+                }
+                // #endif
+                
+                // #ifndef APP-PLUS || MP
+                // 其他平台直接显示错误提示
+                uni.showToast({
+                    title: t('feedback.imageSelectFailed') || '选择图片失败',
+                    icon: 'none'
+                });
+                // #endif
             }
         });
     };
