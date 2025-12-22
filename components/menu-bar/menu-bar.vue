@@ -2,7 +2,7 @@
     <!-- 状态栏背景遮挡 -->
     <view class="status-bar-bg" :style="{ height: getStatusBarHeight() + 'px' }"></view>
     
-    <view class="box" :style="{ top: getStatusBarHeight() + 'px' }">
+    <view class="box" :style="{ top: getStatusBarHeight() + 'px', height: getTitleBarHeight() + 'px' }">
         <view class="navbar">
             <view class="left">
                 <view class="back" @click="goBack">
@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-    import { getStatusBarHeight, getNavBarHeight } from '@/utils/system.js';
+    import { getStatusBarHeight, getNavBarHeight, getTitleBarHeight } from '@/utils/system.js';
 
     const goBack = () => {
         uni.navigateBack({
@@ -73,12 +73,14 @@
         width: 100%;
         z-index: 100;
         background: #f5f5f5;
+        display: flex;
+        justify-content: left;
+        align-items: center;
 
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 88rpx;
             padding: 0 30rpx;
 
             .left {

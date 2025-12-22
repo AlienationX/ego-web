@@ -1,5 +1,5 @@
 <template>
-    <view class="queryPanel" :style="{ top: top }">
+    <view class="queryPanel" :style="{ top: top , height: height + 'rpx' }">
         <view class="left">
             <button size="mini" plain :class="{ active: activeButton === 'recommend' }" @click="onRecommend">{{ $t('common.recommend') }}</button>
             <button size="mini" plain :class="{ active: activeButton === 'score' }" @click="onScore">{{ $t('common.score') }}</button>
@@ -46,6 +46,8 @@
     // const emit = defineEmits(['recommend', 'score', 'dateSort', 'change']);
     const emit = defineEmits(['onQuery']);
 
+    // 组件高度，默认76rpx
+    const height = ref('76');
     // 激活按钮
     const activeButton = ref('');
     // 时间排序按钮
@@ -85,7 +87,8 @@
 
     // 暴露方法给父组件
     defineExpose({
-        reset
+        reset,
+        height
     });
 </script>
 
@@ -99,11 +102,10 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 2rpx 8rpx;
-        border-top: 1rpx solid #e0e0e0;
+        // padding: 2rpx 8rpx;
+        // border-top: none;
         // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
-        // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
-        box-shadow: 0 0 8rpx rgba(0, 0, 0, 0.25);
+        box-shadow: 0 8rpx 8rpx -4rpx rgba(0, 0, 0, 0.1);
 
         .left {
             display: flex;

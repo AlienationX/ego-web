@@ -6,7 +6,7 @@
                 <view class="bg-circle circle-1"></view>
                 <view class="bg-circle circle-2"></view>
                 <view class="bg-circle circle-3"></view>
-        </view>
+            </view>
 
             <view class="avater">
                 <image src="/common/images/pics/default_avatar.svg" mode="aspectFill"></image>
@@ -113,6 +113,7 @@
     import { getStatusBarHeight } from '@/utils/system.js';
     import { useUserStore } from '@/stores/user.js';
     import { useI18n } from 'vue-i18n';
+    
     const { t } = useI18n();
 
     const userStore = useUserStore();

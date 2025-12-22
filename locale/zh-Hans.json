@@ -18,7 +18,9 @@
         "publishDate": "发布日期",
         "hotSearch": "热门搜索",
         "recentSearch": "最近搜索",
-        "noResult": "抱歉，没有找到您想要的搜索结果"
+        "noResult": "抱歉，没有找到您想要的搜索结果",
+        "clearHistory": "是否清空历史搜索？",
+        "hotKeywords": "美女,帅哥,宠物,卡通"
     },
     "index": {
         "title": "推荐",
@@ -28,7 +30,8 @@
     },
     "category": {
         "title": "分类",
-        "desc": "探索更多精美壁纸分类"
+        "desc": "探索更多精美壁纸分类",
+        "empty": "加载分类数据中..."
     },
     "user": {
         "profile": {

@@ -54,7 +54,8 @@
 </template>
 
 <script setup>
-    import { ref, onMounted, computed } from 'vue';
+    import { ref, computed } from 'vue';
+    import { onLoad } from '@dcloudio/uni-app';
     import { useI18n } from 'vue-i18n';
 
     const { t } = useI18n();
@@ -110,15 +111,22 @@
         });
     };
 
-    onMounted(() => {
+    const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
+    if (hasSeenGuide) {
+        // 已看过，直接跳转到首页
+        uni.reLaunch({
+            url: '/pages/index/index'
+        });
+    }
+    onLoad(() => {
         // 检查是否已看过引导页
-        const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
-        if (hasSeenGuide) {
-            // 已看过，直接跳转到首页
-            uni.reLaunch({
-                url: '/pages/index/index'
-            });
-        }
+        // const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
+        // if (hasSeenGuide) {
+        //     // 已看过，直接跳转到首页
+        //     uni.reLaunch({
+        //         url: '/pages/index/index'
+        //     });
+        // }
     });
 </script>
 
@@ -205,7 +213,7 @@
 
     .skip-btn {
         position: fixed;
-        top: calc(env(safe-area-inset-top) + 40rpx);
+        top: calc(env(safe-area-inset-top) + 60rpx);
         right: 40rpx;
         padding: 16rpx 32rpx;
         background: rgba(255, 255, 255, 0.2);

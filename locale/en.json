@@ -18,7 +18,9 @@
         "publishDate": "Date",
         "hotSearch": "Hot search",
         "recentSearch": "Recnet search",
-        "noResult": "Sorry, it's empty here."
+        "noResult": "Sorry, it's empty here.",
+        "clearHistory": "Clear search history?",
+        "hotKeywords": "美女,帅哥,宠物,卡通"  // "Beauty,Handsome,Pets,Cartoon"
     },
     "index": {
         "title": "Recommend",
@@ -29,7 +31,8 @@
     },
     "category": {
         "title": "Category",
-        "desc": "Explore more beautiful wallpaper categories"
+        "desc": "Explore more beautiful wallpaper categories",
+        "empty": "Loading category data..."
     },
     "user": {
         "profile": {

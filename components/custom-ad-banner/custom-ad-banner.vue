@@ -38,11 +38,11 @@
 
 <style lang="scss" scoped>
     .content {
-        // background-color: #DBDBDB;
+        background-color: #f5f5f5;
         // padding: 0rpx 30rpx 20rpx;
 
         .ad-view {
-            background-color: #ffffff;
+            // background-color: #ffffff;
         }
     }
 </style>

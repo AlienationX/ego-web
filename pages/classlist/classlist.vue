@@ -4,34 +4,21 @@
             <template #title>{{ props.name || '分类列表' }}</template>
         </menu-bar>
         
-        <query-panel v-if="classList.length" @onQuery="onQuery" :top="queryPanelTop" />
+        <query-panel ref="queryPanelRef" v-if="classList.length" @onQuery="onQuery" :top="getNavBarHeight() + 'px'" />
         
-        <!-- query-panel 占位区域，避免内容被遮挡 -->
-        <view class="query-panel-placeholder" v-if="classList.length" :style="{ height: placeholderHeight + 'px' }"></view>
+        <!-- 内容区域，使用 margin-top/padding-top 代替占位容器 -->
+        <view class="content-wrapper" :style="{ marginTop: queryPanelHeight + 'rpx'}">
+            <pics-view :classList="classList"></pics-view>
+            
+            <view class="loadingLayout" v-show="noData || isRunning">
+                <uni-load-more :status="noData ? 'noMore' : 'loading'"></uni-load-more>
+            </view>
 
-        <!-- <view class="content">
-            <navigator :url="'/pages/preview/preview?id='+item.id" class="item" v-for="item in classList"
-                :key="item.id">
-                <image :src="item.smallPicurl" mode="aspectFill"></image>
-            </navigator>
-        </view> -->
-        
-        <!-- <window-view :classList="classList"></window-view> -->
-    
-        <!-- 使用v-if切换会重新渲染 waterfall-view 并返回到顶部，所以封装到一个组件中 pics-view -->
-        <!-- <window-view v-if="settingsStore.options.view === 'window'" :classList="classList"></window-view>
-        <waterfall-view v-else :classList="classList"></waterfall-view> -->
-        
-        <pics-view :classList="classList"></pics-view>
-        
-        <view class="loadingLayout" v-show="noData || isRunning">
-            <uni-load-more :status="noData ? 'noMore' : 'loading'"></uni-load-more>
+            <back-to-top ref="backToTopRef"></back-to-top>
+
+            <!-- 安全区域，主要针对手机上的home键上方的区域 -->
+            <view class="safe-area-inset-bottom"></view>
         </view>
-
-        <back-to-top ref="backToTopRef"></back-to-top>
-
-        <!-- 安全区域，主要针对手机上的home键上方的区域 -->
-        <view class="safe-area-inset-bottom"></view>
     </view>
 </template>
 
@@ -45,22 +32,8 @@
 
     const settingsStore = useSettingsStore();
 
-    const picsViewRef = ref(null);
+    const queryPanelRef = ref(null);
     const backToTopRef = ref(null);
-
-    // query-panel 的 top 位置，固定在 menu-bar 下方
-    const queryPanelTop = computed(() => {
-        return getNavBarHeight() + 'px';
-    });
-
-    // query-panel 的高度（padding: 2rpx 8rpx, left height: 48rpx, left padding: 12rpx 12rpx）
-    // 总高度 = 2 + 12 + 48 + 12 + 2 = 76rpx ≈ 38px
-    const queryPanelHeight = 38;
-    
-    // 占位区域总高度 = menu-bar 高度 + query-panel 高度
-    const placeholderHeight = computed(() => {
-        return queryPanelHeight;
-    });
 
     // 正在执行
     const isRunning = ref(false);
@@ -71,6 +44,17 @@
     const classList = ref([]);
     // 搜索结果临时列表，主要是为了解决 filter 按钮切换导致 图片列表 有1秒的空白的问题
     const pendingList = ref([]);
+
+    // 定义一个计算属性来安全地计算 marginTop
+    const queryPanelHeight = computed(() => {
+        // 如果 classList 为空，则 marginTop 为 '0'
+        if (!classList.value.length) {
+            return '0';
+        }
+        // 如果 classList 不为空，但子组件尚未挂载或未暴露 height，则安全地访问
+        // 可选链操作符 ?. 可以确保当 queryPanelRef.value 为 null/undefined 时不报错
+        return queryPanelRef.value?.height || 0;
+    });
 
     // UniApp 会将 URL 中的参数自动注入到 props
     const props = defineProps({
@@ -154,6 +138,7 @@
             return;
         }
 
+        // 获取数据
         getClassList();
     });
 
@@ -211,7 +196,5 @@
         min-height: 100vh;
     }
 
-    .query-panel-placeholder {
-        width: 100%;
-    }
+
 </style>

@@ -14,8 +14,15 @@
         </view>
 
         <!-- 加载状态 -->
-        <view v-if="!classifyList.length">
-            <rotate-loading style="min-height: 60vh"></rotate-loading>
+        <view v-if="isLoading" class="loading-container">
+            <rotate-loading :size="100" color="#28B389"></rotate-loading>
+            <view class="loading-text">{{ $t('message.loading') }}</view>
+        </view>
+
+        <!-- 空状态 -->
+        <view v-else-if="!classifyList.length" class="empty-container">
+            <view class="empty-icon">📂</view>
+            <view class="empty-text">{{ $t('category.empty') }}</view>
         </view>
 
         <!-- 分类网格 -->
@@ -36,6 +43,7 @@
     import { handlePicUrl } from '@/utils/common.js';
 
     const classifyList = ref([]);
+    const isLoading = ref(true); // 添加加载状态变量
     const classifyComputed = computed(() => {
         return classifyList.value.map((item) => ({
             ...item,
@@ -44,11 +52,18 @@
     });
 
     const getClassify = async () => {
-        let res = await apiGetClassify({
-            // 该参数无效，接口默认就是显示全部分类
-            pageSize: 30
-        });
-        classifyList.value = res.data.map((item) => handlePicUrl(item));
+        try {
+            isLoading.value = true;
+            let res = await apiGetClassify({
+                // 该参数无效，接口默认就是显示全部分类
+                pageSize: 30
+            });
+            classifyList.value = res.data.map((item) => handlePicUrl(item));
+        } catch (error) {
+            console.error('获取分类数据失败:', error);
+        } finally {
+            isLoading.value = false;
+        }
     };
 
     getClassify();
@@ -118,5 +133,42 @@
     .ad-row {
         grid-column: 1 / -1;
         height: 100%;
+    }
+
+    // 加载状态样式
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 40rpx 0;
+
+        .loading-text {
+            margin-top: 30rpx;
+            font-size: 28rpx;
+            color: #666;
+        }
+    }
+
+    // 空状态样式
+    .empty-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        padding: 40rpx 0;
+
+        .empty-icon {
+            font-size: 100rpx;
+            margin-bottom: 20rpx;
+            opacity: 0.6;
+        }
+
+        .empty-text {
+            font-size: 28rpx;
+            color: #999;
+        }
     }
 </style>

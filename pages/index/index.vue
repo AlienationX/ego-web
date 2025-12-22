@@ -365,7 +365,9 @@
             // }
             .btn {
                 padding: 0rpx 16rpx;
-                background-color: $uni-bg-color-grey;
+                // background-color: $uni-bg-color-grey;
+                color: #666;
+                background: $uni-bg-color-grey;
                 height: 42rpx;
 
                 border: none;
@@ -375,10 +377,28 @@
                 // gap: 5rpx;
                 // transition: background-color 0.3s ease, color 0.3s ease;
 
+                // 修复uni-app按钮圆角边框显示问题
+                &::after {
+                    border: none;
+                }
+
+                // &:active {
+                //     opacity: 0.8;
+                // }
+                // &.active {
+                //     color: #f5f5f5;
+                //     background-color: $wp-theme-color;
+                //     //     font-weight: bold;
+                // }
                 &.active {
-                    color: #ffffff;
-                    background-color: $wp-theme-color;
-                    //     font-weight: bold;
+                    color: #fff;
+                    background: $wp-theme-color;
+                    border: none;
+                    
+                    // 确保激活状态下也不显示边框
+                    &::after {
+                        border: none;
+                    }
                 }
             }
 

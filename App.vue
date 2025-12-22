@@ -1,5 +1,7 @@
 <script>
+    import permissionListener from "@/uni_modules/c-permission-listener"; 
     import { writeAccessLog } from '@/utils/system.js';
+    import { permissionEnums } from '@/common/app_permission.js';
 
     export default {
         onLaunch: function () {
@@ -26,10 +28,30 @@
 
         onShow: function () {
             console.log('App Show');
+
+            // permissionEnums枚举建议单独一个js文件，然后引入
+            // const permissionEnums = {
+            //     // 取android.permission.ACCESS_COARSE_LOCATION后面那个
+            //     "ACCESS_COARSE_LOCATION": {
+            //         name: "定位", // 当前权限的名称
+            //         explain: "展示附近店铺、填写收货地址等相关功能"       // 权限说明
+            //     },
+            //     "CALL_PHONE,READ_PHONE_STATE": {
+            //         name: "电话", // 当前权限的名称
+            //         explain: "拨打电话"     // 权限说明
+            //     },
+            //     "WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,READ_MEDIA_IMAGES": {
+            //         name: "存储", // 当前权限的名称
+            //         explain: "上传头像完善个人信息"       // 权限说明
+            //     }
+            // }
+            // 唤起权限会触发onHide，所以listenerFunc须在onShow生命周期调用
+            permissionListener && permissionListener.listenerFunc(permissionEnums);
         },
 
         onHide: function () {
             console.log('App Hide');
+            permissionListener && permissionListener.stopFunc();
         }
     };
 </script>

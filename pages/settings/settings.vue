@@ -43,6 +43,10 @@
 
     const swithTheme = () => {
         settingsStore.options.theme = settingsStore.options.theme === 'light' ? 'dark' : 'light';
+        uni.showToast({
+            title: settingsStore.options.theme,
+            icon: 'none'
+        })
     };
 
     const settings = computed(() => [
