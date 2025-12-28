@@ -25,7 +25,7 @@
             <view class="center">
                 <swiper vertical interval="1500" duration="300" autoplay circular>
                     <swiper-item v-for="item in noticeList" :key="item.id">
-                        <navigator :url="`/pages/notice/detail?id=${item.id}`">
+                        <navigator :url="`/pages/notice/detail?id=${item.id}&name=${item.title}`">
                             {{ item.title }}
                         </navigator>
                     </swiper-item>

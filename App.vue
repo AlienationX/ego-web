@@ -6,6 +6,15 @@
     export default {
         onLaunch: function () {
             console.log('App Launch');
+            
+            // 检查是否已看过引导页
+            const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
+            if (!hasSeenGuide) {
+                // 未看过引导页，跳转到引导页
+                uni.reLaunch({
+                    url: '/pages/guide/guide'
+                });
+            }
 
             // uni.getProvider({
             //     service: 'oauth',

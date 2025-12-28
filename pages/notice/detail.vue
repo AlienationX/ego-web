@@ -1,7 +1,8 @@
 <template>
     <view class="layout">
-        <menu-bar class="menubar">
-            <template #title>{{ props.name }}</template>
+        <menu-bar class="menubar" :show-border="true" :show-toggle-menu="true">
+            <!-- <template #title>{{ props.name }}</template> -->
+            <template #title>{{ $t('index.notice') }}</template>
             <template #menuBtn></template>
         </menu-bar>
 

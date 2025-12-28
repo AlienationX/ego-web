@@ -67,17 +67,17 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
+                    "bz" : {},
+                    "fl" : {},
+                    "jl" : {},
+                    "yt" : {},
                     "gg" : {},
                     "pg" : {},
-                    "bz" : {},
                     "unity" : {},
                     "liftoff" : {},
                     "inmobi" : {},
                     "ironsource" : {},
                     "mintegral" : {},
-                    "fl" : {},
-                    "jl" : {},
-                    "yt" : {},
                     "applovin" : {}
                 },
                 "oauth" : {

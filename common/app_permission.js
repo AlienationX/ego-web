@@ -20,12 +20,6 @@ export const permissionEnums = {
     // READ_MEDIA_VIDEO: 读取相册视频
     // READ_MEDIA_AUDIO: 读取相册音频
 
-    "WRITE_EXTERNAL_STORAGE": {
-        // 提示：${name}权限使用说明
-        // 将获取${name}权限，用于${explain}
-        name: "存储", // 当前权限的名称, 
-        explain: "下载壁纸到本地存储"       // 权限说明
-    },
     "CAMERA": {
         name: "相机",
         explain: "拍照上传图片进行反馈和沟通"
@@ -33,5 +27,11 @@ export const permissionEnums = {
     "READ_MEDIA_IMAGES": {
         name: "相册",
         explain: "上传图片进行反馈和沟通"
-    }
+    },
+    "WRITE_EXTERNAL_STORAGE": {
+        // 提示：${name}权限使用说明
+        // 将获取${name}权限，用于${explain}
+        name: "存储", // 当前权限的名称, 
+        explain: "下载壁纸到本地存储"       // 权限说明
+    },
 }

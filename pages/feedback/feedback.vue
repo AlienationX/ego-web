@@ -1,6 +1,6 @@
 <template>
     <view class="layout">
-        <menu-bar>
+        <menu-bar :showBorder="true">
             <template #title>{{ t('feedback.title') }}</template>
         </menu-bar>
         

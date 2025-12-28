@@ -1,32 +1,46 @@
 <template>
-    <!-- 状态栏背景遮挡 -->
-    <view class="status-bar-bg" :style="{ height: getStatusBarHeight() + 'px' }"></view>
-    
-    <view class="box" :style="{ top: getStatusBarHeight() + 'px', height: getTitleBarHeight() + 'px' }">
-        <view class="navbar">
-            <view class="left">
-                <view class="back" @click="goBack">
-                    <uni-icons type="back" color="#333" size="20"></uni-icons>
+    <view class="menu-bar-container">
+        <!-- 状态栏背景遮挡 -->
+        <view class="status-bar-bg" :style="{ height: getStatusBarHeight() + 'px' }"></view>
+        
+        <view class="box" :class="{ 'with-border': showBorder }" :style="{ top: getStatusBarHeight() + 'px', height: getTitleBarHeight() + 'px' }">
+            <view class="navbar">
+                <view class="left">
+                    <view class="back" @click="goBack">
+                        <uni-icons type="back" color="#333" size="20"></uni-icons>
+                    </view>
+                    <view class="title">
+                        <slot name="title"></slot>
+                    </view>
                 </view>
-                <view class="title">
-                    <slot name="title"></slot>
+
+                <view v-if="showToggleMenu" class="right">
+                    <view class="menu" @click="toggleMenu">
+                        <uni-icons type="more-filled" size="20" color="#666"></uni-icons>
+                    </view>
                 </view>
             </view>
-
-            <!-- <view class="right">
-                <view class="menu" @click="toggleMenu">
-                    <uni-icons type="more-filled" size="20" color="#666"></uni-icons>
-                </view>
-            </view> -->
         </view>
+        
+        <!-- 占位区域，避免内容被导航栏遮挡 -->
+        <view class="fill" :style="{ height: getNavBarHeight() + 'px' }"></view>
     </view>
-    
-    <!-- 占位区域，避免内容被导航栏遮挡 -->
-    <view class="fill" :style="{ height: getNavBarHeight() + 'px' }"></view>
 </template>
 
 <script setup>
     import { getStatusBarHeight, getNavBarHeight, getTitleBarHeight } from '@/utils/system.js';
+    
+    // 定义props
+    const props = defineProps({
+        showBorder: {
+            type: Boolean,
+            default: false
+        },
+        showToggleMenu: {
+            type: Boolean,
+            default: false
+        }
+    });
 
     const goBack = () => {
         uni.navigateBack({
@@ -58,6 +72,10 @@
 </script>
 
 <style lang="scss" scoped>
+    .menu-bar-container {
+        width: 100%;
+    }
+    
     .status-bar-bg {
         position: fixed;
         left: 0;
@@ -76,6 +94,10 @@
         display: flex;
         justify-content: left;
         align-items: center;
+        
+        &.with-border {
+            border-bottom: 1px solid #e5e5e5;
+        }
 
         .navbar {
             display: flex;
@@ -138,11 +160,11 @@
                         transform: scale(0.95);
                     }
                 }
-                }
             }
         }
+    }
 
-        .fill {
+    .fill {
         // 占位区域，避免内容被导航栏遮挡
         width: 100%;
     }

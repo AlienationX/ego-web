@@ -106,27 +106,13 @@
         uni.setStorageSync('hasSeenGuide', true);
         
         // 跳转到首页
-        uni.reLaunch({
+        uni.switchTab({
             url: '/pages/index/index'
         });
     };
 
-    const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
-    if (hasSeenGuide) {
-        // 已看过，直接跳转到首页
-        uni.reLaunch({
-            url: '/pages/index/index'
-        });
-    }
     onLoad(() => {
-        // 检查是否已看过引导页
-        // const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
-        // if (hasSeenGuide) {
-        //     // 已看过，直接跳转到首页
-        //     uni.reLaunch({
-        //         url: '/pages/index/index'
-        //     });
-        // }
+        // 页面加载完成
     });
 </script>
 
@@ -213,7 +199,7 @@
 
     .skip-btn {
         position: fixed;
-        top: calc(env(safe-area-inset-top) + 60rpx);
+        top: calc(env(safe-area-inset-top) + 80rpx);
         right: 40rpx;
         padding: 16rpx 32rpx;
         background: rgba(255, 255, 255, 0.2);
