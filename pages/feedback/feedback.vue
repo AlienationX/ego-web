@@ -12,22 +12,22 @@
                     <view class="type-selector">
                         <view 
                             class="type-item" 
-                            :class="{ active: feedbackForm.type === 'bug' }"
-                            @click="selectType('bug')"
+                            :class="{ active: feedbackForm.type === t('feedback.typeBug') }"
+                            @click="selectType(t('feedback.typeBug'))"
                         >
                             {{ t('feedback.typeBug') }}
                         </view>
                         <view 
                             class="type-item" 
-                            :class="{ active: feedbackForm.type === 'suggestion' }"
-                            @click="selectType('suggestion')"
+                            :class="{ active: feedbackForm.type === t('feedback.typeSuggestion') }"
+                            @click="selectType(t('feedback.typeSuggestion'))"
                         >
                             {{ t('feedback.typeSuggestion') }}
                         </view>
                         <view 
                             class="type-item" 
-                            :class="{ active: feedbackForm.type === 'other' }"
-                            @click="selectType('other')"
+                            :class="{ active: feedbackForm.type === t('feedback.typeOther') }"
+                            @click="selectType(t('feedback.typeOther'))"
                         >
                             {{ t('feedback.typeOther') }}
                         </view>
@@ -99,7 +99,8 @@
                 <view class="submit-btn-wrapper">
                     <button 
                         class="submit-btn" 
-                        :disabled="isSubmitting || !canSubmit"
+                        :class="{ disabled: !canSubmit }"
+                        :disabled="!canSubmit"
                         :loading="isSubmitting"
                         @click="handleSubmit"
                     >
@@ -120,7 +121,7 @@
     const { t } = useI18n();
 
     const feedbackForm = reactive({
-        type: 'bug', // bug, suggestion, other
+        type: t('feedback.typeBug'), // bug, suggestion, other
         content: '',
         contact: ''
     });
@@ -275,8 +276,11 @@
             if (imageList.value.length > 0) {
                 // 将图片转换为 base64
                 for (const imagePath of imageList.value) {
+                    console.log("upload imagePath:", imagePath);  // blob
+                    // TODO: 上传图片到服务器, 调用后端接口, 并获取图片 URL。uni.uploadFile甚至可以直接上传到oss
                     try {
                         const base64 = await new Promise((resolve, reject) => {
+                            // uni.getFileSystemManager是小程序端的文件系统管理器，用于读取文件内容。其他平台报错
                             uni.getFileSystemManager().readFile({
                                 filePath: imagePath,
                                 encoding: 'base64',
@@ -311,13 +315,13 @@
             // 清空表单
             feedbackForm.content = '';
             feedbackForm.contact = '';
-            feedbackForm.type = 'bug';
+            feedbackForm.type = t('feedback.typeBug');
             imageList.value = [];
 
             // 延迟返回上一页
-            setTimeout(() => {
-                uni.navigateBack();
-            }, 2000);
+            // setTimeout(() => {
+            //     uni.navigateBack();
+            // }, 2000);
         } catch (error) {
             console.error('提交反馈失败:', error);
             uni.showToast({
@@ -516,9 +520,16 @@
                             opacity: 0.9;
                         }
                         
-                        &:disabled {
-                            background: #d0d0d0;
-                            opacity: 1;
+                        // &.disabled {
+                        //     background: #cccccc;
+                        //     color: #999999;
+                        //     opacity: 0.6;
+                        // }
+                        
+                        &[disabled] {
+                            background: #cccccc;
+                            color: #999999;
+                            opacity: 0.6;
                         }
                         
                         &::after {

@@ -80,8 +80,11 @@
                         </view>
                         <uni-icons :type="item.right_icon" size="18" color="#aaa"></uni-icons>
                     </view>
+                    <!-- 微信特有的功能 -->
+                    <!-- #ifdef MP-WEIXIN -->
                     <button v-if="item.left_text === t('user.profile.support')" open-type="contact"></button>
-                    <!-- <button v-if="item.left_text === t('user.profile.feedback')" open-type="feedback"></button> -->
+                    <button v-if="item.left_text === t('user.profile.feedback')" open-type="feedback"></button>
+                    <!-- #endif -->
                 </view>
             </view>
         </view>
@@ -119,7 +122,8 @@
     const userStore = useUserStore();
 
     const toLogin = () => {
-        uni.navigateTo({ url: '/pages/login/login' });
+        // uni.navigateTo({ url: '/pages/login/login' });
+        uni.navigateTo({ url: '/pages/login/signin' });
     };
 
     const toSettings = () => {
@@ -136,6 +140,10 @@
 
     const toMyScore = () => {
         console.log('toMyScore');
+    };
+    
+    const toMembership = () => {
+        uni.navigateTo({ url: '/pages/membership/membership' });
     };
 
     const toFAQ = () => {
@@ -186,18 +194,14 @@
         }
     ]);
 
-    const toMembership = () => {
-        uni.navigateTo({ url: '/pages/membership/membership' });
-    };
-
     const sysMenus = computed(() => [
-        {
-            left_icon: 'vip-filled',
-            left_text: t('user.profile.subscription'),
-            right_text: '',
-            right_icon: 'right',
-            click: toMembership
-        },
+        // {
+        //     left_icon: 'vip-filled',
+        //     left_text: t('user.profile.subscription'),
+        //     right_text: '',
+        //     right_icon: 'right',
+        //     click: toMembership
+        // },
         {
             left_icon: 'help-filled',
             left_text: t('user.profile.question'),
@@ -205,6 +209,7 @@
             right_icon: 'right',
             click: toFAQ
         },
+        // #ifdef MP-WEIXIN
         {
             left_icon: 'chatboxes-filled',
             left_text: t('user.profile.support'),
@@ -212,6 +217,7 @@
             right_icon: 'right',
             click: onService
         },
+        // #endif
         {
             left_icon: 'chat-filled',
             left_text: t('user.profile.feedback'),

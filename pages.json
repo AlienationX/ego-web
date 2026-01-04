@@ -123,6 +123,27 @@
             }
         },
         {
+            "path": "pages/login/signup",
+            "style": {
+                "navigationBarTitleText": "注册",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/login/signin",
+            "style": {
+                "navigationBarTitleText": "登录",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/login/forget-password",
+            "style": {
+                "navigationBarTitleText": "忘记密码",
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path" : "pages/demo-view/demo-view",
             "style" : 
             {

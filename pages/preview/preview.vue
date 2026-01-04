@@ -257,6 +257,8 @@
         //     showInterstitialAd();
         // }
 
+        // downloadPic(currentInfo.value.picurl);
+        
         if (currentInfo.value.is_locked) {
             // 弹出观看视频提示框
             adPopup.value.open();

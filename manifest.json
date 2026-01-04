@@ -66,20 +66,7 @@
             },
             /* SDK配置 */
             "sdkConfigs" : {
-                "ad" : {
-                    "bz" : {},
-                    "fl" : {},
-                    "jl" : {},
-                    "yt" : {},
-                    "gg" : {},
-                    "pg" : {},
-                    "unity" : {},
-                    "liftoff" : {},
-                    "inmobi" : {},
-                    "ironsource" : {},
-                    "mintegral" : {},
-                    "applovin" : {}
-                },
+                "ad" : {},
                 "oauth" : {
                     "weixin" : {
                         "appid" : "wx74c392f8525b9268",

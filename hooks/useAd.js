@@ -1,4 +1,4 @@
-// ifdef APP-PLUS || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
+// ifdef APP || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
 import { downloadPic } from '@/common/core.js';
 
 export const useAdIntersititial = () => {

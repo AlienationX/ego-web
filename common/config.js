@@ -1,8 +1,8 @@
 // common/config.js
 
-// export const API_BASE_URL = 'http://127.0.0.1:8000/wallpaper/api';
+export const API_BASE_URL = 'http://127.0.0.1:8000/wallpaper/api';
 // export const API_BASE_URL = 'https://49touviwp7.execute-api.eu-north-1.amazonaws.com/dev/wallpaper/api';
-export const API_BASE_URL = 'https://api.wp.ego8.space/wallpaper/api';
+// export const API_BASE_URL = 'https://api.wp.ego8.space/wallpaper/api';
 
 export const MAX_PAGE_SIZE = 12;
 
