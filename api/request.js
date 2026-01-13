@@ -1,5 +1,6 @@
-import { API_BASE_URL } from '@/common/config';
+import { API_DOMAIN, API_BASE_URL } from '@/common/config';
 import { useUserStore } from '@/stores/user.js';
+import { decrypt } from '@/utils/encryption.js';
 
 // 发送 request 请求函数，如果token过期，刷新后再次发送 request 请求
 export const request = (config = {}) => {
@@ -46,7 +47,7 @@ const sendRequest = (config = {}) => {
             // timeout: 10000,  // 10秒
             header: {
                 'Access-Key': 'secret-insecure-88hefbf6c!mrv5x(xa4swy-h3y41f()(8xh6syj(xi&m!!h$#b',
-                Authorization: userStore.accessToken ? `Bearer ${userStore.accessToken}` : '',
+                Authorization: userStore.accessToken ? `Bearer ${decrypt(userStore.accessToken)}` : '',
                 ...config.header
             },
             success: (res) => {
@@ -87,17 +88,20 @@ const refreshToken = async () => {
     const userStore = useUserStore();
     try {
         const res = await uni.request({
-            url: API_BASE_URL + '/token/refresh/',
+            url: `${API_DOMAIN}/api/token/refresh/`,
             method: 'POST',
-            data: { refresh: userStore.refreshToken }
+            data: { refresh: decrypt(userStore.refreshToken) }
         });
         console.log('================ refresh token', res);
-        let { access, refresh } = res;
+        let { access, refresh } = res.data;
         userStore.setToken(access, refresh);
     } catch (error) {
-        // 刷新失败则跳转登录
+        // 刷新失败则跳转登录页
+        uni.showToast({
+            title: '登录过期，请重新登录',
+            icon: 'none'
+        });
         userStore.clearUserData();
         uni.navigateTo({ url: '/pages/login/login' });
-        // throw new Error('Token 刷新失败')
     }
 };

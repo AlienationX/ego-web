@@ -22,7 +22,7 @@
             <view class="footer">
                 <view class="box" @click="openInfo">
                     <uni-icons type="info-filled" size="28"></uni-icons>
-                    <view class="text">{{ $t('common.information') }}</view>
+                    <view class="text">{{ t('common.information') }}</view>
                 </view>
                 <view class="box" @click="openScore">
                     <uni-icons type="star-filled" size="28"></uni-icons>
@@ -31,7 +31,7 @@
                 <view class="box" @click="clickDownload">
                     <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
                     <uni-icons v-else type="download-filled" size="28"></uni-icons>
-                    <view class="text">{{ $t('common.download') }}</view>
+                    <view class="text">{{ t('common.download') }}</view>
                 </view>
             </view>
         </view>
@@ -41,7 +41,7 @@
             <view class="infoPopup">
                 <view class="popHeader">
                     <view></view>
-                    <view class="title">壁纸信息</view>
+                    <view class="title">{{ t('preview.wallpaperInfo') }}</view>
                     <view class="close">
                         <uni-icons type="closeempty" size="18" color="#999" @click="closeInfo"></uni-icons>
                     </view>
@@ -49,20 +49,20 @@
                 <scroll-view scroll-y>
                     <view class="content">
                         <view class="row">
-                            <view class="label">壁纸ID：</view>
+                            <view class="label">{{ t('preview.wallpaperId') }}</view>
                             <view class="value" selectable>{{ currentInfo.id }}</view>
                         </view>
                         <view class="row" v-if="currentInfo.classify_name">
-                            <view class="label">分类：</view>
+                            <view class="label">{{ t('preview.category') }}</view>
                             <view class="value classify">{{ currentInfo.classify_name }}</view>
                         </view>
                         <view class="row" v-if="currentInfo.publisher">
-                            <view class="label">发布者：</view>
+                            <view class="label">{{ t('preview.publisher') }}</view>
                             <view class="value classify">{{ currentInfo.publisher }}</view>
                             <!-- <view class="value classify">{{currentInfo.nickname}}</view> -->
                         </view>
                         <view class="row">
-                            <view class="label">评分：</view>
+                            <view class="label">{{ t('preview.score') }}</view>
                             <view class="value rateBox">
                                 <uni-rate readonly touchable :value="currentInfo.score"></uni-rate>
                                 <text class="score">{{ currentInfo.score }}</text>
@@ -77,19 +77,18 @@
                             <view class="value">{{ currentInfo.downloads }}</view>
                         </view> -->
                         <view class="row" v-if="currentInfo.description">
-                            <view class="label">描述：</view>
+                            <view class="label">{{ t('preview.description') }}</view>
                             <view class="value" selectable>{{ currentInfo.description }}</view>
                         </view>
                         <view class="row">
-                            <view class="label">标签：</view>
+                            <view class="label">{{ t('preview.tags') }}</view>
                             <view class="value tabs">
                                 <view class="tab" v-for="tab in currentInfo.tabs_list" :key="tab">
                                     {{ tab }}
                                 </view>
                             </view>
                         </view>
-                        <!-- <view class="copyright">{{ $t('message.copyrightStatement') }}</view> -->
-                        <view class="copyright">声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱735003439@qq.com，管理员将删除侵权壁纸，维护您的权益。</view>
+                        <view class="copyright">{{ t('message.copyrightStatement') }}</view>
 
                         <view v-if="displayAd" class="ad-row">
                             <custom-ad-banner></custom-ad-banner>
@@ -103,7 +102,7 @@
             <view class="scorePopup">
                 <view class="popHeader">
                     <view></view>
-                    <view class="title">壁纸评分</view>
+                    <view class="title">{{ t('preview.wallpaperRating') }}</view>
                     <view class="close">
                         <uni-icons type="closeempty" size="18" color="#999" @click="closeScore"></uni-icons>
                     </view>
@@ -111,11 +110,11 @@
 
                 <view class="content">
                     <uni-rate v-model="userScore" allowHalf></uni-rate>
-                    <text class="text">{{ userScore }}分</text>
+                    <text class="text">{{ userScore }} {{ t('preview.points') }}</text>
                 </view>
 
                 <view class="footer">
-                    <button type="default" size="mini" plain :disabled="!userScore" @click="submitScore">确认评分</button>
+                    <button type="default" size="mini" plain :disabled="!userScore" @click="submitScore">{{ t('preview.confirmRating') }}</button>
                 </view>
             </view>
         </uni-popup>
@@ -127,15 +126,15 @@
 <script setup>
     import { ref, computed } from 'vue';
     import { useI18n } from 'vue-i18n';
-    import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+    import { onLoad, onUnload, onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app';
     import { getStatusBarHeight } from '@/utils/system.js';
     import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
     import { downloadPic } from '@/common/core.js';
-    import { apiPostIncrementViews, apiPostIncrementDownloads } from '@/api/wallpaper.js';
+    import { apiPostIncrementViews, apiPostIncrementDownloads, apiPostActions } from '@/api/wallpaper.js';
 
     import { useUserStore } from '@/stores/user.js';
     const userStore = useUserStore();
-    
+
     const { t, locale } = useI18n();
 
     const classList = ref([]);
@@ -163,7 +162,7 @@
     // 返回按钮高度
     const getGoBackButtonTop = () => {
         if (getStatusBarHeight() === 0) {
-            return 15;
+            return 24;
         }
         return getStatusBarHeight();
     };
@@ -191,42 +190,72 @@
     const openInfo = () => {
         infoPopup.value.open();
         displayAd.value = true;
-        console.log(displayAd.value);
     };
     const closeInfo = () => {
         infoPopup.value.close();
         displayAd.value = false;
-        console.log(displayAd.value);
     };
 
     // 点击评分弹窗
     const scorePopup = ref(null);
     const userScore = ref(0);
     const openScore = () => {
-        console.log('test open score');
-        // userScore.value = currentInfo.value.userScore || 0;
-        // scorePopup.value.open();
+        console.log("accessToken", userStore.accessToken);
+        console.log("refreshToken", userStore.refreshToken);
+        console.log(userStore.userinfo)
+
+        return
+        
+        // 如果未登录，跳转到登录，或增加友好提示
+        if (Object.keys(userStore.userinfo).length === 0) {            
+            uni.showModal({
+                title: t('common.information'),
+                content: t('preview.loginPrompt'),
+                cancelText: t('preview.cancel'),
+                confirmText: t('preview.login'),
+                success: (res) => {
+                    if (res.confirm) {
+                        uni.navigateTo({ url: '/pages/login/login' });
+                    }
+                }
+            });
+            return; // 未登录时直接返回，不执行后续操作
+        }
+
+        userScore.value = currentInfo.value.userScore || 0;
+        scorePopup.value.open();
     };
     const closeScore = () => {
         scorePopup.value.close();
     };
-    const submitScore = () => {
+    const submitScore = async () => {
         // TODO
         // 接口获取用户评分，没有评分的用户默认为0分
         // userScore.value =
         // let userid = ...  // 获取用户id
         // let {classid, _id: wallId} = currentInfo.value;  // 获取分类id和图片id
         // 然后调用接口请求进行增删改等操作
+        const data = {
+            wall_id: currentInfo.value.id,
+            pic_score: userScore.value
+        };
+        try {
+            let res = await apiPostActions(data);
 
-        console.log(userScore.value);
-        // 图片信息增加用户当前评分
-        classList.value[currentIndex.value].userScore = userScore.value;
-        uni.setStorageSync('wallList', classList.value);
-        uni.showToast({
-            title: '评分成功',
-            icon: 'none'
-        });
-        closeScore();
+            // 图片信息增加用户当前评分。不修改当前壁纸的评分
+            // classList.value[currentIndex.value].userScore = userScore.value;
+            // uni.setStorageSync('wallList', classList.value);
+            uni.showToast({
+                title: t('preview.ratingSuccess'),
+                icon: 'none'
+            });
+            closeScore();
+        } catch (error) {
+            uni.showToast({
+                title: t('preview.ratingFailed'),
+                icon: 'none'
+            });
+        }
     };
 
     // 点击下载弹窗观看广告
@@ -234,10 +263,10 @@
 
     const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
     // const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
-    const clickDownload = () => {
+    const clickDownload = async () => {
         // #ifdef WEB
         uni.showModal({
-            content: '请长按或右键菜单保存壁纸',
+            content: t('preview.savePrompt'),
             showCancel: false
         });
         // #endif
@@ -258,7 +287,7 @@
         // }
 
         // downloadPic(currentInfo.value.picurl);
-        
+
         if (currentInfo.value.is_locked) {
             // 弹出观看视频提示框
             adPopup.value.open();
@@ -270,6 +299,16 @@
             destroyInterstitialAd(); // 销毁插屏广告
 
             incrementDownloads(currentInfo.value.id);
+
+            // 如果已登录，写入 我的下载 的数据
+            if (Object.keys(userStore.userinfo).length > 0) {
+                let data = {
+                    wall_id: currentInfo.value.id,
+                    is_download: true
+                };
+                
+                let res = await apiPostActions(data);
+            }
         }
         // #endif
     };
@@ -327,7 +366,7 @@
     onShareAppMessage((e) => {
         // 读取缓存数据的话需要增加type=share，分享到的用户就可以不读缓存，直接读取数据库数据
         return {
-            title: '本我壁纸',
+            title: t('common.appName'),
             path: '/pages/preview/preview?id=' + currentId.value + '&type=share'
         };
     });
@@ -335,7 +374,7 @@
     //分享朋友圈
     onShareTimeline(() => {
         return {
-            title: '本我壁纸',
+            title: t('common.appName'),
             query: 'id=' + currentId.value + '&type=share'
         };
     });

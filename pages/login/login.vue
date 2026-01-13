@@ -8,7 +8,7 @@
             <!-- Logo区域 -->
             <view class="logo-section">
                 <view class="logo-wrapper">
-                    <image class="logo" src="/static/logo.png" mode="aspectFit"></image>
+                    <image class="logo" src="/static/logo.svg" mode="aspectFit"></image>
                 </view>
                 <view class="app-name">{{ t('common.appName') }}</view>
             </view>
@@ -185,15 +185,15 @@
                 <!-- <view class="social-title">{{ t('login.socialLogin') }}</view> -->
                 <view class="social-buttons">
                     <view class="social-btn wechat" @click="handleWechatLogin">
-                        <view class="social-icon"></view>
+                        <image class="social-icon" src="/common/icons/brands/wechat.svg" mode="aspectFit"></image>
                         <text class="social-text">{{ t('login.wechat') }}</text>
                     </view>
                     <view class="social-btn google" @click="handleGoogleLogin">
-                        <view class="social-icon"></view>
+                        <image class="social-icon" src="/common/icons/brands/google.svg" mode="aspectFit"></image>
                         <text class="social-text">{{ t('login.google') }}</text>
                     </view>
                     <view class="social-btn apple" @click="handleAppleLogin">
-                        <view class="social-icon"></view>
+                        <image class="social-icon" src="/common/icons/brands/apple.svg" mode="aspectFit"></image>
                         <text class="social-text">{{ t('login.apple') }}</text>
                     </view>
                 </view>
@@ -323,7 +323,7 @@
         isSubmitting.value = true;
         try {
             const res = await apiPostLogin({
-                username: loginForm.username,
+                email: loginForm.username,
                 password: loginForm.password
             });
 
@@ -467,11 +467,12 @@
         justify-content: center;
         margin-bottom: 24rpx;
         box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+        overflow: hidden;
     }
 
     .logo {
-        width: 120rpx;
-        height: 120rpx;
+        width: 100%;
+        height: 100%;
     }
 
     .app-name {
@@ -680,58 +681,16 @@
             color: #666;
         }
 
-        &.wechat {
-            .social-icon {
-                background-color: #07c160;
-                mask-image: url('/common/icons/brand/wechat.svg');
-                mask-size: contain;
-                mask-repeat: no-repeat;
-                mask-position: center;
-                -webkit-mask-image: url('/common/icons/brand/wechat.svg');
-                -webkit-mask-size: contain;
-                -webkit-mask-repeat: no-repeat;
-                -webkit-mask-position: center;
-            }
-            
-            .social-text {
-                color: #07c160;
-            }
+        &.wechat .social-text {
+            color: #07c160;
         }
 
-        &.google {
-            .social-icon {
-                background-color: #ea4335;
-                mask-image: url('/common/icons/brand/google.svg');
-                mask-size: contain;
-                mask-repeat: no-repeat;
-                mask-position: center;
-                -webkit-mask-image: url('/common/icons/brand/google.svg');
-                -webkit-mask-size: contain;
-                -webkit-mask-repeat: no-repeat;
-                -webkit-mask-position: center;
-            }
-            
-            .social-text {
-                color: #ea4335;
-            }
+        &.google .social-text {
+            color: #C62828;
         }
 
-        &.apple {
-            .social-icon {
-                background-color: #000;
-                mask-image: url('/common/icons/brand/apple.svg');
-                mask-size: contain;
-                mask-repeat: no-repeat;
-                mask-position: center;
-                -webkit-mask-image: url('/common/icons/brand/apple.svg');
-                -webkit-mask-size: contain;
-                -webkit-mask-repeat: no-repeat;
-                -webkit-mask-position: center;
-            }
-            
-            .social-text {
-                color: #000;
-            }
+        &.apple .social-text {
+            color: #000;
         }
     }
 </style>

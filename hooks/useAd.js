@@ -1,8 +1,11 @@
 // ifdef APP || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
 import { downloadPic } from '@/common/core.js';
+import { useUserStore } from '@/stores/user.js';
 
 export const useAdIntersititial = () => {
-    // #ifdef APP
+    // #ifdef MP-360
+    const userStore = useUserStore();
+
     const adOption = {
         // 1111111113 HBuilder基座的测试广告位
         // 1129226586 正式的广告位
@@ -33,6 +36,12 @@ export const useAdIntersititial = () => {
     };
 
     const showInterstitialAd = (inputPicurl) => {
+        // 如果用户是VIP或广告开关关闭，直接下载图片
+        if (userStore.isVip || !userStore.showAd) {
+            picurl = inputPicurl;
+            return;
+        }
+        
         // 调用 interstitialAd.show()，如果数据正在加载中不会显示广告，加载成功后才显示
         // 在数据没有加载成功时，需要防止用户频繁点击显示广告
         // if (this.loading == true) {
@@ -57,17 +66,19 @@ export const useAdIntersititial = () => {
     };
     // #endif
 
-    // #ifndef APP
+    // #ifndef MP-360
     return {
         createInterstitialAd: function () {},
-        showInterstitialAd: function () {},
+        showInterstitialAd: function (inputPicurl) {downloadPic(inputPicurl);},
         destroyInterstitialAd: function () {}
     };
     // #endif
 };
 
 export const useAdRewardedVideo = () => {
-    // #ifdef APP
+    // #ifdef MP-360
+    const userStore = useUserStore();
+
     const adOption = {
         // 1507000689 HBuilder基座的测试广告位
         // 1892019135 正式的广告位
@@ -121,6 +132,12 @@ export const useAdRewardedVideo = () => {
     };
 
     const showRewardedVideoAd = (inputPicurl) => {
+        // 如果用户是VIP或广告开关关闭，直接下载图片
+        if (userStore.isVip || !userStore.showAd) {
+            picurl = inputPicurl;
+            return;
+        }
+        
         // 调用 interstitialAd.show()，如果数据正在加载中不会显示广告，加载成功后才显示
         // 在数据没有加载成功时，需要防止用户频繁点击显示广告
         // if (this.loading == true) {
@@ -165,10 +182,10 @@ export const useAdRewardedVideo = () => {
     };
     // #endif
 
-    // #ifndef APP
+    // #ifndef MP-360
     return {
         createRewardedVideoAd: function () {},
-        showRewardedVideoAd: function () {},
+        showRewardedVideoAd: function (inputPicurl) {downloadPic(inputPicurl);},
         destroyRewardedVideoAd: function () {}
     };
     // #endif

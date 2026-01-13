@@ -55,7 +55,11 @@
             "english": "English",
             "theme": "Theme",
             "light": "Light",
-            "dark": "Dark"
+            "dark": "Dark",
+            "clearCache": "Clear Cache",
+            "clearing": "Clearing...",
+            "clearSuccess": "Cache cleared successfully",
+            "clearFailed": "Failed to clear cache"
         }
     },
     "message": {
@@ -66,6 +70,24 @@
         "loading": "Loading...",
         "adText": "Unlock This Wallpaper",
         "adPrompt": "Watch An Ads"
+    },
+    "preview": {
+        "wallpaperInfo": "Wallpaper Info",
+        "wallpaperId": "Wallpaper ID:",
+        "category": "Category:",
+        "publisher": "Publisher:",
+        "score": "Score:",
+        "description": "Description:",
+        "tags": "Tags:",
+        "wallpaperRating": "Wallpaper Rating",
+        "points": "points",
+        "confirmRating": "Confirm Rating",
+        "loginPrompt": "You need to login to rate",
+        "login": "Login",
+        "cancel": "Cancel",
+        "ratingSuccess": "Rating successful. You can view it in [My Ratings].",
+        "ratingFailed": "Rating failed. Please try again later.",
+        "savePrompt": "Please long press or right-click menu to save wallpaper"
     },
     "feedback": {
         "title": "Feedback",

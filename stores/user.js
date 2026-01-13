@@ -1,6 +1,7 @@
 import { ref, reactive, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { apiGetProfile } from '@/api/wallpaper';
+import { encrypt } from '@/utils/encryption.js';
 
 export const useUserStore = defineStore(
     'user',
@@ -13,11 +14,12 @@ export const useUserStore = defineStore(
             fontSize: 14
         });
 
-        const showAd = ref(true);
+        const showAd = ref(true);  // 全局控制
+        const isVip = computed(() => userinfo.value.is_vip || false);  // 用户级别控制
 
         const setToken = (access, refresh) => {
-            accessToken.value = access;
-            refreshToken.value = refresh;
+            accessToken.value = encrypt(access);
+            refreshToken.value = encrypt(refresh);
         };
 
         const setUserInfo = () => {
@@ -52,7 +54,7 @@ export const useUserStore = defineStore(
             console.log('已下载次数', downloadCnt.value);
         };
 
-        return { accessToken, refreshToken, userinfo, showAd, setToken, setUserInfo, clearUserData, downloadCnt, downloadCntAdd };
+        return { accessToken, refreshToken, userinfo, showAd, isVip, setToken, setUserInfo, clearUserData, downloadCnt, downloadCntAdd };
     },
     {
         persist: {

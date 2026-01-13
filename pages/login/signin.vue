@@ -1,7 +1,15 @@
 <template>
     <view class="signin-container">
+        <!-- <menu-bar :showBorder="false">
+            <template #title>{{ t('feedback.title') }}</template>
+        </menu-bar> -->
+        
         <!-- 内容区域 -->
         <view class="content">
+            <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
+                <uni-icons type="back" color="#e5e5e5" size="20"></uni-icons>
+            </view>
+            
             <!-- 标题区域 -->
             <view class="title-section">
                 <view class="main-title">Sign In</view>
@@ -76,6 +84,7 @@
     import { ref, reactive } from 'vue';
     import { useUserStore } from '@/stores/user.js';
     import { apiPostLogin } from '@/api/wallpaper.js';
+    import { getStatusBarHeight } from '@/utils/system.js';
 
     const userStore = useUserStore();
 
@@ -183,6 +192,25 @@
             url: '/pages/login/signup'
         });
     };
+    
+    // 返回按钮高度
+    const getGoBackButtonTop = () => {
+        if (getStatusBarHeight() === 0) {
+            return 24;
+        }
+        return getStatusBarHeight();
+    };
+    const goBack = () => {
+        uni.navigateBack({
+            success: () => {},
+            fail: (err) => {
+                // 返回失败，直接跳转回首页
+                uni.reLaunch({
+                    url: '/pages/index/index'
+                });
+            }
+        });
+    };
 </script>
 
 <style lang="scss" scoped>
@@ -193,7 +221,21 @@
     }
 
     .content {
-        padding-top: 244rpx;
+        // padding-top: 244rpx;
+        
+        .goBack {
+            width: 38px;
+            height: 38px;
+            background: rgba(0, 0, 0, 0.5);
+            left: 30rpx;
+            margin-left: 0;
+            border-radius: 100rpx;
+            backdrop-filter: blur(10rpx);
+            border-radius: 1rpx solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
     }
 
     .title-section {

@@ -110,9 +110,17 @@ export const apiGetProfile = () => {
 };
 
 export const apiPostFeedback = (data = {}) => {
-    // 提交反馈接口
     return request({
         url: '/feedback/',
+        data,
+        method: 'POST'
+    });
+};
+
+export const apiPostActions = (data = {}) => {
+    // 用户操作接口
+    return request({
+        url: '/actions/',
         data,
         method: 'POST'
     });

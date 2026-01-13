@@ -14,7 +14,7 @@
             </view>
 
             <view v-if="userStore.userinfo.id" class="user-details">
-                <view class="name">{{ userStore.userinfo.nickname }}</view>
+                <view class="name">{{ userStore.userinfo.nickname || userStore.userinfo.username }}</view>
                 <view class="address" v-if="userStore.userinfo.region">
                     <uni-icons type="location" size="14" color="#999"></uni-icons>
                     <text>{{ userStore.userinfo.region }}</text>
@@ -23,7 +23,7 @@
             <view v-else class="not-logged-in-content">
                 <view class="app-name">{{ $t('common.appName') }}</view>
                 <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
-                <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
+                <!-- <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button> -->
             </view>
         </view>
 
@@ -35,7 +35,7 @@
                     <view class="stats-icon heart">
                         <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
                     </view>
-                    <view class="stats-number">{{ userStore.userinfo.id ? '12' : '0' }}</view>
+                    <view class="stats-number">{{ userStore.userinfo.count ? userStore.userinfo.count.collect_count : 0 }}</view>
                 </view>
                 <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
                 <view class="card-decoration decoration-1"></view>
@@ -46,7 +46,7 @@
                     <view class="stats-icon download">
                         <uni-icons type="download-filled" size="32" color="#28b389"></uni-icons>
                     </view>
-                    <view class="stats-number">{{ userStore.userinfo.id ? '3' : '0' }}</view>
+                    <view class="stats-number">{{ userStore.userinfo.count ? userStore.userinfo.count.download_count : 0 }}</view>
                 </view>
                 <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
                 <view class="card-decoration decoration-2"></view>
@@ -57,7 +57,7 @@
                     <view class="stats-icon star">
                         <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
                     </view>
-                    <view class="stats-number">{{ userStore.userinfo.id ? '8' : '0' }}</view>
+                    <view class="stats-number">{{  userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0  }}</view>
                 </view>
                 <view class="stats-label">{{ t('user.profile.myScore') }}</view>
                 <view class="card-decoration decoration-3"></view>
@@ -93,7 +93,8 @@
             <view class="list">
                 <view class="row exit-row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <uni-icons :type="item.left_icon" size="20" color="#ff6b6b"></uni-icons>
+                        <uni-icons :type="item.left_icon" size="24" color="#ff6b6b"></uni-icons>
+                        <!-- <image class="icon" :src="item.left_icon"></image> -->
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -113,6 +114,7 @@
 
 <script setup>
     import { ref, reactive, computed } from 'vue';
+    import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
     import { getStatusBarHeight } from '@/utils/system.js';
     import { useUserStore } from '@/stores/user.js';
     import { useI18n } from 'vue-i18n';
@@ -123,7 +125,7 @@
 
     const toLogin = () => {
         // uni.navigateTo({ url: '/pages/login/login' });
-        uni.navigateTo({ url: '/pages/login/signin' });
+        uni.navigateTo({ url: '/pages/login/login' });
     };
 
     const toSettings = () => {
@@ -149,12 +151,6 @@
     const toFAQ = () => {
         uni.navigateTo({
             url: '/pages/notice/detail?id=2&name=常见问题'
-        });
-    };
-
-    const toSubscribe = () => {
-        uni.navigateTo({
-            url: '/pages/membership/membership'
         });
     };
 
@@ -236,13 +232,21 @@
 
     const exitMenus = computed(() => [
         {
-            left_icon: 'gear-filled',
+            left_icon: 'gear-filled',  // /static/icons/exit-to-app.svg
             left_text: t('user.profile.exit'),
             right_text: t('user.profile.exitText'),
             right_icon: '',
             click: onExit
         }
     ]);
+
+    onShow(() => {
+        // console.log('页面显示时触发，用于切换回此页面时重新获取用户信息');
+        // 检查是否已登录，已登录则获取最新用户信息
+        if (Object.keys(userStore.userinfo).length > 0) {            
+            userStore.setUserInfo();
+        }
+    });
 </script>
 
 <style lang="scss" scoped>

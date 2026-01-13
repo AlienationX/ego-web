@@ -54,7 +54,11 @@
             "english": "英语",
             "theme": "主题",
             "light": "明亮",
-            "dark": "暗黑"
+            "dark": "暗黑",
+            "clearCache": "清除缓存",
+            "clearing": "清除中...",
+            "clearSuccess": "清除缓存成功",
+            "clearFailed": "清除缓存失败"
         }
     },
     "message": {
@@ -137,6 +141,24 @@
         "wechatLoginFailed": "微信登录失败",
         "googleLoginTip": "Google登录功能开发中",
         "appleLoginTip": "Apple登录功能开发中"
+    },
+    "preview": {
+        "wallpaperInfo": "壁纸信息",
+        "wallpaperId": "壁纸ID：",
+        "category": "分类：",
+        "publisher": "发布者：",
+        "score": "评分：",
+        "description": "描述：",
+        "tags": "标签：",
+        "wallpaperRating": "壁纸评分",
+        "points": "分",
+        "confirmRating": "确认评分",
+        "loginPrompt": "您需要登录后才能进行评分",
+        "login": "登录",
+        "cancel": "取消",
+        "ratingSuccess": "评分成功，您可以在【我的评分】中查看",
+        "ratingFailed": "评分失败，请稍后重试",
+        "savePrompt": "请长按或右键菜单保存壁纸"
     },
     "membership": {
         "title": "会员购买",

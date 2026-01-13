@@ -49,6 +49,31 @@
         })
     };
 
+    const clearCache = async () => {
+        uni.showLoading({
+            title: t('user.settings.clearing'),
+            mask: true
+        });
+
+        try {
+            uni.clearStorageSync();
+
+            uni.hideLoading();
+            uni.showToast({
+                title: t('user.settings.clearSuccess'),
+                icon: 'none',  // success 对勾图标
+                duration: 2000
+            });
+        } catch (error) {
+            uni.hideLoading();
+            uni.showToast({
+                title: t('user.settings.clearFailed'),
+                icon: 'none',
+                duration: 2000
+            });
+        }
+    };
+
     const settings = computed(() => [
         {
             left_icon: '/static/icons/translate.svg',
@@ -63,6 +88,13 @@
             right_text: settingsStore.options.theme === 'light' ? t('user.settings.light') : t('user.settings.dark'),
             right_icon: 'forward',
             click: swithTheme
+        },
+        {
+            left_icon: '/static/icons/database-refresh.svg',
+            left_text: t('user.settings.clearCache'),
+            right_text: '',
+            right_icon: '',
+            click: clearCache
         }
     ]);
 
