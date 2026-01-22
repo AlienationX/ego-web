@@ -268,7 +268,7 @@
 
     const exitMenus = computed(() => [
         {
-            left_icon: 'gear-filled',  // /static/icons/exit-to-app.svg
+            left_icon: 'gear-filled',  // /common/icons/exit-to-app.svg
             left_text: t('user.profile.exit'),
             right_text: t('user.profile.exitText'),
             right_icon: '',
