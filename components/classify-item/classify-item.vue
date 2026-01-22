@@ -12,7 +12,7 @@
 
         <!-- 跳转到tabbar页面，open-type需要设置为reLaunch -->
         <navigator class="box more" url="/pages/classify/classify" open-type="reLaunch" v-if="isMore">
-            <image class="pic" src="/static/images/more.jpg" mode="aspectFill"></image>
+            <image class="pic" src="/common/images/pics/more.jpg" mode="aspectFill"></image>
             <view class="mask">
                 <uni-icons type="more-filled" size="34" color="#fff"></uni-icons>
                 <view class="text">{{ $t('common.more') }}</view>

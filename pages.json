@@ -171,6 +171,46 @@
                 "navigationBarTitleText": "会员购买",
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/favorite/favorite",
+            "style": {
+                "navigationBarTitleText": "我的收藏",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/download/download",
+            "style": {
+                "navigationBarTitleText": "我的下载",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/rating/rating",
+            "style": {
+                "navigationBarTitleText": "我的评分",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/detail/detail",
+            "style": {
+                "navigationBarTitleText": "壁纸详情",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/about/about",
+            "style": {
+                "navigationBarTitleText": "关于我们",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
         }
     ],
     "globalStyle": {

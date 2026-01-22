@@ -28,20 +28,26 @@
     import { computed } from 'vue';
     import { useI18n } from 'vue-i18n';
     import { useSettingsStore } from '@/stores/settings.js';
+    import { changeLocale, getCurrentLocale } from '@/utils/i18n.js';
 
     const { t, locale } = useI18n();
 
     const settingsStore = useSettingsStore();
 
-    const swithLanguage = () => {
+    const switchLanguage = () => {
         const currentLanguage = uni.getLocale() === 'en' ? 'zh-Hans' : 'en';
         uni.setLocale(currentLanguage);
         uni.setStorageSync('lang', currentLanguage);
         locale.value = currentLanguage;
+    }
 
-    };
+    // const switchLanguage = async () => {
+    //     const currentLanguage = getCurrentLocale();
+    //     const newLanguage = currentLanguage === 'en' ? 'zh-CN' : 'en';
+    //     await changeLocale(newLanguage);
+    // };
 
-    const swithTheme = () => {
+    const switchTheme = () => {
         settingsStore.options.theme = settingsStore.options.theme === 'light' ? 'dark' : 'light';
         uni.showToast({
             title: settingsStore.options.theme,
@@ -74,20 +80,24 @@
         }
     };
 
+    const goToAbout = () => {
+        uni.navigateTo({ url: '/pages/about/about' });
+    };
+
     const settings = computed(() => [
         {
             left_icon: '/static/icons/translate.svg',
             left_text: t('user.settings.language'),
             right_text: uni.getLocale() === 'en' ? t('user.settings.english') : t('user.settings.chinese'),
             right_icon: 'forward',
-            click: swithLanguage
+            click: switchLanguage
         },
         {
             left_icon: '/static/icons/theme-light-dark.svg',
             left_text: t('user.settings.theme'),
             right_text: settingsStore.options.theme === 'light' ? t('user.settings.light') : t('user.settings.dark'),
             right_icon: 'forward',
-            click: swithTheme
+            click: switchTheme
         },
         {
             left_icon: '/static/icons/database-refresh.svg',
@@ -95,6 +105,13 @@
             right_text: '',
             right_icon: '',
             click: clearCache
+        },
+        {
+            left_icon: '/static/icons/info.svg',
+            left_text: t('user.settings.about'),
+            right_text: '',
+            right_icon: 'forward',
+            click: goToAbout
         }
     ]);
 

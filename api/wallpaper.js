@@ -134,3 +134,35 @@ export const apiGetSetupScore = (data = {}) => {
         data
     });
 };
+
+export const apiGetDetail = (id = '') => {
+    // 获取壁纸详情
+    return request({
+        url: `/wall/${id}/`
+    });
+};
+
+export const apiGetComments = (data = {}) => {
+    // 获取评论列表
+    return request({
+        url: '/comment/',
+        data
+    });
+};
+
+export const apiPostComment = (data = {}) => {
+    // 发布评论
+    return request({
+        url: '/comment/',
+        data,
+        method: 'POST'
+    });
+};
+
+export const apiPostLikeComment = (commentId = '') => {
+    // 点赞评论
+    return request({
+        url: `/comment/${commentId}/like/`,
+        method: 'POST'
+    });
+};

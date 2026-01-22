@@ -22,11 +22,15 @@ export const useUserStore = defineStore(
             refreshToken.value = encrypt(refresh);
         };
 
-        const setUserInfo = () => {
-            (async () => {
-                let res = await apiGetProfile();
-                userinfo.value = res.data;
-            })();
+        // const setUserInfo = () => {
+        //     (async () => {
+        //         let res = await apiGetProfile();
+        //         userinfo.value = res.data;
+        //     })();
+
+        const setUserInfo = async () => {
+            let res = await apiGetProfile();
+            userinfo.value = res.data;
         };
 
         const clearUserData = () => {

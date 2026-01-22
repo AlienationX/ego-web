@@ -20,7 +20,14 @@
         "recentSearch": "最近搜索",
         "noResult": "抱歉，没有找到您想要的搜索结果",
         "clearHistory": "是否清空历史搜索？",
-        "hotKeywords": "美女,帅哥,宠物,卡通"
+        "hotKeywords": "美女,帅哥,宠物,卡通",
+        "tip": "提示",
+        "submitting": "提交中...",
+        "submitSuccess": "提交成功",
+        "submitFailed": "提交失败",
+        "downloading": "下载中...",
+        "downloadSuccess": "下载成功",
+        "downloadFailed": "下载失败"
     },
     "index": {
         "title": "推荐",
@@ -46,7 +53,8 @@
             "exit": "退出",
             "exitText": "退出当前账号",
             "appDesc": "发现更多精美壁纸",
-            "login": "登录"
+            "login": "登录",
+            "loginRequired": "请先登录后使用此功能"
         },
         "settings": {
             "language": "语言",
@@ -58,7 +66,8 @@
             "clearCache": "清除缓存",
             "clearing": "清除中...",
             "clearSuccess": "清除缓存成功",
-            "clearFailed": "清除缓存失败"
+            "clearFailed": "清除缓存失败",
+            "about": "关于我们"
         }
     },
     "message": {
@@ -183,5 +192,62 @@
         "confirmContent": "确认购买 {title}，价格 ¥{price}？",
         "processing": "处理中...",
         "purchaseSuccess": "购买成功"
+    },
+    "favorite": {
+        "empty": "还没有收藏任何壁纸",
+        "goBrowse": "去浏览"
+    },
+    "download": {
+        "empty": "还没有下载任何壁纸",
+        "goBrowse": "去浏览"
+    },
+    "rating": {
+        "empty": "还没有评分任何壁纸",
+        "goBrowse": "去浏览",
+        "untitled": "未命名",
+        "justNow": "刚刚",
+        "minutesAgo": "分钟前",
+        "hoursAgo": "小时前",
+        "daysAgo": "天前"
+    },
+    "detail": {
+        "comments": "评论",
+        "writeComment": "写评论",
+        "noComments": "暂无评论，快来抢沙发吧",
+        "reply": "回复",
+        "related": "相关推荐",
+        "commentPlaceholder": "说点什么吧...",
+        "commentEmpty": "请输入评论内容",
+        "loginRequired": "请先登录",
+        "vipRequired": "请先开通会员才能下载此壁纸",
+        "submit": "提交"
+    },
+    "about": {
+        "title": "关于我们",
+        "slogan": "探索壁纸，亦探索自我",
+        "version": "当前版本",
+        "build": "构建号",
+        "information": "应用信息",
+        "introduction": "应用介绍",
+        "checkUpdate": "检查更新",
+        "latestVersion": "已是最新",
+        "legal": "法律信息",
+        "privacy": "隐私政策",
+        "agreement": "用户协议",
+        "contact": "联系方式",
+        "feedback": "意见反馈",
+        "email": "联系邮箱",
+        "others": "其他",
+        "rateUs": "给我们评分",
+        "share": "分享应用",
+        "copyright": "Copyright © 2024 本我壁纸. All rights reserved.\n探索壁纸，亦探索自我",
+        "copied": "已复制到剪贴板",
+        "checking": "检查中...",
+        "alreadyLatest": "当前已是最新版本",
+        "rateTip": "前往应用商店给我们评分？",
+        "shareText": "发现一款超棒的壁纸APP，海量高清壁纸等你来发现！",
+        "shareSuccess": "分享成功",
+        "shareFailed": "分享失败",
+        "introText": "本我壁纸是一款专注于提供高质量壁纸的应用。我们汇集了海量的精美壁纸，涵盖多种风格和分类，为用户提供最佳的壁纸选择体验。无论是风景、人物、动漫还是抽象艺术，你都能在这里找到心仪的壁纸。"
     }
 }

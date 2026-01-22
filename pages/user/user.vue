@@ -23,7 +23,7 @@
             <view v-else class="not-logged-in-content">
                 <view class="app-name">{{ $t('common.appName') }}</view>
                 <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
-                <!-- <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button> -->
+                <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
             </view>
         </view>
 
@@ -133,15 +133,51 @@
     };
 
     const toMyFavorite = () => {
-        console.log('toMyFavorite');
+        if (!userStore.userinfo.id) {
+            uni.showModal({
+                title: t('common.tip'),
+                content: t('user.profile.loginRequired'),
+                success: (res) => {
+                    if (res.confirm) {
+                        uni.navigateTo({ url: '/pages/login/login' });
+                    }
+                }
+            });
+            return;
+        }
+        uni.navigateTo({ url: '/pages/favorite/favorite' });
     };
 
     const toMyDownload = () => {
-        console.log('toMyDownload');
+        if (!userStore.userinfo.id) {
+            uni.showModal({
+                title: t('common.tip'),
+                content: t('user.profile.loginRequired'),
+                success: (res) => {
+                    if (res.confirm) {
+                        uni.navigateTo({ url: '/pages/login/login' });
+                    }
+                }
+            });
+            return;
+        }
+        uni.navigateTo({ url: '/pages/download/download' });
     };
 
     const toMyScore = () => {
-        console.log('toMyScore');
+        if (!userStore.userinfo.id) {
+            uni.showModal({
+                title: t('common.tip'),
+                content: t('user.profile.loginRequired'),
+                success: (res) => {
+                    if (res.confirm) {
+                        uni.navigateTo({ url: '/pages/login/login' });
+                    }
+                }
+            });
+            return;
+        }
+        uni.navigateTo({ url: '/pages/rating/rating' });
     };
     
     const toMembership = () => {

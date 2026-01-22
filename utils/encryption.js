@@ -1,8 +1,8 @@
 import CryptoJS from 'crypto-js';
 
 // 从环境变量中获取加密密钥
-const SECRET_KEY = process.env.ENCRYPTION_KEY || 'secret-key';
-const SECRET_IV = process.env.ENCRYPTION_IV || 'secret-iv';
+const SECRET_KEY = process.env.ENCRYPTION_KEY || 'wallpaper-app-secret-key';
+const SECRET_IV = process.env.ENCRYPTION_IV || 'wallpaper-app-secret-iv';
 
 // 创建加密解密实例
 const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
@@ -28,10 +28,15 @@ export const encrypt = (data) => {
 /**
  * 解密函数
  * @param {string} ciphertext - 要解密的字符串
- * @returns {string|object} - 解密后的数据
+ * @returns {string|object|null} - 解密后的数据，如果输入为空则返回空字符串
  */
 export const decrypt = (ciphertext) => {
     try {
+        // 添加空值检查
+        if (!ciphertext) {
+            return '';
+        }
+        
         const decrypted = CryptoJS.AES.decrypt(ciphertext, key, {
             iv,
             mode: CryptoJS.mode.CBC,

@@ -47,7 +47,8 @@
             "exit": "Exit",
             "exitText": "Exit the current account",
             "appDesc": "Discover more beautiful wallpapers",
-            "login": "Login"
+            "login": "Login",
+            "loginRequired": "Please login to use this feature"
         },
         "settings": {
             "language": "Language",
@@ -59,7 +60,8 @@
             "clearCache": "Clear Cache",
             "clearing": "Clearing...",
             "clearSuccess": "Cache cleared successfully",
-            "clearFailed": "Failed to clear cache"
+            "clearFailed": "Failed to clear cache",
+            "about": "About"
         }
     },
     "message": {
@@ -184,5 +186,89 @@
         "confirmContent": "Confirm purchase {title} for ¥{price}?",
         "processing": "Processing...",
         "purchaseSuccess": "Purchase successful"
+    },
+    "favorite": {
+        "empty": "No favorite wallpapers yet",
+        "goBrowse": "Browse Now"
+    },
+    "download": {
+        "empty": "No downloaded wallpapers yet",
+        "goBrowse": "Browse Now"
+    },
+    "rating": {
+        "empty": "No rated wallpapers yet",
+        "goBrowse": "Browse Now",
+        "untitled": "Untitled",
+        "justNow": "Just now",
+        "minutesAgo": "min ago",
+        "hoursAgo": "hours ago",
+        "daysAgo": "days ago"
+    },
+    "detail": {
+        "comments": "Comments",
+        "writeComment": "Write Comment",
+        "noComments": "No comments yet. Be the first to comment!",
+        "reply": "Reply",
+        "related": "Related",
+        "commentPlaceholder": "Say something...",
+        "commentEmpty": "Please enter a comment",
+        "loginRequired": "Please login first",
+        "vipRequired": "Please upgrade to membership to download this wallpaper",
+        "submit": "Submit"
+    },
+    "common": {
+        "appName": "Ego Wallpapers",
+        "more": "More",
+        "refresh": "Refresh",
+        "month": "Month",
+        "day": "Day",
+        "seeAll": "See All",
+        "search": "Search",
+        "information": "Information",
+        "download": "Download",
+        "points": "Points",
+        "recommend": "Recommend",
+        "score": "Score",
+        "publishDate": "Date",
+        "hotSearch": "Hot search",
+        "recentSearch": "Recnet search",
+        "noResult": "Sorry, it's empty here.",
+        "clearHistory": "Clear search history?",
+        "hotKeywords": "美女,帅哥,宠物,卡通",
+        "tip": "Tip",
+        "submitting": "Submitting...",
+        "submitSuccess": "Submitted successfully",
+        "submitFailed": "Submit failed",
+        "downloading": "Downloading...",
+        "downloadSuccess": "Downloaded successfully",
+        "downloadFailed": "Download failed"
+    },
+    "about": {
+        "title": "About Us",
+        "slogan": "Explore Wallpapers, Discover Yourself",
+        "version": "Current Version",
+        "build": "Build",
+        "information": "App Information",
+        "introduction": "Introduction",
+        "checkUpdate": "Check Update",
+        "latestVersion": "Latest",
+        "legal": "Legal",
+        "privacy": "Privacy Policy",
+        "agreement": "User Agreement",
+        "contact": "Contact",
+        "feedback": "Feedback",
+        "email": "Email",
+        "others": "Others",
+        "rateUs": "Rate Us",
+        "share": "Share App",
+        "copyright": "Copyright © 2024 Ego Wallpapers. All rights reserved.\nExplore Wallpapers, Discover Yourself",
+        "copied": "Copied to clipboard",
+        "checking": "Checking...",
+        "alreadyLatest": "Already the latest version",
+        "rateTip": "Go to app store to rate us?",
+        "shareText": "Discover an amazing wallpaper app with massive HD wallpapers waiting for you!",
+        "shareSuccess": "Shared successfully",
+        "shareFailed": "Share failed",
+        "introText": "Ego Wallpapers is a high-quality wallpaper application. We have gathered massive beautiful wallpapers covering various styles and categories, providing users with the best wallpaper selection experience. Whether it's landscape, portraits, anime, or abstract art, you can find your favorite wallpapers here."
     }
 }
