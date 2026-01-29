@@ -1,15 +1,15 @@
 {
     "version" : "1",
     "prompt" : "template",
-    "title" : "服务协议和隐私政策",
-    "message" : "　　请你务必审慎阅读、充分理解“服务协议”和“隐私政策”各条款，包括但不限于：为了更好的向你提供服务，我们需要收集你的设备标识、操作日志等信息用于分析、优化应用性能。<br/>　　你可阅读<a href=\"https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/user_agreement.html\">《服务协议》</a>和<a href=\"https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/privacy_agreement.html\">《隐私政策》</a>了解详细信息。如果你同意，请点击下面按钮开始接受我们的服务。",
+    "title" : "隐私政策和服务协议",
+    "message" : "　　请你务必审慎阅读、充分理解“隐私政策”和“服务协议”各条款，包括但不限于：为了更好的向你提供服务，我们需要收集你的设备信息，例如设备型号、操作系统版本、唯一设备标识符（如IMEI、Android ID）、IP地址、设备MAC地址、OAID（移动智能终端补充设备标识）等，和操作日志等信息用于分析、优化应用性能。<br/>　　你可阅读<a href=\"https://wp-1328701250.cos.ap-beijing.myqcloud.com/privacy_agreement.html\">《隐私政策》</a>和<a href=\"https://wp-1328701250.cos.ap-beijing.myqcloud.com/user_agreement.html\">《服务协议》</a>了解详细信息。如果你同意，请点击下面按钮开始接受我们的服务。",
     "buttonAccept" : "同意并接受",
     "buttonRefuse" : "暂不同意",
     "hrefLoader" : "system",
     "backToExit" : "false",
     "second" : {
         "title" : "确认提示",
-        "message" : "　　进入应用前，你需先同意<a href=\"https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/user_agreement.html\">《服务协议》</a>和<a href=\"https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/privacy_agreement.html\">《隐私政策》</a>，否则将退出应用。",
+        "message" : "　　进入应用前，你需先同意<a href=\"https://wp-1328701250.cos.ap-beijing.myqcloud.com/privacy_agreement.html\">《隐私政策》</a>和<a href=\"https://wp-1328701250.cos.ap-beijing.myqcloud.com/user_agreement.html\">《服务协议》</a>，否则将退出应用。",
         "buttonAccept" : "同意并继续",
         "buttonRefuse" : "退出应用"
     },

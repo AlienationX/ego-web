@@ -86,28 +86,28 @@
 
     const settings = computed(() => [
         {
-            left_icon: '/common/icons/translate.svg',
+            left_icon: '/static/icons/translate.svg',
             left_text: t('user.settings.language'),
             right_text: uni.getLocale() === 'en' ? t('user.settings.english') : t('user.settings.chinese'),
             right_icon: 'forward',
             click: switchLanguage
         },
         {
-            left_icon: '/common/icons/theme-light-dark.svg',
+            left_icon: '/static/icons/theme-light-dark.svg',
             left_text: t('user.settings.theme'),
             right_text: settingsStore.options.theme === 'light' ? t('user.settings.light') : t('user.settings.dark'),
             right_icon: 'forward',
             click: switchTheme
         },
         {
-            left_icon: '/common/icons/database-refresh.svg',
+            left_icon: '/static/icons/database-refresh.svg',
             left_text: t('user.settings.clearCache'),
             right_text: '',
             right_icon: '',
             click: clearCache
         },
         {
-            left_icon: '/common/icons/cog.svg',
+            left_icon: '/static/icons/cog.svg',
             left_text: t('user.settings.about'),
             right_text: '',
             right_icon: 'forward',
@@ -146,6 +146,7 @@
                     .icon {
                         width: 44rpx;
                         height: 44rpx;
+                        filter: brightness(0) saturate(100%) invert(52%) sepia(88%) saturate(485%) hue-rotate(106deg) brightness(91%) contrast(87%);
                     }
 
                     .text {

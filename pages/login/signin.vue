@@ -20,11 +20,11 @@
             <view class="social-section">
                 <view class="social-buttons">
                     <view class="social-btn" @click="handleGoogleLogin">
-                        <image src="/common/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
+                        <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
                         <text class="social-text">Google</text>
                     </view>
                     <view class="social-btn" @click="handleFacebookLogin">
-                        <image src="/common/icons/brands/facebook.svg" mode="aspectFit" class="social-icon"></image>
+                        <image src="/static/icons/brands/facebook.svg" mode="aspectFit" class="social-icon"></image>
                         <text class="social-text">Facebook</text>
                     </view>
                 </view>
@@ -58,7 +58,7 @@
                         @blur="passwordFocused = false"
                     />
                         <view class="password-toggle" @click="togglePassword">
-                            <image src="/common/icons/eye-icon.svg" mode="aspectFit"></image>
+                            <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
                         </view>
                 </view>
                 <view class="forgot-password" @click="handleForgotPassword">

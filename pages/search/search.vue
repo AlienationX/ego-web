@@ -49,7 +49,7 @@
         </view>
 
         <view v-if="noResult" class="noResult" :style="{ marginTop: getNavBarHeight() + 'px' }">
-            <image class="empty-image" src="/common/images/pics/NoImages.svg" mode="aspectFit"></image>
+            <image class="empty-image" src="/static/images/pics/NoImages.svg" mode="aspectFit"></image>
             <text class="text">{{ $t('common.noResult') }}</text>
         </view>
 

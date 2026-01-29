@@ -93,21 +93,6 @@
 
             <!-- 注册表单 -->
             <view class="form-wrapper" v-else>
-                <view class="form-item">
-                    <view class="input-wrapper">
-                        <uni-icons class="input-icon" type="person" size="20" color="#999"></uni-icons>
-                        <input 
-                            class="input" 
-                            type="text" 
-                            :placeholder="t('login.usernamePlaceholder')"
-                            v-model="registerForm.username"
-                            :adjust-position="true"
-                        />
-                    </view>
-                    <view class="error-text" v-if="registerErrors.username">
-                        {{ registerErrors.username }}
-                    </view>
-                </view>
 
                 <view class="form-item">
                     <view class="input-wrapper">
@@ -185,15 +170,15 @@
                 <!-- <view class="social-title">{{ t('login.socialLogin') }}</view> -->
                 <view class="social-buttons">
                     <view class="social-btn wechat" @click="handleWechatLogin">
-                        <image class="social-icon" src="/common/icons/brands/wechat.svg" mode="aspectFit"></image>
+                        <image class="social-icon" src="/static/icons/brands/wechat.svg" mode="aspectFit"></image>
                         <text class="social-text">{{ t('login.wechat') }}</text>
                     </view>
                     <view class="social-btn google" @click="handleGoogleLogin">
-                        <image class="social-icon" src="/common/icons/brands/google.svg" mode="aspectFit"></image>
+                        <image class="social-icon" src="/static/icons/brands/google.svg" mode="aspectFit"></image>
                         <text class="social-text">{{ t('login.google') }}</text>
                     </view>
                     <view class="social-btn apple" @click="handleAppleLogin">
-                        <image class="social-icon" src="/common/icons/brands/apple.svg" mode="aspectFit"></image>
+                        <image class="social-icon" src="/static/icons/brands/apple.svg" mode="aspectFit"></image>
                         <text class="social-text">{{ t('login.apple') }}</text>
                     </view>
                 </view>
@@ -286,11 +271,6 @@
         clearRegisterErrors();
         let isValid = true;
 
-        if (!registerForm.username || registerForm.username.length < 3) {
-            registerErrors.username = t('login.usernameError');
-            isValid = false;
-        }
-
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!registerForm.email || !emailRegex.test(registerForm.email)) {
             registerErrors.email = t('login.emailError');
@@ -359,7 +339,6 @@
         isSubmitting.value = true;
         try {
             await apiPostRegister({
-                username: registerForm.username,
                 email: registerForm.email,
                 password: registerForm.password
             });
@@ -372,7 +351,7 @@
             // 注册成功后切换到登录
             setTimeout(() => {
                 switchToLogin();
-                registerForm.username = registerForm.email;
+                registerForm.email = '';
                 registerForm.password = '';
                 registerForm.confirmPassword = '';
             }, 1500);

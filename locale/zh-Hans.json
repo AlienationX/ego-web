@@ -240,7 +240,7 @@
         "others": "其他",
         "rateUs": "给我们评分",
         "share": "分享应用",
-        "copyright": "Copyright © 2024 本我壁纸. All rights reserved.\n探索壁纸，亦探索自我",
+        "copyright": "Copyright © {year} 本我壁纸. All rights reserved.\n探索壁纸，亦探索自我",
         "copied": "已复制到剪贴板",
         "checking": "检查中...",
         "alreadyLatest": "当前已是最新版本",

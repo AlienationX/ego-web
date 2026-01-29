@@ -9,7 +9,7 @@
             </view>
 
             <view class="avater">
-                <image src="/common/images/pics/default_avatar.svg" mode="aspectFill"></image>
+                <image src="/static/images/pics/default_avatar.svg" mode="aspectFill"></image>
                 <view class="avatar-ring"></view>
             </view>
 
@@ -268,7 +268,7 @@
 
     const exitMenus = computed(() => [
         {
-            left_icon: 'gear-filled',  // /common/icons/exit-to-app.svg
+            left_icon: 'gear-filled',  // /static/icons/exit-to-app.svg
             left_text: t('user.profile.exit'),
             right_text: t('user.profile.exitText'),
             right_icon: '',

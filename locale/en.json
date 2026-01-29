@@ -1,5 +1,5 @@
 {
-    "tabbar.index": "Home", // tarbar的变量设置不能嵌套
+    "tabbar.index": "Home",
     "tabbar.category": "Category",
     "tabbar.user": "Profile",
     "common": {
@@ -20,7 +20,9 @@
         "recentSearch": "Recnet search",
         "noResult": "Sorry, it's empty here.",
         "clearHistory": "Clear search history?",
-        "hotKeywords": "美女,帅哥,宠物,卡通"  // "Beauty,Handsome,Pets,Cartoon"
+        "hotKeywords": "美女,帅哥,宠物,卡通",
+        "privacy": "Privacy Policy",
+        "agreement": "User Agreement"
     },
     "index": {
         "title": "Recommend",
@@ -261,7 +263,7 @@
         "others": "Others",
         "rateUs": "Rate Us",
         "share": "Share App",
-        "copyright": "Copyright © 2024 Ego Wallpapers. All rights reserved.\nExplore Wallpapers, Discover Yourself",
+        "copyright": "Copyright © {year} Ego Wallpapers. All rights reserved.\nExplore Wallpapers, Discover Yourself",
         "copied": "Copied to clipboard",
         "checking": "Checking...",
         "alreadyLatest": "Already the latest version",

@@ -7,7 +7,7 @@
         <view class="content-wrapper">
             <view class="app-info">
                 <view class="logo-section">
-                    <image src="/static/logo.png" mode="aspectFit" class="app-logo"></image>
+                    <image src="/static/logo.svg" mode="aspectFit" class="app-logo"></image>
                     <view class="app-name">{{ t('common.appName') }}</view>
                     <view class="app-slogan">{{ t('about.slogan') }}</view>
                 </view>
@@ -15,11 +15,11 @@
                 <view class="version-section">
                     <view class="version-item">
                         <text class="version-label">{{ t('about.version') }}</text>
-                        <text class="version-value">1.1.6</text>
+                        <text class="version-value">{{ APP_INFO.appVersion }}</text>
                     </view>
                     <view class="version-item">
                         <text class="version-label">{{ t('about.build') }}</text>
-                        <text class="version-value">116</text>
+                        <text class="version-value">{{ APP_INFO.appVersionCode }}</text>
                     </view>
                 </view>
             </view>
@@ -48,14 +48,14 @@
 
                 <view class="info-group">
                     <view class="group-title">{{ t('about.legal') }}</view>
-                    <view class="info-item" @click="openPrivacy">
+                    <view class="info-item" @click="openHtmlFile('/privacy_agreement.html')">
                         <view class="item-left">
                             <uni-icons type="locked-filled" size="20" color="#28b389"></uni-icons>
                             <text class="item-text">{{ t('about.privacy') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                     </view>
-                    <view class="info-item" @click="openAgreement">
+                    <view class="info-item" @click="openHtmlFile('/user_agreement.html')">
                         <view class="item-left">
                             <uni-icons type="paperplane-filled" size="20" color="#28b389"></uni-icons>
                             <text class="item-text">{{ t('about.agreement') }}</text>
@@ -105,7 +105,7 @@
             </view>
 
             <view class="footer">
-                <text class="copyright">{{ t('about.copyright') }}</text>
+                <text class="copyright">{{ t('about.copyright').replace('{year}', currentYear) }}</text>
             </view>
 
             <view class="safe-area-inset-bottom"></view>
@@ -120,15 +120,12 @@
 
     const { t } = useI18n();
 
-    const openPrivacy = () => {
-        uni.navigateTo({
-            url: '/pages/privacy/privacy'
-        });
-    };
+    const APP_INFO = uni.getAppBaseInfo();
+    const currentYear = new Date().getFullYear();    
 
-    const openAgreement = () => {
+    const openHtmlFile = (url) => {
         uni.navigateTo({
-            url: '/pages/agreement/agreement'
+            url: `/pages/webview/webview?url=${encodeURIComponent(url)}`
         });
     };
 

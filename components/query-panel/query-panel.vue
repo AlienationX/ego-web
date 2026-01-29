@@ -15,13 +15,13 @@
             <!-- <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,11H11V3H3M3,21H11V13H3M13,21H21V13H13M13,3V11H21V3" /></svg> -->
 
             <view class="num" @click="onChangeColumn">
-                <image v-if="settingsStore.options.column === 3" src="/common/icons/numeric-3-box.svg"></image>
-                <image v-else src="/common/icons/numeric-2-box.svg"></image>
+                <image v-if="settingsStore.options.column === 3" src="/static/icons/numeric-3-box.svg"></image>
+                <image v-else src="/static/icons/numeric-2-box.svg"></image>
             </view>
 
             <view class="icon" @click="onChangeView">
-                <image v-if="settingsStore.options.view === 'window'" src="/common/icons/view-grid.svg"></image>
-                <image v-else src="/common/icons/view-dashboard.svg"></image>
+                <image v-if="settingsStore.options.view === 'window'" src="/static/icons/view-grid.svg"></image>
+                <image v-else src="/static/icons/view-dashboard.svg"></image>
             </view>
         </view>
     </view>

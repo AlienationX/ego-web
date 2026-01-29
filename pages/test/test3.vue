@@ -27,11 +27,11 @@
 
     const items = ref([
         { url: 'https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_4/1742264636709_5_small.webp' },
-        { url: '/common/images/pics/ad_pic1.jpg' },
+        { url: '/static/images/pics/ad_pic1.jpg' },
         { url: 'https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_4/1742264636551_1_small.webp' },
-        { url: '/common/images/pics/ad_pic2.jpg' },
+        { url: '/static/images/pics/ad_pic2.jpg' },
         { url: 'https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_4/1726307754755_7_small.webp' },
-        { url: '/common/images/logo_Obsidian_Dark.png' },
+        { url: '/static/images/logo_Obsidian_Dark.png' },
         { url: 'https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_1/1739092323417_2_small.webp' }
     ]);
 

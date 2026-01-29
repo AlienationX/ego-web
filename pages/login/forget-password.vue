@@ -2,7 +2,7 @@
     <view class="reset-password-container">
         <!-- 返回按钮 -->
         <view class="back-btn" @click="goBack">
-            <image src="/common/icons/arrow-left.svg" mode="aspectFit"></image>
+            <image src="/static/icons/arrow-left.svg" mode="aspectFit"></image>
         </view>
 
         <swiper
@@ -117,7 +117,7 @@
                                     v-model="step3Form.newPassword"
                                 />
                                 <view class="password-toggle" @click="togglePassword">
-                                    <image src="/common/icons/eye-icon.svg" mode="aspectFit"></image>
+                                    <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
                                 </view>
                             </view>
 

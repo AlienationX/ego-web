@@ -16,11 +16,11 @@
 
     const items = ref([
         {src: "https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_4/1742264636709_5_small.webp"},
-        {src: "/common/images/pics/ad_pic1.jpg"},
+        {src: "/static/images/pics/ad_pic1.jpg"},
         {src: "https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_4/1742264636551_1_small.webp"},
-        {src: "/common/images/pics/ad_pic2.jpg"},
+        {src: "/static/images/pics/ad_pic2.jpg"},
         {src: "https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_4/1726307754755_7_small.webp"},
-        {src: "/common/images/logo_Obsidian_Dark.png"},
+        {src: "/static/images/logo_Obsidian_Dark.png"},
         {src: "https://wallpaper-kpze6c.s3.eu-north-1.amazonaws.com/pics/classify_1/1739092323417_2_small.webp"},
     ]);
     

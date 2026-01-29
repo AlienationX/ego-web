@@ -6,7 +6,7 @@
 
         <view class="content-wrapper">
             <view v-if="favoriteList.length === 0 && !isRunning" class="empty-state">
-                <!-- <image src="/common/images/pics/empty.svg" mode="aspectFit" class="empty-image"></image> -->
+                <!-- <image src="/static/images/pics/empty.svg" mode="aspectFit" class="empty-image"></image> -->
                 <text class="empty-text">{{ $t('favorite.empty') }}</text>
                 <button class="go-browse-btn" @click="goBrowse">{{ $t('favorite.goBrowse') }}</button>
             </view>

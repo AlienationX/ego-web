@@ -197,18 +197,17 @@
             }
         },
         {
-            "path": "pages/detail/detail",
+            "path": "pages/about/about",
             "style": {
-                "navigationBarTitleText": "壁纸详情",
+                "navigationBarTitleText": "关于我们",
                 "navigationStyle": "custom",
                 "enablePullDownRefresh": false
             }
         },
         {
-            "path": "pages/about/about",
+            "path": "pages/webview/webview",
             "style": {
-                "navigationBarTitleText": "关于我们",
-                "navigationStyle": "custom",
+                "navigationBarTitleText": "网页浏览",
                 "enablePullDownRefresh": false
             }
         }

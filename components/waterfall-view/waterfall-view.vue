@@ -28,7 +28,7 @@
             default: () => [
                 {
                     id: '0',
-                    smallPicurl: '/common/images/logo_Obsidian_Light_Raw.png',
+                    smallPicurl: '/static/images/logo_Obsidian_Light_Raw.png',
                     description: '默认描述',
                     score: 0
                 }
