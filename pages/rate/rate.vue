@@ -1,14 +1,14 @@
 <template>
     <view class="layout">
         <menu-bar>
-            <template #title>{{ $t('user.profile.myScore') }}</template>
+            <template #title>{{ t('user.profile.myScore') }}</template>
         </menu-bar>
 
         <view class="content-wrapper">
             <view v-if="ratingList.length === 0 && !isRunning" class="empty-state">
                 <!-- <image src="/static/images/pics/empty.svg" mode="aspectFit" class="empty-image"></image> -->
-                <text class="empty-text">{{ $t('rating.empty') }}</text>
-                <button class="go-browse-btn" @click="goBrowse">{{ $t('rating.goBrowse') }}</button>
+                <text class="empty-text">{{ t('rating.empty') }}</text>
+                <button class="go-browse-btn" @click="goBrowse">{{ t('rating.goBrowse') }}</button>
             </view>
 
             <view v-else class="rating-list">
@@ -17,18 +17,18 @@
                         <image :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
                     </view>
                     <view class="rating-info">
-                        <view class="wallpaper-name">{{ item.nickname || item.description || $t('rating.untitled') }}</view>
+                        <view class="wallpaper-name">{{ item.description || t('rating.untitled') }}</view>
                         <view class="rating-meta">
                             <view class="score-section">
-                                <uni-rate readonly :value="item.user_score || item.score" size="14" margin="8"></uni-rate>
-                                <text class="score-text">{{ item.user_score || item.score }}</text>
+                                <uni-rate readonly :value="item.my_score" size="14" margin="8"></uni-rate>
+                                <text class="score-text">{{ item.my_score }}</text>
                             </view>
-                            <view class="rating-time" v-if="item.rating_time">
-                                {{ formatTime(item.rating_time) }}
+                            <view class="rating-time" v-if="item.action_updated_at">
+                                {{ formatTime(item.action_updated_at) }}
                             </view>
                         </view>
-                        <view class="rating-comment" v-if="item.comment">
-                            {{ item.comment }}
+                        <view class="rating-comment" v-if="item.tabs">
+                            {{ item.tabs }}
                         </view>
                     </view>
                     <view class="rating-arrow">
@@ -51,9 +51,12 @@
 <script setup>
     import { ref } from 'vue';
     import { onLoad, onUnload, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
-    import { apiGetClassList } from '@/api/wallpaper.js';
+    import { apiGetActions } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
     import { getNavBarHeight } from '@/utils/system.js';
+    import { useI18n } from 'vue-i18n';
+
+    const { t } = useI18n();
 
     const backToTopRef = ref(null);
     const isRunning = ref(false);
@@ -73,7 +76,7 @@
             }
             isRunning.value = true;
 
-            let res = await apiGetClassList(queryParams.value);
+            let res = await apiGetActions(queryParams.value);
             let fullData = res.data.map((item) => handlePicUrl(item));
 
             if (queryParams.value.pageNum === 1) {
@@ -82,7 +85,7 @@
                 ratingList.value.push(...fullData);
             }
 
-            if (queryParams.value.pageSize > res.data.length) noData.value = true;
+            if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
         } finally {
             uni.hideLoading();
             isRunning.value = false;
@@ -99,10 +102,10 @@
         const hours = Math.floor(diff / 3600000);
         const days = Math.floor(diff / 86400000);
 
-        if (minutes < 1) return $t('rating.justNow');
-        if (minutes < 60) return `${minutes}${$t('rating.minutesAgo')}`;
-        if (hours < 24) return `${hours}${$t('rating.hoursAgo')}`;
-        if (days < 7) return `${days}${$t('rating.daysAgo')}`;
+        if (minutes < 1) return t('rating.justNow');
+        if (minutes < 60) return `${minutes}${t('rating.minutesAgo')}`;
+        if (hours < 24) return `${hours}${t('rating.hoursAgo')}`;
+        if (days < 7) return `${days}${t('rating.daysAgo')}`;
         
         return date.toLocaleDateString();
     };

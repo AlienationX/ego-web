@@ -72,7 +72,7 @@
                     <view class="remember-me">
                         <checkbox-group @change="onRememberChange">
                             <label class="checkbox-label">
-                                <checkbox value="remember" :checked="rememberMe" />
+                                <checkbox value="remember" :checked="rememberMe" style="transform:scale(0.7)"/>
                                 <text>{{ t('login.rememberMe') }}</text>
                             </label>
                         </checkbox-group>
@@ -313,7 +313,7 @@
 
             uni.showToast({
                 title: t('login.loginSuccess'),
-                icon: 'success'
+                icon: 'none'
             });
 
             setTimeout(() => {
@@ -345,7 +345,7 @@
 
             uni.showToast({
                 title: t('login.registerSuccess'),
-                icon: 'success'
+                icon: 'none'
             });
 
             // 注册成功后切换到登录
@@ -380,7 +380,7 @@
 
                     uni.showToast({
                         title: t('login.loginSuccess'),
-                        icon: 'success'
+                        icon: 'none'
                     });
 
                     setTimeout(() => {

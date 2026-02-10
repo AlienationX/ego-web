@@ -200,12 +200,6 @@
     const scorePopup = ref(null);
     const userScore = ref(0);
     const openScore = () => {
-        console.log("accessToken", userStore.accessToken);
-        console.log("refreshToken", userStore.refreshToken);
-        console.log(userStore.userinfo)
-
-        return
-        
         // 如果未登录，跳转到登录，或增加友好提示
         if (Object.keys(userStore.userinfo).length === 0) {            
             uni.showModal({

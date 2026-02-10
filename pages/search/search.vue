@@ -61,12 +61,12 @@
                     <button size="mini" plain :class="{ active: activeButton === 'date' }" @click="onDateSort">
                         发布日期
                         <view class="icon" v-if="activeButton === 'date'">
-                            <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="14" color="#28b389"></uni-icons>
+                            <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="14" color="#28B389"></uni-icons>
                         </view>
                     </button>
                 </view>
                 <view class="right" @click="onChange">
-                    <uni-icons :type="settingsStore.switchViewIcon" size="18" color="#28b389"></uni-icons>
+                    <uni-icons :type="settingsStore.switchViewIcon" size="18" color="#28B389"></uni-icons>
                 </view>
             </view> -->
 
@@ -240,7 +240,7 @@
 
             uni.setStorageSync('wallList', pendingList.value);
 
-            if (queryParams.value.pageSize > res.data.length) noData.value = true;
+            if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
             if (res.data.length === 0 && pendingList.value.length === 0) {
                 showWordBoard.value = true;
                 noResult.value = true;

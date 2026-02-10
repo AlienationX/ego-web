@@ -33,6 +33,14 @@
             }
         },
         {
+            "path": "pages/user/edit-profile",
+            "style": {
+                "navigationBarTitleText": "编辑个人信息",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/classlist/classlist",
             "style": {
                 "navigationBarTitleText": "分类列表",
@@ -189,7 +197,7 @@
             }
         },
         {
-            "path": "pages/rating/rating",
+            "path": "pages/rate/rate",
             "style": {
                 "navigationBarTitleText": "我的评分",
                 "navigationStyle": "custom",

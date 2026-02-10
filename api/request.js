@@ -4,8 +4,6 @@ import { decrypt } from '@/utils/encryption.js';
 
 // 发送 request 请求函数，如果token过期，刷新后再次发送 request 请求
 export const request = (config = {}) => {
-    const userStore = useUserStore();
-
     return new Promise(async (resolve, reject) => {
         try {
             resolve(await sendRequest(config));
@@ -38,6 +36,17 @@ const sendRequest = (config = {}) => {
     // } = config;
 
     const userStore = useUserStore();
+    const rawToken = userStore.accessToken ? decrypt(userStore.accessToken) : '';
+    const hasValidToken = rawToken && rawToken.trim().length > 0;
+
+    const header = {
+        'Access-Key': 'secret-insecure-88hefbf6c!mrv5x(xa4swy-h3y41f()(8xh6syj(xi&m!!h$#b',
+        ...config.header
+    };
+    // 仅当存在有效 token 时添加 Authorization，避免服务端报 "two space-delimited values"
+    if (hasValidToken) {
+        header.Authorization = `Bearer ${rawToken.trim()}`;
+    }
 
     return new Promise((resolve, reject) => {
         uni.request({
@@ -45,11 +54,7 @@ const sendRequest = (config = {}) => {
             data: config.data || {},
             method: config.method || 'GET',
             // timeout: 10000,  // 10秒
-            header: {
-                'Access-Key': 'secret-insecure-88hefbf6c!mrv5x(xa4swy-h3y41f()(8xh6syj(xi&m!!h$#b',
-                Authorization: userStore.accessToken ? `Bearer ${decrypt(userStore.accessToken)}` : '',
-                ...config.header
-            },
+            header: header,
             success: (res) => {
                 if (res.data.code === 200 || res.data.code === 201) {
                     resolve(res.data);
@@ -83,6 +88,17 @@ const sendRequest = (config = {}) => {
     });
 };
 
+// 处理 Token 过期
+const handleRefreshToken = (title) => {
+    const userStore = useUserStore();
+    uni.showToast({
+        title: title,
+        icon: 'none'
+    });
+    userStore.clearUserData();
+    uni.navigateTo({ url: '/pages/login/login' });
+};
+
 // 刷新 Token 函数
 const refreshToken = async () => {
     const userStore = useUserStore();
@@ -93,15 +109,16 @@ const refreshToken = async () => {
             data: { refresh: decrypt(userStore.refreshToken) }
         });
         console.log('================ refresh token', res);
-        let { access, refresh } = res.data;
-        userStore.setToken(access, refresh);
+        
+        if (res.statusCode === 200) {
+            let { access, refresh } = res.data;
+            userStore.setToken(access, refresh);
+        } else if (res.statusCode === 400) {
+            handleRefreshToken('登录过期，请重新登录');
+        } else {
+            handleRefreshToken('刷新Token失败，请重新登录');
+        }
     } catch (error) {
-        // 刷新失败则跳转登录页
-        uni.showToast({
-            title: '登录过期，请重新登录',
-            icon: 'none'
-        });
-        userStore.clearUserData();
-        uni.navigateTo({ url: '/pages/login/login' });
+        handleRefreshToken('Internal Server Error：刷新Token的接口报错');
     }
 };

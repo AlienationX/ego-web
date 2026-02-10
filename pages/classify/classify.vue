@@ -15,21 +15,20 @@
 
         <!-- 加载状态 -->
         <view v-if="isLoading" class="loading-container">
-            <rotate-loading :size="100" color="#28B389"></rotate-loading>
+            <rotate-loading :size="100"></rotate-loading>
             <view class="loading-text">{{ $t('message.loading') }}</view>
         </view>
 
         <!-- 空状态 -->
         <view v-else-if="!classifyList.length" class="empty-container">
-            <view class="empty-icon">📂</view>
             <view class="empty-text">{{ $t('category.empty') }}</view>
         </view>
 
-        <!-- 分类网格 -->
+        <!-- 分类网格：两列随意布局，部分高/跨列 -->
         <view class="classify" v-if="classifyList.length">
             <template v-for="(item, idx) in classifyComputed" :key="item.id">
-                <classify-item :item="item"></classify-item>
-                <view v-if="(idx + 1) % 6 === 0" class="ad-row">
+                <classify-item :item="item" :layout-style="getLayoutStyle(idx)"></classify-item>
+                <view v-if="(idx + 1) % 6 === 0">
                     <custom-ad-banner style="padding: 15rpx 0"></custom-ad-banner>
                 </view>
             </template>
@@ -55,7 +54,6 @@
         try {
             isLoading.value = true;
             let res = await apiGetClassify({
-                // 该参数无效，接口默认就是显示全部分类
                 pageSize: 30
             });
             classifyList.value = res.data.map((item) => handlePicUrl(item));
@@ -64,6 +62,33 @@
         } finally {
             isLoading.value = false;
         }
+    };
+
+    // 随意布局：每 6 个为一组，0/1 小格，2 高格，3/4 小格，5 通栏；
+    // 最后一组如果不足 6 个，则使用默认两列顺序排布，避免多占用空 grid 行
+    const getLayoutStyle = (idx) => {
+        const total = classifyComputed.value.length;
+        const fullCount = Math.floor(total / 6) * 6; // 能完整套用布局规则的数量
+
+        // 最后一组不满 6 个：不指定 gridRow，让 CSS Grid 自然排版，只控制列数
+        if (idx >= fullCount) {
+            const local = idx - fullCount;
+            return {
+                gridColumn: String((local % 2) + 1)
+                // gridRow 交给浏览器自动计算，这样不会预留多余空白
+            };
+        }
+
+        const block = Math.floor(idx / 6);
+        const baseRow = block * 5 + 1; // 每组6个分类项+1个广告位，共占用5行
+        const r = idx % 6;
+        if (r === 0) return { gridColumn: '1', gridRow: baseRow };
+        if (r === 1) return { gridColumn: '2', gridRow: baseRow };
+        if (r === 2) return { gridColumn: '1', gridRow: `${baseRow + 1} / span 2` };
+        if (r === 3) return { gridColumn: '2', gridRow: baseRow + 1 };
+        if (r === 4) return { gridColumn: '2', gridRow: baseRow + 2 };
+        if (r === 5) return { gridColumn: '1 / -1', gridRow: baseRow + 3 };
+        return {};
     };
 
     getClassify();
@@ -123,16 +148,16 @@
     }
 
     .classify {
-        padding: 0 30rpx 30rpx;
+        padding: 0 24rpx 30rpx;
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 30rpx;
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 200rpx;
+        gap: 20rpx;
         background: transparent;
     }
 
     .ad-row {
         grid-column: 1 / -1;
-        height: 100%;
     }
 
     // 加载状态样式

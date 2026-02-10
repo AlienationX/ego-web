@@ -1,50 +1,62 @@
 <template>
     <view class="container">
-        <svg class="loading" :style="loadingStyle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path :fill="color" d="M12,4V2A10,10 0 0,0 2,12H4A8,8 0 0,1 12,4Z" />
-        </svg>
+        <view class="spinner" :style="spinnerStyle"></view>
     </view>
 </template>
 
 <script setup>
-    import { ref, computed, toRefs } from 'vue';
+    import { computed, toRefs } from 'vue';
 
-    // 组件属性
     const props = defineProps({
-        size: { type: Number, default: 120 }, // SVG 尺寸
-        speed: { type: Number, default: 1.2 }, // 旋转速度（秒/圈）
-        color: { type: String, default: '#28B389' } // 颜色
+        size: { type: Number, default: 120 },
+        speed: { type: Number, default: 1.2 },
+        color: { type: String, default: '' }
     });
 
-    const { size, speed } = toRefs(props);
+    const { size, speed, color } = toRefs(props);
 
-    const loadingStyle = computed(() => ({
-        width: size.value + 'rpx',
-        height: size.value + 'rpx'
-        // animation: `spin ${speed.value}s linear infinite` // 这么写存在问题，动画不转
-        // animationPlayState: loading ? 'running' : 'paused'
-    }));
+    const spinnerStyle = computed(() => {
+        const c = color.value || '#28B389';
+        const borderW = Math.max(6, Math.round(size.value * 0.08));
+        return {
+            width: size.value + 'rpx',
+            height: size.value + 'rpx',
+            borderWidth: borderW + 'rpx',
+            borderStyle: 'solid',
+            borderColor: c,
+            borderTopColor: 'transparent',
+            animationDuration: speed.value + 's'
+        };
+    });
 </script>
 
 <style lang="scss" scoped>
+    @import '@/static/styles/variable-style.scss';
+
     .container {
         display: flex;
         justify-content: center;
         align-items: center;
+        min-width: 60rpx;
+        min-height: 60rpx;
+    }
 
-        .loading {
-            animation: spin 1.2s linear infinite;
-            transform-origin: center;
+    .spinner {
+        box-sizing: border-box;
+        border-radius: 50%;
+        border-style: solid;
+        animation: spin linear infinite;
+        -webkit-animation: spin linear infinite;
+    }
 
-            // 小程序不支持 @keyframes css实现动画效果
-            @keyframes spin {
-                from {
-                    transform: rotate(0deg);
-                }
-                to {
-                    transform: rotate(360deg);
-                }
-            }
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+            -webkit-transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+            -webkit-transform: rotate(360deg);
         }
     }
 </style>

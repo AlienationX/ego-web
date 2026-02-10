@@ -29,14 +29,14 @@
                     <view class="group-title">{{ t('about.information') }}</view>
                     <view class="info-item" @click="goToPage('introduction')">
                         <view class="item-left">
-                            <uni-icons type="info-filled" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="info-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.introduction') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                     </view>
                     <view class="info-item" @click="checkUpdate">
                         <view class="item-left">
-                            <uni-icons type="loop" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="loop" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.checkUpdate') }}</text>
                         </view>
                         <view class="item-right">
@@ -50,14 +50,14 @@
                     <view class="group-title">{{ t('about.legal') }}</view>
                     <view class="info-item" @click="openHtmlFile('/privacy_agreement.html')">
                         <view class="item-left">
-                            <uni-icons type="locked-filled" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="locked-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.privacy') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                     </view>
                     <view class="info-item" @click="openHtmlFile('/user_agreement.html')">
                         <view class="item-left">
-                            <uni-icons type="paperplane-filled" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="paperplane-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.agreement') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
@@ -68,14 +68,14 @@
                     <view class="group-title">{{ t('about.contact') }}</view>
                     <view class="info-item" @click="contactSupport">
                         <view class="item-left">
-                            <uni-icons type="chatboxes-filled" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="chatboxes-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.feedback') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                     </view>
                     <view class="info-item" @click="copyEmail">
                         <view class="item-left">
-                            <uni-icons type="email-filled" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="email-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.email') }}</text>
                         </view>
                         <view class="item-right">
@@ -89,14 +89,14 @@
                     <view class="group-title">{{ t('about.others') }}</view>
                     <view class="info-item" @click="goAppStore">
                         <view class="item-left">
-                            <uni-icons type="star-filled" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="star-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.rateUs') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                     </view>
                     <view class="info-item" @click="shareApp">
                         <view class="item-left">
-                            <uni-icons type="redo" size="20" color="#28b389"></uni-icons>
+                            <uni-icons type="redo" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.share') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>

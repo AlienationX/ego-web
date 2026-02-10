@@ -18,7 +18,7 @@
 
         <view class="notice">
             <view class="left">
-                <uni-icons type="sound-filled" size="20" color="#28b389"></uni-icons>
+                <uni-icons type="sound-filled" size="20" color="#28B389"></uni-icons>
                 <text class="text">{{ $t('index.notice') }}</text>
             </view>
 
@@ -46,7 +46,7 @@
                         <navigator class="button" url="/pages/login/login">Login</navigator> -->
 
                         <button class="button" size="mini" @click="refreshRandom" plain>{{ $t('common.refresh') }}</button>
-                        <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
+                        <uni-icons type="calendar" size="18" color="#28B389"></uni-icons>
                         <view class="text">
                             <!-- <uni-dateformat :date="Date.now()" locale='en' format="dd日"></uni-dateformat> -->
                             {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
@@ -97,7 +97,7 @@
                 <template #custom>
                     <view class="date">
                         <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
-                        <uni-icons type="calendar" size="18" color="#28b389"></uni-icons>
+                        <uni-icons type="calendar" size="18" color="#28B389"></uni-icons>
                         <view class="text">
                             <uni-dateformat :date="Date.now()" format="dd日"></uni-dateformat>
                         </view>
@@ -123,10 +123,9 @@
 
             <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
 
-            <view class="content" v-if="classifyList.length">
-                <!-- :item="item",第一个item是和组件绑定传参，第二个item是for循环遍历的值-->
-                <classify-item v-for="item in classifyComputed" :key="item.id" :item="item"></classify-item>
-                <classify-item :isMore="true"></classify-item>
+            <view class="content classify-grid" v-if="classifyList.length">
+                <classify-item v-for="(item, idx) in classifyPreviewList" :key="item.id" :item="item" :layout-style="getLayoutStyleForIndex(idx)"></classify-item>
+                <!-- <classify-item :isMore="true" :layout-style="getLayoutStyleMore()"></classify-item> -->
             </view>
         </view>
 
@@ -159,6 +158,23 @@
             name: uni.getLocale() === 'en' ? item.name_en : item.name
         }));
     });
+
+    const classifyPreviewList = computed(() => classifyComputed.value.slice(0, 8));
+
+    // 与 classify 页一致：前 6 个 2×3（左高格跨 2 行）+ 第 6 个通栏，第 7、8 个占第 5 行两列，「更多」通栏第 6 行
+    const getLayoutStyleForIndex = (idx) => {
+        if (idx === 0) return { gridColumn: '1', gridRow: '1' };
+        if (idx === 1) return { gridColumn: '2', gridRow: '1' };
+        if (idx === 2) return { gridColumn: '1', gridRow: '2 / span 2' };
+        if (idx === 3) return { gridColumn: '2', gridRow: '2' };
+        if (idx === 4) return { gridColumn: '2', gridRow: '3' };
+        if (idx === 5) return { gridColumn: '1 / -1', gridRow: '4' };
+        if (idx === 6) return { gridColumn: '1', gridRow: '5' };
+        if (idx === 7) return { gridColumn: '2', gridRow: '5' };
+        return {};
+    };
+
+    const getLayoutStyleMore = () => ({ gridColumn: '1 / -1', gridRow: '6' });
 
     const getBanner = async () => {
         let res = await apiGetBanner();
@@ -342,7 +358,7 @@
             padding: 30rpx 0 0 0;
 
             .date {
-                color: #28b389;
+                color: $wp-theme-color;
                 display: flex;
                 align-items: center;
 
@@ -444,12 +460,13 @@
         .classify {
             padding: 30rpx 0;
 
-            .content {
+            .content.classify-grid {
                 margin-top: 30rpx;
-                padding: 0 30rpx;
+                padding: 0 24rpx;
                 display: grid;
-                gap: 15rpx;
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(2, 1fr);
+                grid-auto-rows: 200rpx;
+                gap: 20rpx;
             }
 
             .more {

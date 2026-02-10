@@ -107,7 +107,7 @@
             pendingList.value.push(...fullData);
             classList.value = [...pendingList.value];
 
-            if (queryParams.value.pageSize > res.data.length) noData.value = true;
+            if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
 
             // 缓存数据
             uni.setStorageSync('wallList', classList.value);

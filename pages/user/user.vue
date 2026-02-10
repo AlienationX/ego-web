@@ -1,6 +1,7 @@
 <template>
     <view class="layout">
         <view class="userInfo" :class="{ 'not-logged-in': !userStore.userinfo.id }" :style="{ paddingTop: (getStatusBarHeight() + 20) + 'px' }">
+            
             <!-- 装饰性背景 -->
             <view class="decorative-bg">
                 <view class="bg-circle circle-1"></view>
@@ -8,19 +9,64 @@
                 <view class="bg-circle circle-3"></view>
             </view>
 
-            <view class="avater">
-                <image src="/static/images/pics/default_avatar.svg" mode="aspectFill"></image>
-                <view class="avatar-ring"></view>
-            </view>
+            <view v-if="userStore.userinfo.id" class="user-content">
+                <view class="avater">
+                    <image src="/static/images/pics/default_avatar.svg" mode="aspectFill"></image>
+                    <view class="avatar-ring"></view>
+                </view>
 
-            <view v-if="userStore.userinfo.id" class="user-details">
-                <view class="name">{{ userStore.userinfo.nickname || userStore.userinfo.username }}</view>
-                <view class="address" v-if="userStore.userinfo.region">
-                    <uni-icons type="location" size="14" color="#999"></uni-icons>
-                    <text>{{ userStore.userinfo.region }}</text>
+                <view class="user-details">
+                    <view class="details-top">
+                        <view class="name-row">
+                            <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
+                            <view v-if="userStore.userinfo.profile.is_vip" class="vip-badge">
+                                <uni-icons type="vip-filled" size="14" color="#fff"></uni-icons>
+                                <text>{{ t('user.profile.member') }}</text>
+                            </view>
+                            <view v-else class="non-vip-badge" @click="toMembership">
+                                <text>成为会员</text>
+                                <uni-icons type="arrow-right" size="12" color="#28B389"></uni-icons>
+                            </view>
+                        </view>
+                        <view class="edit-btn" @click="toEditProfile">
+                            {{ t('user.profile.editProfile') }}
+                        </view>
+                    </view>
+                    
+                    <view class="user-description">
+                        {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
+                    </view>
+                    
+                    <view class="user-info-row">
+                        <view v-if="userStore.userinfo.email" class="info-item">
+                            <uni-icons type="mail-filled" size="16" color="#999"></uni-icons>
+                            <text>{{ userStore.userinfo.email }}</text>
+                        </view>
+                        <view v-if="userStore.userinfo.profile.region" class="info-item">
+                            <uni-icons type="location" size="16" color="#999"></uni-icons>
+                            <text>{{ userStore.userinfo.profile.region }}</text>
+                        </view>
+                    </view>
                 </view>
             </view>
+            
+            <!-- 签到和能量 -->
+            <view v-if="userStore.userinfo.id" class="checkin-section">
+                <view class="energy-info">
+                    <uni-icons type="lightbulb-filled" size="24" color="#ffc107"></uni-icons>
+                    <text class="energy-text">当前能量: {{ userStore.userinfo.profile.energy || 0 }}</text>
+                </view>
+                <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
+                    <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
+                    <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
+                </view>
+            </view>
+
             <view v-else class="not-logged-in-content">
+                <view class="avater">
+                    <image src="/static/images/pics/default_avatar.svg" mode="aspectFill"></image>
+                    <view class="avatar-ring"></view>
+                </view>
                 <view class="app-name">{{ $t('common.appName') }}</view>
                 <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
                 <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
@@ -39,18 +85,18 @@
                 </view>
                 <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
                 <view class="card-decoration decoration-1"></view>
-                        </view>
+            </view>
             <view class="stats-card download-card" @click="toMyDownload">
                 <view class="card-bg"></view>
                 <view class="stats-row">
                     <view class="stats-icon download">
-                        <uni-icons type="download-filled" size="32" color="#28b389"></uni-icons>
+                        <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
                     </view>
                     <view class="stats-number">{{ userStore.userinfo.count ? userStore.userinfo.count.download_count : 0 }}</view>
                 </view>
                 <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
                 <view class="card-decoration decoration-2"></view>
-                        </view>
+            </view>
             <view class="stats-card star-card" @click="toMyScore">
                 <view class="card-bg"></view>
                 <view class="stats-row">
@@ -69,7 +115,7 @@
             <view class="list">
                 <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <uni-icons :type="item.left_icon" size="24" color="#28b389"></uni-icons>
+                        <uni-icons :type="item.left_icon" size="24" color="#28B389"></uni-icons>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -93,8 +139,8 @@
             <view class="list">
                 <view class="row exit-row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <uni-icons :type="item.left_icon" size="24" color="#ff6b6b"></uni-icons>
-                        <!-- <image class="icon" :src="item.left_icon"></image> -->
+                        <!-- <uni-icons :type="item.left_icon" size="24" color="#ff6b6b"></uni-icons> -->
+                        <image class="icon" :src="item.left_icon"></image>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -115,6 +161,7 @@
 <script setup>
     import { ref, reactive, computed } from 'vue';
     import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
+    import { apiPostProfile } from '@/api/wallpaper.js';
     import { getStatusBarHeight } from '@/utils/system.js';
     import { useUserStore } from '@/stores/user.js';
     import { useI18n } from 'vue-i18n';
@@ -122,6 +169,7 @@
     const { t } = useI18n();
 
     const userStore = useUserStore();
+    const hasCheckedInToday = ref(false);
 
     const toLogin = () => {
         // uni.navigateTo({ url: '/pages/login/login' });
@@ -130,6 +178,10 @@
 
     const toSettings = () => {
         uni.navigateTo({ url: '/pages/settings/settings' });
+    };
+
+    const toEditProfile = () => {
+        uni.navigateTo({ url: '/pages/user/edit-profile' });
     };
 
     const toMyFavorite = () => {
@@ -177,7 +229,7 @@
             });
             return;
         }
-        uni.navigateTo({ url: '/pages/rating/rating' });
+        uni.navigateTo({ url: '/pages/rate/rate' });
     };
     
     const toMembership = () => {
@@ -200,6 +252,45 @@
 
     const onExit = () => {
         userStore.clearUserData();
+    };
+
+    const checkin = async() => {
+        if (hasCheckedInToday.value) {
+            uni.showToast({
+                title: '今日已签到',
+                icon: 'none'
+            });
+            return;
+        }
+
+        const currentEnergy = userStore.userinfo.profile.energy || 0;
+        
+        // 发送签到请求
+        const res = await apiPostProfile({
+            energy: currentEnergy + 1
+        });
+        console.log(res);
+
+        if (res.code === 200) {
+            // 存储签到状态
+            userStore.userinfo.profile.energy = currentEnergy + 1;
+        
+            // 标记今日已签到
+            hasCheckedInToday.value = true;
+
+            const today = new Date().toISOString().split('T')[0];
+            uni.setStorageSync('lastCheckinDate', today);
+            
+            uni.showToast({
+                title: '签到成功，获得1点能量',
+                icon: 'success'
+            });
+        } else {
+            uni.showToast({
+                title: '签到失败',
+                icon: 'none'
+            });
+        }
     };
 
     const appMenus = computed(() => [
@@ -268,7 +359,7 @@
 
     const exitMenus = computed(() => [
         {
-            left_icon: 'gear-filled',  // /static/icons/exit-to-app.svg
+            left_icon: '/static/icons/exit-to-app.svg',
             left_text: t('user.profile.exit'),
             right_text: t('user.profile.exitText'),
             right_icon: '',
@@ -277,11 +368,15 @@
     ]);
 
     onShow(() => {
-        // console.log('页面显示时触发，用于切换回此页面时重新获取用户信息');
         // 检查是否已登录，已登录则获取最新用户信息
-        if (Object.keys(userStore.userinfo).length > 0) {            
+        if (Object.keys(userStore.userinfo).length > 0) {
             userStore.setUserInfo();
         }
+        
+        // 检查今日是否已签到
+        const lastCheckinDate = uni.getStorageSync('lastCheckinDate');
+        const today = new Date().toISOString().split('T')[0];
+        hasCheckedInToday.value = lastCheckinDate === today;
     });
 </script>
 
@@ -292,10 +387,8 @@
 
         .userInfo {
             display: flex;
-            align-items: center;
-            justify-content: top;
             flex-direction: column;
-            padding: 0 0 50rpx;
+            padding: 0 30rpx 30rpx;
             min-height: 320rpx;
             background: #fff;
             margin-bottom: 20rpx;
@@ -344,15 +437,24 @@
                 }
             }
 
+            .user-content {
+                display: flex;
+                align-items: flex-start;
+                margin-top: 20rpx;
+                gap: 24rpx;
+                position: relative;
+                z-index: 1;
+            }
+
             .avater {
-                width: 160rpx;
-                height: 160rpx;
+                width: 140rpx;
+                height: 140rpx;
                 border-radius: 50%;
                 overflow: hidden;
                 position: relative;
                 z-index: 1;
-                border: 4rpx solid #fff;
-                box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+                border: 3rpx solid #fff;
+                box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 
                 image {
                     width: 100%;
@@ -361,12 +463,12 @@
 
                 .avatar-ring {
                     position: absolute;
-                    top: -4rpx;
-                    left: -4rpx;
+                    top: -3rpx;
+                    left: -3rpx;
                     width: 100%;
                     height: 100%;
                     border-radius: 50%;
-                    border: 4rpx solid transparent;
+                    border: 3rpx solid transparent;
                     border-top-color: $wp-theme-color;
                     border-right-color: #ff6b9d;
                     animation: rotate 3s linear infinite;
@@ -374,24 +476,164 @@
             }
 
             .user-details {
+                flex: 1;
+                position: relative;
+                z-index: 1;
+                min-width: 0;
+            }
+
+            .details-top {
                 display: flex;
-                flex-direction: column;
+                justify-content: space-between;
                 align-items: center;
+                margin-bottom: 12rpx;
+            }
+
+            .name-row {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 8rpx;
+                flex: 1;
+                min-width: 0;
             }
 
             .name {
-                font-size: 40rpx;
-                color: #333;
-                font-weight: 600;
-                padding: 40rpx 0 8rpx;
+                font-size: 36rpx;
+                color: #1a1a1a;
+                font-weight: 700;
+                letter-spacing: 0.5rpx;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
-            .address {
+            .vip-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4rpx;
+                padding: 4rpx 12rpx;
+                background: linear-gradient(135deg, $wp-theme-color 0%, darken($wp-theme-color, 8%) 100%);
+                color: #fff;
+                font-size: 18rpx;
+                font-weight: 600;
+                border-radius: 16rpx;
+                white-space: nowrap;
+            }
+
+            .non-vip-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4rpx;
+                padding: 4rpx 12rpx;
+                background: rgba($wp-theme-color, 0.08);
+                color: #28B389;
+                font-size: 18rpx;
+                font-weight: 600;
+                border-radius: 16rpx;
+                white-space: nowrap;
+                cursor: pointer;
+                transition: all 0.3s;
+
+                &:active {
+                    background: rgba($wp-theme-color, 0.15);
+                    transform: scale(0.95);
+                }
+            }
+
+            .edit-btn {
+                padding: 6rpx 16rpx;
+                background: rgba(40, 179, 137, 0.08);
+                color: #28B389;
+                font-size: 20rpx;
+                font-weight: 600;
+                border-radius: 12rpx;
+                cursor: pointer;
+                transition: all 0.3s;
+                white-space: nowrap;
+
+                &:active {
+                    background: rgba(40, 179, 137, 0.15);
+                    transform: scale(0.95);
+                }
+            }
+
+            .user-description {
+                font-size: 24rpx;
+                color: #666;
+                line-height: 1.4;
+                margin-bottom: 12rpx;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .user-info-row {
                 display: flex;
                 align-items: center;
-                gap: 8rpx;
-                font-size: 28rpx;
+                gap: 16rpx;
+                flex-wrap: wrap;
+            }
+
+            .info-item {
+                display: flex;
+                align-items: center;
+                gap: 6rpx;
+                font-size: 22rpx;
                 color: #999;
+                white-space: nowrap;
+            }
+
+            .checkin-section {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 30rpx;
+                padding: 20rpx;
+                background: rgba($wp-theme-color, 0.05);
+                border-radius: 16rpx;
+                position: relative;
+                z-index: 1;
+            }
+
+            .energy-info {
+                display: flex;
+                align-items: center;
+                gap: 12rpx;
+            }
+
+            .energy-text {
+                font-size: 28rpx;
+                color: #333;
+                font-weight: 600;
+            }
+
+            .checkin-btn {
+                display: flex;
+                align-items: center;
+                gap: 6rpx;
+                padding: 10rpx 24rpx;
+                background: rgba(40, 179, 137, 0.08);
+                color: #28B389;
+                font-size: 24rpx;
+                font-weight: 600;
+                border-radius: 20rpx;
+                cursor: pointer;
+                transition: all 0.3s;
+                border: 1rpx solid rgba(40, 179, 137, 0.2);
+
+                &:active:not(.checked-in) {
+                    background: rgba(40, 179, 137, 0.15);
+                    transform: scale(0.95);
+                }
+
+                &.checked-in {
+                    background: rgba(100, 100, 100, 0.08);
+                    color: #999;
+                    border-color: rgba(100, 100, 100, 0.2);
+                    cursor: not-allowed;
+                }
             }
 
             .not-logged-in-content {
@@ -624,6 +866,13 @@
                         display: flex;
                         align-items: center;
 
+                        .icon {
+                            width: 48rpx;
+                            height: 48rpx;
+                            flex-shrink: 0;
+                            filter: brightness(0) saturate(100%) invert(52%) sepia(88%) saturate(485%) hue-rotate(106deg) brightness(91%) contrast(87%);
+                        }
+
                         .text {
                             padding-left: 20rpx;
                             color: #333;
@@ -653,14 +902,6 @@
                 }
             }
 
-            &.exit-section {
-                .row.exit-row {
-                    .left .text {
-                        color: #ff6b6b;
-                    }
-                }
-            }
         }
     }
 </style>
-

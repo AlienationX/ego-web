@@ -29,7 +29,7 @@
 <script setup>
     import { ref } from 'vue';
     import { onLoad, onUnload, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
-    import { apiGetClassList } from '@/api/wallpaper.js';
+    import { apiGetActions } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
     import { getNavBarHeight } from '@/utils/system.js';
 
@@ -51,7 +51,7 @@
             }
             isRunning.value = true;
 
-            let res = await apiGetClassList(queryParams.value);
+            let res = await apiGetActions(queryParams.value);
             let fullData = res.data.map((item) => handlePicUrl(item));
 
             if (queryParams.value.pageNum === 1) {
@@ -60,7 +60,7 @@
                 downloadList.value.push(...fullData);
             }
 
-            if (queryParams.value.pageSize > res.data.length) noData.value = true;
+            if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
 
             uni.setStorageSync('wallList', downloadList.value);
         } finally {

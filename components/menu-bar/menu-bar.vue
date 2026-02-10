@@ -75,14 +75,14 @@
     .menu-bar-container {
         width: 100%;
     }
-    
+
     .status-bar-bg {
         position: fixed;
         left: 0;
         top: 0;
         width: 100%;
         z-index: 101;
-        background: #f5f5f5;
+        background: $wp-bg-color-grey;
     }
 
     .box {
@@ -90,19 +90,20 @@
         left: 0;
         width: 100%;
         z-index: 100;
-        background: #f5f5f5;
+        background: $wp-bg-color-grey;
         display: flex;
         justify-content: left;
         align-items: center;
-        
+
         &.with-border {
-            border-bottom: 1px solid #e5e5e5;
+            border-bottom: 1px solid $wp-border-color-light;
         }
 
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
             padding: 0 30rpx;
 
             .left {
@@ -114,25 +115,25 @@
                 .back {
                     width: 64rpx;
                     height: 64rpx;
-                    background: #fff;
+                    background: $wp-bg-color;
                     border-radius: 50%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     flex-shrink: 0;
                     transition: all 0.3s;
-                    
+
                     &:active {
-                        background: #f0f0f0;
+                        background: $wp-bg-color-hover;
                         transform: scale(0.95);
                     }
                 }
-                
+
                 .title {
                     padding-left: 24rpx;
                     font-size: 36rpx;
                     font-weight: 600;
-                    color: #333;
+                    color: $wp-text-color;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -143,20 +144,19 @@
 
             .right {
                 flex-shrink: 0;
-                margin-left: 20rpx;
-                
+
                 .menu {
                     width: 64rpx;
                     height: 64rpx;
-                    background: #fff;
+                    background: transparent;
                     border-radius: 50%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     transition: all 0.3s;
-                    
+
                     &:active {
-                        background: #f0f0f0;
+                        background: $wp-bg-color-hover;
                         transform: scale(0.95);
                     }
                 }
@@ -165,7 +165,6 @@
     }
 
     .fill {
-        // 占位区域，避免内容被导航栏遮挡
         width: 100%;
     }
 </style>

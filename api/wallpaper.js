@@ -126,43 +126,19 @@ export const apiPostActions = (data = {}) => {
     });
 };
 
-// demo
-export const apiGetSetupScore = (data = {}) => {
-    // 图片评分接口，该接口根据ip验证是否已经打过分了
+export const apiGetActions = (data = {}) => {
+    // 获取用户操作数据接口
     return request({
-        url: '/setupScore/',
+        url: '/actions/',
         data
     });
 };
 
-export const apiGetDetail = (id = '') => {
-    // 获取壁纸详情
+export const apiPostProfile = (data = {}) => {
+    // 更新用户个人信息
     return request({
-        url: `/wall/${id}/`
-    });
-};
-
-export const apiGetComments = (data = {}) => {
-    // 获取评论列表
-    return request({
-        url: '/comment/',
-        data
-    });
-};
-
-export const apiPostComment = (data = {}) => {
-    // 发布评论
-    return request({
-        url: '/comment/',
+        url: '/user/update_me/',
         data,
-        method: 'POST'
-    });
-};
-
-export const apiPostLikeComment = (commentId = '') => {
-    // 点赞评论
-    return request({
-        url: `/comment/${commentId}/like/`,
         method: 'POST'
     });
 };
