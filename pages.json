@@ -152,17 +152,15 @@
             }
         },
         {
-            "path" : "pages/demo-view/demo-view",
-            "style" : 
-            {
-                "navigationBarTitleText" : "视图切换"
+            "path": "pages/demo-view/demo-view",
+            "style": {
+                "navigationBarTitleText": "视图切换"
             }
         },
         {
-            "path" : "pages/settings/settings",
-            "style" : 
-            {
-                "navigationBarTitleText" : "设置",
+            "path": "pages/settings/settings",
+            "style": {
+                "navigationBarTitleText": "设置",
                 "navigationStyle": "custom"
             }
         },
@@ -221,7 +219,7 @@
         }
     ],
     "globalStyle": {
-        "rpxCalcMaxDeviceWidth": 1444,   // rpx 进行缩放计算的最大设备宽度（单位 px），默认 960
+        "rpxCalcMaxDeviceWidth": 1444, // rpx 进行缩放计算的最大设备宽度（单位 px），默认 960
         "navigationBarTextStyle": "black",
         "navigationBarTitleText": "本我壁纸",
         "navigationBarBackgroundColor": "#F8F8F8",
@@ -230,22 +228,26 @@
     "tabBar": {
         "color": "#9799a5",
         "selectedColor": "#28b389",
-        "list": [{
-            "text": "%tabbar.index%",
-            "pagePath": "pages/index/index",
-            "iconPath": "/static/tabbar/Line_Home.png",
-            "selectedIconPath": "/static/tabbar/Fill_Home_Green.png"
-        }, {
-            "text": "%tabbar.category%",
-            "pagePath": "pages/classify/classify",
-            "iconPath": "/static/tabbar/Line_Category.png",
-            "selectedIconPath": "/static/tabbar/Fill_Category_Green.png"
-        }, {
-            "text": "%tabbar.user%",
-            "pagePath": "pages/user/user",
-            "iconPath": "/static/tabbar/Line_User.png",
-            "selectedIconPath": "/static/tabbar/Fill_User_Green.png"
-        }]
+        "list": [
+            {
+                "text": "%tabbar.index%",
+                "pagePath": "pages/index/index",
+                "iconPath": "/static/tabbar/Line_Home.png",
+                "selectedIconPath": "/static/tabbar/Fill_Home_Green.png"
+            },
+            {
+                "text": "%tabbar.category%",
+                "pagePath": "pages/classify/classify",
+                "iconPath": "/static/tabbar/Line_Category.png",
+                "selectedIconPath": "/static/tabbar/Fill_Category_Green.png"
+            },
+            {
+                "text": "%tabbar.user%",
+                "pagePath": "pages/user/user",
+                "iconPath": "/static/tabbar/Line_User.png",
+                "selectedIconPath": "/static/tabbar/Fill_User_Green.png"
+            }
+        ]
     },
     "uniIdRouter": {}
 }

@@ -5,13 +5,13 @@ import en from './locale/en.json';
 import zhHans from './locale/zh-Hans.json';
 const messages = {
     en,
-    'zh-Hans': zhHans
+    'zh-Hans': zhHans,
 };
 
 let i18nConfig = {
     locale: uni.getStorageSync('lang') || uni.getLocale() || 'en', // 获取已设置的语言
     globalInjection: true, // 全局注入 $t 方法
-    messages
+    messages,
 };
 
 import { createSSRApp } from 'vue';
@@ -22,7 +22,7 @@ import { createPersistedState } from 'pinia-plugin-persistedstate';
 const i18n = createI18n(i18nConfig);
 export function createApp() {
     const app = createSSRApp(App);
-    
+
     const pinia = Pinia.createPinia();
     // 添加持久化插件
     pinia.use(
@@ -36,14 +36,14 @@ export function createApp() {
                 },
                 removeItem(key) {
                     uni.removeStorageSync(key);
-                }
-            }
+                },
+            },
         })
     );
     app.use(i18n);
     app.use(pinia);
     return {
         app,
-        Pinia // 此处必须将 Pinia 返回
+        Pinia, // 此处必须将 Pinia 返回
     };
 }
