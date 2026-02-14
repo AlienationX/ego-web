@@ -2,6 +2,7 @@ import { ref, reactive, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { apiGetProfile } from '@/api/wallpaper';
 import { encrypt } from '@/utils/encryption.js';
+import { PICS_BASE_URL } from '@/common/config.js';
 
 export const useUserStore = defineStore(
     'user',
@@ -11,11 +12,12 @@ export const useUserStore = defineStore(
         const userinfo = ref({}); // const 声明的变量不能被整体重新赋值userinfo=res.data，只能修改其属性。Object.assign(userinfo, res.data);
         const preferences = reactive({
             language: 'zh-CN',
-            fontSize: 14
+            fontSize: 14,
         });
 
-        const showAd = ref(true);  // 全局控制
-        const isVip = computed(() => userinfo.value.is_vip || false);  // 用户级别控制
+        const showAd = ref(true); // 全局控制
+        const isVip = computed(() => userinfo.value.profile.is_vip || false); // 用户级别控制
+        const isLogin = computed(() => userinfo.value.id || false); // 登录状态控制
 
         const setToken = (access, refresh) => {
             accessToken.value = encrypt(access);
@@ -31,6 +33,14 @@ export const useUserStore = defineStore(
         const setUserInfo = async () => {
             let res = await apiGetProfile();
             userinfo.value = res.data;
+
+            // 如果avatar字段不为空，则拼接，不存在则使用随机头像
+            if (userinfo.value.profile.avatar) {
+                userinfo.value.profile.avatar &&= `${PICS_BASE_URL}/${userinfo.value.profile.avatar}`;
+            } else {
+                // /static/images/pics/default_avatar.svg
+                userinfo.value.profile.avatar = `https://api.dicebear.com/9.x/bottts/svg?seed=${userinfo.value.id}`;
+            }
         };
 
         const clearUserData = () => {
@@ -58,7 +68,19 @@ export const useUserStore = defineStore(
             console.log('已下载次数', downloadCnt.value);
         };
 
-        return { accessToken, refreshToken, userinfo, showAd, isVip, setToken, setUserInfo, clearUserData, downloadCnt, downloadCntAdd };
+        return {
+            accessToken,
+            refreshToken,
+            userinfo,
+            showAd,
+            isVip,
+            isLogin,
+            setToken,
+            setUserInfo,
+            clearUserData,
+            downloadCnt,
+            downloadCntAdd,
+        };
     },
     {
         persist: {
@@ -67,7 +89,7 @@ export const useUserStore = defineStore(
             // 存储位置，默认 localStorage，还支持sessionStorage，cookie比较复杂
             // storage: localStorage,
             // 指定存储的内容
-            paths: ['accessToken', 'refreshToken']
-        }
+            paths: ['accessToken', 'refreshToken'],
+        },
     }
 );

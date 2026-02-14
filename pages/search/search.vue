@@ -314,7 +314,7 @@
             z-index: 20;
             background: #f5f5f5;
             // padding: 10rpx 0;
-            box-shadow: 0 8rpx 8rpx -4rpx rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8rpx 8rpx -4rpx rgba(0, 0, 0, 0.02);
             // border-bottom: 1rpx solid #e8e8e8;
 
             .navbar {

@@ -1,0 +1,16 @@
+{
+    // 指定默认格式化工具为Prettier
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    // 为JS和TS文件单独指定Prettier
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    // 保存时自动格式化
+    "editor.formatOnSave": true,
+}

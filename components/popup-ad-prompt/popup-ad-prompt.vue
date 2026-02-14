@@ -10,102 +10,102 @@
 </template>
 
 <script setup>
-    import { ref } from 'vue';
-    import { onLoad, onUnload } from '@dcloudio/uni-app';
-    import { useAdRewardedVideo } from '@/hooks/useAd.js';
-    import { apiPostIncrementDownloads } from '@/api/wallpaper.js';
+import { ref } from 'vue';
+import { onLoad, onUnload } from '@dcloudio/uni-app';
+import { useAdRewardedVideo } from '@/hooks/useAd.js';
+import { apiPostIncrementDownloads } from '@/api/wallpaper.js';
 
-    const props = defineProps({
-        id: Number,
-        picurl: String
+const props = defineProps({
+    id: Number,
+    picurl: String,
+});
+
+// views字段值+1
+const incrementDownloads = async (id) => {
+    let res = await apiPostIncrementDownloads(id);
+};
+
+const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
+
+const popup = ref(null);
+const open = () => {
+    popup.value.open();
+};
+
+const close = () => {
+    popup.value.close();
+};
+
+const onWatch = () => {
+    close();
+    uni.showLoading({
+        title: 'Downloading...',
+        mask: true,
     });
 
-    // views字段值+1
-    const incrementDownloads = async (id) => {
-        let res = await apiPostIncrementDownloads(id);
-    };
+    // createRewardedVideoAd(); // 创建激励视频广告
+    showRewardedVideoAd(props.picurl);
+    // destroyRewardedVideoAd(); // 销毁激励视频广告
 
-    const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
+    incrementDownloads(props.id);
 
-    const popup = ref(null);
-    const open = () => {
-        popup.value.open();
-    };
+    uni.hideLoading();
+};
 
-    const close = () => {
-        popup.value.close();
-    };
+onLoad((e) => {
+    createRewardedVideoAd(); // 创建激励视频广告
+});
 
-    const onWatch = () => {
-        close();
-        uni.showLoading({
-            title: 'Downloading...',
-            mask: true
-        });
+onUnload(() => {
+    destroyRewardedVideoAd(); // 销毁激励视频广告
+});
 
-        // createRewardedVideoAd(); // 创建激励视频广告
-        showRewardedVideoAd(props.picurl);
-        // destroyRewardedVideoAd(); // 销毁激励视频广告
-
-        incrementDownloads(props.id);
-
-        uni.hideLoading();
-    };
-
-    onLoad((e) => {
-        createRewardedVideoAd(); // 创建激励视频广告
-    });
-
-    onUnload(() => {
-        destroyRewardedVideoAd(); // 销毁激励视频广告
-    });
-
-    // 暴露方法给父组件
-    defineExpose({
-        open
-    });
+// 暴露方法给父组件
+defineExpose({
+    open,
+});
 </script>
 
 <style lang="scss" scoped>
-    .popup {
-        .box {
-            padding: 40rpx;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            // background: #28b389;
+.popup {
+    .box {
+        padding: 40rpx;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        // background: #28b389;
 
-            .close {
-                position: absolute;
-                top: 8rpx;
-                right: 8rpx;
-            }
+        .close {
+            position: absolute;
+            top: 20rpx;
+            right: 20rpx;
+        }
 
-            .pic {
-                height: 200rpx;
-                margin-bottom: 20rpx;
-            }
+        .pic {
+            height: 200rpx;
+            margin-bottom: 20rpx;
+        }
 
-            .txt {
-                font-weight: bold;
-                font-size: 42rpx;
-                color: #555555;
-                text-align: center;
-                margin: 20rpx;
-            }
+        .txt {
+            font-weight: bold;
+            font-size: 42rpx;
+            color: #555555;
+            text-align: center;
+            margin: 20rpx;
+        }
 
-            .btn {
-                font-size: 32rpx;
-                color: #ffffff;
-                background-color: $wp-theme-color;
-                font-weight: bold;
-                margin: 20rpx 20rpx;
-                width: 100%;
-                border: none;
-                border-radius: 32rpx;
-            }
+        .btn {
+            font-size: 32rpx;
+            color: #ffffff;
+            background-color: $wp-theme-color;
+            font-weight: bold;
+            margin: 20rpx 20rpx;
+            width: 100%;
+            border: none;
+            border-radius: 32rpx;
         }
     }
+}
 </style>

@@ -3,7 +3,7 @@ import { downloadPic } from '@/common/core.js';
 import { useUserStore } from '@/stores/user.js';
 
 export const useAdIntersititial = () => {
-    // #ifdef MP-360
+    // #ifdef APP
     const userStore = useUserStore();
 
     const adOption = {
@@ -66,7 +66,7 @@ export const useAdIntersititial = () => {
     };
     // #endif
 
-    // #ifndef MP-360
+    // #ifndef APP
     return {
         createInterstitialAd: function () {},
         showInterstitialAd: function (inputPicurl) {downloadPic(inputPicurl);},
@@ -76,7 +76,7 @@ export const useAdIntersititial = () => {
 };
 
 export const useAdRewardedVideo = () => {
-    // #ifdef MP-360
+    // #ifdef APP
     const userStore = useUserStore();
 
     const adOption = {
@@ -182,7 +182,7 @@ export const useAdRewardedVideo = () => {
     };
     // #endif
 
-    // #ifndef MP-360
+    // #ifndef APP
     return {
         createRewardedVideoAd: function () {},
         showRewardedVideoAd: function (inputPicurl) {downloadPic(inputPicurl);},

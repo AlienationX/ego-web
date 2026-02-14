@@ -29,7 +29,6 @@
         "notice": "Notice",
         "dailyRecommend": "Daily Recommend",
         "categoryRecommend": "Category Recommend"
-
     },
     "category": {
         "title": "Category",
@@ -48,6 +47,7 @@
             "settings": "Settings",
             "exit": "Exit",
             "exitText": "Exit the current account",
+            "exitConfirm": "Are you sure you want to exit?",
             "appDesc": "Discover more beautiful wallpapers",
             "login": "Login",
             "loginRequired": "Please login to use this feature",
@@ -56,6 +56,7 @@
             "editProfile": "Edit Profile",
             "checkin": "Daily Check-in",
             "checkedIn": "Checked In",
+            "alreadyCheckedInToday": "Already checked in today",
             "noDescription": "This user is lazy and hasn't filled in a personal description yet",
             "nickname": "Nickname",
             "email": "Email",
@@ -86,7 +87,7 @@
         }
     },
     "message": {
-        "copyrightStatement": "Declaration: This image is from the internet. If there is any infringement, please copy the wallpaper ID and relevant proof and send them to the email 735003439@qq.com. The administrator will delete the infringing wallpaper to protect your rights.",
+        "copyrightStatement": "Declaration: This image is from the internet. If there is any infringement, please copy the wallpaper ID and relevant proof and send them to the email 735003439{'@'}qq.com. The administrator will delete the infringing wallpaper to protect your rights.",
         "saveSuccessful": "Save successful. Please go to the album to view.",
         "saveFailed": "Save failed. Please try again.",
         "downloading": "Downloading...",
@@ -95,7 +96,7 @@
         "adPrompt": "Watch An Ads"
     },
     "preview": {
-        "wallpaperInfo": "Wallpaper Info",
+        "wallpaperInfo": "Wallpaper Information",
         "wallpaperId": "Wallpaper ID:",
         "category": "Category:",
         "publisher": "Publisher:",
@@ -108,7 +109,7 @@
         "loginPrompt": "You need to login to rate",
         "login": "Login",
         "cancel": "Cancel",
-        "ratingSuccess": "Rating successful. You can view it in [My Ratings].",
+        "ratingSuccess": "Rating successful. You can view it in [My Score].",
         "ratingFailed": "Rating failed. Please try again later.",
         "savePrompt": "Please long press or right-click menu to save wallpaper"
     },

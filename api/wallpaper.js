@@ -1,36 +1,36 @@
-import { request } from '@/api/request.js';
+import { request, uploadRequest } from '@/api/request.js';
 
 export const apiPostAccess = (data = {}) => {
     return request({
         url: '/access/',
         data,
-        method: 'POST'
+        method: 'POST',
     });
 };
 
 export const apiGetBanner = () => {
     return request({
-        url: '/banner/'
+        url: '/banner/',
     });
 };
 
 export const apiGetRandomDay = () => {
     return request({
-        url: '/wall/random/'
+        url: '/wall/random/',
     });
 };
 
 export const apiGetRandomRecommend = (data = {}) => {
     return request({
         url: '/wall/random_recommend/',
-        data
+        data,
     });
 };
 
 export const apiGetNotice = (data = {}, id = '') => {
     return request({
         url: id ? `/notice/${id}/` : '/notice/',
-        data
+        data,
     });
 };
 
@@ -38,7 +38,7 @@ export const apiGetClassify = (data = {}) => {
     // 获取分类
     return request({
         url: '/classify/',
-        data
+        data,
     });
 };
 
@@ -46,7 +46,7 @@ export const apiGetClassList = (data = {}) => {
     // 获取分类列表，也就是分类下的所有图片
     return request({
         url: '/wall/',
-        data
+        data,
     });
 };
 
@@ -54,21 +54,21 @@ export const apiSearchData = (data = {}) => {
     // 获取搜索数据
     return request({
         url: '/wall/search/',
-        data
+        data,
     });
 };
 
 export const apiPostIncrementViews = (id = '') => {
     return request({
         url: `/wall/${id}/increment_views/`,
-        method: 'POST'
+        method: 'POST',
     });
 };
 
 export const apiPostIncrementDownloads = (id = '') => {
     return request({
         url: `/wall/${id}/increment_downloads/`,
-        method: 'POST'
+        method: 'POST',
     });
 };
 
@@ -76,7 +76,7 @@ export const apiPostLoginByWechat = (data = {}) => {
     return request({
         url: '/login/wechat/',
         data,
-        method: 'POST'
+        method: 'POST',
     });
 };
 
@@ -84,7 +84,7 @@ export const apiPostLogin = (data = {}) => {
     return request({
         url: '/login/',
         data,
-        method: 'POST'
+        method: 'POST',
     });
 };
 
@@ -92,7 +92,7 @@ export const apiPostRegister = (data = {}) => {
     return request({
         url: '/register/',
         data,
-        method: 'POST'
+        method: 'POST',
     });
 };
 
@@ -105,7 +105,8 @@ export const apiPostRegister = (data = {}) => {
 
 export const apiGetProfile = () => {
     return request({
-        url: '/user/me/'
+        url: '/user/me/',
+        isAuth: true,
     });
 };
 
@@ -113,7 +114,7 @@ export const apiPostFeedback = (data = {}) => {
     return request({
         url: '/feedback/',
         data,
-        method: 'POST'
+        method: 'POST',
     });
 };
 
@@ -122,7 +123,8 @@ export const apiPostActions = (data = {}) => {
     return request({
         url: '/actions/',
         data,
-        method: 'POST'
+        method: 'POST',
+        isAuth: true,
     });
 };
 
@@ -130,15 +132,28 @@ export const apiGetActions = (data = {}) => {
     // 获取用户操作数据接口
     return request({
         url: '/actions/',
-        data
+        data,
+        isAuth: true,
+    });
+};
+
+export const apiUploadProfile = (data = {}) => {
+    // 更新用户个人信息
+    return uploadRequest({
+        url: '/user/update_profile/',
+        filePath: formData.value.avatar,
+        name: 'avatar',
+        data,
+        isAuth: true,
     });
 };
 
 export const apiPostProfile = (data = {}) => {
-    // 更新用户个人信息
+    // 更新用户个人信息的能量
     return request({
-        url: '/user/update_me/',
+        url: '/user/update_profile/',
         data,
-        method: 'POST'
+        method: 'POST',
+        isAuth: true,
     });
 };
