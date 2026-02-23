@@ -47,7 +47,7 @@
                     <view></view>
                     <view class="title">{{ t('preview.wallpaperInfo') }}</view>
                     <view class="close">
-                        <uni-icons type="closeempty" size="18" color="#999" @click="closeInfo"></uni-icons>
+                        <uni-icons class="close" type="clear" size="32" @click="closeInfo"></uni-icons>
                     </view>
                 </view>
                 <scroll-view scroll-y>
@@ -105,7 +105,6 @@
         <uni-popup ref="scorePopup" :is-mask-click="false">
             <view class="scorePopup">
                 <view class="popHeader">
-                    <view></view>
                     <view class="title">{{ t('preview.wallpaperRating') }}</view>
                     <uni-icons class="close" type="clear" size="32" @click="closeScore"></uni-icons>
                 </view>
@@ -487,7 +486,7 @@ onShareTimeline(() => {
 
         .popHeader {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
 
             .title {
@@ -498,7 +497,9 @@ onShareTimeline(() => {
             }
 
             .close {
-                // padding: 2px 6rpx;
+                position: absolute;
+                top: 18rpx;
+                right: 18rpx;
             }
         }
 
@@ -609,7 +610,7 @@ onShareTimeline(() => {
         .popHeader {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             padding: 0 10rpx 20rpx 10rpx;
             border-bottom: 1rpx solid #f0f0f0;
 

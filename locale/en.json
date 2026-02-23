@@ -70,7 +70,10 @@
             "nicknameRequired": "Please enter nickname",
             "changeAvatar": "Change Avatar",
             "chooseAvatarFailed": "Failed to choose avatar",
-            "avatarHint": "Tap to change your avatar"
+            "avatarHint": "Tap to change your avatar",
+            "currentEnergy": "Current Energy",
+            "energyHintTitle": "Energy Guide",
+            "energyHintContent": "How to get energy:\n1. Check in daily: +1 energy\n2. Upload wallpapers: +2 energy per upload\n3. Refer friends: +5 energy per referral\n\nHow to use energy:\n1. Unlock premium wallpapers: 10 energy\n2. Download high-resolution images: 5 energy\n3. Participate in lucky draws: 3 energy per entry"
         },
         "settings": {
             "language": "Language",
@@ -171,6 +174,7 @@
         "loginSuccess": "Login successful",
         "loginFailed": "Login failed, please check your credentials",
         "registerSuccess": "Registration successful",
+        "registerSuccessAndLoggedIn": "Registration successful, automatically logged in",
         "registerFailed": "Registration failed, please try again later",
         "usernameError": "Username must be at least 3 characters",
         "emailError": "Please enter a valid email address",

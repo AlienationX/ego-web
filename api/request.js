@@ -72,13 +72,13 @@ const sendRequest = (config = {}) => {
                 } else {
                     if (res.data.code === undefined) {
                         uni.showModal({
-                            title: '服务器错误提示',
+                            title: '未知错误提示',
                             content: 'Internal Server Error (500)',
                             showCancel: false,
                         });
                     } else {
                         uni.showModal({
-                            title: '未知错误提示: ' + res.data.code,
+                            title: '服务器错误提示 - ' + res.data.code,
                             content: res.data.message || res.data || res,
                             showCancel: false,
                         });

@@ -75,7 +75,10 @@
             "nicknameRequired": "请输入昵称",
             "changeAvatar": "更换头像",
             "chooseAvatarFailed": "选择头像失败",
-            "avatarHint": "点击更换头像"
+            "avatarHint": "点击更换头像",
+            "currentEnergy": "当前能量",
+            "energyHintTitle": "能量指南",
+            "energyHintContent": "如何获取能量：\n1. 每日签到：+1能量\n2. 上传壁纸：每上传+2能量\n3. 邀请好友：每邀请+5能量\n\n如何使用能量：\n1. 解锁 premium 壁纸：10能量\n2. 下载高清图片：5能量\n3. 参与幸运抽奖：每次3能量"
         },
         "settings": {
             "language": "语言",
@@ -158,6 +161,7 @@
         "loginSuccess": "登录成功",
         "loginFailed": "登录失败，请检查账号密码",
         "registerSuccess": "注册成功",
+        "registerSuccessAndLoggedIn": "注册成功，自动登录中",
         "registerFailed": "注册失败，请稍后重试",
         "usernameError": "用户名至少3个字符",
         "emailError": "请输入有效的邮箱地址",

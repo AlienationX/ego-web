@@ -20,6 +20,7 @@ defineProps({
         default: '1760125998' // 1760125998
     }
 });
+const emit = defineEmits(['load', 'close', 'error']);
 
 import { computed } from 'vue';
 import { useUserStore } from '@/stores/user.js';
@@ -27,12 +28,15 @@ const userStore = useUserStore();
 const showAd = computed(() => !userStore.isVip && userStore.showAd);
 
 const onload = (e) => {
+    emit('load', e);
     // console.log('ad-banner onload', e);
 };
 const onclose = (e) => {
+    emit('close', e);
     // console.log('ad-banner onclose: ' + e.detail, e);
 };
 const onerror = (e) => {
+    emit('error', e);
     // console.log('ad-banner onerror: ' + e.detail.errMsg.errCode + ' message:: ' + e.detail.errMsg.errMsg, e);
 };
 </script>

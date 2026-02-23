@@ -28,8 +28,12 @@
         <view class="classify" v-if="classifyList.length">
             <template v-for="(item, idx) in classifyComputed" :key="item.id">
                 <classify-item :item="item" :layout-style="getLayoutStyle(idx)"></classify-item>
-                <view v-if="(idx + 1) % 6 === 0">
-                    <custom-ad-banner style="padding: 15rpx 0"></custom-ad-banner>
+                <view v-if="(idx + 1) % 6 === 0" class="ad-row" :style="getAdWrapStyle(idx)">
+                    <custom-ad-banner
+                        style="padding: 15rpx 0"
+                        @load="onAdLoad(idx)"
+                        @error="onAdError(idx)"
+                        @close="onAdClose(idx)"></custom-ad-banner>
                 </view>
             </template>
         </view>
@@ -37,18 +41,24 @@
 </template>
 
 <script setup>
-    import { ref, computed } from 'vue';
+    import { ref, computed, watch } from 'vue';
     import { apiGetClassify } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
+    import { useUserStore } from '@/stores/user.js';
 
     const classifyList = ref([]);
     const isLoading = ref(true); // 添加加载状态变量
+    const userStore = useUserStore();
+    const adStateMap = ref({});
+
     const classifyComputed = computed(() => {
         return classifyList.value.map((item) => ({
             ...item,
             name: uni.getLocale() === 'en' ? item.name_en : item.name
         }));
     });
+    const adEnabled = computed(() => !userStore.isVip && userStore.showAd);
+    const fullBlockCount = computed(() => Math.floor(classifyComputed.value.length / 6));
 
     const getClassify = async () => {
         try {
@@ -64,31 +74,118 @@
         }
     };
 
-    // 随意布局：每 6 个为一组，0/1 小格，2 高格，3/4 小格，5 通栏；
-    // 最后一组如果不足 6 个，则使用默认两列顺序排布，避免多占用空 grid 行
-    const getLayoutStyle = (idx) => {
-        const total = classifyComputed.value.length;
-        const fullCount = Math.floor(total / 6) * 6; // 能完整套用布局规则的数量
+    const setupAdBlocks = () => {
+        const nextState = {};
+        if (!adEnabled.value) {
+            adStateMap.value = nextState;
+            return;
+        }
 
-        // 最后一组不满 6 个：不指定 gridRow，让 CSS Grid 自然排版，只控制列数
+        for (let block = 0; block < fullBlockCount.value; block++) {
+            nextState[block] = 'pending';
+        }
+        adStateMap.value = nextState;
+    };
+
+    watch([fullBlockCount, adEnabled], setupAdBlocks, { immediate: true });
+
+    const getBlockByIdx = (idx) => Math.floor(idx / 6);
+
+    const isAdBlockVisible = (block) => adEnabled.value && adStateMap.value[block] === 'loaded';
+
+    const getVisibleAdCountBeforeBlock = (block) => {
+        if (!adEnabled.value) return 0;
+        let count = 0;
+        for (let i = 0; i < block; i++) {
+            if (isAdBlockVisible(i)) count++;
+        }
+        return count;
+    };
+
+    const getUsedRowsByFullBlocks = () => {
+        let rows = 0;
+        for (let block = 0; block < fullBlockCount.value; block++) {
+            rows += 4;
+            if (isAdBlockVisible(block)) rows += 1;
+        }
+        return rows;
+    };
+
+    const getBaseRow = (block) => block * 4 + getVisibleAdCountBeforeBlock(block) + 1;
+
+    const onAdLoad = (idx) => {
+        const block = getBlockByIdx(idx);
+        adStateMap.value = { ...adStateMap.value, [block]: 'loaded' };
+    };
+
+    const onAdError = (idx) => {
+        const block = getBlockByIdx(idx);
+        adStateMap.value = { ...adStateMap.value, [block]: 'hidden' };
+    };
+
+    const onAdClose = (idx) => {
+        const block = getBlockByIdx(idx);
+        adStateMap.value = { ...adStateMap.value, [block]: 'hidden' };
+    };
+
+    const isAdVisible = (idx) => {
+        const block = getBlockByIdx(idx);
+        return isAdBlockVisible(block);
+    };
+
+    // 每 6 个为一组，布局如下：
+    // 1: 第1行第1列；2: 第1行第2列；3: 第2-3行第1列；
+    // 4: 第2行第2列；5: 第3-4行第2列；6: 第4行第1列；
+    // 每组 6 个下面增加 1 个横屏广告（第5行整行）
+    // 最后一组不满 6 个时按两列自然流排布
+    const getLayoutStyle = (idx) => {
+        const fullCount = fullBlockCount.value * 6; // 能完整套用布局规则的数量
+
+        // 最后一组不满 6 个：放在完整分组之后的连续行中，避免空白行
         if (idx >= fullCount) {
             const local = idx - fullCount;
+            const tailStartRow = getUsedRowsByFullBlocks() + 1;
             return {
-                gridColumn: String((local % 2) + 1)
-                // gridRow 交给浏览器自动计算，这样不会预留多余空白
+                gridColumn: String((local % 2) + 1),
+                gridRow: tailStartRow + Math.floor(local / 2)
             };
         }
 
-        const block = Math.floor(idx / 6);
-        const baseRow = block * 5 + 1; // 每组6个分类项+1个广告位，共占用5行
+        const block = getBlockByIdx(idx);
+        const baseRow = getBaseRow(block); // 4行分类 + （可见时）1行广告
         const r = idx % 6;
         if (r === 0) return { gridColumn: '1', gridRow: baseRow };
         if (r === 1) return { gridColumn: '2', gridRow: baseRow };
         if (r === 2) return { gridColumn: '1', gridRow: `${baseRow + 1} / span 2` };
         if (r === 3) return { gridColumn: '2', gridRow: baseRow + 1 };
-        if (r === 4) return { gridColumn: '2', gridRow: baseRow + 2 };
-        if (r === 5) return { gridColumn: '1 / -1', gridRow: baseRow + 3 };
+        if (r === 4) return { gridColumn: '2', gridRow: `${baseRow + 2} / span 2` };
+        if (r === 5) return { gridColumn: '1', gridRow: baseRow + 3 };
         return {};
+    };
+
+    const getAdStyle = (idx) => {
+        const block = getBlockByIdx(idx);
+        const baseRow = getBaseRow(block);
+        return {
+            gridColumn: '1 / -1',
+            gridRow: baseRow + 4
+        };
+    };
+
+    const getAdWrapStyle = (idx) => {
+        if (isAdVisible(idx)) {
+            return getAdStyle(idx);
+        }
+        return {
+            position: 'absolute',
+            left: '-99999rpx',
+            top: '0',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden',
+            opacity: 0,
+            pointerEvents: 'none'
+        };
     };
 
     getClassify();

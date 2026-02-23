@@ -31,7 +31,7 @@ export default {
 
         // #ifndef MP
         console.log(process.env, 'process.env'); // 小程序不支持
-        console.log(process.env.VUE_APP_DEBUG_MODE);
+        console.log(process.env.VUE_APP_DEBUG_MODE, "debug");
         // #endif
     },
 

@@ -56,8 +56,12 @@
             <!-- 签到和能量 -->
             <view v-if="userStore.userinfo.id" class="checkin-section">
                 <view class="energy-info">
-                    <uni-icons type="lightbulb-filled" size="24" color="#ffc107"></uni-icons>
-                    <text class="energy-text">当前能量: {{ userStore.userinfo.profile.energy || 0 }}</text>
+                    <view class="energy-hint" @click="showEnergyHint">
+                        <uni-icons type="info" size="24" color="#999"></uni-icons>
+                    </view>
+                    <text class="energy-text">
+                        {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
+                    </text>
                 </view>
                 <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
                     <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
@@ -307,6 +311,15 @@ const checkin = async () => {
             icon: 'none',
         });
     }
+};
+
+const showEnergyHint = () => {
+    uni.showModal({
+        title: t('user.profile.energyHintTitle'),
+        content: t('user.profile.energyHintContent'),
+        showCancel: false,
+        confirmText: 'OK',
+    });
 };
 
 const appMenus = computed(() => [
@@ -623,6 +636,18 @@ onShow(() => {
             font-size: 28rpx;
             color: #333;
             font-weight: 600;
+        }
+
+        .energy-hint {
+            padding: 8rpx;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 50%;
+
+            &:active {
+                background: rgba(0, 0, 0, 0.05);
+                transform: scale(0.95);
+            }
         }
 
         .checkin-btn {

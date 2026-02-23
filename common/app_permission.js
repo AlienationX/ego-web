@@ -26,12 +26,12 @@ export const permissionEnums = {
         // 提示：${name}权限使用说明
         // 将获取${name}权限，用于${explain}
         name: "相机",  // 当前权限的名称, 
-        explain: "拍照上传图片进行反馈和沟通，上传本地图片完善个人信息（头像）等"  // 权限说明
+        explain: "拍照上传图片进行反馈和沟通，上传本地图片完善个人信息（头像）等。"  // 权限说明
     },
-    "WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE,READ_MEDIA_IMAGES": {
+    "READ_MEDIA_IMAGES": {
         // WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE是老版本的权限，现已废弃。
         // Android 13使用最新媒体权限API，写入权限不再需要单独申请
         name: "存储/相册",
-        explain: "下载壁纸到本地存储。上传本地图片进行反馈和沟通，上传本地图片完善个人信息（头像）等"
+        explain: "下载壁纸到本地存储。上传本地图片进行反馈和沟通，上传本地图片完善个人信息（头像）等。"
     },
 }
