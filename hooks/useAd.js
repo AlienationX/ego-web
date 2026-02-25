@@ -12,51 +12,113 @@ export const useAdIntersititial = () => {
         adpid: '1129226586'
     };
 
-    let picurl = '';
-    const interstitialAd = uni.createInterstitialAd(adOption);
+    const shouldBypassAd = () => userStore.isVip || !userStore.showAd;
+    const safeDownload = (url) => {
+        if (url) downloadPic(url);
+    };
+
+    let interstitialAd = null;
+    let initialized = false;
+    let loadingPromise = null;
+    let isShowing = false;
+    let pendingDestroy = false;
+    let pendingPicurl = '';
+
+    const ensureInterstitialAd = () => {
+        if (interstitialAd) return interstitialAd;
+        interstitialAd = uni.createInterstitialAd(adOption);
+        return interstitialAd;
+    };
+
+    const clearPending = () => {
+        pendingPicurl = '';
+        isShowing = false;
+    };
+
+    const tryDestroyIfNeeded = () => {
+        if (!pendingDestroy || isShowing || !interstitialAd) return;
+        interstitialAd.destroy();
+        interstitialAd = null;
+        initialized = false;
+        loadingPromise = null;
+        pendingDestroy = false;
+    };
+
+    const preloadInterstitial = () => {
+        if (!interstitialAd || loadingPromise) return loadingPromise;
+        loadingPromise = interstitialAd.load().catch(() => {}).finally(() => {
+            loadingPromise = null;
+        });
+        return loadingPromise;
+    };
 
     const createInterstitialAd = () => {
-        // 广告实例创建成功后默认会执行一次 load，加载广告数据
-        // 如果界面有 "显示广告" 按钮，需要先禁用掉，防止用户点击，等待广告数据加载成功后在放开
-        // this.loading = true;
+        const ad = ensureInterstitialAd();
+        if (initialized) {
+            preloadInterstitial();
+            return;
+        }
 
-        interstitialAd.onLoad((e) => {
-            // this.loading = false;
-            // console.log('use ad-interstitial onload', e);
+        initialized = true;
+        ad.onLoad(() => {
+            // 广告加载成功，不需要额外处理
         });
-        interstitialAd.onClose(() => {
-            // 用户点击了关闭或返回键(仅Android有返回键)
-            // console.log('use ad-interstitial onclose');
-            downloadPic(picurl);
+        ad.onClose(() => {
+            // 用户关闭广告后继续业务流程
+            safeDownload(pendingPicurl);
+            clearPending();
+            preloadInterstitial();
+            tryDestroyIfNeeded();
         });
-        interstitialAd.onError((e) => {
-            // this.loading = false;
-            // console.log('use ad-interstitial onerror', e);
+        ad.onError(() => {
+            // 广告异常时回退，不阻塞主流程
+            safeDownload(pendingPicurl);
+            clearPending();
+            preloadInterstitial();
+            tryDestroyIfNeeded();
         });
+
+        preloadInterstitial();
     };
 
     const showInterstitialAd = (inputPicurl) => {
         // 如果用户是VIP或广告开关关闭，直接下载图片
-        if (userStore.isVip || !userStore.showAd) {
-            picurl = inputPicurl;
+        if (shouldBypassAd()) {
+            safeDownload(inputPicurl);
             return;
         }
-        
-        // 调用 interstitialAd.show()，如果数据正在加载中不会显示广告，加载成功后才显示
-        // 在数据没有加载成功时，需要防止用户频繁点击显示广告
-        // if (this.loading == true) {
-        //     return
-        // }
-        // this.loading = true;
-        interstitialAd.show().then(() => {
-            // this.loading = false;
-            picurl = inputPicurl;
-        });
+
+        createInterstitialAd();
+        if (isShowing) {
+            uni.showToast({
+                title: 'Ad is showing. Please wait.',
+                icon: 'none'
+            });
+            return;
+        }
+
+        pendingPicurl = inputPicurl || '';
+        isShowing = true;
+
+        interstitialAd
+            .show()
+            .catch(() =>
+                interstitialAd.load().then(() => {
+                    return interstitialAd.show();
+                })
+            )
+            .catch(() => {
+                // show失败回退直接下载
+                safeDownload(pendingPicurl);
+                clearPending();
+                tryDestroyIfNeeded();
+            });
     };
 
     const destroyInterstitialAd = () => {
-        // 页面关闭后销毁实例
-        interstitialAd.destroy();
+        // 页面关闭后销毁实例。若正在展示，延迟到close/error后销毁，避免中断流程
+        pendingDestroy = true;
+        tryDestroyIfNeeded();
     };
 
     return {
@@ -90,27 +152,62 @@ export const useAdRewardedVideo = () => {
         }
     };
 
-    let picurl = '';
-    const rewardedVideoAd = uni.createRewardedVideoAd(adOption);
+    const shouldBypassAd = () => userStore.isVip || !userStore.showAd;
+    const safeDownload = (url) => {
+        if (url) downloadPic(url);
+    };
+
+    let rewardedVideoAd = null;
+    let initialized = false;
+    let loadingPromise = null;
+    let isShowing = false;
+    let pendingDestroy = false;
+    let pendingPicurl = '';
+
+    const ensureRewardedAd = () => {
+        if (rewardedVideoAd) return rewardedVideoAd;
+        rewardedVideoAd = uni.createRewardedVideoAd(adOption);
+        return rewardedVideoAd;
+    };
+
+    const clearPending = () => {
+        pendingPicurl = '';
+        isShowing = false;
+    };
+
+    const tryDestroyIfNeeded = () => {
+        if (!pendingDestroy || isShowing || !rewardedVideoAd) return;
+        rewardedVideoAd.destroy();
+        rewardedVideoAd = null;
+        initialized = false;
+        loadingPromise = null;
+        pendingDestroy = false;
+    };
+
+    const preloadRewarded = () => {
+        if (!rewardedVideoAd || loadingPromise) return loadingPromise;
+        loadingPromise = rewardedVideoAd.load().catch(() => {}).finally(() => {
+            loadingPromise = null;
+        });
+        return loadingPromise;
+    };
 
     const createRewardedVideoAd = () => {
-        // 广告实例创建成功后默认会执行一次 load，加载广告数据
-        // 如果界面有 "显示广告" 按钮，需要先禁用掉，防止用户点击，等待广告数据加载成功后在放开
-        // this.loading = true;
+        const ad = ensureRewardedAd();
+        if (initialized) {
+            preloadRewarded();
+            return;
+        }
 
-        rewardedVideoAd.onLoad((e) => {
-            // this.loading = false;
-            // console.log('use ad-rewarded-video onload', e);
-            // 当激励视频被关闭时，默认预载下一条数据，加载完成时仍然触发 `onLoad` 事件
+        initialized = true;
+        ad.onLoad(() => {
+            // 广告加载成功，不需要额外处理
         });
-        rewardedVideoAd.onClose((e) => {
-            // 用户点击了关闭或返回键(仅Android有返回键)
-            // console.log('use ad-rewarded-video onclose', e, picurl);
-
+        ad.onClose((e) => {
             // 用户点击了【关闭广告】按钮
-            if (e.isEnded) {
+            if (e?.isEnded) {
                 // 正常播放结束
-                downloadPic(picurl);
+                safeDownload(pendingPicurl);
             } else {
                 // 播放中途退出
                 uni.showToast({
@@ -119,60 +216,65 @@ export const useAdRewardedVideo = () => {
                     duration: 3000
                 });
             }
+            clearPending();
+            preloadRewarded();
+            tryDestroyIfNeeded();
         });
-        rewardedVideoAd.onError((e) => {
-            // this.loading = false;
+        ad.onError(() => {
+            // 广告异常时回退，不阻塞主流程
             uni.showToast({
-                title: 'Ad loading failed. Please try again later.',
+                title: 'Ad loading failed. Download directly.',
                 icon: 'none',
-                duration: 3000
+                duration: 2500
             });
-            rewardedVideoAd.load(); // 加载失败，手动再次拉取广告
+            safeDownload(pendingPicurl);
+            clearPending();
+            preloadRewarded();
+            tryDestroyIfNeeded();
         });
+
+        preloadRewarded();
     };
 
     const showRewardedVideoAd = (inputPicurl) => {
         // 如果用户是VIP或广告开关关闭，直接下载图片
-        if (userStore.isVip || !userStore.showAd) {
-            picurl = inputPicurl;
+        if (shouldBypassAd()) {
+            safeDownload(inputPicurl);
             return;
         }
-        
-        // 调用 interstitialAd.show()，如果数据正在加载中不会显示广告，加载成功后才显示
-        // 在数据没有加载成功时，需要防止用户频繁点击显示广告
-        // if (this.loading == true) {
-        //     return
-        // }
-        // uni.showLoading({
-        //     title: 'Loading...',
-        //     mask: true
-        // });
+
+        createRewardedVideoAd();
+        if (isShowing) {
+            uni.showToast({
+                title: 'Ad is showing. Please wait.',
+                icon: 'none'
+            });
+            return;
+        }
+
+        pendingPicurl = inputPicurl || '';
+        isShowing = true;
 
         rewardedVideoAd
             .show()
-            .then(() => {
-                picurl = inputPicurl;
-            })
             .catch(() => {
                 // show失败的话 重新load获取
                 rewardedVideoAd
                     .load()
-                    .then(() =>
-                        rewardedVideoAd.show().then(() => {
-                            picurl = inputPicurl;
-                        })
-                    )
-                    .catch((err) => {
-                        console.log('激励视频 广告显示失败！为了不影响用户体验，直接下载！');
+                    .then(() => rewardedVideoAd.show())
+                    .catch(() => {
+                        // 再次失败直接回退，防止卡住下载流程
+                        safeDownload(pendingPicurl);
+                        clearPending();
+                        tryDestroyIfNeeded();
                     });
             });
-
-        // uni.hideLoading();
     };
 
     const destroyRewardedVideoAd = () => {
-        // 页面关闭后销毁实例
-        rewardedVideoAd.destroy();
+        // 页面关闭后销毁实例。若正在展示，延迟到close/error后销毁，避免中断流程
+        pendingDestroy = true;
+        tryDestroyIfNeeded();
     };
 
     return {

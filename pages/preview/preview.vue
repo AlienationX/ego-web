@@ -23,10 +23,14 @@
                     new Date().getDate().toString().padStart(2, '0')
                 }}
             </view>
-            <view class="footer">
+            <view class="footer" v-if="previewType === 'classic'">
                 <view class="box" @click="openInfo">
                     <uni-icons type="info-filled" size="28"></uni-icons>
                     <view class="text">{{ t('common.information') }}</view>
+                </view>
+                <view class="box" @click="toggleCollect">
+                    <uni-icons type="heart-filled" size="28"></uni-icons>
+                    <view class="text">{{ currentInfo.is_collect ? t('preview.collected') : t('preview.collect') }}</view>
                 </view>
                 <view class="box" @click="openScore">
                     <uni-icons type="star-filled" size="28"></uni-icons>
@@ -36,6 +40,36 @@
                     <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
                     <uni-icons v-else type="download-filled" size="28"></uni-icons>
                     <view class="text">{{ t('common.download') }}</view>
+                </view>
+            </view>
+
+            <view class="footer-floating" v-else>
+                <view class="right-actions">
+                    <view class="action-item" @click="toggleCollect">
+                        <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
+                        <view class="action-text">{{ currentInfo.is_collect ? t('preview.collected') : t('preview.collect') }}</view>
+                    </view>
+                    <view class="action-item" @click="openScore">
+                        <uni-icons type="star-filled" size="36" color="#ffffff"></uni-icons>
+                        <view class="action-text">{{ currentInfo.score }}</view>
+                    </view>
+                    <view class="action-item" @click="openInfo">
+                        <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
+                        <view class="action-text">{{ t('common.information') }}</view>
+                    </view>
+                    <view class="action-item" @click="clickDownload">
+                        <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="36" color="#ffffff"></uni-icons>
+                        <uni-icons v-else type="download-filled" size="36" color="#ffffff"></uni-icons>
+                        <view class="action-text">{{ t('common.download') }}</view>
+                    </view>
+                </view>
+
+                <view class="left-meta">
+                    <view class="meta-user">
+                        <image class="meta-avatar" :src="publisherAvatar" mode="aspectFill"></image>
+                        <text class="meta-user-name">{{ publisherName }}</text>
+                    </view>
+                    <view class="meta-desc">{{ currentInfo.description || currentInfo.classify_name || '' }}</view>
                 </view>
             </view>
         </view>
@@ -134,11 +168,25 @@ import { getStatusBarHeight } from '@/utils/system.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
 import { downloadPic } from '@/common/core.js';
 import { apiPostIncrementViews, apiPostIncrementDownloads, apiPostActions } from '@/api/wallpaper.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 import { useUserStore } from '@/stores/user.js';
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
 const { t, locale } = useI18n();
+const previewType = computed(() => settingsStore.options.previewType || 'classic');
+const publisherName = computed(() => currentInfo.value?.publisher || t('common.appName'));
+const publisherAvatar = computed(() => {
+    const rawPublisher = String(currentInfo.value?.publisher || '')
+        .trim()
+        .toLowerCase();
+    if (rawPublisher === 'bing') return '/static/icons/brands/microsoft-bing.svg';
+    if (rawPublisher === 'pokemon') return '/static/icons/pokeball.svg';
+    const seed = `${publisherName.value}-${currentInfo.value?.id || 'wall'}-${avatarSeedSalt}`;
+    return `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
+});
 
 const classList = ref([]);
 const wallList = uni.getStorageSync('wallList') || [];
@@ -146,6 +194,7 @@ classList.value = wallList.map((item) => {
     // 增加tabs_list字段，将字符串转换成数组
     return {
         ...item,
+        is_collect: !!item.is_collect,
         tabs_list: item.tabs.split(','),
     };
 });
@@ -225,6 +274,48 @@ const openScore = () => {
 const closeScore = () => {
     scorePopup.value.close();
 };
+
+const toggleCollect = async () => {
+    // 如果未登录，跳转到登录，或增加友好提示
+    if (Object.keys(userStore.userinfo).length === 0) {
+        uni.showModal({
+            title: t('common.information'),
+            content: t('preview.loginPrompt'),
+            cancelText: t('preview.cancel'),
+            confirmText: t('preview.login'),
+            success: (res) => {
+                if (res.confirm) {
+                    uni.navigateTo({ url: '/pages/login/login' });
+                }
+            },
+        });
+        return;
+    }
+
+    const nextCollect = !currentInfo.value.is_collect;
+    try {
+        await apiPostActions({
+            wall_id: currentInfo.value.id,
+            is_collect: nextCollect,
+        });
+
+        currentInfo.value.is_collect = nextCollect;
+        if (classList.value[currentIndex.value]) {
+            classList.value[currentIndex.value].is_collect = nextCollect;
+        }
+
+        uni.showToast({
+            title: nextCollect ? t('preview.collectSuccess') : t('preview.uncollectSuccess'),
+            icon: 'none',
+        });
+    } catch (error) {
+        uni.showToast({
+            title: t('preview.collectFailed'),
+            icon: 'none',
+        });
+    }
+};
+
 const submitScore = async () => {
     // TODO
     // 接口获取用户评分，没有评分的用户默认为0分
@@ -444,7 +535,7 @@ onShareTimeline(() => {
         .footer {
             background: rgba(255, 255, 255, 0.8);
             bottom: 10vh;
-            width: 65vw;
+            width: 82vw;
             height: 120rpx;
             border-radius: 120rpx;
             color: #000;
@@ -471,6 +562,105 @@ onShareTimeline(() => {
                 .text {
                     font-size: 26rpx;
                     // color: $wp-font-color-2;
+                }
+            }
+        }
+
+        .footer-floating {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom) + 28rpx);
+            width: auto !important;
+            height: 420rpx;
+            padding: 30rpx 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: -18rpx;
+                right: -18rpx;
+                bottom: -28rpx;
+                height: 240rpx;
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.4) 54%, transparent 100%);
+                pointer-events: none;
+                z-index: 0;
+            }
+
+            .right-actions {
+                position: absolute;
+                right: 8rpx;
+                bottom: 48rpx;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 30rpx;
+                min-width: 128rpx;
+                color: #fff;
+                z-index: 2;
+
+                .action-item {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8rpx;
+                    width: 100%;
+                }
+
+                .action-text {
+                    font-size: 24rpx;
+                    font-weight: 500;
+                    text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+                    text-align: center;
+                    white-space: nowrap;
+                }
+
+                :deep(.uni-icons) {
+                    color: #fff !important;
+                }
+            }
+
+            .left-meta {
+                position: absolute;
+                left: 44rpx;
+                bottom: 88rpx;
+                right: 170rpx;
+                max-width: none;
+                color: #fff;
+                text-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.55);
+                z-index: 2;
+
+                .meta-user {
+                    display: flex;
+                    align-items: center;
+                    gap: 12rpx;
+                    margin-bottom: 12rpx;
+
+                    .meta-avatar {
+                        width: 44rpx;
+                        height: 44rpx;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.95);
+                        border: 1rpx solid rgba(255, 255, 255, 0.7);
+                    }
+
+                    .meta-user-name {
+                        font-size: 30rpx;
+                        font-weight: 600;
+                        line-height: 1.35;
+                        letter-spacing: 0.2rpx;
+                    }
+                }
+
+                .meta-desc {
+                    font-size: 28rpx;
+                    line-height: 44rpx;
+                    height: 88rpx;
+                    font-weight: 400;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    opacity: 0.95;
                 }
             }
         }

@@ -57,7 +57,7 @@
             <view v-if="userStore.userinfo.id" class="checkin-section">
                 <view class="energy-info">
                     <view class="energy-hint" @click="showEnergyHint">
-                        <uni-icons type="info" size="24" color="#999"></uni-icons>
+                        <uni-icons type="help" size="24" color="#999"></uni-icons>
                     </view>
                     <text class="energy-text">
                         {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}

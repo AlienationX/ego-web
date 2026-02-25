@@ -20,6 +20,16 @@ export const getTitleBarHeight = () => {
 
 export const getNavBarHeight = () => getStatusBarHeight() + getTitleBarHeight();
 
+export const getTabBarHeight = () => {
+    // #ifdef WEB
+    return 50;
+    // #endif
+    
+    // #ifndef WEB
+    return SYSTEM_INFO.windowBottom;
+    // #endif
+}
+
 export const getLeftIconWidth = () => {
     // #ifdef MP-TOUTIAO
     // 抖音/头条 小程序头部左侧的按钮显示问题

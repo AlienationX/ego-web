@@ -1,6 +1,7 @@
 {
     "tabbar.index": "推荐", // tarbar的变量设置不能嵌套
     "tabbar.category": "分类",
+    "tabbar.discover": "发现",
     "tabbar.user": "我的",
     "common": {
         "appName": "本我壁纸",
@@ -87,6 +88,9 @@
             "theme": "主题",
             "light": "明亮",
             "dark": "暗黑",
+            "previewType": "预览方式",
+            "previewClassic": "锁屏样式",
+            "previewFloating": "悬浮样式",
             "clearCache": "清除缓存",
             "clearing": "清除中...",
             "clearSuccess": "清除缓存成功",
@@ -184,6 +188,11 @@
         "score": "评分:",
         "description": "描述:",
         "tags": "标签:",
+        "collect": "收藏",
+        "collected": "已收藏",
+        "collectSuccess": "收藏成功",
+        "uncollectSuccess": "已取消收藏",
+        "collectFailed": "收藏操作失败，请稍后重试",
         "wallpaperRating": "壁纸评分",
         "points": "分",
         "confirmRating": "确认评分",
@@ -246,6 +255,23 @@
         "loginRequired": "请先登录",
         "vipRequired": "请先开通会员才能下载此壁纸",
         "submit": "提交"
+    },
+    "discover": {
+        "title": "发现自我",
+        "subtitle": "从一张你喜欢的图片，发现你自己",
+        "desc": "仅可从你的收藏中选图，大模型会给出审美偏好、性格倾向和自我建议。",
+        "sourceFavorite": "从收藏选择",
+        "sourceLocal": "从本地选择",
+        "pickFavorite": "选择一张收藏图片",
+        "pickLocal": "选择一张本地图片",
+        "pickLocalBtn": "从相册选图",
+        "analyzeBtn": "开始分析",
+        "analyzing": "分析中...",
+        "analyzingMessage": "正在分析中...",
+        "waiting": "正在生成分析内容...",
+        "localVipRequired": "本地选图仅会员可用，是否前往开通会员？",
+        "empty": "你还没有收藏图片，先去收藏一张再来分析吧",
+        "goFavorite": "去我的收藏"
     },
     "about": {
         "title": "关于我们",

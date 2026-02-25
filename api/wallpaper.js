@@ -138,10 +138,10 @@ export const apiGetActions = (data = {}) => {
 };
 
 export const apiUploadProfile = (data = {}) => {
-    // 更新用户个人信息
+    // 更新用户个人信息的头像
     return uploadRequest({
         url: '/user/update_profile/',
-        filePath: formData.value.avatar,
+        filePath: data.avatar,
         name: 'avatar',
         data,
         isAuth: true,
@@ -149,9 +149,19 @@ export const apiUploadProfile = (data = {}) => {
 };
 
 export const apiPostProfile = (data = {}) => {
-    // 更新用户个人信息的能量
+    // 更新用户个人信息
     return request({
         url: '/user/update_profile/',
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
+export const apiPostDiscoverAnalyze = (data = {}) => {
+    // 基于收藏图片做个性分析
+    return request({
+        url: '/discover/analyze/',
         data,
         method: 'POST',
         isAuth: true,

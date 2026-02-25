@@ -14,6 +14,7 @@ export const useSettingsStore = defineStore(
             // vuetify项目的配置，后续修改
             theme: 'light',
             language: 'zh-CN',
+            previewType: 'classic', // classic / floating
 
             navBarFlat: false, // 导航栏扁平效果
             navBarBehavior: [], // 导航栏行为设置

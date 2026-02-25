@@ -216,6 +216,13 @@
                 "navigationBarTitleText": "网页浏览",
                 "enablePullDownRefresh": false
             }
+        },
+        {
+            "path": "pages/discover/discover",
+            "style": {
+                "navigationBarTitleText": "发现",
+                "navigationStyle": "custom"
+            }
         }
     ],
     "globalStyle": {
@@ -240,6 +247,12 @@
                 "pagePath": "pages/classify/classify",
                 "iconPath": "/static/tabbar/Line_Category.png",
                 "selectedIconPath": "/static/tabbar/Fill_Category_Green.png"
+            },
+            {
+                "text": "%tabbar.discover%",
+                "pagePath": "pages/discover/discover",
+                "iconPath": "/static/tabbar/Line_Setting.png",
+                "selectedIconPath": "/static/tabbar/Fill_Setting_Green.png"
             },
             {
                 "text": "%tabbar.user%",

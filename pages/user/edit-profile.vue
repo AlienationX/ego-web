@@ -79,7 +79,7 @@
 import { ref, reactive } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { apiUploadProfile } from '@/api/wallpaper.js';
+import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
 import { useUserStore } from '@/stores/user.js';
 import { API_BASE_URL } from '@/common/config';
 import { decrypt } from '@/utils/encryption.js';
@@ -137,12 +137,34 @@ const saveProfile = async () => {
         return;
     }
 
-    if (formData.value.avatar !== userStore.userinfo.profile.avatar) {
+    if (formData.value.avatar === userStore.userinfo.profile.avatar) {
+        // 不上传头像，使用普通的接口更新信息
         const { avatar, ...rest } = formData.value;
         data.value = rest;
+        const res = await apiPostProfile(data.value);
+        // console.log(res);
+    } else {
+        // 上传头像，使用upload接口更新信息
+        const res = await apiUploadProfile(formData.value);
+        // console.log(res);
     }
-    const res = await apiUploadProfile(data.value);
-    console.log(res);
+
+    // 更新用户信息
+    userStore.userinfo = {
+        ...userStore.userinfo,
+        ...formData.value,
+    };
+
+    // 显示成功提示
+    uni.showToast({
+        title: t('user.profile.saveSuccess'),
+        icon: 'none',
+    });
+
+    // 延迟返回上一页
+    setTimeout(() => {
+        uni.navigateBack();
+    }, 1000);
 
     // 2. 上传文件
     // uni.uploadFile({

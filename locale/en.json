@@ -1,6 +1,7 @@
 {
     "tabbar.index": "Home",
     "tabbar.category": "Category",
+    "tabbar.discover": "Discover",
     "tabbar.user": "Profile",
     "common": {
         "appName": "Ego Wallpapers",
@@ -82,6 +83,9 @@
             "theme": "Theme",
             "light": "Light",
             "dark": "Dark",
+            "previewType": "Preview Type",
+            "previewClassic": "Lock Screen",
+            "previewFloating": "Floating",
             "clearCache": "Clear Cache",
             "clearing": "Clearing...",
             "clearSuccess": "Cache cleared successfully",
@@ -106,6 +110,11 @@
         "score": "Score:",
         "description": "Description:",
         "tags": "Tags:",
+        "collect": "Favorite",
+        "collected": "Favorited",
+        "collectSuccess": "Added to favorites",
+        "uncollectSuccess": "Removed from favorites",
+        "collectFailed": "Favorite action failed. Please try again.",
         "wallpaperRating": "Wallpaper Rating",
         "points": "points",
         "confirmRating": "Confirm Rating",
@@ -241,6 +250,23 @@
         "loginRequired": "Please login first",
         "vipRequired": "Please upgrade to membership to download this wallpaper",
         "submit": "Submit"
+    },
+    "discover": {
+        "title": "Discover Self",
+        "subtitle": "Discover yourself from one image you love",
+        "desc": "You can only pick from favorites. AI will analyze preference, personality tendency and self-discovery suggestions.",
+        "sourceFavorite": "From Favorites",
+        "sourceLocal": "From Local",
+        "pickFavorite": "Pick a favorite image",
+        "pickLocal": "Pick a local image",
+        "pickLocalBtn": "Choose from Album",
+        "analyzeBtn": "Analyze",
+        "analyzing": "Analyzing...",
+        "analyzingMessage": "Analyzing...",
+        "waiting": "Generating analysis...",
+        "localVipRequired": "Local image selection is VIP only. Go to membership now?",
+        "empty": "No favorites yet. Add one first, then come back.",
+        "goFavorite": "Go to Favorites"
     },
     "common": {
         "appName": "Ego Wallpapers",
