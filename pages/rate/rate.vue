@@ -85,6 +85,7 @@ const getRatingList = async () => {
             ratingList.value.push(...fullData);
         }
 
+        console.log(ratingList.value);
         if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
     } finally {
         uni.hideLoading();

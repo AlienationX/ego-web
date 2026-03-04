@@ -1,19 +1,15 @@
 <template>
     <view class="signin-container">
-        <!-- <menu-bar :showBorder="false">
-            <template #title>{{ t('feedback.title') }}</template>
-        </menu-bar> -->
+        <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
+            <uni-icons type="back" color="#4a5670" size="20"></uni-icons>
+        </view>
         
         <!-- 内容区域 -->
         <view class="content">
-            <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
-                <uni-icons type="back" color="#e5e5e5" size="20"></uni-icons>
-            </view>
-            
             <!-- 标题区域 -->
             <view class="title-section">
-                <view class="main-title">Sign In</view>
-                <view class="sub-title">It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum.</view>
+                <view class="main-title">{{ t('login.signInTitle') }}</view>
+                <view class="sub-title">{{ t('login.signInSubtitle') }}</view>
             </view>
 
             <!-- 社交登录按钮 -->
@@ -21,11 +17,11 @@
                 <view class="social-buttons">
                     <view class="social-btn" @click="handleGoogleLogin">
                         <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
-                        <text class="social-text">Google</text>
+                        <text class="social-text">{{ t('login.google') }}</text>
                     </view>
                     <view class="social-btn" @click="handleFacebookLogin">
                         <image src="/static/icons/brands/facebook.svg" mode="aspectFit" class="social-icon"></image>
-                        <text class="social-text">Facebook</text>
+                        <text class="social-text">{{ t('login.facebook') }}</text>
                     </view>
                 </view>
             </view>
@@ -33,7 +29,7 @@
             <!-- 分割线 -->
             <view class="divider">
                 <view class="divider-line"></view>
-                <text class="divider-text">Or</text>
+                <text class="divider-text">{{ t('login.or') }}</text>
                 <view class="divider-line"></view>
             </view>
 
@@ -43,7 +39,7 @@
                     <input
                         class="form-input"
                         type="text"
-                        placeholder="Email"
+                        :placeholder="t('login.emailPlaceholder')"
                         v-model="form.email"
                     />
                 </view>
@@ -52,7 +48,7 @@
                     <input
                         class="form-input"
                         :type="showPassword ? 'text' : 'password'"
-                        placeholder="Password"
+                        :placeholder="t('login.passwordPlaceholder')"
                         v-model="form.password"
                         @focus="passwordFocused = true"
                         @blur="passwordFocused = false"
@@ -61,19 +57,27 @@
                             <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
                         </view>
                 </view>
-                <view class="forgot-password" @click="handleForgotPassword">
-                    <text>Forget Password?</text>
+                <view class="form-options">
+                    <view class="remember-option" @click="toggleRememberPassword">
+                        <view class="remember-checkbox" :class="{ checked: rememberPassword }">
+                            <view class="remember-dot"></view>
+                        </view>
+                        <text class="remember-text">{{ t('login.rememberPassword') }}</text>
+                    </view>
+                    <view class="forgot-password" @click="handleForgotPassword">
+                        <text>{{ t('login.forgotPassword') }}</text>
+                    </view>
                 </view>
             </view>
 
             <!-- 登录按钮 -->
             <view class="submit-section">
                 <button class="submit-btn" :disabled="isSubmitting" @click="handleLogin">
-                    {{ isSubmitting ? 'Logging...' : 'Log In' }}
+                    {{ isSubmitting ? t('login.loggingIn') : t('login.login') }}
                 </button>
                 <view class="signup-link">
-                    <text class="normal-text">Don't have account? </text>
-                    <text class="link-text" @click="goToSignup">Sign Up</text>
+                    <text class="normal-text">{{ t('login.noAccount') }}</text>
+                    <text class="link-text" @click="goToSignup">{{ t('login.register') }}</text>
                 </view>
             </view>
         </view>
@@ -81,12 +85,16 @@
 </template>
 
 <script setup>
-    import { ref, reactive } from 'vue';
+    import { ref, reactive, onMounted } from 'vue';
+    import { useI18n } from 'vue-i18n';
     import { useUserStore } from '@/stores/user.js';
     import { apiPostLogin } from '@/api/wallpaper.js';
     import { getStatusBarHeight } from '@/utils/system.js';
 
+    const { t } = useI18n();
     const userStore = useUserStore();
+    const backTop = ref((getStatusBarHeight() || 0) + 10);
+    const REMEMBER_STORAGE_KEY = 'signinRemember';
 
     // 表单数据
     const form = reactive({
@@ -98,10 +106,28 @@
     const showPassword = ref(false);
     const passwordFocused = ref(false);
     const isSubmitting = ref(false);
+    const rememberPassword = ref(false);
+
+    onMounted(() => {
+        const saved = uni.getStorageSync(REMEMBER_STORAGE_KEY);
+        if (!saved || typeof saved !== 'object') return;
+        rememberPassword.value = !!saved.remember;
+        if (rememberPassword.value) {
+            form.email = saved.email || '';
+            form.password = saved.password || '';
+        }
+    });
 
     // 切换密码显示
     const togglePassword = () => {
         showPassword.value = !showPassword.value;
+    };
+
+    const toggleRememberPassword = () => {
+        rememberPassword.value = !rememberPassword.value;
+        if (!rememberPassword.value) {
+            uni.removeStorageSync(REMEMBER_STORAGE_KEY);
+        }
     };
 
     // 忘记密码
@@ -114,7 +140,7 @@
     // Facebook登录
     const handleFacebookLogin = () => {
         uni.showToast({
-            title: 'Facebook login',
+            title: t('login.facebookLoginTip'),
             icon: 'none'
         });
     };
@@ -122,7 +148,7 @@
     // Google登录
     const handleGoogleLogin = () => {
         uni.showToast({
-            title: 'Google login',
+            title: t('login.googleLoginTip'),
             icon: 'none'
         });
     };
@@ -131,7 +157,7 @@
     const validateForm = () => {
         if (!form.email || form.email.trim().length < 5) {
             uni.showToast({
-                title: 'Please enter valid email',
+                title: t('login.emailError'),
                 icon: 'none'
             });
             return false;
@@ -139,7 +165,7 @@
 
         if (!form.password || form.password.length < 6) {
             uni.showToast({
-                title: 'Please enter password',
+                title: t('login.passwordError'),
                 icon: 'none'
             });
             return false;
@@ -150,6 +176,7 @@
 
     // 登录处理
     const handleLogin = async () => {
+        if (isSubmitting.value) return;
         if (!validateForm()) {
             return;
         }
@@ -157,7 +184,7 @@
         isSubmitting.value = true;
         try {
             const res = await apiPostLogin({
-                username: form.email,
+                email: form.email.trim(),
                 password: form.password
             });
 
@@ -165,8 +192,18 @@
             userStore.setToken(access, refresh);
             await userStore.setUserInfo();
 
+            if (rememberPassword.value) {
+                uni.setStorageSync(REMEMBER_STORAGE_KEY, {
+                    remember: true,
+                    email: form.email.trim(),
+                    password: form.password
+                });
+            } else {
+                uni.removeStorageSync(REMEMBER_STORAGE_KEY);
+            }
+
             uni.showToast({
-                title: 'Login successful',
+                title: t('login.loginSuccess'),
                 icon: 'success'
             });
 
@@ -177,7 +214,7 @@
             }, 1500);
         } catch (error) {
             uni.showToast({
-                title: error.message || 'Login failed',
+                title: error.message || t('login.loginFailed'),
                 icon: 'none',
                 duration: 2000
             });
@@ -188,23 +225,14 @@
 
     // 跳转到注册页
     const goToSignup = () => {
-        uni.redirectTo({
+        uni.navigateTo({
             url: '/pages/login/signup'
         });
     };
-    
-    // 返回按钮高度
-    const getGoBackButtonTop = () => {
-        if (getStatusBarHeight() === 0) {
-            return 24;
-        }
-        return getStatusBarHeight();
-    };
+
     const goBack = () => {
         uni.navigateBack({
-            success: () => {},
-            fail: (err) => {
-                // 返回失败，直接跳转回首页
+            fail: () => {
                 uni.reLaunch({
                     url: '/pages/index/index'
                 });
@@ -220,22 +248,23 @@
         padding: 0 48rpx;
     }
 
+    .back-btn {
+        position: fixed;
+        left: 36rpx;
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1rpx solid rgba(214, 223, 238, 0.95);
+        box-shadow: 0 8rpx 20rpx rgba(31, 44, 72, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 12;
+    }
+
     .content {
-        // padding-top: 244rpx;
-        
-        .goBack {
-            width: 38px;
-            height: 38px;
-            background: rgba(0, 0, 0, 0.5);
-            left: 30rpx;
-            margin-left: 0;
-            border-radius: 100rpx;
-            backdrop-filter: blur(10rpx);
-            border-radius: 1rpx solid rgba(255, 255, 255, 0.3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        padding-top: 170rpx;
     }
 
     .title-section {
@@ -361,12 +390,55 @@
 
         .forgot-password {
             text-align: right;
-            padding-right: 24rpx;
 
             text {
                 font-size: 24rpx;
                 color: #7C8BA0;
             }
+        }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8rpx;
+        }
+
+        .remember-option {
+            display: flex;
+            align-items: center;
+            gap: 12rpx;
+        }
+
+        .remember-checkbox {
+            width: 32rpx;
+            height: 32rpx;
+            border-radius: 50%;
+            border: 2rpx solid #C8D3E7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            .remember-dot {
+                width: 16rpx;
+                height: 16rpx;
+                border-radius: 50%;
+                background: transparent;
+            }
+
+            &.checked {
+                border-color: #3461FD;
+
+                .remember-dot {
+                    background: #3461FD;
+                }
+            }
+        }
+
+        .remember-text {
+            font-size: 24rpx;
+            color: #7C8BA0;
         }
     }
 

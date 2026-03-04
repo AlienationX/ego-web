@@ -158,7 +158,7 @@ const settings = computed(() => [
         click: openPreviewTypePopup,
     },
     {
-        left_icon: '/static/icons/database-refresh.svg',
+        left_icon: '/static/icons/cached.svg',
         left_text: t('user.settings.clearCache'),
         right_text: '',
         right_icon: '',

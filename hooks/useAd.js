@@ -16,6 +16,10 @@ export const useAdIntersititial = () => {
     const safeDownload = (url) => {
         if (url) downloadPic(url);
     };
+    const adminToast = (options) => {
+        if (!userStore.isAdmin) return;
+        uni.showToast(options);
+    };
 
     let interstitialAd = null;
     let initialized = false;
@@ -90,7 +94,7 @@ export const useAdIntersititial = () => {
 
         createInterstitialAd();
         if (isShowing) {
-            uni.showToast({
+            adminToast({
                 title: 'Ad is showing. Please wait.',
                 icon: 'none'
             });
@@ -156,6 +160,10 @@ export const useAdRewardedVideo = () => {
     const safeDownload = (url) => {
         if (url) downloadPic(url);
     };
+    const adminToast = (options) => {
+        if (!userStore.isAdmin) return;
+        uni.showToast(options);
+    };
 
     let rewardedVideoAd = null;
     let initialized = false;
@@ -210,7 +218,7 @@ export const useAdRewardedVideo = () => {
                 safeDownload(pendingPicurl);
             } else {
                 // 播放中途退出
-                uni.showToast({
+                adminToast({
                     title: 'Cannot download without watching the Ad completely.',
                     icon: 'none',
                     duration: 3000
@@ -222,7 +230,7 @@ export const useAdRewardedVideo = () => {
         });
         ad.onError(() => {
             // 广告异常时回退，不阻塞主流程
-            uni.showToast({
+            adminToast({
                 title: 'Ad loading failed. Download directly.',
                 icon: 'none',
                 duration: 2500
@@ -245,7 +253,7 @@ export const useAdRewardedVideo = () => {
 
         createRewardedVideoAd();
         if (isShowing) {
-            uni.showToast({
+            adminToast({
                 title: 'Ad is showing. Please wait.',
                 icon: 'none'
             });

@@ -1,11 +1,15 @@
 <template>
     <view class="signup-container">
+        <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
+            <uni-icons type="back" color="#4a5670" size="20"></uni-icons>
+        </view>
+
         <!-- 主要内容区域 -->
         <view class="content">
             <!-- 标题区域 -->
             <view class="title-section">
-                <view class="main-title">Sign Up</view>
-                <view class="sub-title">It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum.</view>
+                <view class="main-title">{{ t('login.signUpTitle') }}</view>
+                <view class="sub-title">{{ t('login.signUpSubtitle') }}</view>
             </view>
 
             <!-- 社交登录按钮 -->
@@ -13,11 +17,11 @@
                 <view class="social-buttons">
                     <view class="social-btn" @click="handleGoogleLogin">
                         <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
-                        <text class="social-text">Google</text>
+                        <text class="social-text">{{ t('login.google') }}</text>
                     </view>
                     <view class="social-btn" @click="handleFacebookLogin">
                         <image src="/static/icons/brands/facebook.svg" mode="aspectFit" class="social-icon"></image>
-                        <text class="social-text">Facebook</text>
+                        <text class="social-text">{{ t('login.facebook') }}</text>
                     </view>
                 </view>
             </view>
@@ -25,7 +29,7 @@
             <!-- 分割线 -->
             <view class="divider">
                 <view class="divider-line"></view>
-                <text class="divider-text">Or</text>
+                <text class="divider-text">{{ t('login.or') }}</text>
                 <view class="divider-line"></view>
             </view>
 
@@ -35,16 +39,7 @@
                     <input
                         class="form-input"
                         type="text"
-                        placeholder="Name"
-                        v-model="form.name"
-                    />
-                </view>
-
-                <view class="form-item">
-                    <input
-                        class="form-input"
-                        type="text"
-                        placeholder="Email/Phone Number"
+                        :placeholder="t('login.emailPlaceholder')"
                         v-model="form.email"
                     />
                 </view>
@@ -53,12 +48,21 @@
                     <input
                         class="form-input"
                         :type="showPassword ? 'text' : 'password'"
-                        placeholder="Password"
+                        :placeholder="t('login.passwordPlaceholder')"
                         v-model="form.password"
                     />
                         <view class="password-toggle" @click="togglePassword">
                             <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
                         </view>
+                </view>
+
+                <view class="form-item password-item">
+                    <input
+                        class="form-input"
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        :placeholder="t('login.confirmPasswordPlaceholder')"
+                        v-model="form.confirmPassword"
+                    />
                 </view>
             </view>
 
@@ -68,15 +72,15 @@
                     <view class="checkbox-wrapper">
                         <view class="checkbox" :class="{ checked: isAgreed }">
                             <view class="checkbox-inner" v-if="isAgreed">
-                                <image src="/static/icons/check-icon.svg" mode="aspectFit"></image>
+                                <uni-icons type="checkmarkempty" color="#ffffff" size="16"></uni-icons>
                             </view>
                         </view>
                     </view>
                     <view class="agreement-text">
-                        <text class="normal-text">I'm agree to the </text>
-                        <text class="link-text" @click.stop="openTerms">Tarms of Service</text>
-                        <text class="normal-text"> and </text>
-                        <text class="link-text" @click.stop="openPrivacy">Privasy Policy</text>
+                        <text class="normal-text">{{ t('login.agreePrefix') }}</text>
+                        <text class="link-text" @click.stop="openTerms">{{ t('login.termsOfService') }}</text>
+                        <text class="normal-text"> {{ t('login.and') }} </text>
+                        <text class="link-text" @click.stop="openPrivacy">{{ t('login.privacyPolicy') }}</text>
                     </view>
                 </view>
             </view>
@@ -84,11 +88,11 @@
             <!-- 创建账号按钮 -->
             <view class="submit-section">
                 <button class="submit-btn" :disabled="!isAgreed || isSubmitting" @click="handleSignup">
-                    {{ isSubmitting ? 'Creating...' : 'Creat Account' }}
+                    {{ isSubmitting ? t('login.creating') : t('login.createAccount') }}
                 </button>
                 <view class="login-link">
-                    <text class="normal-text">Do you have account? </text>
-                    <text class="link-text" @click="goToLogin">Sign In</text>
+                    <text class="normal-text">{{ t('login.haveAccount') }}</text>
+                    <text class="link-text" @click="goToLogin">{{ t('login.login') }}</text>
                 </view>
             </view>
         </view>
@@ -97,26 +101,31 @@
 
 <script setup>
     import { ref, reactive } from 'vue';
-    import { useUserStore } from '@/stores/user.js';
+    import { useI18n } from 'vue-i18n';
     import { apiPostRegister } from '@/api/wallpaper.js';
-
-    const userStore = useUserStore();
+    import { getStatusBarHeight } from '@/utils/system.js';
+    const { t } = useI18n();
 
     // 表单数据
     const form = reactive({
-        name: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: ''
     });
 
     // 状态管理
     const showPassword = ref(false);
+    const showConfirmPassword = ref(false);
     const isAgreed = ref(false);
     const isSubmitting = ref(false);
+    const backTop = ref((getStatusBarHeight() || 0) + 10);
 
     // 切换密码显示
     const togglePassword = () => {
         showPassword.value = !showPassword.value;
+    };
+    const toggleConfirmPassword = () => {
+        showConfirmPassword.value = !showConfirmPassword.value;
     };
 
     // 切换协议同意状态
@@ -124,11 +133,16 @@
         isAgreed.value = !isAgreed.value;
     };
 
-    // 返回上一页
+    // 跳转到登录页
+    const goToLogin = () => {
+        uni.navigateTo({
+            url: '/pages/login/signin'
+        });
+    };
+
     const goBack = () => {
         uni.navigateBack({
-            success: () => {},
-            fail: (err) => {
+            fail: () => {
                 uni.reLaunch({
                     url: '/pages/index/index'
                 });
@@ -136,47 +150,24 @@
         });
     };
 
-    // 跳转到登录页
-    const goToLogin = () => {
-        uni.redirectTo({
-            url: '/pages/login/signin'
-        });
-    };
-
     // 打开服务条款
     const openTerms = () => {
-        // #ifdef MP-WEIXIN
         uni.navigateTo({
-            url: '/pages/webview/webview?url=https://yourdomain.com/terms'
+            url: '/pages/webview/webview?url=user_agreement'
         });
-        // #endif
-
-        // #ifndef MP-WEIXIN
-        uni.navigateTo({
-            url: '/pages/notice/detail?id=1&name=服务条款'
-        });
-        // #endif
     };
 
     // 打开隐私政策
     const openPrivacy = () => {
-        // #ifdef MP-WEIXIN
         uni.navigateTo({
-            url: '/pages/webview/webview?url=https://yourdomain.com/privacy'
+            url: '/pages/webview/webview?url=privacy_agreement'
         });
-        // #endif
-
-        // #ifndef MP-WEIXIN
-        uni.navigateTo({
-            url: '/pages/notice/detail?id=2&name=隐私政策'
-        });
-        // #endif
     };
 
     // Facebook登录
     const handleFacebookLogin = () => {
         uni.showToast({
-            title: 'Facebook login',
+            title: t('login.facebookLoginTip'),
             icon: 'none'
         });
     };
@@ -184,32 +175,55 @@
     // Google登录
     const handleGoogleLogin = () => {
         uni.showToast({
-            title: 'Google login',
+            title: t('login.googleLoginTip'),
             icon: 'none'
         });
     };
 
     // 表单验证
     const validateForm = () => {
-        if (!form.name || form.name.trim().length < 2) {
+        const email = form.email.trim();
+        const password = form.password;
+        const confirmPassword = form.confirmPassword;
+
+        if (!email) {
             uni.showToast({
-                title: 'Please enter your name',
+                title: t('login.emailError'),
                 icon: 'none'
             });
             return false;
         }
 
-        if (!form.email || form.email.trim().length < 5) {
+        const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailReg.test(email)) {
             uni.showToast({
-                title: 'Please enter valid email',
+                title: t('login.emailError'),
                 icon: 'none'
             });
             return false;
         }
 
-        if (!form.password || form.password.length < 6) {
+        if (!password || password.length < 6) {
             uni.showToast({
-                title: 'Password must be at least 6 characters',
+                title: t('login.passwordError'),
+                icon: 'none'
+            });
+            return false;
+        }
+
+        // 至少包含字母和数字，提升密码有效性
+        const passwordReg = /^(?=.*[A-Za-z])(?=.*\d).{6,}$/;
+        if (!passwordReg.test(password)) {
+            uni.showToast({
+                title: t('login.passwordRuleError'),
+                icon: 'none'
+            });
+            return false;
+        }
+
+        if (password !== confirmPassword) {
+            uni.showToast({
+                title: t('login.confirmPasswordError'),
                 icon: 'none'
             });
             return false;
@@ -220,13 +234,14 @@
 
     // 注册处理
     const handleSignup = async () => {
+        if (isSubmitting.value) return;
         if (!validateForm()) {
             return;
         }
 
         if (!isAgreed.value) {
             uni.showToast({
-                title: 'Please agree to the terms',
+                title: t('login.agreeRequired'),
                 icon: 'none'
             });
             return;
@@ -235,25 +250,25 @@
         isSubmitting.value = true;
         try {
             await apiPostRegister({
-                username: form.email,
-                email: form.email,
-                nickname: form.name,
+                username: form.email.trim(),
+                email: form.email.trim(),
+                nickname: form.email.trim().split('@')[0] || form.email.trim(),
                 password: form.password
             });
 
             uni.showToast({
-                title: 'Registration successful',
-                icon: 'success'
+                title: t('login.registerSuccess'),
+                icon: 'none'
             });
 
             setTimeout(() => {
                 uni.redirectTo({
-                    url: '/pages/login/login'
+                    url: '/pages/login/signin'
                 });
             }, 1500);
         } catch (error) {
             uni.showToast({
-                title: error.message || 'Registration failed',
+                title: error.message || t('login.registerFailed'),
                 icon: 'none',
                 duration: 2000
             });
@@ -268,6 +283,21 @@
         min-height: 100vh;
         background: #ffffff;
         overflow: hidden;
+    }
+
+    .back-btn {
+        position: fixed;
+        left: 36rpx;
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1rpx solid rgba(214, 223, 238, 0.95);
+        box-shadow: 0 8rpx 20rpx rgba(31, 44, 72, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 12;
     }
 
     .status-bar-placeholder {
@@ -310,7 +340,7 @@
 
     .content {
         padding: 0 48rpx;
-        padding-top: 244rpx;
+        padding-top: 170rpx;
     }
 
     .title-section {
@@ -434,16 +464,15 @@
 
         .agreement-content {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 16rpx;
 
             .checkbox-wrapper {
                 flex-shrink: 0;
-                padding-top: 4rpx;
 
                 .checkbox {
-                    width: 48rpx;
-                    height: 48rpx;
+                    width: 32rpx;
+                    height: 32rpx;
                     border: 2rpx solid #D0D5DD;
                     border-radius: 8rpx;
                     display: flex;
@@ -458,11 +487,9 @@
                         .checkbox-inner {
                             width: 32rpx;
                             height: 32rpx;
-
-                            image {
-                                width: 32rpx;
-                                height: 32rpx;
-                            }
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
                         }
                     }
                 }

@@ -1,8 +1,8 @@
 // common/config.js
 
-// export const API_DOMAIN = 'http://127.0.0.1:8000';
+export const API_DOMAIN = 'http://127.0.0.1:8000';
 // export const API_DOMAIN = 'https://49touviwp7.execute-api.eu-north-1.amazonaws.com/dev';
-export const API_DOMAIN = 'https://api.wp.ego8.space';
+// export const API_DOMAIN = 'https://api.wp.ego8.space';
 
 export const API_BASE_URL = `${API_DOMAIN}/wallpaper/api`;
 
@@ -15,6 +15,6 @@ export const MAX_PAGE_SIZE = 12;
 // Ten Cloud bucket 图片地址
 // export const PICS_BASE_URL = 'https://wp-1328701250.cos.ap-beijing.myqcloud.com';
 // local 图片地址
-export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper';
+export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper/media';
 
 export const ACCESS_KEY = 'secret-insecure-88hefbf6c!mrv5x(xa4swy-h3y41f()(8xh6syj(xi&m!!h$#b';

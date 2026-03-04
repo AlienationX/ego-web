@@ -86,8 +86,8 @@
                 </scroll-view>
             </view>
 
-            <view v-if="idx % 3 === 0">
-                <custom-ad-banner style="padding: 30rpx 30rpx 0"></custom-ad-banner>
+            <view v-if="idx % 3 === 0" class="ad-slot" :class="{ ready: adVisibleMap[`mid-${idx}`] }">
+                <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
             </view>
         </view>
 
@@ -129,12 +129,14 @@
             </view>
         </view>
 
-        <custom-ad-banner style="padding: 0 30rpx 30rpx"></custom-ad-banner>
+        <view class="ad-slot ad-slot-bottom" :class="{ ready: adVisibleMap.bottom }">
+            <custom-ad-banner @load="onAdLoad('bottom')" @error="onAdError('bottom')"></custom-ad-banner>
+        </view>
     </view>
 </template>
 
 <script setup>
-    import { ref, computed } from 'vue';
+    import { ref, computed, reactive } from 'vue';
     import { onLoad, onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
     import { apiGetBanner, apiGetRandomDay, apiGetRandomRecommend, apiGetNotice, apiGetClassify } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
@@ -144,6 +146,7 @@
     const randomRecommendList = ref([]);
     const noticeList = ref([]);
     const classifyList = ref([]);
+    const adVisibleMap = reactive({});
 
     const randomRecommendComputed = computed(() => {
         return randomRecommendList.value.map((item) => ({
@@ -222,6 +225,14 @@
         });
     };
 
+    const onAdLoad = (key) => {
+        adVisibleMap[key] = true;
+    };
+
+    const onAdError = (key) => {
+        adVisibleMap[key] = false;
+    };
+
     const refreshRandom = () => {
         getRandom();
         getRandomRecommend();
@@ -267,6 +278,23 @@
 
 <style lang="scss" scoped>
     .homeLayout {
+        .ad-slot {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            min-height: 0;
+
+            &.ready {
+                padding: 30rpx 30rpx 0;
+            }
+        }
+
+        .ad-slot-bottom {
+            &.ready {
+                padding: 0 30rpx 30rpx;
+            }
+        }
+
         .banner {
             width: 750rpx;
             padding: 0 0 16rpx;

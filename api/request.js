@@ -62,7 +62,7 @@ const sendRequest = (config = {}) => {
             url: config.url.startsWith('http') ? config.url : API_BASE_URL + config.url,
             data: config.data || {},
             method: config.method || 'GET',
-            // timeout: 10000,  // 10秒
+            timeout: config.timeout || 60000, // 默认1分钟
             header: { ...setHeader(config.isAuth || false), ...config.header },
             success: (res) => {
                 if (res.data.code === 200 || res.data.code === 201) {
@@ -92,6 +92,7 @@ const sendRequest = (config = {}) => {
                     content: JSON.stringify(err),
                     icon: 'none',
                 });
+                console.log('Request Failed', err);
                 reject(err);
             },
         });

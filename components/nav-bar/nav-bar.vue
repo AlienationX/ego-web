@@ -1,10 +1,10 @@
 <template>
-    <view class="layout">
+    <view class="navbar-layout">
         <view class="navbar">
             <view class="statusBar" :style="{ height: getStatusBarHeight() + 'px' }"></view>
             <view class="titleBar" :style="{ height: getTitleBarHeight() + 'px', marginLeft: getLeftIconWidth() + 'px', marginRight: getRightIconWidth() + 'px' }">
                 <view class="title">{{ title }}</view>
-                <navigator url="/pages/search/search" class="search">
+                <navigator url="/pages/search/search" class="search" v-if="showSearch">
                     <uni-icons class="icon" type="search" color="#888" size="18"></uni-icons>
                     <text class="text">{{ $t('common.search') }}</text>
                 </navigator>
@@ -23,12 +23,16 @@
         title: {
             type: String,
             default: '壁纸'
+        },
+        showSearch: {
+            type: Boolean,
+            default: true
         }
     });
 </script>
 
 <style lang="scss" scoped>
-    .layout {
+    .navbar-layout {
         .navbar {
             position: fixed;
             top: 0;

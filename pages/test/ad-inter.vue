@@ -1,11 +1,17 @@
 <template>
-    <view class="content">
-        <!-- #ifndef MP-WEIXIN -->
-        <ad-interstitial adpid="1111111113" :loadnext="true" v-slot:default="{ loading, error }" @load="onadload" @close="onadclose" @error="onaderror">
-            <button :disabled="loading" :loading="loading">显示广告</button>
-            <view v-if="error">{{ error }}</view>
-        </ad-interstitial>
-        <!-- #endif -->
+    <view class="page">
+        <menu-bar>
+            <template #title>Ad Interstitial</template>
+        </menu-bar>
+
+        <view class="content">
+            <!-- #ifndef MP-WEIXIN -->
+            <ad-interstitial adpid="1111111113" :loadnext="true" v-slot:default="{ loading, error }" @load="onadload" @close="onadclose" @error="onaderror">
+                <button :disabled="loading" :loading="loading">显示广告</button>
+                <view v-if="error">{{ error }}</view>
+            </ad-interstitial>
+            <!-- #endif -->
+        </view>
     </view>
 </template>
 
@@ -31,3 +37,13 @@ export default {
     }
 };
 </script>
+
+<style scoped>
+.page {
+    min-height: 100vh;
+}
+
+.content {
+    padding: 30rpx;
+}
+</style>

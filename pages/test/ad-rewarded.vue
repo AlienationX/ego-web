@@ -1,5 +1,10 @@
 <template>
-    <view>
+    <view class="page">
+        <menu-bar>
+            <template #title>Ad Rewarded</template>
+        </menu-bar>
+
+        <view class="content">
         <!-- #ifndef MP-WEIXIN -->
         <ad-rewarded-video ref="adRewardedVideo" adpid="1507000689" :url-callback="urlCallback" :preload="false"
             :loadnext="false" :disabled="true" v-slot:default="{loading, error}" @load="onadload" @close="onadclose"
@@ -8,6 +13,7 @@
         </ad-rewarded-video>
         <button :disabled="isLoading" :loading="isLoading" @click="showAd">显示广告</button>
         <!-- #endif -->
+        </view>
     </view>
 </template>
 
@@ -63,6 +69,14 @@
 </script>
 
 <style>
+    .page {
+        min-height: 100vh;
+    }
+
+    .content {
+        padding: 30rpx;
+    }
+
     .ad-error {
         color: orangered;
         margin-top: 5px;

@@ -19,8 +19,8 @@
                 </navigator>
 
                 <!-- TODO 每12个图片后插入广告，但是不显示，存在bug -->
-                <view v-if="(idx + 1) % 12 === 0" class="ad-row">
-                    <custom-ad-banner></custom-ad-banner>
+                <view v-if="(idx + 1) % 12 === 0 && canShowAd && !adErrorMap[`slot-${idx}`]" class="ad-row">
+                    <custom-ad-banner @error="onAdError(`slot-${idx}`)"></custom-ad-banner>
                 </view>
                 
             </template>
@@ -32,7 +32,9 @@
     import { ref, reactive, watch, computed, onMounted, toRef, toRefs } from 'vue';
     import { onLoad, onUnload, onReady } from '@dcloudio/uni-app';
     import { useSettingsStore } from '@/stores/settings.js';
+    import { useUserStore } from '@/stores/user.js';
     const settingsStore = useSettingsStore();
+    const userStore = useUserStore();
 
     const props = defineProps({
         classList: {
@@ -49,6 +51,8 @@
     });
 
     const images = ref([]);
+    const adErrorMap = reactive({});
+    const canShowAd = computed(() => !userStore.isVip && userStore.showAd);
 
     // const { classList } = toRefs(props)
     // const classList = toRef(props, 'classList');
@@ -379,6 +383,10 @@
         if (isWaterfall.value) {
             nextTick(() => calculateLayout());
         }
+    };
+
+    const onAdError = (key) => {
+        adErrorMap[key] = true;
     };
 
     // 暴露属性给父组件

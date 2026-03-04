@@ -125,7 +125,8 @@
             <view class="list">
                 <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <uni-icons :type="item.left_icon" size="24" color="#28B389"></uni-icons>
+                        <image v-if="String(item.left_icon).startsWith('/')" class="icon" :src="item.left_icon" mode="aspectFit"></image>
+                        <uni-icons v-else :type="item.left_icon" size="24" color="#28B389"></uni-icons>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -259,8 +260,12 @@ const onService = () => {
     console.log('onService');
 };
 
-const onFeedback = () => {
+const toFeedback = () => {
     uni.navigateTo({ url: '/pages/feedback/feedback' });
+};
+
+const toTest = () => {
+    uni.navigateTo({ url: '/pages/test/test' });
 };
 
 const onExit = () => {
@@ -349,13 +354,14 @@ const appMenus = computed(() => [
 const sysMenus = computed(() => [
     // {
     //     left_icon: 'vip-filled',
+    //     left_icon: '/static/icons/crown-circle.svg',
     //     left_text: t('user.profile.subscription'),
     //     right_text: '',
     //     right_icon: 'right',
     //     click: toMembership
     // },
     {
-        left_icon: 'help-filled',
+        left_icon: '/static/icons/help-circle.svg',
         left_text: t('user.profile.question'),
         right_text: '',
         right_icon: 'right',
@@ -364,6 +370,7 @@ const sysMenus = computed(() => [
     // #ifdef MP-WEIXIN
     {
         left_icon: 'chatboxes-filled',
+        // left_icon: '/static/icons/forum.svg',
         left_text: t('user.profile.support'),
         right_text: '',
         right_icon: 'right',
@@ -371,19 +378,30 @@ const sysMenus = computed(() => [
     },
     // #endif
     {
-        left_icon: 'chat-filled',
+        left_icon: '/static/icons/comment-processing.svg',
         left_text: t('user.profile.feedback'),
         right_text: '',
         right_icon: 'right',
-        click: onFeedback,
+        click: toFeedback,
     },
     {
-        left_icon: 'gear-filled',
+        left_icon: '/static/icons/cog.svg',
         left_text: t('user.profile.settings'),
         right_text: '',
         right_icon: 'right',
         click: toSettings,
     },
+    ...(userStore.isAdmin
+        ? [
+              {
+                  left_icon: '/static/icons/ab-testing.svg',
+                  left_text: t('user.profile.testLab'),
+                  right_text: '',
+                  right_icon: 'right',
+                  click: toTest,
+              },
+          ]
+        : []),
 ]);
 
 const exitMenus = computed(() => [

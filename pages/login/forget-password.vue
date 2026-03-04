@@ -1,146 +1,123 @@
 <template>
     <view class="reset-password-container">
         <!-- 返回按钮 -->
-        <view class="back-btn" @click="goBack">
-            <image src="/static/icons/arrow-left.svg" mode="aspectFit"></image>
+        <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
+            <uni-icons type="back" color="#4a5670" size="20"></uni-icons>
         </view>
 
-        <swiper
-            class="swiper"
-            :indicator-dots="false"
-            :autoplay="false"
-            :circular="false"
-            :duration="300"
-            :current="currentIndex"
-            @change="onSwiperChange"
-        >
+        <view class="step-host">
             <!-- 第一步：忘记密码 -->
-            <swiper-item class="swiper-item">
-                <view class="step-page">
-                    <view class="content">
-                        <!-- 标题区域 -->
-                        <view class="title-section">
-                            <view class="main-title">Forget Password</view>
-                            <view class="sub-title">Enter your email or phone number to reset your password</view>
-                        </view>
+            <view :class="['step-page', stepAnimClass]" v-if="currentIndex === 0" :key="`step-0-${animTick}`">
+                <view class="content">
+                    <view class="title-section">
+                        <view class="main-title">{{ t('login.forgetPasswordTitle') }}</view>
+                        <view class="sub-title">{{ t('login.forgetPasswordSubtitle') }}</view>
+                    </view>
 
-                        <!-- 输入表单 -->
-                        <view class="form-section">
-                            <view class="form-item">
-                                <input
-                                    class="form-input"
-                                    type="text"
-                                    placeholder="Email or Phone Number"
-                                    v-model="step1Form.contact"
-                                />
-                            </view>
-                        </view>
-
-                        <!-- 发送按钮 -->
-                        <view class="submit-section">
-                            <button class="submit-btn" :disabled="isSubmitting" @click="handleStep1">
-                                {{ isSubmitting ? 'Sending...' : 'Send' }}
-                            </button>
+                    <view class="form-section">
+                        <view class="form-item">
+                            <input
+                                class="form-input"
+                                type="text"
+                                :placeholder="t('login.emailPhonePlaceholder')"
+                                v-model="step1Form.contact"
+                            />
                         </view>
                     </view>
+
+                    <view class="submit-section">
+                        <button class="submit-btn" :disabled="isSubmitting" @click="handleStep1">
+                            {{ isSubmitting ? t('login.sending') : t('login.send') }}
+                        </button>
+                    </view>
                 </view>
-            </swiper-item>
+            </view>
 
             <!-- 第二步：验证OTP -->
-            <swiper-item class="swiper-item">
-                <view class="step-page">
-                    <view class="content">
-                        <!-- 标题区域 -->
-                        <view class="title-section">
-                            <view class="main-title">Enter OTP</view>
-                            <view class="sub-title">Enter OTP code we just sent you on your registered Email/Phone number</view>
-                        </view>
+            <view :class="['step-page', stepAnimClass]" v-else-if="currentIndex === 1" :key="`step-1-${animTick}`">
+                <view class="content">
+                    <view class="title-section">
+                        <view class="main-title">{{ t('login.enterOtpTitle') }}</view>
+                        <view class="sub-title">{{ t('login.enterOtpSubtitle') }}</view>
+                    </view>
 
-                        <!-- OTP输入框 -->
-                        <view class="otp-section">
-                            <view class="otp-inputs">
-                                <view
-                                    class="otp-input-box"
-                                    v-for="(digit, index) in otpDigits"
-                                    :key="index"
-                                    :class="{ filled: digit }"
-                                    @click="focusOtp(index)"
-                                >
-                                    <input
-                                        v-model="otpDigits[index]"
-                                        type="tel"
-                                        maxlength="1"
-                                        class="otp-input"
-                                        @input="onOtpInput(index, $event)"
-                                        @focus="onOtpFocus(index)"
-                                        @blur="onOtpBlur(index)"
-                                    />
-                                </view>
+                    <view class="otp-section">
+                        <view class="otp-inputs">
+                            <view
+                                class="otp-input-box"
+                                v-for="(digit, index) in otpDigits"
+                                :key="index"
+                                :class="{ filled: digit }"
+                                @click="focusOtp(index)"
+                            >
+                                <input
+                                    :focus="activeIndex === index && currentIndex === 1"
+                                    v-model="otpDigits[index]"
+                                    type="tel"
+                                    maxlength="1"
+                                    class="otp-input"
+                                    @input="onOtpInput(index, $event)"
+                                    @focus="onOtpFocus(index)"
+                                    @blur="onOtpBlur(index)"
+                                />
                             </view>
                         </view>
+                    </view>
 
-                        <!-- 验证按钮 -->
-                        <view class="submit-section">
-                            <button class="submit-btn" :disabled="!isOtpComplete || isSubmitting" @click="handleStep2">
-                                {{ isSubmitting ? 'Verifying...' : 'Verify' }}
-                            </button>
-                        </view>
+                    <view class="submit-section">
+                        <button class="submit-btn" :disabled="!isOtpComplete || isSubmitting" @click="handleStep2">
+                            {{ isSubmitting ? t('login.verifying') : t('login.verify') }}
+                        </button>
+                    </view>
 
-                        <!-- 重新发送OTP -->
-                        <view class="resend-section">
-                            <text class="resend-text">Didn't get OTP? </text>
-                            <text class="resend-link" :class="{ disabled: isResendDisabled }" @click="handleResend">
-                                {{ isResendDisabled ? `Resend in ${countdown}s` : 'Resend OTP' }}
-                            </text>
-                        </view>
+                    <view class="resend-section">
+                        <text class="resend-text">{{ t('login.didntGetOtp') }}</text>
+                        <text class="resend-link" :class="{ disabled: isResendDisabled }" @click="handleResend">
+                            {{ isResendDisabled ? t('login.resendIn', { seconds: countdown }) : t('login.resendOtp') }}
+                        </text>
                     </view>
                 </view>
-            </swiper-item>
+            </view>
 
             <!-- 第三步：重置密码 -->
-            <swiper-item class="swiper-item">
-                <view class="step-page">
-                    <view class="content">
-                        <!-- 标题区域 -->
-                        <view class="title-section">
-                            <view class="main-title">Reset Password</view>
-                            <view class="sub-title">Enter your new password</view>
-                        </view>
+            <view :class="['step-page', stepAnimClass]" v-else :key="`step-2-${animTick}`">
+                <view class="content">
+                    <view class="title-section">
+                        <view class="main-title">{{ t('login.resetPasswordTitle') }}</view>
+                        <view class="sub-title">{{ t('login.resetPasswordSubtitle') }}</view>
+                    </view>
 
-                        <!-- 密码表单 -->
-                        <view class="form-section">
-                            <view class="form-item">
-                                <input
-                                    class="form-input"
-                                    :type="showPassword ? 'text' : 'password'"
-                                    placeholder="New Password"
-                                    v-model="step3Form.newPassword"
-                                />
-                                <view class="password-toggle" @click="togglePassword">
-                                    <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
-                                </view>
-                            </view>
-
-                            <view class="form-item">
-                                <input
-                                    class="form-input"
-                                    type="password"
-                                    placeholder="Confirm Password"
-                                    v-model="step3Form.confirmPassword"
-                                />
+                    <view class="form-section">
+                        <view class="form-item">
+                            <input
+                                class="form-input"
+                                :type="showPassword ? 'text' : 'password'"
+                                :placeholder="t('login.newPasswordPlaceholder')"
+                                v-model="step3Form.newPassword"
+                            />
+                            <view class="password-toggle" @click="togglePassword">
+                                <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
                             </view>
                         </view>
 
-                        <!-- 确认按钮 -->
-                        <view class="submit-section">
-                            <button class="submit-btn" :disabled="isSubmitting" @click="handleStep3">
-                                {{ isSubmitting ? 'Resetting...' : 'Reset Password' }}
-                            </button>
+                        <view class="form-item">
+                            <input
+                                class="form-input"
+                                type="password"
+                                :placeholder="t('login.confirmPasswordPlaceholder')"
+                                v-model="step3Form.confirmPassword"
+                            />
                         </view>
                     </view>
+
+                    <view class="submit-section">
+                        <button class="submit-btn" :disabled="isSubmitting" @click="handleStep3">
+                            {{ isSubmitting ? t('login.resetting') : t('login.resetPassword') }}
+                        </button>
+                    </view>
                 </view>
-            </swiper-item>
-        </swiper>
+            </view>
+        </view>
 
         <!-- 指示器 -->
         <view class="indicator-wrapper">
@@ -155,9 +132,15 @@
 </template>
 
 <script setup>
-    import { ref, computed, onMounted, onUnmounted } from 'vue';
+    import { ref, computed, onUnmounted } from 'vue';
+    import { useI18n } from 'vue-i18n';
+    import { getStatusBarHeight } from '@/utils/system.js';
 
+    const { t } = useI18n();
     const currentIndex = ref(0);
+    const stepAnimClass = ref('step-anim-left');
+    const animTick = ref(0);
+    const maxUnlockedStep = ref(0);
     const isSubmitting = ref(false);
     const showPassword = ref(false);
     const isResendDisabled = ref(false);
@@ -178,27 +161,19 @@
     // OTP数据
     const otpDigits = ref(['', '', '', '']);
     const activeIndex = ref(0);
+    const backTop = ref((getStatusBarHeight() || 0) + 10);
 
     // 计算OTP是否完整
     const isOtpComplete = computed(() => {
         return otpDigits.value.every(digit => digit !== '');
     });
 
-    // Swiper切换事件
-    const onSwiperChange = (e) => {
-        currentIndex.value = e.detail.current;
-
-        // 切换到第二步（OTP）时开始倒计时
-        if (currentIndex.value === 1 && !isResendDisabled.value) {
-            startCountdown();
-        }
-    };
-
     // 第一步：发送OTP
     const handleStep1 = async () => {
+        if (isSubmitting.value) return;
         if (!step1Form.value.contact || step1Form.value.contact.trim().length < 5) {
             uni.showToast({
-                title: 'Please enter email or phone number',
+                title: t('login.contactError'),
                 icon: 'none'
             });
             return;
@@ -210,17 +185,23 @@
             // await apiSendOtp({ contact: step1Form.value.contact });
 
             uni.showToast({
-                title: 'OTP sent successfully',
-                icon: 'success'
+                title: t('login.otpSentSuccess'),
+                icon: 'none'
             });
 
             // 自动跳转到下一步
             setTimeout(() => {
+                otpDigits.value = ['', '', '', ''];
+                activeIndex.value = 0;
+                maxUnlockedStep.value = 1;
                 swiperToStep(1);
+                if (!isResendDisabled.value) {
+                    startCountdown();
+                }
             }, 1500);
         } catch (error) {
             uni.showToast({
-                title: error.message || 'Failed to send OTP',
+                title: error.message || t('login.sendOtpFailed'),
                 icon: 'none',
                 duration: 2000
             });
@@ -231,9 +212,10 @@
 
     // 第二步：验证OTP
     const handleStep2 = async () => {
+        if (isSubmitting.value) return;
         if (!isOtpComplete.value) {
             uni.showToast({
-                title: 'Please enter complete OTP',
+                title: t('login.otpIncomplete'),
                 icon: 'none'
             });
             return;
@@ -247,17 +229,18 @@
             // await apiVerifyOtp({ otp });
 
             uni.showToast({
-                title: 'OTP verified successfully',
-                icon: 'success'
+                title: t('login.otpVerifiedSuccess'),
+                icon: 'none'
             });
 
             // 验证成功后，自动跳转到下一步
             setTimeout(() => {
+                maxUnlockedStep.value = 2;
                 swiperToStep(2);
             }, 1500);
         } catch (error) {
             uni.showToast({
-                title: error.message || 'Invalid OTP',
+                title: error.message || t('login.invalidOtp'),
                 icon: 'none',
                 duration: 2000
             });
@@ -268,9 +251,10 @@
 
     // 第三步：重置密码
     const handleStep3 = async () => {
+        if (isSubmitting.value) return;
         if (!step3Form.value.newPassword || step3Form.value.newPassword.length < 6) {
             uni.showToast({
-                title: 'Password must be at least 6 characters',
+                title: t('login.passwordError'),
                 icon: 'none'
             });
             return;
@@ -278,7 +262,7 @@
 
         if (step3Form.value.newPassword !== step3Form.value.confirmPassword) {
             uni.showToast({
-                title: 'Passwords do not match',
+                title: t('login.confirmPasswordError'),
                 icon: 'none'
             });
             return;
@@ -290,8 +274,8 @@
             // await apiResetPassword({ password: step3Form.value.newPassword });
 
             uni.showToast({
-                title: 'Password reset successfully',
-                icon: 'success'
+                title: t('login.passwordResetSuccess'),
+                icon: 'none'
             });
 
             // 重置成功后，跳转到登录页
@@ -302,7 +286,7 @@
             }, 1500);
         } catch (error) {
             uni.showToast({
-                title: error.message || 'Failed to reset password',
+                title: error.message || t('login.resetPasswordFailed'),
                 icon: 'none',
                 duration: 2000
             });
@@ -313,6 +297,18 @@
 
     // 切换到指定步骤
     const swiperToStep = (index) => {
+        if (index > maxUnlockedStep.value) {
+            uni.showToast({
+                title: t('login.completeCurrentStepFirst'),
+                icon: 'none'
+            });
+            return;
+        }
+        if (index === currentIndex.value) {
+            return;
+        }
+        stepAnimClass.value = index > currentIndex.value ? 'step-anim-left' : 'step-anim-right';
+        animTick.value += 1;
         currentIndex.value = index;
     };
 
@@ -329,7 +325,7 @@
     // OTP输入处理
     const onOtpInput = (index, event) => {
         const value = event.detail.value;
-        const digits = value.split('');
+        const digits = String(value || '').split('');
 
         // 自动填充下一个输入框
         if (digits.length > 1) {
@@ -338,13 +334,13 @@
                     otpDigits.value[index + i] = digit;
                 }
             });
+            const nextIndex = Math.min(index + digits.length, otpDigits.value.length - 1);
+            if (!isOtpComplete.value) activeIndex.value = nextIndex;
         } else {
             otpDigits.value[index] = value;
-        }
-
-        // 自动跳转到下一个输入框
-        if (value && index < otpDigits.value.length - 1) {
-            activeIndex.value = index + 1;
+            if (value && index < otpDigits.value.length - 1) {
+                activeIndex.value = index + 1;
+            }
         }
 
         // 如果所有输入框都已填写，自动提交
@@ -368,6 +364,10 @@
 
     // 倒计时
     const startCountdown = () => {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
         isResendDisabled.value = true;
         countdown.value = 60;
 
@@ -375,6 +375,7 @@
             countdown.value--;
             if (countdown.value <= 0) {
                 clearInterval(timer);
+                timer = null;
                 isResendDisabled.value = false;
             }
         }, 1000);
@@ -388,7 +389,7 @@
 
         // 调用发送OTP的API
         uni.showToast({
-            title: 'OTP resent',
+            title: t('login.otpResent'),
             icon: 'success'
         });
 
@@ -400,7 +401,13 @@
     const goBack = () => {
         if (currentIndex.value === 0) {
             // 第一步，返回到登录页
-            uni.navigateBack();
+            uni.navigateBack({
+                fail: () => {
+                    uni.reLaunch({
+                        url: '/pages/login/signin'
+                    });
+                }
+            });
         } else {
             // 其他步骤，返回到上一步
             swiperToStep(currentIndex.value - 1);
@@ -411,58 +418,89 @@
     onUnmounted(() => {
         if (timer) {
             clearInterval(timer);
+            timer = null;
         }
     });
 </script>
 
 <style lang="scss" scoped>
     .reset-password-container {
-        width: 100%;
+        width: 750rpx;
+        max-width: 100%;
         height: 100vh;
         background: #ffffff;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: hidden;
         position: relative;
+        box-sizing: border-box;
     }
 
     .back-btn {
         position: fixed;
-        top: 88rpx;
-        left: 48rpx;
-        width: 48rpx;
-        height: 48rpx;
-        z-index: 100;
+        left: 36rpx;
+        width: 72rpx;
+        height: 72rpx;
+        z-index: 12;
         display: flex;
         align-items: center;
         justify-content: center;
-
-        image {
-            width: 48rpx;
-            height: 48rpx;
-        }
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1rpx solid rgba(214, 223, 238, 0.95);
+        box-shadow: 0 8rpx 20rpx rgba(31, 44, 72, 0.12);
     }
 
-    .swiper {
-        width: 100%;
+    .step-host {
+        width: 750rpx;
+        max-width: 100%;
         height: 100%;
-    }
-
-    .swiper-item {
-        width: 100%;
-        height: 100%;
+        box-sizing: border-box;
     }
 
     .step-page {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 750rpx;
+        max-width: 100%;
+        min-height: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
+        background: #ffffff;
+    }
+
+    .step-anim-left {
+        animation: step-slide-in-left 0.28s ease both;
+    }
+
+    .step-anim-right {
+        animation: step-slide-in-right 0.28s ease both;
+    }
+
+    @keyframes step-slide-in-left {
+        from {
+            transform: translateX(56rpx);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes step-slide-in-right {
+        from {
+            transform: translateX(-56rpx);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 
     .content {
-        width: 100%;
         padding: 0 48rpx;
-        padding-top: 160rpx;
+        padding-top: 170rpx;
+        box-sizing: border-box;
+        overflow-x: hidden;
     }
 
     .title-section {
@@ -484,6 +522,9 @@
             color: #61677D;
             line-height: 1.6;
             opacity: 0.8;
+            white-space: normal;
+            word-break: break-word;
+            overflow-wrap: anywhere;
         }
     }
 
@@ -492,17 +533,25 @@
         flex-direction: column;
         gap: 24rpx;
         margin-bottom: 60rpx;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
 
         .form-item {
+            width: 100%;
+            max-width: 100%;
             height: 120rpx;
             background: #F5F9FE;
             border-radius: 28rpx;
             display: flex;
             align-items: center;
             padding: 0 48rpx;
+            box-sizing: border-box;
 
             .form-input {
                 flex: 1;
+                width: 0;
+                min-width: 0;
                 font-size: 32rpx;
                 color: #333;
                 background: transparent;
@@ -556,15 +605,24 @@
 
     .otp-section {
         margin-bottom: 80rpx;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
 
         .otp-inputs {
             display: flex;
-            gap: 24rpx;
-            justify-content: center;
+            gap: 16rpx;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         .otp-input-box {
-            width: 112rpx;
+            flex: 1;
+            min-width: 0;
+            max-width: 112rpx;
             height: 140rpx;
             background: #F5F9FE;
             border-radius: 24rpx;
@@ -598,8 +656,15 @@
     }
 
     .resend-section {
+        padding: 48rpx;
         text-align: center;
         font-size: 28rpx;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
 
         .resend-text {
             color: #3B4054;

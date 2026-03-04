@@ -1,5 +1,10 @@
 <template>
-    <div class="container">
+    <view class="page">
+        <menu-bar>
+            <template #title>Demo View</template>
+        </menu-bar>
+
+        <div class="container">
         <!-- 切换按钮 -->
         <button @click="toggleLayout" class="toggle-btn">
             {{ isWaterfall ? '切换为Grid布局' : '切换为瀑布流' }}
@@ -11,7 +16,8 @@
                 <img :src="item.url" @load="isWaterfall && updateLayout(index)" :class="{ 'grid-img': !isWaterfall }" />
             </div>
         </div>
-    </div>
+        </div>
+    </view>
 </template>
 
 <script setup>
@@ -104,6 +110,10 @@
 </script>
 
 <style scoped>
+    .page {
+        min-height: 100vh;
+    }
+
     /* 基础布局容器 */
     .layout-container {
         margin: 20px;

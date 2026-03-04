@@ -16,7 +16,7 @@ export const apiGetBanner = () => {
 
 export const apiGetRandomDay = () => {
     return request({
-        url: '/wall/random/',
+        url: '/wall/random_daily/',
     });
 };
 
@@ -158,12 +158,21 @@ export const apiPostProfile = (data = {}) => {
     });
 };
 
-export const apiPostDiscoverAnalyze = (data = {}) => {
-    // 基于收藏图片做个性分析
+export const apiPostRewards = (data = {}) => {
+    // 奖励用户接口
     return request({
-        url: '/discover/analyze/',
+        url: '/rewards/',
         data,
         method: 'POST',
-        isAuth: true,
+    });
+};
+
+export const apiPostDiscoverAnalyze = (data = {}) => {
+    // 发现分析接口
+    return request({
+        url: '/discover/',
+        data,
+        method: 'POST',
+        timeout: 180000, // 180秒超时
     });
 };

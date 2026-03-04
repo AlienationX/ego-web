@@ -5,7 +5,13 @@ const APP_INFO = uni.getAppBaseInfo();
 
 export const getStatusBarHeight = () => {
     // 状态栏高度
-    return SYSTEM_INFO.statusBarHeight || 0;
+    // #ifdef WEB
+    return 0;
+    // #endif
+    
+    // #ifndef WEB
+    return SYSTEM_INFO.statusBarHeight;
+    // #endif
 };
 
 export const getTitleBarHeight = () => {

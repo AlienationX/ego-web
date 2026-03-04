@@ -82,39 +82,9 @@
             "path": "pages/access/access",
             "style": {
                 "navigationBarTitleText": "Access-Key获取",
-                // "navigationStyle": "custom"
-                "navigationBarBackgroundColor": "#0078d4",
-                "navigationBarTextStyle": "white"
-            }
-        },
-        {
-            "path": "pages/test/ad-inter",
-            "style": {
-                "navigationBarTitleText": ""
-            }
-        },
-        {
-            "path": "pages/test/ad-rewarded",
-            "style": {
-                "navigationBarTitleText": ""
-            }
-        },
-        {
-            "path": "pages/test/waterfall-view",
-            "style": {
-                "navigationBarTitleText": ""
-            }
-        },
-        {
-            "path": "pages/test/test2",
-            "style": {
-                "navigationBarTitleText": ""
-            }
-        },
-        {
-            "path": "pages/test/test3",
-            "style": {
-                "navigationBarTitleText": ""
+                "navigationStyle": "custom"
+                // "navigationBarBackgroundColor": "#0078d4",
+                // "navigationBarTextStyle": "white"
             }
         },
         {
@@ -149,12 +119,6 @@
             "style": {
                 "navigationBarTitleText": "忘记密码",
                 "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/demo-view/demo-view",
-            "style": {
-                "navigationBarTitleText": "视图切换"
             }
         },
         {
@@ -221,6 +185,41 @@
             "path": "pages/discover/discover",
             "style": {
                 "navigationBarTitleText": "发现",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/test",
+            "style": {
+                "navigationBarTitleText": "Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/ad-inter",
+            "style": {
+                "navigationBarTitleText": "Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/ad-rewarded",
+            "style": {
+                "navigationBarTitleText": "Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/waterfall-view",
+            "style": {
+                "navigationBarTitleText": "Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/demo-view",
+            "style": {
+                "navigationBarTitleText": "Test",
                 "navigationStyle": "custom"
             }
         }
