@@ -129,13 +129,6 @@
             }
         },
         {
-            "path": "pages/test/settings1",
-            "style": {
-                "navigationBarTitleText": "Settings",
-                "navigationStyle": "custom"
-            }
-        },
-        {
             "path": "pages/feedback/feedback",
             "style": {
                 "navigationBarTitleText": "反馈",
@@ -227,6 +220,20 @@
             "path": "pages/test/demo-view",
             "style": {
                 "navigationBarTitleText": "Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/settings1",
+            "style": {
+                "navigationBarTitleText": "Settings",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/settings2",
+            "style": {
+                "navigationBarTitleText": "Settings",
                 "navigationStyle": "custom"
             }
         }
