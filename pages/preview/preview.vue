@@ -43,11 +43,13 @@
                 </view>
             </view>
 
-            <view class="footer-floating" v-else>
+            <template v-else>
                 <view class="right-actions">
                     <view class="action-item" @click="toggleCollect">
                         <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
-                        <view class="action-text">{{ currentInfo.is_collect ? t('preview.collected') : t('preview.collect') }}</view>
+                        <view class="action-text">{{
+                            currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
+                        }}</view>
                     </view>
                     <view class="action-item" @click="openScore">
                         <uni-icons type="star-filled" size="36" color="#ffffff"></uni-icons>
@@ -71,7 +73,7 @@
                     </view>
                     <view class="meta-desc">{{ currentInfo.description || currentInfo.classify_name || '' }}</view>
                 </view>
-            </view>
+            </template>
         </view>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
@@ -485,6 +487,13 @@ onShareTimeline(() => {
     }
 
     .mask {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+
         & > view {
             // goBack\count\time\date\footer都需要绝对定位，统一在这里设
             position: absolute;
@@ -493,6 +502,7 @@ onShareTimeline(() => {
             right: 0;
             margin: auto;
             color: #fff;
+            pointer-events: auto;
         }
 
         .goBack {
@@ -566,102 +576,104 @@ onShareTimeline(() => {
             }
         }
 
-        .footer-floating {
+        .right-actions {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom) + 28rpx);
-            width: auto !important;
-            height: 420rpx;
-            padding: 30rpx 0;
+            right: 8rpx;
+            bottom: calc(env(safe-area-inset-bottom) + 76rpx);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30rpx;
+            min-width: 128rpx;
+            color: #fff;
+            z-index: 10;
+            margin: 0;
+            left: auto;
+
+            .action-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 8rpx;
+                width: 100%;
+            }
+
+            .action-text {
+                font-size: 24rpx;
+                font-weight: 500;
+                text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            :deep(.uni-icons) {
+                color: #fff !important;
+            }
+        }
+
+        .left-meta {
+            position: absolute;
+            left: 44rpx;
+            bottom: calc(env(safe-area-inset-bottom) + 100rpx);
+            right: 170rpx;
+            width: auto;
+            min-width: 0;
+            max-width: none;
+            color: #fff;
+            text-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.55);
+            z-index: 2;
+            padding: 20rpx;
+            margin: 0;
 
             &::before {
                 content: '';
                 position: absolute;
-                left: -18rpx;
-                right: -18rpx;
-                bottom: -28rpx;
-                height: 240rpx;
+                left: -44rpx;
+                right: -170rpx;
+                bottom: -116rpx;
+                top: -20rpx;
                 background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.4) 54%, transparent 100%);
                 pointer-events: none;
-                z-index: 0;
+                z-index: -1;
             }
 
-            .right-actions {
-                position: absolute;
-                right: 8rpx;
-                bottom: 48rpx;
+            .meta-user {
                 display: flex;
-                flex-direction: column;
                 align-items: center;
-                gap: 30rpx;
-                min-width: 128rpx;
-                color: #fff;
-                z-index: 2;
+                gap: 12rpx;
+                margin-bottom: 12rpx;
 
-                .action-item {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8rpx;
-                    width: 100%;
+                .meta-avatar {
+                    width: 44rpx;
+                    height: 44rpx;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.95);
+                    border: 1rpx solid rgba(255, 255, 255, 0.7);
                 }
 
-                .action-text {
-                    font-size: 24rpx;
-                    font-weight: 500;
-                    text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
-                    text-align: center;
-                    white-space: nowrap;
-                }
-
-                :deep(.uni-icons) {
-                    color: #fff !important;
+                .meta-user-name {
+                    font-size: 30rpx;
+                    font-weight: 600;
+                    line-height: 1.35;
+                    letter-spacing: 0.2rpx;
                 }
             }
 
-            .left-meta {
-                position: absolute;
-                left: 44rpx;
-                bottom: 88rpx;
-                right: 170rpx;
-                max-width: none;
-                color: #fff;
-                text-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.55);
-                z-index: 2;
-
-                .meta-user {
-                    display: flex;
-                    align-items: center;
-                    gap: 12rpx;
-                    margin-bottom: 12rpx;
-
-                    .meta-avatar {
-                        width: 44rpx;
-                        height: 44rpx;
-                        border-radius: 50%;
-                        background: rgba(255, 255, 255, 0.95);
-                        border: 1rpx solid rgba(255, 255, 255, 0.7);
-                    }
-
-                    .meta-user-name {
-                        font-size: 30rpx;
-                        font-weight: 600;
-                        line-height: 1.35;
-                        letter-spacing: 0.2rpx;
-                    }
-                }
-
-                .meta-desc {
-                    font-size: 28rpx;
-                    line-height: 44rpx;
-                    height: 88rpx;
-                    font-weight: 400;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                    opacity: 0.95;
-                }
+            .meta-desc {
+                font-size: 28rpx;
+                line-height: 44rpx;
+                height: 88rpx;
+                max-height: 88rpx;
+                font-weight: 400;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                line-clamp: 2;
+                word-break: break-word;
+                overflow-wrap: anywhere;
+                overflow: hidden;
+                opacity: 0.95;
             }
         }
     }
@@ -671,6 +683,7 @@ onShareTimeline(() => {
         padding: 30rpx;
         border-radius: 30rpx 30rpx 0 0;
         overflow: hidden;
+        z-index: 100;
 
         // padding-bottom: 30rpx !important; // safe-area关闭后，手动增加相应高度
 

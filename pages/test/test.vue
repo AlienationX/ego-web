@@ -30,6 +30,7 @@ const testMenus = [
     { name: 'Forget Password', url: '/pages/login/forget-password' },
     { name: 'Access', url: '/pages/access/access' },
     { name: 'Membership', url: '/pages/membership/membership' },
+    { name: 'Settings1', url: '/pages/test/settings1' },
     { name: 'Interstitial Ad', url: '/pages/test/ad-inter' },
     { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded' },
     { name: 'Waterfall View', url: '/pages/test/waterfall-view' },

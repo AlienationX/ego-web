@@ -1,8 +1,8 @@
 // common/config.js
 
-export const API_DOMAIN = 'http://127.0.0.1:8000';
+// export const API_DOMAIN = 'http://127.0.0.1:8000';
 // export const API_DOMAIN = 'https://49touviwp7.execute-api.eu-north-1.amazonaws.com/dev';
-// export const API_DOMAIN = 'https://api.wp.ego8.space';
+export const API_DOMAIN = 'https://api.wp.ego8.space';
 
 export const API_BASE_URL = `${API_DOMAIN}/wallpaper/api`;
 

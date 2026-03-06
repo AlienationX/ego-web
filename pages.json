@@ -129,6 +129,13 @@
             }
         },
         {
+            "path": "pages/test/settings1",
+            "style": {
+                "navigationBarTitleText": "Settings",
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/feedback/feedback",
             "style": {
                 "navigationBarTitleText": "反馈",

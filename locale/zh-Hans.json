@@ -83,6 +83,9 @@
             "energyHintContent": "如何获取能量：\n1. 每日签到：+1能量\n2. 上传壁纸：每上传+2能量\n3. 邀请好友：每邀请+5能量\n\n如何使用能量：\n1. 解锁 premium 壁纸：10能量\n2. 下载高清图片：5能量\n3. 参与幸运抽奖：每次3能量"
         },
         "settings": {
+            "preferences": "偏好设置",
+            "system": "系统",
+            "managePreferences": "管理语言、主题、预览和系统偏好设置",
             "language": "语言",
             "chinese": "中文",
             "english": "英语",

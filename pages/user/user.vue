@@ -125,7 +125,12 @@
             <view class="list">
                 <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <image v-if="String(item.left_icon).startsWith('/')" class="icon" :src="item.left_icon" mode="aspectFit"></image>
+                        <image
+                            v-if="String(item.left_icon).startsWith('/')"
+                            class="icon"
+                            :src="item.left_icon"
+                            mode="aspectFit"
+                        ></image>
                         <uni-icons v-else :type="item.left_icon" size="24" color="#28B389"></uni-icons>
                         <view class="text">
                             {{ item.left_text }}
@@ -926,8 +931,8 @@ onShow(() => {
                     align-items: center;
 
                     .icon {
-                        width: 48rpx;
-                        height: 48rpx;
+                        width: 42rpx;
+                        height: 42rpx;
                         flex-shrink: 0;
                         filter: brightness(0) saturate(100%) invert(52%) sepia(88%) saturate(485%) hue-rotate(106deg)
                             brightness(91%) contrast(87%);

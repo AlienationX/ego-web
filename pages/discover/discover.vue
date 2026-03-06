@@ -18,6 +18,7 @@
             }"
         >
             <view class="intro">
+                <view :style="{ height: getStatusBarHeight() + 'px' }"></view>
                 <view class="intro-title intro-enter-1">{{ $t('discover.subtitle') }}</view>
                 <view class="intro-desc intro-enter-2">{{ $t('discover.desc') }}</view>
             </view>
