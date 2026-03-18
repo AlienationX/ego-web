@@ -29,7 +29,15 @@
         "title": "Recommend",
         "notice": "Notice",
         "dailyRecommend": "Daily Recommend",
+        "latestRelease": "Latest Releases",
         "categoryRecommend": "Category Recommend"
+    },
+    "latest": {
+        "title": "Latest Releases",
+        "subtitle": "Newest Updates",
+        "desc": "Browse the most recent wallpapers in reverse chronological order.",
+        "empty": "No recent releases yet",
+        "wallpaper": "Wallpaper"
     },
     "category": {
         "title": "Category",
@@ -127,7 +135,22 @@
         "cancel": "Cancel",
         "ratingSuccess": "Rating successful. You can view it in [My Score].",
         "ratingFailed": "Rating failed. Please try again later.",
-        "savePrompt": "Please long press or right-click menu to save wallpaper"
+        "savePrompt": "Please long press or right-click menu to save wallpaper",
+        "adminEdit": "Edit Wallpaper",
+        "adminSave": "Save Changes",
+        "adminSaveSuccess": "Changes saved",
+        "adminSaveFailed": "Save failed, try again",
+        "adminDelete": "Delete Wallpaper",
+        "adminDeleteConfirm": "Delete this wallpaper?",
+        "adminDeleteSuccess": "Wallpaper deleted",
+        "adminDeleteFailed": "Delete failed, try again",
+        "lock": "Lock",
+        "active": "Active",
+        "lockToggled": "Lock status updated",
+        "lockToggleFailed": "Lock update failed",
+        "shareSuccess": "Shared successfully",
+        "shareFailed": "Share failed",
+        "shareHint": "Use the system share panel"
     },
     "feedback": {
         "title": "Feedback",
@@ -373,5 +396,245 @@
         "shareSuccess": "Shared successfully",
         "shareFailed": "Share failed",
         "introText": "Ego Wallpapers is a high-quality wallpaper application. We have gathered massive beautiful wallpapers covering various styles and categories, providing users with the best wallpaper selection experience. Whether it's landscape, portraits, anime, or abstract art, you can find your favorite wallpapers here."
+    },
+    "settings1": {
+        "title": "Settings",
+        "defaultName": "Sample User",
+        "version": "Version",
+        "build": "Build",
+        "sections": {
+            "profile": "PROFILE",
+            "security": "SECURITY",
+            "notifications": "NOTIFICATIONS",
+            "preferences": "PREFERENCES",
+            "data": "DATA",
+            "support": "SUPPORT",
+            "appInformation": "APP INFORMATION",
+            "others": "OTHERS",
+            "account": "ACCOUNT"
+        },
+        "preview": {
+            "title": "Preview Type",
+            "classic": "Classic",
+            "floating": "Floating"
+        },
+        "items": {
+            "editProfile": {
+                "label": "Edit Profile",
+                "sublabel": "Update avatar, name and contact"
+            },
+            "changePassword": {
+                "label": "Change Password",
+                "sublabel": "Last changed: 3 months ago"
+            },
+            "resetPassword": {
+                "label": "Reset Password",
+                "sublabel": "Send reset link to email"
+            },
+            "twoFA": {
+                "label": "Two-Factor Authentication",
+                "enabled": "Enabled via authenticator",
+                "disabled": "Currently disabled"
+            },
+            "assignmentAlerts": {
+                "label": "Assignment Alerts",
+                "sublabel": "Notify when new tasks arrive"
+            },
+            "ticketUpdates": {
+                "label": "Ticket Updates",
+                "sublabel": "Status changes and comments"
+            },
+            "reminders": {
+                "label": "Reminders",
+                "sublabel": "Due dates and follow-up alerts"
+            },
+            "language": {
+                "label": "Language",
+                "sublabel": "Switch application language",
+                "valueZh": "Chinese",
+                "valueEn": "English"
+            },
+            "theme": {
+                "label": "Theme",
+                "sublabel": "Switch light or dark mode",
+                "light": "Light",
+                "dark": "Dark"
+            },
+            "previewType": {
+                "label": "Preview Type",
+                "sublabel": "Set wallpaper preview layout"
+            },
+            "availability": {
+                "label": "Availability Status",
+                "available": "Currently available",
+                "unavailable": "Currently unavailable"
+            },
+            "location": {
+                "label": "Location Services",
+                "sublabel": "Used for field check-ins"
+            },
+            "autoSave": {
+                "label": "Auto-save Reports",
+                "sublabel": "Save drafts automatically"
+            },
+            "syncWifi": {
+                "label": "Sync on Wi-Fi Only",
+                "sublabel": "Reduce mobile data usage"
+            },
+            "clearCache": {
+                "label": "Clear Cache",
+                "sublabel": "Free local storage space"
+            },
+            "helpCentre": {
+                "label": "Help Centre",
+                "sublabel": "Browse FAQs and guides"
+            },
+            "contactSupport": {
+                "label": "Contact Support",
+                "sublabel": "Get help from support team"
+            },
+            "sendFeedback": {
+                "label": "Send Feedback",
+                "sublabel": "Share ideas or report issues"
+            },
+            "about": {
+                "label": "About",
+                "sublabel": "View app and version info"
+            },
+            "privacy": {
+                "label": "Privacy Policy",
+                "sublabel": "View privacy and data statement"
+            },
+            "agreement": {
+                "label": "User Agreement",
+                "sublabel": "View terms of service"
+            },
+            "introduction": {
+                "label": "Product Introduction",
+                "sublabel": "App overview and highlights"
+            },
+            "checkUpdate": {
+                "label": "Check for Updates",
+                "sublabel": "View current version status"
+            },
+            "rateUs": {
+                "label": "Rate Us",
+                "sublabel": "Leave a store review"
+            },
+            "share": {
+                "label": "Share App",
+                "sublabel": "Share with friends or team"
+            },
+            "logout": {
+                "label": "Logout",
+                "sublabel": "Sign out current account"
+            },
+            "deactivate": {
+                "label": "Deactivate Account",
+                "sublabel": "Permanently disable access"
+            }
+        },
+        "toast": {
+            "themeChanged": "Theme changed",
+            "clearing": "Clearing",
+            "clearSuccess": "Clear success",
+            "loggedOut": "Logged out"
+        }
+    },
+    "editProfile1": {
+        "title": "Edit Profile",
+        "save": "Save",
+        "saved": "Saved",
+        "changePhoto": "Change Photo",
+        "personalInfo": "Personal Information",
+        "workInfo": "Work Details",
+        "fullName": "Full Name",
+        "email": "Email Address",
+        "phone": "Phone Number",
+        "jobTitle": "Job Title",
+        "department": "Department",
+        "saveChanges": "Save Changes",
+        "profileSaved": "Profile Saved!",
+        "enterName": "Please enter name",
+        "saveFailed": "Save failed",
+        "placeholders": {
+            "fullName": "Enter full name",
+            "email": "Enter email",
+            "phone": "Enter phone number",
+            "jobTitle": "Enter job title",
+            "department": "Enter department"
+        }
+    },
+    "helpCentre": {
+        "title": "Help Centre",
+        "introTitle": "How can we help?",
+        "introDesc": "Find quick answers for account, privacy, and wallpaper usage.",
+        "contactSupport": "Contact Support",
+        "privacy": "Privacy Policy",
+        "agreement": "User Agreement",
+        "faq": {
+            "q1": "How do I change language and theme?",
+            "a1": "Go to Settings > Preferences and tap Language or Theme.",
+            "q2": "Why local image analysis needs VIP?",
+            "a2": "It uses premium model resources and is available for VIP users.",
+            "q3": "How do I report a bug?",
+            "a3": "Use Contact Support or Send Feedback with screenshots."
+        }
+    },
+    "deactivate": {
+        "title": "Deactivate Account",
+        "finalTitle": "Final Confirmation",
+        "doneHeader": "Deactivation Complete",
+        "warnTitle": "Before you go",
+        "warnDesc": "Deactivating your account will suspend access to all features and data. Please review what will happen.",
+        "happenTitle": "What will happen",
+        "happen1Icon": "🚫",
+        "happen1Title": "Immediate access suspension",
+        "happen1Desc": "You'll be signed out across all devices.",
+        "happen2Icon": "💾",
+        "happen2Title": "Data held for 30 days",
+        "happen2Desc": "Reports, tasks, and history are retained.",
+        "happen3Icon": "📧",
+        "happen3Title": "Confirmation email sent",
+        "happen3Desc": "A receipt will be sent to your registered email.",
+        "happen4Icon": "↩️",
+        "happen4Title": "Reactivation possible",
+        "happen4Desc": "Contact support within 30 days to restore.",
+        "reasonTitle": "Reason (optional)",
+        "reason1": "I no longer need this account",
+        "reason2": "I have a duplicate account",
+        "reason3": "Privacy concerns",
+        "reason4": "Switching to a different service",
+        "reason5": "Taking a break",
+        "reason6": "Other",
+        "continue": "Continue to Deactivate",
+        "keep": "Keep My Account",
+        "warningTitle": "This action is irreversible",
+        "warningDesc": "Deactivating your account will immediately suspend access. Data will be permanently deleted after 30 days.",
+        "typeToConfirm": "Type “DEACTIVATE” to confirm",
+        "placeholder": "DEACTIVATE",
+        "agree": "I understand and confirm the deactivation.",
+        "button": "Deactivate My Account",
+        "cancel": "Cancel",
+        "doneTitle": "Account Deactivated",
+        "doneDesc": "Your account has been scheduled for deactivation. You'll receive a confirmation email within 24 hours.",
+        "doneNextTitle": "What happens next?",
+        "done1": "Access is suspended immediately",
+        "done2": "Data retained for 30 days",
+        "done3": "Email confirmation will be sent",
+        "done4": "Contact support to reactivate",
+        "backSettings": "Back to Settings",
+        "confirmContent": "Are you sure you want to deactivate now?",
+        "success": "Account deactivated"
+    },
+    "logoutPage": {
+        "title": "Log Out",
+        "askTitle": "Log out?",
+        "askDesc": "You'll be signed out on this device. Your data and settings will remain saved.",
+        "confirm": "Yes, Log Me Out",
+        "cancel": "Cancel",
+        "doneTitle": "You've been logged out",
+        "doneDesc": "See you next time, {name}! Your data and settings are safely stored.",
+        "backSettings": "Back to Settings"
     }
 }

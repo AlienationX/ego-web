@@ -21,21 +21,12 @@
     },
     "styles": {
         "backgroundColor": "#FFFFFF",
-        "borderRadius": "16px",
+        "borderRadius": "20px",
         "buttonAccept": {
-            "fontWeight": "bold",
-            "color": "#FFFFFF",
-            "backgroundColor": "#007AFF",
-            "marginLeft": "20px",
-            "borderRadius": "8px",
-            "boxShadow": "0 2px 8px rgba(0,122,255,0.15)"
+            "color": "#0000ff"
         },
         "buttonRefuse": {
-            "color": "#666666",
-            "backgroundColor": "#F0F0F0",
-            "marginRight": "20px",
-            "borderRadius": "8px",
-            "boxShadow": "0 2px 8px rgba(0,0,0,0.08)"
+            "color": "#666666"
         }
     }
 }

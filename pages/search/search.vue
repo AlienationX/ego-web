@@ -111,7 +111,7 @@
 <script setup>
     import { ref, nextTick, computed } from 'vue';
     import { onLoad, onUnload, onReachBottom, onPageScroll } from '@dcloudio/uni-app';
-    import { apiSearchData } from '@/api/wallpaper.js';
+    import { apiGetSearchData } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
     import { useSettingsStore } from '@/stores/settings.js';
     import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth } from '@/utils/system.js';
@@ -232,7 +232,7 @@
         try {
             uni.showLoading(); // 屏幕中间黑方框中间转圈效果
 
-            let res = await apiSearchData(queryParams.value);
+            let res = await apiGetSearchData(queryParams.value);
             let fullData = res.data.map((item) => handlePicUrl(item));
             // pendingList.value.value = [...pendingList.value.value, ...fullData];
             pendingList.value.push(...fullData);

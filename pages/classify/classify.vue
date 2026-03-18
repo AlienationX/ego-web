@@ -193,7 +193,7 @@
 
 <style lang="scss" scoped>
     .classLayout {
-        background: linear-gradient(135deg, rgba(40, 179, 137, 0.08) 0%, rgba(255, 107, 157, 0.05) 100%);
+        background: #f5f5f5;
         min-height: 100vh;
     }
 

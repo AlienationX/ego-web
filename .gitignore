@@ -1,9 +1,18 @@
-
+# 忽略 .DS_Store 文件
 .DS_Store
+
+# IDE相关目录或文件
 .hbuilderx
 .codebuddy
+
+# 环境变量文件
 .env*
 
+# 插件文件夹
 uni_modules
 node_modules
 unpackage
+
+# 临时文件夹
+Mobile_App_Settings_Screen
+hello-darkmode_副本

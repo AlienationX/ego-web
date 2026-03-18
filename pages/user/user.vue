@@ -722,22 +722,24 @@ onShow(() => {
 
         .login-btn {
             margin-top: 20rpx;
-            width: 300rpx;
-            height: 80rpx;
+            width: 420rpx;
+            height: 88rpx;
             background: $wp-theme-color;
             color: #fff;
             font-size: 32rpx;
-            font-weight: 600;
-            border-radius: 40rpx;
+            font-weight: 700;
+            border-radius: 60rpx;
             border: none;
             display: flex;
             align-items: center;
             justify-content: center;
+            letter-spacing: 0.6rpx;
+            box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.55);
             transition: all 0.3s;
 
             &:active {
-                background: darken($wp-theme-color, 5%);
-                transform: scale(0.95);
+                background: #2a8e06;
+                transform: scale(0.96);
             }
 
             &::after {

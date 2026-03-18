@@ -10,6 +10,18 @@
             <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
                 <uni-icons type="back" color="#fff" size="20"></uni-icons>
             </view>
+            <view class="top-actions" :style="{ top: getGoBackButtonTop() + 'px' }">
+                <view v-if="isAdmin" class="icon-btn" @click="openEdit">
+                    <uni-icons type="compose" size="20" color="#fff"></uni-icons>
+                </view>
+                <!-- <view v-if="isAdmin" class="icon-btn" @click="toggleLock">
+                    <uni-icons :type="currentInfo.is_locked ? 'locked-filled' : 'locked'" size="20" color="#fff"></uni-icons>
+                </view> -->
+                <button class="icon-btn share-btn" open-type="share" @click="handleShare">
+                    <uni-icons type="redo" size="20" color="#fff"></uni-icons>
+                </button>
+            </view>
+
             <view class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
             <view class="time">
                 <!-- <uni-dateformat :date="new Date()" format="hh:mm"></uni-dateformat> -->
@@ -23,6 +35,7 @@
                     new Date().getDate().toString().padStart(2, '0')
                 }}
             </view>
+
             <view class="footer" v-if="previewType === 'classic'">
                 <view class="box" @click="openInfo">
                     <uni-icons type="info-filled" size="28"></uni-icons>
@@ -32,10 +45,10 @@
                     <uni-icons type="heart-filled" size="28"></uni-icons>
                     <view class="text">{{ currentInfo.is_collect ? t('preview.collected') : t('preview.collect') }}</view>
                 </view>
-                <view class="box" @click="openScore">
+                <!-- <view class="box" @click="openScore">
                     <uni-icons type="star-filled" size="28"></uni-icons>
                     <view class="text">{{ currentInfo.score }}</view>
-                </view>
+                </view> -->
                 <view class="box" @click="clickDownload">
                     <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
                     <uni-icons v-else type="download-filled" size="28"></uni-icons>
@@ -45,19 +58,19 @@
 
             <template v-else>
                 <view class="right-actions">
-                    <view class="action-item" @click="toggleCollect">
-                        <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
-                        <view class="action-text">{{
-                            currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
-                        }}</view>
+                    <view class="action-item" @click="openInfo">
+                        <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
+                        <view class="action-text">{{ t('common.information') }}</view>
                     </view>
                     <view class="action-item" @click="openScore">
                         <uni-icons type="star-filled" size="36" color="#ffffff"></uni-icons>
                         <view class="action-text">{{ currentInfo.score }}</view>
                     </view>
-                    <view class="action-item" @click="openInfo">
-                        <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
-                        <view class="action-text">{{ t('common.information') }}</view>
+                    <view class="action-item" @click="toggleCollect">
+                        <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
+                        <view class="action-text">{{
+                            currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
+                        }}</view>
                     </view>
                     <view class="action-item" @click="clickDownload">
                         <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="36" color="#ffffff"></uni-icons>
@@ -158,6 +171,52 @@
             </view>
         </uni-popup>
 
+        <uni-popup ref="editPopup" type="bottom" :safe-area="false">
+            <view class="editPopup">
+                <view class="popHeader">
+                    <view></view>
+                    <view class="title">{{ t('preview.adminEdit') }}</view>
+                    <view class="close">
+                        <uni-icons class="close" type="clear" size="32" @click="closeEdit"></uni-icons>
+                    </view>
+                </view>
+                <scroll-view scroll-y>
+                    <view class="content">
+                        <view class="row">
+                            <view class="label">{{ t('preview.description') }}</view>
+                            <textarea v-model="editForm.description" class="input-textarea" :auto-height="true"></textarea>
+                        </view>
+                        <view class="row">
+                            <view class="label">{{ t('preview.tags') }}</view>
+                            <input v-model="editForm.tags" class="input" />
+                        </view>
+                        <view class="row">
+                            <view class="label">{{ t('preview.category') }}</view>
+                            <input v-model="editForm.classify" class="input" />
+                        </view>
+                        <view class="row">
+                            <view class="label">{{ t('preview.publisher') }}</view>
+                            <input v-model="editForm.publisher" class="input" />
+                        </view>
+                        <view class="row row-inline">
+                            <view class="inline-item">
+                                <view class="label">{{ t('preview.active') }}</view>
+                                <switch color="#E5322D" :checked="editForm.is_active" @change="onEditActiveChange" />
+                            </view>
+                            <view class="inline-item">
+                                <view class="label">{{ t('preview.lock') }}</view>
+                                <switch color="#E5322D" :checked="editForm.is_locked" @change="onEditLockChange" />
+                            </view>
+                        </view>
+                        <view class="edit-actions">
+                            <button class="btn-primary" @click="saveEdit">{{ t('preview.adminSave') }}</button>
+                            <button class="btn-danger" @click="deleteWall">{{ t('preview.adminDelete') }}</button>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </uni-popup>
+
         <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
     </view>
 </template>
@@ -169,7 +228,7 @@ import { onLoad, onUnload, onShareAppMessage, onShareTimeline, onShow } from '@d
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
 import { downloadPic } from '@/common/core.js';
-import { apiPostIncrementViews, apiPostIncrementDownloads, apiPostActions } from '@/api/wallpaper.js';
+import { apiPostIncrementViews, apiPostIncrementDownloads, apiPostActions, apiPostUpdateWall } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 import { useUserStore } from '@/stores/user.js';
@@ -179,6 +238,7 @@ const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
 const { t, locale } = useI18n();
 const previewType = computed(() => settingsStore.options.previewType || 'classic');
+const isAdmin = computed(() => !!userStore.isAdmin);
 const publisherName = computed(() => currentInfo.value?.publisher || t('common.appName'));
 const publisherAvatar = computed(() => {
     const rawPublisher = String(currentInfo.value?.publisher || '')
@@ -275,6 +335,135 @@ const openScore = () => {
 };
 const closeScore = () => {
     scorePopup.value.close();
+};
+
+const editPopup = ref(null);
+const editForm = ref({
+    description: '',
+    tags: '',
+    classify: '',
+    publisher: '',
+    is_active: true,
+    is_locked: false,
+});
+
+const openEdit = () => {
+    editForm.value = {
+        description: currentInfo.value.description || '',
+        tags: currentInfo.value.tabs || (currentInfo.value.tabs_list || []).join(','),
+        classify: currentInfo.value.classify_name || '',
+        publisher: currentInfo.value.publisher || '',
+        is_active: !!currentInfo.value.is_active,
+        is_locked: !!currentInfo.value.is_locked,
+    };
+    editPopup.value.open();
+};
+
+const closeEdit = () => {
+    editPopup.value.close();
+};
+
+const onEditLockChange = (e) => {
+    editForm.value.is_locked = !!e.detail.value;
+};
+
+const onEditActiveChange = (e) => {
+    editForm.value.is_active = !!e.detail.value;
+};
+
+const applyLocalUpdate = (payload) => {
+    const next = { ...currentInfo.value, ...payload };
+    currentInfo.value = next;
+    if (classList.value[currentIndex.value]) {
+        classList.value[currentIndex.value] = { ...classList.value[currentIndex.value], ...payload };
+    }
+};
+
+const saveEdit = async () => {
+    const payload = {
+        description: editForm.value.description,
+        tabs: editForm.value.tags,
+        classify_name: editForm.value.classify,
+        publisher: editForm.value.publisher,
+        is_active: editForm.value.is_active,
+        is_locked: editForm.value.is_locked,
+    };
+    try {
+        await apiPostUpdateWall(currentInfo.value.id, payload);
+        applyLocalUpdate({
+            ...payload,
+            tabs_list: editForm.value.tags
+                ? editForm.value.tags
+                      .split(',')
+                      .map((t) => t.trim())
+                      .filter(Boolean)
+                : [],
+        });
+        uni.showToast({ title: t('preview.adminSaveSuccess'), icon: 'none' });
+        closeEdit();
+    } catch (error) {
+        uni.showToast({ title: t('preview.adminSaveFailed'), icon: 'none' });
+    }
+};
+
+const deleteWall = () => {
+    uni.showModal({
+        title: t('common.tip'),
+        content: t('preview.adminDeleteConfirm'),
+        confirmText: t('preview.adminDelete'),
+        cancelText: t('preview.cancel'),
+        success: async (res) => {
+            if (!res.confirm) return;
+            try {
+                await apiPostUpdateWall(currentInfo.value.id, { is_active: false });
+                classList.value = classList.value.filter((item) => item.id !== currentInfo.value.id);
+                if (!classList.value.length) {
+                    goBack();
+                    return;
+                }
+                if (currentIndex.value >= classList.value.length) {
+                    currentIndex.value = classList.value.length - 1;
+                }
+                currentInfo.value = classList.value[currentIndex.value];
+                uni.showToast({ title: t('preview.adminDeleteSuccess'), icon: 'none' });
+                closeEdit();
+            } catch (error) {
+                uni.showToast({ title: t('preview.adminDeleteFailed'), icon: 'none' });
+            }
+        },
+    });
+};
+
+const toggleLock = async () => {
+    const next = !currentInfo.value.is_locked;
+    try {
+        await apiPostUpdateWall(currentInfo.value.id, { is_locked: next });
+        applyLocalUpdate({ is_locked: next });
+        uni.showToast({ title: t('preview.lockToggled'), icon: 'none' });
+    } catch (error) {
+        uni.showToast({ title: t('preview.lockToggleFailed'), icon: 'none' });
+    }
+};
+
+const handleShare = () => {
+    // #ifdef APP-PLUS
+    uni.share({
+        provider: 'weixin',
+        scene: 'WXSceneSession',
+        type: 0,
+        summary: t('common.appName'),
+        success: () => {
+            uni.showToast({ title: t('preview.shareSuccess'), icon: 'success' });
+        },
+        fail: () => {
+            uni.showToast({ title: t('preview.shareFailed'), icon: 'none' });
+        },
+    });
+    // #endif
+
+    // #ifdef H5
+    uni.showToast({ title: t('preview.shareHint'), icon: 'none' });
+    // #endif
 };
 
 const toggleCollect = async () => {
@@ -410,7 +599,7 @@ function readImgsFun() {
     readImgs.value.push(
         currentIndex.value <= 0 ? classList.value.length - 1 : currentIndex.value - 1,
         currentIndex.value,
-        currentIndex.value >= classList.value.length ? 0 : currentIndex.value + 1
+        currentIndex.value >= classList.value.length ? 0 : currentIndex.value + 1,
     );
     // 去重
     readImgs.value = [...new Set(readImgs.value)];
@@ -506,8 +695,8 @@ onShareTimeline(() => {
         }
 
         .goBack {
-            width: 38px;
-            height: 38px;
+            width: 76rpx;
+            height: 76rpx;
             background: rgba(0, 0, 0, 0.5);
             left: 30rpx;
             margin-left: 0;
@@ -517,6 +706,38 @@ onShareTimeline(() => {
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .top-actions {
+            position: absolute;
+            right: 30rpx;
+            display: flex;
+            align-items: center;
+            gap: 16rpx;
+            left: auto;
+            margin: 0;
+            pointer-events: auto;
+        }
+
+        .icon-btn {
+            width: 76rpx;
+            height: 76rpx;
+            border-radius: 100rpx;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1rpx solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .share-btn {
+            border: none;
+            background: rgba(0, 0, 0, 0.55);
+
+            &::after {
+                border: none;
+            }
         }
 
         .count {
@@ -864,6 +1085,128 @@ onShareTimeline(() => {
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+    }
+
+    .editPopup {
+        background: #fff;
+        padding: 30rpx;
+        border-radius: 30rpx 30rpx 0 0;
+        overflow: hidden;
+        z-index: 100;
+
+        .popHeader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            .title {
+                color: $wp-font-color-2;
+                font-size: 32rpx;
+                font-weight: 600;
+                padding: 16rpx 0;
+            }
+
+            .close {
+                position: absolute;
+                top: 18rpx;
+                right: 18rpx;
+            }
+        }
+
+        scroll-view {
+            max-height: 70vh;
+        }
+
+        .content {
+            .row {
+                display: flex;
+                flex-direction: column;
+                gap: 10rpx;
+                padding: 12rpx 0;
+                font-size: 28rpx;
+                line-height: 1.6em;
+            }
+
+            .row-inline {
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 24rpx;
+            }
+
+            .inline-item {
+                flex: 1;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12rpx;
+                background: #f7f7f9;
+                border-radius: 16rpx;
+                padding: 16rpx 20rpx;
+                box-sizing: border-box;
+            }
+
+            .label {
+                font-size: 26rpx;
+                color: $wp-font-color-2;
+                font-weight: 600;
+            }
+
+            .input,
+            .input-textarea {
+                width: 100%;
+                background: #f7f7f9;
+                border-radius: 16rpx;
+                padding: 16rpx 20rpx;
+                font-size: 28rpx;
+                color: #333;
+                box-sizing: border-box;
+                min-height: 80rpx;
+                line-height: 1.5;
+            }
+
+            .input-textarea {
+                min-height: 80rpx;
+                line-height: 1.6;
+            }
+
+            .edit-actions {
+                margin-top: 20rpx;
+                display: flex;
+                flex-direction: column;
+                gap: 16rpx;
+            }
+
+            .btn-primary {
+                width: 100%;
+                height: 84rpx;
+                border-radius: 16rpx;
+                background: $wp-theme-color;
+                color: #fff;
+                font-size: 30rpx;
+                font-weight: 600;
+                border: none;
+
+                &::after {
+                    border: none;
+                }
+            }
+
+            .btn-danger {
+                width: 100%;
+                height: 84rpx;
+                border-radius: 16rpx;
+                background: #fef2f2;
+                color: #e5322d;
+                font-size: 30rpx;
+                font-weight: 600;
+                border: 1rpx solid #fecaca;
+
+                &::after {
+                    border: none;
+                }
+            }
         }
     }
 }

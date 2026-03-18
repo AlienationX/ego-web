@@ -31,7 +31,10 @@
                         <template v-if="msg.image">
                             <image class="msg-image" :src="msg.image" mode="aspectFill"></image>
                         </template>
-                        <view class="msg-text" v-if="msg.text">{{ msg.text }}</view>
+                        <template v-if="msg.text">
+                            <rich-text v-if="msg.role === 'assistant'" class="msg-text markdown" :nodes="msg.html"></rich-text>
+                            <view v-else class="msg-text">{{ msg.text }}</view>
+                        </template>
                     </view>
                 </view>
 
@@ -98,7 +101,7 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
-import { apiGetActions, apiPostDiscoverAnalyze } from '@/api/wallpaper.js';
+import { apiGetActions, apiPostDiscoverStream } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
@@ -184,21 +187,62 @@ const updateMessage = (id, patch) => {
     chatMessages.value[idx] = { ...chatMessages.value[idx], ...patch };
 };
 
+const appendTextToMessage = (id, text) => {
+    if (!text) return;
+    const idx = chatMessages.value.findIndex((m) => m.id === id);
+    if (idx === -1) return;
+    const current = String(chatMessages.value[idx].text || '');
+    const nextText = current + text;
+    const html = chatMessages.value[idx].role === 'assistant' ? markdownToHtml(nextText) : undefined;
+    chatMessages.value[idx] = { ...chatMessages.value[idx], text: nextText, html };
+    scrollToBottom(0);
+};
+
 const startTypingToMessage = (targetId, text) => {
     stopTyping();
     const full = String(text || '');
     let index = 0;
-    updateMessage(targetId, { text: '' });
+    updateMessage(targetId, { text: '', html: '' });
 
     typingTimer = setInterval(() => {
         index += 1;
         const next = full.slice(0, index);
-        updateMessage(targetId, { text: next });
+        updateMessage(targetId, { text: next, html: markdownToHtml(next) });
         scrollToBottom(0);
         if (index >= full.length) {
             stopTyping();
         }
     }, 80);
+};
+
+const escapeHtml = (str = '') =>
+    String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+const markdownToHtml = (md = '') => {
+    let html = escapeHtml(md);
+    html = html.replace(/```([\s\S]*?)```/g, (_m, code) => `<pre><code>${code}</code></pre>`);
+    html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    html = html.replace(/(?:^|\n)(- .+(?:\n- .+)*)/g, (m) => {
+        const items = m
+            .trim()
+            .split('\n')
+            .map((line) => `<li>${line.replace(/^- /, '')}</li>`)
+            .join('');
+        return `\n<ul>${items}</ul>`;
+    });
+    html = html.replace(/\n/g, '<br/>');
+    return html;
 };
 
 const getFavoriteList = async () => {
@@ -290,11 +334,6 @@ const pickLocalImage = () => {
     });
 };
 
-const extractContent = (res) => {
-    const data = res?.data || {};
-    return data.analysis || data.content || data.result || data.message || res?.message || '';
-};
-
 const onAnalyze = async () => {
     if (!canAnalyze.value || isRunning.value) return;
     isRunning.value = true;
@@ -323,19 +362,44 @@ const onAnalyze = async () => {
     await sleep(2000);
 
     try {
-        const res = await apiPostDiscoverAnalyze({
+        let aiMsgId = null;
+        const result = await apiPostDiscoverStream({
             img_url: currentPicUrl,
+            lang: uni.getStorageSync('lang') || uni.getLocale()
+        }, {
+            onMessage: (chunk) => {
+                const piece = String(chunk || '');
+                if (!piece) return;
+
+                if (!aiMsgId) {
+                    stopThinkingTimer();
+                    isThinking.value = false;
+                    aiMsgId = appendMessage({
+                        role: 'assistant',
+                        name: aiProfile.value.name,
+                        avatar: aiProfile.value.avatar,
+                        text: '',
+                    });
+                }
+
+                appendTextToMessage(aiMsgId, piece);
+            },
         });
-        const content = extractContent(res.data.content);
-        stopThinkingTimer(); // 停止思考计时器
-        isThinking.value = false;
-        const aiMsgId = appendMessage({
-            role: 'assistant',
-            name: aiProfile.value.name,
-            avatar: aiProfile.value.avatar,
-            text: '',
-        });
-        startTypingToMessage(aiMsgId, content);
+
+        // 后端降级为非流式时，使用最终文本兜底
+        if (!aiMsgId) {
+            stopThinkingTimer();
+            isThinking.value = false;
+            const text = String(result?.text || '').trim();
+            const fallbackText = text || t('discover.systemError');
+            aiMsgId = appendMessage({
+                role: 'assistant',
+                name: aiProfile.value.name,
+                avatar: aiProfile.value.avatar,
+                text: '',
+            });
+            startTypingToMessage(aiMsgId, fallbackText);
+        }
     } catch (error) {
         stopThinkingTimer(); // 停止思考计时器
         isThinking.value = false;
@@ -363,7 +427,6 @@ const goFavorite = () => {
 
 onLoad(() => {
     createAiProfile();
-    getFavoriteList();
     statusBarHeight.value = getStatusBarHeight();
     tabBarHeight.value = getTabBarHeight();
 });
@@ -621,6 +684,62 @@ onUnload(() => {
     white-space: pre-wrap;
     word-break: break-word;
     box-shadow: 0 8rpx 20rpx rgba(18, 31, 53, 0.08);
+}
+
+.markdown {
+    width: auto;
+}
+
+.markdown :deep(h1),
+.markdown :deep(h2),
+.markdown :deep(h3) {
+    font-weight: 700;
+    margin: 12rpx 0 6rpx;
+    line-height: 1.4;
+}
+
+.markdown :deep(h1) { font-size: 34rpx; }
+.markdown :deep(h2) { font-size: 32rpx; }
+.markdown :deep(h3) { font-size: 30rpx; }
+
+.markdown :deep(p) {
+    margin: 6rpx 0;
+}
+
+.markdown :deep(ul) {
+    padding-left: 26rpx;
+    margin: 6rpx 0;
+}
+
+.markdown :deep(li) {
+    margin: 4rpx 0;
+}
+
+.markdown :deep(code) {
+    background: #f4f6f9;
+    border-radius: 8rpx;
+    padding: 2rpx 6rpx;
+    font-size: 26rpx;
+}
+
+.markdown :deep(pre) {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 12rpx;
+    border-radius: 12rpx;
+    overflow-x: auto;
+    margin: 8rpx 0;
+}
+
+.markdown :deep(pre code) {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+}
+
+.markdown :deep(a) {
+    color: #1f9f79;
+    text-decoration: underline;
 }
 
 .msg-row.user .msg-text {

@@ -1,4 +1,4 @@
-import { API_DOMAIN, API_BASE_URL, ACCESS_KEY } from '@/common/config';
+import { API_DOMAIN, API_BASE_URL, API_SECRET_KEY } from '@/common/config';
 import { useUserStore } from '@/stores/user.js';
 import { decrypt } from '@/utils/encryption.js';
 
@@ -36,7 +36,7 @@ const setHeader = (isAuth) => {
     const hasValidToken = rawToken && rawToken.trim().length > 0;
 
     const header = {
-        'Access-Key': ACCESS_KEY,
+        'Access-Key': API_SECRET_KEY,
     };
     // 仅当存在有效 token 时添加 Authorization，避免服务端报 "two space-delimited values"
     if (isAuth && hasValidToken) {
@@ -159,5 +159,275 @@ export const uploadRequest = (config = {}) => {
                 reject(err);
             },
         });
+    });
+};
+
+export const streamRequest = (config = {}) => {
+    return new Promise((resolve, reject) => {
+        const state = { buffer: '', fullText: '', done: false };
+        let settled = false;
+        const debug = !!config.debug;
+        const log = (...args) => {
+            if (debug) {
+                console.log('[streamRequest]', ...args);
+            }
+            if (typeof config.onLog === 'function') {
+                config.onLog(...args);
+            }
+        };
+
+        const safeResolve = (payload) => {
+            if (settled) return;
+            settled = true;
+            resolve(payload);
+        };
+
+        const safeReject = (error) => {
+            if (settled) return;
+            settled = true;
+            reject(error);
+        };
+
+        const normalizeJson = (text) => {
+            return String(text)
+                .replace(/\bTrue\b/g, 'true')
+                .replace(/\bFalse\b/g, 'false')
+                .replace(/\bNone\b/g, 'null');
+        };
+
+        const handlePayload = (payloadText = '') => {
+            let data = null;
+            try {
+                data = JSON.parse(payloadText);
+                log('payload', data);
+            } catch (error) {
+                try {
+                    data = JSON.parse(normalizeJson(payloadText));
+                    log('payload.normalize', data);
+                } catch (error2) {
+                    return false;
+                }
+            }
+
+            if (!data || typeof data !== 'object') return false;
+            // 解析done为true，即为结束
+            if (data.done === true || data.DONE === true) {
+                state.done = true;
+                log('done', { textLength: state.fullText.length });
+                if (typeof config.onDone === 'function') {
+                    config.onDone(state.fullText);
+                }
+                return true;
+            }
+            // 解析content内容
+            log('content.type', typeof data.content);
+            if (typeof data.content === 'string' && data.content) {
+                state.fullText += data.content;
+                log('content.append', { chunkLength: data.content.length, totalLength: state.fullText.length });
+                if (typeof config.onMessage === 'function') {
+                    config.onMessage(data.content, state.fullText);
+                }
+            }
+            return true;
+        };
+
+        const parseChunk = (chunkText = '') => {
+            if (!chunkText) return;
+            const chunkString = String(chunkText);
+            log('chunk', { size: chunkString.length, sample: chunkString.slice(0, 120) });
+            state.buffer += chunkString;
+            const lines = state.buffer.split(/\r?\n/);
+            state.buffer = lines.pop() || '';
+
+            let currentEventData = '';
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) {
+                    if (currentEventData) {
+                        handlePayload(currentEventData);
+                        currentEventData = '';
+                    }
+                } else if (trimmedLine.startsWith('data:')) {
+                    currentEventData += trimmedLine.slice(5).trim();
+                }
+            }
+
+            if (currentEventData) {
+                handlePayload(currentEventData);
+            }
+        };
+
+        const requestUrl = config.url.startsWith('http') ? config.url : API_BASE_URL + config.url;
+        const requestData = config.data || {};
+        const requestMethod = config.method || 'POST';
+        const requestHeader = {
+            'Content-Type': 'application/json',
+            ...setHeader(config.isAuth || false),
+            ...config.header,
+        };
+
+        const finalize = (res = {}) => {
+            if (state.buffer.trim()) {
+                parseChunk(state.buffer);
+                state.buffer = '';
+            }
+            if (!state.done && typeof res.data === 'string' && res.data.trim()) {
+                parseChunk(res.data);
+            }
+            log('finalize', {
+                text: state.fullText,
+                data: res.data,
+                statusCode: res.statusCode,
+                done: state.done,
+            });
+            safeResolve({
+                text: state.fullText,
+                data: res.data,
+                statusCode: res.statusCode,
+                done: state.done,
+            });
+        };
+
+        // #ifdef WEB
+        (async () => {
+            try {
+                log('web.request', { url: requestUrl, method: requestMethod });
+                const response = await fetch(requestUrl, {
+                    method: requestMethod,
+                    headers: requestHeader,
+                    body: JSON.stringify(requestData),
+                });
+                log('web.response', { ok: response.ok, status: response.status });
+                if (!response.ok) {
+                    safeReject(response);
+                    return;
+                }
+                const reader = response.body?.getReader();
+                if (!reader) {
+                    safeReject(new Error('ReadableStream not supported'));
+                    return;
+                }
+                const decoder = new TextDecoder('utf-8');
+                while (true) {
+                    const { value, done } = await reader.read();
+                    log('web.chunk', { done, size: value?.length || 0 });
+                    if (done) break;
+                    parseChunk(decoder.decode(value, { stream: true }));
+                    if (state.done) break;
+                }
+                finalize({ statusCode: response.status, data: null });
+            } catch (err) {
+                safeReject(err);
+            }
+        })();
+        // #endif
+
+        // #ifdef APP
+        log('app.request', { url: requestUrl, method: requestMethod, mode: 'plus.net.XMLHttpRequest' });
+        const xhr = new plus.net.XMLHttpRequest();
+        let lastIndex = 0;
+
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState === 3 || xhr.readyState === 4) {
+                const responseText = xhr.responseText || '';
+                if (responseText.length > lastIndex) {
+                    const chunk = responseText.slice(lastIndex);
+                    lastIndex = responseText.length;
+                    log('app.onChunkReceived', { size: chunk.length });
+                    parseChunk(chunk);
+                }
+            }
+            if (xhr.readyState === 4) {
+                const statusCode = xhr.status || 0;
+                if (statusCode < 200 || statusCode >= 300) {
+                    safeReject({ statusCode, data: xhr.responseText });
+                    return;
+                }
+                log('app.success', { statusCode, dataLength: String(xhr.responseText || '').length });
+                finalize({ statusCode, data: xhr.responseText });
+            }
+        };
+
+        xhr.onerror = (err) => {
+            safeReject(err);
+        };
+
+        xhr.ontimeout = () => {
+            safeReject(new Error('Request timeout'));
+        };
+
+        xhr.timeout = config.timeout || 180000;
+        xhr.open(requestMethod, requestUrl);
+        Object.keys(requestHeader || {}).forEach((key) => {
+            try {
+                xhr.setRequestHeader(key, requestHeader[key]);
+            } catch (error) {
+                log('app.header.error', { key });
+            }
+        });
+        xhr.send(JSON.stringify(requestData));
+        // #endif
+
+        // #ifdef MP
+        log('app.request', { url: requestUrl, method: requestMethod, enableChunked: true });
+        const appTask = uni.request({
+            url: requestUrl,
+            data: requestData,
+            method: requestMethod,
+            timeout: config.timeout || 180000,
+            enableChunked: true,
+            responseType: 'text',
+            header: requestHeader,
+            success: (res) => {
+                if (res.statusCode < 200 || res.statusCode >= 300) {
+                    safeReject(res.data || res);
+                    return;
+                }
+                log('app.success', { statusCode: res.statusCode, dataLength: String(res.data || '').length });
+                finalize(res);
+            },
+            fail: (err) => safeReject(err),
+        });
+        if (appTask && typeof appTask.onChunkReceived === 'function') {
+            log('app.onChunkReceived.ready', true);
+            appTask.onChunkReceived((res) => {
+                log('app.onChunkReceived', { size: String(res?.data || '').length });
+                parseChunk(decodeChunkData(res?.data));
+            });
+        } else {
+            log('app.onChunkReceived.missing', true);
+        }
+        // #endif
+
+        // #ifdef MP-WEIXIN
+        log('mp.request', { url: requestUrl, method: requestMethod, enableChunked: true });
+        const mpTask = wx.request({
+            url: requestUrl,
+            data: requestData,
+            method: requestMethod,
+            timeout: config.timeout || 180000,
+            enableChunked: true,
+            responseType: 'text',
+            header: requestHeader,
+            success: (res) => {
+                if (res.statusCode < 200 || res.statusCode >= 300) {
+                    safeReject(res.data || res);
+                    return;
+                }
+                log('mp.success', { statusCode: res.statusCode, dataLength: String(res.data || '').length });
+                finalize(res);
+            },
+            fail: (err) => safeReject(err),
+        });
+        if (mpTask && typeof mpTask.onChunkReceived === 'function') {
+            log('mp.onChunkReceived.ready', true);
+            mpTask.onChunkReceived((res) => {
+                log('mp.onChunkReceived', { size: String(res?.data || '').length });
+                parseChunk(decodeChunkData(res?.data));
+            });
+        } else {
+            log('mp.onChunkReceived.missing', true);
+        }
+        // #endif
     });
 };

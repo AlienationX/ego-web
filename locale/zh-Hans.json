@@ -34,7 +34,15 @@
         "title": "推荐",
         "notice": "公告",
         "dailyRecommend": "每日推荐",
+        "latestRelease": "最新发布",
         "categoryRecommend": "分类推荐"
+    },
+    "latest": {
+        "title": "最新发布",
+        "subtitle": "最新内容",
+        "desc": "按时间倒序浏览最近发布的壁纸。",
+        "empty": "暂无最新发布内容",
+        "wallpaper": "壁纸"
     },
     "category": {
         "title": "分类",
@@ -251,7 +259,22 @@
         "cancel": "取消",
         "ratingSuccess": "评分成功，您可以在【我的评分】中查看",
         "ratingFailed": "评分失败，请稍后重试",
-        "savePrompt": "请长按或右键菜单保存壁纸"
+        "savePrompt": "请长按或右键菜单保存壁纸",
+        "adminEdit": "编辑壁纸",
+        "adminSave": "保存修改",
+        "adminSaveSuccess": "已保存修改",
+        "adminSaveFailed": "保存失败，请稍后重试",
+        "adminDelete": "删除壁纸",
+        "adminDeleteConfirm": "确认删除该壁纸吗？",
+        "adminDeleteSuccess": "已删除壁纸",
+        "adminDeleteFailed": "删除失败，请稍后重试",
+        "lock": "锁定",
+        "active": "状态",
+        "lockToggled": "锁定状态已更新",
+        "lockToggleFailed": "锁定状态更新失败",
+        "shareSuccess": "分享成功",
+        "shareFailed": "分享失败",
+        "shareHint": "请使用系统分享功能"
     },
     "membership": {
         "title": "会员购买",
@@ -351,5 +374,245 @@
         "shareSuccess": "分享成功",
         "shareFailed": "分享失败",
         "introText": "本我壁纸是一款专注于提供高质量壁纸的应用。我们汇集了海量的精美壁纸，涵盖多种风格和分类，为用户提供最佳的壁纸选择体验。无论是风景、人物、动漫还是抽象艺术，你都能在这里找到心仪的壁纸。"
+    },
+    "settings1": {
+        "title": "设置",
+        "defaultName": "示例用户",
+        "version": "版本",
+        "build": "构建",
+        "sections": {
+            "profile": "个人资料",
+            "security": "安全",
+            "notifications": "通知",
+            "preferences": "偏好",
+            "data": "数据",
+            "support": "支持",
+            "appInformation": "应用信息",
+            "others": "其他",
+            "account": "账号"
+        },
+        "preview": {
+            "title": "预览方式",
+            "classic": "经典",
+            "floating": "悬浮"
+        },
+        "items": {
+            "editProfile": {
+                "label": "编辑资料",
+                "sublabel": "修改头像、昵称和联系方式"
+            },
+            "changePassword": {
+                "label": "修改密码",
+                "sublabel": "最近一次修改：3个月前"
+            },
+            "resetPassword": {
+                "label": "重置密码",
+                "sublabel": "发送重置链接到邮箱"
+            },
+            "twoFA": {
+                "label": "双重验证",
+                "enabled": "已启用认证器",
+                "disabled": "当前未启用"
+            },
+            "assignmentAlerts": {
+                "label": "任务分配提醒",
+                "sublabel": "有新任务时通知"
+            },
+            "ticketUpdates": {
+                "label": "工单更新提醒",
+                "sublabel": "状态变化与评论提醒"
+            },
+            "reminders": {
+                "label": "日程提醒",
+                "sublabel": "截止日期与跟进提醒"
+            },
+            "language": {
+                "label": "语言",
+                "sublabel": "切换应用显示语言",
+                "valueZh": "中文",
+                "valueEn": "英文"
+            },
+            "theme": {
+                "label": "主题",
+                "sublabel": "切换浅色或深色主题",
+                "light": "浅色",
+                "dark": "深色"
+            },
+            "previewType": {
+                "label": "预览方式",
+                "sublabel": "设置壁纸预览布局样式"
+            },
+            "availability": {
+                "label": "在线状态",
+                "available": "当前可用",
+                "unavailable": "当前不可用"
+            },
+            "location": {
+                "label": "定位服务",
+                "sublabel": "用于外勤签到定位"
+            },
+            "autoSave": {
+                "label": "自动保存报告",
+                "sublabel": "自动保存草稿内容"
+            },
+            "syncWifi": {
+                "label": "仅 Wi-Fi 同步",
+                "sublabel": "减少移动数据消耗"
+            },
+            "clearCache": {
+                "label": "清除缓存",
+                "sublabel": "释放本地存储空间"
+            },
+            "helpCentre": {
+                "label": "帮助中心",
+                "sublabel": "查看常见问题和指南"
+            },
+            "contactSupport": {
+                "label": "联系支持",
+                "sublabel": "联系团队获得帮助"
+            },
+            "sendFeedback": {
+                "label": "发送反馈",
+                "sublabel": "提交建议或问题反馈"
+            },
+            "about": {
+                "label": "关于我们",
+                "sublabel": "查看版本与应用信息"
+            },
+            "privacy": {
+                "label": "隐私政策",
+                "sublabel": "查看隐私与数据声明"
+            },
+            "agreement": {
+                "label": "用户协议",
+                "sublabel": "查看服务条款"
+            },
+            "introduction": {
+                "label": "产品介绍",
+                "sublabel": "查看应用简介与亮点"
+            },
+            "checkUpdate": {
+                "label": "检查更新",
+                "sublabel": "查看当前版本状态"
+            },
+            "rateUs": {
+                "label": "去评分",
+                "sublabel": "前往应用商店评分"
+            },
+            "share": {
+                "label": "分享应用",
+                "sublabel": "分享给朋友或同事"
+            },
+            "logout": {
+                "label": "退出登录",
+                "sublabel": "退出当前账号登录状态"
+            },
+            "deactivate": {
+                "label": "停用账号",
+                "sublabel": "永久停用访问权限"
+            }
+        },
+        "toast": {
+            "themeChanged": "主题已切换",
+            "clearing": "清理中",
+            "clearSuccess": "清理成功",
+            "loggedOut": "已退出登录"
+        }
+    },
+    "editProfile1": {
+        "title": "编辑资料",
+        "save": "保存",
+        "saved": "已保存",
+        "changePhoto": "更换头像",
+        "personalInfo": "个人信息",
+        "workInfo": "工作信息",
+        "fullName": "姓名",
+        "email": "邮箱",
+        "phone": "电话",
+        "jobTitle": "职位",
+        "department": "部门",
+        "saveChanges": "保存修改",
+        "profileSaved": "资料已保存",
+        "enterName": "请输入姓名",
+        "saveFailed": "保存失败",
+        "placeholders": {
+            "fullName": "请输入姓名",
+            "email": "请输入邮箱",
+            "phone": "请输入电话",
+            "jobTitle": "请输入职位",
+            "department": "请输入部门"
+        }
+    },
+    "helpCentre": {
+        "title": "帮助中心",
+        "introTitle": "我们可以如何帮助你？",
+        "introDesc": "快速了解账号、隐私与壁纸功能常见问题。",
+        "contactSupport": "联系支持",
+        "privacy": "隐私政策",
+        "agreement": "用户协议",
+        "faq": {
+            "q1": "如何切换语言与主题？",
+            "a1": "进入 设置 > 偏好，点击语言或主题即可切换。",
+            "q2": "为什么本地图片分析需要 VIP？",
+            "a2": "本地分析会调用高级模型资源，仅对 VIP 订阅用户开放。",
+            "q3": "如何反馈问题？",
+            "a3": "可前往联系支持或提交反馈，并附带截图帮助定位问题。"
+        }
+    },
+    "deactivate": {
+        "title": "停用账号",
+        "finalTitle": "最终确认",
+        "doneHeader": "停用完成",
+        "warnTitle": "离开前确认",
+        "warnDesc": "停用账号将暂停所有功能与数据访问。请确认以下内容。",
+        "happenTitle": "将发生的事情",
+        "happen1Icon": "🚫",
+        "happen1Title": "立即暂停访问",
+        "happen1Desc": "你会在所有设备上退出登录。",
+        "happen2Icon": "💾",
+        "happen2Title": "数据保留 30 天",
+        "happen2Desc": "报告、任务与历史记录将被保留。",
+        "happen3Icon": "📧",
+        "happen3Title": "发送确认邮件",
+        "happen3Desc": "将向你的注册邮箱发送回执。",
+        "happen4Icon": "↩️",
+        "happen4Title": "可申请恢复",
+        "happen4Desc": "30 天内联系支持可恢复账号。",
+        "reasonTitle": "原因（可选）",
+        "reason1": "我不再需要这个账号",
+        "reason2": "我有重复账号",
+        "reason3": "隐私相关顾虑",
+        "reason4": "改用其他服务",
+        "reason5": "想暂时休息一下",
+        "reason6": "其他",
+        "continue": "继续停用",
+        "keep": "保留我的账号",
+        "warningTitle": "此操作不可撤销",
+        "warningDesc": "停用账号将立即暂停访问权限。数据将在 30 天后永久删除。",
+        "typeToConfirm": "输入“DEACTIVATE”以确认",
+        "placeholder": "DEACTIVATE",
+        "agree": "我已了解并确认停用当前账号。",
+        "button": "停用我的账号",
+        "cancel": "取消",
+        "doneTitle": "账号已停用",
+        "doneDesc": "你的账号已进入停用流程，24 小时内会收到确认邮件。",
+        "doneNextTitle": "接下来会发生",
+        "done1": "访问权限将立即暂停",
+        "done2": "数据保留 30 天",
+        "done3": "将发送确认邮件",
+        "done4": "联系支持可恢复",
+        "backSettings": "返回设置",
+        "confirmContent": "确认现在停用账号吗？",
+        "success": "账号已停用"
+    },
+    "logoutPage": {
+        "title": "退出登录",
+        "askTitle": "确认退出？",
+        "askDesc": "你将在当前设备退出账号登录，账号数据与设置将被保留。",
+        "confirm": "确认退出",
+        "cancel": "取消",
+        "doneTitle": "你已退出登录",
+        "doneDesc": "下次再见，{name}！你的数据和设置已安全保存。",
+        "backSettings": "返回设置"
     }
 }

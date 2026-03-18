@@ -545,17 +545,19 @@ const handleAppleLogin = () => {
     background: $wp-theme-color;
     color: #fff;
     font-size: 36rpx;
-    font-weight: 600;
-    border-radius: 48rpx;
+    font-weight: 700;
+    border-radius: 60rpx;
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s;
     margin-top: 60rpx;
+    letter-spacing: 0.6rpx;
+    box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.55);
 
     &:active {
-        background: darken($wp-theme-color, 5%);
+        background: $wp-theme-color;
         opacity: 0.9;
     }
 

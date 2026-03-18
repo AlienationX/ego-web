@@ -41,6 +41,14 @@
             }
         },
         {
+            "path": "pages/user/edit-profile1",
+            "style": {
+                "navigationBarTitleText": "Edit Profile",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/classlist/classlist",
             "style": {
                 "navigationBarTitleText": "分类列表",
@@ -136,6 +144,14 @@
             }
         },
         {
+            "path": "pages/latest/latest",
+            "style": {
+                "navigationBarTitleText": "最新发布",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/membership/membership",
             "style": {
                 "navigationBarTitleText": "会员购买",
@@ -175,6 +191,30 @@
             }
         },
         {
+            "path": "pages/help-centre/help-centre",
+            "style": {
+                "navigationBarTitleText": "Help Centre",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/deactivate-account/deactivate-account",
+            "style": {
+                "navigationBarTitleText": "Deactivate Account",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/logout/logout",
+            "style": {
+                "navigationBarTitleText": "Logout",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/webview/webview",
             "style": {
                 "navigationBarTitleText": "网页浏览",
@@ -190,6 +230,13 @@
         },
         {
             "path": "pages/test/test",
+            "style": {
+                "navigationBarTitleText": "Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/stream-test",
             "style": {
                 "navigationBarTitleText": "Test",
                 "navigationStyle": "custom"
@@ -229,49 +276,44 @@
                 "navigationBarTitleText": "Settings",
                 "navigationStyle": "custom"
             }
-        },
-        {
-            "path": "pages/test/settings2",
-            "style": {
-                "navigationBarTitleText": "Settings",
-                "navigationStyle": "custom"
-            }
         }
     ],
     "globalStyle": {
         "rpxCalcMaxDeviceWidth": 1444, // rpx 进行缩放计算的最大设备宽度（单位 px），默认 960
-        "navigationBarTextStyle": "black",
+        "navigationBarTextStyle": "@navigationBarTextStyle",
         "navigationBarTitleText": "本我壁纸",
-        "navigationBarBackgroundColor": "#F8F8F8",
-        "backgroundColor": "#F8F8F8"
+        "navigationBarBackgroundColor": "@navigationBarBackgroundColor",
+        "backgroundColor": "@backgroundColor"
     },
     "tabBar": {
-        "color": "#9799a5",
-        "selectedColor": "#28b389",
+        "color": "@tabBarColor",
+        "selectedColor": "@tabBarSelectedColor",
+        "borderStyle": "@tabBarBorderStyle",
+        "backgroundColor": "@tabBarBackgroundColor",
         "list": [
             {
                 "text": "%tabbar.index%",
                 "pagePath": "pages/index/index",
-                "iconPath": "/static/tabbar/Line_Home.png",
-                "selectedIconPath": "/static/tabbar/Fill_Home_Green.png"
+                "iconPath": "@tabIconHome",
+                "selectedIconPath": "@tabIconHomeSelected"
             },
             {
                 "text": "%tabbar.category%",
                 "pagePath": "pages/classify/classify",
-                "iconPath": "/static/tabbar/Line_Category.png",
-                "selectedIconPath": "/static/tabbar/Fill_Category_Green.png"
+                "iconPath": "@tabIconCategory",
+                "selectedIconPath": "@tabIconCategorySelected"
             },
             {
                 "text": "%tabbar.discover%",
                 "pagePath": "pages/discover/discover",
-                "iconPath": "/static/tabbar/Line_Setting.png",
-                "selectedIconPath": "/static/tabbar/Fill_Setting_Green.png"
+                "iconPath": "@tabIconDiscover",
+                "selectedIconPath": "@tabIconDiscoverSelected"
             },
             {
                 "text": "%tabbar.user%",
                 "pagePath": "pages/user/user",
-                "iconPath": "/static/tabbar/Line_User.png",
-                "selectedIconPath": "/static/tabbar/Fill_User_Green.png"
+                "iconPath": "@tabIconUser",
+                "selectedIconPath": "@tabIconUserSelected"
             }
         ]
     },

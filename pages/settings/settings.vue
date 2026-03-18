@@ -30,7 +30,8 @@
                     <view
                         class="preview-type-item"
                         :class="{ active: settingsStore.options.previewType === 'classic' }"
-                        @click="setPreviewType('classic')">
+                        @click="setPreviewType('classic')"
+                    >
                         <view class="preview-mock phone classic">
                             <view class="mock-time"></view>
                             <view class="mock-clock">08:00</view>
@@ -42,13 +43,15 @@
                             class="active-mark"
                             type="checkmarkempty"
                             size="16"
-                            color="#1f87ef"></uni-icons>
+                            color="#1f87ef"
+                        ></uni-icons>
                     </view>
 
                     <view
                         class="preview-type-item"
                         :class="{ active: settingsStore.options.previewType === 'floating' }"
-                        @click="setPreviewType('floating')">
+                        @click="setPreviewType('floating')"
+                    >
                         <view class="preview-mock phone floating">
                             <view class="mock-time"></view>
                             <view class="mock-clock">08:00</view>
@@ -60,7 +63,8 @@
                             class="active-mark"
                             type="checkmarkempty"
                             size="16"
-                            color="#1f87ef"></uni-icons>
+                            color="#1f87ef"
+                        ></uni-icons>
                     </view>
                 </view>
             </view>
@@ -78,18 +82,28 @@ const settingsStore = useSettingsStore();
 const previewTypePopup = ref(null);
 
 const switchLanguage = () => {
-    const currentLanguage = uni.getLocale() === 'en' ? 'zh-Hans' : 'en';
-    uni.setLocale(currentLanguage);
-    uni.setStorageSync('lang', currentLanguage);
-    locale.value = currentLanguage;
+    const changeLanguage = uni.getLocale() === 'en' ? 'zh-Hans' : 'en';
+    uni.setLocale(changeLanguage);
+    locale.value = changeLanguage;
+    // 保存语言选择
+    uni.setStorageSync('lang', changeLanguage);
 };
 
 const switchTheme = () => {
-    settingsStore.options.theme = settingsStore.options.theme === 'light' ? 'dark' : 'light';
+    const changeTheme = uni.getSystemInfoSync().theme === 'light' ? 'dark' : 'light';
+    settingsStore.options.theme = changeTheme;
+
+    // #ifdef APP
+    // APP端触发主题切换，WEB跟随浏览器的默认设置，小程序跟随小程序的默认设置
+    plus.nativeUI.setUIStyle(changeTheme);
+    // #endif
+
     uni.showToast({
-        title: settingsStore.options.theme,
+        title: t(`user.settings.${changeTheme}`),
         icon: 'none',
     });
+    // 保存主题选择
+    uni.setStorageSync('theme', changeTheme);
 };
 
 const openPreviewTypePopup = () => {
@@ -153,7 +167,9 @@ const settings = computed(() => [
         left_icon: '/static/icons/view-carousel.svg',
         left_text: t('user.settings.previewType'),
         right_text:
-            settingsStore.options.previewType === 'floating' ? t('user.settings.previewFloating') : t('user.settings.previewClassic'),
+            settingsStore.options.previewType === 'floating'
+                ? t('user.settings.previewFloating')
+                : t('user.settings.previewClassic'),
         right_icon: 'forward',
         click: openPreviewTypePopup,
     },
@@ -203,8 +219,8 @@ const settings = computed(() => [
             .icon {
                 width: 40rpx;
                 height: 40rpx;
-                filter: brightness(0) saturate(100%) invert(52%) sepia(88%) saturate(485%) hue-rotate(106deg)
-                    brightness(91%) contrast(87%);
+                filter: brightness(0) saturate(100%) invert(52%) sepia(88%) saturate(485%) hue-rotate(106deg) brightness(91%)
+                    contrast(87%);
             }
 
             .text {
@@ -358,6 +374,5 @@ const settings = computed(() => [
         border-radius: 8rpx;
         background: #1f87ef;
     }
-
 }
 </style>

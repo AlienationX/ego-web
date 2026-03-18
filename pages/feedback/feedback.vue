@@ -1,91 +1,88 @@
 <template>
     <view class="layout">
-        <menu-bar :showBorder="true">
-            <template #title>{{ t('feedback.title') }}</template>
-        </menu-bar>
-        
-        <view class="container">
-            <view class="form">
-                <!-- 反馈类型 -->
-                <view class="form-item">
-                    <view class="label">{{ t('feedback.type') }}</view>
-                    <view class="type-selector">
-                        <view 
-                            class="type-item" 
-                            :class="{ active: feedbackForm.type === t('feedback.typeBug') }"
-                            @click="selectType(t('feedback.typeBug'))"
-                        >
-                            {{ t('feedback.typeBug') }}
-                        </view>
-                        <view 
-                            class="type-item" 
-                            :class="{ active: feedbackForm.type === t('feedback.typeSuggestion') }"
-                            @click="selectType(t('feedback.typeSuggestion'))"
-                        >
-                            {{ t('feedback.typeSuggestion') }}
-                        </view>
-                        <view 
-                            class="type-item" 
-                            :class="{ active: feedbackForm.type === t('feedback.typeOther') }"
-                            @click="selectType(t('feedback.typeOther'))"
-                        >
-                            {{ t('feedback.typeOther') }}
-                        </view>
+        <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
+        <view class="header">
+            <view class="back-btn" @click="goBack">
+                <uni-icons type="back" size="18" color="#374151"></uni-icons>
+            </view>
+            <text class="header-title">{{ t('feedback.title') }}</text>
+            <view class="header-placeholder"></view>
+        </view>
+
+        <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
+            <view class="section">
+                <text class="section-title">{{ t('feedback.type') }}</text>
+                <view class="chip-group">
+                    <view
+                        class="chip"
+                        :class="{ active: feedbackForm.type === t('feedback.typeBug') }"
+                        @click="selectType(t('feedback.typeBug'))"
+                    >
+                        {{ t('feedback.typeBug') }}
+                    </view>
+                    <view
+                        class="chip"
+                        :class="{ active: feedbackForm.type === t('feedback.typeSuggestion') }"
+                        @click="selectType(t('feedback.typeSuggestion'))"
+                    >
+                        {{ t('feedback.typeSuggestion') }}
+                    </view>
+                    <view
+                        class="chip"
+                        :class="{ active: feedbackForm.type === t('feedback.typeOther') }"
+                        @click="selectType(t('feedback.typeOther'))"
+                    >
+                        {{ t('feedback.typeOther') }}
                     </view>
                 </view>
+            </view>
 
-                <!-- 反馈内容 -->
-                <view class="form-item">
-                    <view class="label">{{ t('feedback.content') }}</view>
-                    <textarea 
+            <view class="section">
+                <text class="section-title">{{ t('feedback.content') }}</text>
+                <view class="card">
+                    <textarea
                         class="textarea"
                         v-model="feedbackForm.content"
                         :placeholder="t('feedback.contentPlaceholder')"
                         maxlength="500"
                         :show-confirm-bar="false"
                     ></textarea>
-                    <view class="char-count">{{ feedbackForm.content.length }}/500</view>
-                </view>
-
-                <!-- 图片上传 -->
-                <view class="form-item">
-                    <view class="label">{{ t('feedback.images') }}</view>
-                    <view class="image-upload">
-                        <view class="image-list">
-                            <view 
-                                class="image-item" 
-                                v-for="(image, index) in imageList" 
-                                :key="index"
-                            >
-                                <image 
-                                    class="image-preview" 
-                                    :src="image" 
-                                    mode="aspectFill"
-                                    @click="previewImage(index)"
-                                ></image>
-                                <view class="image-delete" @click="removeImage(index)">
-                                    <uni-icons type="close" size="16" color="#fff"></uni-icons>
-                                </view>
-                            </view>
-                            <view 
-                                class="image-add" 
-                                v-if="imageList.length < maxImages"
-                                @click="chooseImage"
-                            >
-                                <uni-icons type="plus" size="32" color="#999"></uni-icons>
-                                <text class="add-text">{{ t('feedback.addImage') }}</text>
-                            </view>
-                        </view>
-                        <view class="image-tip" v-if="imageList.length > 0">
-                            {{ t('feedback.imageTip').replace('{count}', imageList.length).replace('{max}', maxImages) }}
-                        </view>
+                    <view class="char-row">
+                        <text class="char-count">{{ feedbackForm.content.length }}/500</text>
                     </view>
                 </view>
+            </view>
 
-                <!-- 联系方式 -->
-                <view class="form-item">
-                    <view class="label">{{ t('feedback.contact') }}</view>
-                    <input 
+            <view class="section">
+                <text class="section-title">{{ t('feedback.images') }}</text>
+                <view class="card">
+                    <view class="image-list">
+                        <view class="image-item" v-for="(image, index) in imageList" :key="index">
+                            <image
+                                class="image-preview"
+                                :src="image"
+                                mode="aspectFill"
+                                @click="previewImage(index)"
+                            ></image>
+                            <view class="image-delete" @click="removeImage(index)">
+                                <uni-icons type="close" size="14" color="#fff"></uni-icons>
+                            </view>
+                        </view>
+                        <view class="image-add" v-if="imageList.length < maxImages" @click="chooseImage">
+                            <uni-icons type="plus" size="26" color="#9CA3AF"></uni-icons>
+                            <text class="add-text">{{ t('feedback.addImage') }}</text>
+                        </view>
+                    </view>
+                    <view class="image-tip" v-if="imageList.length > 0">
+                        {{ t('feedback.imageTip').replace('{count}', imageList.length).replace('{max}', maxImages) }}
+                    </view>
+                </view>
+            </view>
+
+            <view class="section">
+                <text class="section-title">{{ t('feedback.contact') }}</text>
+                <view class="card">
+                    <input
                         class="input"
                         v-model="feedbackForm.contact"
                         :placeholder="t('feedback.contactPlaceholder')"
@@ -94,450 +91,438 @@
                         :hold-keyboard="false"
                     />
                 </view>
-
-                <!-- 提交按钮 -->
-                <view class="submit-btn-wrapper">
-                    <button 
-                        class="submit-btn" 
-                        :class="{ disabled: !canSubmit }"
-                        :disabled="!canSubmit"
-                        :loading="isSubmitting"
-                        @click="handleSubmit"
-                    >
-                        {{ isSubmitting ? t('feedback.submitting') : t('feedback.submit') }}
-                    </button>
-                </view>
             </view>
-        </view>
+
+            <view class="submit-wrap">
+                <button
+                    class="submit-btn"
+                    :class="{ disabled: !canSubmit }"
+                    :disabled="!canSubmit"
+                    :loading="isSubmitting"
+                    @click="handleSubmit"
+                >
+                    {{ isSubmitting ? t('feedback.submitting') : t('feedback.submit') }}
+                </button>
+            </view>
+        </scroll-view>
     </view>
 </template>
 
 <script setup>
-    import { ref, reactive, computed } from 'vue';
-    import { onLoad } from '@dcloudio/uni-app';
-    import { useI18n } from 'vue-i18n';
-    import { apiPostFeedback } from '@/api/wallpaper.js';
+import { ref, reactive, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { apiPostFeedback } from '@/api/wallpaper.js';
+import { getStatusBarHeight } from '@/utils/system.js';
 
-    const { t } = useI18n();
+const { t } = useI18n();
 
-    const feedbackForm = reactive({
-        type: t('feedback.typeBug'), // bug, suggestion, other
-        content: '',
-        contact: ''
-    });
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
 
-    const imageList = ref([]);
-    const maxImages = 9; // 最多上传9张图片
-    const isSubmitting = ref(false);
+const feedbackForm = reactive({
+    type: t('feedback.typeBug'),
+    content: '',
+    contact: '',
+});
 
-    const canSubmit = computed(() => {
-        return feedbackForm.content.trim().length >= 10;
-    });
+const imageList = ref([]);
+const maxImages = 9;
+const isSubmitting = ref(false);
 
-    const selectType = (type) => {
-        feedbackForm.type = type;
-    };
+const canSubmit = computed(() => {
+    return feedbackForm.content.trim().length >= 10;
+});
 
-    // 选择图片
-    const chooseImage = () => {
-        const remaining = maxImages - imageList.value.length;
-        if (remaining <= 0) {
-            uni.showToast({
-                title: t('feedback.maxImagesReached').replace('{max}', maxImages),
-                icon: 'none'
-            });
-            return;
-        }
+const selectType = (type) => {
+    feedbackForm.type = type;
+};
 
-        // 直接选择图片，系统会自动处理权限请求
-        selectImage(remaining);
-    };
+const chooseImage = () => {
+    const remaining = maxImages - imageList.value.length;
+    if (remaining <= 0) {
+        uni.showToast({
+            title: t('feedback.maxImagesReached').replace('{max}', maxImages),
+            icon: 'none',
+        });
+        return;
+    }
+    selectImage(remaining);
+};
 
-    // 选择图片的具体实现
-    const selectImage = (count) => {
-        uni.chooseImage({
-            count: count,
-            sizeType: ['compressed'], // 压缩图片
-            sourceType: ['camera', 'album'], // 可以从相机或相册选择
-            success: (res) => {
-                const tempFilePaths = res.tempFilePaths;
-                imageList.value.push(...tempFilePaths);
-            },
-            fail: (err) => {
-                console.error('选择图片失败:', err);
-                // 处理权限被拒绝的情况
-                // #ifdef APP-PLUS
-                // App 端：检查是否是权限问题
-                const errMsg = err.errMsg || '';
-                if (errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
-                    uni.showModal({
-                        title: t('feedback.permissionTitle') || '需要访问相册',
-                        content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
-                        confirmText: t('feedback.goToSettings') || '去设置',
-                        cancelText: t('common.cancel') || '取消',
-                        success: (res) => {
-                            if (res.confirm) {
-                                // App 端打开系统设置
-                                // #ifdef APP-PLUS
-                                if (typeof plus !== 'undefined' && plus.runtime) {
-                                    plus.runtime.openURL('app-settings:');
-                                } else {
-                                    // 如果 plus 不可用，尝试使用 uni.openSetting（小程序端）
-                                    uni.openSetting();
-                                }
-                                // #endif
+const selectImage = (count) => {
+    uni.chooseImage({
+        count: count,
+        sizeType: ['compressed'],
+        sourceType: ['camera', 'album'],
+        success: (res) => {
+            const tempFilePaths = res.tempFilePaths;
+            imageList.value.push(...tempFilePaths);
+        },
+        fail: (err) => {
+            console.error('选择图片失败:', err);
+            // #ifdef APP-PLUS
+            const errMsg = err.errMsg || '';
+            if (errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
+                uni.showModal({
+                    title: t('feedback.permissionTitle') || '需要访问相册',
+                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                    confirmText: t('feedback.goToSettings') || '去设置',
+                    cancelText: t('common.cancel') || '取消',
+                    success: (res) => {
+                        if (res.confirm) {
+                            // #ifdef APP-PLUS
+                            if (typeof plus !== 'undefined' && plus.runtime) {
+                                plus.runtime.openURL('app-settings:');
+                            } else {
+                                uni.openSetting();
                             }
+                            // #endif
                         }
-                    });
-                } else {
-                    uni.showToast({
-                        title: t('feedback.imageSelectFailed') || '选择图片失败',
-                        icon: 'none'
-                    });
-                }
-                // #endif
-                
-                // #ifdef MP
-                // 小程序端：使用 openSetting
-                if (err.errMsg && (err.errMsg.includes('permission') || err.errMsg.includes('权限'))) {
-                    uni.showModal({
-                        title: t('feedback.permissionTitle') || '需要访问相册',
-                        content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
-                        confirmText: t('feedback.goToSettings') || '去设置',
-                        cancelText: t('common.cancel') || '取消',
-                        success: (res) => {
-                            if (res.confirm) {
-                                uni.openSetting({
-                                    success: (settingRes) => {
-                                        if (settingRes.authSetting['scope.album']) {
-                                            // 权限已开启，重新选择图片
-                                            selectImage(count);
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    uni.showToast({
-                        title: t('feedback.imageSelectFailed') || '选择图片失败',
-                        icon: 'none'
-                    });
-                }
-                // #endif
-                
-                // #ifndef APP-PLUS || MP
-                // 其他平台直接显示错误提示
+                    },
+                });
+            } else {
                 uni.showToast({
                     title: t('feedback.imageSelectFailed') || '选择图片失败',
-                    icon: 'none'
+                    icon: 'none',
                 });
-                // #endif
             }
-        });
-    };
+            // #endif
 
-    // 预览图片
-    const previewImage = (index) => {
-        uni.previewImage({
-            urls: imageList.value,
-            current: index
-        });
-    };
-
-    // 删除图片
-    const removeImage = (index) => {
-        imageList.value.splice(index, 1);
-    };
-
-    const handleSubmit = async () => {
-        // 验证反馈内容
-        if (!feedbackForm.content.trim()) {
-            uni.showToast({
-                title: t('feedback.contentRequired'),
-                icon: 'none'
-            });
-            return;
-        }
-
-        if (feedbackForm.content.trim().length < 10) {
-            uni.showToast({
-                title: t('feedback.contentMinLength'),
-                icon: 'none'
-            });
-            return;
-        }
-
-        isSubmitting.value = true;
-
-        try {
-            // 处理图片：转换为 base64 或上传到服务器
-            let images = [];
-            if (imageList.value.length > 0) {
-                // 将图片转换为 base64
-                for (const imagePath of imageList.value) {
-                    console.log("upload imagePath:", imagePath);  // blob
-                    // TODO: 上传图片到服务器, 调用后端接口, 并获取图片 URL。uni.uploadFile甚至可以直接上传到oss
-                    try {
-                        const base64 = await new Promise((resolve, reject) => {
-                            // uni.getFileSystemManager是小程序端的文件系统管理器，用于读取文件内容。其他平台报错
-                            uni.getFileSystemManager().readFile({
-                                filePath: imagePath,
-                                encoding: 'base64',
-                                success: (res) => {
-                                    resolve(`data:image/jpeg;base64,${res.data}`);
+            // #ifdef MP
+            if (err.errMsg && (err.errMsg.includes('permission') || err.errMsg.includes('权限'))) {
+                uni.showModal({
+                    title: t('feedback.permissionTitle') || '需要访问相册',
+                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                    confirmText: t('feedback.goToSettings') || '去设置',
+                    cancelText: t('common.cancel') || '取消',
+                    success: (res) => {
+                        if (res.confirm) {
+                            uni.openSetting({
+                                success: (settingRes) => {
+                                    if (settingRes.authSetting['scope.album']) {
+                                        selectImage(count);
+                                    }
                                 },
-                                fail: reject
                             });
+                        }
+                    },
+                });
+            } else {
+                uni.showToast({
+                    title: t('feedback.imageSelectFailed') || '选择图片失败',
+                    icon: 'none',
+                });
+            }
+            // #endif
+
+            // #ifndef APP-PLUS || MP
+            uni.showToast({
+                title: t('feedback.imageSelectFailed') || '选择图片失败',
+                icon: 'none',
+            });
+            // #endif
+        },
+    });
+};
+
+const previewImage = (index) => {
+    uni.previewImage({
+        urls: imageList.value,
+        current: index,
+    });
+};
+
+const removeImage = (index) => {
+    imageList.value.splice(index, 1);
+};
+
+const goBack = () => {
+    uni.navigateBack({
+        fail: () => uni.reLaunch({ url: '/pages/test/settings1' }),
+    });
+};
+
+const handleSubmit = async () => {
+    if (!feedbackForm.content.trim()) {
+        uni.showToast({
+            title: t('feedback.contentRequired'),
+            icon: 'none',
+        });
+        return;
+    }
+
+    if (feedbackForm.content.trim().length < 10) {
+        uni.showToast({
+            title: t('feedback.contentMinLength'),
+            icon: 'none',
+        });
+        return;
+    }
+
+    isSubmitting.value = true;
+
+    try {
+        let images = [];
+        if (imageList.value.length > 0) {
+            for (const imagePath of imageList.value) {
+                console.log('upload imagePath:', imagePath);
+                try {
+                    const base64 = await new Promise((resolve, reject) => {
+                        uni.getFileSystemManager().readFile({
+                            filePath: imagePath,
+                            encoding: 'base64',
+                            success: (res) => {
+                                resolve(`data:image/jpeg;base64,${res.data}`);
+                            },
+                            fail: reject,
                         });
-                        images.push(base64);
-                    } catch (error) {
-                        console.error('图片转换失败:', error);
-                    }
+                    });
+                    images.push(base64);
+                } catch (error) {
+                    console.error('图片转换失败:', error);
                 }
             }
-
-            const data = {
-                type: feedbackForm.type,
-                content: feedbackForm.content.trim(),
-                contact: feedbackForm.contact.trim() || undefined,
-                images: images.length > 0 ? images : undefined
-            };
-
-            await apiPostFeedback(data);
-
-            uni.showToast({
-                title: t('feedback.submitSuccess'),
-                icon: 'success',
-                duration: 2000
-            });
-
-            // 清空表单
-            feedbackForm.content = '';
-            feedbackForm.contact = '';
-            feedbackForm.type = t('feedback.typeBug');
-            imageList.value = [];
-
-            // 延迟返回上一页
-            // setTimeout(() => {
-            //     uni.navigateBack();
-            // }, 2000);
-        } catch (error) {
-            console.error('提交反馈失败:', error);
-            uni.showToast({
-                title: t('feedback.submitFailed'),
-                icon: 'none'
-            });
-        } finally {
-            isSubmitting.value = false;
         }
-    };
 
+        const data = {
+            type: feedbackForm.type,
+            content: feedbackForm.content.trim(),
+            contact: feedbackForm.contact.trim() || undefined,
+            images: images.length > 0 ? images : undefined,
+        };
+
+        await apiPostFeedback(data);
+
+        uni.showToast({
+            title: t('feedback.submitSuccess'),
+            icon: 'success',
+            duration: 2000,
+        });
+
+        feedbackForm.content = '';
+        feedbackForm.contact = '';
+        feedbackForm.type = t('feedback.typeBug');
+        imageList.value = [];
+    } catch (error) {
+        console.error('提交反馈失败:', error);
+        uni.showToast({
+            title: t('feedback.submitFailed'),
+            icon: 'none',
+        });
+    } finally {
+        isSubmitting.value = false;
+    }
+};
 </script>
 
 <style lang="scss" scoped>
-    .layout {
-        background-color: #f5f5f5;
-        min-height: 100vh;
-        
-        .container {
-            padding: 40rpx 30rpx;
-            position: relative;
-            z-index: 1;
-            
-            .form {
-                .form-item {
-                    margin-bottom: 50rpx;
-                    position: relative;
-                    
-                    &:last-child {
-                        margin-bottom: 0;
-                    }
-                    
-                    .label {
-                        font-size: 32rpx;
-                        color: #333;
-                        font-weight: 600;
-                        margin-bottom: 24rpx;
-                    }
-                    
-                    .type-selector {
-                        display: flex;
-                        gap: 20rpx;
-                        flex-wrap: wrap;
-                        justify-content: flex-start;
-                        
-                        .type-item {
-                            padding: 12rpx 24rpx;
-                            text-align: center;
-                            border-radius: 40rpx;
-                            font-size: 26rpx;
-                            color: #666;
-                            background: #e8e8e8;
-                            border: 2rpx solid transparent;
-                            transition: all 0.3s;
-                            white-space: nowrap;
-                            
-                            &:active {
-                                opacity: 0.8;
-                            }
-                            
-                            &.active {
-                                color: #fff;
-                                background: $wp-theme-color;
-                                border-color: $wp-theme-color;
-                                font-weight: 600;
-                            }
-                        }
-                    }
-                    
-                    .textarea {
-                        width: 100%;
-                        min-height: 320rpx;
-                        padding: 20rpx 0;
-                        border-radius: 0;
-                        font-size: 28rpx;
-                        color: #333;
-                        background: transparent;
-                        border-bottom: 2rpx solid #e0e0e0;
-                        box-sizing: border-box;
-                        line-height: 1.8;
-                        transition: all 0.3s;
-                        
-                        &:focus {
-                            border-bottom-color: $wp-theme-color;
-                        }
-                    }
-                    
-                    .char-count {
-                        text-align: right;
-                        font-size: 24rpx;
-                        color: #999;
-                        margin-top: 12rpx;
-                    }
-                    
-                    .input {
-                        width: 100%;
-                        min-height: 88rpx;
-                        padding: 20rpx 0;
-                        border-radius: 0;
-                        font-size: 28rpx;
-                        color: #333;
-                        background: transparent;
-                        border-bottom: 2rpx solid #e0e0e0;
-                        box-sizing: border-box;
-                        position: relative;
-                        z-index: 2;
-                        -webkit-user-select: text;
-                        user-select: text;
-                        transition: all 0.3s;
-                        
-                        &:focus {
-                            border-bottom-color: $wp-theme-color;
-                        }
-                    }
-                    
-                    .image-upload {
-                        .image-list {
-                            display: flex;
-                            flex-wrap: wrap;
-                            gap: 20rpx;
-                            
-                            .image-item {
-                                position: relative;
-                                width: 200rpx;
-                                height: 200rpx;
-                                border-radius: 0;
-                                overflow: hidden;
-                                border: 2rpx solid #e0e0e0;
-                                
-                                .image-preview {
-                                    width: 100%;
-                                    height: 100%;
-                                }
-                                
-                                .image-delete {
-                                    position: absolute;
-                                    top: 8rpx;
-                                    right: 8rpx;
-                                    width: 48rpx;
-                                    height: 48rpx;
-                                    background: rgba(0, 0, 0, 0.6);
-                                    border-radius: 0;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                }
-                            }
-                            
-                            .image-add {
-                                width: 200rpx;
-                                height: 200rpx;
-                                border-radius: 0;
-                                background: transparent;
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                justify-content: center;
-                                border: 2rpx solid #e0e0e0;
-                                
-                                .add-text {
-                                    margin-top: 12rpx;
-                                    font-size: 24rpx;
-                                    color: #999;
-                                }
-                                
-                                &:active {
-                                    border-color: $wp-theme-color;
-                                    background: rgba($wp-theme-color, 0.05);
-                                }
-                            }
-                        }
-                        
-                        .image-tip {
-                            margin-top: 16rpx;
-                            font-size: 24rpx;
-                            color: #999;
-                        }
-                    }
-                }
-                
-                .submit-btn-wrapper {
-                    margin-top: 80rpx;
-                    
-                    .submit-btn {
-                        width: 100%;
-                        height: 96rpx;
-                        line-height: 96rpx;
-                        background: $wp-theme-color;
-                        color: #fff;
-                        font-size: 32rpx;
-                        font-weight: 600;
-                        border-radius: 48rpx;
-                        border: none;
-                        
-                        &:active {
-                            opacity: 0.9;
-                        }
-                        
-                        // &.disabled {
-                        //     background: #cccccc;
-                        //     color: #999999;
-                        //     opacity: 0.6;
-                        // }
-                        
-                        &[disabled] {
-                            background: #cccccc;
-                            color: #999999;
-                            opacity: 0.6;
-                        }
-                        
-                        &::after {
-                            border: none;
-                        }
-                    }
-                }
-            }
-        }
-    }
+.layout {
+    min-height: 100vh;
+    background: #f5f6f8;
+    display: flex;
+    flex-direction: column;
+}
+
+.status-holder {
+    width: 100%;
+}
+
+.header {
+    height: 56px;
+    background: #f5f6f8;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 8px;
+}
+
+.back-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #f0f1f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-title {
+    flex: 1;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.header-placeholder {
+    width: 36px;
+    height: 36px;
+}
+
+.content {
+    padding: 12px 16px 36px;
+    box-sizing: border-box;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip {
+    height: 34px;
+    padding: 0 14px;
+    border-radius: 20px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    font-size: 13px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chip.active {
+    background: #e5322d;
+    border-color: #e5322d;
+    color: #fff;
+    font-weight: 600;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #f0f1f3;
+    border-radius: 12px;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.textarea {
+    width: 100%;
+    min-height: 160px;
+    border: none;
+    background: transparent;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #111827;
+    line-height: 22px;
+    box-sizing: border-box;
+}
+
+.char-row {
+    border-top: 1px solid #f3f4f6;
+    padding: 8px 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.char-count {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.image-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+}
+
+.image-item,
+.image-add {
+    width: 88px;
+    height: 88px;
+    border-radius: 12px;
+    border: 1px dashed #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: #f9fafb;
+    overflow: hidden;
+}
+
+.image-item {
+    border-style: solid;
+    background: #fff;
+}
+
+.image-preview {
+    width: 100%;
+    height: 100%;
+}
+
+.image-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-text {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 6px;
+}
+
+.image-tip {
+    padding: 0 12px 12px;
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.input {
+    width: 100%;
+    height: 46px;
+    border: none;
+    background: transparent;
+    padding: 0 16px;
+    font-size: 14px;
+    color: #111827;
+    box-sizing: border-box;
+    display: block;
+}
+
+.submit-wrap {
+    margin-top: 8px;
+}
+
+.submit-btn {
+    width: 100%;
+    height: 50px;
+    border-radius: 12px;
+    background: #e5322d;
+    border: none;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.submit-btn.disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+}
 </style>

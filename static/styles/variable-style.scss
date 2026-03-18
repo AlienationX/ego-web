@@ -1,25 +1,27 @@
-$wp-theme-color: #28B389;  // 品牌主题颜色
-// $wp-theme-color: #1BA684;  // 品牌主题颜色
-// $wp-theme-color: #4b3886;  // 品牌主题颜色
+$wp-theme-color: #28b389; // 品牌主题颜色 绿色
+// $wp-theme-color: #1ba684; // 品牌主题颜色
+// $wp-theme-color: #4b3886; // 品牌主题颜色 紫色
+// $wp-theme-color: #2f9e07; // 品牌主题颜色 深绿色
 
 /* 行为相关颜色 */
 $wp-color-primary: #3f2bcd;
 $wp-color-secondary: #007aff;
+$wp-color-info: #007aff;
 $wp-color-success: #4cd964;
 $wp-color-warning: #f0ad4e;
 $wp-color-error: #dd524d;
 
 /* 文字基本颜色 */
 $wp-text-color: #212121; //基本色
-$wp-text-color-inverse: #FAFAFA; //反色
-$wp-text-color-grey: #9E9E9E; //辅助灰色，如加载更多的提示信息
+$wp-text-color-inverse: #fafafa; //反色
+$wp-text-color-grey: #9e9e9e; //辅助灰色，如加载更多的提示信息
 $wp-text-color-placeholder: #808080;
 $wp-text-color-disable: #c0c0c0;
 
-$wp-font-color-1: #424242;  // 标题
-$wp-font-color-2: #616161;  // 副标题
-$wp-font-color-3: #757575;  // 内容
-$wp-font-color-4: #BDBDBD;  // 单词
+$wp-font-color-1: #424242; // 标题
+$wp-font-color-2: #616161; // 副标题
+$wp-font-color-3: #757575; // 内容
+$wp-font-color-4: #bdbdbd; // 单词
 
 /* 背景颜色 */
 $wp-bg-color: #ffffff;
@@ -28,5 +30,5 @@ $wp-bg-color-hover: #f1f1f1; //点击状态颜色
 $wp-bg-color-mask: rgba(0, 0, 0, 0.4); //遮罩颜色
 
 /* 边框颜色 */
-$wp-border-color: #c8c7cc;  // 边框颜色
-$wp-border-color-light: #efefef;  // 边框亮色
+$wp-border-color: #c8c7cc; // 边框颜色
+$wp-border-color-light: #efefef; // 边框亮色

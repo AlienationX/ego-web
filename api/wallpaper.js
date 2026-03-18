@@ -1,4 +1,4 @@
-import { request, uploadRequest } from '@/api/request.js';
+import { request, uploadRequest, streamRequest } from '@/api/request.js';
 
 export const apiPostAccess = (data = {}) => {
     return request({
@@ -50,7 +50,7 @@ export const apiGetClassList = (data = {}) => {
     });
 };
 
-export const apiSearchData = (data = {}) => {
+export const apiGetSearchData = (data = {}) => {
     // 获取搜索数据
     return request({
         url: '/wall/search/',
@@ -158,6 +158,26 @@ export const apiPostProfile = (data = {}) => {
     });
 };
 
+export const apiPostUpdateWall = (data = {}) => {
+    // 编辑壁纸接口
+    return request({
+        url: '/wall/update/',
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
+export const apiPostClassifyPicUrl = (data = {}) => {
+    // 更新分类图片接口
+    return request({
+        url: '/classify/update_picurl/',
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
 export const apiPostRewards = (data = {}) => {
     // 奖励用户接口
     return request({
@@ -174,5 +194,16 @@ export const apiPostDiscoverAnalyze = (data = {}) => {
         data,
         method: 'POST',
         timeout: 180000, // 180秒超时
+    });
+};
+
+export const apiPostDiscoverStream = (data = {}, options = {}) => {
+    // 发现分析流式接口
+    return streamRequest({
+        url: '/discover/stream/',
+        data,
+        method: 'POST',
+        timeout: 180000, // 180秒超时
+        ...options,
     });
 };

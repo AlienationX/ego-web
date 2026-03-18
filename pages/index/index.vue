@@ -65,6 +65,26 @@
             </view>
         </view>
 
+        <view class="select">
+            <index-title>
+                <template #name>{{ $t('index.latestRelease') }}</template>
+                <template #custom>
+                    <navigator class="box" url="/pages/latest/latest">
+                        <button size="mini" plain class="btn" :class="{ active: false }">{{ $t('common.seeAll') }}</button>
+                    </navigator>
+                </template>
+            </index-title>
+
+            <view class="content">
+                <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
+                <scroll-view scroll-x>
+                    <view class="box" v-for="item in latestPreviewList" :key="item.id" @click="goPriview(item.id, latestList)">
+                        <image :src="item.smallPicurl" mode="aspectFill"></image>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
+
         <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
             <index-title>
                 <template #name>{{ classify.name }}</template>
@@ -138,12 +158,13 @@
 <script setup>
     import { ref, computed, reactive } from 'vue';
     import { onLoad, onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
-    import { apiGetBanner, apiGetRandomDay, apiGetRandomRecommend, apiGetNotice, apiGetClassify } from '@/api/wallpaper.js';
+    import { apiGetBanner, apiGetRandomDay, apiGetRandomRecommend, apiGetNotice, apiGetClassify, apiGetClassList } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
 
     const bannerList = ref([]);
     const randomDailyList = ref([]);
     const randomRecommendList = ref([]);
+    const latestList = ref([]);
     const noticeList = ref([]);
     const classifyList = ref([]);
     const adVisibleMap = reactive({});
@@ -163,6 +184,7 @@
     });
 
     const classifyPreviewList = computed(() => classifyComputed.value.slice(0, 8));
+    const latestPreviewList = computed(() => latestList.value.slice(0, 10));
 
     // 与 classify 页一致：前 6 个 2×3（左高格跨 2 行）+ 第 6 个通栏，第 7、8 个占第 5 行两列，「更多」通栏第 6 行
     const getLayoutStyleForIndex = (idx) => {
@@ -218,6 +240,14 @@
         classifyList.value = res.data.map((item) => handlePicUrl(item));
     };
 
+    const getLatest = async () => {
+        let res = await apiGetClassList({
+            ordering: '-created',
+            page_size: 20
+        });
+        latestList.value = (res.data || []).map((item) => handlePicUrl(item));
+    };
+
     const goPriview = (id, data) => {
         uni.setStorageSync('wallList', data);
         uni.navigateTo({
@@ -244,6 +274,7 @@
         getRandom();
         getRandomRecommend();
         getClassify();
+        getLatest();
     });
 
     // 下拉刷新
@@ -409,40 +440,19 @@
             // }
             .btn {
                 padding: 0rpx 16rpx;
-                // background-color: $uni-bg-color-grey;
                 color: #666;
                 background: $uni-bg-color-grey;
                 height: 42rpx;
-
+                // width: 96rpx;
+                
                 border: none;
                 border-radius: 40rpx;
                 display: flex;
                 align-items: center;
-                // gap: 5rpx;
-                // transition: background-color 0.3s ease, color 0.3s ease;
-
-                // 修复uni-app按钮圆角边框显示问题
+                justify-content: center;
+                
                 &::after {
                     border: none;
-                }
-
-                // &:active {
-                //     opacity: 0.8;
-                // }
-                // &.active {
-                //     color: #f5f5f5;
-                //     background-color: $wp-theme-color;
-                //     //     font-weight: bold;
-                // }
-                &.active {
-                    color: #fff;
-                    background: $wp-theme-color;
-                    border: none;
-                    
-                    // 确保激活状态下也不显示边框
-                    &::after {
-                        border: none;
-                    }
                 }
             }
 
