@@ -201,7 +201,7 @@
             }
         },
         {
-            "path": "pages/auth/deactivate-account",
+            "path": "pages/auth/deactivate",
             "style": {
                 "navigationBarTitleText": "Deactivate Account",
                 "navigationStyle": "custom",

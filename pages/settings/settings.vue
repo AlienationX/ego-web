@@ -10,7 +10,7 @@
         </view>
 
         <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
-            <view class="section">
+            <view class="section" v-if="userStore.userinfo.id">
                 <view class="section-title">{{ t('settings1.sections.profile') }}</view>
                 <view class="card">
                     <view class="profile-card">
@@ -49,50 +49,52 @@
             </view>
 
             <view v-for="section in sections" :key="section.key" class="section">
-                <view class="section-title">{{ section.title }}</view>
-                <view class="card">
-                    <view
-                        v-for="(item, index) in section.items"
-                        :key="item.key"
-                        class="row"
-                        :class="{ 'row-last': index === section.items.length - 1, destructive: item.destructive }"
-                        @click="handleClick(item)"
-                    >
-                        <view class="row-left">
-                            <view class="icon-box" :class="{ destructive: item.destructive }">
-                                <template v-if="item.icon.startsWith('/')">
-                                    <image :src="item.icon" mode="aspectFit" style="width: 28px; height: 28px"></image>
+                <template v-if="!['security', 'account'].includes(section.key) || userStore.userinfo.id">
+                    <view class="section-title">{{ section.title }}</view>
+                    <view class="card">
+                        <view
+                            v-for="(item, index) in section.items"
+                            :key="item.key"
+                            class="row"
+                            :class="{ 'row-last': index === section.items.length - 1, destructive: item.destructive }"
+                            @click="handleClick(item)"
+                        >
+                            <view class="row-left">
+                                <view class="icon-box" :class="{ destructive: item.destructive }">
+                                    <template v-if="item.icon.startsWith('/')">
+                                        <image :src="item.icon" mode="aspectFit" style="width: 28px; height: 28px"></image>
+                                    </template>
+                                    <template v-else>
+                                        <uni-icons
+                                            :type="item.icon"
+                                            size="28"
+                                            :color="item.destructive ? '#E5322D' : '#6B7280'"
+                                        ></uni-icons>
+                                    </template>
+                                </view>
+                                <view class="label-block">
+                                    <text class="label">{{ item.label }}</text>
+                                    <text class="sublabel">{{ item.sublabel }}</text>
+                                </view>
+                            </view>
+                            <view class="row-right">
+                                <template v-if="item.type === 'toggle'">
+                                    <view
+                                        class="switch"
+                                        :class="{ on: !!toggles[item.toggleKey] }"
+                                        @click.stop="toggleSwitch(item.toggleKey)"
+                                    >
+                                        <view class="switch-dot"></view>
+                                    </view>
                                 </template>
                                 <template v-else>
-                                    <uni-icons
-                                        :type="item.icon"
-                                        size="28"
-                                        :color="item.destructive ? '#E5322D' : '#6B7280'"
-                                    ></uni-icons>
+                                    <text v-if="item.value" class="value">{{ item.value }}</text>
+                                    <uni-icons type="forward" size="17" color="#C4C9D4"></uni-icons>
                                 </template>
                             </view>
-                            <view class="label-block">
-                                <text class="label">{{ item.label }}</text>
-                                <text class="sublabel">{{ item.sublabel }}</text>
-                            </view>
-                        </view>
-                        <view class="row-right">
-                            <template v-if="item.type === 'toggle'">
-                                <view
-                                    class="switch"
-                                    :class="{ on: !!toggles[item.toggleKey] }"
-                                    @click.stop="toggleSwitch(item.toggleKey)"
-                                >
-                                    <view class="switch-dot"></view>
-                                </view>
-                            </template>
-                            <template v-else>
-                                <text v-if="item.value" class="value">{{ item.value }}</text>
-                                <uni-icons type="forward" size="17" color="#C4C9D4"></uni-icons>
-                            </template>
                         </view>
                     </view>
-                </view>
+                </template>
             </view>
 
             <text class="app-version"
@@ -516,7 +518,7 @@ const sections = computed(() => [
             },
             {
                 key: 'share_app',
-                icon: 'redo',
+                icon: 'redo-filled',
                 label: t('settings1.items.share.label'),
                 sublabel: t('settings1.items.share.sublabel'),
                 action: shareApp,
@@ -541,7 +543,7 @@ const sections = computed(() => [
                 label: t('settings1.items.deactivate.label'),
                 sublabel: t('settings1.items.deactivate.sublabel'),
                 destructive: true,
-                action: () => uni.navigateTo({ url: '/pages/deactivate-account/deactivate-account' }),
+                action: () => uni.navigateTo({ url: '/pages/auth/deactivate' }),
             },
         ],
     },
@@ -563,9 +565,7 @@ function handleClick(item) {
 }
 
 function goBack() {
-    uni.navigateBack({
-        fail: () => uni.reLaunch({ url: '/pages/app/index' }),
-    });
+    uni.reLaunch({ url: '/pages/user/user' });
 }
 
 function switchLanguage() {

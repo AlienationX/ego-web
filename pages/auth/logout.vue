@@ -64,11 +64,7 @@ const loggedOut = ref(false);
 const profileName = computed(() => userStore.userinfo?.profile?.nickname || userStore.userinfo?.nickname || 'User');
 const profileShortName = computed(() => String(profileName.value || '').split(' ')[0] || 'User');
 const profileEmail = computed(() => userStore.userinfo?.email || 'user@example.com');
-const profileAvatar = computed(
-    () =>
-        userStore.userinfo?.profile?.avatar ||
-        'https://images.unsplash.com/photo-1655249493799-9cee4fe983bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200',
-);
+const profileAvatar = computed(() => userStore.userinfo?.profile?.avatar);
 
 const onConfirm = () => {
     userStore.clearUserData();
@@ -101,18 +97,18 @@ const backToSettings = () => {
 }
 
 .header {
-    height: 56px;
+    height: 112rpx;
     background: #f5f6f8;
     display: flex;
     align-items: center;
-    padding: 0 16px;
-    gap: 8px;
+    padding: 0 32rpx;
+    gap: 16rpx;
 }
 
 .back-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 16rpx;
     background: #fff;
     border: 1px solid #f0f1f3;
     display: flex;
@@ -123,60 +119,55 @@ const backToSettings = () => {
 .header-title {
     flex: 1;
     text-align: center;
-    font-size: 18px;
+    font-size: 36rpx;
     font-weight: 700;
     color: #111827;
 }
 
 .header-placeholder {
-    width: 36px;
-    height: 36px;
+    width: 72rpx;
+    height: 72rpx;
 }
 
 .center-content {
-    // flex: 1;
-    // display: flex;
-    // flex-direction: column;
-    // align-items: center;
-    // justify-content: center;
-    padding: 24px;
+    padding: 48rpx;
     padding-top: 120rpx;
 }
 
 .panel {
     width: 100%;
-    max-width: 420px;
+    max-width: 840rpx;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
 .logout-icon-wrap {
-    width: 80px;
-    height: 80px;
+    width: 160rpx;
+    height: 160rpx;
     border-radius: 50%;
     background: #fef2f2;
-    border: 2px solid #fecaca;
+    border: 4rpx solid #fecaca;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 24px;
+    margin-bottom: 48rpx;
 }
 
 .main-title {
-    font-size: 22px;
+    font-size: 44rpx;
     font-weight: 700;
     color: #111827;
-    margin-bottom: 10px;
+    margin-bottom: 20rpx;
     text-align: center;
 }
 
 .desc {
-    font-size: 14px;
+    font-size: 28rpx;
     color: #6b7280;
-    line-height: 22px;
+    line-height: 44rpx;
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 64rpx;
 }
 
 .account-card {
@@ -184,31 +175,31 @@ const backToSettings = () => {
     max-width: 100%;
     box-sizing: border-box;
     background: #fff;
-    border-radius: 12px;
+    border-radius: 24rpx;
     border: 1px solid #f0f1f3;
-    padding: 14px 16px;
+    padding: 28rpx 32rpx;
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 32px;
+    gap: 24rpx;
+    margin-bottom: 64rpx;
 }
 
 .avatar {
-    width: 44px;
-    height: 44px;
+    width: 88rpx;
+    height: 88rpx;
     border-radius: 50%;
 }
 
 .account-meta .name {
     display: block;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
     color: #111827;
 }
 
 .account-meta .email {
     display: block;
-    font-size: 12px;
+    font-size: 24rpx;
     color: #9ca3af;
 }
 
@@ -218,32 +209,32 @@ const backToSettings = () => {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 24rpx;
 }
 
 .confirm-btn {
     width: 100%;
-    height: 50px;
-    border-radius: 12px;
+    height: 100rpx;
+    border-radius: 24rpx;
     background: #e5322d;
     border: none;
     color: #fff;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 16rpx;
 }
 
 .cancel-btn {
     width: 100%;
-    height: 50px;
-    border-radius: 12px;
+    height: 100rpx;
+    border-radius: 24rpx;
     background: #fff;
-    border: 1px solid #e5e7eb;
+    border: 2rpx solid #e5e7eb;
     color: #374151;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
 }
 
@@ -253,37 +244,37 @@ const backToSettings = () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 32px;
+    padding: 64rpx;
 }
 
 .success-emoji {
-    font-size: 52px;
-    margin-bottom: 20px;
+    font-size: 104rpx;
+    margin-bottom: 40rpx;
 }
 
 .success-title {
-    font-size: 22px;
+    font-size: 44rpx;
     font-weight: 700;
     color: #111827;
-    margin-bottom: 10px;
+    margin-bottom: 20rpx;
 }
 
 .success-desc {
-    font-size: 14px;
+    font-size: 28rpx;
     color: #6b7280;
-    line-height: 22px;
+    line-height: 44rpx;
     text-align: center;
-    margin-bottom: 36px;
+    margin-bottom: 72rpx;
 }
 
 .back-settings-btn {
     width: 100%;
-    height: 50px;
-    border-radius: 12px;
+    height: 100rpx;
+    border-radius: 24rpx;
     background: #e5322d;
     border: none;
     color: #fff;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
 }
 </style>
