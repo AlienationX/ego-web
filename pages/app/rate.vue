@@ -114,13 +114,13 @@ const formatTime = (time) => {
 const goPreview = (item) => {
     uni.setStorageSync('wallList', ratingList.value);
     uni.navigateTo({
-        url: '/pages/preview/preview?id=' + item.id,
+        url: '/pages/app/preview?id=' + item.id,
     });
 };
 
 const goBrowse = () => {
     uni.switchTab({
-        url: '/pages/index/index',
+        url: '/pages/app/index',
     });
 };
 

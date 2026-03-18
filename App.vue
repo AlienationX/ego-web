@@ -7,18 +7,6 @@ export default {
     onLaunch: function () {
         console.log('App Launch');
 
-        // 监控主题变化。如果是浏览器或小程序使用了暗黑模式，就会触发该监控
-        // 除了APP平台可以手动设置，其他平台都只能跟随系统的主题变化
-        uni.onThemeChange(({ theme }) => {
-            // 默认传参的是对象{theme: 'dark'}, 所以需要解构赋值
-            console.log('onThemeChange', theme);
-            
-            // #ifdef APP
-            // APP端触发主题切换，WEB跟随浏览器的默认设置，小程序跟随小程序的默认设置
-            plus.nativeUI.setUIStyle(theme);
-            // #endif
-        });
-
         // 检查是否已看过引导页
         const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
         if (!hasSeenGuide) {
@@ -34,6 +22,18 @@ export default {
         //         console.log(res, 'getProvider'); // ['weixin', qq', 'univerify']
         //     }
         // });
+        
+        // 监控主题变化。如果是浏览器或小程序使用了暗黑模式，就会触发该监控
+        // 除了APP平台可以手动设置，其他平台都只能跟随系统的主题变化
+        uni.onThemeChange(({ theme }) => {
+            // 默认传参的是对象{theme: 'dark'}, 所以需要解构赋值
+            console.log('onThemeChange', theme);
+            
+            // #ifdef APP
+            // APP端触发主题切换，WEB跟随浏览器的默认设置，小程序跟随小程序的默认设置
+            plus.nativeUI.setUIStyle(theme);
+            // #endif
+        });
 
         writeAccessLog();
 

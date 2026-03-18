@@ -67,7 +67,7 @@ const profileEmail = computed(() => userStore.userinfo?.email || 'user@example.c
 const profileAvatar = computed(
     () =>
         userStore.userinfo?.profile?.avatar ||
-        'https://images.unsplash.com/photo-1655249493799-9cee4fe983bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200'
+        'https://images.unsplash.com/photo-1655249493799-9cee4fe983bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=200',
 );
 
 const onConfirm = () => {
@@ -78,13 +78,13 @@ const onConfirm = () => {
 const goBack = () => {
     uni.navigateBack({
         fail: () => {
-            uni.reLaunch({ url: '/pages/test/settings1' });
+            uni.reLaunch({ url: '/pages/settings/settings' });
         },
     });
 };
 
 const backToSettings = () => {
-    uni.reLaunch({ url: '/pages/test/settings1' });
+    uni.reLaunch({ url: '/pages/settings/settings' });
 };
 </script>
 

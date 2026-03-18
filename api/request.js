@@ -19,7 +19,7 @@ export const request = (config = {}) => {
                 } catch (err2) {
                     // 刷新token失败，跳转登录页
                     if (config.isRedirect) {
-                        uni.navigateTo({ url: '/pages/login/login' });
+                        uni.navigateTo({ url: '/pages/auth/login' });
                     }
                     reject(err2);
                 }

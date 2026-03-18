@@ -90,8 +90,7 @@ const latestGroups = computed(() => {
 
 const getLatest = async () => {
     const res = await apiGetClassList({
-        ordering: '-created',
-        page_size: 60,
+        pageSize: 12,
     });
     latestList.value = (res.data || [])
         .map((item) => handlePicUrl(item))
@@ -100,12 +99,12 @@ const getLatest = async () => {
 
 const goPreview = (id) => {
     uni.setStorageSync('wallList', latestList.value);
-    uni.navigateTo({ url: `/pages/preview/preview?id=${id}` });
+    uni.navigateTo({ url: `/pages/app/preview?id=${id}` });
 };
 
 const goBack = () => {
     uni.navigateBack({
-        fail: () => uni.reLaunch({ url: '/pages/index/index' }),
+        fail: () => uni.reLaunch({ url: '/pages/app/index' }),
     });
 };
 
@@ -213,7 +212,7 @@ onLoad(() => {
 .card-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28rpx;  
+    gap: 28rpx;
 }
 
 .card-item {

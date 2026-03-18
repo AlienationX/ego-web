@@ -131,7 +131,7 @@ const openHtmlFile = (url) => {
 
 const contactSupport = () => {
     uni.navigateTo({
-        url: '/pages/feedback/feedback',
+        url: '/pages/settings/feedback',
     });
 };
 

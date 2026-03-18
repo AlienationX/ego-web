@@ -17,7 +17,9 @@
                 <view class="warn-hero">
                     <view class="hero-icon">
                         <svg class="icon-userx" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M6,18C6,15.79 9.58,14 12,14C14.42,14 18,15.79 18,18V20H6V18M21.73,4.27L19.46,6.54L17.19,4.27L15.78,5.68L18.05,7.95L15.78,10.22L17.19,11.63L19.46,9.36L21.73,11.63L23.14,10.22L20.87,7.95L23.14,5.68L21.73,4.27Z" />
+                            <path
+                                d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M6,18C6,15.79 9.58,14 12,14C14.42,14 18,15.79 18,18V20H6V18M21.73,4.27L19.46,6.54L17.19,4.27L15.78,5.68L18.05,7.95L15.78,10.22L17.19,11.63L19.46,9.36L21.73,11.63L23.14,10.22L20.87,7.95L23.14,5.68L21.73,4.27Z"
+                            />
                         </svg>
                     </view>
                     <text class="hero-title">{{ t('deactivate.warnTitle') }}</text>
@@ -26,7 +28,12 @@
 
                 <text class="section-title">{{ t('deactivate.happenTitle') }}</text>
                 <view class="list-card">
-                    <view class="list-row" v-for="(item, idx) in happenList" :key="item.title" :class="{ last: idx === happenList.length - 1 }">
+                    <view
+                        class="list-row"
+                        v-for="(item, idx) in happenList"
+                        :key="item.title"
+                        :class="{ last: idx === happenList.length - 1 }"
+                    >
                         <text class="list-emoji">{{ item.icon }}</text>
                         <view class="list-text">
                             <text class="list-title">{{ item.title }}</text>
@@ -97,7 +104,9 @@
                 <view class="btn-group">
                     <button class="primary-btn" :disabled="!canSubmit" @click="onDeactivate">
                         <svg class="icon-userx" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M6,18C6,15.79 9.58,14 12,14C14.42,14 18,15.79 18,18V20H6V18M21.73,4.27L19.46,6.54L17.19,4.27L15.78,5.68L18.05,7.95L15.78,10.22L17.19,11.63L19.46,9.36L21.73,11.63L23.14,10.22L20.87,7.95L23.14,5.68L21.73,4.27Z" />
+                            <path
+                                d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M6,18C6,15.79 9.58,14 12,14C14.42,14 18,15.79 18,18V20H6V18M21.73,4.27L19.46,6.54L17.19,4.27L15.78,5.68L18.05,7.95L15.78,10.22L17.19,11.63L19.46,9.36L21.73,11.63L23.14,10.22L20.87,7.95L23.14,5.68L21.73,4.27Z"
+                            />
                         </svg>
                         <text>{{ t('deactivate.button') }}</text>
                     </button>
@@ -169,12 +178,7 @@ const reasonList = computed(() => [
     t('deactivate.reason6'),
 ]);
 
-const doneList = computed(() => [
-    t('deactivate.done1'),
-    t('deactivate.done2'),
-    t('deactivate.done3'),
-    t('deactivate.done4'),
-]);
+const doneList = computed(() => [t('deactivate.done1'), t('deactivate.done2'), t('deactivate.done3'), t('deactivate.done4')]);
 
 const onConfirmInput = (e) => {
     const value = typeof e === 'string' ? e : e?.detail?.value;
@@ -196,7 +200,7 @@ const onBack = () => {
     }
     uni.navigateBack({
         fail: () => {
-            uni.reLaunch({ url: '/pages/test/settings1' });
+            uni.reLaunch({ url: '/pages/settings/settings' });
         },
     });
 };
@@ -210,7 +214,9 @@ const onBack = () => {
     flex-direction: column;
 }
 
-.status-holder { width: 100%; }
+.status-holder {
+    width: 100%;
+}
 
 .header {
     height: 56px;
@@ -240,7 +246,10 @@ const onBack = () => {
     color: #111827;
 }
 
-.header-placeholder { width: 36px; height: 36px; }
+.header-placeholder {
+    width: 36px;
+    height: 36px;
+}
 
 .content {
     flex: 1;

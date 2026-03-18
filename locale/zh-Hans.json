@@ -270,6 +270,7 @@
         "adminDeleteFailed": "删除失败，请稍后重试",
         "lock": "锁定",
         "active": "状态",
+        "selectCategory": "选择分类",
         "lockToggled": "锁定状态已更新",
         "lockToggleFailed": "锁定状态更新失败",
         "shareSuccess": "分享成功",
@@ -433,7 +434,7 @@
                 "valueEn": "英文"
             },
             "theme": {
-                "label": "主题",
+                "label": "暗黑模式",
                 "sublabel": "切换浅色或深色主题",
                 "light": "浅色",
                 "dark": "深色"
@@ -529,8 +530,8 @@
         "fullName": "姓名",
         "email": "邮箱",
         "phone": "电话",
-        "jobTitle": "职位",
-        "department": "部门",
+        "region": "地区",
+        "description": "描述",
         "saveChanges": "保存修改",
         "profileSaved": "资料已保存",
         "enterName": "请输入姓名",
@@ -539,8 +540,8 @@
             "fullName": "请输入姓名",
             "email": "请输入邮箱",
             "phone": "请输入电话",
-            "jobTitle": "请输入职位",
-            "department": "请输入部门"
+            "region": "请输入地区",
+            "description": "请输入描述"
         }
     },
     "helpCentre": {

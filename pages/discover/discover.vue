@@ -283,7 +283,7 @@ const setSourceMode = (mode) => {
             content: t('discover.localVipRequired'),
             success: (res) => {
                 if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/membership/membership' });
+                    uni.navigateTo({ url: '/pages/member/payment' });
                 }
             },
         });
@@ -316,7 +316,7 @@ const pickLocalImage = () => {
             content: t('discover.localVipRequired'),
             success: (res) => {
                 if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/membership/membership' });
+                    uni.navigateTo({ url: '/pages/member/payment' });
                 }
             },
         });
@@ -363,28 +363,31 @@ const onAnalyze = async () => {
 
     try {
         let aiMsgId = null;
-        const result = await apiPostDiscoverStream({
-            img_url: currentPicUrl,
-            lang: uni.getStorageSync('lang') || uni.getLocale()
-        }, {
-            onMessage: (chunk) => {
-                const piece = String(chunk || '');
-                if (!piece) return;
-
-                if (!aiMsgId) {
-                    stopThinkingTimer();
-                    isThinking.value = false;
-                    aiMsgId = appendMessage({
-                        role: 'assistant',
-                        name: aiProfile.value.name,
-                        avatar: aiProfile.value.avatar,
-                        text: '',
-                    });
-                }
-
-                appendTextToMessage(aiMsgId, piece);
+        const result = await apiPostDiscoverStream(
+            {
+                img_url: currentPicUrl,
+                lang: uni.getStorageSync('lang') || uni.getLocale(),
             },
-        });
+            {
+                onMessage: (chunk) => {
+                    const piece = String(chunk || '');
+                    if (!piece) return;
+
+                    if (!aiMsgId) {
+                        stopThinkingTimer();
+                        isThinking.value = false;
+                        aiMsgId = appendMessage({
+                            role: 'assistant',
+                            name: aiProfile.value.name,
+                            avatar: aiProfile.value.avatar,
+                            text: '',
+                        });
+                    }
+
+                    appendTextToMessage(aiMsgId, piece);
+                },
+            },
+        );
 
         // 后端降级为非流式时，使用最终文本兜底
         if (!aiMsgId) {
@@ -419,10 +422,10 @@ const onAnalyze = async () => {
 
 const goFavorite = () => {
     if (!userStore.isLogin) {
-        uni.navigateTo({ url: '/pages/login/login' });
+        uni.navigateTo({ url: '/pages/auth/login' });
         return;
     }
-    uni.navigateTo({ url: '/pages/favorite/favorite' });
+    uni.navigateTo({ url: '/pages/app/favorite' });
 };
 
 onLoad(() => {
@@ -698,9 +701,15 @@ onUnload(() => {
     line-height: 1.4;
 }
 
-.markdown :deep(h1) { font-size: 34rpx; }
-.markdown :deep(h2) { font-size: 32rpx; }
-.markdown :deep(h3) { font-size: 30rpx; }
+.markdown :deep(h1) {
+    font-size: 34rpx;
+}
+.markdown :deep(h2) {
+    font-size: 32rpx;
+}
+.markdown :deep(h3) {
+    font-size: 30rpx;
+}
 
 .markdown :deep(p) {
     margin: 6rpx 0;

@@ -17,9 +17,12 @@
                 <!-- <view v-if="isAdmin" class="icon-btn" @click="toggleLock">
                     <uni-icons :type="currentInfo.is_locked ? 'locked-filled' : 'locked'" size="20" color="#fff"></uni-icons>
                 </view> -->
-                <button class="icon-btn share-btn" open-type="share" @click="handleShare">
+                <view v-if="previewType === 'classic'" class="icon-btn" @click="openInfo">
+                    <uni-icons type="info" size="22" color="#fff"></uni-icons>
+                </view>
+                <!-- <button class="icon-btn share-btn" open-type="share" @click="handleShare">
                     <uni-icons type="redo" size="20" color="#fff"></uni-icons>
-                </button>
+                </button> -->
             </view>
 
             <view class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
@@ -37,18 +40,18 @@
             </view>
 
             <view class="footer" v-if="previewType === 'classic'">
-                <view class="box" @click="openInfo">
+                <!-- <view v-if="previewType === 'classic'" class="box" @click="openInfo">
                     <uni-icons type="info-filled" size="28"></uni-icons>
                     <view class="text">{{ t('common.information') }}</view>
-                </view>
+                </view> -->
                 <view class="box" @click="toggleCollect">
                     <uni-icons type="heart-filled" size="28"></uni-icons>
                     <view class="text">{{ currentInfo.is_collect ? t('preview.collected') : t('preview.collect') }}</view>
                 </view>
-                <!-- <view class="box" @click="openScore">
+                <view class="box" @click="openScore">
                     <uni-icons type="star-filled" size="28"></uni-icons>
                     <view class="text">{{ currentInfo.score }}</view>
-                </view> -->
+                </view>
                 <view class="box" @click="clickDownload">
                     <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
                     <uni-icons v-else type="download-filled" size="28"></uni-icons>
@@ -192,7 +195,16 @@
                         </view>
                         <view class="row">
                             <view class="label">{{ t('preview.category') }}</view>
-                            <input v-model="editForm.classify" class="input" />
+                            <picker
+                                :range="classifyList"
+                                range-key="classify_name"
+                                @change="onClassifyChange"
+                                :value="getClassifyIndex()"
+                            >
+                                <view class="input picker-input">
+                                    {{ getClassifyName() || t('preview.selectCategory') }}
+                                </view>
+                            </picker>
                         </view>
                         <view class="row">
                             <view class="label">{{ t('preview.publisher') }}</view>
@@ -228,7 +240,13 @@ import { onLoad, onUnload, onShareAppMessage, onShareTimeline, onShow } from '@d
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
 import { downloadPic } from '@/common/core.js';
-import { apiPostIncrementViews, apiPostIncrementDownloads, apiPostActions, apiPostUpdateWall } from '@/api/wallpaper.js';
+import {
+    apiPostIncrementViews,
+    apiPostIncrementDownloads,
+    apiPostActions,
+    apiPostUpdateWall,
+    apiGetClassify,
+} from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 import { useUserStore } from '@/stores/user.js';
@@ -286,7 +304,7 @@ const goBack = () => {
         fail: (err) => {
             // 返回失败，直接跳转回首页
             uni.reLaunch({
-                url: '/pages/index/index',
+                url: '/pages/app/index',
             });
         },
     });
@@ -323,7 +341,7 @@ const openScore = () => {
             confirmText: t('preview.login'),
             success: (res) => {
                 if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/login/login' });
+                    uni.navigateTo({ url: '/pages/auth/login' });
                 }
             },
         });
@@ -338,20 +356,27 @@ const closeScore = () => {
 };
 
 const editPopup = ref(null);
+const classifyList = ref([]);
 const editForm = ref({
     description: '',
     tags: '',
-    classify: '',
+    classify_id: '',
     publisher: '',
     is_active: true,
     is_locked: false,
 });
 
-const openEdit = () => {
+const openEdit = async () => {
+    const res = await apiGetClassify();
+    classifyList.value = res.data.map((item) => ({
+        classify_id: item.id,
+        classify_name: item.name,
+    }));
+    const currentClassify = classifyList.value.find((item) => item.classify_name === currentInfo.value.classify_name);
     editForm.value = {
         description: currentInfo.value.description || '',
         tags: currentInfo.value.tabs || (currentInfo.value.tabs_list || []).join(','),
-        classify: currentInfo.value.classify_name || '',
+        classify_id: currentClassify ? currentClassify.classify_id : '',
         publisher: currentInfo.value.publisher || '',
         is_active: !!currentInfo.value.is_active,
         is_locked: !!currentInfo.value.is_locked,
@@ -371,6 +396,22 @@ const onEditActiveChange = (e) => {
     editForm.value.is_active = !!e.detail.value;
 };
 
+const onClassifyChange = (e) => {
+    const index = e.detail.value;
+    if (index >= 0 && index < classifyList.value.length) {
+        editForm.value.classify_id = classifyList.value[index].classify_id;
+    }
+};
+
+const getClassifyIndex = () => {
+    return classifyList.value.findIndex((item) => item.classify_id === editForm.value.classify_id);
+};
+
+const getClassifyName = () => {
+    const item = classifyList.value.find((item) => item.classify_id === editForm.value.classify_id);
+    return item ? item.classify_name : '';
+};
+
 const applyLocalUpdate = (payload) => {
     const next = { ...currentInfo.value, ...payload };
     currentInfo.value = next;
@@ -380,10 +421,11 @@ const applyLocalUpdate = (payload) => {
 };
 
 const saveEdit = async () => {
+    const selectedClassify = classifyList.value.find((item) => item.classify_id === editForm.value.classify);
     const payload = {
         description: editForm.value.description,
         tabs: editForm.value.tags,
-        classify_name: editForm.value.classify,
+        classify_name: selectedClassify ? selectedClassify.classify_name : '',
         publisher: editForm.value.publisher,
         is_active: editForm.value.is_active,
         is_locked: editForm.value.is_locked,
@@ -476,7 +518,7 @@ const toggleCollect = async () => {
             confirmText: t('preview.login'),
             success: (res) => {
                 if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/login/login' });
+                    uni.navigateTo({ url: '/pages/auth/login' });
                 }
             },
         });
@@ -646,7 +688,7 @@ onShareAppMessage((e) => {
     // 读取缓存数据的话需要增加type=share，分享到的用户就可以不读缓存，直接读取数据库数据
     return {
         title: t('common.appName'),
-        path: '/pages/preview/preview?id=' + currentId.value + '&type=share',
+        path: '/pages/app/preview?id=' + currentId.value + '&type=share',
     };
 });
 
@@ -1164,6 +1206,18 @@ onShareTimeline(() => {
                 box-sizing: border-box;
                 min-height: 80rpx;
                 line-height: 1.5;
+            }
+
+            .picker-input {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .picker-input::after {
+                content: '▼';
+                font-size: 20rpx;
+                color: #999;
             }
 
             .input-textarea {

@@ -3,7 +3,7 @@
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
             <uni-icons type="back" color="#4a5670" size="20"></uni-icons>
         </view>
-        
+
         <view class="title-area">
             <view :style="{ height: getStatusBarHeight() + 'px' }"></view>
             <view class="title">{{ pageTitle }}</view>
@@ -99,7 +99,7 @@ const handleWatchAdWithInputKey = () => {
 };
 
 const goBack = () => {
-    uni.reLaunch({ url: '/pages/index/index' });
+    uni.reLaunch({ url: '/pages/app/index' });
 };
 
 onLoad(() => {

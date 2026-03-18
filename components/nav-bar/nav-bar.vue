@@ -2,9 +2,16 @@
     <view class="navbar-layout">
         <view class="navbar">
             <view class="statusBar" :style="{ height: getStatusBarHeight() + 'px' }"></view>
-            <view class="titleBar" :style="{ height: getTitleBarHeight() + 'px', marginLeft: getLeftIconWidth() + 'px', marginRight: getRightIconWidth() + 'px' }">
+            <view
+                class="titleBar"
+                :style="{
+                    height: getTitleBarHeight() + 'px',
+                    marginLeft: getLeftIconWidth() + 'px',
+                    marginRight: getRightIconWidth() + 'px',
+                }"
+            >
                 <view class="title">{{ title }}</view>
-                <navigator url="/pages/search/search" class="search" v-if="showSearch">
+                <navigator url="/pages/app/search" class="search" v-if="showSearch">
                     <uni-icons class="icon" type="search" color="#888" size="18"></uni-icons>
                     <text class="text">{{ $t('common.search') }}</text>
                 </navigator>
@@ -17,77 +24,78 @@
 </template>
 
 <script setup>
-    import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth, getRightIconWidth } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth, getRightIconWidth } from '@/utils/system.js';
 
-    defineProps({
-        title: {
-            type: String,
-            default: '壁纸'
-        },
-        showSearch: {
-            type: Boolean,
-            default: true
-        }
-    });
+defineProps({
+    title: {
+        type: String,
+        default: '壁纸',
+    },
+    showSearch: {
+        type: Boolean,
+        default: true,
+    },
+});
 </script>
 
 <style lang="scss" scoped>
-    .navbar-layout {
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 10; // 层级设置10，比其他都高就覆盖再最前面
+.navbar-layout {
+    .navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 10; // 层级设置10，比其他都高就覆盖再最前面
 
-            background: linear-gradient(to bottom, transparent, #fff 400rpx), linear-gradient(to right, #beecd8 20%, #f4e2d8); // 背景渐变色
+        background:
+            linear-gradient(to bottom, transparent, #fff 400rpx), linear-gradient(to right, #beecd8 20%, #f4e2d8); // 背景渐变色
 
-            .statusBar {
-                // border: 1rpx solid red;
+        .statusBar {
+            // border: 1rpx solid red;
+        }
+
+        .titleBar {
+            // border: 1rpx solid green;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30rpx;
+
+            .title {
+                font-size: 40rpx;
+                font-weight: 700;
+                color: $uni-text-color;
             }
 
-            .titleBar {
-                // border: 1rpx solid green;
+            .search {
+                width: 220rpx;
+                height: 58rpx;
+                background: rgba(255, 255, 255, 0.4);
+                // border: 1px solid #fff;
+                border-radius: 60rpx;
+                margin-left: 30rpx;
+                color: #999;
+                font-size: 28rpx;
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
-                padding: 0 30rpx;
+                // box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.25);
 
-                .title {
-                    font-size: 40rpx;
-                    font-weight: 700;
-                    color: $uni-text-color;
+                .icon {
+                    margin-left: 5rpx;
                 }
 
-                .search {
-                    width: 220rpx;
-                    height: 58rpx;
-                    background: rgba(255, 255, 255, 0.4);
-                    // border: 1px solid #fff;
-                    border-radius: 60rpx;
-                    margin-left: 30rpx;
-                    color: #999;
-                    font-size: 28rpx;
-                    display: flex;
-                    align-items: center;
-                    // box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.25);
-
-                    .icon {
-                        margin-left: 5rpx;
-                    }
-
-                    .text {
-                        padding-left: 10rpx;
-                    }
+                .text {
+                    padding-left: 10rpx;
                 }
-            }
-
-            .capsule {
-                width: 60rpx;
             }
         }
 
-        .fill {
+        .capsule {
+            width: 60rpx;
         }
     }
+
+    .fill {
+    }
+}
 </style>

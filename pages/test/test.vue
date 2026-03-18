@@ -25,12 +25,11 @@
 
 <script setup>
 const testMenus = [
-    { name: 'Sign In', url: '/pages/login/signin' },
-    { name: 'Sign Up', url: '/pages/login/signup' },
-    { name: 'Forget Password', url: '/pages/login/forget-password' },
+    { name: 'Sign In', url: '/pages/auth/signin' },
+    { name: 'Sign Up', url: '/pages/auth/signup' },
+    { name: 'Forget Password', url: '/pages/auth/forget-password' },
     { name: 'Access', url: '/pages/access/access' },
-    { name: 'Membership', url: '/pages/membership/membership' },
-    { name: 'Settings1', url: '/pages/test/settings1' },
+    { name: 'Membership', url: '/pages/member/payment' },
     { name: 'Stream Test', url: '/pages/test/stream-test' },
     { name: 'Interstitial Ad', url: '/pages/test/ad-inter' },
     { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded' },

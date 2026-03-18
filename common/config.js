@@ -17,3 +17,5 @@ export const MAX_PAGE_SIZE = 12;
 // export const PICS_BASE_URL = 'https://wp-1328701250.cos.ap-beijing.myqcloud.com';
 // local 图片地址
 export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper/media';
+
+export const RIGHT_ICP = '粤ICP备15077732号-2';

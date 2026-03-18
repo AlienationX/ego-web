@@ -45,10 +45,10 @@
                             <uni-icons type="mail-filled" size="16" color="#999"></uni-icons>
                             <text>{{ userStore.userinfo.email }}</text>
                         </view>
-                        <view v-if="userStore.userinfo.profile.region" class="info-item">
+                        <!-- <view v-if="userStore.userinfo.profile.region" class="info-item">
                             <uni-icons type="location" size="16" color="#999"></uni-icons>
                             <text>{{ userStore.userinfo.profile.region }}</text>
-                        </view>
+                        </view> -->
                     </view>
                 </view>
             </view>
@@ -191,8 +191,8 @@ const userStore = useUserStore();
 const hasCheckedInToday = ref(false);
 
 const toLogin = () => {
-    // uni.navigateTo({ url: '/pages/login/login' });
-    uni.navigateTo({ url: '/pages/login/login' });
+    // uni.navigateTo({ url: '/pages/auth/signin' });
+    uni.navigateTo({ url: '/pages/auth/login' });
 };
 
 const toSettings = () => {
@@ -210,13 +210,13 @@ const toMyFavorite = () => {
             content: t('user.profile.loginRequired'),
             success: (res) => {
                 if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/login/login' });
+                    uni.navigateTo({ url: '/pages/auth/login' });
                 }
             },
         });
         return;
     }
-    uni.navigateTo({ url: '/pages/favorite/favorite' });
+    uni.navigateTo({ url: '/pages/app/favorite' });
 };
 
 const toMyDownload = () => {
@@ -226,13 +226,13 @@ const toMyDownload = () => {
             content: t('user.profile.loginRequired'),
             success: (res) => {
                 if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/login/login' });
+                    uni.navigateTo({ url: '/pages/auth/login' });
                 }
             },
         });
         return;
     }
-    uni.navigateTo({ url: '/pages/download/download' });
+    uni.navigateTo({ url: '/pages/app/download' });
 };
 
 const toMyScore = () => {
@@ -242,22 +242,22 @@ const toMyScore = () => {
             content: t('user.profile.loginRequired'),
             success: (res) => {
                 if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/login/login' });
+                    uni.navigateTo({ url: '/pages/auth/login' });
                 }
             },
         });
         return;
     }
-    uni.navigateTo({ url: '/pages/rate/rate' });
+    uni.navigateTo({ url: '/pages/app/rate' });
 };
 
 const toMembership = () => {
-    uni.navigateTo({ url: '/pages/membership/membership' });
+    uni.navigateTo({ url: '/pages/member/payment' });
 };
 
 const toFAQ = () => {
     uni.navigateTo({
-        url: '/pages/notice/detail?id=2&name=常见问题',
+        url: '/pages/app/notice-detail?id=2&name=常见问题',
     });
 };
 
@@ -266,7 +266,7 @@ const onService = () => {
 };
 
 const toFeedback = () => {
-    uni.navigateTo({ url: '/pages/feedback/feedback' });
+    uni.navigateTo({ url: '/pages/settings/feedback' });
 };
 
 const toTest = () => {

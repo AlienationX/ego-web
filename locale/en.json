@@ -146,6 +146,7 @@
         "adminDeleteFailed": "Delete failed, try again",
         "lock": "Lock",
         "active": "Active",
+        "selectCategory": "Select Category",
         "lockToggled": "Lock status updated",
         "lockToggleFailed": "Lock update failed",
         "shareSuccess": "Shared successfully",
@@ -455,7 +456,7 @@
                 "valueEn": "English"
             },
             "theme": {
-                "label": "Theme",
+                "label": "Dark Mode",
                 "sublabel": "Switch light or dark mode",
                 "light": "Light",
                 "dark": "Dark"
@@ -551,8 +552,8 @@
         "fullName": "Full Name",
         "email": "Email Address",
         "phone": "Phone Number",
-        "jobTitle": "Job Title",
-        "department": "Department",
+        "region": "Region",
+        "description": "Description",
         "saveChanges": "Save Changes",
         "profileSaved": "Profile Saved!",
         "enterName": "Please enter name",
@@ -561,8 +562,8 @@
             "fullName": "Enter full name",
             "email": "Enter email",
             "phone": "Enter phone number",
-            "jobTitle": "Enter job title",
-            "department": "Enter department"
+            "region": "Enter region",
+            "description": "Enter description"
         }
     },
     "helpCentre": {

@@ -1,7 +1,7 @@
 {
     "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
         {
-            "path": "pages/index/index",
+            "path": "pages/app/index",
             "style": {
                 "navigationBarTitleText": "首页",
                 "navigationStyle": "custom", // 去掉顶部栏
@@ -17,7 +17,7 @@
             }
         },
         {
-            "path": "pages/classify/classify",
+            "path": "pages/app/classify",
             "style": {
                 "navigationBarTitleText": "分类",
                 "navigationStyle": "custom",
@@ -49,7 +49,7 @@
             }
         },
         {
-            "path": "pages/classlist/classlist",
+            "path": "pages/app/classlist",
             "style": {
                 "navigationBarTitleText": "分类列表",
                 "navigationStyle": "custom",
@@ -57,7 +57,7 @@
             }
         },
         {
-            "path": "pages/preview/preview",
+            "path": "pages/app/preview",
             "style": {
                 "navigationBarTitleText": "预览",
                 "navigationStyle": "custom",
@@ -65,14 +65,15 @@
             }
         },
         {
-            "path": "pages/notice/notice",
+            "path": "pages/app/notice",
             "style": {
                 "navigationBarTitleText": "公告",
+                "navigationStyle": "custom",
                 "enablePullDownRefresh": false
             }
         },
         {
-            "path": "pages/notice/detail",
+            "path": "pages/app/notice-detail",
             "style": {
                 "navigationBarTitleText": "公告详情",
                 "navigationStyle": "custom",
@@ -80,7 +81,7 @@
             }
         },
         {
-            "path": "pages/search/search",
+            "path": "pages/app/search",
             "style": {
                 "navigationBarTitleText": "搜索",
                 "navigationStyle": "custom"
@@ -96,34 +97,35 @@
             }
         },
         {
-            "path": "pages/subject/subject",
+            "path": "pages/app/subject",
             "style": {
-                "navigationBarTitleText": "专题"
+                "navigationBarTitleText": "专题",
+                "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/login/login",
+            "path": "pages/auth/login",
             "style": {
                 "navigationBarTitleText": "登录",
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/login/signup",
+            "path": "pages/auth/signup",
             "style": {
                 "navigationBarTitleText": "注册",
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/login/signin",
+            "path": "pages/auth/signin",
             "style": {
                 "navigationBarTitleText": "登录",
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/login/forget-password",
+            "path": "pages/auth/forget-password",
             "style": {
                 "navigationBarTitleText": "忘记密码",
                 "navigationStyle": "custom"
@@ -137,14 +139,14 @@
             }
         },
         {
-            "path": "pages/feedback/feedback",
+            "path": "pages/settings/feedback",
             "style": {
                 "navigationBarTitleText": "反馈",
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/latest/latest",
+            "path": "pages/app/latest",
             "style": {
                 "navigationBarTitleText": "最新发布",
                 "navigationStyle": "custom",
@@ -152,14 +154,14 @@
             }
         },
         {
-            "path": "pages/membership/membership",
+            "path": "pages/member/payment",
             "style": {
                 "navigationBarTitleText": "会员购买",
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/favorite/favorite",
+            "path": "pages/app/favorite",
             "style": {
                 "navigationBarTitleText": "我的收藏",
                 "navigationStyle": "custom",
@@ -167,7 +169,7 @@
             }
         },
         {
-            "path": "pages/download/download",
+            "path": "pages/app/download",
             "style": {
                 "navigationBarTitleText": "我的下载",
                 "navigationStyle": "custom",
@@ -175,7 +177,7 @@
             }
         },
         {
-            "path": "pages/rate/rate",
+            "path": "pages/app/rate",
             "style": {
                 "navigationBarTitleText": "我的评分",
                 "navigationStyle": "custom",
@@ -183,7 +185,7 @@
             }
         },
         {
-            "path": "pages/about/about",
+            "path": "pages/settings/about",
             "style": {
                 "navigationBarTitleText": "关于我们",
                 "navigationStyle": "custom",
@@ -191,7 +193,7 @@
             }
         },
         {
-            "path": "pages/help-centre/help-centre",
+            "path": "pages/settings/help-centre",
             "style": {
                 "navigationBarTitleText": "Help Centre",
                 "navigationStyle": "custom",
@@ -199,7 +201,7 @@
             }
         },
         {
-            "path": "pages/deactivate-account/deactivate-account",
+            "path": "pages/auth/deactivate-account",
             "style": {
                 "navigationBarTitleText": "Deactivate Account",
                 "navigationStyle": "custom",
@@ -207,7 +209,7 @@
             }
         },
         {
-            "path": "pages/logout/logout",
+            "path": "pages/auth/logout",
             "style": {
                 "navigationBarTitleText": "Logout",
                 "navigationStyle": "custom",
@@ -269,13 +271,6 @@
                 "navigationBarTitleText": "Test",
                 "navigationStyle": "custom"
             }
-        },
-        {
-            "path": "pages/test/settings1",
-            "style": {
-                "navigationBarTitleText": "Settings",
-                "navigationStyle": "custom"
-            }
         }
     ],
     "globalStyle": {
@@ -293,13 +288,13 @@
         "list": [
             {
                 "text": "%tabbar.index%",
-                "pagePath": "pages/index/index",
+                "pagePath": "pages/app/index",
                 "iconPath": "@tabIconHome",
                 "selectedIconPath": "@tabIconHomeSelected"
             },
             {
                 "text": "%tabbar.category%",
-                "pagePath": "pages/classify/classify",
+                "pagePath": "pages/app/classify",
                 "iconPath": "@tabIconCategory",
                 "selectedIconPath": "@tabIconCategorySelected"
             },

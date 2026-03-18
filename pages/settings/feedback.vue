@@ -58,12 +58,7 @@
                 <view class="card">
                     <view class="image-list">
                         <view class="image-item" v-for="(image, index) in imageList" :key="index">
-                            <image
-                                class="image-preview"
-                                :src="image"
-                                mode="aspectFill"
-                                @click="previewImage(index)"
-                            ></image>
+                            <image class="image-preview" :src="image" mode="aspectFill" @click="previewImage(index)"></image>
                             <view class="image-delete" @click="removeImage(index)">
                                 <uni-icons type="close" size="14" color="#fff"></uni-icons>
                             </view>
@@ -162,10 +157,16 @@ const selectImage = (count) => {
             console.error('选择图片失败:', err);
             // #ifdef APP-PLUS
             const errMsg = err.errMsg || '';
-            if (errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
+            if (
+                errMsg.includes('permission') ||
+                errMsg.includes('权限') ||
+                errMsg.includes('denied') ||
+                errMsg.includes('拒绝')
+            ) {
                 uni.showModal({
                     title: t('feedback.permissionTitle') || '需要访问相册',
-                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                    content:
+                        t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
                     confirmText: t('feedback.goToSettings') || '去设置',
                     cancelText: t('common.cancel') || '取消',
                     success: (res) => {
@@ -192,7 +193,8 @@ const selectImage = (count) => {
             if (err.errMsg && (err.errMsg.includes('permission') || err.errMsg.includes('权限'))) {
                 uni.showModal({
                     title: t('feedback.permissionTitle') || '需要访问相册',
-                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                    content:
+                        t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
                     confirmText: t('feedback.goToSettings') || '去设置',
                     cancelText: t('common.cancel') || '取消',
                     success: (res) => {
@@ -238,7 +240,7 @@ const removeImage = (index) => {
 
 const goBack = () => {
     uni.navigateBack({
-        fail: () => uni.reLaunch({ url: '/pages/test/settings1' }),
+        fail: () => uni.reLaunch({ url: '/pages/settings/settings' }),
     });
 };
 

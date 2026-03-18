@@ -8,7 +8,7 @@ export const getStatusBarHeight = () => {
     // #ifdef WEB
     return 0;
     // #endif
-    
+
     // #ifndef WEB
     return SYSTEM_INFO.statusBarHeight;
     // #endif
@@ -30,18 +30,18 @@ export const getTabBarHeight = () => {
     // #ifdef WEB
     return 50;
     // #endif
-    
+
     // #ifndef WEB
     return SYSTEM_INFO.windowBottom;
     // #endif
-}
+};
 
 export const getLeftIconWidth = () => {
     // #ifdef MP-TOUTIAO
     // 抖音/头条 小程序头部左侧的按钮显示问题
     // 深度结构，两层
     let {
-        leftIcon: { left, width }
+        leftIcon: { left, width },
     } = tt.getCustomButtonBoundingClientRect();
     return left + parseInt(width);
     // #endif
@@ -83,7 +83,8 @@ export const writeAccessLog = async () => {
         // 如果是app，用来区分 android 和 ios
         platform: SYSTEM_INFO.uniPlatform === 'app' ? SYSTEM_INFO.platform : SYSTEM_INFO.uniPlatform,
         channel: channel,
-        remark: JSON.stringify(SYSTEM_INFO)
+        app_version: APP_INFO.appVersion,
+        remark: JSON.stringify(SYSTEM_INFO),
     };
 
     // console.log(data);

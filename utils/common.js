@@ -30,7 +30,7 @@ export function handlePicUrl(item, prefix = PICS_BASE_URL) {
     return {
         ...item,
         picurl: prefixedUrl, // 覆盖原始的picurl数据
-        smallPicurl
+        smallPicurl,
     };
 }
 
@@ -42,9 +42,9 @@ export function gotoHome() {
         success: (res) => {
             if (res.confirm) {
                 uni.reLaunch({
-                    url: '/pages/index/index'
+                    url: '/pages/app/index',
                 });
             }
-        }
+        },
     });
 }
