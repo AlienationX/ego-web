@@ -28,5 +28,6 @@
 ## 注意事项
 
 - 不要使用 `window`、`document` 等浏览器专有 API，请使用 uni 提供的跨平台 API
-- 图片资源统一放在 `static/` 目录，不要使用网络图片作为默认资源
+- css单位统一使用 rpx，避免使用 px 单位
+- icon图标统一放在 `static/icons/` 目录，优先使用自定义组件 mdi-icon,size属性使用px单位。没有的再使用网络上的material-design-icons 图标库中的图标，并提示我下载到本地目录
 - 涉及支付、授权等敏感功能，修改前请先查阅 `docs/` 目录下的相关说明文档

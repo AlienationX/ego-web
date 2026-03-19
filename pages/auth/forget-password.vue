@@ -2,7 +2,7 @@
     <view class="reset-password-container">
         <!-- 返回按钮 -->
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
-            <uni-icons type="back" color="#4a5670" size="20"></uni-icons>
+            <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#4a5670"></mdi-icon>
         </view>
 
         <view class="step-host">
@@ -96,7 +96,11 @@
                                 v-model="step3Form.newPassword"
                             />
                             <view class="password-toggle" @click="togglePassword">
-                                <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
+                                <mdi-icon
+                                    :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                                    size="48"
+                                    color="#9ca3af"
+                                ></mdi-icon>
                             </view>
                         </view>
 

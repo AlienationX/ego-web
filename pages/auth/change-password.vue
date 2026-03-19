@@ -5,7 +5,7 @@
         <template v-if="!saved">
             <view class="header">
                 <view class="back-btn" @click="goBack">
-                    <uni-icons type="back" size="18" color="#374151"></uni-icons>
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
                 </view>
                 <text class="header-title">Change Password</text>
                 <view class="header-placeholder"></view>
@@ -32,10 +32,11 @@
                                 @blur="focusKey = ''"
                             />
                             <view class="eye-btn" @click="showCurrent = !showCurrent">
-                                <image
-                                    class="eye-icon"
-                                    :src="showCurrent ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
-                                />
+                                <mdi-icon
+                                    :path="showCurrent ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                                    size="20px"
+                                    color="#9ca3af"
+                                ></mdi-icon>
                             </view>
                         </view>
                         <view class="field-line"></view>
@@ -55,10 +56,11 @@
                                 @blur="focusKey = ''"
                             />
                             <view class="eye-btn" @click="showNext = !showNext">
-                                <image
-                                    class="eye-icon"
-                                    :src="showNext ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
-                                />
+                                <mdi-icon
+                                    :path="showNext ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                                    size="20px"
+                                    color="#9ca3af"
+                                ></mdi-icon>
                             </view>
                         </view>
                         <view class="field-line"></view>
@@ -74,10 +76,11 @@
                                 @blur="focusKey = ''"
                             />
                             <view class="eye-btn" @click="showConfirm = !showConfirm">
-                                <image
-                                    class="eye-icon"
-                                    :src="showConfirm ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
-                                />
+                                <mdi-icon
+                                    :path="showConfirm ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                                    size="20px"
+                                    color="#9ca3af"
+                                ></mdi-icon>
                             </view>
                         </view>
                         <view class="field-line"></view>
@@ -97,7 +100,7 @@
                         <text class="strength-label" :style="{ color: strength.color }">{{ strength.label }}</text>
                         <view v-if="confirm.length" class="strength-match" :class="{ ok: next === confirm }">
                             <template v-if="next === confirm">
-                                <image class="match-icon" src="/static/icons/check.svg" />
+                                <mdi-icon path="/static/icons/check.svg" size="20px" color="#22c55e"></mdi-icon>
                                 <text>Passwords match</text>
                             </template>
                             <template v-else>Passwords don't match</template>
@@ -109,7 +112,7 @@
                     <text class="requirements-title">Requirements</text>
                     <view v-for="item in requirements" :key="item.label" class="requirements-row">
                         <view class="requirements-dot" :class="{ ok: item.met }">
-                            <image v-if="item.met" class="check-icon" src="/static/icons/check.svg" />
+                            <mdi-icon v-if="item.met" path="/static/icons/check.svg" size="20px" color="#22c55e"></mdi-icon>
                         </view>
                         <text class="requirements-text" :class="{ ok: item.met }">{{ item.label }}</text>
                     </view>
@@ -130,7 +133,7 @@
         <template v-else>
             <view class="success">
                 <view class="success-icon">
-                    <image class="shield-icon" src="/static/icons/shield-check-outline.svg" />
+                    <mdi-icon path="/static/icons/shield-check.svg" size="100px" color="#22c55e"></mdi-icon>
                 </view>
                 <text class="success-title">Password Updated</text>
                 <text class="success-desc">

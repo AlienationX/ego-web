@@ -279,10 +279,17 @@
                 "navigationBarTitleText": "Test",
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/test/mdi-icon-test",
+            "style": {
+                "navigationBarTitleText": "MDI Icon Test",
+                "navigationStyle": "custom"
+            }
         }
     ],
     "globalStyle": {
-        "rpxCalcMaxDeviceWidth": 1444, // rpx 进行缩放计算的最大设备宽度（单位 px），默认 960
+        // "rpxCalcMaxDeviceWidth": 1444, // rpx 进行缩放计算的最大设备宽度（单位 px），默认 960
         "navigationBarTextStyle": "@navigationBarTextStyle",
         "navigationBarTitleText": "本我壁纸",
         "navigationBarBackgroundColor": "@navigationBarBackgroundColor",

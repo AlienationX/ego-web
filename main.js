@@ -15,6 +15,7 @@ let i18nConfig = {
 };
 
 import { createSSRApp } from 'vue';
+import MDIIcon from '@/components/mdi-icon/MDIIcon.vue';
 import { createI18n } from 'vue-i18n';
 import * as Pinia from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
@@ -38,10 +39,11 @@ export function createApp() {
                     uni.removeStorageSync(key);
                 },
             },
-        })
+        }),
     );
     app.use(i18n);
     app.use(pinia);
+    app.component('mdi-icon', MDIIcon);
     return {
         app,
         Pinia, // 此处必须将 Pinia 返回

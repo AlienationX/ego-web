@@ -31,6 +31,7 @@ const testMenus = [
     { name: 'Access', url: '/pages/access/access' },
     { name: 'Membership', url: '/pages/member/payment' },
     { name: 'Stream Test', url: '/pages/test/stream-test' },
+    { name: 'MDI Icon Test', url: '/pages/test/mdi-icon-test' },
     { name: 'Interstitial Ad', url: '/pages/test/ad-inter' },
     { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded' },
     { name: 'Waterfall View', url: '/pages/test/waterfall-view' },

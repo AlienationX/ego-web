@@ -3,7 +3,7 @@
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <uni-icons type="back" size="18" color="#374151"></uni-icons>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
             </view>
             <text class="header-title">{{ t('settings1.title') }}</text>
             <view class="header-placeholder"></view>
@@ -34,7 +34,7 @@
                     >
                         <view class="row-left">
                             <view class="icon-box">
-                                <uni-icons :type="item.icon" size="28" color="#6B7280"></uni-icons>
+                                <mdi-icon :path="item.icon" size="28px" color="#6B7280"></mdi-icon>
                             </view>
                             <view class="label-block">
                                 <text class="label">{{ item.label }}</text>
@@ -42,7 +42,7 @@
                             </view>
                         </view>
                         <view class="row-right">
-                            <uni-icons type="forward" size="17" color="#C4C9D4"></uni-icons>
+                            <mdi-icon path="/static/icons/chevron-right.svg" size="17px" color="#C4C9D4"></mdi-icon>
                         </view>
                     </view>
                 </view>
@@ -61,16 +61,11 @@
                         >
                             <view class="row-left">
                                 <view class="icon-box" :class="{ destructive: item.destructive }">
-                                    <template v-if="item.icon.startsWith('/')">
-                                        <image :src="item.icon" mode="aspectFit" style="width: 28px; height: 28px"></image>
-                                    </template>
-                                    <template v-else>
-                                        <uni-icons
-                                            :type="item.icon"
-                                            size="28"
-                                            :color="item.destructive ? '#E5322D' : '#6B7280'"
-                                        ></uni-icons>
-                                    </template>
+                                    <mdi-icon
+                                        :path="item.icon"
+                                        size="28px"
+                                        :color="item.destructive ? '#E5322D' : '#6B7280'"
+                                    ></mdi-icon>
                                 </view>
                                 <view class="label-block">
                                     <text class="label">{{ item.label }}</text>
@@ -89,7 +84,7 @@
                                 </template>
                                 <template v-else>
                                     <text v-if="item.value" class="value">{{ item.value }}</text>
-                                    <uni-icons type="forward" size="17" color="#C4C9D4"></uni-icons>
+                                    <mdi-icon path="/static/icons/chevron-right.svg" size="17px" color="#C4C9D4"></mdi-icon>
                                 </template>
                             </view>
                         </view>
@@ -108,7 +103,7 @@
                 <view class="popup-head">
                     <text class="popup-title">{{ t('settings1.preview.title') }}</text>
                     <view class="popup-close" @click="closePreviewTypePopup">
-                        <uni-icons type="closeempty" size="20" color="#6f7786"></uni-icons>
+                        <mdi-icon path="/static/icons/close.svg" size="20px" color="#6f7786"></mdi-icon>
                     </view>
                 </view>
                 <view class="preview-list">
@@ -145,7 +140,7 @@
                 <view class="about-head">
                     <text class="about-title">{{ t('about.title') }}</text>
                     <view class="about-close" @click="closeAboutPopup">
-                        <uni-icons type="closeempty" size="20" color="#6f7786"></uni-icons>
+                        <mdi-icon path="/static/icons/close.svg" size="20px" color="#6f7786"></mdi-icon>
                     </view>
                 </view>
 
@@ -171,14 +166,14 @@
                         <view class="about-list">
                             <view class="about-row" @click="contactSupport">
                                 <view class="about-row-left">
-                                    <uni-icons type="chatboxes-filled" size="20" color="#28B389"></uni-icons>
+                                    <mdi-icon path="/static/icons/forum.svg" size="20px" color="#28B389"></mdi-icon>
                                     <text class="about-row-text">{{ t('about.feedback') }}</text>
                                 </view>
-                                <uni-icons type="right" size="16" color="#c4c9d4"></uni-icons>
+                                <mdi-icon path="/static/icons/chevron-right.svg" size="16px" color="#c4c9d4"></mdi-icon>
                             </view>
                             <view class="about-row" @click="copyEmail">
                                 <view class="about-row-left">
-                                    <uni-icons type="email-filled" size="20" color="#28B389"></uni-icons>
+                                    <mdi-icon path="/static/icons/email.svg" size="20px" color="#28B389"></mdi-icon>
                                     <text class="about-row-text">{{ t('about.email') }}</text>
                                 </view>
                                 <text class="about-row-value">735003439@qq.com</text>
@@ -229,7 +224,7 @@ const profileAvatar = computed(() => userStore.userinfo?.profile?.avatar);
 const profileItems = computed(() => [
     {
         key: 'edit_profile',
-        icon: 'person-filled',
+        icon: '/static/icons/account.svg',
         label: t('settings1.items.editProfile.label'),
         sublabel: t('settings1.items.editProfile.sublabel'),
         action: () => uni.navigateTo({ url: '/pages/user/edit-profile1' }),
@@ -243,17 +238,17 @@ const sections = computed(() => [
         items: [
             {
                 key: 'change_password',
-                icon: 'locked-filled',
+                icon: '/static/icons/lock.svg',
                 label: t('settings1.items.changePassword.label'),
                 sublabel: t('settings1.items.changePassword.sublabel'),
                 action: () => uni.navigateTo({ url: '/pages/auth/change-password' }),
             },
             {
                 key: 'reset_password',
-                icon: 'loop',
+                icon: '/static/icons/autorenew.svg',
                 label: t('settings1.items.resetPassword.label'),
                 sublabel: t('settings1.items.resetPassword.sublabel'),
-                action: () => uni.navigateTo({ url: '/pages/login/forget-password' }),
+                action: () => uni.navigateTo({ url: '/pages/auth/forget-password' }),
             },
             // {
             //     key: 'twofa',
@@ -370,7 +365,7 @@ const sections = computed(() => [
             // },
             {
                 key: 'clear_cache',
-                icon: 'trash-filled',
+                icon: '/static/icons/delete-empty.svg',
                 label: t('settings1.items.clearCache.label'),
                 sublabel: t('settings1.items.clearCache.sublabel'),
                 action: clearCache,
@@ -383,7 +378,7 @@ const sections = computed(() => [
         items: [
             {
                 key: 'help_centre',
-                icon: 'help-filled',
+                icon: '/static/icons/help-circle.svg',
                 label: t('settings1.items.helpCentre.label'),
                 sublabel: t('settings1.items.helpCentre.sublabel'),
                 action: () => uni.navigateTo({ url: '/pages/settings/help-centre' }),
@@ -397,28 +392,28 @@ const sections = computed(() => [
             // },
             {
                 key: 'send_feedback',
-                icon: 'paperplane-filled',
+                icon: '/static/icons/comment-processing.svg',
                 label: t('settings1.items.sendFeedback.label'),
                 sublabel: t('settings1.items.sendFeedback.sublabel'),
                 action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
             },
             {
                 key: 'about_page',
-                icon: 'info-filled',
+                icon: '/static/icons/information.svg',
                 label: t('settings1.items.about.label'),
                 sublabel: t('settings1.items.about.sublabel'),
                 action: openAboutPopup,
             },
             {
                 key: 'privacy',
-                icon: 'locked-filled',
+                icon: '/static/icons/lock.svg',
                 label: t('settings1.items.privacy.label'),
                 sublabel: t('settings1.items.privacy.sublabel'),
                 action: () => openHtmlFile('/privacy_agreement.html'),
             },
             {
                 key: 'agreement',
-                icon: 'wallet-filled',
+                icon: '/static/icons/wallet-bifold.svg',
                 label: t('settings1.items.agreement.label'),
                 sublabel: t('settings1.items.agreement.sublabel'),
                 action: () => openHtmlFile('/user_agreement.html'),
@@ -431,14 +426,14 @@ const sections = computed(() => [
         items: [
             {
                 key: 'introduction',
-                icon: 'info-filled',
+                icon: '/static/icons/information.svg',
                 label: t('settings1.items.introduction.label'),
                 sublabel: t('settings1.items.introduction.sublabel'),
                 action: showIntroduction,
             },
             {
                 key: 'check_update',
-                icon: 'loop',
+                icon: '/static/icons/cached.svg',
                 label: t('settings1.items.checkUpdate.label'),
                 sublabel: t('settings1.items.checkUpdate.sublabel'),
                 action: checkUpdate,
@@ -451,14 +446,14 @@ const sections = computed(() => [
         items: [
             {
                 key: 'rate_us',
-                icon: 'star-filled',
+                icon: '/static/icons/star.svg',
                 label: t('settings1.items.rateUs.label'),
                 sublabel: t('settings1.items.rateUs.sublabel'),
                 action: goAppStore,
             },
             {
                 key: 'share_app',
-                icon: 'redo-filled',
+                icon: '/static/icons/share.svg',
                 label: t('settings1.items.share.label'),
                 sublabel: t('settings1.items.share.sublabel'),
                 action: shareApp,
@@ -471,7 +466,7 @@ const sections = computed(() => [
         items: [
             {
                 key: 'logout',
-                icon: '/static/icons/logout.svg',
+                icon: '/static/icons/exit-to-app.svg',
                 label: t('settings1.items.logout.label'),
                 sublabel: t('settings1.items.logout.sublabel'),
                 destructive: true,
@@ -479,7 +474,7 @@ const sections = computed(() => [
             },
             {
                 key: 'deactivate',
-                icon: '/static/icons/user-x.svg',
+                icon: '/static/icons/account-remove.svg',
                 label: t('settings1.items.deactivate.label'),
                 sublabel: t('settings1.items.deactivate.sublabel'),
                 destructive: true,

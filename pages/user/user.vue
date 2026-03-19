@@ -56,9 +56,17 @@
             <!-- 签到和能量 -->
             <view v-if="userStore.userinfo.id" class="checkin-section">
                 <view class="energy-info">
-                    <view class="energy-hint" @click="showEnergyHint">
-                        <uni-icons type="help" size="24" color="#999"></uni-icons>
-                    </view>
+                    <uni-tooltip
+                        :content="t('user.profile.energyHintContent')"
+                        :placement="'bottom'"
+                        :show-arrow="true"
+                        :trigger="'click'"
+                        class="energy-tooltip"
+                    >
+                        <view class="energy-hint">
+                            <uni-icons type="help" size="20" color="#999"></uni-icons>
+                        </view>
+                    </uni-tooltip>
                     <text class="energy-text">
                         {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
                     </text>
@@ -125,13 +133,14 @@
             <view class="list">
                 <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <image
-                            v-if="String(item.left_icon).startsWith('/')"
-                            class="icon"
-                            :src="item.left_icon"
-                            mode="aspectFit"
-                        ></image>
-                        <uni-icons v-else :type="item.left_icon" size="24" color="#28B389"></uni-icons>
+                        <view class="icon-wrap">
+                            <mdi-icon
+                                class="icon"
+                                :path="item.left_icon"
+                                size="20px"
+                                :color="item.left_color || '#28B389'"
+                            ></mdi-icon>
+                        </view>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -140,7 +149,7 @@
                         <view class="text">
                             {{ item.right_text }}
                         </view>
-                        <uni-icons :type="item.right_icon" size="18" color="#aaa"></uni-icons>
+                        <mdi-icon path="/static/icons/chevron-right.svg" size="20px" color="#a3a8b3"></mdi-icon>
                     </view>
                     <!-- 微信特有的功能 -->
                     <!-- #ifdef MP-WEIXIN -->
@@ -155,8 +164,14 @@
             <view class="list">
                 <view class="row exit-row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
-                        <!-- <uni-icons :type="item.left_icon" size="24" color="#ff6b6b"></uni-icons> -->
-                        <image class="icon" :src="item.left_icon"></image>
+                        <view class="icon-wrap exit-icon">
+                            <mdi-icon
+                                class="icon"
+                                :path="item.left_icon"
+                                size="20px"
+                                :color="item.left_color || '#ff6b6b'"
+                            ></mdi-icon>
+                        </view>
                         <view class="text">
                             {{ item.left_text }}
                         </view>
@@ -323,32 +338,26 @@ const checkin = async () => {
     }
 };
 
-const showEnergyHint = () => {
-    uni.showModal({
-        title: t('user.profile.energyHintTitle'),
-        content: t('user.profile.energyHintContent'),
-        showCancel: false,
-        confirmText: 'OK',
-    });
-};
-
 const appMenus = computed(() => [
     {
-        left_icon: 'heart-filled',
+        left_icon: '/static/icons/heart.svg',
+        left_color: '#ff6b9d',
         left_text: t('user.profile.myFavorite'),
         right_text: '12',
         right_icon: 'forward',
         click: toMyFavorite,
     },
     {
-        left_icon: 'download-filled',
+        left_icon: '/static/icons/download.svg',
+        left_color: '#28b389',
         left_text: t('user.profile.myDownload'),
         right_text: '3',
         right_icon: 'forward',
         click: toMyDownload,
     },
     {
-        left_icon: 'star-filled',
+        left_icon: '/static/icons/star.svg',
+        left_color: '#ffc107',
         left_text: t('user.profile.myScore'),
         right_text: '',
         right_icon: 'forward',
@@ -367,6 +376,7 @@ const sysMenus = computed(() => [
     // },
     {
         left_icon: '/static/icons/help-circle.svg',
+        left_color: '#28b389',
         left_text: t('user.profile.question'),
         right_text: '',
         right_icon: 'right',
@@ -374,7 +384,8 @@ const sysMenus = computed(() => [
     },
     // #ifdef MP-WEIXIN
     {
-        left_icon: 'chatboxes-filled',
+        left_icon: '/static/icons/forum.svg',
+        left_color: '#28b389',
         // left_icon: '/static/icons/forum.svg',
         left_text: t('user.profile.support'),
         right_text: '',
@@ -384,6 +395,7 @@ const sysMenus = computed(() => [
     // #endif
     {
         left_icon: '/static/icons/comment-processing.svg',
+        left_color: '#28b389',
         left_text: t('user.profile.feedback'),
         right_text: '',
         right_icon: 'right',
@@ -391,6 +403,7 @@ const sysMenus = computed(() => [
     },
     {
         left_icon: '/static/icons/cog.svg',
+        left_color: '#28b389',
         left_text: t('user.profile.settings'),
         right_text: '',
         right_icon: 'right',
@@ -400,6 +413,7 @@ const sysMenus = computed(() => [
         ? [
               {
                   left_icon: '/static/icons/ab-testing.svg',
+                  left_color: '#28b389',
                   left_text: t('user.profile.testLab'),
                   right_text: '',
                   right_icon: 'right',
@@ -412,6 +426,7 @@ const sysMenus = computed(() => [
 const exitMenus = computed(() => [
     {
         left_icon: '/static/icons/exit-to-app.svg',
+        left_color: '#ff6b6b',
         left_text: t('user.profile.exit'),
         right_text: t('user.profile.exitText'),
         right_icon: '',
@@ -652,7 +667,7 @@ onShow(() => {
         .energy-info {
             display: flex;
             align-items: center;
-            gap: 12rpx;
+            gap: 8rpx;
         }
 
         .energy-text {
@@ -662,7 +677,7 @@ onShow(() => {
         }
 
         .energy-hint {
-            padding: 8rpx;
+            padding: 4rpx;
             cursor: pointer;
             transition: all 0.3s;
             border-radius: 50%;
@@ -932,18 +947,31 @@ onShow(() => {
                     display: flex;
                     align-items: center;
 
+                    .icon-wrap {
+                        width: 56rpx;
+                        height: 56rpx;
+                        border-radius: 16rpx;
+                        background: rgba(40, 179, 137, 0.12);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                    }
+
+                    .icon-wrap.exit-icon {
+                        background: rgba(229, 50, 45, 0.12);
+                    }
+
                     .icon {
                         width: 42rpx;
                         height: 42rpx;
-                        flex-shrink: 0;
-                        filter: brightness(0) saturate(100%) invert(52%) sepia(88%) saturate(485%) hue-rotate(106deg)
-                            brightness(91%) contrast(87%);
                     }
 
                     .text {
                         padding-left: 20rpx;
-                        color: #333;
-                        font-size: 32rpx;
+                        color: #4b5563;
+                        font-size: 30rpx;
+                        font-weight: 600;
                     }
                 }
 
@@ -952,8 +980,8 @@ onShow(() => {
                     align-items: center;
 
                     .text {
-                        font-size: 28rpx;
-                        color: #999;
+                        font-size: 26rpx;
+                        color: #a3aab5;
                         margin-right: 12rpx;
                     }
                 }

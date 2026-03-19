@@ -5,7 +5,7 @@
         <template v-if="!loggedOut">
             <view class="header">
                 <view class="back-btn" @click="goBack">
-                    <uni-icons type="back" size="18" color="#374151"></uni-icons>
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
                 </view>
                 <text class="header-title">{{ t('logoutPage.title') }}</text>
                 <view class="header-placeholder"></view>
@@ -14,7 +14,7 @@
             <view class="center-content">
                 <view class="panel">
                     <view class="logout-icon-wrap">
-                        <uni-icons type="redo" size="32" color="#E5322D"></uni-icons>
+                        <mdi-icon path="/static/icons/exit-to-app.svg" size="40px" color="#E5322D"></mdi-icon>
                     </view>
 
                     <text class="main-title">{{ t('logoutPage.askTitle') }}</text>
@@ -30,7 +30,7 @@
 
                     <view class="btn-group">
                         <button class="confirm-btn" @click="onConfirm">
-                            <uni-icons type="redo" size="16" color="#fff"></uni-icons>
+                            <mdi-icon path="/static/icons/exit-to-app.svg" size="20px" color="#fff"></mdi-icon>
                             <text>{{ t('logoutPage.confirm') }}</text>
                         </button>
                         <button class="cancel-btn" @click="goBack">{{ t('logoutPage.cancel') }}</button>

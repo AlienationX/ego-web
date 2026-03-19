@@ -4,9 +4,7 @@
 
         <view class="header">
             <view class="back-btn" @click="onBack">
-                <svg class="icon-back" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" />
-                </svg>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
             </view>
             <text class="header-title">{{ headerTitle }}</text>
             <view class="header-placeholder"></view>
@@ -16,7 +14,7 @@
             <view class="panel" v-if="step === 'warn'">
                 <view class="warn-hero">
                     <view class="hero-icon">
-                        <image src="/static/icons/user-x.svg" mode="aspectFit" style="width: 64rpx; height: 64rpx"></image>
+                        <mdi-icon path="/static/icons/account-remove.svg" size="40px" color="#E5322D"></mdi-icon>
                     </view>
                     <text class="hero-title">{{ t('deactivate.warnTitle') }}</text>
                     <text class="hero-desc">{{ t('deactivate.warnDesc') }}</text>
@@ -56,13 +54,7 @@
 
                 <view class="btn-group">
                     <button class="primary-btn" @click="step = 'confirm'">
-                        <svg class="icon-alert" viewBox="0 0 24 24" aria-hidden="true">
-                            <path
-                                d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                            />
-                            <line x1="12" y1="9" x2="12" y2="13" />
-                            <line x1="12" y1="17" x2="12.01" y2="17" />
-                        </svg>
+                        <mdi-icon path="/static/icons/alert-box.svg" size="20px" color="#fff"></mdi-icon>
                         <text>{{ t('deactivate.continue') }}</text>
                     </button>
                     <button class="secondary-btn" @click="onBack">{{ t('deactivate.keep') }}</button>
@@ -72,13 +64,7 @@
             <view class="panel" v-else-if="step === 'confirm'">
                 <view class="warning-card">
                     <view class="warning-icon">
-                        <svg class="icon-alert" viewBox="0 0 24 24" aria-hidden="true">
-                            <path
-                                d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-                            />
-                            <line x1="12" y1="9" x2="12" y2="13" />
-                            <line x1="12" y1="17" x2="12.01" y2="17" />
-                        </svg>
+                        <mdi-icon path="/static/icons/alert-box.svg" size="20px" color="#dc2626"></mdi-icon>
                     </view>
                     <view class="warning-text">
                         <text class="warning-title">{{ t('deactivate.warningTitle') }}</text>
@@ -97,9 +83,7 @@
 
                     <view class="check-line" @click="agree = !agree">
                         <view class="check-box" :class="{ on: agree }">
-                            <svg v-if="agree" class="icon-check" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" />
-                            </svg>
+                            <mdi-icon v-if="agree" path="/static/icons/check.svg" size="20px" color="#fff"></mdi-icon>
                         </view>
                         <text class="check-text">{{ t('deactivate.agree') }}</text>
                     </view>
@@ -107,12 +91,7 @@
 
                 <view class="btn-group">
                     <button class="primary-btn" :disabled="!canSubmit" @click="onDeactivate">
-                        <svg class="icon-userx" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle cx="12" cy="7" r="4" />
-                            <path d="M5.5 21a8.38 8.38 0 0 1 13 0" />
-                            <line x1="17" y1="14" x2="22" y2="19" />
-                            <line x1="22" y1="14" x2="17" y2="19" />
-                        </svg>
+                        <mdi-icon path="/static/icons/account-remove.svg" size="20px" color="#fff"></mdi-icon>
                         <text>{{ t('deactivate.button') }}</text>
                     </button>
                     <button class="secondary-btn" @click="onBack">{{ t('deactivate.cancel') }}</button>
@@ -122,9 +101,7 @@
             <view class="panel" v-else>
                 <view class="done-hero">
                     <view class="done-icon">
-                        <svg class="icon-check" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M9,16.17L4.83,12L3.41,13.41L9,19L21,7L19.59,5.59L9,16.17Z" />
-                        </svg>
+                        <mdi-icon path="/static/icons/check.svg" size="20px" color="#22c55e"></mdi-icon>
                     </view>
                     <text class="done-title">{{ t('deactivate.doneTitle') }}</text>
                     <text class="done-desc">{{ t('deactivate.doneDesc') }}</text>
