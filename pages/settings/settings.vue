@@ -167,46 +167,6 @@
                     </view>
 
                     <view class="about-group">
-                        <text class="about-group-title">{{ t('about.information') }}</text>
-                        <view class="about-list">
-                            <view class="about-row" @click="showIntroduction">
-                                <view class="about-row-left">
-                                    <uni-icons type="info-filled" size="20" color="#28B389"></uni-icons>
-                                    <text class="about-row-text">{{ t('about.introduction') }}</text>
-                                </view>
-                                <uni-icons type="right" size="16" color="#c4c9d4"></uni-icons>
-                            </view>
-                            <view class="about-row" @click="checkUpdate">
-                                <view class="about-row-left">
-                                    <uni-icons type="loop" size="20" color="#28B389"></uni-icons>
-                                    <text class="about-row-text">{{ t('about.checkUpdate') }}</text>
-                                </view>
-                                <uni-icons type="right" size="16" color="#c4c9d4"></uni-icons>
-                            </view>
-                        </view>
-                    </view>
-
-                    <view class="about-group">
-                        <text class="about-group-title">{{ t('about.legal') }}</text>
-                        <view class="about-list">
-                            <view class="about-row" @click="openHtmlFile('/privacy_agreement.html')">
-                                <view class="about-row-left">
-                                    <uni-icons type="locked-filled" size="20" color="#28B389"></uni-icons>
-                                    <text class="about-row-text">{{ t('about.privacy') }}</text>
-                                </view>
-                                <uni-icons type="right" size="16" color="#c4c9d4"></uni-icons>
-                            </view>
-                            <view class="about-row" @click="openHtmlFile('/user_agreement.html')">
-                                <view class="about-row-left">
-                                    <uni-icons type="paperplane-filled" size="20" color="#28B389"></uni-icons>
-                                    <text class="about-row-text">{{ t('about.agreement') }}</text>
-                                </view>
-                                <uni-icons type="right" size="16" color="#c4c9d4"></uni-icons>
-                            </view>
-                        </view>
-                    </view>
-
-                    <view class="about-group">
                         <text class="about-group-title">{{ t('about.contact') }}</text>
                         <view class="about-list">
                             <view class="about-row" @click="contactSupport">
@@ -222,26 +182,6 @@
                                     <text class="about-row-text">{{ t('about.email') }}</text>
                                 </view>
                                 <text class="about-row-value">735003439@qq.com</text>
-                            </view>
-                        </view>
-                    </view>
-
-                    <view class="about-group">
-                        <text class="about-group-title">{{ t('about.others') }}</text>
-                        <view class="about-list">
-                            <view class="about-row" @click="goAppStore">
-                                <view class="about-row-left">
-                                    <uni-icons type="star-filled" size="20" color="#28B389"></uni-icons>
-                                    <text class="about-row-text">{{ t('about.rateUs') }}</text>
-                                </view>
-                                <uni-icons type="right" size="16" color="#c4c9d4"></uni-icons>
-                            </view>
-                            <view class="about-row" @click="shareApp">
-                                <view class="about-row-left">
-                                    <uni-icons type="redo" size="20" color="#28B389"></uni-icons>
-                                    <text class="about-row-text">{{ t('about.share') }}</text>
-                                </view>
-                                <uni-icons type="right" size="16" color="#c4c9d4"></uni-icons>
                             </view>
                         </view>
                     </view>
@@ -305,16 +245,16 @@ const sections = computed(() => [
                 key: 'change_password',
                 icon: 'locked-filled',
                 label: t('settings1.items.changePassword.label'),
-                sublabel: t('settings1.items.resetPassword.sublabel'),
-                action: () => uni.navigateTo({ url: '/pages/auth/forget-password' }),
+                sublabel: t('settings1.items.changePassword.sublabel'),
+                action: () => uni.navigateTo({ url: '/pages/auth/change-password' }),
             },
-            // {
-            //     key: 'reset_password',
-            //     icon: 'loop',
-            //     label: t('settings1.items.resetPassword.label'),
-            //     sublabel: t('settings1.items.changePassword.sublabel'),
-            //     action: () => uni.navigateTo({ url: '/pages/login/forget-password' }),
-            // },
+            {
+                key: 'reset_password',
+                icon: 'loop',
+                label: t('settings1.items.resetPassword.label'),
+                sublabel: t('settings1.items.resetPassword.sublabel'),
+                action: () => uni.navigateTo({ url: '/pages/login/forget-password' }),
+            },
             // {
             //     key: 'twofa',
             //     icon: 'locked-filled',
@@ -531,7 +471,7 @@ const sections = computed(() => [
         items: [
             {
                 key: 'logout',
-                icon: 'close',
+                icon: '/static/icons/logout.svg',
                 label: t('settings1.items.logout.label'),
                 sublabel: t('settings1.items.logout.sublabel'),
                 destructive: true,
@@ -539,7 +479,7 @@ const sections = computed(() => [
             },
             {
                 key: 'deactivate',
-                icon: 'person-filled',
+                icon: '/static/icons/user-x.svg',
                 label: t('settings1.items.deactivate.label'),
                 sublabel: t('settings1.items.deactivate.sublabel'),
                 destructive: true,
@@ -683,10 +623,25 @@ function goAppStore() {
         content: t('about.rateTip'),
         success: (res) => {
             if (res.confirm) {
-                // #ifdef APP-PLUS
-                plus.runtime.openURL('itms-apps://itunes.apple.com/app/idYOUR_APP_ID');
+                // 根据不同平台和渠道，打开对应的应用商店
+                // platform: SYSTEM_INFO.uniPlatform === 'app' ? SYSTEM_INFO.platform : SYSTEM_INFO.uniPlatform,
+                // channel: channel,
+
+                // #ifdef APP
+                channel = plus.runtime.channel;
+                if (channel === 'google') {
+                    plus.runtime.openURL('market://details?id=com.wallpaper.app.ego');
+                } else {
+                    plus.runtime.openURL('itms-apps://itunes.apple.com/app/idYOUR_APP_ID');
+                }
                 // #endif
             }
+        },
+        fail: () => {
+            uni.showToast({
+                title: t('about.rateFailed'),
+                icon: 'none',
+            });
         },
     });
 }
@@ -752,8 +707,8 @@ function shareApp() {
 }
 .content {
     box-sizing: border-box;
-    padding-top: 16px;
-    padding-bottom: 40px;
+    // padding-top: 16px;
+    // padding-bottom: 40px;
 }
 .section {
     margin-bottom: 24px;
@@ -909,7 +864,7 @@ function shareApp() {
     text-align: center;
     font-size: 12px;
     color: #c4c9d4;
-    margin-top: 4px;
+    padding-bottom: 36px;
 }
 .preview-popup {
     background: #fff;

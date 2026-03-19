@@ -201,6 +201,14 @@
             }
         },
         {
+            "path": "pages/auth/change-password",
+            "style": {
+                "navigationBarTitleText": "Change Password",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/auth/deactivate",
             "style": {
                 "navigationBarTitleText": "Deactivate Account",

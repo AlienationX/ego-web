@@ -16,11 +16,7 @@
             <view class="panel" v-if="step === 'warn'">
                 <view class="warn-hero">
                     <view class="hero-icon">
-                        <svg class="icon-userx" viewBox="0 0 24 24" aria-hidden="true">
-                            <path
-                                d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M6,18C6,15.79 9.58,14 12,14C14.42,14 18,15.79 18,18V20H6V18M21.73,4.27L19.46,6.54L17.19,4.27L15.78,5.68L18.05,7.95L15.78,10.22L17.19,11.63L19.46,9.36L21.73,11.63L23.14,10.22L20.87,7.95L23.14,5.68L21.73,4.27Z"
-                            />
-                        </svg>
+                        <image src="/static/icons/user-x.svg" mode="aspectFit" style="width: 64rpx; height: 64rpx"></image>
                     </view>
                     <text class="hero-title">{{ t('deactivate.warnTitle') }}</text>
                     <text class="hero-desc">{{ t('deactivate.warnDesc') }}</text>
@@ -61,7 +57,11 @@
                 <view class="btn-group">
                     <button class="primary-btn" @click="step = 'confirm'">
                         <svg class="icon-alert" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M1,21H23L12,2L1,21M12,16V18H12V16M12,10H12V14H12V10Z" />
+                            <path
+                                d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                            />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
                         </svg>
                         <text>{{ t('deactivate.continue') }}</text>
                     </button>
@@ -73,7 +73,11 @@
                 <view class="warning-card">
                     <view class="warning-icon">
                         <svg class="icon-alert" viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M1,21H23L12,2L1,21M12,16V18H12V16M12,10H12V14H12V10Z" />
+                            <path
+                                d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                            />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
                         </svg>
                     </view>
                     <view class="warning-text">
@@ -104,9 +108,10 @@
                 <view class="btn-group">
                     <button class="primary-btn" :disabled="!canSubmit" @click="onDeactivate">
                         <svg class="icon-userx" viewBox="0 0 24 24" aria-hidden="true">
-                            <path
-                                d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M6,18C6,15.79 9.58,14 12,14C14.42,14 18,15.79 18,18V20H6V18M21.73,4.27L19.46,6.54L17.19,4.27L15.78,5.68L18.05,7.95L15.78,10.22L17.19,11.63L19.46,9.36L21.73,11.63L23.14,10.22L20.87,7.95L23.14,5.68L21.73,4.27Z"
-                            />
+                            <circle cx="12" cy="7" r="4" />
+                            <path d="M5.5 21a8.38 8.38 0 0 1 13 0" />
+                            <line x1="17" y1="14" x2="22" y2="19" />
+                            <line x1="22" y1="14" x2="17" y2="19" />
                         </svg>
                         <text>{{ t('deactivate.button') }}</text>
                     </button>
@@ -219,20 +224,20 @@ const onBack = () => {
 }
 
 .header {
-    height: 56px;
+    height: 112rpx;
     background: #f5f6f8;
     display: flex;
     align-items: center;
-    padding: 0 16px;
-    gap: 8px;
+    padding: 0 32rpx;
+    gap: 16rpx;
 }
 
 .back-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 16rpx;
     background: #fff;
-    border: 1px solid #f0f1f3;
+    border: 2rpx solid #f0f1f3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -241,50 +246,58 @@ const onBack = () => {
 .header-title {
     flex: 1;
     text-align: center;
-    font-size: 18px;
+    font-size: 36rpx;
     font-weight: 700;
     color: #111827;
 }
 
 .header-placeholder {
-    width: 36px;
-    height: 36px;
+    width: 72rpx;
+    height: 72rpx;
 }
 
 .content {
     flex: 1;
     display: flex;
     justify-content: center;
-    padding: 12px 16px 40px;
+    padding: 24rpx 32rpx 80rpx;
 }
 
 .panel {
     width: 100%;
-    max-width: 420px;
+    max-width: 840rpx;
 }
 
 .icon-back {
-    width: 18px;
-    height: 18px;
+    width: 36rpx;
+    height: 36rpx;
     fill: #374151;
 }
 
 .icon-alert {
-    width: 16px;
-    height: 16px;
-    fill: currentColor;
+    width: 32rpx;
+    height: 32rpx;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4rpx;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .icon-check {
-    width: 18px;
-    height: 18px;
+    width: 36rpx;
+    height: 36rpx;
     fill: currentColor;
 }
 
 .icon-userx {
-    width: 30px;
-    height: 30px;
-    fill: currentColor;
+    width: 32rpx;
+    height: 32rpx;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 4rpx;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .warn-hero {
@@ -292,59 +305,59 @@ const onBack = () => {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 24px 24px;
+    padding: 48rpx 48rpx;
 }
 
 .hero-icon {
-    width: 72px;
-    height: 72px;
+    width: 164rpx;
+    height: 164rpx;
     border-radius: 50%;
     background: #fef2f2;
-    border: 2px solid #fecaca;
+    border: 4rpx solid #fecaca;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #e5322d;
-    margin-bottom: 18px;
+    margin-bottom: 36rpx;
 }
 
 .hero-title {
-    font-size: 18px;
+    font-size: 36rpx;
     font-weight: 700;
     color: #111827;
-    margin-bottom: 8px;
+    margin-bottom: 16rpx;
 }
 
 .hero-desc {
-    font-size: 13px;
+    font-size: 26rpx;
     color: #6b7280;
-    line-height: 20px;
+    line-height: 40rpx;
 }
 
 .section-title {
     display: block;
-    font-size: 11px;
+    font-size: 22rpx;
     font-weight: 600;
     color: #9ca3af;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    margin: 0 0 8px;
+    margin: 0 0 16rpx;
 }
 
 .list-card {
     background: #fff;
-    border-radius: 12px;
-    border: 1px solid #f0f1f3;
+    border-radius: 24rpx;
+    border: 2rpx solid #f0f1f3;
     overflow: hidden;
-    margin-bottom: 24px;
+    margin-bottom: 48rpx;
 }
 
 .list-row {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
-    padding: 13px 16px;
-    border-bottom: 1px solid #f3f4f6;
+    gap: 24rpx;
+    padding: 26rpx 32rpx;
+    border-bottom: 2rpx solid #f3f4f6;
 }
 
 .list-row.last {
@@ -357,29 +370,29 @@ const onBack = () => {
 }
 
 .list-emoji {
-    font-size: 18px;
+    font-size: 36rpx;
     flex-shrink: 0;
 }
 
 .list-text {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4rpx;
 }
 
 .list-title {
-    font-size: 14px;
+    font-size: 28rpx;
     font-weight: 600;
     color: #111827;
 }
 
 .list-desc {
-    font-size: 12px;
+    font-size: 24rpx;
     color: #9ca3af;
 }
 
 .reason-text {
-    font-size: 14px;
+    font-size: 28rpx;
     color: #374151;
 }
 
@@ -389,10 +402,10 @@ const onBack = () => {
 }
 
 .radio {
-    width: 18px;
-    height: 18px;
+    width: 36rpx;
+    height: 36rpx;
     border-radius: 50%;
-    border: 2px solid #d1d5db;
+    border: 4rpx solid #d1d5db;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -404,8 +417,8 @@ const onBack = () => {
 }
 
 .radio-dot {
-    width: 6px;
-    height: 6px;
+    width: 12rpx;
+    height: 12rpx;
     border-radius: 50%;
     background: #fff;
 }
@@ -413,22 +426,22 @@ const onBack = () => {
 .btn-group {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 24rpx;
 }
 
 .primary-btn {
     width: 100%;
-    height: 50px;
-    border-radius: 12px;
+    height: 100rpx;
+    border-radius: 24rpx;
     background: #e5322d;
     border: none;
     color: #fff;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 16rpx;
 }
 
 .primary-btn:disabled {
@@ -438,61 +451,66 @@ const onBack = () => {
 
 .secondary-btn {
     width: 100%;
-    height: 50px;
-    border-radius: 12px;
+    height: 100rpx;
+    border-radius: 24rpx;
     background: #fff;
-    border: 1px solid #e5e7eb;
+    border: 2rpx solid #e5e7eb;
     color: #374151;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
 }
 
 .warning-card {
     background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 12px;
-    padding: 16px;
+    border: 2rpx solid #fecaca;
+    border-radius: 24rpx;
+    padding: 32rpx;
     display: flex;
-    gap: 10px;
+    gap: 20rpx;
     align-items: flex-start;
-    margin-bottom: 24px;
+    margin-bottom: 48rpx;
     color: #dc2626;
 }
 
 .warning-icon {
-    width: 18px;
-    height: 18px;
+    width: 36rpx;
+    height: 36rpx;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-top: 1px;
+    margin-top: 2rpx;
+}
+
+.warning-icon .icon-alert {
+    width: 36rpx;
+    height: 36rpx;
 }
 
 .warning-text {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 12rpx;
 }
 
 .warning-title {
-    font-size: 14px;
+    font-size: 28rpx;
     font-weight: 700;
     color: #991b1b;
 }
 
 .warning-desc {
-    font-size: 12px;
+    font-size: 24rpx;
     color: #b91c1c;
-    line-height: 18px;
+    line-height: 36rpx;
 }
 
 .confirm-card {
     background: #fff;
-    border: 1px solid #f0f1f3;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 28px;
+    border: 2rpx solid #f0f1f3;
+    border-radius: 24rpx;
+    padding: 28rpx 32rpx;
+    margin-bottom: 56rpx;
 }
 
 .confirm-card.confirmed {
@@ -501,10 +519,10 @@ const onBack = () => {
 
 .confirm-input {
     width: 100%;
-    height: 26px;
+    height: 52rpx;
     border: none;
     background: transparent;
-    font-size: 16px;
+    font-size: 32rpx;
     font-weight: 600;
     color: #111827;
     letter-spacing: 0.1em;
@@ -518,17 +536,17 @@ const onBack = () => {
 }
 
 .check-line {
-    margin-top: 12px;
+    margin-top: 24rpx;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 16rpx;
 }
 
 .check-box {
-    width: 18px;
-    height: 18px;
-    border-radius: 6px;
-    border: 1px solid #cad3e2;
+    width: 36rpx;
+    height: 36rpx;
+    border-radius: 12rpx;
+    border: 2rpx solid #cad3e2;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -542,7 +560,7 @@ const onBack = () => {
 }
 
 .check-text {
-    font-size: 13px;
+    font-size: 26rpx;
     color: #596273;
     line-height: 1.6;
 }
@@ -552,77 +570,77 @@ const onBack = () => {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: 32px 24px 20px;
+    padding: 64rpx 48rpx 40rpx;
 }
 
 .done-icon {
-    width: 72px;
-    height: 72px;
+    width: 144rpx;
+    height: 144rpx;
     border-radius: 50%;
     background: #dcfce7;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #22c55e;
-    margin-bottom: 20px;
+    margin-bottom: 40rpx;
 }
 
 .done-title {
-    font-size: 20px;
+    font-size: 40rpx;
     font-weight: 700;
     color: #111827;
-    margin-bottom: 10px;
+    margin-bottom: 20rpx;
 }
 
 .done-desc {
-    font-size: 14px;
+    font-size: 28rpx;
     color: #6b7280;
-    line-height: 22px;
+    line-height: 44rpx;
 }
 
 .done-card {
     background: #fef2f2;
-    border-radius: 12px;
-    border: 1px solid #fecaca;
-    padding: 14px 16px;
-    margin-bottom: 28px;
+    border-radius: 24rpx;
+    border: 2rpx solid #fecaca;
+    padding: 28rpx 32rpx;
+    margin-bottom: 56rpx;
 }
 
 .done-card-title {
-    font-size: 13px;
+    font-size: 26rpx;
     font-weight: 600;
     color: #991b1b;
-    margin-bottom: 4px;
+    margin-bottom: 8rpx;
 }
 
 .done-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 8px;
+    gap: 16rpx;
+    margin-top: 16rpx;
 }
 
 .dot {
-    width: 4px;
-    height: 4px;
+    width: 8rpx;
+    height: 8rpx;
     border-radius: 50%;
     background: #e5322d;
     flex-shrink: 0;
 }
 
 .done-item-text {
-    font-size: 12px;
+    font-size: 24rpx;
     color: #b91c1c;
 }
 
 .dark-btn {
     width: 100%;
-    height: 50px;
-    border-radius: 12px;
+    height: 100rpx;
+    border-radius: 24rpx;
     background: #374151;
     border: none;
     color: #fff;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
 }
 </style>

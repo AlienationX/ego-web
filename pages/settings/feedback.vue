@@ -330,20 +330,20 @@ const handleSubmit = async () => {
 }
 
 .header {
-    height: 56px;
+    height: 112rpx;
     background: #f5f6f8;
     display: flex;
     align-items: center;
-    padding: 0 16px;
-    gap: 8px;
+    padding: 0 32rpx;
+    gap: 16rpx;
 }
 
 .back-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 16rpx;
     background: #fff;
-    border: 1px solid #f0f1f3;
+    border: 2rpx solid #f0f1f3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -352,48 +352,48 @@ const handleSubmit = async () => {
 .header-title {
     flex: 1;
     text-align: center;
-    font-size: 18px;
+    font-size: 36rpx;
     font-weight: 700;
     color: #111827;
 }
 
 .header-placeholder {
-    width: 36px;
-    height: 36px;
+    width: 72rpx;
+    height: 72rpx;
 }
 
 .content {
-    padding: 12px 16px 36px;
+    padding: 24rpx 32rpx 72rpx;
     box-sizing: border-box;
 }
 
 .section {
-    margin-bottom: 20px;
+    margin-bottom: 40rpx;
 }
 
 .section-title {
     display: block;
-    font-size: 11px;
+    font-size: 22rpx;
     font-weight: 600;
     color: #9ca3af;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 16rpx;
 }
 
 .chip-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 16rpx;
 }
 
 .chip {
-    height: 34px;
-    padding: 0 14px;
-    border-radius: 20px;
-    border: 1px solid #e5e7eb;
+    height: 68rpx;
+    padding: 0 28rpx;
+    border-radius: 40rpx;
+    border: 2rpx solid #e5e7eb;
     background: #fff;
-    font-size: 13px;
+    font-size: 26rpx;
     color: #6b7280;
     display: flex;
     align-items: center;
@@ -409,8 +409,8 @@ const handleSubmit = async () => {
 
 .card {
     background: #fff;
-    border: 1px solid #f0f1f3;
-    border-radius: 12px;
+    border: 2rpx solid #f0f1f3;
+    border-radius: 24rpx;
     overflow: hidden;
     width: 100%;
     box-sizing: border-box;
@@ -418,41 +418,41 @@ const handleSubmit = async () => {
 
 .textarea {
     width: 100%;
-    min-height: 160px;
+    min-height: 320rpx;
     border: none;
     background: transparent;
-    padding: 14px 16px;
-    font-size: 14px;
+    padding: 28rpx 32rpx;
+    font-size: 28rpx;
     color: #111827;
-    line-height: 22px;
+    line-height: 44rpx;
     box-sizing: border-box;
 }
 
 .char-row {
-    border-top: 1px solid #f3f4f6;
-    padding: 8px 16px;
+    border-top: 2rpx solid #f3f4f6;
+    padding: 16rpx 32rpx;
     display: flex;
     justify-content: flex-end;
 }
 
 .char-count {
-    font-size: 11px;
+    font-size: 22rpx;
     color: #9ca3af;
 }
 
 .image-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    padding: 12px;
+    gap: 24rpx;
+    padding: 24rpx;
 }
 
 .image-item,
 .image-add {
-    width: 88px;
-    height: 88px;
-    border-radius: 12px;
-    border: 1px dashed #e5e7eb;
+    width: 176rpx;
+    height: 176rpx;
+    border-radius: 24rpx;
+    border: 2rpx dashed #e5e7eb;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -473,11 +473,11 @@ const handleSubmit = async () => {
 
 .image-delete {
     position: absolute;
-    top: 6px;
-    right: 6px;
-    width: 22px;
-    height: 22px;
-    border-radius: 11px;
+    top: 12rpx;
+    right: 12rpx;
+    width: 44rpx;
+    height: 44rpx;
+    border-radius: 22rpx;
     background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
@@ -485,41 +485,41 @@ const handleSubmit = async () => {
 }
 
 .add-text {
-    font-size: 11px;
+    font-size: 22rpx;
     color: #9ca3af;
-    margin-top: 6px;
+    margin-top: 12rpx;
 }
 
 .image-tip {
-    padding: 0 12px 12px;
-    font-size: 12px;
+    padding: 0 24rpx 24rpx;
+    font-size: 24rpx;
     color: #9ca3af;
 }
 
 .input {
     width: 100%;
-    height: 46px;
+    height: 92rpx;
     border: none;
     background: transparent;
-    padding: 0 16px;
-    font-size: 14px;
+    padding: 0 32rpx;
+    font-size: 28rpx;
     color: #111827;
     box-sizing: border-box;
     display: block;
 }
 
 .submit-wrap {
-    margin-top: 8px;
+    margin-top: 16rpx;
 }
 
 .submit-btn {
     width: 100%;
-    height: 50px;
-    border-radius: 12px;
+    height: 100rpx;
+    border-radius: 24rpx;
     background: #e5322d;
     border: none;
     color: #fff;
-    font-size: 15px;
+    font-size: 30rpx;
     font-weight: 600;
 }
 
