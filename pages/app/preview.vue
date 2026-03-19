@@ -8,30 +8,36 @@
 
         <view class="mask" v-if="maskState">
             <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
+                <uni-icons type="back" color="#fff" size="20"></uni-icons>
             </view>
             <view class="top-actions" :style="{ top: getGoBackButtonTop() + 'px' }">
                 <view v-if="isAdmin" class="icon-btn" @click="openEdit">
-                    <mdi-icon path="/static/icons/pencil.svg" size="20px" color="#fff"></mdi-icon>
+                    <uni-icons type="compose" size="20" color="#fff"></uni-icons>
                 </view>
-                <view v-if="isAdmin" class="icon-btn" @click="toggleLock">
-                    <mdi-icon
-                        :path="currentInfo.is_locked ? '/static/icons/lock.svg' : '/static/icons/lock-open.svg'"
-                        size="20px"
-                        color="#fff"
-                    ></mdi-icon>
-                </view>
-                <button class="icon-btn share-btn" open-type="share" @click="handleShare">
-                    <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
-                </button>
+                <!-- <view v-if="isAdmin" class="icon-btn" @click="toggleLock">
+                    <uni-icons :type="currentInfo.is_locked ? 'locked-filled' : 'locked'" size="20" color="#fff"></uni-icons>
+                </view> -->
                 <view v-if="previewType === 'classic'" class="icon-btn" @click="openInfo">
-                    <mdi-icon path="/static/icons/information.svg" size="20px" color="#fff"></mdi-icon>
+                    <uni-icons type="info" size="22" color="#fff"></uni-icons>
                 </view>
+                <!-- <button class="icon-btn share-btn" open-type="share" @click="handleShare">
+                    <uni-icons type="redo" size="20" color="#fff"></uni-icons>
+                </button> -->
             </view>
 
             <view class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
-            <view class="time">{{ timeText }}</view>
-            <view class="date">{{ dateText }}</view>
+            <view class="time">
+                <!-- <uni-dateformat :date="new Date()" format="hh:mm"></uni-dateformat> -->
+                {{ new Date().getHours().toString().padStart(2, '0') }}:{{
+                    new Date().getMinutes().toString().padStart(2, '0')
+                }}
+            </view>
+            <view class="date">
+                <!-- <uni-dateformat :date="new Date()" format="MM月dd日"></uni-dateformat> -->
+                {{ (new Date().getMonth() + 1).toString().padStart(2, '0') }}/{{
+                    new Date().getDate().toString().padStart(2, '0')
+                }}
+            </view>
 
             <view class="footer" v-if="previewType === 'classic'">
                 <!-- <view v-if="previewType === 'classic'" class="box" @click="openInfo">
@@ -249,37 +255,6 @@ const settingsStore = useSettingsStore();
 const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 
 const { t, locale } = useI18n();
-const weekNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const weekNamesZh = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-const monthNamesEn = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-];
-const timeText = computed(() => {
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    return `${hh}:${mm}`;
-});
-const dateText = computed(() => {
-    const now = new Date();
-    const isZh = String(locale.value || '').startsWith('zh');
-    const week = isZh ? weekNamesZh[now.getDay()] : weekNamesEn[now.getDay()];
-    if (isZh) {
-        return `${week} ${now.getMonth() + 1}月${now.getDate()}日`;
-    }
-    return `${week}, ${monthNamesEn[now.getMonth()]} ${now.getDate()}`;
-});
 const previewType = computed(() => settingsStore.options.previewType || 'classic');
 const isAdmin = computed(() => !!userStore.isAdmin);
 const publisherName = computed(() => currentInfo.value?.publisher || t('common.appName'));
@@ -809,10 +784,8 @@ onShareTimeline(() => {
 
         .count {
             top: 10vh;
-            background: rgba(0, 0, 0, 0.25);
-            font-size: 26rpx;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.78);
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 28rpx;
             border-radius: 40rpx;
             padding: 8rpx 28rpx;
             // backdrop-filter: blur(10rpx);  // 磨砂
@@ -820,20 +793,15 @@ onShareTimeline(() => {
 
         .time {
             top: calc(10vh + 80rpx);
-            font-size: 120rpx;
-            font-weight: 400;
-            letter-spacing: 2rpx;
-            color: rgba(255, 255, 255, 0.95);
+            font-size: 140rpx;
+            font-weight: 300;
             line-height: 1em;
             text-shadow: 0 4rpx rgba(0, 0, 0, 0.3);
         }
 
         .date {
             top: calc(10vh + 230rpx);
-            font-size: 30rpx;
-            font-weight: 500;
-            letter-spacing: 1rpx;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 34rpx;
             text-shadow: 0 2rpx rgba(0, 0, 0, 0.3);
         }
 
