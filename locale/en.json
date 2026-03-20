@@ -181,17 +181,33 @@
     "guide": {
         "skip": "Skip",
         "enter": "Get Started",
+        "ready": "Ready",
         "page1": {
             "title": "Discover Beautiful Wallpapers",
-            "desc": "Massive HD wallpapers updated daily\nFind your unique style"
+            "desc": "Massive HD wallpapers updated daily\nFind your unique style",
+            "placeholder": "Featured wallpaper preview",
+            "hint": "Swipe or tap the dots below to continue",
+            "feature1": "HD Preview",
+            "feature2": "Immersive View",
+            "feature3": "Save Instantly"
         },
         "page2": {
             "title": "Browse by Category",
-            "desc": "Rich category tags\nQuickly find your favorite wallpaper types"
+            "desc": "Rich category tags\nQuickly find your favorite wallpaper types",
+            "placeholder": "Fresh inspiration keeps coming",
+            "hint": "Tap the dots below to switch quickly",
+            "feature1": "Style Categories",
+            "feature2": "Featured Topics",
+            "feature3": "Quick Filters"
         },
         "page3": {
             "title": "Personal Collection",
-            "desc": "Save your favorite wallpapers\nBuild your exclusive wallpaper library"
+            "desc": "Save your favorite wallpapers\nBuild your exclusive wallpaper library",
+            "placeholder": "Keep every wallpaper you love",
+            "hint": "Tap the current indicator again to enter the app",
+            "feature1": "Synced Favorites",
+            "feature2": "Fast Download",
+            "feature3": "Switch Anytime"
         }
     },
     "login": {

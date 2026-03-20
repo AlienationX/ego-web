@@ -514,6 +514,7 @@ function switchLanguage() {
 function switchTheme() {
     const changeTheme = uni.getSystemInfoSync().theme === 'light' ? 'dark' : 'light';
     settingsStore.options.theme = changeTheme;
+    toggles.theme = changeTheme === 'dark';
 
     // #ifdef APP
     // APP端触发主题切换，WEB跟随浏览器的默认设置，小程序跟随小程序的默认设置

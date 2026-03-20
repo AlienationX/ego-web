@@ -58,7 +58,7 @@
                 <view class="energy-info">
                     <uni-tooltip
                         :content="t('user.profile.energyHintContent')"
-                        :placement="'bottom'"
+                        :placement="'right'"
                         :show-arrow="true"
                         :trigger="'click'"
                         class="energy-tooltip"

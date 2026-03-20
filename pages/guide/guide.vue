@@ -2,46 +2,44 @@
     <view class="guide-layout">
         <swiper
             class="swiper"
+            :current="currentIndex"
             :indicator-dots="false"
             :autoplay="false"
             :circular="false"
-            :duration="300"
+            :duration="320"
             @change="onSwiperChange"
         >
             <swiper-item v-for="(item, index) in guideList" :key="index" class="swiper-item">
                 <view class="guide-page">
-                    <view class="guide-image-wrapper">
-                        <image
-                            v-if="!imageError[index]"
-                            class="guide-image"
-                            :src="item.image"
-                            mode="aspectFit"
-                            @error="() => onImageError(index)"
-                        ></image>
-                        <!-- 图片加载失败时显示图标占位 -->
-                        <view class="guide-icon-placeholder" v-else>
-                            <uni-icons :type="item.icon + '-filled'" size="120" color="#fff"></uni-icons>
-                        </view>
+                    <view class="guide-stage">
+                        <image class="guide-visual" :src="item.visual" mode="widthFix"></image>
                     </view>
+
                     <view class="guide-content">
-                        <view class="guide-title">{{ item.title }}</view>
-                        <view class="guide-desc">{{ item.desc }}</view>
+                        <view class="guide-content__panel">
+                            <view class="guide-title">{{ item.title }}</view>
+                            <view class="guide-desc">{{ item.desc }}</view>
+                            <view class="guide-meta">
+                                <view class="guide-meta__item" v-for="feature in item.features" :key="feature">
+                                    {{ feature }}
+                                </view>
+                            </view>
+                        </view>
                     </view>
                 </view>
             </swiper-item>
         </swiper>
 
-        <!-- 跳过按钮 -->
         <view class="skip-btn" v-if="currentIndex < guideList.length - 1" @click="skipGuide">
-            {{ t('guide.skip') }}
+            <text class="skip-btn__text">{{ t('guide.skip') }}</text>
+            <text class="skip-btn__arrow">›</text>
         </view>
 
-        <!-- 进入按钮（最后一页显示） -->
-        <view class="enter-btn" v-if="currentIndex === guideList.length - 1" @click="enterApp">
-            {{ t('guide.enter') }}
+        <view class="guide-status" v-if="currentIndex === guideList.length - 1">
+            <view class="guide-status__dot"></view>
+            <text class="guide-status__text">{{ t('guide.ready') }}</text>
         </view>
 
-        <!-- 指示器（自定义样式） -->
         <view class="indicator-wrapper">
             <view
                 class="indicator-dot"
@@ -49,6 +47,10 @@
                 :key="index"
                 :class="{ active: currentIndex === index }"
             ></view>
+        </view>
+
+        <view class="enter-btn" v-if="currentIndex === guideList.length - 1" @click="enterApp">
+            {{ t('guide.enter') }}
         </view>
     </view>
 </template>
@@ -61,206 +63,289 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 const currentIndex = ref(0);
-const imageError = ref({});
 
-// 引导页数据（使用计算属性确保国际化正确）
 const guideList = computed(() => [
     {
-        image: '/static/guide/guide1.png',
-        icon: 'image',
+        visual: '/static/images/guide/guide1.png',
         title: t('guide.page1.title'),
         desc: t('guide.page1.desc'),
+        placeholder: t('guide.page1.placeholder'),
+        hint: t('guide.page1.hint'),
+        features: [t('guide.page1.feature1'), t('guide.page1.feature2'), t('guide.page1.feature3')],
     },
     {
-        image: '/static/guide/guide2.png',
-        icon: 'grid',
+        visual: '/static/images/guide/guide2.png',
         title: t('guide.page2.title'),
         desc: t('guide.page2.desc'),
+        placeholder: t('guide.page2.placeholder'),
+        hint: t('guide.page2.hint'),
+        features: [t('guide.page2.feature1'), t('guide.page2.feature2'), t('guide.page2.feature3')],
     },
     {
-        image: '/static/guide/guide3.png',
-        icon: 'heart',
+        visual: '/static/images/guide/guide3.png',
         title: t('guide.page3.title'),
         desc: t('guide.page3.desc'),
+        placeholder: t('guide.page3.placeholder'),
+        hint: t('guide.page3.hint'),
+        features: [t('guide.page3.feature1'), t('guide.page3.feature2'), t('guide.page3.feature3')],
     },
 ]);
 
-// 图片加载失败处理
-const onImageError = (index) => {
-    imageError.value[index] = true;
-};
-
-// 轮播切换事件
 const onSwiperChange = (e) => {
     currentIndex.value = e.detail.current;
 };
 
-// 跳过引导
+const handleIndicatorClick = (index) => {
+    if (index === currentIndex.value && index === guideList.value.length - 1) {
+        enterApp();
+        return;
+    }
+
+    currentIndex.value = index;
+};
+
 const skipGuide = () => {
     enterApp();
 };
 
-// 进入应用
 const enterApp = () => {
-    // 标记已看过引导页
     uni.setStorageSync('hasSeenGuide', true);
-
-    // 跳转到首页
     uni.switchTab({
         url: '/pages/app/index',
     });
 };
 
-onLoad(() => {
-    // 页面加载完成
-});
+onLoad(() => {});
 </script>
 
 <style lang="scss" scoped>
 .guide-layout {
+    --text-main: #f7f7fb;
+    --text-sub: rgba(247, 247, 251, 0.72);
     width: 100%;
     height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     position: relative;
     overflow: hidden;
+    background: #111111;
 }
 
-.swiper {
-    width: 100%;
-    height: 100%;
+.guide-bg-shape {
+    position: absolute;
+    border: 2rpx solid rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    opacity: 0.7;
 }
 
+.guide-bg-shape--left {
+    width: 520rpx;
+    height: 520rpx;
+    left: -180rpx;
+    top: 220rpx;
+}
+
+.guide-bg-shape--right {
+    width: 680rpx;
+    height: 680rpx;
+    right: -260rpx;
+    bottom: 220rpx;
+}
+
+.guide-bg-line {
+    position: absolute;
+    left: 48rpx;
+    right: 48rpx;
+    height: 2rpx;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.guide-bg-line--top {
+    top: calc(env(safe-area-inset-top) + 56rpx);
+}
+
+.guide-bg-line--bottom {
+    bottom: calc(env(safe-area-inset-bottom) + 124rpx);
+}
+
+.swiper,
 .swiper-item {
     width: 100%;
     height: 100%;
 }
 
 .guide-page {
+    position: relative;
+    z-index: 2;
     width: 100%;
     height: 100%;
+    padding: calc(env(safe-area-inset-top) + 84rpx) 44rpx calc(env(safe-area-inset-bottom) + 176rpx);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    padding: 0 60rpx;
-    padding-top: calc(env(safe-area-inset-top) + 100rpx);
-    padding-bottom: calc(env(safe-area-inset-bottom) + 200rpx);
-    box-sizing: border-box;
+    gap: 20rpx;
 }
 
-.guide-image-wrapper {
-    width: 600rpx;
-    height: 600rpx;
-    margin-bottom: 80rpx;
-    position: relative;
+.guide-stage {
     display: flex;
-    align-items: center;
+    flex: 1;
     justify-content: center;
+    align-items: center;
+    min-height: 0;
 }
 
-.guide-image {
+.guide-visual {
+    display: block;
     width: 100%;
-    height: 100%;
-    border-radius: 32rpx;
-    box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.2);
-}
-
-.guide-icon-placeholder {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 32rpx;
-    backdrop-filter: blur(10rpx);
+    max-width: 840rpx;
+    margin: 100rpx auto 0;
 }
 
 .guide-content {
-    text-align: center;
-    color: #fff;
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.guide-content__panel {
+    width: 100%;
+    padding: 12rpx 10rpx 0;
 }
 
 .guide-title {
-    font-size: 48rpx;
+    color: var(--text-main);
+    font-size: 52rpx;
+    line-height: 1.2;
     font-weight: 700;
-    margin-bottom: 32rpx;
-    color: #fff;
-    text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+    letter-spacing: 1rpx;
+    text-align: center;
 }
 
 .guide-desc {
-    font-size: 32rpx;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
-    padding: 0 40rpx;
+    margin-top: 18rpx;
+    color: var(--text-sub);
+    font-size: 28rpx;
+    line-height: 1.75;
+    text-align: center;
+}
+
+.guide-meta {
+    margin-top: 26rpx;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16rpx;
+}
+
+.guide-meta__item {
+    padding: 14rpx 22rpx;
+    border-radius: 999rpx;
+    font-size: 22rpx;
+    color: rgba(255, 255, 255, 0.86);
+    background: rgba(255, 255, 255, 0.06);
+    border: 2rpx solid rgba(255, 255, 255, 0.06);
 }
 
 .skip-btn {
     position: fixed;
-    top: calc(env(safe-area-inset-top) + 80rpx);
-    right: 40rpx;
-    padding: 16rpx 32rpx;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 40rpx;
-    font-size: 28rpx;
-    color: #fff;
-    z-index: 10;
+    top: calc(env(safe-area-inset-top) + 32rpx);
+    right: 28rpx;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+    padding: 14rpx 18rpx 14rpx 24rpx;
+    border-radius: 999rpx;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2rpx solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(10rpx);
-    border: 2rpx solid rgba(255, 255, 255, 0.3);
-    transition: all 0.3s;
-
-    &:active {
-        background: rgba(255, 255, 255, 0.3);
-        transform: scale(0.95);
-    }
 }
 
-.enter-btn {
-    position: fixed;
-    bottom: calc(env(safe-area-inset-bottom) + 80rpx);
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600rpx;
-    padding: 28rpx 0;
-    background: #fff;
-    border-radius: 50rpx;
-    font-size: 36rpx;
-    font-weight: 600;
-    color: #667eea;
-    text-align: center;
-    z-index: 10;
-    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
-    transition: all 0.3s;
+.skip-btn__text {
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 24rpx;
+    letter-spacing: 1rpx;
+}
 
-    &:active {
-        transform: translateX(-50%) scale(0.95);
-        box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
-    }
+.skip-btn__arrow {
+    width: 34rpx;
+    height: 34rpx;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 34rpx;
+    color: #111111;
+    font-size: 26rpx;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.88);
+}
+
+.guide-status {
+    position: fixed;
+    top: calc(env(safe-area-inset-top) + 32rpx);
+    right: 28rpx;
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    padding: 16rpx 22rpx;
+    border-radius: 999rpx;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2rpx solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10rpx);
+}
+
+.guide-status__dot {
+    width: 14rpx;
+    height: 14rpx;
+    border-radius: 50%;
+    background: #7df7c4;
+    box-shadow: 0 0 18rpx rgba(125, 247, 196, 0.6);
+}
+
+.guide-status__text {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 24rpx;
+    letter-spacing: 1rpx;
 }
 
 .indicator-wrapper {
     position: fixed;
-    bottom: calc(env(safe-area-inset-bottom) + 200rpx);
     left: 50%;
-    transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom) + 74rpx);
+    z-index: 8;
     display: flex;
-    gap: 16rpx;
-    z-index: 10;
+    align-items: center;
+    gap: 22rpx;
+    transform: translateX(-50%);
 }
 
 .indicator-dot {
-    width: 16rpx;
-    height: 16rpx;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    transition: all 0.3s;
+    width: 18rpx;
+    height: 18rpx;
+    border-radius: 999rpx;
+    background: rgba(255, 255, 255, 0.24);
+    transition: all 0.28s ease;
+}
 
-    &.active {
-        width: 40rpx;
-        background: #fff;
-        border-radius: 8rpx;
-    }
+.indicator-dot.active {
+    width: 48rpx;
+    height: 8rpx;
+    background: #ffffff;
+    box-shadow: none;
+}
+
+.enter-btn {
+    position: fixed;
+    left: 50%;
+    bottom: calc(env(safe-area-inset-bottom) + 140rpx);
+    z-index: 8;
+    min-width: 240rpx;
+    padding: 22rpx 48rpx;
+    border-radius: 999rpx;
+    transform: translateX(-50%);
+    text-align: center;
+    color: #111111;
+    font-size: 28rpx;
+    font-weight: 600;
+    background: #ffffff;
 }
 </style>

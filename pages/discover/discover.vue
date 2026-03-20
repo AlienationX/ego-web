@@ -9,6 +9,9 @@
             <view class="bg-circle circle-6"></view>
             <view class="bg-circle circle-7"></view>
             <view class="bg-circle circle-8"></view>
+            <view class="bg-mesh"></view>
+            <view class="bg-line bg-line--top"></view>
+            <view class="bg-line bg-line--bottom"></view>
         </view>
 
         <view
@@ -446,9 +449,28 @@ onUnload(() => {
 
 <style lang="scss" scoped>
 .layout {
+    --discover-bg: #f5f5f8;
+    --discover-panel: rgba(255, 255, 255, 0.9);
+    --discover-panel-strong: rgba(255, 255, 255, 0.98);
+    --discover-border: rgba(17, 17, 17, 0.08);
+    --discover-border-strong: rgba(17, 17, 17, 0.12);
+    --discover-text-main: #15171c;
+    --discover-text-secondary: rgba(21, 23, 28, 0.72);
+    --discover-text-muted: rgba(21, 23, 28, 0.52);
+    --discover-accent: #ff8db3;
+    --discover-accent-strong: #15171c;
+    --discover-success: #28b389;
+    --discover-shadow: rgba(19, 25, 39, 0.12);
+    --discover-user-bubble: rgba(255, 141, 179, 0.12);
+    --discover-code-bg: #0f172a;
+    --discover-code-text: #e2e8f0;
+    --discover-link: #d9487d;
+    --discover-switch-active-text: #15171c;
+    --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
+    --discover-bottom-panel: rgba(255, 255, 255, 0.94);
     position: relative;
     min-height: 94vh;
-    background: #fff;
+    background: var(--discover-bg);
     overflow: hidden;
 }
 
@@ -472,43 +494,47 @@ onUnload(() => {
     .bg-circle {
         position: absolute;
         border-radius: 50%;
-        opacity: 0.06;
-        background: linear-gradient(135deg, $wp-theme-color 0%, darken($wp-theme-color, 8%) 100%);
+        filter: blur(6rpx);
     }
 
     .circle-1 {
-        width: 300rpx;
-        height: 300rpx;
-        top: -80rpx;
-        right: -62rpx;
+        width: 420rpx;
+        height: 420rpx;
+        top: 100rpx;
+        right: -120rpx;
+        background: radial-gradient(circle, rgba(255, 154, 158, 0.26) 0%, rgba(255, 154, 158, 0) 72%);
     }
 
     .circle-2 {
-        width: 220rpx;
-        height: 220rpx;
-        bottom: 230rpx;
-        left: -60rpx;
+        width: 520rpx;
+        height: 520rpx;
+        bottom: 240rpx;
+        left: -200rpx;
+        background: radial-gradient(circle, rgba(127, 219, 255, 0.2) 0%, rgba(127, 219, 255, 0) 72%);
     }
 
     .circle-3 {
-        width: 160rpx;
-        height: 160rpx;
-        top: 42%;
-        right: 18%;
+        width: 180rpx;
+        height: 180rpx;
+        top: 38%;
+        right: 16%;
+        background: radial-gradient(circle, rgba(255, 214, 143, 0.18) 0%, rgba(255, 214, 143, 0) 72%);
     }
 
     .circle-4 {
-        width: 180rpx;
-        height: 180rpx;
-        top: 18%;
+        width: 220rpx;
+        height: 220rpx;
+        top: 20%;
         left: 8%;
+        background: radial-gradient(circle, rgba(143, 119, 255, 0.18) 0%, rgba(143, 119, 255, 0) 72%);
     }
 
     .circle-5 {
-        width: 260rpx;
-        height: 260rpx;
+        width: 300rpx;
+        height: 300rpx;
         top: 66%;
-        right: -70rpx;
+        right: -90rpx;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 72%);
     }
 
     .circle-6 {
@@ -516,13 +542,15 @@ onUnload(() => {
         height: 140rpx;
         top: 28%;
         right: 6%;
+        background: radial-gradient(circle, rgba(125, 247, 196, 0.18) 0%, rgba(125, 247, 196, 0) 72%);
     }
 
     .circle-7 {
-        width: 200rpx;
-        height: 200rpx;
+        width: 240rpx;
+        height: 240rpx;
         bottom: 90rpx;
         left: 22%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 72%);
     }
 
     .circle-8 {
@@ -530,29 +558,58 @@ onUnload(() => {
         height: 120rpx;
         top: 74%;
         left: -26rpx;
+        background: radial-gradient(circle, rgba(255, 214, 143, 0.18) 0%, rgba(255, 214, 143, 0) 72%);
     }
+}
+
+.bg-mesh {
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 64rpx 64rpx;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent 92%);
+}
+
+.bg-line {
+    position: absolute;
+    left: 40rpx;
+    right: 40rpx;
+    height: 2rpx;
+    background: var(--discover-border);
+}
+
+.bg-line--top {
+    top: calc(env(safe-area-inset-top) + 48rpx);
+}
+
+.bg-line--bottom {
+    bottom: calc(env(safe-area-inset-bottom) + 146rpx);
 }
 
 .intro {
     position: relative;
     z-index: 1;
     background: transparent;
-    padding: 24rpx;
-    margin-bottom: 12rpx;
-    border-bottom: 1rpx solid #e3e6eb;
+    padding: 24rpx 24rpx 28rpx;
+    margin-bottom: 18rpx;
+    border-bottom: 1rpx solid var(--discover-border);
 }
 
 .intro-title {
-    font-size: 34rpx;
+    font-size: 40rpx;
     font-weight: 700;
-    color: #1f2d3d;
-    margin-bottom: 10rpx;
+    color: var(--discover-text-main);
+    margin-bottom: 12rpx;
+    letter-spacing: 1rpx;
 }
 
 .intro-desc {
     font-size: 26rpx;
-    color: #5b6675;
-    line-height: 1.6;
+    color: var(--discover-text-secondary);
+    line-height: 1.75;
 }
 
 .intro-enter-1 {
@@ -567,13 +624,13 @@ onUnload(() => {
 .panel {
     background: transparent;
     padding: 20rpx;
-    border-bottom: 1rpx solid #e3e6eb;
+    border-bottom: 1rpx solid var(--discover-border);
 }
 
 .picker-title {
     font-size: 26rpx;
     font-weight: 600;
-    color: #3e4d66;
+    color: var(--discover-text-main);
     margin-bottom: 14rpx;
 }
 
@@ -591,17 +648,19 @@ onUnload(() => {
 .fav-card {
     width: 180rpx;
     height: 320rpx;
-    border-radius: 18rpx;
-    border: 2rpx solid transparent;
+    border-radius: 24rpx;
+    border: 2rpx solid var(--discover-border);
     overflow: hidden;
     flex-shrink: 0;
-    background: #fff;
-    box-shadow: 0 8rpx 18rpx rgba(20, 35, 66, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 16rpx 32rpx var(--discover-shadow);
 }
 
 .fav-card.active {
-    border-color: #3a66f4;
-    box-shadow: 0 10rpx 22rpx rgba(58, 102, 244, 0.2);
+    border-color: var(--discover-border-strong);
+    box-shadow:
+        0 0 0 4rpx rgba(255, 215, 230, 0.16),
+        0 18rpx 36rpx var(--discover-shadow);
 }
 
 .fav-image {
@@ -632,9 +691,9 @@ onUnload(() => {
     width: 58rpx;
     height: 58rpx;
     border-radius: 50%;
-    border: 1rpx solid #d9dee6;
-    background: #fff;
-    box-shadow: 0 6rpx 14rpx rgba(24, 39, 75, 0.12);
+    border: 1rpx solid var(--discover-border);
+    background: var(--discover-panel);
+    box-shadow: 0 12rpx 24rpx var(--discover-shadow);
 }
 
 .msg-content {
@@ -663,7 +722,7 @@ onUnload(() => {
     align-items: center;
     min-height: 58rpx;
     padding: 0;
-    color: #46566b;
+    color: var(--discover-text-secondary);
     font-size: 28rpx;
     font-weight: 600;
     margin-bottom: 8rpx;
@@ -671,22 +730,23 @@ onUnload(() => {
 
 .msg-row.user .msg-label {
     margin-left: auto;
-    color: #1f9f79;
+    color: var(--discover-accent);
 }
 
 .msg-text {
     display: inline-block;
     text-align: left;
-    border: 1rpx solid #dbe3ec;
-    background: #fff;
+    border: 1rpx solid var(--discover-border);
+    background: var(--discover-panel);
     padding: 16rpx 18rpx;
-    border-radius: 14rpx;
+    border-radius: 22rpx;
     font-size: 30rpx;
-    color: #2b3440;
+    color: var(--discover-text-main);
     line-height: 1.72;
     white-space: pre-wrap;
     word-break: break-word;
-    box-shadow: 0 8rpx 20rpx rgba(18, 31, 53, 0.08);
+    box-shadow: 0 14rpx 30rpx var(--discover-shadow);
+    backdrop-filter: blur(20rpx);
 }
 
 .markdown {
@@ -725,15 +785,15 @@ onUnload(() => {
 }
 
 .markdown :deep(code) {
-    background: #f4f6f9;
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 8rpx;
     padding: 2rpx 6rpx;
     font-size: 26rpx;
 }
 
 .markdown :deep(pre) {
-    background: #0f172a;
-    color: #e2e8f0;
+    background: var(--discover-code-bg);
+    color: var(--discover-code-text);
     padding: 12rpx;
     border-radius: 12rpx;
     overflow-x: auto;
@@ -747,13 +807,13 @@ onUnload(() => {
 }
 
 .markdown :deep(a) {
-    color: #1f9f79;
+    color: var(--discover-link);
     text-decoration: underline;
 }
 
 .msg-row.user .msg-text {
-    border-color: #bfe8da;
-    background: #f2fbf8;
+    border-color: var(--discover-border-strong);
+    background: var(--discover-user-bubble);
 }
 
 .thinking-text {
@@ -763,7 +823,7 @@ onUnload(() => {
     margin-top: 2rpx;
     padding: 0;
     font-size: 28rpx;
-    color: #516071;
+    color: var(--discover-text-secondary);
     border: none;
     background: transparent;
     box-shadow: none;
@@ -782,11 +842,11 @@ onUnload(() => {
 .msg-image {
     width: 240rpx;
     height: 520rpx;
-    border-radius: 10rpx;
+    border-radius: 18rpx;
     display: block;
     margin-bottom: 10rpx;
-    border: 1rpx solid #dde2e9;
-    box-shadow: 0 8rpx 20rpx rgba(18, 31, 53, 0.08);
+    border: 1rpx solid var(--discover-border);
+    box-shadow: 0 14rpx 28rpx var(--discover-shadow);
 }
 
 .empty {
@@ -795,7 +855,7 @@ onUnload(() => {
 }
 
 .empty-text {
-    color: #8a94a6;
+    color: var(--discover-text-muted);
     margin-bottom: 28rpx;
     font-size: 30rpx;
 }
@@ -804,11 +864,12 @@ onUnload(() => {
     width: 280rpx;
     height: 80rpx;
     line-height: 80rpx;
-    border: 1rpx solid #1f9f79;
-    border-radius: 8rpx;
-    color: #fff;
-    background: #28b389;
+    border: 1rpx solid var(--discover-border-strong);
+    border-radius: 18rpx;
+    color: #111111;
+    background: linear-gradient(135deg, #ffe0f1 0%, #ffd38f 100%);
     font-size: 28rpx;
+    box-shadow: 0 14rpx 28rpx rgba(255, 190, 128, 0.18);
 }
 
 .local-panel {
@@ -823,19 +884,18 @@ onUnload(() => {
     width: 180rpx;
     height: 240rpx;
     border-radius: 18rpx;
-    border: 1rpx solid #d8e2f4;
-    box-shadow: 0 8rpx 18rpx rgba(20, 35, 66, 0.08);
+    border: 1rpx solid var(--discover-border);
+    box-shadow: 0 14rpx 28rpx var(--discover-shadow);
 }
 
 .pick-local-btn {
-    // height: 84rpx;
-    // line-height: 84rpx;
     border-radius: 22rpx;
     border: none;
-    background: linear-gradient(135deg, #3461fd 0%, #4a6fd4 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, #ffe0f1 0%, #ffd38f 100%);
+    color: #111111;
     font-size: 28rpx;
     font-weight: 600;
+    box-shadow: 0 16rpx 34rpx rgba(255, 190, 128, 0.18);
 
     &::after {
         border: none;
@@ -846,25 +906,27 @@ onUnload(() => {
     position: fixed;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.96);
-    border-top-left-radius: 28rpx;
-    border-top-right-radius: 28rpx;
-    border-top: 1rpx solid #dce4f5;
-    box-shadow: 0 -12rpx 24rpx rgba(24, 40, 72, 0.08);
-    padding-top: 14rpx;
+    background: var(--discover-bottom-panel);
+    border-top-left-radius: 34rpx;
+    border-top-right-radius: 34rpx;
+    border-top: 1rpx solid var(--discover-border);
+    box-shadow: 0 -20rpx 44rpx var(--discover-shadow);
+    backdrop-filter: blur(24rpx);
+    padding-top: 18rpx;
     padding-left: 24rpx;
     padding-right: 24rpx;
-    padding-bottom: 18rpx;
+    padding-bottom: 22rpx;
     z-index: 99;
 }
 
 .picker-wrap {
-    border: 1rpx solid #d8e1f5;
-    border-radius: 22rpx;
-    background: linear-gradient(180deg, #ffffff 0%, #f6f9ff 100%);
-    padding: 18rpx;
+    border: 1rpx solid var(--discover-border);
+    border-radius: 26rpx;
+    background: var(--discover-panel);
+    padding: 22rpx;
     margin-bottom: 14rpx;
-    box-shadow: 0 8rpx 18rpx rgba(24, 40, 72, 0.05);
+    box-shadow: 0 14rpx 30rpx var(--discover-shadow);
+    backdrop-filter: blur(18rpx);
 }
 
 .source-switch {
@@ -876,11 +938,11 @@ onUnload(() => {
     flex: 1;
     text-align: center;
     font-size: 27rpx;
-    color: #55627b;
-    border: 1rpx solid #cfd8ee;
+    color: var(--discover-text-secondary);
+    border: 1rpx solid var(--discover-border);
     padding: 16rpx 12rpx;
-    border-radius: 18rpx;
-    background: #f5f8ff;
+    border-radius: 20rpx;
+    background: rgba(255, 255, 255, 0.05);
     position: relative;
     display: flex;
     align-items: center;
@@ -889,27 +951,51 @@ onUnload(() => {
     font-weight: 500;
 }
 
+@media (prefers-color-scheme: dark) {
+    .layout {
+        --discover-bg: #111111;
+        --discover-panel: rgba(255, 255, 255, 0.06);
+        --discover-panel-strong: rgba(255, 255, 255, 0.08);
+        --discover-border: rgba(255, 255, 255, 0.1);
+        --discover-border-strong: rgba(255, 255, 255, 0.14);
+        --discover-text-main: #f7f7fb;
+        --discover-text-secondary: rgba(247, 247, 251, 0.72);
+        --discover-text-muted: rgba(247, 247, 251, 0.56);
+        --discover-accent: #ffd7e6;
+        --discover-accent-strong: #ffffff;
+        --discover-success: #7df7c4;
+        --discover-shadow: rgba(0, 0, 0, 0.28);
+        --discover-user-bubble: rgba(255, 215, 230, 0.12);
+        --discover-code-bg: #0f172a;
+        --discover-code-text: #e2e8f0;
+        --discover-link: #ffd7e6;
+        --discover-switch-active-text: #111111;
+        --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
+        --discover-bottom-panel: rgba(10, 12, 20, 0.86);
+    }
+}
+
 .source-item.active {
-    color: #2f5ee8;
-    border-color: #3461fd;
-    background: #eaf0ff;
-    box-shadow: 0 6rpx 16rpx rgba(52, 97, 253, 0.16);
+    color: var(--discover-switch-active-text);
+    border-color: var(--discover-border-strong);
+    background: linear-gradient(135deg, #ffe0f1 0%, #ffd38f 100%);
+    box-shadow: 0 10rpx 24rpx var(--discover-switch-active-shadow);
 }
 
 .lock-icon {
-    border: 1rpx solid #f0cc8d;
+    border: 1rpx solid rgba(255, 215, 143, 0.5);
     border-radius: 6rpx;
     padding: 2rpx 6rpx;
-    background: #fff6e5;
+    background: rgba(255, 240, 214, 0.9);
 }
 
 .mini-empty {
-    color: #7f8ba2;
+    color: var(--discover-text-muted);
     font-size: 24rpx;
 }
 
 .mini-link {
-    color: #3461fd;
+    color: var(--discover-accent);
     font-weight: 600;
     margin-left: 10rpx;
 }

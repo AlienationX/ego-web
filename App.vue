@@ -7,6 +7,11 @@ export default {
     onLaunch: function () {
         console.log('App Launch');
 
+        const savedTheme = uni.getStorageSync('theme') || 'light';
+        // #ifdef APP
+        plus.nativeUI.setUIStyle(savedTheme);
+        // #endif
+
         // 检查是否已看过引导页
         const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
         if (!hasSeenGuide) {
@@ -28,6 +33,8 @@ export default {
         uni.onThemeChange(({ theme }) => {
             // 默认传参的是对象{theme: 'dark'}, 所以需要解构赋值
             console.log('onThemeChange', theme);
+
+            uni.setStorageSync('theme', theme);
             
             // #ifdef APP
             // APP端触发主题切换，WEB跟随浏览器的默认设置，小程序跟随小程序的默认设置
