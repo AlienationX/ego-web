@@ -10,8 +10,6 @@
             <view class="bg-circle circle-7"></view>
             <view class="bg-circle circle-8"></view>
             <view class="bg-mesh"></view>
-            <view class="bg-line bg-line--top"></view>
-            <view class="bg-line bg-line--bottom"></view>
         </view>
 
         <view
@@ -249,7 +247,7 @@ const markdownToHtml = (md = '') => {
 };
 
 const getFavoriteList = async () => {
-    if (!userStore.isLogin) {
+    if (!userStore.isLoggedIn) {
         favoriteList.value = [];
         selectedId.value = null;
         return;
@@ -424,7 +422,7 @@ const onAnalyze = async () => {
 };
 
 const goFavorite = () => {
-    if (!userStore.isLogin) {
+    if (!userStore.isLoggedIn) {
         uni.navigateTo({ url: '/pages/auth/login' });
         return;
     }

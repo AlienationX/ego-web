@@ -148,6 +148,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { apiPostChangePassword } from '@/api/wallpaper.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
@@ -171,7 +172,7 @@ const requirements = computed(() => [
     { label: 'One special character', met: /[^A-Za-z0-9]/.test(next.value) },
 ]);
 
-function handleSave() {
+async function handleSave() {
     error.value = '';
     if (next.value !== confirm.value) {
         error.value = 'New passwords do not match.';
@@ -181,7 +182,17 @@ function handleSave() {
         error.value = 'Password must be at least 8 characters.';
         return;
     }
-    saved.value = true;
+
+    const res = await apiPostChangePassword({
+        old_password: current.value,
+        new_password: next.value,
+        confirm_password: confirm.value,
+    });
+    if (res.code === 200) {
+        saved.value = true;
+    } else {
+        error.value = res.data.error || 'Failed to update password.';
+    }
 }
 
 function goBack() {

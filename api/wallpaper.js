@@ -1,5 +1,6 @@
 import { request, uploadRequest, streamRequest } from '@/api/request.js';
 
+// 访问接口
 export const apiPostAccess = (data = {}) => {
     return request({
         url: '/access/',
@@ -8,18 +9,21 @@ export const apiPostAccess = (data = {}) => {
     });
 };
 
+// 获取banner接口
 export const apiGetBanner = () => {
     return request({
         url: '/banner/',
     });
 };
 
+// 获取随机推荐图片接口
 export const apiGetRandomDay = () => {
     return request({
         url: '/wall/random_daily/',
     });
 };
 
+// 获取随机推荐图片接口
 export const apiGetRandomRecommend = (data = {}) => {
     return request({
         url: '/wall/random_recommend/',
@@ -27,6 +31,7 @@ export const apiGetRandomRecommend = (data = {}) => {
     });
 };
 
+// 获取通知接口
 export const apiGetNotice = (data = {}, id = '') => {
     return request({
         url: id ? `/notice/${id}/` : '/notice/',
@@ -34,30 +39,31 @@ export const apiGetNotice = (data = {}, id = '') => {
     });
 };
 
+// 获取分类接口
 export const apiGetClassify = (data = {}) => {
-    // 获取分类
     return request({
         url: '/classify/',
         data,
     });
 };
 
+// 获取分类列表，也就是分类下的所有图片接口
 export const apiGetClassList = (data = {}) => {
-    // 获取分类列表，也就是分类下的所有图片
     return request({
         url: '/wall/',
         data,
     });
 };
 
+// 获取搜索数据接口
 export const apiGetSearchData = (data = {}) => {
-    // 获取搜索数据
     return request({
         url: '/wall/search/',
         data,
     });
 };
 
+// 增加图片访问量接口
 export const apiPostIncrementViews = (id = '') => {
     return request({
         url: `/wall/${id}/increment_views/`,
@@ -65,6 +71,7 @@ export const apiPostIncrementViews = (id = '') => {
     });
 };
 
+// 增加图片下载量接口
 export const apiPostIncrementDownloads = (id = '') => {
     return request({
         url: `/wall/${id}/increment_downloads/`,
@@ -72,6 +79,7 @@ export const apiPostIncrementDownloads = (id = '') => {
     });
 };
 
+// 微信登录接口
 export const apiPostLoginByWechat = (data = {}) => {
     return request({
         url: '/login/wechat/',
@@ -80,6 +88,7 @@ export const apiPostLoginByWechat = (data = {}) => {
     });
 };
 
+// 登录接口
 export const apiPostLogin = (data = {}) => {
     return request({
         url: '/login/',
@@ -88,6 +97,7 @@ export const apiPostLogin = (data = {}) => {
     });
 };
 
+// 注册接口
 export const apiPostRegister = (data = {}) => {
     return request({
         url: '/register/',
@@ -103,6 +113,7 @@ export const apiPostRegister = (data = {}) => {
 //     });
 // };
 
+// 获取用户个人信息接口
 export const apiGetProfile = () => {
     return request({
         url: '/user/me/',
@@ -110,6 +121,7 @@ export const apiGetProfile = () => {
     });
 };
 
+// 反馈接口
 export const apiPostFeedback = (data = {}) => {
     return request({
         url: '/feedback/',
@@ -118,8 +130,8 @@ export const apiPostFeedback = (data = {}) => {
     });
 };
 
+// 用户操作接口
 export const apiPostActions = (data = {}) => {
-    // 用户操作接口
     return request({
         url: '/actions/',
         data,
@@ -128,8 +140,8 @@ export const apiPostActions = (data = {}) => {
     });
 };
 
+// 获取用户操作数据接口
 export const apiGetActions = (data = {}) => {
-    // 获取用户操作数据接口
     return request({
         url: '/actions/',
         data,
@@ -137,8 +149,8 @@ export const apiGetActions = (data = {}) => {
     });
 };
 
+// 更新用户个人信息的头像
 export const apiUploadProfile = (data = {}) => {
-    // 更新用户个人信息的头像
     return uploadRequest({
         url: '/user/update_profile/',
         filePath: data.avatar,
@@ -148,8 +160,8 @@ export const apiUploadProfile = (data = {}) => {
     });
 };
 
+// 更新用户个人信息接口
 export const apiPostProfile = (data = {}) => {
-    // 更新用户个人信息
     return request({
         url: '/user/update_profile/',
         data,
@@ -158,18 +170,55 @@ export const apiPostProfile = (data = {}) => {
     });
 };
 
-export const apiPostUpdateWall = (data = {}) => {
-    // 编辑壁纸接口
+// 修改用户密码
+export const apiPostChangePassword = (data = {}) => {
     return request({
-        url: '/wall/update/',
+        url: '/user/change_password/',
         data,
         method: 'POST',
         isAuth: true,
     });
 };
 
+// 发送邮件验证码接口
+export const apiPostSendEmailCode = (data = {}) => {
+    return request({
+        url: '/verify/send_email_verification_code/',
+        data,
+        method: 'POST',
+    });
+};
+
+// 校验验证码接口
+export const apiPostVerifyCode = (data = {}) => {
+    return request({
+        url: '/verify/',
+        data,
+        method: 'POST',
+    });
+};
+
+// 重置密码接口
+export const apiPostResetPassword = (data = {}) => {
+    return request({
+        url: '/verify/reset_password/',
+        data,
+        method: 'POST',
+    });
+};
+
+// 编辑壁纸接口
+export const apiPostUpdateWall = (data = {}) => {
+    return request({
+        url: '/wall/',
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
+// 更新分类图片接口
 export const apiPostClassifyPicUrl = (data = {}) => {
-    // 更新分类图片接口
     return request({
         url: '/classify/update_picurl/',
         data,
@@ -178,8 +227,8 @@ export const apiPostClassifyPicUrl = (data = {}) => {
     });
 };
 
+// 奖励用户接口
 export const apiPostRewards = (data = {}) => {
-    // 奖励用户接口
     return request({
         url: '/rewards/',
         data,
@@ -187,8 +236,8 @@ export const apiPostRewards = (data = {}) => {
     });
 };
 
+// 发现分析接口
 export const apiPostDiscoverAnalyze = (data = {}) => {
-    // 发现分析接口
     return request({
         url: '/discover/',
         data,
@@ -197,8 +246,8 @@ export const apiPostDiscoverAnalyze = (data = {}) => {
     });
 };
 
+// 发现分析流式接口
 export const apiPostDiscoverStream = (data = {}, options = {}) => {
-    // 发现分析流式接口
     return streamRequest({
         url: '/discover/stream/',
         data,

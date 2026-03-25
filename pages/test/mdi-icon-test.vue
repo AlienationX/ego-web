@@ -41,7 +41,7 @@ const icons = ref([]);
 
 const loadIcons = () => {
     // 编译期自动收集图标路径（排除 brands 目录）
-    const modules = import.meta.glob('../../static/icons/**/*.svg', { eager: true, as: 'url' });
+    const modules = import.meta.glob('../../static/icons/**/*.svg', { eager: true, query: '?url', import: 'default' });
     const list = Object.entries(modules)
         .filter(([key]) => !key.includes('/brands/'))
         .map(([, url]) => url)

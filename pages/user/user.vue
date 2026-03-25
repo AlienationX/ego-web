@@ -676,6 +676,33 @@ onShow(() => {
             font-weight: 600;
         }
 
+        .energy-tooltip {
+            // 自定义弹出框样式
+            :deep(.uni-tooltip__content) {
+                background: rgba(0, 0, 0, 0.85);
+                color: #fff;
+                font-size: 26rpx;
+                line-height: 1.5;
+                padding: 24rpx 32rpx;
+                border-radius: 16rpx;
+                max-width: 400rpx;
+                box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
+                border: none;
+
+                // 箭头样式
+                &::before {
+                    border-bottom-color: rgba(0, 0, 0, 0.85);
+                }
+            }
+
+            // 触发元素样式
+            :deep(.uni-tooltip__trigger) {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
         .energy-hint {
             padding: 4rpx;
             cursor: pointer;

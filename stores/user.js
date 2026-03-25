@@ -16,9 +16,15 @@ export const useUserStore = defineStore(
         });
 
         const showAd = ref(true); // 全局控制
-        const isLogin = computed(() => userinfo.value.id || false); // 登录状态控制
+        const isLoggedIn = computed(() => Boolean(userinfo.value.id) || false); // 登录状态控制
         const isVip = computed(() => userinfo.value.profile?.is_vip || false); // 用户级别控制
-        const isAdmin = computed(() => ["le7yi_ss@163.com", "test@123.com"].includes(userinfo.value.username) || userinfo.value.is_superuser || false);
+        const isAdmin = computed(
+            () =>
+                userinfo.value.is_superuser ||
+                userinfo.value.is_staff ||
+                ['le7yi_ss@163.com', 'test@123.com'].includes(userinfo.value.username) ||
+                false,
+        );
 
         const setToken = (access, refresh) => {
             accessToken.value = encrypt(access);
@@ -75,7 +81,7 @@ export const useUserStore = defineStore(
             userinfo,
             showAd,
             isVip,
-            isLogin,
+            isLoggedIn,
             isAdmin,
             setToken,
             setUserInfo,
@@ -93,5 +99,5 @@ export const useUserStore = defineStore(
             // 指定存储的内容
             paths: ['accessToken', 'refreshToken'],
         },
-    }
+    },
 );

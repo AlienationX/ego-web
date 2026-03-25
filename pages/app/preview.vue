@@ -446,19 +446,19 @@ const applyLocalUpdate = (payload) => {
 };
 
 const saveEdit = async () => {
-    const selectedClassify = classifyList.value.find((item) => item.classify_id === editForm.value.classify);
-    const payload = {
-        description: editForm.value.description,
-        tabs: editForm.value.tags,
-        classify_name: selectedClassify ? selectedClassify.classify_name : '',
-        publisher: editForm.value.publisher,
-        is_active: editForm.value.is_active,
-        is_locked: editForm.value.is_locked,
-    };
+    // const selectedClassify = classifyList.value.find((item) => item.classify_id === editForm.value.classify_id);
+    // const payload = {
+    //     description: editForm.value.description,
+    //     tabs: editForm.value.tags,
+    //     classify_id: editForm.value.classify_id,
+    //     publisher: editForm.value.publisher,
+    //     is_active: editForm.value.is_active,
+    //     is_locked: editForm.value.is_locked,
+    // };
     try {
-        await apiPostUpdateWall(currentInfo.value.id, payload);
+        await apiPostUpdateWall({ id: currentInfo.value.id, ...editForm.value });
         applyLocalUpdate({
-            ...payload,
+            ...editForm.value,
             tabs_list: editForm.value.tags
                 ? editForm.value.tags
                       .split(',')
@@ -482,7 +482,7 @@ const deleteWall = () => {
         success: async (res) => {
             if (!res.confirm) return;
             try {
-                await apiPostUpdateWall(currentInfo.value.id, { is_active: false });
+                await apiPostUpdateWall({ id: currentInfo.value.id, is_active: false });
                 classList.value = classList.value.filter((item) => item.id !== currentInfo.value.id);
                 if (!classList.value.length) {
                     goBack();
@@ -504,7 +504,7 @@ const deleteWall = () => {
 const toggleLock = async () => {
     const next = !currentInfo.value.is_locked;
     try {
-        await apiPostUpdateWall(currentInfo.value.id, { is_locked: next });
+        await apiPostUpdateWall({ id: currentInfo.value.id, is_locked: next });
         applyLocalUpdate({ is_locked: next });
         uni.showToast({ title: t('preview.lockToggled'), icon: 'none' });
     } catch (error) {
@@ -808,7 +808,7 @@ onShareTimeline(() => {
         }
 
         .count {
-            top: 10vh;
+            top: 12vh;
             background: rgba(0, 0, 0, 0.25);
             font-size: 26rpx;
             font-weight: 500;
@@ -819,7 +819,7 @@ onShareTimeline(() => {
         }
 
         .time {
-            top: calc(10vh + 80rpx);
+            top: calc(12vh + 80rpx);
             font-size: 120rpx;
             font-weight: 400;
             letter-spacing: 2rpx;
@@ -829,7 +829,7 @@ onShareTimeline(() => {
         }
 
         .date {
-            top: calc(10vh + 230rpx);
+            top: calc(12vh + 230rpx);
             font-size: 30rpx;
             font-weight: 500;
             letter-spacing: 1rpx;
@@ -840,7 +840,7 @@ onShareTimeline(() => {
         .footer {
             background: rgba(255, 255, 255, 0.8);
             bottom: 10vh;
-            width: 82vw;
+            width: 80vw;
             height: 120rpx;
             border-radius: 120rpx;
             color: #000;

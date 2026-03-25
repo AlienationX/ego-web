@@ -10,7 +10,7 @@
         </view>
 
         <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
-            <view class="section" v-if="userStore.userinfo.id">
+            <view class="section" v-if="userStore.isLoggedIn">
                 <view class="section-title">{{ t('settings1.sections.profile') }}</view>
                 <view class="card">
                     <view class="profile-card">
@@ -49,47 +49,45 @@
             </view>
 
             <view v-for="section in sections" :key="section.key" class="section">
-                <template v-if="!['security', 'account'].includes(section.key) || userStore.userinfo.id">
-                    <view class="section-title">{{ section.title }}</view>
-                    <view class="card">
-                        <view
-                            v-for="(item, index) in section.items"
-                            :key="item.key"
-                            class="row"
-                            :class="{ 'row-last': index === section.items.length - 1, destructive: item.destructive }"
-                            @click="handleClick(item)"
-                        >
-                            <view class="row-left">
-                                <view class="icon-box" :class="{ destructive: item.destructive }">
-                                    <mdi-icon
-                                        :path="item.icon"
-                                        size="28px"
-                                        :color="item.destructive ? '#E5322D' : '#6B7280'"
-                                    ></mdi-icon>
-                                </view>
-                                <view class="label-block">
-                                    <text class="label">{{ item.label }}</text>
-                                    <text class="sublabel">{{ item.sublabel }}</text>
-                                </view>
+                <view class="section-title">{{ section.title }}</view>
+                <view class="card">
+                    <view
+                        v-for="(item, index) in section.items"
+                        :key="item.key"
+                        class="row"
+                        :class="{ 'row-last': index === section.items.length - 1, destructive: item.destructive }"
+                        @click="handleClick(item)"
+                    >
+                        <view class="row-left">
+                            <view class="icon-box" :class="{ destructive: item.destructive }">
+                                <mdi-icon
+                                    :path="item.icon"
+                                    size="28px"
+                                    :color="item.destructive ? '#E5322D' : '#6B7280'"
+                                ></mdi-icon>
                             </view>
-                            <view class="row-right">
-                                <template v-if="item.type === 'toggle'">
-                                    <view
-                                        class="switch"
-                                        :class="{ on: !!toggles[item.toggleKey] }"
-                                        @click.stop="toggleSwitch(item.toggleKey)"
-                                    >
-                                        <view class="switch-dot"></view>
-                                    </view>
-                                </template>
-                                <template v-else>
-                                    <text v-if="item.value" class="value">{{ item.value }}</text>
-                                    <mdi-icon path="/static/icons/chevron-right.svg" size="17px" color="#C4C9D4"></mdi-icon>
-                                </template>
+                            <view class="label-block">
+                                <text class="label">{{ item.label }}</text>
+                                <text class="sublabel">{{ item.sublabel }}</text>
                             </view>
                         </view>
+                        <view class="row-right">
+                            <template v-if="item.type === 'toggle'">
+                                <view
+                                    class="switch"
+                                    :class="{ on: !!toggles[item.toggleKey] }"
+                                    @click.stop="toggleSwitch(item.toggleKey)"
+                                >
+                                    <view class="switch-dot"></view>
+                                </view>
+                            </template>
+                            <template v-else>
+                                <text v-if="item.value" class="value">{{ item.value }}</text>
+                                <mdi-icon path="/static/icons/chevron-right.svg" size="17px" color="#C4C9D4"></mdi-icon>
+                            </template>
+                        </view>
                     </view>
-                </template>
+                </view>
             </view>
 
             <text class="app-version"
@@ -231,258 +229,263 @@ const profileItems = computed(() => [
     },
 ]);
 
-const sections = computed(() => [
-    {
-        key: 'security',
-        title: t('settings1.sections.security'),
-        items: [
-            {
-                key: 'change_password',
-                icon: '/static/icons/lock.svg',
-                label: t('settings1.items.changePassword.label'),
-                sublabel: t('settings1.items.changePassword.sublabel'),
-                action: () => uni.navigateTo({ url: '/pages/auth/change-password' }),
-            },
-            {
-                key: 'reset_password',
-                icon: '/static/icons/autorenew.svg',
-                label: t('settings1.items.resetPassword.label'),
-                sublabel: t('settings1.items.resetPassword.sublabel'),
-                action: () => uni.navigateTo({ url: '/pages/auth/forget-password' }),
-            },
-            // {
-            //     key: 'twofa',
-            //     icon: 'locked-filled',
-            //     label: t('settings1.items.twoFA.label'),
-            //     sublabel: toggles.twoFA ? t('settings1.items.twoFA.enabled') : t('settings1.items.twoFA.disabled'),
-            //     type: 'toggle',
-            //     toggleKey: 'twoFA',
-            // },
-        ],
-    },
-    // {
-    //     key: 'notifications',
-    //     title: t('settings1.sections.notifications'),
-    //     items: [
-    //         {
-    //             key: 'assignment_alerts',
-    //             icon: 'paperplane-filled',
-    //             label: t('settings1.items.assignmentAlerts.label'),
-    //             sublabel: t('settings1.items.assignmentAlerts.sublabel'),
-    //             type: 'toggle',
-    //             toggleKey: 'assignmentAlerts',
-    //         },
-    //         {
-    //             key: 'ticket_updates',
-    //             icon: 'bell-filled',
-    //             label: t('settings1.items.ticketUpdates.label'),
-    //             sublabel: t('settings1.items.ticketUpdates.sublabel'),
-    //             type: 'toggle',
-    //             toggleKey: 'ticketUpdates',
-    //         },
-    //         {
-    //             key: 'reminders',
-    //             icon: 'bell-filled',
-    //             label: t('settings1.items.reminders.label'),
-    //             sublabel: t('settings1.items.reminders.sublabel'),
-    //             type: 'toggle',
-    //             toggleKey: 'reminders',
-    //         },
-    //     ],
-    // },
-    {
-        key: 'preferences',
-        title: t('settings1.sections.preferences'),
-        items: [
-            {
-                key: 'language',
-                icon: '/static/icons/translate.svg',
-                label: t('settings1.items.language.label'),
-                sublabel: t('settings1.items.language.sublabel'),
-                value: locale.value === 'en' ? t('settings1.items.language.valueEn') : t('settings1.items.language.valueZh'),
-                action: switchLanguage,
-            },
-            // #ifdef APP
-            {
-                key: 'theme',
-                icon: '/static/icons/theme-light-dark.svg',
-                label: t('settings1.items.theme.label'),
-                sublabel: t('settings1.items.theme.sublabel'),
-                type: 'toggle',
-                toggleKey: 'theme',
-            },
-            // #endif
-            {
-                key: 'preview_type',
-                icon: '/static/icons/view-carousel.svg',
-                label: t('settings1.items.previewType.label'),
-                sublabel: t('settings1.items.previewType.sublabel'),
-                value:
-                    settingsStore.options.previewType === 'floating'
-                        ? t('settings1.preview.floating')
-                        : t('settings1.preview.classic'),
-                action: openPreviewTypePopup,
-            },
-            // {
-            //     key: 'availability_status',
-            //     icon: 'calendar',
-            //     label: t('settings1.items.availability.label'),
-            //     sublabel: toggles.availability
-            //         ? t('settings1.items.availability.available')
-            //         : t('settings1.items.availability.unavailable'),
-            //     type: 'toggle',
-            //     toggleKey: 'availability',
-            // },
-            // {
-            //     key: 'location_services',
-            //     icon: 'location-filled',
-            //     label: t('settings1.items.location.label'),
-            //     sublabel: t('settings1.items.location.sublabel'),
-            //     type: 'toggle',
-            //     toggleKey: 'locationServices',
-            // },
-        ],
-    },
-    {
-        key: 'data',
-        title: t('settings1.sections.data'),
-        items: [
-            // {
-            //     key: 'auto_save',
-            //     icon: 'gear-filled',
-            //     label: t('settings1.items.autoSave.label'),
-            //     sublabel: t('settings1.items.autoSave.sublabel'),
-            //     type: 'toggle',
-            //     toggleKey: 'autoSave',
-            // },
-            // {
-            //     key: 'sync_wifi',
-            //     icon: 'loop',
-            //     label: t('settings1.items.syncWifi.label'),
-            //     sublabel: t('settings1.items.syncWifi.sublabel'),
-            //     type: 'toggle',
-            //     toggleKey: 'syncWifiOnly',
-            // },
-            {
-                key: 'clear_cache',
-                icon: '/static/icons/delete-empty.svg',
-                label: t('settings1.items.clearCache.label'),
-                sublabel: t('settings1.items.clearCache.sublabel'),
-                action: clearCache,
-            },
-        ],
-    },
-    {
-        key: 'support',
-        title: t('settings1.sections.support'),
-        items: [
-            {
-                key: 'help_centre',
-                icon: '/static/icons/help-circle.svg',
-                label: t('settings1.items.helpCentre.label'),
-                sublabel: t('settings1.items.helpCentre.sublabel'),
-                action: () => uni.navigateTo({ url: '/pages/settings/help-centre' }),
-            },
-            // {
-            //     key: 'contact_support',
-            //     icon: 'chatboxes-filled',
-            //     label: t('settings1.items.contactSupport.label'),
-            //     sublabel: t('settings1.items.contactSupport.sublabel'),
-            //     action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
-            // },
-            {
-                key: 'send_feedback',
-                icon: '/static/icons/comment-processing.svg',
-                label: t('settings1.items.sendFeedback.label'),
-                sublabel: t('settings1.items.sendFeedback.sublabel'),
-                action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
-            },
-            {
-                key: 'about_page',
-                icon: '/static/icons/information.svg',
-                label: t('settings1.items.about.label'),
-                sublabel: t('settings1.items.about.sublabel'),
-                action: openAboutPopup,
-            },
-            {
-                key: 'privacy',
-                icon: '/static/icons/lock.svg',
-                label: t('settings1.items.privacy.label'),
-                sublabel: t('settings1.items.privacy.sublabel'),
-                action: () => openHtmlFile('/privacy_agreement.html'),
-            },
-            {
-                key: 'agreement',
-                icon: '/static/icons/wallet-bifold.svg',
-                label: t('settings1.items.agreement.label'),
-                sublabel: t('settings1.items.agreement.sublabel'),
-                action: () => openHtmlFile('/user_agreement.html'),
-            },
-        ],
-    },
-    {
-        key: 'app_information',
-        title: t('settings1.sections.appInformation'),
-        items: [
-            {
-                key: 'introduction',
-                icon: '/static/icons/information.svg',
-                label: t('settings1.items.introduction.label'),
-                sublabel: t('settings1.items.introduction.sublabel'),
-                action: showIntroduction,
-            },
-            {
-                key: 'check_update',
-                icon: '/static/icons/cached.svg',
-                label: t('settings1.items.checkUpdate.label'),
-                sublabel: t('settings1.items.checkUpdate.sublabel'),
-                action: checkUpdate,
-            },
-        ],
-    },
-    {
-        key: 'others',
-        title: t('settings1.sections.others'),
-        items: [
-            {
-                key: 'rate_us',
-                icon: '/static/icons/star.svg',
-                label: t('settings1.items.rateUs.label'),
-                sublabel: t('settings1.items.rateUs.sublabel'),
-                action: goAppStore,
-            },
-            {
-                key: 'share_app',
-                icon: '/static/icons/share.svg',
-                label: t('settings1.items.share.label'),
-                sublabel: t('settings1.items.share.sublabel'),
-                action: shareApp,
-            },
-        ],
-    },
-    {
-        key: 'account',
-        title: t('settings1.sections.account'),
-        items: [
-            {
-                key: 'logout',
-                icon: '/static/icons/exit-to-app.svg',
-                label: t('settings1.items.logout.label'),
-                sublabel: t('settings1.items.logout.sublabel'),
-                destructive: true,
-                action: () => uni.navigateTo({ url: '/pages/auth/logout' }),
-            },
-            {
-                key: 'deactivate',
-                icon: '/static/icons/account-remove.svg',
-                label: t('settings1.items.deactivate.label'),
-                sublabel: t('settings1.items.deactivate.sublabel'),
-                destructive: true,
-                action: () => uni.navigateTo({ url: '/pages/auth/deactivate' }),
-            },
-        ],
-    },
-]);
+const sections = computed(() => {
+    const allSections = [
+        {
+            key: 'security',
+            title: t('settings1.sections.security'),
+            items: [
+                {
+                    key: 'change_password',
+                    icon: '/static/icons/lock.svg',
+                    label: t('settings1.items.changePassword.label'),
+                    sublabel: t('settings1.items.changePassword.sublabel'),
+                    action: () => uni.navigateTo({ url: '/pages/auth/change-password' }),
+                },
+                {
+                    key: 'reset_password',
+                    icon: '/static/icons/autorenew.svg',
+                    label: t('settings1.items.resetPassword.label'),
+                    sublabel: t('settings1.items.resetPassword.sublabel'),
+                    action: () => uni.navigateTo({ url: '/pages/auth/forget-password' }),
+                },
+                // {
+                //     key: 'twofa',
+                //     icon: 'locked-filled',
+                //     label: t('settings1.items.twoFA.label'),
+                //     sublabel: toggles.twoFA ? t('settings1.items.twoFA.enabled') : t('settings1.items.twoFA.disabled'),
+                //     type: 'toggle',
+                //     toggleKey: 'twoFA',
+                // },
+            ],
+        },
+        // {
+        //     key: 'notifications',
+        //     title: t('settings1.sections.notifications'),
+        //     items: [
+        //         {
+        //             key: 'assignment_alerts',
+        //             icon: 'paperplane-filled',
+        //             label: t('settings1.items.assignmentAlerts.label'),
+        //             sublabel: t('settings1.items.assignmentAlerts.sublabel'),
+        //             type: 'toggle',
+        //             toggleKey: 'assignmentAlerts',
+        //         },
+        //         {
+        //             key: 'ticket_updates',
+        //             icon: 'bell-filled',
+        //             label: t('settings1.items.ticketUpdates.label'),
+        //             sublabel: t('settings1.items.ticketUpdates.sublabel'),
+        //             type: 'toggle',
+        //             toggleKey: 'ticketUpdates',
+        //         },
+        //         {
+        //             key: 'reminders',
+        //             icon: 'bell-filled',
+        //             label: t('settings1.items.reminders.label'),
+        //             sublabel: t('settings1.items.reminders.sublabel'),
+        //             type: 'toggle',
+        //             toggleKey: 'reminders',
+        //         },
+        //     ],
+        // },
+        {
+            key: 'preferences',
+            title: t('settings1.sections.preferences'),
+            items: [
+                {
+                    key: 'language',
+                    icon: '/static/icons/translate.svg',
+                    label: t('settings1.items.language.label'),
+                    sublabel: t('settings1.items.language.sublabel'),
+                    value:
+                        locale.value === 'en' ? t('settings1.items.language.valueEn') : t('settings1.items.language.valueZh'),
+                    action: switchLanguage,
+                },
+                // #ifdef APP
+                {
+                    key: 'theme',
+                    icon: '/static/icons/theme-light-dark.svg',
+                    label: t('settings1.items.theme.label'),
+                    sublabel: t('settings1.items.theme.sublabel'),
+                    type: 'toggle',
+                    toggleKey: 'theme',
+                },
+                // #endif
+                {
+                    key: 'preview_type',
+                    icon: '/static/icons/view-carousel.svg',
+                    label: t('settings1.items.previewType.label'),
+                    sublabel: t('settings1.items.previewType.sublabel'),
+                    value:
+                        settingsStore.options.previewType === 'floating'
+                            ? t('settings1.preview.floating')
+                            : t('settings1.preview.classic'),
+                    action: openPreviewTypePopup,
+                },
+                // {
+                //     key: 'availability_status',
+                //     icon: 'calendar',
+                //     label: t('settings1.items.availability.label'),
+                //     sublabel: toggles.availability
+                //         ? t('settings1.items.availability.available')
+                //         : t('settings1.items.availability.unavailable'),
+                //     type: 'toggle',
+                //     toggleKey: 'availability',
+                // },
+                // {
+                //     key: 'location_services',
+                //     icon: 'location-filled',
+                //     label: t('settings1.items.location.label'),
+                //     sublabel: t('settings1.items.location.sublabel'),
+                //     type: 'toggle',
+                //     toggleKey: 'locationServices',
+                // },
+            ],
+        },
+        {
+            key: 'data',
+            title: t('settings1.sections.data'),
+            items: [
+                // {
+                //     key: 'auto_save',
+                //     icon: 'gear-filled',
+                //     label: t('settings1.items.autoSave.label'),
+                //     sublabel: t('settings1.items.autoSave.sublabel'),
+                //     type: 'toggle',
+                //     toggleKey: 'autoSave',
+                // },
+                // {
+                //     key: 'sync_wifi',
+                //     icon: 'loop',
+                //     label: t('settings1.items.syncWifi.label'),
+                //     sublabel: t('settings1.items.syncWifi.sublabel'),
+                //     type: 'toggle',
+                //     toggleKey: 'syncWifiOnly',
+                // },
+                {
+                    key: 'clear_cache',
+                    icon: '/static/icons/delete-empty.svg',
+                    label: t('settings1.items.clearCache.label'),
+                    sublabel: t('settings1.items.clearCache.sublabel'),
+                    action: clearCache,
+                },
+            ],
+        },
+        {
+            key: 'support',
+            title: t('settings1.sections.support'),
+            items: [
+                {
+                    key: 'help_centre',
+                    icon: '/static/icons/help-circle.svg',
+                    label: t('settings1.items.helpCentre.label'),
+                    sublabel: t('settings1.items.helpCentre.sublabel'),
+                    action: () => uni.navigateTo({ url: '/pages/settings/help-centre' }),
+                },
+                // {
+                //     key: 'contact_support',
+                //     icon: 'chatboxes-filled',
+                //     label: t('settings1.items.contactSupport.label'),
+                //     sublabel: t('settings1.items.contactSupport.sublabel'),
+                //     action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
+                // },
+                {
+                    key: 'send_feedback',
+                    icon: '/static/icons/comment-processing.svg',
+                    label: t('settings1.items.sendFeedback.label'),
+                    sublabel: t('settings1.items.sendFeedback.sublabel'),
+                    action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
+                },
+                {
+                    key: 'about_page',
+                    icon: '/static/icons/information.svg',
+                    label: t('settings1.items.about.label'),
+                    sublabel: t('settings1.items.about.sublabel'),
+                    action: openAboutPopup,
+                },
+                {
+                    key: 'privacy',
+                    icon: '/static/icons/lock.svg',
+                    label: t('settings1.items.privacy.label'),
+                    sublabel: t('settings1.items.privacy.sublabel'),
+                    action: () => openHtmlFile('/privacy_agreement.html'),
+                },
+                {
+                    key: 'agreement',
+                    icon: '/static/icons/wallet-bifold.svg',
+                    label: t('settings1.items.agreement.label'),
+                    sublabel: t('settings1.items.agreement.sublabel'),
+                    action: () => openHtmlFile('/user_agreement.html'),
+                },
+            ],
+        },
+        {
+            key: 'app_information',
+            title: t('settings1.sections.appInformation'),
+            items: [
+                {
+                    key: 'introduction',
+                    icon: '/static/icons/information.svg',
+                    label: t('settings1.items.introduction.label'),
+                    sublabel: t('settings1.items.introduction.sublabel'),
+                    action: showIntroduction,
+                },
+                {
+                    key: 'check_update',
+                    icon: '/static/icons/cached.svg',
+                    label: t('settings1.items.checkUpdate.label'),
+                    sublabel: t('settings1.items.checkUpdate.sublabel'),
+                    action: checkUpdate,
+                },
+            ],
+        },
+        {
+            key: 'others',
+            title: t('settings1.sections.others'),
+            items: [
+                {
+                    key: 'rate_us',
+                    icon: '/static/icons/star.svg',
+                    label: t('settings1.items.rateUs.label'),
+                    sublabel: t('settings1.items.rateUs.sublabel'),
+                    action: goAppStore,
+                },
+                {
+                    key: 'share_app',
+                    icon: '/static/icons/share.svg',
+                    label: t('settings1.items.share.label'),
+                    sublabel: t('settings1.items.share.sublabel'),
+                    action: shareApp,
+                },
+            ],
+        },
+        {
+            key: 'account',
+            title: t('settings1.sections.account'),
+            items: [
+                {
+                    key: 'logout',
+                    icon: '/static/icons/exit-to-app.svg',
+                    label: t('settings1.items.logout.label'),
+                    sublabel: t('settings1.items.logout.sublabel'),
+                    destructive: true,
+                    action: () => uni.navigateTo({ url: '/pages/auth/logout' }),
+                },
+                {
+                    key: 'deactivate',
+                    icon: '/static/icons/account-remove.svg',
+                    label: t('settings1.items.deactivate.label'),
+                    sublabel: t('settings1.items.deactivate.sublabel'),
+                    destructive: true,
+                    action: () => uni.navigateTo({ url: '/pages/auth/deactivate' }),
+                },
+            ],
+        },
+    ];
+
+    return allSections.filter((section) => !['security', 'account'].includes(section.key) || userStore.isLoggedIn);
+});
 
 function toggleSwitch(key) {
     if (!key) return;

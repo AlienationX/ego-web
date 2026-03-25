@@ -53,7 +53,7 @@
                                 <input
                                     :focus="activeIndex === index && currentIndex === 1"
                                     v-model="otpDigits[index]"
-                                    type="tel"
+                                    type="text"
                                     maxlength="1"
                                     class="otp-input"
                                     @input="onOtpInput(index, $event)"
@@ -139,6 +139,7 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { apiPostSendEmailCode, apiPostVerifyCode, apiPostResetPassword } from '@/api/wallpaper.js';
 
 const { t } = useI18n();
 const currentIndex = ref(0);
@@ -152,9 +153,11 @@ const countdown = ref(60);
 let timer = null;
 
 // 第一步表单
-const step1Form = ref({
-    contact: '',
-});
+const step1Form = ref({ contact: '' });
+
+// 第二步OTP数据
+const otpDigits = ref(['', '', '', '', '', '']);
+const resetToken = ref('');
 
 // 第三步表单
 const step3Form = ref({
@@ -162,8 +165,6 @@ const step3Form = ref({
     confirmPassword: '',
 });
 
-// OTP数据
-const otpDigits = ref(['', '', '', '']);
 const activeIndex = ref(0);
 const backTop = ref((getStatusBarHeight() || 0) + 10);
 
@@ -186,7 +187,7 @@ const handleStep1 = async () => {
     isSubmitting.value = true;
     try {
         // 调用发送OTP的API
-        // await apiSendOtp({ contact: step1Form.value.contact });
+        await apiPostSendEmailCode({ email: step1Form.value.contact });
 
         uni.showToast({
             title: t('login.otpSentSuccess'),
@@ -195,7 +196,7 @@ const handleStep1 = async () => {
 
         // 自动跳转到下一步
         setTimeout(() => {
-            otpDigits.value = ['', '', '', ''];
+            otpDigits.value = ['', '', '', '', '', ''];
             activeIndex.value = 0;
             maxUnlockedStep.value = 1;
             swiperToStep(1);
@@ -230,7 +231,13 @@ const handleStep2 = async () => {
     isSubmitting.value = true;
     try {
         // 调用验证OTP的API
-        // await apiVerifyOtp({ otp });
+        const res = await apiPostVerifyCode({ email: step1Form.value.contact, code: otp });
+        if (res.code !== 200) {
+            error.value = res.data.error || t('login.invalidOtp');
+            throw new Error(res.data.error);
+        } else {
+            resetToken.value = res.data.reset_token;
+        }
 
         uni.showToast({
             title: t('login.otpVerifiedSuccess'),
@@ -275,7 +282,15 @@ const handleStep3 = async () => {
     isSubmitting.value = true;
     try {
         // 调用重置密码的API
-        // await apiResetPassword({ password: step3Form.value.newPassword });
+        const res = await apiPostResetPassword({
+            reset_token: resetToken.value,
+            new_password: step3Form.value.newPassword,
+            confirm_password: step3Form.value.confirmPassword,
+        });
+        if (res.code !== 200) {
+            error.value = res.data.error || t('login.resetPasswordFailed');
+            throw new Error(res.data.error);
+        }
 
         uni.showToast({
             title: t('login.passwordResetSuccess'),
@@ -285,7 +300,7 @@ const handleStep3 = async () => {
         // 重置成功后，跳转到登录页
         setTimeout(() => {
             uni.reLaunch({
-                url: '/pages/auth/signin',
+                url: '/pages/user/user',
             });
         }, 1500);
     } catch (error) {
@@ -392,9 +407,10 @@ const handleResend = () => {
     }
 
     // 调用发送OTP的API
+    handleStep1();
     uni.showToast({
         title: t('login.otpResent'),
-        icon: 'success',
+        icon: 'none',
     });
 
     // 重新开始倒计时
@@ -616,7 +632,7 @@ onUnmounted(() => {
 
     .otp-inputs {
         display: flex;
-        gap: 16rpx;
+        gap: 12rpx;
         justify-content: space-between;
         width: 100%;
         max-width: 100%;
@@ -626,8 +642,8 @@ onUnmounted(() => {
     .otp-input-box {
         flex: 1;
         min-width: 0;
-        max-width: 112rpx;
-        height: 140rpx;
+        max-width: 96rpx;
+        height: 120rpx;
         background: #f5f9fe;
         border-radius: 24rpx;
         display: flex;
@@ -648,7 +664,7 @@ onUnmounted(() => {
         .otp-input {
             width: 100%;
             height: 100%;
-            font-size: 48rpx;
+            font-size: 44rpx;
             font-weight: 600;
             color: #333;
             text-align: center;
