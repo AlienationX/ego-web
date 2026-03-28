@@ -58,6 +58,9 @@ defineProps({
         position: relative;
         display: block;
         background: rgba(245, 185, 166, 0.3);
+        transition:
+            transform 0.35s ease,
+            box-shadow 0.35s ease;
 
         .pic {
             position: absolute;
@@ -67,6 +70,9 @@ defineProps({
             height: 100%;
             object-fit: cover;
             object-position: center;
+            transition:
+                transform 0.45s ease,
+                filter 0.45s ease;
         }
 
         .mask {
@@ -124,6 +130,20 @@ defineProps({
 
     .box.more .mask-text {
         font-size: 28rpx;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .themeItem {
+        .box:hover {
+            transform: translateY(-8rpx);
+            box-shadow: 0 16rpx 36rpx rgba(15, 23, 42, 0.16);
+
+            .pic {
+                transform: scale(1.05);
+                filter: saturate(1.08) brightness(1.03);
+            }
+        }
     }
 }
 </style>

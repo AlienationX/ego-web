@@ -131,6 +131,8 @@ const tabBarHeight = ref(getTabBarHeight());
 let typingTimer = null;
 const chatMessages = ref([]);
 let msgSeed = 1;
+let streamFlushTimer = null;
+const streamBufferMap = new Map();
 
 const selectedItem = computed(() => favoriteList.value.find((item) => item.id === selectedId.value));
 const userName = computed(() => userStore.userinfo?.profile?.nickname || 'User');
@@ -150,6 +152,92 @@ const stopTyping = () => {
         clearInterval(typingTimer);
         typingTimer = null;
     }
+};
+
+const stopStreamFlush = () => {
+    if (streamFlushTimer) {
+        clearInterval(streamFlushTimer);
+        streamFlushTimer = null;
+    }
+};
+
+const updateAssistantHtml = (id, force = false) => {
+    const idx = chatMessages.value.findIndex((m) => m.id === id);
+    if (idx === -1) return;
+    const target = chatMessages.value[idx];
+    const now = Date.now();
+    const lastMarkdownAt = target.lastMarkdownAt || 0;
+    if (!force && now - lastMarkdownAt < 120) return;
+    chatMessages.value[idx] = {
+        ...target,
+        html: markdownToHtml(String(target.text || '')),
+        lastMarkdownAt: now,
+    };
+};
+
+const finishAssistantMessage = (id) => {
+    const idx = chatMessages.value.findIndex((m) => m.id === id);
+    if (idx === -1) return;
+    const target = chatMessages.value[idx];
+    const text = String(target.text || '');
+    chatMessages.value[idx] = {
+        ...target,
+        isStreaming: false,
+        html: markdownToHtml(text),
+        lastMarkdownAt: Date.now(),
+    };
+    streamBufferMap.delete(id);
+    nextTick(() => scrollToBottom(0));
+};
+
+const flushStreamText = () => {
+    let hasPending = false;
+    streamBufferMap.forEach((buffer, id) => {
+        if (!buffer) return;
+        hasPending = true;
+        const idx = chatMessages.value.findIndex((m) => m.id === id);
+        if (idx === -1) {
+            streamBufferMap.delete(id);
+            return;
+        }
+        const target = chatMessages.value[idx];
+        const currentText = String(target.text || '');
+        const consumeSize = buffer.length > 240 ? 3 : buffer.length > 120 ? 2 : 1;
+        const nextChunk = buffer.slice(0, consumeSize);
+        const remainChunk = buffer.slice(consumeSize);
+        chatMessages.value[idx] = {
+            ...target,
+            text: currentText + nextChunk,
+            isStreaming: true,
+        };
+        updateAssistantHtml(id, !remainChunk || !!target.streamEnded);
+        if (remainChunk) {
+            streamBufferMap.set(id, remainChunk);
+        } else {
+            streamBufferMap.delete(id);
+            if (target.streamEnded) {
+                finishAssistantMessage(id);
+            }
+        }
+    });
+    nextTick(() => scrollToBottom(0));
+    if (!hasPending && streamBufferMap.size === 0) {
+        stopStreamFlush();
+    }
+};
+
+const ensureStreamFlush = () => {
+    if (streamFlushTimer) return;
+    streamFlushTimer = setInterval(() => {
+        flushStreamText();
+    }, 32);
+};
+
+const queueStreamText = (id, text) => {
+    if (!text) return;
+    const current = streamBufferMap.get(id) || '';
+    streamBufferMap.set(id, current + text);
+    ensureStreamFlush();
 };
 
 const startThinkingTimer = () => {
@@ -203,15 +291,17 @@ const startTypingToMessage = (targetId, text) => {
     stopTyping();
     const full = String(text || '');
     let index = 0;
-    updateMessage(targetId, { text: '', html: '' });
+    updateMessage(targetId, { text: '', html: '', isStreaming: true, lastMarkdownAt: 0 });
 
     typingTimer = setInterval(() => {
         index += 1;
         const next = full.slice(0, index);
-        updateMessage(targetId, { text: next, html: markdownToHtml(next) });
+        updateMessage(targetId, { text: next, isStreaming: true });
+        updateAssistantHtml(targetId, index >= full.length || index % 2 === 0);
         scrollToBottom(0);
         if (index >= full.length) {
             stopTyping();
+            finishAssistantMessage(targetId);
         }
     }, 80);
 };
@@ -339,6 +429,8 @@ const onAnalyze = async () => {
     if (!canAnalyze.value || isRunning.value) return;
     isRunning.value = true;
     stopTyping();
+    stopStreamFlush();
+    streamBufferMap.clear();
     pickerOpen.value = false;
 
     const currentImage =
@@ -382,10 +474,29 @@ const onAnalyze = async () => {
                             name: aiProfile.value.name,
                             avatar: aiProfile.value.avatar,
                             text: '',
+                            html: '',
+                            isStreaming: true,
+                            streamEnded: false,
+                            lastMarkdownAt: 0,
                         });
                     }
 
-                    appendTextToMessage(aiMsgId, piece);
+                    queueStreamText(aiMsgId, piece);
+                },
+                onDone: () => {
+                    if (!aiMsgId) return;
+                    const idx = chatMessages.value.findIndex((m) => m.id === aiMsgId);
+                    if (idx === -1) return;
+                    const target = chatMessages.value[idx];
+                    chatMessages.value[idx] = {
+                        ...target,
+                        streamEnded: true,
+                    };
+                    if (!streamBufferMap.get(aiMsgId)) {
+                        finishAssistantMessage(aiMsgId);
+                    } else {
+                        ensureStreamFlush();
+                    }
                 },
             },
         );
@@ -401,8 +512,26 @@ const onAnalyze = async () => {
                 name: aiProfile.value.name,
                 avatar: aiProfile.value.avatar,
                 text: '',
+                html: '',
+                isStreaming: true,
+                streamEnded: false,
+                lastMarkdownAt: 0,
             });
             startTypingToMessage(aiMsgId, fallbackText);
+        } else {
+            const idx = chatMessages.value.findIndex((m) => m.id === aiMsgId);
+            if (idx !== -1) {
+                const target = chatMessages.value[idx];
+                chatMessages.value[idx] = {
+                    ...target,
+                    streamEnded: true,
+                };
+                if (!streamBufferMap.get(aiMsgId)) {
+                    finishAssistantMessage(aiMsgId);
+                } else {
+                    ensureStreamFlush();
+                }
+            }
         }
     } catch (error) {
         stopThinkingTimer(); // 停止思考计时器
@@ -412,6 +541,9 @@ const onAnalyze = async () => {
             name: aiProfile.value.name,
             avatar: aiProfile.value.avatar,
             text: '',
+            html: '',
+            isStreaming: true,
+            lastMarkdownAt: 0,
         });
         startTypingToMessage(aiMsgId, t('discover.systemError'));
     } finally {
@@ -441,6 +573,8 @@ onShow(() => {
 
 onUnload(() => {
     stopTyping();
+    stopStreamFlush();
+    streamBufferMap.clear();
     stopThinkingTimer(); // 停止思考计时器
 });
 </script>
@@ -745,6 +879,10 @@ onUnload(() => {
     word-break: break-word;
     box-shadow: 0 14rpx 30rpx var(--discover-shadow);
     backdrop-filter: blur(20rpx);
+}
+
+.streaming-text {
+    white-space: pre-wrap;
 }
 
 .markdown {

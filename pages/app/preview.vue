@@ -25,7 +25,7 @@
                     <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
                 </button>
                 <view v-if="previewType === 'classic'" class="icon-btn" @click="openInfo">
-                    <mdi-icon path="/static/icons/information.svg" size="20px" color="#fff"></mdi-icon>
+                    <mdi-icon path="/static/icons/information-symbol.svg" size="32px" color="#fff"></mdi-icon>
                 </view>
             </view>
 
@@ -185,7 +185,7 @@
                         </view>
                         <view class="row">
                             <view class="label">{{ t('preview.tags') }}</view>
-                            <input v-model="editForm.tags" class="input" />
+                            <input v-model="editForm.tabs" class="input" />
                         </view>
                         <view class="row">
                             <view class="label">{{ t('preview.category') }}</view>
@@ -384,7 +384,7 @@ const editPopup = ref(null);
 const classifyList = ref([]);
 const editForm = ref({
     description: '',
-    tags: '',
+    tabs: '',
     classify_id: '',
     publisher: '',
     is_active: true,
@@ -400,7 +400,7 @@ const openEdit = async () => {
     const currentClassify = classifyList.value.find((item) => item.classify_name === currentInfo.value.classify_name);
     editForm.value = {
         description: currentInfo.value.description || '',
-        tags: currentInfo.value.tabs || (currentInfo.value.tabs_list || []).join(','),
+        tabs: currentInfo.value.tabs || (currentInfo.value.tabs_list || []).join(','),
         classify_id: currentClassify ? currentClassify.classify_id : '',
         publisher: currentInfo.value.publisher || '',
         is_active: !!currentInfo.value.is_active,

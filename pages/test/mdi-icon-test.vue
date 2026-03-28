@@ -7,7 +7,7 @@
         <view class="container">
             <view class="intro">
                 <text class="title">MDI Icon 组件测试</text>
-                <text class="desc">支持本地 /static/icons 的路径，支持颜色与大小。</text>
+                <text class="desc">支持本地 /static/icons 的路径，支持 prop 改色与 class 改色。</text>
             </view>
 
             <view class="control">
@@ -24,7 +24,14 @@
 
             <view class="grid">
                 <view class="item" v-for="icon in icons" :key="icon">
-                    <mdi-icon :path="icon" :size="Number(size || 32)" :color="color" />
+                    <view class="demo-row">
+                        <text class="demo-label">Prop</text>
+                        <mdi-icon :path="icon" :size="Number(size || 32)" :color="color" />
+                    </view>
+                    <view class="demo-row">
+                        <text class="demo-label">Class</text>
+                        <mdi-icon class="class-color-icon" :path="icon" :size="Number(size || 32)" />
+                    </view>
                     <text class="name">{{ icon }}</text>
                 </view>
             </view>
@@ -141,11 +148,33 @@ loadIcons();
     align-items: center;
     gap: 16rpx;
 
+    .demo-row {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14rpx;
+        padding: 12rpx 0;
+        border-radius: 12rpx;
+        background: #f8fafc;
+    }
+
+    .demo-label {
+        min-width: 72rpx;
+        font-size: 22rpx;
+        color: #64748b;
+        text-align: right;
+    }
+
     .name {
         font-size: 22rpx;
         color: #64748b;
         text-align: center;
         word-break: break-all;
     }
+}
+
+.class-color-icon {
+    color: #2563eb;
 }
 </style>

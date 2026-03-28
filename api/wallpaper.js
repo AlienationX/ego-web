@@ -180,6 +180,24 @@ export const apiPostChangePassword = (data = {}) => {
     });
 };
 
+// 重置密码接口
+export const apiPostResetPassword = (data = {}) => {
+    return request({
+        url: '/verify/reset_password/',
+        data,
+        method: 'POST',
+    });
+};
+
+// 注销用户接口
+export const apiPostDeactivateUser = () => {
+    return request({
+        url: '/user/deactivate/',
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
 // 发送邮件验证码接口
 export const apiPostSendEmailCode = (data = {}) => {
     return request({
@@ -193,15 +211,6 @@ export const apiPostSendEmailCode = (data = {}) => {
 export const apiPostVerifyCode = (data = {}) => {
     return request({
         url: '/verify/',
-        data,
-        method: 'POST',
-    });
-};
-
-// 重置密码接口
-export const apiPostResetPassword = (data = {}) => {
-    return request({
-        url: '/verify/reset_password/',
         data,
         method: 'POST',
     });

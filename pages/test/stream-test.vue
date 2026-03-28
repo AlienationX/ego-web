@@ -8,6 +8,7 @@
             <view class="intro">
                 <view class="title">SSE 流式测试</view>
                 <view class="desc">用于验证 App 端 onChunkReceived 以及流式回调日志。</view>
+                <view class="timer">已运行 {{ elapsedSeconds }}s</view>
             </view>
 
             <view class="form">
@@ -17,7 +18,10 @@
             </view>
 
             <view class="result">
-                <view class="section-title">流式输出</view>
+                <view class="section-title-row">
+                    <view class="section-title">流式输出</view>
+                    <view class="stream-stats">已显示 {{ displayedLength }} 字，待输出 {{ pendingLength }} 字</view>
+                </view>
                 <view class="result-box">{{ streamText || '暂无输出' }}</view>
             </view>
 
@@ -35,17 +39,109 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
 import { apiPostDiscoverStream } from '@/api/wallpaper.js';
 
 const imageUrl = ref('https://api.wp.ego8.space/static/wallpaper/media/pics/classify_bing/20250320-春日仙境.jpg');
 const logs = ref([]);
 const streamText = ref('');
 const isRunning = ref(false);
+const displayedLength = ref(0);
+const pendingLength = ref(0);
+const elapsedSeconds = ref('0.0');
 
-const pushLog = (text) => {
-    logs.value.unshift(`${new Date().toLocaleTimeString()} ${text}`);
-    if (logs.value.length > 200) logs.value.pop();
+let streamBuffer = '';
+let displayTimer = null;
+let streamEnded = false;
+let pendingLogsBuffer = [];
+let logTimer = null;
+let requestTimer = null;
+let requestStartedAt = 0;
+
+const getConsumeSize = () => {
+    if (streamBuffer.length > 240) return 3;
+    if (streamBuffer.length > 120) return 2;
+    return 1;
+};
+
+const startDisplayTimer = () => {
+    if (displayTimer) return;
+    displayTimer = setInterval(() => {
+        if (!streamBuffer) {
+            if (streamEnded) {
+                stopDisplayTimer();
+                isRunning.value = false;
+            }
+            return;
+        }
+        const consumeSize = getConsumeSize();
+        const nextChunk = streamBuffer.slice(0, consumeSize);
+        streamBuffer = streamBuffer.slice(consumeSize);
+        streamText.value += nextChunk;
+        displayedLength.value = streamText.value.length;
+        pendingLength.value = streamBuffer.length;
+        if (!streamBuffer && streamEnded) {
+            stopDisplayTimer();
+            isRunning.value = false;
+        }
+    }, 32);
+};
+
+const stopDisplayTimer = () => {
+    if (displayTimer) {
+        clearInterval(displayTimer);
+        displayTimer = null;
+    }
+};
+
+const flushLogs = () => {
+    if (!pendingLogsBuffer.length) return;
+    logs.value = [...pendingLogsBuffer, ...logs.value].slice(0, 200);
+    pendingLogsBuffer = [];
+};
+
+const startLogTimer = () => {
+    if (logTimer) return;
+    logTimer = setInterval(() => {
+        flushLogs();
+        if (streamEnded && !pendingLogsBuffer.length) {
+            stopLogTimer();
+        }
+    }, 120);
+};
+
+const stopLogTimer = () => {
+    if (logTimer) {
+        clearInterval(logTimer);
+        logTimer = null;
+    }
+};
+
+const startRequestTimer = () => {
+    requestStartedAt = Date.now();
+    elapsedSeconds.value = '0.0';
+    if (requestTimer) return;
+    requestTimer = setInterval(() => {
+        elapsedSeconds.value = ((Date.now() - requestStartedAt) / 1000).toFixed(1);
+    }, 100);
+};
+
+const stopRequestTimer = () => {
+    if (requestTimer) {
+        clearInterval(requestTimer);
+        requestTimer = null;
+    }
+    if (requestStartedAt) {
+        elapsedSeconds.value = ((Date.now() - requestStartedAt) / 1000).toFixed(1);
+    }
+};
+
+const queueLog = (text) => {
+    pendingLogsBuffer.unshift(`${new Date().toLocaleTimeString()} ${text}`);
+    if (pendingLogsBuffer.length > 60) {
+        flushLogs();
+    }
+    startLogTimer();
 };
 
 const startTest = async () => {
@@ -55,24 +151,49 @@ const startTest = async () => {
     }
     logs.value = [];
     streamText.value = '';
+    displayedLength.value = 0;
+    pendingLength.value = 0;
+    streamBuffer = '';
+    streamEnded = false;
+    pendingLogsBuffer = [];
+    stopDisplayTimer();
+    stopLogTimer();
+    stopRequestTimer();
     isRunning.value = true;
+    startRequestTimer();
 
     try {
         await apiPostDiscoverStream(
             { img_url: imageUrl.value.trim() },
             {
                 debug: true,
-                onLog: (...args) => pushLog(JSON.stringify(args)),
+                onLog: (...args) => queueLog(JSON.stringify(args)),
                 onMessage: (chunk) => {
-                    streamText.value += String(chunk || '');
+                    streamBuffer += String(chunk || '');
+                    pendingLength.value = streamBuffer.length;
+                    startDisplayTimer();
                 },
-                onDone: () => pushLog('DONE'),
+                onDone: () => {
+                    streamEnded = true;
+                    startDisplayTimer();
+                    queueLog('DONE');
+                },
             }
         );
     } catch (error) {
-        pushLog(`ERROR: ${error?.message || String(error)}`);
+        streamEnded = true;
+        queueLog(`ERROR: ${error?.message || String(error)}`);
     } finally {
-        isRunning.value = false;
+        stopRequestTimer();
+        streamEnded = true;
+        if (!streamBuffer) {
+            stopDisplayTimer();
+            isRunning.value = false;
+        } else {
+            startDisplayTimer();
+        }
+        flushLogs();
+        startLogTimer();
     }
 };
 
@@ -89,6 +210,12 @@ const copyLogs = () => {
         },
     });
 };
+
+onUnmounted(() => {
+    stopDisplayTimer();
+    stopLogTimer();
+    stopRequestTimer();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -119,6 +246,13 @@ const copyLogs = () => {
         font-size: 24rpx;
         line-height: 1.6;
         color: #64748b;
+    }
+
+    .timer {
+        margin-top: 12rpx;
+        font-size: 22rpx;
+        color: #0f766e;
+        font-weight: 600;
     }
 }
 
@@ -193,6 +327,11 @@ const copyLogs = () => {
     justify-content: flex-end;
 }
 
+.stream-stats {
+    font-size: 22rpx;
+    color: #94a3b8;
+}
+
 .result,
 .logs {
     background: #fff;
@@ -208,6 +347,7 @@ const copyLogs = () => {
     color: #334155;
     line-height: 1.6;
     white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .log-box {

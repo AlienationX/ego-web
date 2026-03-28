@@ -460,7 +460,8 @@ onShow(() => {
         background: #fff;
         margin-bottom: 20rpx;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
+        z-index: 20;
 
         &.not-logged-in {
             background: #f5f5f5;
@@ -661,7 +662,8 @@ onShow(() => {
             background: rgba($wp-theme-color, 0.05);
             border-radius: 16rpx;
             position: relative;
-            z-index: 1;
+            z-index: 5;
+            overflow: visible;
         }
 
         .energy-info {
@@ -678,25 +680,27 @@ onShow(() => {
 
         .energy-tooltip {
             // 自定义弹出框样式
-            :deep(.uni-tooltip__content) {
-                background: rgba(0, 0, 0, 0.85);
+            :deep(.uni-tooltip-popup) {
+                position: absolute;
+                z-index: 9999;
+                background: rgba(18, 22, 28, 0.96);
                 color: #fff;
-                font-size: 26rpx;
-                line-height: 1.5;
-                padding: 24rpx 32rpx;
-                border-radius: 16rpx;
-                max-width: 400rpx;
-                box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.2);
-                border: none;
-
-                // 箭头样式
-                &::before {
-                    border-bottom-color: rgba(0, 0, 0, 0.85);
-                }
+                font-size: 24rpx;
+                line-height: 1.8;
+                letter-spacing: 0.3rpx;
+                white-space: pre-line;
+                word-break: break-word;
+                padding: 28rpx 30rpx;
+                border-radius: 20rpx;
+                min-width: 420rpx;
+                max-width: 620rpx;
+                box-sizing: border-box;
+                box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.24);
+                border: 1rpx solid rgba(255, 255, 255, 0.08);
             }
 
             // 触发元素样式
-            :deep(.uni-tooltip__trigger) {
+            :deep(.uni-tooltip) {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -795,6 +799,8 @@ onShow(() => {
         gap: 20rpx;
         padding: 0 30rpx;
         margin-bottom: 30rpx;
+        position: relative;
+        z-index: 1;
 
         .stats-card {
             flex: 1;
