@@ -1,89 +1,123 @@
 <template>
-    <view class="preview" v-if="currentInfo">
-        <swiper circular :current="currentIndex" @change="swiperChange">
-            <swiper-item v-for="(item, index) in classList" :key="item.id">
-                <image v-if="readImgs.includes(index)" @click="maskChange" :src="item.picurl" mode="aspectFill"></image>
-            </swiper-item>
-        </swiper>
+    <scroll-view v-if="currentInfo" scroll-y class="previewScroll" @scroll="handlePreviewScroll">
+        <view class="preview">
+            <view class="previewHero">
+                <swiper
+                    :circular="!disableSwipe && classList.length > 1"
+                    :disable-touch="disableSwipe"
+                    :current="currentIndex"
+                    @change="swiperChange"
+                >
+                    <swiper-item v-for="(item, index) in classList" :key="item.id">
+                        <view class="preview-slide">
+                            <view v-if="readImgs.includes(index) && !isImageLoaded(index)" class="preview-loading">
+                                <view class="preview-loading__glow"></view>
+                                <rotate-loading :size="88"></rotate-loading>
+                                <view class="preview-loading__text">{{ t('message.loading') }}</view>
+                            </view>
+                            <image
+                                v-if="readImgs.includes(index)"
+                                class="preview-slide__image"
+                                :class="{ 'is-loaded': isImageLoaded(index) }"
+                                @click="maskChange"
+                                @load="handleImageLoad(index)"
+                                @error="handleImageLoad(index)"
+                                :src="item.picurl"
+                                mode="aspectFill"
+                            ></image>
+                        </view>
+                    </swiper-item>
+                </swiper>
 
-        <view class="mask" v-if="maskState">
-            <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
+                <view class="mask" v-if="maskState">
+                    <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
+                    </view>
+                    <view class="top-actions" :style="{ top: getGoBackButtonTop() + 'px' }">
+                        <view v-if="isAdmin" class="icon-btn" @click="openEdit">
+                            <mdi-icon path="/static/icons/pencil.svg" size="20px" color="#fff"></mdi-icon>
+                        </view>
+                        <view v-if="isAdmin" class="icon-btn" @click="toggleLock">
+                            <mdi-icon
+                                :path="currentInfo.is_locked ? '/static/icons/lock.svg' : '/static/icons/lock-open.svg'"
+                                size="20px"
+                                color="#fff"
+                            ></mdi-icon>
+                        </view>
+                        <button class="icon-btn share-btn" open-type="share" @click="handleShare">
+                            <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
+                        </button>
+                        <view v-if="previewType === 'classic'" class="icon-btn" @click="openInfo">
+                            <mdi-icon path="/static/icons/information-symbol.svg" size="32px" color="#fff"></mdi-icon>
+                        </view>
+                    </view>
+
+                    <view v-if="!disableSwipe" class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
+                    <view class="time">{{ timeText }}</view>
+                    <view class="date">{{ dateText }}</view>
+
+                    <view v-if="showScrollHint" class="scrollHint">
+                        <uni-icons type="down" size="18" color="#ffffff"></uni-icons>
+                        <uni-icons type="down" size="18" color="#ffffff"></uni-icons>
+                    </view>
+
+                    <view class="footer" v-if="previewType === 'classic'">
+                        <view class="box" @click="toggleCollect">
+                            <uni-icons type="heart-filled" size="28"></uni-icons>
+                            <view class="text">{{
+                                currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
+                            }}</view>
+                        </view>
+                        <view class="box" @click="openScore">
+                            <uni-icons type="star-filled" size="28"></uni-icons>
+                            <view class="text">{{ currentInfo.score }}</view>
+                        </view>
+                        <view class="box" @click="clickDownload">
+                            <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
+                            <uni-icons v-else type="download-filled" size="28"></uni-icons>
+                            <view class="text">{{ t('common.download') }}</view>
+                        </view>
+                    </view>
+
+                    <template v-else>
+                        <view class="right-actions">
+                            <view class="action-item" @click="openInfo">
+                                <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
+                                <view class="action-text">{{ t('common.information') }}</view>
+                            </view>
+                            <view class="action-item" @click="openScore">
+                                <uni-icons type="star-filled" size="36" color="#ffffff"></uni-icons>
+                                <view class="action-text">{{ currentInfo.score }}</view>
+                            </view>
+                            <view class="action-item" @click="toggleCollect">
+                                <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
+                                <view class="action-text">{{
+                                    currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
+                                }}</view>
+                            </view>
+                            <view class="action-item" @click="clickDownload">
+                                <uni-icons
+                                    v-if="currentInfo.is_locked"
+                                    type="locked-filled"
+                                    size="36"
+                                    color="#ffffff"
+                                ></uni-icons>
+                                <uni-icons v-else type="download-filled" size="36" color="#ffffff"></uni-icons>
+                                <view class="action-text">{{ t('common.download') }}</view>
+                            </view>
+                        </view>
+
+                        <view class="left-meta">
+                            <view class="meta-user">
+                                <image class="meta-avatar" :src="publisherAvatar" mode="aspectFill"></image>
+                                <text class="meta-user-name">{{ publisherName }}</text>
+                            </view>
+                            <view class="meta-desc">{{ currentInfo.description || currentInfo.classify_name || '' }}</view>
+                        </view>
+                    </template>
+                </view>
             </view>
-            <view class="top-actions" :style="{ top: getGoBackButtonTop() + 'px' }">
-                <view v-if="isAdmin" class="icon-btn" @click="openEdit">
-                    <mdi-icon path="/static/icons/pencil.svg" size="20px" color="#fff"></mdi-icon>
-                </view>
-                <view v-if="isAdmin" class="icon-btn" @click="toggleLock">
-                    <mdi-icon
-                        :path="currentInfo.is_locked ? '/static/icons/lock.svg' : '/static/icons/lock-open.svg'"
-                        size="20px"
-                        color="#fff"
-                    ></mdi-icon>
-                </view>
-                <button class="icon-btn share-btn" open-type="share" @click="handleShare">
-                    <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
-                </button>
-                <view v-if="previewType === 'classic'" class="icon-btn" @click="openInfo">
-                    <mdi-icon path="/static/icons/information-symbol.svg" size="32px" color="#fff"></mdi-icon>
-                </view>
-            </view>
-
-            <view class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
-            <view class="time">{{ timeText }}</view>
-            <view class="date">{{ dateText }}</view>
-
-            <view class="footer" v-if="previewType === 'classic'">
-                <!-- <view v-if="previewType === 'classic'" class="box" @click="openInfo">
-                    <uni-icons type="info-filled" size="28"></uni-icons>
-                    <view class="text">{{ t('common.information') }}</view>
-                </view> -->
-                <view class="box" @click="toggleCollect">
-                    <uni-icons type="heart-filled" size="28"></uni-icons>
-                    <view class="text">{{ currentInfo.is_collect ? t('preview.collected') : t('preview.collect') }}</view>
-                </view>
-                <view class="box" @click="openScore">
-                    <uni-icons type="star-filled" size="28"></uni-icons>
-                    <view class="text">{{ currentInfo.score }}</view>
-                </view>
-                <view class="box" @click="clickDownload">
-                    <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
-                    <uni-icons v-else type="download-filled" size="28"></uni-icons>
-                    <view class="text">{{ t('common.download') }}</view>
-                </view>
-            </view>
-
-            <template v-else>
-                <view class="right-actions">
-                    <view class="action-item" @click="openInfo">
-                        <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
-                        <view class="action-text">{{ t('common.information') }}</view>
-                    </view>
-                    <view class="action-item" @click="openScore">
-                        <uni-icons type="star-filled" size="36" color="#ffffff"></uni-icons>
-                        <view class="action-text">{{ currentInfo.score }}</view>
-                    </view>
-                    <view class="action-item" @click="toggleCollect">
-                        <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
-                        <view class="action-text">{{
-                            currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
-                        }}</view>
-                    </view>
-                    <view class="action-item" @click="clickDownload">
-                        <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="36" color="#ffffff"></uni-icons>
-                        <uni-icons v-else type="download-filled" size="36" color="#ffffff"></uni-icons>
-                        <view class="action-text">{{ t('common.download') }}</view>
-                    </view>
-                </view>
-
-                <view class="left-meta">
-                    <view class="meta-user">
-                        <image class="meta-avatar" :src="publisherAvatar" mode="aspectFill"></image>
-                        <text class="meta-user-name">{{ publisherName }}</text>
-                    </view>
-                    <view class="meta-desc">{{ currentInfo.description || currentInfo.classify_name || '' }}</view>
-                </view>
-            </template>
+            <recommend-wallpapers :current-info="currentInfo"></recommend-wallpapers>
         </view>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
@@ -224,13 +258,13 @@
         </uni-popup>
 
         <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
-    </view>
+    </scroll-view>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { onLoad, onUnload, onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app';
+import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
 import { downloadPic } from '@/common/core.js';
@@ -242,11 +276,13 @@ import {
     apiGetClassify,
 } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import RecommendWallpapers from '@/components/recommend-wallpapers/recommend-wallpapers.vue';
 
 import { useUserStore } from '@/stores/user.js';
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+const PREVIEW_SCROLL_HINT_KEY = 'preview_scroll_hint_seen';
 
 const { t, locale } = useI18n();
 const weekNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -300,9 +336,20 @@ classList.value = wallList.map((item) => {
     return {
         ...item,
         is_collect: !!item.is_collect,
-        tabs_list: item.tabs.split(','),
+        tabs_list: typeof item.tabs === 'string' ? item.tabs.split(',') : item.tabs_list || [],
     };
 });
+const disableSwipe = ref(false);
+const showScrollHint = ref(!uni.getStorageSync(PREVIEW_SCROLL_HINT_KEY));
+
+const handlePreviewScroll = (e) => {
+    if (!showScrollHint.value) return;
+    const scrollTop = Number(e?.detail?.scrollTop || 0);
+    if (scrollTop > 60) {
+        showScrollHint.value = false;
+        uni.setStorageSync(PREVIEW_SCROLL_HINT_KEY, true);
+    }
+};
 
 // views字段值+1，请求太频繁，labmda次数不够用，暂时搁置
 const incrementViews = async (id) => {
@@ -661,6 +708,7 @@ const clickDownload = async () => {
 
 // 图片节流
 const readImgs = ref([]);
+const loadedImageMap = ref({});
 
 function readImgsFun() {
     readImgs.value.push(
@@ -672,12 +720,22 @@ function readImgsFun() {
     readImgs.value = [...new Set(readImgs.value)];
 }
 
+const isImageLoaded = (index) => !!loadedImageMap.value[index];
+
+const handleImageLoad = (index) => {
+    loadedImageMap.value = {
+        ...loadedImageMap.value,
+        [index]: true,
+    };
+};
+
 // OnLoad接收参数
 const currentId = ref(null);
 const currentIndex = ref(0);
 const currentInfo = ref({});
 onLoad((e) => {
     currentId.value = e.id;
+    disableSwipe.value = e.mode === 'recommend' || e.disableSwipe === '1';
     if (e.type === 'share') {
         // TODO
         console.log('分享页接收到的用户需要发送api请求，自己获取数据');
@@ -685,10 +743,14 @@ onLoad((e) => {
         // classList.value = res.data;
     }
     currentIndex.value = classList.value.findIndex((item) => item.id === parseInt(currentId.value));
+    if (currentIndex.value < 0) {
+        currentIndex.value = 0;
+    }
     currentInfo.value = classList.value[currentIndex.value];
-    readImgsFun();
-
-    incrementViews(currentInfo.value.id);
+    if (currentInfo.value) {
+        readImgsFun();
+        incrementViews(currentInfo.value.id);
+    }
 
     // createInterstitialAd(); // 创建插屏广告
     // createRewardedVideoAd(); // 创建激励视频广告
@@ -701,6 +763,7 @@ onUnload(() => {
 
 // 滑动事件，变化当前数字
 const swiperChange = (e) => {
+    if (disableSwipe.value) return;
     currentIndex.value = e.detail.current;
     currentInfo.value = classList.value[currentIndex.value];
     readImgsFun();
@@ -729,6 +792,17 @@ onShareTimeline(() => {
 <style lang="scss" scoped>
 .preview {
     width: 100%;
+    position: relative;
+    min-height: 100vh;
+    background: #0b0f14;
+}
+
+.previewScroll {
+    height: 100vh;
+}
+
+.previewHero {
+    width: 100%;
     height: 100vh;
     position: relative;
 
@@ -736,9 +810,53 @@ onShareTimeline(() => {
         width: 100%;
         height: 100%;
 
-        image {
+        .preview-slide {
             width: 100%;
             height: 100%;
+            position: relative;
+            background: #0b0f14;
+        }
+
+        .preview-slide__image {
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.28s ease;
+        }
+
+        .preview-slide__image.is-loaded {
+            opacity: 1;
+        }
+
+        .preview-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18rpx;
+            background:
+                radial-gradient(circle at center, rgba(64, 100, 138, 0.18), transparent 28%),
+                linear-gradient(180deg, #0a0f15 0%, #0d141d 100%);
+            z-index: 1;
+        }
+
+        .preview-loading__glow {
+            position: absolute;
+            width: 360rpx;
+            height: 360rpx;
+            border-radius: 999rpx;
+            background: radial-gradient(circle, rgba(110, 168, 255, 0.18) 0%, rgba(110, 168, 255, 0) 72%);
+            filter: blur(10rpx);
+        }
+
+        .preview-loading__text {
+            position: relative;
+            z-index: 1;
+            font-size: 24rpx;
+            color: rgba(255, 255, 255, 0.72);
+            letter-spacing: 1rpx;
         }
     }
 
@@ -835,6 +953,21 @@ onShareTimeline(() => {
             letter-spacing: 1rpx;
             color: rgba(255, 255, 255, 0.9);
             text-shadow: 0 2rpx rgba(0, 0, 0, 0.3);
+        }
+
+        .scrollHint {
+            bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            animation: preview-bounce 1.2s ease-in-out infinite;
+            opacity: 0.9;
+
+            :deep(.uni-icons) {
+                color: #fff !important;
+            }
         }
 
         .footer {
@@ -1294,6 +1427,16 @@ onShareTimeline(() => {
                 }
             }
         }
+    }
+}
+
+@keyframes preview-bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(12rpx);
     }
 }
 </style>

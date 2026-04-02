@@ -146,9 +146,25 @@
             }
         },
         {
-            "path": "pages/app/latest",
+            "path": "pages/app/timeline",
             "style": {
-                "navigationBarTitleText": "最新发布",
+                "navigationBarTitleText": "时间轴",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/app/topN",
+            "style": {
+                "navigationBarTitleText": "Top 10",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/app/edit-cover",
+            "style": {
+                "navigationBarTitleText": "Edit Cover",
                 "navigationStyle": "custom",
                 "enablePullDownRefresh": false
             }
@@ -284,6 +300,13 @@
             "path": "pages/test/mdi-icon-test",
             "style": {
                 "navigationBarTitleText": "MDI Icon Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/test/custom-bars",
+            "style": {
+                "navigationBarTitleText": "Custom Bars",
                 "navigationStyle": "custom"
             }
         }

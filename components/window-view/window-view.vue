@@ -4,7 +4,7 @@
         <!-- <view class="layout" :style="{ gridTemplateColumns: gridTemplateColumns }"> -->
         <view class="layout" :style="styles.layout">
             <template v-for="(item, idx) in classList" :key="item.id">
-                <navigator class="box" :style="styles.box" :url="`/pages/app/preview?id=${item.id}`">
+                <view class="box" :style="styles.box" @click="openPreview(item.id)">
                     <image class="img" :style="styles.img" :src="item.smallPicurl" mode="aspectFill" lazy-load></image>
                     <uni-icons
                         class="lock"
@@ -14,7 +14,7 @@
                         :size="lockSize"
                         color="#F9E9B5"
                     ></uni-icons>
-                </navigator>
+                </view>
 
                 <!-- 每12个图片后插入广告 -->
                 <view v-if="(idx + 1) % 12 === 0" class="ad-row">
@@ -55,6 +55,13 @@ const props = defineProps({
 // });
 
 const lockSize = ref(18);
+const openPreview = (id) => {
+    uni.setStorageSync('wallList', props.classList || []);
+    uni.navigateTo({
+        url: `/pages/app/preview?id=${id}`,
+    });
+};
+
 const styles = computed(() => {
     // 这里返回有大括号，所以上面直接使用即可，:style="styles.layout"
     if (settingsStore.options.column === 3) {

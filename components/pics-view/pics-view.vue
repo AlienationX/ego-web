@@ -3,10 +3,10 @@
     <view class="container" ref="containerRef">
         <view class="layout" :style="styles.layout">
             <template v-for="(item, idx) in images" :key="item.id">
-                <navigator
+                <view
                     class="box"
                     :style="[styles.box, isWaterfall ? item.position : '']"
-                    :url="`/pages/app/preview?id=${item.id}`"
+                    @click="openPreview(item.id)"
                 >
                     <image
                         :class="['img', { loaded: item.loaded, shadow: item.loaded }]"
@@ -31,7 +31,7 @@
                         <text class="star">{{ item.score }}</text>
                     </view>
                 </view> -->
-                </navigator>
+                </view>
 
                 <!-- TODO 每12个图片后插入广告，但是不显示，存在bug -->
                 <view v-if="(idx + 1) % 12 === 0 && canShowAd && !adErrorMap[`slot-${idx}`]" class="ad-row">
@@ -68,6 +68,13 @@ const images = ref([]);
 const adErrorMap = reactive({});
 const canShowAd = computed(() => !userStore.isVip && userStore.showAd);
 
+const openPreview = (id) => {
+    uni.setStorageSync('wallList', props.classList || []);
+    uni.navigateTo({
+        url: `/pages/app/preview?id=${id}`,
+    });
+};
+
 // const { classList } = toRefs(props)
 // const classList = toRef(props, 'classList');
 
@@ -84,7 +91,7 @@ const canShowAd = computed(() => !userStore.isVip && userStore.showAd);
 // 监听原始数据变化
 watch(
     () => props.classList,
-    (newVal, oldVal) => {
+    (newVal, oldVal = []) => {
         // console.log('watch classList >>>>>>>>', newVal, oldVal);
 
         // 如果newVal是undefined或null，则还未初始化则返回
@@ -114,7 +121,7 @@ watch(
         // console.log('watch images object >>>>>>>>', JSON.parse(JSON.stringify(images.value)));
         // console.log('watch images ref >>>>>>>>', images.value);
     },
-    // { immediate: true } // 初始化时立即执行
+    { immediate: true },
 );
 
 // 监控列数变化，重新计算layout和position

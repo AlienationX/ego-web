@@ -39,6 +39,33 @@
         "empty": "No recent releases yet",
         "wallpaper": "Wallpaper"
     },
+    "timeline": {
+        "brand": "TIMELINE",
+        "title": "Timeline",
+        "subtitle": "Visual\nTimeline",
+        "desc": "Browse recent wallpaper releases in a more editorial rhythm, like flipping through a midnight visual journal.",
+        "empty": "No timeline entries yet",
+        "recentTag": "LATEST {count}"
+    },
+    "top10": {
+        "title": "Top 10 Wallpapers",
+        "subtitle": "Leaderboard",
+        "tabs": {
+            "views": "Most Viewed",
+            "downloads": "Most Downloaded"
+        },
+        "badgeViews": "HOT BY VIEWS",
+        "badgeDownloads": "HOT BY DOWNLOADS",
+        "descViews": "A live leaderboard of the ten wallpapers getting the most attention right now, ranked by total views.",
+        "descDownloads": "Switch to the download chart to see which wallpapers users actually keep and save the most.",
+        "heroTag": "TOP PICK",
+        "listTitle": "Trending Contenders",
+        "metricViews": "views",
+        "metricDownloads": "downloads",
+        "empty": "No ranking data yet",
+        "emptyDesc": "There is not enough ranking data at the moment. Please check back later.",
+        "wallpaper": "Wallpaper"
+    },
     "category": {
         "title": "Category",
         "desc": "Explore more beautiful wallpaper categories",
@@ -151,7 +178,13 @@
         "lockToggleFailed": "Lock update failed",
         "shareSuccess": "Shared successfully",
         "shareFailed": "Share failed",
-        "shareHint": "Use the system share panel"
+        "shareHint": "Use the system share panel",
+        "recommend": {
+            "title": "Similar Picks",
+            "desc": "Keep browsing wallpapers with a matching style",
+            "empty": "No similar recommendations yet",
+            "topN": "Top {count}"
+        }
     },
     "feedback": {
         "title": "Feedback",
@@ -177,6 +210,10 @@
         "permissionContent": "To upload feedback images, we need access to your photo library. Please enable photo library permission in Settings.",
         "goToSettings": "Go to Settings",
         "imageSelectFailed": "Failed to select image"
+    },
+    "search": {
+        "clearAll": "Clear All",
+        "noResultTitle": "No results found"
     },
     "guide": {
         "skip": "Skip",
@@ -550,6 +587,12 @@
                 "label": "Deactivate Account",
                 "sublabel": "Permanently disable access"
             }
+        },
+        "ratePopup": {
+            "title": "Enjoy Our App",
+            "desc": "If you enjoy using our app,\nPlease rate us",
+            "confirm": "Rate Now",
+            "webHint": "Please search for this app in your app store to rate it"
         },
         "toast": {
             "themeChanged": "Theme changed",

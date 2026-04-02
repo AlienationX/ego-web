@@ -44,6 +44,33 @@
         "empty": "暂无最新发布内容",
         "wallpaper": "壁纸"
     },
+    "timeline": {
+        "brand": "TIMELINE",
+        "title": "时间轴",
+        "subtitle": "视觉\n时间轴",
+        "desc": "把最近发布的壁纸按时间切成更有节奏的浏览方式，像翻一份深夜编辑刊物一样往下看。",
+        "empty": "暂无时间轴内容",
+        "recentTag": "最新 {count} 张"
+    },
+    "top10": {
+        "title": "Top 10 壁纸",
+        "subtitle": "排行榜",
+        "tabs": {
+            "views": "最多浏览",
+            "downloads": "最多下载"
+        },
+        "badgeViews": "HOT BY VIEWS",
+        "badgeDownloads": "HOT BY DOWNLOADS",
+        "descViews": "实时汇总最受关注的壁纸，用更直观的榜单方式展示当前浏览热度最高的前十张作品。",
+        "descDownloads": "切换查看最常被保存的壁纸榜单，快速找到真正被用户带走和反复使用的高人气内容。",
+        "heroTag": "TOP PICK",
+        "listTitle": "后续竞争者",
+        "metricViews": "次浏览",
+        "metricDownloads": "次下载",
+        "empty": "暂无排行数据",
+        "emptyDesc": "当前还没有足够的排行内容，可以稍后再来看看。",
+        "wallpaper": "壁纸"
+    },
     "category": {
         "title": "分类",
         "desc": "探索更多精美壁纸分类",
@@ -143,6 +170,10 @@
         "permissionContent": "为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。",
         "goToSettings": "去设置",
         "imageSelectFailed": "选择图片失败"
+    },
+    "search": {
+        "clearAll": "清空",
+        "noResultTitle": "未找到相关结果"
     },
     "guide": {
         "skip": "跳过",
@@ -291,7 +322,13 @@
         "lockToggleFailed": "锁定状态更新失败",
         "shareSuccess": "分享成功",
         "shareFailed": "分享失败",
-        "shareHint": "请使用系统分享功能"
+        "shareHint": "请使用系统分享功能",
+        "recommend": {
+            "title": "相似推荐",
+            "desc": "继续浏览同类风格壁纸",
+            "empty": "暂无相似推荐",
+            "topN": "Top {count}"
+        }
     },
     "membership": {
         "title": "会员购买",
@@ -528,6 +565,12 @@
                 "label": "停用账号",
                 "sublabel": "永久停用访问权限"
             }
+        },
+        "ratePopup": {
+            "title": "喜欢我们的应用",
+            "desc": "如果你喜欢使用我们的应用，\n请给我们一个评分",
+            "confirm": "立即评分",
+            "webHint": "请在应用商店中搜索本应用进行评分"
         },
         "toast": {
             "themeChanged": "主题已切换",

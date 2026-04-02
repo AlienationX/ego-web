@@ -1,13 +1,84 @@
 <template>
     <view class="layout">
-        <menu-bar>
-            <template #title>{{ props.name || '分类列表' }}</template>
-        </menu-bar>
+        <view v-if="showTopbar" class="top-shell">
+            <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
+            <view class="topbar" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
+                <view class="topbar__left">
+                    <view class="topbar__back topbar__back--bar" @click="goBack">
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#eef5ff"></mdi-icon>
+                    </view>
+                    <view class="topbar__title">{{ props.name || t('category.title') }}</view>
+                </view>
+                <view class="topbar__actions">
+                    <view class="topbar__icon" @click="goSearch">
+                        <uni-icons type="search" size="18" color="#94a3b8"></uni-icons>
+                    </view>
+                    <view class="topbar__icon">
+                        <uni-icons type="more-filled" size="18" color="#94a3b8"></uni-icons>
+                    </view>
+                </view>
+            </view>
+        </view>
 
-        <query-panel ref="queryPanelRef" v-if="classList.length" @onQuery="onQuery" :top="getNavBarHeight() + 'px'" />
+        <view class="fill" :style="{ height: `${showTopbar ? navBarHeight : 0}px` }"></view>
 
-        <!-- 内容区域，使用 margin-top/padding-top 代替占位容器 -->
-        <view class="content-wrapper" :style="{ marginTop: queryPanelHeight + 'rpx' }">
+        <view class="hero">
+            <image class="hero__image" :src="heroImage" mode="aspectFill"></image>
+            <view class="hero__overlay"></view>
+            <view class="hero__back" :style="{ top: `${statusBarHeight + 12}px` }" @click="goBack">
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#eef5ff"></mdi-icon>
+            </view>
+            <view class="hero__content">
+                <view class="hero__badge">{{ heroBadge }}</view>
+                <view class="hero__title">{{ heroTitle }}</view>
+                <view class="hero__desc">{{ heroDesc }}</view>
+            </view>
+        </view>
+
+        <view class="toolbar" :style="{ top: `${showTopbar ? navBarHeight : 0}px` }">
+            <scroll-view scroll-x class="toolbar__chips" show-scrollbar="false">
+                <view class="toolbar__chips-inner">
+                    <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'recommend' }" @click="onRecommend">
+                        {{ t('common.recommend') }}
+                    </view>
+                    <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'score' }" @click="onScore">
+                        {{ t('common.score') }}
+                    </view>
+                    <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'date' }" @click="onDateSort">
+                        <text>{{ t('common.publishDate') }}</text>
+                        <uni-icons
+                            v-if="activeButton === 'date'"
+                            :type="dateSortAsc ? 'arrow-up' : 'arrow-down'"
+                            size="13"
+                            color="#dce8ff"
+                        ></uni-icons>
+                    </view>
+                </view>
+            </scroll-view>
+
+            <view class="toolbar__actions">
+                <view class="toolbar__action" @click="onChangeColumn">
+                    <image
+                        class="toolbar__action-icon"
+                        v-if="settingsStore.options.column === 3"
+                        src="/static/icons/numeric-3-box.svg"
+                        mode="aspectFit"
+                    ></image>
+                    <image class="toolbar__action-icon" v-else src="/static/icons/numeric-2-box.svg" mode="aspectFit"></image>
+                </view>
+                <view class="toolbar__action" @click="onChangeView">
+                    <image
+                        class="toolbar__action-icon"
+                        v-if="settingsStore.options.view === 'window'"
+                        src="/static/icons/view-grid.svg"
+                        mode="aspectFit"
+                    ></image>
+                    <image class="toolbar__action-icon" v-else src="/static/icons/view-dashboard.svg" mode="aspectFit"></image>
+                </view>
+            </view>
+        </view>
+
+        <view class="content-wrapper">
             <pics-view :classList="classList"></pics-view>
 
             <view class="loadingLayout" v-show="noData || isRunning">
@@ -15,15 +86,13 @@
             </view>
 
             <back-to-top ref="backToTopRef"></back-to-top>
-
-            <!-- 安全区域，主要针对手机上的home键上方的区域 -->
             <view class="safe-area-inset-bottom"></view>
         </view>
     </view>
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, computed } from 'vue';
 import {
     onLoad,
     onUnload,
@@ -33,58 +102,51 @@ import {
     onShareAppMessage,
     onShareTimeline,
 } from '@dcloudio/uni-app';
-import { apiGetClassList, apiGetClassify } from '@/api/wallpaper.js';
+import { useI18n } from 'vue-i18n';
+import { apiGetClassList } from '@/api/wallpaper.js';
 import { gotoHome, handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 
+const { t } = useI18n();
 const settingsStore = useSettingsStore();
 
-const queryPanelRef = ref(null);
 const backToTopRef = ref(null);
-
-// 正在执行
 const isRunning = ref(false);
-// 没有更多
 const noData = ref(false);
-
-// 搜索结果最终展示列表
 const classList = ref([]);
-// 搜索结果临时列表，主要是为了解决 filter 按钮切换导致 图片列表 有1秒的空白的问题
 const pendingList = ref([]);
+const activeButton = ref('');
+const dateSortAsc = ref(true);
+const showTopbar = ref(false);
 
-// 定义一个计算属性来安全地计算 marginTop
-const queryPanelHeight = computed(() => {
-    // 如果 classList 为空，则 marginTop 为 '0'
-    if (!classList.value.length) {
-        return '0';
-    }
-    // 如果 classList 不为空，但子组件尚未挂载或未暴露 height，则安全地访问
-    // 可选链操作符 ?. 可以确保当 queryPanelRef.value 为 null/undefined 时不报错
-    return queryPanelRef.value?.height || 0;
-});
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const titleBarHeight = ref(getTitleBarHeight() || 44);
+const navBarHeight = ref(getNavBarHeight() || 88);
 
-// UniApp 会将 URL 中的参数自动注入到 props
 const props = defineProps({
-    id: String, // 分类id
-    name: String, // 分类名称
+    id: String,
+    name: String,
 });
+
+const heroImage = computed(() => classList.value[0]?.picurl || classList.value[0]?.smallPicurl || '/static/images/guide/guide1.png');
+const heroTitle = computed(() => (props.name || t('category.title')).toUpperCase());
+const heroBadge = computed(() => `${t('common.recommend')} CATEGORY`);
+const heroDesc = computed(() => `${props.name || t('category.title')} · ${t('category.desc')}`);
 
 const queryParams = ref({
     classify_id: parseInt(props.id),
     pageNum: 1,
     pageSize: 12,
-    // keyword: '',
     sortord: '',
 });
 
-const init = (sortord = '', resetClassList = new Array()) => {
+const init = (sortord = '', resetClassList = []) => {
     queryParams.value = {
         classify_id: parseInt(props.id),
         pageNum: 1,
         pageSize: 12,
-        // keyword: keyword,
-        sortord: sortord,
+        sortord,
     };
     noData.value = false;
     classList.value = resetClassList;
@@ -92,32 +154,16 @@ const init = (sortord = '', resetClassList = new Array()) => {
 
 const getClassList = async () => {
     try {
-        uni.showLoading(); // 屏幕中间黑方框中间转圈效果
+        uni.showLoading();
         isRunning.value = true;
 
-        let res = await apiGetClassList(queryParams.value);
+        const res = await apiGetClassList(queryParams.value);
+        const fullData = (res.data || []).map((item) => handlePicUrl(item));
 
-        // 增加缩略图samllPicurl字段
-        let fullData = res.data.map((item) => handlePicUrl(item));
-
-        // // 两表关联增加 classify_name 用来显示
-        // let classRes = await apiGetClassify();
-        // // 1. 将listA转换为Map，键为classid，值为对象
-        // const classMap = new Map(classRes.data.map(item => [item.id, item]));
-        // // 2. 遍历listB，通过Map关联数据
-        // fullData = fullData.map(item => {
-        //   const matchedClass = classMap.get(item.classify_id);
-        //   return { ...item, classify_name:matchedClass.name };
-        // })
-
-        // classList.value = [...classList.value, ...res.data];
-        // classList.value.push(...fullData); // 推荐该方法，不用重新赋值
         pendingList.value.push(...fullData);
         classList.value = [...pendingList.value];
 
         if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
-
-        // 缓存数据
         uni.setStorageSync('wallList', classList.value);
     } finally {
         uni.hideLoading();
@@ -125,28 +171,61 @@ const getClassList = async () => {
     }
 };
 
-// 传递给query-panel的方法，供子组件调用
-const onQuery = (sortord) => {
-    // order by 字段：random / score / date_asc /date_desc
+const runQuery = (sortord) => {
     init(sortord, [...pendingList.value]);
     pendingList.value = [];
     getClassList();
-    backToTopRef.value.scrollToTop();
+    backToTopRef.value?.scrollToTop();
+};
+
+const onRecommend = () => {
+    activeButton.value = 'recommend';
+    dateSortAsc.value = true;
+    runQuery('random');
+};
+
+const onScore = () => {
+    activeButton.value = 'score';
+    dateSortAsc.value = true;
+    runQuery('score');
+};
+
+const onDateSort = () => {
+    activeButton.value = 'date';
+    dateSortAsc.value = !dateSortAsc.value;
+    runQuery(dateSortAsc.value ? 'date_asc' : 'date_desc');
+};
+
+const onChangeColumn = () => {
+    settingsStore.options.column = settingsStore.options.column === 3 ? 2 : 3;
+};
+
+const onChangeView = () => {
+    settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
+};
+
+const goBack = () => {
+    uni.navigateBack({
+        fail: () => {
+            uni.reLaunch({
+                url: '/pages/app/index',
+            });
+        },
+    });
+};
+
+const goSearch = () => {
+    uni.navigateTo({
+        url: '/pages/app/search',
+    });
 };
 
 onLoad((e) => {
-    // 页面加载时，获取id。比较慢，推荐使用获取页面参数，可以在setup中直接使用
-
-    // console.log('解析url传入的参数，比如：?id=5&name=明星美女', e);
-    let { id, name } = e;
-
-    // 如果bug进入没有参数的页面，默认返回首页，不关键
+    const { id } = e;
     if (!id) {
         gotoHome();
         return;
     }
-
-    // 获取数据
     getClassList();
 });
 
@@ -154,53 +233,276 @@ onUnload(() => {
     uni.removeStorageSync('wallList');
 });
 
-// 触底加载更多
 onReachBottom(() => {
-    // 如果已经没有数据，不再出发接口调用
     if (noData.value) return;
-
-    // 实现触底加载更多
     queryParams.value.pageNum++;
     getClassList();
 });
 
-// 下拉刷新
 onPullDownRefresh(() => {
-    console.log('onPullDownRefresh');
     classList.value = [];
+    pendingList.value = [];
     uni.removeStorageSync('wallList');
-
     getClassList();
-
-    // uni.hideNavigationBarLoading();
     uni.stopPullDownRefresh();
     isRunning.value = false;
 });
 
 onPageScroll((e) => {
-    backToTopRef.value.showBackToTop = e.scrollTop > 200; // 当滚动距离超过200px时显示按钮
+    backToTopRef.value.showBackToTop = e.scrollTop > 260;
+    const heroHeightPx = uni.upx2px(560);
+    showTopbar.value = e.scrollTop >= Math.max(heroHeightPx - navBarHeight.value, 0);
 });
 
-//分享给好友
-onShareAppMessage((e) => {
+onShareAppMessage(() => {
     return {
         title: '本我壁纸: ' + props.name,
         path: '/pages/app/classlist?id=' + queryParams.value.classify_id + '&name=' + props.name,
     };
 });
 
-//分享朋友圈
 onShareTimeline(() => {
     return {
         title: '本我壁纸: ' + props.name,
-        // query: "id=" + queryParams.value.classify_id + "&name=" + props.name
     };
 });
 </script>
 
 <style lang="scss" scoped>
 .layout {
-    background-color: #f5f5f5;
     min-height: 100vh;
+    background:
+        radial-gradient(circle at top right, rgba(97, 154, 239, 0.18), transparent 24%),
+        linear-gradient(180deg, #0b1017 0%, #10161f 32%, #0b1017 100%);
+}
+
+.top-shell {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 120;
+}
+
+.status-bar-bg {
+    width: 100%;
+    background: #0b1017;
+}
+
+.topbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 121;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24rpx;
+    background: #0b1017;
+    border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.topbar__left {
+    display: flex;
+    align-items: center;
+    gap: 18rpx;
+    min-width: 0;
+}
+
+.topbar__back,
+.topbar__icon {
+    width: 70rpx;
+    height: 70rpx;
+    border-radius: 999rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topbar__back {
+    background: rgba(97, 154, 239, 0.12);
+    border: 1rpx solid rgba(97, 154, 239, 0.16);
+}
+
+.topbar__back--bar {
+    background: rgba(97, 154, 239, 0.08);
+}
+
+.topbar__title {
+    font-size: 34rpx;
+    font-weight: 700;
+    color: #f8fbff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 420rpx;
+}
+
+.topbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+}
+
+.topbar__icon {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.fill {
+    width: 100%;
+}
+
+.hero {
+    position: relative;
+    width: 100%;
+    height: 560rpx;
+    overflow: hidden;
+}
+
+.hero__back {
+    position: absolute;
+    left: 24rpx;
+    z-index: 2;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 999rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 14, 21, 0.46);
+    border: 1rpx solid rgba(255, 255, 255, 0.08);
+}
+
+.hero__image {
+    width: 100%;
+    height: 100%;
+}
+
+.hero__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(8, 12, 18, 0.1) 0%, rgba(8, 12, 18, 0.26) 45%, rgba(8, 12, 18, 0.92) 100%);
+}
+
+.hero__content {
+    position: absolute;
+    left: 28rpx;
+    right: 28rpx;
+    bottom: 34rpx;
+    z-index: 1;
+}
+
+.hero__badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40rpx;
+    padding: 0 14rpx;
+    border-radius: 999rpx;
+    background: rgba(97, 154, 239, 0.16);
+    border: 1rpx solid rgba(97, 154, 239, 0.22);
+    color: #7fb2ff;
+    font-size: 18rpx;
+    font-weight: 800;
+    letter-spacing: 2rpx;
+    margin-bottom: 14rpx;
+}
+
+.hero__title {
+    font-size: 66rpx;
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -2rpx;
+    color: #ffffff;
+    text-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.34);
+}
+
+.hero__desc {
+    margin-top: 12rpx;
+    max-width: 540rpx;
+    font-size: 24rpx;
+    line-height: 1.7;
+    color: rgba(226, 232, 240, 0.76);
+}
+
+.toolbar {
+    position: sticky;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16rpx;
+    padding: 18rpx 24rpx 20rpx;
+    background: rgba(11, 16, 23, 0.94);
+    backdrop-filter: blur(18rpx);
+    border-bottom: 1rpx solid rgba(255, 255, 255, 0.04);
+}
+
+.toolbar__chips {
+    flex: 1;
+    white-space: nowrap;
+}
+
+.toolbar__chips-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 14rpx;
+    padding-right: 16rpx;
+}
+
+.toolbar__chip {
+    min-height: 68rpx;
+    padding: 0 26rpx;
+    border-radius: 999rpx;
+    display: inline-flex;
+    align-items: center;
+    gap: 8rpx;
+    font-size: 24rpx;
+    font-weight: 600;
+    color: #c2cfdf;
+    background: rgba(32, 40, 52, 0.92);
+    border: 1rpx solid rgba(255, 255, 255, 0.05);
+}
+
+.toolbar__chip.is-active {
+    color: #f8fbff;
+    background: #619aef;
+    border-color: rgba(97, 154, 239, 0.24);
+    box-shadow: 0 14rpx 30rpx rgba(97, 154, 239, 0.24);
+}
+
+.toolbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    flex-shrink: 0;
+}
+
+.toolbar__action {
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: 18rpx;
+    background: rgba(41, 52, 68, 0.96);
+    border: 1rpx solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar__action image {
+    width: 38rpx;
+    height: 38rpx;
+}
+
+.toolbar__action-icon {
+    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%) contrast(101%);
+}
+
+.content-wrapper {
+    padding-bottom: 48rpx;
+}
+
+.loadingLayout {
+    padding: 26rpx 0 0;
 }
 </style>

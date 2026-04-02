@@ -94,6 +94,7 @@ const listWithAds = computed(() => {
 
 const onImageClick = (item) => {
     if (!item.isAd) {
+        uni.setStorageSync('wallList', props.classList || []);
         uni.navigateTo({
             url: `/pages/app/preview?id=${item.id}`,
         });

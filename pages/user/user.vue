@@ -22,14 +22,14 @@
                     <view class="details-top">
                         <view class="name-row">
                             <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
-                            <view v-if="userStore.userinfo.profile.is_vip" class="vip-badge">
+                            <!-- <view v-if="userStore.userinfo.profile.is_vip" class="vip-badge">
                                 <uni-icons type="vip-filled" size="14" color="#fff"></uni-icons>
                                 <text>{{ t('user.profile.member') }}</text>
                             </view>
                             <view v-else class="non-vip-badge" @click="toMembership">
                                 <text>成为会员</text>
                                 <uni-icons type="arrow-right" size="12" color="#28B389"></uni-icons>
-                            </view>
+                            </view> -->
                         </view>
                         <view class="edit-btn" @click="toEditProfile">
                             {{ t('user.profile.editProfile') }}

@@ -181,6 +181,55 @@
                 </scroll-view>
             </view>
         </uni-popup>
+
+        <uni-popup ref="ratePopup" type="center" :mask-click="true" :safe-area="true">
+            <view class="rate-popup">
+                <view class="rate-popup__close" @click="closeRatePopup">
+                    <mdi-icon path="/static/icons/close.svg" size="18px" color="#2f3949"></mdi-icon>
+                </view>
+
+                <text class="rate-popup__title">{{ t('settings1.ratePopup.title') }}</text>
+
+                <view class="rate-popup__stars">
+                    <uni-icons
+                        class="rate-star-icon rate-star-icon--xs"
+                        type="star-filled"
+                        size="28"
+                        color="#ffbf0b"
+                    ></uni-icons>
+                    <uni-icons
+                        class="rate-star-icon rate-star-icon--sm"
+                        type="star-filled"
+                        size="54"
+                        color="#ffbf0b"
+                    ></uni-icons>
+                    <uni-icons
+                        class="rate-star-icon rate-star-icon--lg"
+                        type="star-filled"
+                        size="92"
+                        color="#ffbf0b"
+                    ></uni-icons>
+                    <uni-icons
+                        class="rate-star-icon rate-star-icon--sm"
+                        type="star-filled"
+                        size="54"
+                        color="#ffbf0b"
+                    ></uni-icons>
+                    <uni-icons
+                        class="rate-star-icon rate-star-icon--xs"
+                        type="star-filled"
+                        size="28"
+                        color="#ffbf0b"
+                    ></uni-icons>
+                </view>
+
+                <text class="rate-popup__desc">{{ t('settings1.ratePopup.desc') }}</text>
+
+                <button class="rate-popup__button" @click="confirmRateNow">
+                    {{ t('settings1.ratePopup.confirm') }}
+                </button>
+            </view>
+        </uni-popup>
     </view>
 </template>
 
@@ -196,6 +245,7 @@ const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const previewTypePopup = ref(null);
 const aboutPopup = ref(null);
+const ratePopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
 const APP_INFO = uni.getAppBaseInfo();
@@ -449,7 +499,7 @@ const sections = computed(() => {
                     icon: '/static/icons/star.svg',
                     label: t('settings1.items.rateUs.label'),
                     sublabel: t('settings1.items.rateUs.sublabel'),
-                    action: goAppStore,
+                    action: openRatePopup,
                 },
                 {
                     key: 'share_app',
@@ -548,6 +598,14 @@ function closeAboutPopup() {
     aboutPopup.value?.close();
 }
 
+function openRatePopup() {
+    ratePopup.value?.open();
+}
+
+function closeRatePopup() {
+    ratePopup.value?.close();
+}
+
 function setPreviewType(type) {
     settingsStore.options.previewType = type;
     closePreviewTypePopup();
@@ -616,33 +674,34 @@ function copyEmail() {
     });
 }
 
-function goAppStore() {
-    uni.showModal({
-        title: t('common.tip'),
-        content: t('about.rateTip'),
-        success: (res) => {
-            if (res.confirm) {
-                // 根据不同平台和渠道，打开对应的应用商店
-                // platform: SYSTEM_INFO.uniPlatform === 'app' ? SYSTEM_INFO.platform : SYSTEM_INFO.uniPlatform,
-                // channel: channel,
+function openAppStore() {
+    try {
+        // #ifdef APP
+        const channel = plus.runtime.channel;
+        if (channel === 'google') {
+            plus.runtime.openURL('market://details?id=com.wallpaper.app.ego');
+        } else {
+            plus.runtime.openURL('itms-apps://itunes.apple.com/app/idYOUR_APP_ID');
+        }
+        // #endif
 
-                // #ifdef APP
-                channel = plus.runtime.channel;
-                if (channel === 'google') {
-                    plus.runtime.openURL('market://details?id=com.wallpaper.app.ego');
-                } else {
-                    plus.runtime.openURL('itms-apps://itunes.apple.com/app/idYOUR_APP_ID');
-                }
-                // #endif
-            }
-        },
-        fail: () => {
-            uni.showToast({
-                title: t('about.rateFailed'),
-                icon: 'none',
-            });
-        },
-    });
+        // #ifdef H5
+        uni.showToast({
+            title: t('settings1.ratePopup.webHint'),
+            icon: 'none',
+        });
+        // #endif
+    } catch (error) {
+        uni.showToast({
+            title: t('about.rateFailed'),
+            icon: 'none',
+        });
+    }
+}
+
+function confirmRateNow() {
+    closeRatePopup();
+    openAppStore();
 }
 
 function shareApp() {
@@ -953,6 +1012,92 @@ function shareApp() {
     margin-top: 10rpx;
     font-size: 22rpx;
     color: #4f596d;
+}
+
+.rate-popup {
+    width: 76vw;
+    max-width: 560rpx;
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 22px 18px 22px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 24px 72px rgba(15, 23, 42, 0.18);
+}
+
+.rate-popup__close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 26px;
+    height: 26px;
+    border-radius: 30px;
+    border: 1.5px solid #31394a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rate-popup__title {
+    font-size: 20px;
+    line-height: 1.2;
+    font-weight: 800;
+    color: #1f2740;
+    text-align: center;
+}
+
+.rate-popup__stars {
+    margin-top: 18px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 10px;
+}
+
+.rate-star-icon {
+    text-shadow: 0 6px 0 rgba(191, 100, 0, 0.42);
+}
+
+.rate-star-icon--lg {
+    margin-bottom: 0;
+}
+
+.rate-star-icon--sm {
+    margin-bottom: 6px;
+}
+
+.rate-star-icon--xs {
+    margin-bottom: 16px;
+}
+
+.rate-popup__desc {
+    margin-top: 18px;
+    font-size: 18px;
+    line-height: 1.35;
+    color: #2b3147;
+    text-align: center;
+    white-space: pre-line;
+}
+
+.rate-popup__button {
+    margin-top: 22px;
+    min-width: 176px;
+    height: 52px;
+    border-radius: 999px;
+    background: #1f2640;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 16px 32px rgba(31, 38, 64, 0.18);
+}
+
+.rate-popup__button::after {
+    border: none;
 }
 
 .about-popup {

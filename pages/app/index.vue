@@ -71,7 +71,7 @@
             <index-title>
                 <template #name>{{ $t('index.latestRelease') }}</template>
                 <template #custom>
-                    <navigator class="box" url="/pages/app/latest">
+                    <navigator class="box" url="/pages/app/timeline">
                         <button size="mini" plain class="btn" :class="{ active: false }">{{ $t('common.seeAll') }}</button>
                     </navigator>
                 </template>

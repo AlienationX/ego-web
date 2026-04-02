@@ -245,6 +245,14 @@ export const apiPostRewards = (data = {}) => {
     });
 };
 
+// 获取相似壁纸接口
+export const apiGetSimilarWall = (id = '') => {
+    return request({
+        url: `/similar/${id}/precomputed/`,
+        method: 'GET',
+    });
+};
+
 // 发现分析接口
 export const apiPostDiscoverAnalyze = (data = {}) => {
     return request({
