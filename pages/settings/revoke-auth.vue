@@ -38,12 +38,21 @@ import { computed, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { permissionEnums } from '@/common/app_permission.js';
 
 const { t } = useI18n();
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
 const appAuthorizeSetting = ref({});
+const androidPermissionStatus = ref({});
+
+const APP_PLUS_PERMISSION_PREFIX = 'android.permission.';
+const ALBUM_PERMISSION_NAMES = Object.keys(permissionEnums)
+    .find((key) => key.includes('READ_MEDIA_IMAGES'))
+    ?.split(',')
+    .map((item) => item.trim())
+    .filter(Boolean) || ['READ_MEDIA_IMAGES'];
 
 const permissionConfigs = computed(() => [
     {
@@ -64,11 +73,11 @@ const permissionConfigs = computed(() => [
         desc: t('settings.revokeAuth.items.location.desc'),
         authKeys: ['locationAuthorized'],
     },
-    
+
     // 电话权限（READ_PHONE_STATE）：用于获取本机号码，便于用户快速注册账号。我们仅在您选择使用手机号注册时请求此权限。
     // 已安装应用列表权限（QUERY_ALL_PACKAGES）：用于获取设备中已安装应用的账户列表，提供便捷登录和社交功能，以及进行用户画像或数据分析。我们仅在您使用相关功能时请求此权限。
     // 系统设置权限（WRITE_SETTINGS）：用于修改系统设置中的壁纸设置项，实现一键设置手机壁纸功能。我们仅在您主动点击设置壁纸时请求此权限。
-    
+
     // {
     //     key: 'microphone',
     //     title: t('settings.revokeAuth.items.microphone.title'),
@@ -103,6 +112,19 @@ const resolveStatus = (keys = []) => {
 
 const getStatusMeta = (item) => {
     const settings = appAuthorizeSetting.value || {};
+
+    if (item.key === 'album') {
+        const permissionGranted = ALBUM_PERMISSION_NAMES.some(
+            (permissionName) => androidPermissionStatus.value[permissionName] === true,
+        );
+        if (permissionGranted) {
+            return {
+                status: 'enabled',
+                statusText: t('settings.revokeAuth.status.enabled'),
+            };
+        }
+    }
+
     const status = resolveStatus(item.authKeys);
 
     if (item.key === 'location') {
@@ -170,68 +192,50 @@ const permissionItems = computed(() =>
 );
 
 const readAuthorizeSetting = () => {
-    if (typeof uni.getAppAuthorizeSetting === 'function') {
-        try {
-            appAuthorizeSetting.value = uni.getAppAuthorizeSetting() || {};
-            return;
-        } catch (error) {
-            appAuthorizeSetting.value = {};
-            return;
-        }
-    }
-    appAuthorizeSetting.value = {};
+    appAuthorizeSetting.value = uni.getAppAuthorizeSetting() || {};
+    // uni.getAppAuthorizeSetting() 安卓端仅能获取以下权限状态，有点弱，鸡肋
+    // {
+    //     "cameraAuthorized": "denied",
+    //     "microphoneAuthorized": "config error",
+    //     "notificationAuthorized": "denied",
+    //     "locationAccuracy": "full",
+    //     "locationAuthorized": "authorized"
+    // }
 };
 
-const openSystemSettings = () => {
-    if (typeof uni.openAppAuthorizeSetting === 'function') {
-        uni.openAppAuthorizeSetting({
-            fail: () => {
-                fallbackOpenSystemSettings();
-            },
-        });
-        return;
-    }
-
-    fallbackOpenSystemSettings();
-};
-
-const fallbackOpenSystemSettings = () => {
+const getAndroidPermissionStatus = (permissionName) => {
     // #ifdef APP-PLUS
-    if (typeof plus !== 'undefined' && plus.runtime) {
-        const osName = String(plus.os?.name || '').toLowerCase();
-        if (osName === 'android') {
-            plus.runtime.launchApplication(
-                {
-                    pname: 'com.android.settings',
-                },
-                () => {
-                    uni.showToast({
-                        title: t('settings.revokeAuth.unsupported'),
-                        icon: 'none',
-                    });
-                },
-            );
-            return;
-        }
+    if (typeof plus !== 'undefined' && plus.os?.name?.toLowerCase() === 'android') {
+        const mainActivity = plus.android.runtimeMainActivity();
+        const status = mainActivity.checkSelfPermission(`${APP_PLUS_PERMISSION_PREFIX}${permissionName}`);
+        return status === 0;
+    }
+    // #endif
 
-        plus.runtime.openURL('app-settings:');
+    return false;
+};
+
+const readAndroidPermissionStatus = () => {
+    // #ifdef APP-PLUS
+    if (typeof plus !== 'undefined' && plus.os?.name?.toLowerCase() === 'android') {
+        const nextStatus = {};
+        ALBUM_PERMISSION_NAMES.forEach((permissionName) => {
+            nextStatus[permissionName] = getAndroidPermissionStatus(permissionName);
+        });
+        androidPermissionStatus.value = nextStatus;
         return;
     }
     // #endif
 
-    if (typeof uni.openSetting === 'function') {
-        uni.openSetting();
-        return;
-    }
-
-    uni.showToast({
-        title: t('settings.revokeAuth.unsupported'),
-        icon: 'none',
-    });
+    androidPermissionStatus.value = {};
 };
 
-const handleItemClick = () => {
-    openSystemSettings();
+const handleItemClick = async (item) => {
+    uni.openAppAuthorizeSetting({
+        fail: () => {
+            uni.openSetting();
+        },
+    });
 };
 
 const goBack = () => {
@@ -242,6 +246,7 @@ const goBack = () => {
 
 onShow(() => {
     readAuthorizeSetting();
+    readAndroidPermissionStatus();
 });
 </script>
 

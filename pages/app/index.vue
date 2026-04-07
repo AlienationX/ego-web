@@ -530,28 +530,33 @@ onShareTimeline(() => {
         position: relative;
         margin: 30rpx 30rpx 0;
         padding: 24rpx 24rpx 24rpx 28rpx;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 18rpx;
+        display: block;
         min-height: 210rpx;
         overflow: visible;
         border-radius: 28rpx;
         background: linear-gradient(180deg, #40454f 0%, #393f48 100%);
         border: 1rpx solid rgba(255, 255, 255, 0.04);
         box-shadow: 0 10rpx 24rpx rgba(15, 23, 42, 0.1);
+        text-align: left;
     }
 
     .top-entry__content {
-        flex: 1;
-        min-width: 0;
+        width: 340rpx;
+        min-width: 340rpx;
         padding: 4rpx 0;
-        max-width: 370rpx;
+        margin-left: 0;
         position: relative;
         z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        justify-content: flex-start;
     }
 
     .top-entry__eyebrow {
+        display: block;
+        width: 100%;
         font-size: 20rpx;
         line-height: 1;
         font-weight: 800;
@@ -561,6 +566,8 @@ onShareTimeline(() => {
     }
 
     .top-entry__title {
+        display: block;
+        width: 100%;
         margin-top: 10rpx;
         font-size: 34rpx;
         line-height: 1.2;
@@ -569,6 +576,8 @@ onShareTimeline(() => {
     }
 
     .top-entry__desc {
+        display: block;
+        width: 100%;
         margin-top: 10rpx;
         font-size: 24rpx;
         line-height: 1.6;
@@ -578,9 +587,11 @@ onShareTimeline(() => {
 
     .top-entry__action {
         margin-top: 20rpx;
+        margin-left: 0;
+        align-self: flex-start;
         width: 56rpx;
         height: 56rpx;
-        border-radius: 999rpx;
+        border-radius: 16rpx;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -594,7 +605,7 @@ onShareTimeline(() => {
 
     .top-entry__visual {
         position: absolute;
-        right: 30rpx;
+        right: 10rpx;
         bottom: -18rpx;
         height: 384rpx;
         width: auto;

@@ -348,8 +348,7 @@ const sections = computed(() => {
                     icon: '/static/icons/translate.svg',
                     label: t('settings.items.language.label'),
                     sublabel: t('settings.items.language.sublabel'),
-                    value:
-                        locale.value === 'en' ? t('settings.items.language.valueEn') : t('settings.items.language.valueZh'),
+                    value: locale.value === 'en' ? t('settings.items.language.valueEn') : t('settings.items.language.valueZh'),
                     action: switchLanguage,
                 },
                 // #ifdef APP
@@ -455,18 +454,18 @@ const sections = computed(() => {
                     action: openAboutPopup,
                 },
                 {
-                    key: 'privacy',
-                    icon: '/static/icons/lock.svg',
-                    label: t('settings.items.privacy.label'),
-                    sublabel: t('settings.items.privacy.sublabel'),
-                    action: () => openHtmlFile('/privacy_agreement.html'),
-                },
-                {
                     key: 'privacy_permissions',
                     icon: '/static/icons/shield-check.svg',
                     label: t('settings.items.privacyPermissions.label'),
                     sublabel: t('settings.items.privacyPermissions.sublabel'),
                     action: () => uni.navigateTo({ url: '/pages/settings/revoke-auth' }),
+                },
+                {
+                    key: 'privacy',
+                    icon: '/static/icons/lock.svg',
+                    label: t('settings.items.privacy.label'),
+                    sublabel: t('settings.items.privacy.sublabel'),
+                    action: () => openHtmlFile('/privacy_agreement.html'),
                 },
                 {
                     key: 'agreement',

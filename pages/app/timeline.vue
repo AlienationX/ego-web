@@ -6,11 +6,11 @@
             scroll-y
             class="timeline-scroll"
             :style="{ height: contentHeight }"
-            :scroll-top="scrollTop"
-            scroll-with-animation
+            :scroll-into-view="scrollIntoViewTarget"
             @scroll="handleScroll"
         >
             <view class="timeline-wrap">
+                <view id="timeline-top-anchor" class="timeline-top-anchor"></view>
                 <view class="topbar">
                     <view class="topbar__back" @click="goBack">
                         <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#f4f8ff"></mdi-icon>
@@ -53,7 +53,7 @@
                                 :class="{ 'timeline-card--wide': idx === 0 && day.items.length > 1 }"
                                 @click="goPreview(item.id)"
                             >
-                                <image class="timeline-card__image" :src="item.smallPicurl" mode="aspectFill"></image>
+                                <image class="timeline-card__image" :src="item.smallPicurl" mode="aspectFill" lazy-load></image>
                                 <view class="timeline-card__overlay"></view>
                                 <view class="timeline-card__content">
                                     <view class="timeline-card__classify">
@@ -97,7 +97,7 @@ const { t, locale } = useI18n();
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px)`);
-const scrollTop = ref(0);
+const scrollIntoViewTarget = ref('');
 const showScrollTop = ref(false);
 const latestList = ref([]);
 
@@ -210,14 +210,19 @@ const goBack = () => {
 
 const handleScroll = (e) => {
     const top = Number(e?.detail?.scrollTop || 0);
-    scrollTop.value = top;
     const windowHeight = uni.getSystemInfoSync().windowHeight || 0;
-    showScrollTop.value = top > windowHeight / 2;
+    const nextVisible = top > windowHeight / 2;
+    if (showScrollTop.value !== nextVisible) {
+        showScrollTop.value = nextVisible;
+    }
 };
 
 const scrollToTop = () => {
-    scrollTop.value = 0;
+    scrollIntoViewTarget.value = 'timeline-top-anchor';
     showScrollTop.value = false;
+    setTimeout(() => {
+        scrollIntoViewTarget.value = '';
+    }, 80);
 };
 
 onLoad(() => {
@@ -247,6 +252,11 @@ onLoad(() => {
     max-width: 860rpx;
     margin: 0 auto;
     padding: 18rpx 24rpx 72rpx;
+}
+
+.timeline-top-anchor {
+    width: 100%;
+    height: 1rpx;
 }
 
 .topbar {
