@@ -206,8 +206,8 @@ const userStore = useUserStore();
 const hasCheckedInToday = ref(false);
 
 const toLogin = () => {
-    // uni.navigateTo({ url: '/pages/auth/signin' });
-    uni.navigateTo({ url: '/pages/auth/login' });
+    uni.navigateTo({ url: '/pages/auth/signin' });
+    // uni.navigateTo({ url: '/pages/auth/login' });
 };
 
 const toSettings = () => {
@@ -768,24 +768,32 @@ onShow(() => {
 
         .login-btn {
             margin-top: 20rpx;
-            width: 420rpx;
-            height: 88rpx;
+            width: 360rpx;
+            height: 84rpx;
             background: $wp-theme-color;
             color: #fff;
-            font-size: 32rpx;
-            font-weight: 700;
+            font-size: 30rpx;
+            font-weight: 600;
             border-radius: 60rpx;
-            border: none;
+            border: 2rpx solid rgba(24, 32, 42, 0.06);
             display: flex;
             align-items: center;
             justify-content: center;
-            letter-spacing: 0.6rpx;
-            box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.55);
-            transition: all 0.3s;
+            letter-spacing: 0.4rpx;
+            box-shadow:
+                0 12rpx 28rpx rgba(15, 23, 42, 0.12),
+                0 2rpx 6rpx rgba(15, 23, 42, 0.06);
+            transition:
+                transform 0.28s ease,
+                box-shadow 0.28s ease,
+                background-color 0.28s ease;
 
             &:active {
-                background: #2a8e06;
-                transform: scale(0.96);
+                background: #f7f9fc;
+                transform: scale(0.97);
+                box-shadow:
+                    0 8rpx 18rpx rgba(15, 23, 42, 0.1),
+                    0 2rpx 4rpx rgba(15, 23, 42, 0.05);
             }
 
             &::after {

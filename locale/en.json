@@ -23,7 +23,14 @@
         "clearHistory": "Clear search history?",
         "hotKeywords": "美女,帅哥,宠物,卡通",
         "privacy": "Privacy Policy",
-        "agreement": "User Agreement"
+        "agreement": "User Agreement",
+        "tip": "Tip",
+        "submitting": "Submitting...",
+        "submitSuccess": "Submitted successfully",
+        "submitFailed": "Submit failed",
+        "downloading": "Downloading...",
+        "downloadSuccess": "Downloaded successfully",
+        "downloadFailed": "Download failed"
     },
     "index": {
         "title": "Recommend",
@@ -361,6 +368,10 @@
         "empty": "No rated wallpapers yet",
         "goBrowse": "Browse Now",
         "untitled": "Untitled",
+        "delete": "Delete",
+        "deleteConfirm": "Are you sure you want to remove this rating?",
+        "deleteSuccess": "Rating removed",
+        "deleteFailed": "Failed to remove rating",
         "justNow": "Just now",
         "minutesAgo": " min ago",
         "hoursAgo": " hours ago",
@@ -396,33 +407,6 @@
         "goFavorite": "Go to Favorites",
         "systemError": "System error, please try again later"
     },
-    "common": {
-        "appName": "Ego Wallpapers",
-        "more": "More",
-        "refresh": "Refresh",
-        "month": "Month",
-        "day": "Day",
-        "seeAll": "See All",
-        "search": "Search",
-        "information": "Information",
-        "download": "Download",
-        "points": "Points",
-        "recommend": "Recommend",
-        "score": "Score",
-        "publishDate": "Date",
-        "hotSearch": "Hot search",
-        "recentSearch": "Recnet search",
-        "noResult": "Sorry, it's empty here.",
-        "clearHistory": "Clear search history?",
-        "hotKeywords": "美女,帅哥,宠物,卡通",
-        "tip": "Tip",
-        "submitting": "Submitting...",
-        "submitSuccess": "Submitted successfully",
-        "submitFailed": "Submit failed",
-        "downloading": "Downloading...",
-        "downloadSuccess": "Downloaded successfully",
-        "downloadFailed": "Download failed"
-    },
     "about": {
         "title": "About Us",
         "slogan": "Explore Wallpapers, Discover Yourself",
@@ -451,7 +435,7 @@
         "shareFailed": "Share failed",
         "introText": "Ego Wallpapers is a high-quality wallpaper application. We have gathered massive beautiful wallpapers covering various styles and categories, providing users with the best wallpaper selection experience. Whether it's landscape, portraits, anime, or abstract art, you can find your favorite wallpapers here."
     },
-    "settings1": {
+    "settings": {
         "title": "Settings",
         "defaultName": "Sample User",
         "version": "Version",
@@ -559,6 +543,10 @@
                 "label": "Privacy Policy",
                 "sublabel": "View privacy and data statement"
             },
+            "privacyPermissions": {
+                "label": "Privacy Settings",
+                "sublabel": "Manage system permissions and access"
+            },
             "agreement": {
                 "label": "User Agreement",
                 "sublabel": "View terms of service"
@@ -593,6 +581,47 @@
             "desc": "If you enjoy using our app,\nPlease rate us",
             "confirm": "Rate Now",
             "webHint": "Please search for this app in your app store to rate it"
+        },
+        "revokeAuth": {
+            "title": "Revoke Authorization",
+            "enabled": "Enabled",
+            "pending": "Pending",
+            "action": "Manage",
+            "unsupported": "This device does not support opening settings directly",
+            "status": {
+                "enabled": "Enabled",
+                "pending": "Pending",
+                "manage": "Manage",
+                "locationApprox": "Approximate",
+                "notificationsOn": "Enabled",
+                "floatOn": "Enabled"
+            },
+            "items": {
+                "album": {
+                    "title": "Allow access to files and photo library",
+                    "desc": "We need photo access to save downloaded wallpapers, upload feedback images, and update your avatar."
+                },
+                "location": {
+                    "title": "Allow access to location information",
+                    "desc": "Used for nearby recommendations and region-based content after permission is granted."
+                },
+                "camera": {
+                    "title": "Allow camera access",
+                    "desc": "Required when taking photos for feedback attachments or profile images."
+                },
+                "microphone": {
+                    "title": "Allow microphone access",
+                    "desc": "Needed when using voice input or audio-related features in the app."
+                },
+                "notification": {
+                    "title": "Allow notifications",
+                    "desc": "Used for update reminders, download progress, and service-related alerts."
+                },
+                "floatWindow": {
+                    "title": "Allow floating window permission",
+                    "desc": "Used on some devices for quick access and does not affect regular browsing."
+                }
+            }
         },
         "toast": {
             "themeChanged": "Theme changed",
@@ -648,16 +677,12 @@
         "warnTitle": "Before you go",
         "warnDesc": "Deactivating your account will suspend access to all features and data. Please review what will happen.",
         "happenTitle": "What will happen",
-        "happen1Icon": "🚫",
         "happen1Title": "Immediate access suspension",
         "happen1Desc": "You'll be signed out across all devices.",
-        "happen2Icon": "💾",
         "happen2Title": "Data held for 30 days",
         "happen2Desc": "Reports, tasks, and history are retained.",
-        "happen3Icon": "📧",
         "happen3Title": "Confirmation email sent",
         "happen3Desc": "A receipt will be sent to your registered email.",
-        "happen4Icon": "↩️",
         "happen4Title": "Reactivation possible",
         "happen4Desc": "Contact support within 30 days to restore.",
         "reasonTitle": "Reason (optional)",
@@ -696,5 +721,46 @@
         "doneTitle": "You've been logged out",
         "doneDesc": "See you next time, {name}! Your data and settings are safely stored.",
         "backSettings": "Back to Settings"
+    },
+    "changePasswordPage": {
+        "title": "Change Password",
+        "banner": "Use at least 8 characters. Mix uppercase letters, numbers, and symbols for a stronger password.",
+        "sections": {
+            "current": "Current Password",
+            "next": "New Password"
+        },
+        "fields": {
+            "current": "Current password",
+            "next": "New password",
+            "confirm": "Confirm new password"
+        },
+        "match": {
+            "ok": "Passwords match",
+            "fail": "Passwords don't match"
+        },
+        "requirements": {
+            "title": "Requirements",
+            "length": "At least 8 characters",
+            "uppercase": "One uppercase letter",
+            "number": "One number",
+            "special": "One special character"
+        },
+        "submit": "Update Password",
+        "success": {
+            "title": "Password Updated",
+            "desc": "Your password has been changed successfully. You'll need to use your new password next time you log in.",
+            "button": "Back to Settings"
+        },
+        "errors": {
+            "notMatch": "New passwords do not match.",
+            "minLength": "Password must be at least 8 characters.",
+            "failed": "Failed to update password."
+        },
+        "strength": {
+            "weak": "Weak",
+            "fair": "Fair",
+            "good": "Good",
+            "strong": "Strong"
+        }
     }
 }

@@ -9,8 +9,8 @@ export const request = (config = {}) => {
             resolve(await sendRequest(config));
         } catch (err1) {
             const userStore = useUserStore();
-            // 捕获到token过期的401错误，Token 过期时自动刷新并重试，不是token过期直接返回错误
-            if (err1.code === 401 && userStore.refreshToken) {
+            // 捕获到token过期的401错误或token_not_valid，Token 过期时自动刷新并重试，不是token过期直接返回错误
+            if (userStore.refreshToken && (err1.code === 401 || err1.code === 'token_not_valid')) {
                 try {
                     console.log('retry request ----------->', err1);
                     // 两次异常捕获，第一次是捕获token过期，第二次是捕获真正异常
@@ -67,7 +67,7 @@ const sendRequest = (config = {}) => {
             success: (res) => {
                 if (res.data.code === 200 || res.data.code === 201) {
                     resolve(res.data); // 成功返回数据
-                } else if (res.data.code === 401) {
+                } else if (res.data.code === 401 || res.data.code === 'token_not_valid') {
                     reject(res.data); // 这里的reject会被外层catch捕获
                 } else {
                     if (res.data.code === undefined) {

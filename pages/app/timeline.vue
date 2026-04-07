@@ -34,7 +34,7 @@
                         <view class="month-section__meta">
                             <text class="month-section__year">{{ month.year }}</text>
                             <view class="month-section__line"></view>
-                            <text class="month-section__tag">{{ t('timeline.recentTag', { count: month.count }) }}</text>
+                            <text class="month-section__tag">{{ formatRecentTag(month.count) }}</text>
                         </view>
                     </view>
 
@@ -53,7 +53,7 @@
                                 :class="{ 'timeline-card--wide': idx === 0 && day.items.length > 1 }"
                                 @click="goPreview(item.id)"
                             >
-                                <image class="timeline-card__image" :src="item.picurl || item.smallPicurl" mode="aspectFill"></image>
+                                <image class="timeline-card__image" :src="item.smallPicurl" mode="aspectFill"></image>
                                 <view class="timeline-card__overlay"></view>
                                 <view class="timeline-card__content">
                                     <view class="timeline-card__classify">
@@ -134,6 +134,13 @@ const formatTime = (item) => {
     const h = String(date.getHours()).padStart(2, '0');
     const m = String(date.getMinutes()).padStart(2, '0');
     return `${h}:${m}`;
+};
+
+const formatRecentTag = (count) => {
+    if (isZh.value) {
+        return `最新 ${count} 张`;
+    }
+    return `LATEST ${count}`;
 };
 
 const monthGroups = computed(() => {
@@ -339,7 +346,7 @@ onLoad(() => {
 }
 
 .month-section__year {
-    font-size: 34rpx;
+    font-size: 38rpx;
     font-weight: 800;
     color: #f5f8ff;
 }
@@ -351,7 +358,7 @@ onLoad(() => {
 }
 
 .month-section__tag {
-    font-size: 18rpx;
+    font-size: 20rpx;
     font-weight: 800;
     letter-spacing: 3rpx;
     color: #619aef;

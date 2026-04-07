@@ -217,6 +217,14 @@
             }
         },
         {
+            "path": "pages/settings/revoke-auth",
+            "style": {
+                "navigationBarTitleText": "撤回授权",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/auth/change-password",
             "style": {
                 "navigationBarTitleText": "Change Password",

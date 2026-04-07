@@ -281,7 +281,7 @@ import { useUserStore } from '@/stores/user.js';
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-const PREVIEW_SCROLL_HINT_KEY = 'preview_scroll_hint_seen';
+const PREVIEW_SCROLL_HINT_KEY = 'hasSeenHint';
 
 const { t, locale } = useI18n();
 const weekNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];

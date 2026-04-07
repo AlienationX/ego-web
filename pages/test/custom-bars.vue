@@ -59,7 +59,12 @@
             </view>
         </view>
 
-        <glass-tab-bar current-path="/pages/discover/discover" :theme="currentTheme"></glass-tab-bar>
+        <glass-tab-bar
+            :current-path="currentTabPath"
+            :theme="currentTheme"
+            :disable-navigation="true"
+            @change="handleTabChange"
+        ></glass-tab-bar>
     </view>
 </template>
 
@@ -69,6 +74,7 @@ import GlassNavBar from '@/components/glass-nav-bar/glass-nav-bar.vue';
 import GlassTabBar from '@/components/glass-tab-bar/glass-tab-bar.vue';
 
 const currentTheme = ref(uni.getStorageSync('theme') || 'light');
+const currentTabPath = ref('/pages/discover/discover');
 const themeButtonText = computed(() => (currentTheme.value === 'dark' ? '浅色' : '深色'));
 
 const handleAction = () => {
@@ -85,6 +91,10 @@ const goPage = (url, isTab = false) => {
         return;
     }
     uni.navigateTo({ url });
+};
+
+const handleTabChange = (item) => {
+    currentTabPath.value = item.pagePath;
 };
 </script>
 

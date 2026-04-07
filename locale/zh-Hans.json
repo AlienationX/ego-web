@@ -366,6 +366,10 @@
         "empty": "还没有评分任何壁纸",
         "goBrowse": "去浏览",
         "untitled": "未命名",
+        "delete": "删除",
+        "deleteConfirm": "确定删除这条评分记录吗？",
+        "deleteSuccess": "评分已删除",
+        "deleteFailed": "删除评分失败",
         "justNow": "刚刚",
         "minutesAgo": "分钟前",
         "hoursAgo": "小时前",
@@ -429,7 +433,7 @@
         "shareFailed": "分享失败",
         "introText": "本我壁纸是一款专注于提供高质量壁纸的应用。我们汇集了海量的精美壁纸，涵盖多种风格和分类，为用户提供最佳的壁纸选择体验。无论是风景、人物、动漫还是抽象艺术，你都能在这里找到心仪的壁纸。"
     },
-    "settings1": {
+    "settings": {
         "title": "设置",
         "defaultName": "示例用户",
         "version": "版本",
@@ -537,6 +541,10 @@
                 "label": "隐私政策",
                 "sublabel": "查看隐私与数据声明"
             },
+            "privacyPermissions": {
+                "label": "隐私设置",
+                "sublabel": "管理系统授权与访问权限"
+            },
             "agreement": {
                 "label": "用户协议",
                 "sublabel": "查看服务条款"
@@ -571,6 +579,47 @@
             "desc": "如果你喜欢使用我们的应用，\n请给我们一个评分",
             "confirm": "立即评分",
             "webHint": "请在应用商店中搜索本应用进行评分"
+        },
+        "revokeAuth": {
+            "title": "撤回授权",
+            "enabled": "已开启",
+            "pending": "待授权",
+            "action": "去设置",
+            "unsupported": "当前设备暂不支持直接打开设置",
+            "status": {
+                "enabled": "已开启",
+                "pending": "待授权",
+                "manage": "去设置",
+                "locationApprox": "模糊位置",
+                "notificationsOn": "已开启",
+                "floatOn": "已开启"
+            },
+            "items": {
+                "album": {
+                    "title": "允许本应用使用文件存储和访问功能",
+                    "desc": "为了在下载壁纸时保存到相册，以及在反馈、修改头像时上传图片，我们需要访问你的相册。"
+                },
+                "location": {
+                    "title": "允许本应用访问位置信息",
+                    "desc": "为增强附近推荐和区域内容展示，我们会在授权后读取位置信息。"
+                },
+                "camera": {
+                    "title": "允许本应用使用相机功能",
+                    "desc": "当你需要拍照上传反馈或头像图片时，我们需要使用相机权限。"
+                },
+                "microphone": {
+                    "title": "允许本应用使用麦克风信息",
+                    "desc": "当使用语音输入或音频相关功能时，我们需要访问麦克风权限。"
+                },
+                "notification": {
+                    "title": "允许本应用发送通知提醒",
+                    "desc": "用于接收更新提醒、下载状态和其他服务通知。"
+                },
+                "floatWindow": {
+                    "title": "允许本应用使用悬窗功能",
+                    "desc": "在部分设备上用于展示快捷入口，不会影响主要内容浏览。"
+                }
+            }
         },
         "toast": {
             "themeChanged": "主题已切换",
@@ -626,16 +675,12 @@
         "warnTitle": "离开前确认",
         "warnDesc": "停用账号将暂停所有功能与数据访问。请确认以下内容。",
         "happenTitle": "将发生的事情",
-        "happen1Icon": "🚫",
         "happen1Title": "立即暂停访问",
         "happen1Desc": "你会在所有设备上退出登录。",
-        "happen2Icon": "💾",
         "happen2Title": "数据保留 30 天",
         "happen2Desc": "报告、任务与历史记录将被保留。",
-        "happen3Icon": "📧",
         "happen3Title": "发送确认邮件",
         "happen3Desc": "将向你的注册邮箱发送回执。",
-        "happen4Icon": "↩️",
         "happen4Title": "可申请恢复",
         "happen4Desc": "30 天内联系支持可恢复账号。",
         "reasonTitle": "原因（可选）",
@@ -674,5 +719,46 @@
         "doneTitle": "你已退出登录",
         "doneDesc": "下次再见，{name}！你的数据和设置已安全保存。",
         "backSettings": "返回设置"
+    },
+    "changePasswordPage": {
+        "title": "修改密码",
+        "banner": "请至少使用 8 个字符，并混合大写字母、数字和符号，以创建更安全的密码。",
+        "sections": {
+            "current": "当前密码",
+            "next": "新密码"
+        },
+        "fields": {
+            "current": "当前密码",
+            "next": "新密码",
+            "confirm": "确认新密码"
+        },
+        "match": {
+            "ok": "密码一致",
+            "fail": "两次输入的密码不一致"
+        },
+        "requirements": {
+            "title": "密码要求",
+            "length": "至少 8 个字符",
+            "uppercase": "至少 1 个大写字母",
+            "number": "至少 1 个数字",
+            "special": "至少 1 个特殊字符"
+        },
+        "submit": "更新密码",
+        "success": {
+            "title": "密码已更新",
+            "desc": "你的密码已成功修改。下次登录时，请使用新的密码。",
+            "button": "返回设置"
+        },
+        "errors": {
+            "notMatch": "两次输入的新密码不一致。",
+            "minLength": "密码长度至少需要 8 个字符。",
+            "failed": "更新密码失败。"
+        },
+        "strength": {
+            "weak": "弱",
+            "fair": "一般",
+            "good": "良好",
+            "strong": "强"
+        }
     }
 }

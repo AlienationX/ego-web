@@ -204,7 +204,7 @@ const handleLogin = async () => {
 
         setTimeout(() => {
             uni.reLaunch({
-                url: '/pages/app/index',
+                url: '/pages/user/user',
             });
         }, 1500);
     } catch (error) {

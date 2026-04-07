@@ -28,7 +28,9 @@
                         :key="item.title"
                         :class="{ last: idx === happenList.length - 1 }"
                     >
-                        <text class="list-emoji">{{ item.icon }}</text>
+                        <view class="list-icon">
+                            <mdi-icon :path="item.icon" size="20px" color="#475569"></mdi-icon>
+                        </view>
                         <view class="list-text">
                             <text class="list-title">{{ item.title }}</text>
                             <text class="list-desc">{{ item.desc }}</text>
@@ -78,6 +80,7 @@
                         v-model="confirmText"
                         class="confirm-input"
                         :placeholder="t('deactivate.placeholder')"
+                        placeholder-style="color: rgba(156, 163, 175, 0.5); font-weight: 500;"
                         @input="onConfirmInput"
                     />
 
@@ -145,10 +148,10 @@ const isConfirmed = computed(() => confirmText.value.trim().toUpperCase() === 'D
 const canSubmit = computed(() => isConfirmed.value && agree.value);
 
 const happenList = computed(() => [
-    { icon: t('deactivate.happen1Icon'), title: t('deactivate.happen1Title'), desc: t('deactivate.happen1Desc') },
-    { icon: t('deactivate.happen2Icon'), title: t('deactivate.happen2Title'), desc: t('deactivate.happen2Desc') },
-    { icon: t('deactivate.happen3Icon'), title: t('deactivate.happen3Title'), desc: t('deactivate.happen3Desc') },
-    { icon: t('deactivate.happen4Icon'), title: t('deactivate.happen4Title'), desc: t('deactivate.happen4Desc') },
+    { icon: '/static/icons/account-remove.svg', title: t('deactivate.happen1Title'), desc: t('deactivate.happen1Desc') },
+    { icon: '/static/icons/database-refresh.svg', title: t('deactivate.happen2Title'), desc: t('deactivate.happen2Desc') },
+    { icon: '/static/icons/email.svg', title: t('deactivate.happen3Title'), desc: t('deactivate.happen3Desc') },
+    { icon: '/static/icons/autorenew.svg', title: t('deactivate.happen4Title'), desc: t('deactivate.happen4Desc') },
 ]);
 
 const reasonList = computed(() => [
@@ -346,8 +349,15 @@ const onBack = () => {
     justify-content: space-between;
 }
 
-.list-emoji {
-    font-size: 36rpx;
+.list-icon {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 16rpx;
+    background: #f8fafc;
+    border: 2rpx solid #eef2f7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
 }
 

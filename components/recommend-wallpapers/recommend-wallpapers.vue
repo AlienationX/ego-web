@@ -9,7 +9,7 @@
                 <view class="recommend-panel__title">{{ t('preview.recommend.title') }}</view>
                 <view class="recommend-panel__desc">{{ t('preview.recommend.desc') }}</view>
             </view>
-            <view class="recommend-panel__count">{{ t('preview.recommend.topN', { count: limit }) }}</view>
+            <!-- <view class="recommend-panel__count">{{ t('preview.recommend.topN', { count: limit }) }}</view> -->
         </view>
 
         <view v-if="loading" class="recommend-panel__loading">

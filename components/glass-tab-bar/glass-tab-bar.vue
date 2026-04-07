@@ -39,7 +39,12 @@ const props = defineProps({
         type: String,
         default: 'light',
     },
+    disableNavigation: {
+        type: Boolean,
+        default: false,
+    },
 });
+const emit = defineEmits(['change']);
 
 const { t } = useI18n();
 
@@ -75,6 +80,8 @@ const tabBarSpace = computed(() => safeBottom.value + 122);
 
 const handleSwitch = (item) => {
     if (props.currentPath === item.pagePath) return;
+    emit('change', item);
+    if (props.disableNavigation) return;
     uni.switchTab({
         url: item.pagePath,
     });

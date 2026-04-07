@@ -5,13 +5,13 @@
             <view class="back-btn" @click="goBack">
                 <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
             </view>
-            <text class="header-title">{{ t('settings1.title') }}</text>
+            <text class="header-title">{{ t('settings.title') }}</text>
             <view class="header-placeholder"></view>
         </view>
 
         <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
             <view class="section" v-if="userStore.isLoggedIn">
-                <view class="section-title">{{ t('settings1.sections.profile') }}</view>
+                <view class="section-title">{{ t('settings.sections.profile') }}</view>
                 <view class="card">
                     <view class="profile-card">
                         <view class="avatar-wrap">
@@ -91,7 +91,7 @@
             </view>
 
             <text class="app-version"
-                >{{ t('settings1.version') }} {{ APP_INFO.appVersion }} · {{ t('settings1.build') }}
+                >{{ t('settings.version') }} {{ APP_INFO.appVersion }} · {{ t('settings.build') }}
                 {{ APP_INFO.appVersionCode }}</text
             >
         </scroll-view>
@@ -99,7 +99,7 @@
         <uni-popup ref="previewTypePopup" type="bottom" :safe-area="true">
             <view class="preview-popup">
                 <view class="popup-head">
-                    <text class="popup-title">{{ t('settings1.preview.title') }}</text>
+                    <text class="popup-title">{{ t('settings.preview.title') }}</text>
                     <view class="popup-close" @click="closePreviewTypePopup">
                         <mdi-icon path="/static/icons/close.svg" size="20px" color="#6f7786"></mdi-icon>
                     </view>
@@ -115,7 +115,7 @@
                             <view class="mock-clock">08:00</view>
                             <view class="mock-bar classic"></view>
                         </view>
-                        <text class="preview-name">{{ t('settings1.preview.classic') }}</text>
+                        <text class="preview-name">{{ t('settings.preview.classic') }}</text>
                     </view>
                     <view
                         class="preview-item"
@@ -127,7 +127,7 @@
                             <view class="mock-clock">08:00</view>
                             <view class="mock-bar floating"></view>
                         </view>
-                        <text class="preview-name">{{ t('settings1.preview.floating') }}</text>
+                        <text class="preview-name">{{ t('settings.preview.floating') }}</text>
                     </view>
                 </view>
             </view>
@@ -188,7 +188,7 @@
                     <mdi-icon path="/static/icons/close.svg" size="18px" color="#2f3949"></mdi-icon>
                 </view>
 
-                <text class="rate-popup__title">{{ t('settings1.ratePopup.title') }}</text>
+                <text class="rate-popup__title">{{ t('settings.ratePopup.title') }}</text>
 
                 <view class="rate-popup__stars">
                     <uni-icons
@@ -223,10 +223,10 @@
                     ></uni-icons>
                 </view>
 
-                <text class="rate-popup__desc">{{ t('settings1.ratePopup.desc') }}</text>
+                <text class="rate-popup__desc">{{ t('settings.ratePopup.desc') }}</text>
 
                 <button class="rate-popup__button" @click="confirmRateNow">
-                    {{ t('settings1.ratePopup.confirm') }}
+                    {{ t('settings.ratePopup.confirm') }}
                 </button>
             </view>
         </uni-popup>
@@ -263,7 +263,7 @@ const toggles = reactive({
 });
 
 const profileName = computed(
-    () => userStore.userinfo?.profile?.nickname || userStore.userinfo?.username || t('settings1.defaultName'),
+    () => userStore.userinfo?.profile?.nickname || userStore.userinfo?.username || t('settings.defaultName'),
 );
 const profileEmail = computed(() => userStore.userinfo?.email || 'sarah.example@company.com');
 const profilePhone = computed(() => userStore.userinfo?.profile?.phone || '+1 (555) 248-0391');
@@ -273,8 +273,8 @@ const profileItems = computed(() => [
     {
         key: 'edit_profile',
         icon: '/static/icons/account.svg',
-        label: t('settings1.items.editProfile.label'),
-        sublabel: t('settings1.items.editProfile.sublabel'),
+        label: t('settings.items.editProfile.label'),
+        sublabel: t('settings.items.editProfile.sublabel'),
         action: () => uni.navigateTo({ url: '/pages/user/edit-profile1' }),
     },
 ]);
@@ -283,27 +283,27 @@ const sections = computed(() => {
     const allSections = [
         {
             key: 'security',
-            title: t('settings1.sections.security'),
+            title: t('settings.sections.security'),
             items: [
                 {
                     key: 'change_password',
                     icon: '/static/icons/lock.svg',
-                    label: t('settings1.items.changePassword.label'),
-                    sublabel: t('settings1.items.changePassword.sublabel'),
+                    label: t('settings.items.changePassword.label'),
+                    sublabel: t('settings.items.changePassword.sublabel'),
                     action: () => uni.navigateTo({ url: '/pages/auth/change-password' }),
                 },
                 {
                     key: 'reset_password',
                     icon: '/static/icons/autorenew.svg',
-                    label: t('settings1.items.resetPassword.label'),
-                    sublabel: t('settings1.items.resetPassword.sublabel'),
+                    label: t('settings.items.resetPassword.label'),
+                    sublabel: t('settings.items.resetPassword.sublabel'),
                     action: () => uni.navigateTo({ url: '/pages/auth/forget-password' }),
                 },
                 // {
                 //     key: 'twofa',
                 //     icon: 'locked-filled',
-                //     label: t('settings1.items.twoFA.label'),
-                //     sublabel: toggles.twoFA ? t('settings1.items.twoFA.enabled') : t('settings1.items.twoFA.disabled'),
+                //     label: t('settings.items.twoFA.label'),
+                //     sublabel: toggles.twoFA ? t('settings.items.twoFA.enabled') : t('settings.items.twoFA.disabled'),
                 //     type: 'toggle',
                 //     toggleKey: 'twoFA',
                 // },
@@ -311,29 +311,29 @@ const sections = computed(() => {
         },
         // {
         //     key: 'notifications',
-        //     title: t('settings1.sections.notifications'),
+        //     title: t('settings.sections.notifications'),
         //     items: [
         //         {
         //             key: 'assignment_alerts',
         //             icon: 'paperplane-filled',
-        //             label: t('settings1.items.assignmentAlerts.label'),
-        //             sublabel: t('settings1.items.assignmentAlerts.sublabel'),
+        //             label: t('settings.items.assignmentAlerts.label'),
+        //             sublabel: t('settings.items.assignmentAlerts.sublabel'),
         //             type: 'toggle',
         //             toggleKey: 'assignmentAlerts',
         //         },
         //         {
         //             key: 'ticket_updates',
         //             icon: 'bell-filled',
-        //             label: t('settings1.items.ticketUpdates.label'),
-        //             sublabel: t('settings1.items.ticketUpdates.sublabel'),
+        //             label: t('settings.items.ticketUpdates.label'),
+        //             sublabel: t('settings.items.ticketUpdates.sublabel'),
         //             type: 'toggle',
         //             toggleKey: 'ticketUpdates',
         //         },
         //         {
         //             key: 'reminders',
         //             icon: 'bell-filled',
-        //             label: t('settings1.items.reminders.label'),
-        //             sublabel: t('settings1.items.reminders.sublabel'),
+        //             label: t('settings.items.reminders.label'),
+        //             sublabel: t('settings.items.reminders.sublabel'),
         //             type: 'toggle',
         //             toggleKey: 'reminders',
         //         },
@@ -341,23 +341,23 @@ const sections = computed(() => {
         // },
         {
             key: 'preferences',
-            title: t('settings1.sections.preferences'),
+            title: t('settings.sections.preferences'),
             items: [
                 {
                     key: 'language',
                     icon: '/static/icons/translate.svg',
-                    label: t('settings1.items.language.label'),
-                    sublabel: t('settings1.items.language.sublabel'),
+                    label: t('settings.items.language.label'),
+                    sublabel: t('settings.items.language.sublabel'),
                     value:
-                        locale.value === 'en' ? t('settings1.items.language.valueEn') : t('settings1.items.language.valueZh'),
+                        locale.value === 'en' ? t('settings.items.language.valueEn') : t('settings.items.language.valueZh'),
                     action: switchLanguage,
                 },
                 // #ifdef APP
                 {
                     key: 'theme',
                     icon: '/static/icons/theme-light-dark.svg',
-                    label: t('settings1.items.theme.label'),
-                    sublabel: t('settings1.items.theme.sublabel'),
+                    label: t('settings.items.theme.label'),
+                    sublabel: t('settings.items.theme.sublabel'),
                     type: 'toggle',
                     toggleKey: 'theme',
                 },
@@ -365,29 +365,29 @@ const sections = computed(() => {
                 {
                     key: 'preview_type',
                     icon: '/static/icons/view-carousel.svg',
-                    label: t('settings1.items.previewType.label'),
-                    sublabel: t('settings1.items.previewType.sublabel'),
+                    label: t('settings.items.previewType.label'),
+                    sublabel: t('settings.items.previewType.sublabel'),
                     value:
                         settingsStore.options.previewType === 'floating'
-                            ? t('settings1.preview.floating')
-                            : t('settings1.preview.classic'),
+                            ? t('settings.preview.floating')
+                            : t('settings.preview.classic'),
                     action: openPreviewTypePopup,
                 },
                 // {
                 //     key: 'availability_status',
                 //     icon: 'calendar',
-                //     label: t('settings1.items.availability.label'),
+                //     label: t('settings.items.availability.label'),
                 //     sublabel: toggles.availability
-                //         ? t('settings1.items.availability.available')
-                //         : t('settings1.items.availability.unavailable'),
+                //         ? t('settings.items.availability.available')
+                //         : t('settings.items.availability.unavailable'),
                 //     type: 'toggle',
                 //     toggleKey: 'availability',
                 // },
                 // {
                 //     key: 'location_services',
                 //     icon: 'location-filled',
-                //     label: t('settings1.items.location.label'),
-                //     sublabel: t('settings1.items.location.sublabel'),
+                //     label: t('settings.items.location.label'),
+                //     sublabel: t('settings.items.location.sublabel'),
                 //     type: 'toggle',
                 //     toggleKey: 'locationServices',
                 // },
@@ -395,138 +395,145 @@ const sections = computed(() => {
         },
         {
             key: 'data',
-            title: t('settings1.sections.data'),
+            title: t('settings.sections.data'),
             items: [
                 // {
                 //     key: 'auto_save',
                 //     icon: 'gear-filled',
-                //     label: t('settings1.items.autoSave.label'),
-                //     sublabel: t('settings1.items.autoSave.sublabel'),
+                //     label: t('settings.items.autoSave.label'),
+                //     sublabel: t('settings.items.autoSave.sublabel'),
                 //     type: 'toggle',
                 //     toggleKey: 'autoSave',
                 // },
                 // {
                 //     key: 'sync_wifi',
                 //     icon: 'loop',
-                //     label: t('settings1.items.syncWifi.label'),
-                //     sublabel: t('settings1.items.syncWifi.sublabel'),
+                //     label: t('settings.items.syncWifi.label'),
+                //     sublabel: t('settings.items.syncWifi.sublabel'),
                 //     type: 'toggle',
                 //     toggleKey: 'syncWifiOnly',
                 // },
                 {
                     key: 'clear_cache',
                     icon: '/static/icons/delete-empty.svg',
-                    label: t('settings1.items.clearCache.label'),
-                    sublabel: t('settings1.items.clearCache.sublabel'),
+                    label: t('settings.items.clearCache.label'),
+                    sublabel: t('settings.items.clearCache.sublabel'),
                     action: clearCache,
                 },
             ],
         },
         {
             key: 'support',
-            title: t('settings1.sections.support'),
+            title: t('settings.sections.support'),
             items: [
                 {
                     key: 'help_centre',
                     icon: '/static/icons/help-circle.svg',
-                    label: t('settings1.items.helpCentre.label'),
-                    sublabel: t('settings1.items.helpCentre.sublabel'),
+                    label: t('settings.items.helpCentre.label'),
+                    sublabel: t('settings.items.helpCentre.sublabel'),
                     action: () => uni.navigateTo({ url: '/pages/settings/help-centre' }),
                 },
                 // {
                 //     key: 'contact_support',
                 //     icon: 'chatboxes-filled',
-                //     label: t('settings1.items.contactSupport.label'),
-                //     sublabel: t('settings1.items.contactSupport.sublabel'),
+                //     label: t('settings.items.contactSupport.label'),
+                //     sublabel: t('settings.items.contactSupport.sublabel'),
                 //     action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
                 // },
                 {
                     key: 'send_feedback',
                     icon: '/static/icons/comment-processing.svg',
-                    label: t('settings1.items.sendFeedback.label'),
-                    sublabel: t('settings1.items.sendFeedback.sublabel'),
+                    label: t('settings.items.sendFeedback.label'),
+                    sublabel: t('settings.items.sendFeedback.sublabel'),
                     action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
                 },
                 {
                     key: 'about_page',
                     icon: '/static/icons/information.svg',
-                    label: t('settings1.items.about.label'),
-                    sublabel: t('settings1.items.about.sublabel'),
+                    label: t('settings.items.about.label'),
+                    sublabel: t('settings.items.about.sublabel'),
                     action: openAboutPopup,
                 },
                 {
                     key: 'privacy',
                     icon: '/static/icons/lock.svg',
-                    label: t('settings1.items.privacy.label'),
-                    sublabel: t('settings1.items.privacy.sublabel'),
+                    label: t('settings.items.privacy.label'),
+                    sublabel: t('settings.items.privacy.sublabel'),
                     action: () => openHtmlFile('/privacy_agreement.html'),
+                },
+                {
+                    key: 'privacy_permissions',
+                    icon: '/static/icons/shield-check.svg',
+                    label: t('settings.items.privacyPermissions.label'),
+                    sublabel: t('settings.items.privacyPermissions.sublabel'),
+                    action: () => uni.navigateTo({ url: '/pages/settings/revoke-auth' }),
                 },
                 {
                     key: 'agreement',
                     icon: '/static/icons/wallet-bifold.svg',
-                    label: t('settings1.items.agreement.label'),
-                    sublabel: t('settings1.items.agreement.sublabel'),
+                    label: t('settings.items.agreement.label'),
+                    sublabel: t('settings.items.agreement.sublabel'),
                     action: () => openHtmlFile('/user_agreement.html'),
                 },
             ],
         },
         {
             key: 'app_information',
-            title: t('settings1.sections.appInformation'),
+            title: t('settings.sections.appInformation'),
             items: [
                 {
                     key: 'introduction',
                     icon: '/static/icons/information.svg',
-                    label: t('settings1.items.introduction.label'),
-                    sublabel: t('settings1.items.introduction.sublabel'),
+                    label: t('settings.items.introduction.label'),
+                    sublabel: t('settings.items.introduction.sublabel'),
                     action: showIntroduction,
                 },
                 {
                     key: 'check_update',
                     icon: '/static/icons/cached.svg',
-                    label: t('settings1.items.checkUpdate.label'),
-                    sublabel: t('settings1.items.checkUpdate.sublabel'),
+                    label: t('settings.items.checkUpdate.label'),
+                    sublabel: t('settings.items.checkUpdate.sublabel'),
                     action: checkUpdate,
                 },
             ],
         },
         {
             key: 'others',
-            title: t('settings1.sections.others'),
+            title: t('settings.sections.others'),
             items: [
                 {
                     key: 'rate_us',
                     icon: '/static/icons/star.svg',
-                    label: t('settings1.items.rateUs.label'),
-                    sublabel: t('settings1.items.rateUs.sublabel'),
+                    label: t('settings.items.rateUs.label'),
+                    sublabel: t('settings.items.rateUs.sublabel'),
                     action: openRatePopup,
                 },
                 {
                     key: 'share_app',
                     icon: '/static/icons/share.svg',
-                    label: t('settings1.items.share.label'),
-                    sublabel: t('settings1.items.share.sublabel'),
+                    label: t('settings.items.share.label'),
+                    sublabel: t('settings.items.share.sublabel'),
                     action: shareApp,
                 },
             ],
         },
         {
             key: 'account',
-            title: t('settings1.sections.account'),
+            title: t('settings.sections.account'),
             items: [
                 {
                     key: 'logout',
                     icon: '/static/icons/exit-to-app.svg',
-                    label: t('settings1.items.logout.label'),
-                    sublabel: t('settings1.items.logout.sublabel'),
+                    label: t('settings.items.logout.label'),
+                    sublabel: t('settings.items.logout.sublabel'),
                     destructive: true,
                     action: () => uni.navigateTo({ url: '/pages/auth/logout' }),
                 },
                 {
                     key: 'deactivate',
                     icon: '/static/icons/account-remove.svg',
-                    label: t('settings1.items.deactivate.label'),
-                    sublabel: t('settings1.items.deactivate.sublabel'),
+                    label: t('settings.items.deactivate.label'),
+                    sublabel: t('settings.items.deactivate.sublabel'),
                     destructive: true,
                     action: () => uni.navigateTo({ url: '/pages/auth/deactivate' }),
                 },
@@ -575,7 +582,7 @@ function switchTheme() {
     // #endif
 
     uni.showToast({
-        title: t('settings1.toast.themeChanged'),
+        title: t('settings.toast.themeChanged'),
         icon: 'none',
     });
     // 保存主题选择
@@ -613,14 +620,14 @@ function setPreviewType(type) {
 
 async function clearCache() {
     uni.showLoading({
-        title: t('settings1.toast.clearing'),
+        title: t('settings.toast.clearing'),
         mask: true,
     });
     try {
         uni.clearStorageSync();
         uni.hideLoading();
         uni.showToast({
-            title: t('settings1.toast.clearSuccess'),
+            title: t('settings.toast.clearSuccess'),
             icon: 'none',
         });
     } catch (error) {
@@ -687,7 +694,7 @@ function openAppStore() {
 
         // #ifdef H5
         uni.showToast({
-            title: t('settings1.ratePopup.webHint'),
+            title: t('settings.ratePopup.webHint'),
             icon: 'none',
         });
         // #endif

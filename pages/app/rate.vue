@@ -12,28 +12,34 @@
             </view>
 
             <view v-else class="rating-list">
-                <view class="rating-item" v-for="item in ratingList" :key="item.id" @click="goPreview(item)">
-                    <view class="rating-image">
-                        <image :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
-                    </view>
-                    <view class="rating-info">
-                        <view class="wallpaper-name">{{ item.description || t('rating.untitled') }}</view>
-                        <view class="rating-meta">
-                            <view class="score-section">
-                                <uni-rate readonly :value="item.my_score" size="14" margin="8"></uni-rate>
-                                <text class="score-text">{{ item.my_score }}</text>
+                <view v-for="(item, index) in ratingList" :key="item.id" class="rating-swipe-item">
+                    <uni-swipe-action>
+                        <uni-swipe-action-item :right-options="swipeOptions" @click="handleSwipeClick(item, index, $event)">
+                            <view class="rating-item" @click="goPreview(item)">
+                                <view class="rating-image">
+                                    <image :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                </view>
+                                <view class="rating-info">
+                                    <view class="wallpaper-name">{{ item.description || t('rating.untitled') }}</view>
+                                    <view class="rating-meta">
+                                        <view class="score-section">
+                                            <uni-rate readonly :value="item.my_score" size="14" margin="8"></uni-rate>
+                                            <text class="score-text">{{ item.my_score }}</text>
+                                        </view>
+                                        <view class="rating-time" v-if="item.action_updated_at">
+                                            {{ formatTime(item.action_updated_at) }}
+                                        </view>
+                                    </view>
+                                    <view class="rating-comment" v-if="item.tabs">
+                                        {{ item.tabs }}
+                                    </view>
+                                </view>
+                                <view class="rating-arrow">
+                                    <uni-icons type="right" size="16" color="#ccc"></uni-icons>
+                                </view>
                             </view>
-                            <view class="rating-time" v-if="item.action_updated_at">
-                                {{ formatTime(item.action_updated_at) }}
-                            </view>
-                        </view>
-                        <view class="rating-comment" v-if="item.tabs">
-                            {{ item.tabs }}
-                        </view>
-                    </view>
-                    <view class="rating-arrow">
-                        <uni-icons type="right" size="16" color="#ccc"></uni-icons>
-                    </view>
+                        </uni-swipe-action-item>
+                    </uni-swipe-action>
                 </view>
 
                 <view class="loadingLayout" v-show="noData || isRunning">
@@ -51,7 +57,7 @@
 <script setup>
 import { ref } from 'vue';
 import { onLoad, onUnload, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
-import { apiGetActions } from '@/api/wallpaper.js';
+import { apiGetActions, apiPostActions } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { getNavBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
@@ -62,6 +68,14 @@ const backToTopRef = ref(null);
 const isRunning = ref(false);
 const noData = ref(false);
 const ratingList = ref([]);
+const swipeOptions = ref([
+    {
+        text: t('rating.delete'),
+        style: {
+            backgroundColor: '#e74c3c',
+        },
+    },
+]);
 
 const queryParams = ref({
     pageNum: 1,
@@ -77,7 +91,8 @@ const getRatingList = async () => {
         isRunning.value = true;
 
         let res = await apiGetActions(queryParams.value);
-        let fullData = res.data.map((item) => handlePicUrl(item));
+        let rows = Array.isArray(res?.data) ? res.data : [];
+        let fullData = rows.map((item) => handlePicUrl(item));
 
         if (queryParams.value.pageNum === 1) {
             ratingList.value = fullData;
@@ -85,7 +100,6 @@ const getRatingList = async () => {
             ratingList.value.push(...fullData);
         }
 
-        console.log(ratingList.value);
         if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
     } finally {
         uni.hideLoading();
@@ -121,6 +135,40 @@ const goPreview = (item) => {
 const goBrowse = () => {
     uni.switchTab({
         url: '/pages/app/index',
+    });
+};
+
+const handleSwipeClick = (item, index, e) => {
+    if (e?.content?.text !== t('rating.delete')) return;
+
+    uni.showModal({
+        title: t('common.tip'),
+        content: t('rating.deleteConfirm'),
+        success: async (res) => {
+            if (!res.confirm) return;
+
+            const prevItem = ratingList.value[index];
+            ratingList.value.splice(index, 1);
+            uni.setStorageSync('wallList', ratingList.value);
+
+            try {
+                await apiPostActions({
+                    wall_id: item.id,
+                    pic_score: 0,
+                });
+                uni.showToast({
+                    title: t('rating.deleteSuccess'),
+                    icon: 'none',
+                });
+            } catch (error) {
+                ratingList.value.splice(index, 0, prevItem);
+                uni.setStorageSync('wallList', ratingList.value);
+                uni.showToast({
+                    title: t('rating.deleteFailed'),
+                    icon: 'none',
+                });
+            }
+        },
     });
 };
 
@@ -209,13 +257,25 @@ onPullDownRefresh(() => {
     }
 
     .rating-list {
+        .rating-swipe-item {
+            margin-bottom: 20rpx;
+        }
+
+        .rating-swipe-item:last-child {
+            margin-bottom: 0;
+        }
+
+        :deep(.uni-swipe_action) {
+            border-radius: 16rpx;
+            overflow: hidden;
+        }
+
         .rating-item {
             display: flex;
             align-items: center;
             background: #fff;
             border-radius: 16rpx;
             padding: 24rpx;
-            margin-bottom: 20rpx;
             transition: all 0.3s;
 
             &:active {

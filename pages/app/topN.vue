@@ -118,7 +118,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
-import { apiGetClassList } from '@/api/wallpaper.js';
+import { apiGetClassList, apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
@@ -135,14 +135,14 @@ const metricDescription = computed(() =>
     activeMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads'),
 );
 
-const getOrdering = () => (activeMetric.value === 'views' ? '-views' : '-downloads');
+const getType = () => (activeMetric.value === 'views' ? 'views' : 'downloads');
 
 const getTopList = async () => {
     loading.value = true;
     try {
-        const res = await apiGetClassList({
-            ordering: getOrdering(),
-            pageSize: 10,
+        const res = await apiGetTopWall({
+            type: getType(),
+            n: 10,
         });
         const list = (res.data || []).map((item) => handlePicUrl(item));
         rankedList.value = list
@@ -167,10 +167,25 @@ const switchMetric = async (metric) => {
 
 const formatCount = (value) => {
     const num = Number(value) || 0;
-    return new Intl.NumberFormat(locale.value === 'zh-Hans' ? 'zh-CN' : 'en-US', {
-        notation: 'compact',
-        maximumFractionDigits: 1,
-    }).format(num);
+
+    if (typeof Intl !== 'undefined' && Intl?.NumberFormat) {
+        return new Intl.NumberFormat(locale.value === 'zh-Hans' ? 'zh-CN' : 'en-US', {
+            notation: 'compact',
+            maximumFractionDigits: 1,
+        }).format(num);
+    }
+
+    const isZh = locale.value === 'zh-Hans';
+    if (isZh) {
+        if (num >= 100000000) return `${(num / 100000000).toFixed(num >= 1000000000 ? 0 : 1).replace(/\.0$/, '')}亿`;
+        if (num >= 10000) return `${(num / 10000).toFixed(num >= 100000 ? 0 : 1).replace(/\.0$/, '')}万`;
+        return `${num}`;
+    }
+
+    if (num >= 1000000000) return `${(num / 1000000000).toFixed(1).replace(/\.0$/, '')}B`;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+    return `${num}`;
 };
 
 const formatMetric = (item) => {
@@ -321,17 +336,21 @@ onLoad(() => {
     border-radius: 32rpx;
     background: #182431;
     box-shadow: 0 24rpx 56rpx rgba(0, 0, 0, 0.28);
+    transition:
+        transform 0.28s ease,
+        box-shadow 0.28s ease;
 }
 
 .hero-card--first {
     aspect-ratio: 16 / 10;
+    margin-bottom: 30rpx;
 }
 
 .hero-grid {
     margin-top: 18rpx;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 18rpx;
+    gap: 30rpx;
 }
 
 .hero-card--secondary {
@@ -341,6 +360,7 @@ onLoad(() => {
 .hero-card__image {
     width: 100%;
     height: 100%;
+    transition: transform 0.32s ease;
 }
 
 .hero-card__overlay {
@@ -411,7 +431,7 @@ onLoad(() => {
     font-size: 42rpx;
     line-height: 1.2;
     font-weight: 800;
-    color: #f8fafc;
+    color: #e2e8f0;
 }
 
 .hero-card__title--compact {
@@ -432,6 +452,17 @@ onLoad(() => {
     gap: 8rpx;
     color: #cbd5e1;
     font-size: 22rpx;
+}
+
+.hero-card:active {
+    transform: scale(1.03);
+    box-shadow:
+        0 18rpx 36rpx rgba(0, 0, 0, 0.26),
+        0 32rpx 64rpx rgba(0, 0, 0, 0.22);
+}
+
+.hero-card:active .hero-card__image {
+    transform: scale(1.08);
 }
 
 .rank-section__title {
@@ -455,7 +486,7 @@ onLoad(() => {
 .rank-list {
     display: flex;
     flex-direction: column;
-    gap: 16rpx;
+    gap: 30rpx;
 }
 
 .rank-item {
@@ -517,7 +548,7 @@ onLoad(() => {
 }
 
 .rank-item__title {
-    color: #f8fafc;
+    color: #dce4ee;
     font-size: 28rpx;
     font-weight: 600;
     line-height: 1.38;
@@ -576,6 +607,17 @@ onLoad(() => {
 }
 
 @media (hover: hover) and (pointer: fine) {
+    .hero-card:hover {
+        transform: scale(1.03);
+        box-shadow:
+            0 18rpx 36rpx rgba(0, 0, 0, 0.26),
+            0 32rpx 64rpx rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-card:hover .hero-card__image {
+        transform: scale(1.08);
+    }
+
     .rank-item:hover {
         transform: scale(1.03);
         box-shadow:

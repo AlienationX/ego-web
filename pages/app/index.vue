@@ -87,6 +87,23 @@
             </view>
         </view>
 
+        <navigator class="top-entry" url="/pages/app/topN">
+            <view class="top-entry__content">
+                <view class="top-entry__eyebrow">Top N</view>
+                <view class="top-entry__title">{{ $t('top10.title') }}</view>
+                <view class="top-entry__desc">{{ $t('top10.descViews') }}</view>
+                <view class="top-entry__action">
+                    <text class="top-entry__action-text">{{ $t('common.seeAll') }}</text>
+                    <uni-icons type="right" size="18" color="#ffffff"></uni-icons>
+                </view>
+            </view>
+            <image
+                class="top-entry__visual"
+                src="/static/images/inset/1699281368061_2-removebg-preview.png"
+                mode="heightFix"
+            ></image>
+        </navigator>
+
         <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
             <index-title>
                 <template #name>{{ classify.name }}</template>
@@ -507,6 +524,82 @@ onShareTimeline(() => {
     }
 
     .subject {
+    }
+
+    .top-entry {
+        position: relative;
+        margin: 30rpx 30rpx 0;
+        padding: 24rpx 24rpx 24rpx 28rpx;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18rpx;
+        min-height: 210rpx;
+        overflow: visible;
+        border-radius: 28rpx;
+        background: linear-gradient(180deg, #40454f 0%, #393f48 100%);
+        border: 1rpx solid rgba(255, 255, 255, 0.04);
+        box-shadow: 0 10rpx 24rpx rgba(15, 23, 42, 0.1);
+    }
+
+    .top-entry__content {
+        flex: 1;
+        min-width: 0;
+        padding: 4rpx 0;
+        max-width: 370rpx;
+        position: relative;
+        z-index: 1;
+    }
+
+    .top-entry__eyebrow {
+        font-size: 20rpx;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: 2rpx;
+        color: rgba(255, 255, 255, 0.82);
+        text-transform: uppercase;
+    }
+
+    .top-entry__title {
+        margin-top: 10rpx;
+        font-size: 34rpx;
+        line-height: 1.2;
+        font-weight: 800;
+        color: #ffffff;
+    }
+
+    .top-entry__desc {
+        margin-top: 10rpx;
+        font-size: 24rpx;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.56);
+        max-width: 320rpx;
+    }
+
+    .top-entry__action {
+        margin-top: 20rpx;
+        width: 56rpx;
+        height: 56rpx;
+        border-radius: 999rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #2994ff;
+        box-shadow: 0 8rpx 18rpx rgba(41, 148, 255, 0.24);
+    }
+
+    .top-entry__action-text {
+        display: none;
+    }
+
+    .top-entry__visual {
+        position: absolute;
+        right: 30rpx;
+        bottom: -18rpx;
+        height: 384rpx;
+        width: auto;
+        z-index: 2;
+        pointer-events: none;
     }
 
     .classify {

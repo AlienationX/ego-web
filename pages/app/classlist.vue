@@ -129,7 +129,9 @@ const props = defineProps({
     name: String,
 });
 
-const heroImage = computed(() => classList.value[0]?.picurl || classList.value[0]?.smallPicurl || '/static/images/guide/guide1.png');
+const heroImage = computed(
+    () => classList.value[0]?.picurl || classList.value[0]?.smallPicurl || '/static/images/guide/guide1.png',
+);
 const heroTitle = computed(() => (props.name || t('category.title')).toUpperCase());
 const heroBadge = computed(() => `${t('common.recommend')} CATEGORY`);
 const heroDesc = computed(() => `${props.name || t('category.title')} · ${t('category.desc')}`);
@@ -381,8 +383,7 @@ onShareTimeline(() => {
 .hero__overlay {
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(180deg, rgba(8, 12, 18, 0.1) 0%, rgba(8, 12, 18, 0.26) 45%, rgba(8, 12, 18, 0.92) 100%);
+    background: linear-gradient(180deg, rgba(8, 12, 18, 0.1) 0%, rgba(8, 12, 18, 0.26) 45%, rgba(8, 12, 18, 0.92) 100%);
 }
 
 .hero__content {
@@ -495,7 +496,8 @@ onShareTimeline(() => {
 }
 
 .toolbar__action-icon {
-    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%) contrast(101%);
+    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%)
+        contrast(101%);
 }
 
 .content-wrapper {

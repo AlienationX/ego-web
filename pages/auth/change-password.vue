@@ -7,22 +7,24 @@
                 <view class="back-btn" @click="goBack">
                     <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
                 </view>
-                <text class="header-title">Change Password</text>
+                <text class="header-title">{{ t('changePasswordPage.title') }}</text>
                 <view class="header-placeholder"></view>
             </view>
 
             <scroll-view scroll-y class="content">
                 <view class="info-banner">
-                    <text class="info-emoji">🔐</text>
+                    <view class="info-icon">
+                        <mdi-icon path="/static/icons/lock.svg" size="18px" color="#0369a1"></mdi-icon>
+                    </view>
                     <text class="info-text">
-                        Use at least 8 characters. Mix uppercase, numbers, and symbols for a stronger password.
+                        {{ t('changePasswordPage.banner') }}
                     </text>
                 </view>
 
-                <view class="section-label">Current Password</view>
+                <view class="section-label">{{ t('changePasswordPage.sections.current') }}</view>
                 <view class="card">
                     <view class="field" :class="{ focused: focusKey === 'current' }">
-                        <text class="field-label">Current password</text>
+                        <text class="field-label">{{ t('changePasswordPage.fields.current') }}</text>
                         <view class="field-row">
                             <input
                                 class="field-input"
@@ -43,10 +45,10 @@
                     </view>
                 </view>
 
-                <view class="section-label">New Password</view>
+                <view class="section-label">{{ t('changePasswordPage.sections.next') }}</view>
                 <view class="card">
                     <view class="field" :class="{ focused: focusKey === 'next' }">
-                        <text class="field-label">New password</text>
+                        <text class="field-label">{{ t('changePasswordPage.fields.next') }}</text>
                         <view class="field-row">
                             <input
                                 class="field-input"
@@ -66,7 +68,7 @@
                         <view class="field-line"></view>
                     </view>
                     <view class="field field-last" :class="{ focused: focusKey === 'confirm' }">
-                        <text class="field-label">Confirm new password</text>
+                        <text class="field-label">{{ t('changePasswordPage.fields.confirm') }}</text>
                         <view class="field-row">
                             <input
                                 class="field-input"
@@ -101,15 +103,15 @@
                         <view v-if="confirm.length" class="strength-match" :class="{ ok: next === confirm }">
                             <template v-if="next === confirm">
                                 <mdi-icon path="/static/icons/check.svg" size="20px" color="#22c55e"></mdi-icon>
-                                <text>Passwords match</text>
+                                <text>{{ t('changePasswordPage.match.ok') }}</text>
                             </template>
-                            <template v-else>Passwords don't match</template>
+                            <template v-else>{{ t('changePasswordPage.match.fail') }}</template>
                         </view>
                     </view>
                 </view>
 
                 <view class="requirements">
-                    <text class="requirements-title">Requirements</text>
+                    <text class="requirements-title">{{ t('changePasswordPage.requirements.title') }}</text>
                     <view v-for="item in requirements" :key="item.label" class="requirements-row">
                         <view class="requirements-dot" :class="{ ok: item.met }">
                             <mdi-icon v-if="item.met" path="/static/icons/check.svg" size="20px" color="#22c55e"></mdi-icon>
@@ -124,7 +126,7 @@
 
                 <view class="submit-wrap">
                     <button class="submit-btn" :class="{ disabled: !canSave }" :disabled="!canSave" @click="handleSave">
-                        Update Password
+                        {{ t('changePasswordPage.submit') }}
                     </button>
                 </view>
             </scroll-view>
@@ -135,11 +137,9 @@
                 <view class="success-icon">
                     <mdi-icon path="/static/icons/shield-check.svg" size="100px" color="#22c55e"></mdi-icon>
                 </view>
-                <text class="success-title">Password Updated</text>
-                <text class="success-desc">
-                    Your password has been changed successfully. You'll need to use your new password next time you log in.
-                </text>
-                <button class="success-btn" @click="backToSettings">Back to Settings</button>
+                <text class="success-title">{{ t('changePasswordPage.success.title') }}</text>
+                <text class="success-desc">{{ t('changePasswordPage.success.desc') }}</text>
+                <button class="success-btn" @click="backToSettings">{{ t('changePasswordPage.success.button') }}</button>
             </view>
         </template>
     </view>
@@ -147,9 +147,11 @@
 
 <script setup>
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { apiPostChangePassword } from '@/api/wallpaper.js';
 
+const { t } = useI18n();
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
 const current = ref('');
@@ -166,20 +168,20 @@ const strength = computed(() => getStrength(next.value));
 const canSave = computed(() => current.value.length > 0 && next.value.length >= 8 && next.value === confirm.value);
 
 const requirements = computed(() => [
-    { label: 'At least 8 characters', met: next.value.length >= 8 },
-    { label: 'One uppercase letter', met: /[A-Z]/.test(next.value) },
-    { label: 'One number', met: /[0-9]/.test(next.value) },
-    { label: 'One special character', met: /[^A-Za-z0-9]/.test(next.value) },
+    { label: t('changePasswordPage.requirements.length'), met: next.value.length >= 8 },
+    { label: t('changePasswordPage.requirements.uppercase'), met: /[A-Z]/.test(next.value) },
+    { label: t('changePasswordPage.requirements.number'), met: /[0-9]/.test(next.value) },
+    { label: t('changePasswordPage.requirements.special'), met: /[^A-Za-z0-9]/.test(next.value) },
 ]);
 
 async function handleSave() {
     error.value = '';
     if (next.value !== confirm.value) {
-        error.value = 'New passwords do not match.';
+        error.value = t('changePasswordPage.errors.notMatch');
         return;
     }
     if (next.value.length < 8) {
-        error.value = 'Password must be at least 8 characters.';
+        error.value = t('changePasswordPage.errors.minLength');
         return;
     }
 
@@ -191,7 +193,7 @@ async function handleSave() {
     if (res.code === 200) {
         saved.value = true;
     } else {
-        error.value = res.data.error || 'Failed to update password.';
+        error.value = res.data.error || t('changePasswordPage.errors.failed');
     }
 }
 
@@ -213,10 +215,10 @@ function getStrength(password) {
     if (/[A-Z]/.test(password)) score += 1;
     if (/[0-9]/.test(password)) score += 1;
     if (/[^A-Za-z0-9]/.test(password)) score += 1;
-    if (score <= 1) return { score, label: 'Weak', color: '#EF4444' };
-    if (score <= 2) return { score, label: 'Fair', color: '#F59E0B' };
-    if (score <= 3) return { score, label: 'Good', color: '#3B82F6' };
-    return { score, label: 'Strong', color: '#22C55E' };
+    if (score <= 1) return { score, label: t('changePasswordPage.strength.weak'), color: '#EF4444' };
+    if (score <= 2) return { score, label: t('changePasswordPage.strength.fair'), color: '#F59E0B' };
+    if (score <= 3) return { score, label: t('changePasswordPage.strength.good'), color: '#3B82F6' };
+    return { score, label: t('changePasswordPage.strength.strong'), color: '#22C55E' };
 }
 </script>
 
@@ -281,8 +283,15 @@ function getStrength(password) {
     gap: 20rpx;
 }
 
-.info-emoji {
-    font-size: 30rpx;
+.info-icon {
+    width: 44rpx;
+    height: 44rpx;
+    border-radius: 12rpx;
+    background: rgba(3, 105, 161, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .info-text {

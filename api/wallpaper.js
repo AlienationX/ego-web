@@ -31,6 +31,14 @@ export const apiGetRandomRecommend = (data = {}) => {
     });
 };
 
+// 获取TOP榜图片接口
+export const apiGetTopWall = (data = {}) => {
+    return request({
+        url: '/wall/top/',
+        data,
+    });
+};
+
 // 获取通知接口
 export const apiGetNotice = (data = {}, id = '') => {
     return request({
