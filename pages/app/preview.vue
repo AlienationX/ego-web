@@ -1,5 +1,5 @@
 <template>
-    <scroll-view v-if="currentInfo" scroll-y class="previewScroll" @scroll="handlePreviewScroll">
+    <scroll-view v-if="currentInfo?.id" scroll-y class="previewScroll" @scroll="handlePreviewScroll">
         <view class="preview">
             <view class="previewHero">
                 <swiper
@@ -117,7 +117,7 @@
                     </template>
                 </view>
             </view>
-            <recommend-wallpapers :current-info="currentInfo"></recommend-wallpapers>
+            <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
         </view>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
@@ -731,7 +731,7 @@ const handleImageLoad = (index) => {
 // OnLoad接收参数
 const currentId = ref(null);
 const currentIndex = ref(0);
-const currentInfo = ref({});
+const currentInfo = ref(null);
 onLoad((e) => {
     currentId.value = e.id;
     disableSwipe.value = e.mode === 'recommend' || e.disableSwipe === '1';

@@ -186,6 +186,15 @@
         </view>
 
         <custom-ad-banner style="padding: 0rpx 30rpx 30rpx"></custom-ad-banner>
+
+        <popup-navigation-dialog
+            ref="loginPromptPopup"
+            :title="t('user.profile.loginPromptTitle')"
+            :description="t('user.profile.loginRequired')"
+            :confirm-text="t('user.profile.loginPromptConfirm')"
+            :cancel-text="t('user.profile.loginPromptCancel')"
+            @confirm="toLogin"
+        ></popup-navigation-dialog>
     </view>
 </template>
 
@@ -204,10 +213,15 @@ const userStore = useUserStore();
 // const userinfo = computed(() => userStore.userinfo); // 计算属性需要写userinfo.value，也麻烦
 
 const hasCheckedInToday = ref(false);
+const loginPromptPopup = ref(null);
 
 const toLogin = () => {
     uni.navigateTo({ url: '/pages/auth/signin' });
     // uni.navigateTo({ url: '/pages/auth/login' });
+};
+
+const openLoginPrompt = () => {
+    loginPromptPopup.value?.open();
 };
 
 const toSettings = () => {
@@ -220,15 +234,7 @@ const toEditProfile = () => {
 
 const toMyFavorite = () => {
     if (!userStore.userinfo.id) {
-        uni.showModal({
-            title: t('common.tip'),
-            content: t('user.profile.loginRequired'),
-            success: (res) => {
-                if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/auth/login' });
-                }
-            },
-        });
+        openLoginPrompt();
         return;
     }
     uni.navigateTo({ url: '/pages/app/favorite' });
@@ -236,15 +242,7 @@ const toMyFavorite = () => {
 
 const toMyDownload = () => {
     if (!userStore.userinfo.id) {
-        uni.showModal({
-            title: t('common.tip'),
-            content: t('user.profile.loginRequired'),
-            success: (res) => {
-                if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/auth/login' });
-                }
-            },
-        });
+        openLoginPrompt();
         return;
     }
     uni.navigateTo({ url: '/pages/app/download' });
@@ -252,15 +250,7 @@ const toMyDownload = () => {
 
 const toMyScore = () => {
     if (!userStore.userinfo.id) {
-        uni.showModal({
-            title: t('common.tip'),
-            content: t('user.profile.loginRequired'),
-            success: (res) => {
-                if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/auth/login' });
-                }
-            },
-        });
+        openLoginPrompt();
         return;
     }
     uni.navigateTo({ url: '/pages/app/rate' });
