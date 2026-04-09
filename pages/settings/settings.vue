@@ -90,10 +90,25 @@
                 </view>
             </view>
 
-            <text class="app-version"
+            <view class="about-legal">
+                <view class="about-legal__links">
+                    <text class="about-legal__link" @click="openHtmlFile('/privacy_agreement.html')">
+                        {{ t('about.privacy') }}
+                    </text>
+                    <text class="about-legal__divider">|</text>
+                    <text class="about-legal__link" @click="openHtmlFile('/user_agreement.html')">
+                        {{ t('about.agreement') }}
+                    </text>
+                </view>
+                <view class="about-record">{{ rightICP }}</view>
+                <view class="about-copyright">{{ copyrightText }}</view>
+                <view style="height: 50rpx"></view>
+            </view>
+
+            <!-- <text class="app-version"
                 >{{ t('settings.version') }} {{ APP_INFO.appVersion }} · {{ t('settings.build') }}
                 {{ APP_INFO.appVersionCode }}</text
-            >
+            > -->
         </scroll-view>
 
         <uni-popup ref="previewTypePopup" type="bottom" :safe-area="true">
@@ -178,6 +193,21 @@
                             </view>
                         </view>
                     </view>
+
+                    <view class="about-legal">
+                        <view style="height: 18rpx"></view>
+                        <view class="about-legal__links">
+                            <text class="about-legal__link" @click="openHtmlFile('/privacy_agreement.html')">
+                                {{ t('about.privacy') }}
+                            </text>
+                            <text class="about-legal__divider">|</text>
+                            <text class="about-legal__link" @click="openHtmlFile('/user_agreement.html')">
+                                {{ t('about.agreement') }}
+                            </text>
+                        </view>
+                        <view class="about-record">{{ rightICP }}</view>
+                        <view class="about-copyright">{{ copyrightText }}</view>
+                    </view>
                 </scroll-view>
             </view>
         </uni-popup>
@@ -239,6 +269,7 @@ import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { RIGHT_ICP } from '@/common/config.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -249,6 +280,8 @@ const ratePopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
 const APP_INFO = uni.getAppBaseInfo();
+const rightICP = RIGHT_ICP;
+const copyrightText = computed(() => t('about.copyright', { year: new Date().getFullYear() }));
 
 const toggles = reactive({
     twoFA: true,
@@ -741,19 +774,19 @@ function shareApp() {
     width: 100%;
 }
 .header {
-    height: 56px;
+    height: 112rpx;
     background: #f5f6f8;
     display: flex;
     align-items: center;
-    padding: 0 16px;
-    gap: 8px;
+    padding: 0 32rpx;
+    gap: 16rpx;
 }
 .back-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 16rpx;
     background: #fff;
-    border: 1px solid #f0f1f3;
+    border: 2rpx solid #f0f1f3;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -761,13 +794,13 @@ function shareApp() {
 .header-title {
     flex: 1;
     text-align: center;
-    font-size: 20px;
+    font-size: 40rpx;
     font-weight: 700;
     color: #111827;
 }
 .header-placeholder {
-    width: 36px;
-    height: 36px;
+    width: 72rpx;
+    height: 72rpx;
 }
 .content {
     box-sizing: border-box;
@@ -775,49 +808,49 @@ function shareApp() {
     // padding-bottom: 40px;
 }
 .section {
-    margin-bottom: 24px;
+    margin-bottom: 48rpx;
 }
 .section-title {
-    padding: 0 18px;
-    margin-bottom: 10px;
-    font-size: 11px;
+    padding: 0 36rpx;
+    margin-bottom: 20rpx;
+    font-size: 22rpx;
     font-weight: 600;
     letter-spacing: 0.07em;
     color: #9ca3af;
-    line-height: 16px;
+    line-height: 32rpx;
     display: block;
 }
 .card {
-    margin: 0 16px;
+    margin: 0 32rpx;
     background: #fff;
-    border: 1px solid #f0f1f3;
-    border-radius: 12px;
+    border: 2rpx solid #f0f1f3;
+    border-radius: 24rpx;
     overflow: hidden;
 }
 .profile-card {
-    padding: 16px;
+    padding: 32rpx;
     display: flex;
     align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid #f3f4f6;
+    gap: 24rpx;
+    border-bottom: 2rpx solid #f3f4f6;
 }
 .avatar-wrap {
     position: relative;
 }
 .avatar {
-    width: 56px;
-    height: 56px;
+    width: 112rpx;
+    height: 112rpx;
     border-radius: 50%;
 }
 .avatar-dot {
     position: absolute;
-    bottom: 1px;
-    right: 1px;
-    width: 12px;
-    height: 12px;
-    border-radius: 6px;
+    bottom: 2rpx;
+    right: 2rpx;
+    width: 24rpx;
+    height: 24rpx;
+    border-radius: 12rpx;
     background: #22c55e;
-    border: 2px solid #fff;
+    border: 4rpx solid #fff;
 }
 .profile-meta {
     flex: 1;
@@ -825,21 +858,21 @@ function shareApp() {
 }
 .profile-name {
     display: block;
-    font-size: 16px;
+    font-size: 32rpx;
     font-weight: 600;
     color: #111827;
-    line-height: 20px;
+    line-height: 40rpx;
 }
 .profile-line {
     display: block;
-    font-size: 12px;
-    line-height: 16px;
+    font-size: 24rpx;
+    line-height: 32rpx;
     color: #6b7280;
 }
 .row {
-    min-height: 54px;
-    padding: 12px 16px;
-    border-bottom: 1px solid #f3f4f6;
+    min-height: 108rpx;
+    padding: 24rpx 32rpx;
+    border-bottom: 2rpx solid #f3f4f6;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -850,14 +883,14 @@ function shareApp() {
 .row-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 24rpx;
     flex: 1;
     min-width: 0;
 }
 .icon-box {
-    width: 36px;
-    height: 36px;
-    border-radius: 9px;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 18rpx;
     background: #f9fafb;
     display: flex;
     align-items: center;
@@ -873,17 +906,17 @@ function shareApp() {
 }
 .label {
     display: block;
-    font-size: 15px;
-    line-height: 20px;
+    font-size: 30rpx;
+    line-height: 40rpx;
     color: #111827;
     font-weight: 500;
 }
 .sublabel {
     display: block;
-    font-size: 12px;
-    line-height: 16px;
+    font-size: 24rpx;
+    line-height: 32rpx;
     color: #9ca3af;
-    margin-top: 1px;
+    margin-top: 2rpx;
 }
 .destructive .label {
     color: #e5322d;
@@ -891,18 +924,18 @@ function shareApp() {
 .row-right {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-left: 8px;
+    gap: 16rpx;
+    margin-left: 16rpx;
 }
 .value {
-    font-size: 12px;
+    font-size: 24rpx;
     color: #9ca3af;
     white-space: nowrap;
 }
 .switch {
-    width: 44px;
-    height: 26px;
-    border-radius: 13px;
+    width: 88rpx;
+    height: 52rpx;
+    border-radius: 26rpx;
     background: #d1d5db;
     position: relative;
     transition: background-color 0.2s ease;
@@ -912,23 +945,23 @@ function shareApp() {
 }
 .switch-dot {
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 20px;
-    height: 20px;
-    border-radius: 10px;
+    top: 6rpx;
+    left: 6rpx;
+    width: 40rpx;
+    height: 40rpx;
+    border-radius: 20rpx;
     background: #fff;
     transition: left 0.2s ease;
 }
 .switch.on .switch-dot {
-    left: 21px;
+    left: 42rpx;
 }
 .app-version {
     display: block;
     text-align: center;
-    font-size: 12px;
+    font-size: 24rpx;
     color: #c4c9d4;
-    padding-bottom: 36px;
+    padding-bottom: 72rpx;
 }
 .preview-popup {
     background: #fff;
@@ -1024,30 +1057,30 @@ function shareApp() {
     width: 76vw;
     max-width: 560rpx;
     background: #ffffff;
-    border-radius: 28px;
-    padding: 22px 18px 22px;
+    border-radius: 56rpx;
+    padding: 44rpx 36rpx 44rpx;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 24px 72px rgba(15, 23, 42, 0.18);
+    box-shadow: 0 48rpx 144rpx rgba(15, 23, 42, 0.18);
 }
 
 .rate-popup__close {
     position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 26px;
-    height: 26px;
-    border-radius: 30px;
-    border: 1.5px solid #31394a;
+    top: 32rpx;
+    right: 32rpx;
+    width: 52rpx;
+    height: 52rpx;
+    border-radius: 60rpx;
+    border: 3rpx solid #31394a;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .rate-popup__title {
-    font-size: 20px;
+    font-size: 40rpx;
     line-height: 1.2;
     font-weight: 800;
     color: #1f2740;
@@ -1055,15 +1088,15 @@ function shareApp() {
 }
 
 .rate-popup__stars {
-    margin-top: 18px;
+    margin-top: 36rpx;
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    gap: 10px;
+    gap: 20rpx;
 }
 
 .rate-star-icon {
-    text-shadow: 0 6px 0 rgba(191, 100, 0, 0.42);
+    text-shadow: 0 12rpx 0 rgba(191, 100, 0, 0.42);
 }
 
 .rate-star-icon--lg {
@@ -1071,16 +1104,16 @@ function shareApp() {
 }
 
 .rate-star-icon--sm {
-    margin-bottom: 6px;
+    margin-bottom: 12rpx;
 }
 
 .rate-star-icon--xs {
-    margin-bottom: 16px;
+    margin-bottom: 32rpx;
 }
 
 .rate-popup__desc {
-    margin-top: 18px;
-    font-size: 18px;
+    margin-top: 36rpx;
+    font-size: 36rpx;
     line-height: 1.35;
     color: #2b3147;
     text-align: center;
@@ -1088,18 +1121,18 @@ function shareApp() {
 }
 
 .rate-popup__button {
-    margin-top: 22px;
-    min-width: 176px;
-    height: 52px;
-    border-radius: 999px;
+    margin-top: 44rpx;
+    min-width: 352rpx;
+    height: 104rpx;
+    border-radius: 999rpx;
     background: #1f2640;
     color: #ffffff;
-    font-size: 16px;
+    font-size: 32rpx;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 16px 32px rgba(31, 38, 64, 0.18);
+    box-shadow: 0 32rpx 64rpx rgba(31, 38, 64, 0.18);
 }
 
 .rate-popup__button::after {
@@ -1110,8 +1143,8 @@ function shareApp() {
     width: 86vw;
     max-height: 86vh;
     background: #ffffff;
-    border-radius: 16px;
-    padding: 16px;
+    border-radius: 32rpx;
+    padding: 32rpx;
     display: flex;
     flex-direction: column;
 }
@@ -1120,19 +1153,19 @@ function shareApp() {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 24rpx;
 }
 
 .about-title {
-    font-size: 18px;
+    font-size: 36rpx;
     font-weight: 700;
     color: #111827;
 }
 
 .about-close {
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: 32rpx;
     background: #f3f5f9;
     display: flex;
     align-items: center;
@@ -1147,82 +1180,82 @@ function shareApp() {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 0 12px;
+    padding: 16rpx 0 24rpx;
 }
 
 .about-logo {
-    width: 72px;
-    height: 72px;
-    border-radius: 16px;
-    margin-bottom: 8px;
+    width: 144rpx;
+    height: 144rpx;
+    border-radius: 32rpx;
+    margin-bottom: 16rpx;
 }
 
 .about-name {
-    font-size: 16px;
+    font-size: 32rpx;
     font-weight: 600;
     color: #111827;
-    margin-bottom: 2px;
+    margin-bottom: 4rpx;
 }
 
 .about-slogan {
-    font-size: 12px;
+    font-size: 24rpx;
     color: #9ca3af;
-    margin-bottom: 10px;
+    margin-bottom: 20rpx;
 }
 
 .about-version {
     width: 100%;
     display: flex;
-    gap: 8px;
+    gap: 16rpx;
 }
 
 .about-version-item {
     flex: 1;
     background: #f9fafb;
-    border: 1px solid #eef1f5;
-    border-radius: 10px;
-    padding: 8px 10px;
+    border: 2rpx solid #eef1f5;
+    border-radius: 20rpx;
+    padding: 16rpx 20rpx;
 }
 
 .about-version-label {
     display: block;
-    font-size: 11px;
+    font-size: 22rpx;
     color: #9ca3af;
 }
 
 .about-version-value {
     display: block;
-    font-size: 13px;
+    font-size: 26rpx;
     color: #111827;
     font-weight: 600;
-    margin-top: 2px;
+    margin-top: 4rpx;
 }
 
 .about-group {
-    margin-top: 16px;
+    margin-top: 32rpx;
 }
 
 .about-group-title {
     display: block;
-    font-size: 11px;
+    font-size: 22rpx;
     font-weight: 600;
     color: #9ca3af;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 16rpx;
 }
 
 .about-list {
     background: #fff;
-    border: 1px solid #f0f1f3;
-    border-radius: 12px;
+    border: 2rpx solid #f0f1f3;
+    border-radius: 24rpx;
     overflow: hidden;
 }
 
 .about-row {
-    min-height: 50px;
-    padding: 12px 14px;
-    border-bottom: 1px solid #f3f4f6;
+    min-height: 100rpx;
+    padding: 24rpx 28rpx;
+    border-bottom: 2rpx solid #f3f4f6;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1235,18 +1268,59 @@ function shareApp() {
 .about-row-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 20rpx;
     flex: 1;
     min-width: 0;
 }
 
 .about-row-text {
-    font-size: 14px;
+    font-size: 28rpx;
     color: #111827;
 }
 
 .about-row-value {
-    font-size: 12px;
+    font-size: 24rpx;
     color: #9ca3af;
+}
+
+.about-legal {
+    text-align: center;
+}
+
+.about-legal__links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24rpx;
+}
+
+.about-legal__link {
+    font-size: 24rpx;
+    line-height: 1.4;
+    font-weight: 500;
+    color: #3d7fdd;
+}
+
+.about-legal__divider {
+    font-size: 36rpx;
+    line-height: 1.4;
+    color: #9ca3af;
+}
+
+.about-record {
+    margin-top: 16rpx;
+    text-align: center;
+    font-size: 24rpx;
+    line-height: 1.6;
+    color: #9ca3af;
+}
+
+.about-copyright {
+    margin-top: 8rpx;
+    text-align: center;
+    font-size: 24rpx;
+    line-height: 1.6;
+    color: #b3b8c2;
+    white-space: pre-line;
 }
 </style>

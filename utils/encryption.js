@@ -1,8 +1,8 @@
 import CryptoJS from 'crypto-js';
 
-// 从环境变量中获取加密密钥
-const SECRET_KEY = process.env.ENCRYPTION_KEY || 'wallpaper-app-secret-key';
-const SECRET_IV = process.env.ENCRYPTION_IV || 'wallpaper-app-secret-iv';
+// 加密密钥配置（微信小程序不支持 process.env）
+const SECRET_KEY = 'wallpaper-app-secret-key';
+const SECRET_IV = 'wallpaper-app-secret-iv';
 
 // 创建加密解密实例
 const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);

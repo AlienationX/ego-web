@@ -42,22 +42,35 @@
                 <view class="form-item password-item">
                     <input
                         class="form-input"
-                        :type="showPassword ? 'text' : 'password'"
+                        type="text"
+                        :password="!showPassword"
                         :placeholder="t('login.passwordPlaceholder')"
                         v-model="form.password"
                     />
                     <view class="password-toggle" @click="togglePassword">
-                        <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
+                        <mdi-icon
+                            :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                            size="20px"
+                            color="#94a3b8"
+                        ></mdi-icon>
                     </view>
                 </view>
 
                 <view class="form-item password-item">
                     <input
                         class="form-input"
-                        :type="showConfirmPassword ? 'text' : 'password'"
+                        type="text"
+                        :password="!showConfirmPassword"
                         :placeholder="t('login.confirmPasswordPlaceholder')"
                         v-model="form.confirmPassword"
                     />
+                    <view class="password-toggle" @click="toggleConfirmPassword">
+                        <mdi-icon
+                            :path="showConfirmPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                            size="20px"
+                            color="#94a3b8"
+                        ></mdi-icon>
+                    </view>
                 </view>
             </view>
 

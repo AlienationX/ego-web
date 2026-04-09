@@ -6,23 +6,23 @@
 
         <view class="recommend-panel__head">
             <view>
-                <view class="recommend-panel__title">{{ t('preview.recommend.title') }}</view>
-                <view class="recommend-panel__desc">{{ t('preview.recommend.desc') }}</view>
+                <view class="recommend-panel__title">{{ t('previewPage.recommend.title') }}</view>
+                <view class="recommend-panel__desc">{{ t('previewPage.recommend.desc') }}</view>
             </view>
-            <!-- <view class="recommend-panel__count">{{ t('preview.recommend.topN', { count: limit }) }}</view> -->
+            <!-- <view class="recommend-panel__count">{{ t('previewPage.recommend.topN', { count: limit }) }}</view> -->
         </view>
 
         <view v-if="loading" class="recommend-panel__loading">
             <rotate-loading :size="70"></rotate-loading>
         </view>
 
-        <view v-else-if="!list.length" class="recommend-panel__empty">{{ t('preview.recommend.empty') }}</view>
+        <view v-else-if="!list.length" class="recommend-panel__empty">{{ t('previewPage.recommend.empty') }}</view>
 
         <view v-else class="recommend-list">
             <view v-for="item in list" :key="item.id" class="recommend-card" @click="openPreview(item)">
                 <image class="recommend-card__image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
                 <view class="recommend-card__body">
-                    <view class="recommend-card__title">{{ item.description || item.classify_name || `#${item.id}` }}</view>
+                    <view class="recommend-card__title">{{ item.description || `#${item.id}` }}</view>
                     <view class="recommend-card__meta">
                         <text class="recommend-card__meta-text">{{ item.classify_name || t('top10.wallpaper') }}</text>
                         <view class="recommend-card__score">
@@ -72,11 +72,8 @@ const loadRecommend = async () => {
     loading.value = true;
     try {
         const res = await apiGetSimilarWall(currentId);
-        const rows = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
-        list.value = rows
-            .map((item) => handlePicUrl(item))
-            .filter((item) => item.id !== currentId)
-            .slice(0, props.limit);
+        // 必须添加id字段，否则会报错，因为id字段是必填项
+        list.value = res.data.map((item) => handlePicUrl({ ...item, id: item.wall_id })).slice(0, props.limit);
     } catch (error) {
         list.value = [];
     } finally {

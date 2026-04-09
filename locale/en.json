@@ -151,7 +151,7 @@
         "adText": "Unlock This Wallpaper",
         "adPrompt": "Watch An Ads"
     },
-    "preview": {
+    "previewPage": {
         "wallpaperInfo": "Wallpaper Information",
         "wallpaperId": "Wallpaper ID:",
         "category": "Category:",
@@ -428,7 +428,7 @@
         "others": "Others",
         "rateUs": "Rate Us",
         "share": "Share App",
-        "copyright": "Copyright © {year} Ego Wallpapers. All rights reserved.\nExplore Wallpapers, Discover Yourself",
+        "copyright": "Copyright © {year} Ego Wallpapers. All rights reserved",
         "copied": "Copied to clipboard",
         "checking": "Checking...",
         "alreadyLatest": "Already the latest version",

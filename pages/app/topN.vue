@@ -366,11 +366,11 @@ onLoad(() => {
 .hero-card__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(6, 12, 18, 0.02) 0%, rgba(6, 12, 18, 0.92) 100%);
+    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 48%, rgba(6, 12, 18, 0.9) 100%);
 }
 
 .hero-card__overlay--soft {
-    background: linear-gradient(180deg, rgba(6, 12, 18, 0.02) 0%, rgba(6, 12, 18, 0.76) 100%);
+    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 50%, rgba(6, 12, 18, 0.74) 100%);
 }
 
 .hero-card__rank {
@@ -432,10 +432,15 @@ onLoad(() => {
     line-height: 1.2;
     font-weight: 800;
     color: #e2e8f0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .hero-card__title--compact {
     font-size: 28rpx;
+    line-height: 1.38;
 }
 
 .hero-card__meta {

@@ -1,8 +1,9 @@
 <template>
-    <scroll-view v-if="currentInfo?.id" scroll-y class="previewScroll" @scroll="handlePreviewScroll">
-        <view class="preview">
+    <scroll-view v-if="currentInfo && currentInfo.id" scroll-y class="previewScroll" @scroll="handlePreviewScroll">
+        <view class="previewLayout">
             <view class="previewHero">
                 <swiper
+                    class="preview-swiper"
                     :circular="!disableSwipe && classList.length > 1"
                     :disable-touch="disableSwipe"
                     :current="currentIndex"
@@ -47,7 +48,7 @@
                         <button class="icon-btn share-btn" open-type="share" @click="handleShare">
                             <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
                         </button>
-                        <view v-if="previewType === 'classic'" class="icon-btn" @click="openInfo">
+                        <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
                             <mdi-icon path="/static/icons/information-symbol.svg" size="32px" color="#fff"></mdi-icon>
                         </view>
                     </view>
@@ -61,11 +62,11 @@
                         <uni-icons type="down" size="18" color="#ffffff"></uni-icons>
                     </view>
 
-                    <view class="footer" v-if="previewType === 'classic'">
+                    <view class="footer" v-if="currentPreviewType === 'classic'">
                         <view class="box" @click="toggleCollect">
                             <uni-icons type="heart-filled" size="28"></uni-icons>
                             <view class="text">{{
-                                currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
+                                currentInfo.is_collect ? t('previewPage.collected') : t('previewPage.collect')
                             }}</view>
                         </view>
                         <view class="box" @click="openScore">
@@ -92,7 +93,7 @@
                             <view class="action-item" @click="toggleCollect">
                                 <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
                                 <view class="action-text">{{
-                                    currentInfo.is_collect ? t('preview.collected') : t('preview.collect')
+                                    currentInfo.is_collect ? t('previewPage.collected') : t('previewPage.collect')
                                 }}</view>
                             </view>
                             <view class="action-item" @click="clickDownload">
@@ -125,28 +126,28 @@
             <view class="infoPopup">
                 <view class="popHeader">
                     <view></view>
-                    <view class="title">{{ t('preview.wallpaperInfo') }}</view>
+                    <view class="title">{{ t('previewPage.wallpaperInfo') }}</view>
                     <view class="close">
                         <uni-icons class="close" type="clear" size="32" @click="closeInfo"></uni-icons>
                     </view>
                 </view>
-                <scroll-view scroll-y>
+                <scroll-view class="info-scroll-view" scroll-y>
                     <view class="content">
                         <view class="row">
-                            <view class="label">{{ t('preview.wallpaperId') }}</view>
+                            <view class="label">{{ t('previewPage.wallpaperId') }}</view>
                             <view class="value" selectable>{{ currentInfo.id }}</view>
                         </view>
                         <view class="row" v-if="currentInfo.classify_name">
-                            <view class="label">{{ t('preview.category') }}</view>
+                            <view class="label">{{ t('previewPage.category') }}</view>
                             <view class="value classify">{{ currentInfo.classify_name }}</view>
                         </view>
                         <view class="row" v-if="currentInfo.publisher">
-                            <view class="label">{{ t('preview.publisher') }}</view>
+                            <view class="label">{{ t('previewPage.publisher') }}</view>
                             <view class="value classify">{{ currentInfo.publisher }}</view>
                             <!-- <view class="value classify">{{currentInfo.nickname}}</view> -->
                         </view>
                         <view class="row">
-                            <view class="label">{{ t('preview.score') }}</view>
+                            <view class="label">{{ t('previewPage.score') }}</view>
                             <view class="value rateBox">
                                 <uni-rate readonly touchable :value="currentInfo.score"></uni-rate>
                                 <text class="score">{{ currentInfo.score }}</text>
@@ -161,11 +162,11 @@
                             <view class="value">{{ currentInfo.downloads }}</view>
                         </view> -->
                         <view class="row" v-if="currentInfo.description">
-                            <view class="label">{{ t('preview.description') }}</view>
+                            <view class="label">{{ t('previewPage.description') }}</view>
                             <view class="value" selectable>{{ currentInfo.description }}</view>
                         </view>
                         <view class="row">
-                            <view class="label">{{ t('preview.tags') }}</view>
+                            <view class="label">{{ t('previewPage.tags') }}</view>
                             <view class="value tabs">
                                 <view class="tab" v-for="tab in currentInfo.tabs_list" :key="tab">
                                     {{ tab }}
@@ -185,18 +186,18 @@
         <uni-popup ref="scorePopup" :is-mask-click="false">
             <view class="scorePopup">
                 <view class="popHeader">
-                    <view class="title">{{ t('preview.wallpaperRating') }}</view>
+                    <view class="title">{{ t('previewPage.wallpaperRating') }}</view>
                     <uni-icons class="close" type="clear" size="32" @click="closeScore"></uni-icons>
                 </view>
 
                 <view class="content">
                     <uni-rate v-model="userScore" allowHalf></uni-rate>
-                    <text class="text">{{ userScore }} {{ t('preview.points') }}</text>
+                    <text class="text">{{ userScore }} {{ t('previewPage.points') }}</text>
                 </view>
 
                 <view class="footer">
                     <button type="default" size="mini" plain :disabled="!userScore" @click="submitScore">
-                        {{ t('preview.confirmRating') }}
+                        {{ t('previewPage.confirmRating') }}
                     </button>
                 </view>
             </view>
@@ -206,23 +207,23 @@
             <view class="editPopup">
                 <view class="popHeader">
                     <view></view>
-                    <view class="title">{{ t('preview.adminEdit') }}</view>
+                    <view class="title">{{ t('previewPage.adminEdit') }}</view>
                     <view class="close">
                         <uni-icons class="close" type="clear" size="32" @click="closeEdit"></uni-icons>
                     </view>
                 </view>
-                <scroll-view scroll-y>
+                <scroll-view class="info-scroll-view" scroll-y>
                     <view class="content">
                         <view class="row">
-                            <view class="label">{{ t('preview.description') }}</view>
+                            <view class="label">{{ t('previewPage.description') }}</view>
                             <textarea v-model="editForm.description" class="input-textarea" :auto-height="true"></textarea>
                         </view>
                         <view class="row">
-                            <view class="label">{{ t('preview.tags') }}</view>
+                            <view class="label">{{ t('previewPage.tags') }}</view>
                             <input v-model="editForm.tabs" class="input" />
                         </view>
                         <view class="row">
-                            <view class="label">{{ t('preview.category') }}</view>
+                            <view class="label">{{ t('previewPage.category') }}</view>
                             <picker
                                 :range="classifyList"
                                 range-key="classify_name"
@@ -230,27 +231,27 @@
                                 :value="getClassifyIndex()"
                             >
                                 <view class="input picker-input">
-                                    {{ getClassifyName() || t('preview.selectCategory') }}
+                                    {{ getClassifyName() || t('previewPage.selectCategory') }}
                                 </view>
                             </picker>
                         </view>
                         <view class="row">
-                            <view class="label">{{ t('preview.publisher') }}</view>
+                            <view class="label">{{ t('previewPage.publisher') }}</view>
                             <input v-model="editForm.publisher" class="input" />
                         </view>
                         <view class="row row-inline">
                             <view class="inline-item">
-                                <view class="label">{{ t('preview.active') }}</view>
+                                <view class="label">{{ t('previewPage.active') }}</view>
                                 <switch color="#E5322D" :checked="editForm.is_active" @change="onEditActiveChange" />
                             </view>
                             <view class="inline-item">
-                                <view class="label">{{ t('preview.lock') }}</view>
+                                <view class="label">{{ t('previewPage.lock') }}</view>
                                 <switch color="#E5322D" :checked="editForm.is_locked" @change="onEditLockChange" />
                             </view>
                         </view>
                         <view class="edit-actions">
-                            <button class="btn-primary" @click="saveEdit">{{ t('preview.adminSave') }}</button>
-                            <button class="btn-danger" @click="deleteWall">{{ t('preview.adminDelete') }}</button>
+                            <button class="btn-primary" @click="saveEdit">{{ t('previewPage.adminSave') }}</button>
+                            <button class="btn-danger" @click="deleteWall">{{ t('previewPage.adminDelete') }}</button>
                         </view>
                     </view>
                 </scroll-view>
@@ -281,7 +282,7 @@ import { useUserStore } from '@/stores/user.js';
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-const PREVIEW_SCROLL_HINT_KEY = 'hasSeenHint';
+const HAS_SEEN_HINT_KEY = 'hasSeenHint';
 
 const { t, locale } = useI18n();
 const weekNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -315,7 +316,7 @@ const dateText = computed(() => {
     }
     return `${week}, ${monthNamesEn[now.getMonth()]} ${now.getDate()}`;
 });
-const previewType = computed(() => settingsStore.options.previewType || 'classic');
+const currentPreviewType = computed(() => settingsStore.options.previewType || 'classic');
 const isAdmin = computed(() => !!userStore.isAdmin);
 const publisherName = computed(() => currentInfo.value?.publisher || t('common.appName'));
 const publisherAvatar = computed(() => {
@@ -339,24 +340,24 @@ classList.value = wallList.map((item) => {
     };
 });
 const disableSwipe = ref(false);
-const showScrollHint = ref(!uni.getStorageSync(PREVIEW_SCROLL_HINT_KEY));
+const showScrollHint = ref(!uni.getStorageSync(HAS_SEEN_HINT_KEY));
 
 const handlePreviewScroll = (e) => {
     if (!showScrollHint.value) return;
     const scrollTop = Number(e?.detail?.scrollTop || 0);
     if (scrollTop > 60) {
         showScrollHint.value = false;
-        uni.setStorageSync(PREVIEW_SCROLL_HINT_KEY, true);
+        uni.setStorageSync(HAS_SEEN_HINT_KEY, true);
     }
 };
 
 // views字段值+1，请求太频繁，labmda次数不够用，暂时搁置
 const incrementViews = async (id) => {
-    // let res = await apiPostIncrementViews(id);
+    let res = await apiPostIncrementViews(id);
     // console.log('increment views', res);
 };
 
-// views字段值+1
+// downloads字段值+1
 const incrementDownloads = async (id) => {
     let res = await apiPostIncrementDownloads(id);
     // console.log('increment downloads', res);
@@ -407,9 +408,9 @@ const openScore = () => {
     if (Object.keys(userStore.userinfo).length === 0) {
         uni.showModal({
             title: t('common.information'),
-            content: t('preview.loginPrompt'),
-            cancelText: t('preview.cancel'),
-            confirmText: t('preview.login'),
+            content: t('previewPage.loginPrompt'),
+            cancelText: t('previewPage.cancel'),
+            confirmText: t('previewPage.login'),
             success: (res) => {
                 if (res.confirm) {
                     uni.navigateTo({ url: '/pages/auth/login' });
@@ -512,19 +513,19 @@ const saveEdit = async () => {
                       .filter(Boolean)
                 : [],
         });
-        uni.showToast({ title: t('preview.adminSaveSuccess'), icon: 'none' });
+        uni.showToast({ title: t('previewPage.adminSaveSuccess'), icon: 'none' });
         closeEdit();
     } catch (error) {
-        uni.showToast({ title: t('preview.adminSaveFailed'), icon: 'none' });
+        uni.showToast({ title: t('previewPage.adminSaveFailed'), icon: 'none' });
     }
 };
 
 const deleteWall = () => {
     uni.showModal({
         title: t('common.tip'),
-        content: t('preview.adminDeleteConfirm'),
-        confirmText: t('preview.adminDelete'),
-        cancelText: t('preview.cancel'),
+        content: t('previewPage.adminDeleteConfirm'),
+        confirmText: t('previewPage.adminDelete'),
+        cancelText: t('previewPage.cancel'),
         success: async (res) => {
             if (!res.confirm) return;
             try {
@@ -538,10 +539,10 @@ const deleteWall = () => {
                     currentIndex.value = classList.value.length - 1;
                 }
                 currentInfo.value = classList.value[currentIndex.value];
-                uni.showToast({ title: t('preview.adminDeleteSuccess'), icon: 'none' });
+                uni.showToast({ title: t('previewPage.adminDeleteSuccess'), icon: 'none' });
                 closeEdit();
             } catch (error) {
-                uni.showToast({ title: t('preview.adminDeleteFailed'), icon: 'none' });
+                uni.showToast({ title: t('previewPage.adminDeleteFailed'), icon: 'none' });
             }
         },
     });
@@ -552,9 +553,9 @@ const toggleLock = async () => {
     try {
         await apiPostUpdateWall({ id: currentInfo.value.id, is_locked: next });
         applyLocalUpdate({ is_locked: next });
-        uni.showToast({ title: t('preview.lockToggled'), icon: 'none' });
+        uni.showToast({ title: t('previewPage.lockToggled'), icon: 'none' });
     } catch (error) {
-        uni.showToast({ title: t('preview.lockToggleFailed'), icon: 'none' });
+        uni.showToast({ title: t('previewPage.lockToggleFailed'), icon: 'none' });
     }
 };
 
@@ -566,16 +567,16 @@ const handleShare = () => {
         type: 0,
         summary: t('common.appName'),
         success: () => {
-            uni.showToast({ title: t('preview.shareSuccess'), icon: 'success' });
+            uni.showToast({ title: t('previewPage.shareSuccess'), icon: 'success' });
         },
         fail: () => {
-            uni.showToast({ title: t('preview.shareFailed'), icon: 'none' });
+            uni.showToast({ title: t('previewPage.shareFailed'), icon: 'none' });
         },
     });
     // #endif
 
     // #ifdef H5
-    uni.showToast({ title: t('preview.shareHint'), icon: 'none' });
+    uni.showToast({ title: t('previewPage.shareHint'), icon: 'none' });
     // #endif
 };
 
@@ -584,9 +585,9 @@ const toggleCollect = async () => {
     if (Object.keys(userStore.userinfo).length === 0) {
         uni.showModal({
             title: t('common.information'),
-            content: t('preview.loginPrompt'),
-            cancelText: t('preview.cancel'),
-            confirmText: t('preview.login'),
+            content: t('previewPage.loginPrompt'),
+            cancelText: t('previewPage.cancel'),
+            confirmText: t('previewPage.login'),
             success: (res) => {
                 if (res.confirm) {
                     uni.navigateTo({ url: '/pages/auth/login' });
@@ -609,12 +610,12 @@ const toggleCollect = async () => {
         }
 
         uni.showToast({
-            title: nextCollect ? t('preview.collectSuccess') : t('preview.uncollectSuccess'),
+            title: nextCollect ? t('previewPage.collectSuccess') : t('previewPage.uncollectSuccess'),
             icon: 'none',
         });
     } catch (error) {
         uni.showToast({
-            title: t('preview.collectFailed'),
+            title: t('previewPage.collectFailed'),
             icon: 'none',
         });
     }
@@ -638,13 +639,13 @@ const submitScore = async () => {
         // classList.value[currentIndex.value].userScore = userScore.value;
         // uni.setStorageSync('wallList', classList.value);
         uni.showToast({
-            title: t('preview.ratingSuccess'),
+            title: t('previewPage.ratingSuccess'),
             icon: 'none',
         });
         closeScore();
     } catch (error) {
         uni.showToast({
-            title: t('preview.ratingFailed'),
+            title: t('previewPage.ratingFailed'),
             icon: 'none',
         });
     }
@@ -658,7 +659,7 @@ const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useA
 const clickDownload = async () => {
     // #ifdef WEB
     uni.showModal({
-        content: t('preview.savePrompt'),
+        content: t('previewPage.savePrompt'),
         showCancel: false,
     });
     // #endif
@@ -789,7 +790,7 @@ onShareTimeline(() => {
 </script>
 
 <style lang="scss" scoped>
-.preview {
+.previewLayout {
     width: 100%;
     position: relative;
     min-height: 100vh;
@@ -805,7 +806,7 @@ onShareTimeline(() => {
     height: 100vh;
     position: relative;
 
-    swiper {
+    .preview-swiper {
         width: 100%;
         height: 100%;
 
@@ -1134,7 +1135,7 @@ onShareTimeline(() => {
         }
     }
 
-    scroll-view {
+    .info-scroll-view {
         max-height: 60vh;
 
         .content {
@@ -1321,7 +1322,7 @@ onShareTimeline(() => {
         }
     }
 
-    scroll-view {
+    .edit-scroll-view {
         max-height: 70vh;
     }
 

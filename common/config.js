@@ -26,5 +26,3 @@ export const STATUS_BAR_HEIGHT = 44;
 export const NAV_BAR_HEIGHT = 44;
 export const APP_BAR_HEIGHT = STATUS_BAR_HEIGHT + NAV_BAR_HEIGHT;
 export const TAB_BAR_HEIGHT = 44;
-
-export const APP_ID = 'com.wallpaper.app.ego';

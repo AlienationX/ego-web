@@ -42,20 +42,30 @@
                 <view class="form-item password-item" :class="{ focused: passwordFocused }">
                     <input
                         class="form-input"
-                        :type="showPassword ? 'text' : 'password'"
+                        type="text"
+                        :password="!showPassword"
                         :placeholder="t('login.passwordPlaceholder')"
                         v-model="form.password"
                         @focus="passwordFocused = true"
                         @blur="passwordFocused = false"
                     />
                     <view class="password-toggle" @click="togglePassword">
-                        <image src="/static/icons/eye-icon.svg" mode="aspectFit"></image>
+                        <mdi-icon
+                            :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                            size="20px"
+                            color="#94a3b8"
+                        ></mdi-icon>
                     </view>
                 </view>
+            </view>
+
+            <view class="form-options-section">
                 <view class="form-options">
                     <view class="remember-option" @click="toggleRememberPassword">
                         <view class="remember-checkbox" :class="{ checked: rememberPassword }">
-                            <view class="remember-dot"></view>
+                            <view class="remember-inner" v-if="rememberPassword">
+                                <uni-icons type="checkmarkempty" color="#ffffff" size="16"></uni-icons>
+                            </view>
                         </view>
                         <text class="remember-text">{{ t('login.rememberPassword') }}</text>
                     </view>
@@ -378,62 +388,66 @@ const goBack = () => {
             }
         }
     }
+}
 
-    .forgot-password {
-        text-align: right;
+.forgot-password {
+    text-align: right;
 
-        text {
-            font-size: 24rpx;
-            color: #7c8ba0;
-        }
-    }
-
-    .form-options {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 8rpx;
-    }
-
-    .remember-option {
-        display: flex;
-        align-items: center;
-        gap: 12rpx;
-    }
-
-    .remember-checkbox {
-        width: 32rpx;
-        height: 32rpx;
-        border-radius: 50%;
-        border: 2rpx solid #c8d3e7;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-
-        .remember-dot {
-            width: 16rpx;
-            height: 16rpx;
-            border-radius: 50%;
-            background: transparent;
-        }
-
-        &.checked {
-            border-color: #3461fd;
-
-            .remember-dot {
-                background: #3461fd;
-            }
-        }
-    }
-
-    .remember-text {
+    text {
         font-size: 24rpx;
         color: #7c8ba0;
     }
 }
 
+.form-options-section {
+    margin-top: 24rpx;
+}
+
+.form-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8rpx;
+}
+
+.remember-option {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+}
+
+.remember-checkbox {
+    width: 32rpx;
+    height: 32rpx;
+    border-radius: 8rpx;
+    border: 2rpx solid #d0d5dd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+
+    &.checked {
+        background: #3461fd;
+        border-color: #3461fd;
+    }
+}
+
+.remember-inner {
+    width: 32rpx;
+    height: 32rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remember-text {
+    font-size: 24rpx;
+    color: #7c8ba0;
+}
+
 .submit-section {
+    margin-top: 44rpx;
+
     .submit-btn {
         width: 100%;
         height: 120rpx;

@@ -146,7 +146,7 @@
         "saveFailed": "保存失败，请重新点击下载",
         "downloading": "下载中...",
         "loading": "加载中...",
-        "adText": "需要观看视频广告解锁该壁纸",
+        "adText": "观看视频广告解锁该壁纸",
         "adPrompt": "观看视频广告"
     },
     "feedback": {
@@ -288,7 +288,7 @@
         "googleLoginTip": "Google登录功能开发中",
         "appleLoginTip": "Apple登录功能开发中"
     },
-    "preview": {
+    "previewPage": {
         "wallpaperInfo": "壁纸信息",
         "wallpaperId": "壁纸ID:",
         "category": "分类:",
@@ -426,7 +426,7 @@
         "others": "其他",
         "rateUs": "给我们评分",
         "share": "分享应用",
-        "copyright": "Copyright © {year} 本我壁纸. All rights reserved.\n探索壁纸，亦探索自我",
+        "copyright": "Copyright © {year} 本我壁纸. All rights reserved",
         "copied": "已复制到剪贴板",
         "checking": "检查中...",
         "alreadyLatest": "当前已是最新版本",

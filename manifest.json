@@ -158,5 +158,11 @@
         "title" : "benwo",
         "darkmode" : true,
         "themeLocation" : "theme.json"
+    },
+    "app-harmony" : {
+        "distribute" : {
+            "bundleName" : "com.ego.app.wallpaper",
+            "deviceTypes" : [ "phone", "tablet" ]
+        }
     }
 }

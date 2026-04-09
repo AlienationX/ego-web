@@ -8,6 +8,7 @@
 import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
+import { PICS_BASE_URL } from '@/common/config.js';
 
 const { t } = useI18n();
 const webviewUrl = ref('');
@@ -30,9 +31,9 @@ onLoad((options) => {
         const decodedUrl = decodeURIComponent(options.url);
 
         if (decodedUrl.includes('privacy_agreement')) {
-            webviewUrl.value = '/static/assets/privacy_agreement.html';
+            webviewUrl.value = `${PICS_BASE_URL}/privacy_agreement.html`;
         } else if (decodedUrl.includes('user_agreement')) {
-            webviewUrl.value = '/static/assets/user_agreement.html';
+            webviewUrl.value = `${PICS_BASE_URL}/user_agreement.html`;
         }
 
         uni.setNavigationBarTitle({
@@ -47,9 +48,4 @@ onLoad((options) => {
     background-color: #f5f5f5;
     min-height: 100vh;
 }
-
-// .webview {
-//     width: 100%;
-//     height: 100vh;
-// }
 </style>
