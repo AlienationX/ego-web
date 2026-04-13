@@ -89,10 +89,10 @@
                     <view class="source-item" :class="{ active: sourceMode === 'favorite' }" @click="setSourceMode('favorite')">
                         {{ $t('discover.sourceFavorite') }}
                     </view>
-                    <view class="source-item" :class="{ active: sourceMode === 'local' }" @click="setSourceMode('local')">
+                    <!-- <view class="source-item" :class="{ active: sourceMode === 'local' }" @click="setSourceMode('local')">
                         {{ $t('discover.sourceLocal') }}
                         <uni-icons class="lock-icon" type="vip-filled" size="14" color="#b7791f"></uni-icons>
-                    </view>
+                    </view> -->
                 </view>
             </view>
         </view>
@@ -555,7 +555,7 @@ const onAnalyze = async () => {
 
 const goFavorite = () => {
     if (!userStore.isLoggedIn) {
-        uni.navigateTo({ url: '/pages/auth/login' });
+        uni.navigateTo({ url: '/pages/auth/signin' });
         return;
     }
     uni.navigateTo({ url: '/pages/app/favorite' });

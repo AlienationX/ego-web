@@ -35,93 +35,111 @@
             </view>
 
             <template v-else>
-            <view v-if="showWordBoard" class="explore-board">
-                <view class="section-head">
-                    <view class="section-head__title">{{ t('common.hotSearch') }}</view>
-                    <uni-icons type="fire-filled" size="16" color="#619aef"></uni-icons>
-                </view>
-                <view class="keyword-cloud">
-                    <view class="keyword-chip" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">
-                        {{ tab }}
-                    </view>
-                </view>
-
-                <view v-if="searchHistory.length" class="history-block">
+                <view v-if="showWordBoard" class="explore-board">
                     <view class="section-head">
-                        <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}</view>
-                        <view class="section-head__action" @click="removeHistory">{{ t('search.clearAll') }}</view>
+                        <view class="section-head__title">{{ t('common.hotSearch') }}</view>
+                        <uni-icons type="fire-filled" size="16" color="#619aef"></uni-icons>
                     </view>
-                    <view class="history-list">
-                        <view class="history-item" v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">
-                            <view class="history-item__left">
-                                <uni-icons type="refreshempty" size="16" color="#7788a6"></uni-icons>
-                                <text>{{ tab }}</text>
-                            </view>
-                            <uni-icons type="top" size="13" color="#607089"></uni-icons>
+                    <view class="keyword-cloud">
+                        <view class="keyword-chip" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">
+                            {{ tab }}
                         </view>
                     </view>
-                </view>
-            </view>
 
-            <view v-if="noResult" class="noResult">
-                <view class="noResult__icon">
-                    <uni-icons type="search" size="56" color="#619aef"></uni-icons>
-                </view>
-                <view class="noResult__title">{{ t('search.noResultTitle') }}</view>
-                <view class="noResult__text">{{ t('common.noResult') }}</view>
-                <view class="noResult__code">Error Code: 404_NOT_FOUND</view>
-            </view>
-
-            <template v-if="classList.length">
-                <view class="toolbar" :style="{ top: `${navBarHeight}px` }">
-                    <scroll-view scroll-x class="toolbar__chips" show-scrollbar="false">
-                        <view class="toolbar__chips-inner">
-                            <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'recommend' }" @click="onRecommend">
-                                {{ t('common.recommend') }}
-                            </view>
-                            <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'score' }" @click="onScore">
-                                {{ t('common.score') }}
-                            </view>
-                            <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'date' }" @click="onDateSort">
-                                <text>{{ t('common.publishDate') }}</text>
-                                <uni-icons
-                                    v-if="activeButton === 'date'"
-                                    :type="dateSortAsc ? 'arrow-up' : 'arrow-down'"
-                                    size="13"
-                                    color="#dce8ff"
-                                ></uni-icons>
-                            </view>
+                    <view v-if="searchHistory.length" class="history-block">
+                        <view class="section-head">
+                            <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}</view>
+                            <view class="section-head__action" @click="removeHistory">{{ t('search.clearAll') }}</view>
                         </view>
-                    </scroll-view>
-
-                    <view class="toolbar__actions">
-                        <view class="toolbar__action" @click="onChangeColumn">
-                            <image
-                                class="toolbar__action-icon"
-                                v-if="settingsStore.options.column === 3"
-                                src="/static/icons/numeric-3-box.svg"
-                                mode="aspectFit"
-                            ></image>
-                            <image class="toolbar__action-icon" v-else src="/static/icons/numeric-2-box.svg" mode="aspectFit"></image>
-                        </view>
-                        <view class="toolbar__action" @click="onChangeView">
-                            <image
-                                class="toolbar__action-icon"
-                                v-if="settingsStore.options.view === 'window'"
-                                src="/static/icons/view-grid.svg"
-                                mode="aspectFit"
-                            ></image>
-                            <image class="toolbar__action-icon" v-else src="/static/icons/view-dashboard.svg" mode="aspectFit"></image>
+                        <view class="history-list">
+                            <view class="history-item" v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">
+                                <view class="history-item__left">
+                                    <uni-icons type="refreshempty" size="16" color="#7788a6"></uni-icons>
+                                    <text>{{ tab }}</text>
+                                </view>
+                                <uni-icons type="top" size="13" color="#607089"></uni-icons>
+                            </view>
                         </view>
                     </view>
                 </view>
 
-                <pics-view :classList="classList"></pics-view>
-
-                <view class="loadingLayout" v-if="noData || classList.length">
-                    <uni-load-more :status="noData ? 'noMore' : 'loading'" />
+                <view v-if="noResult" class="noResult">
+                    <view class="noResult__icon">
+                        <uni-icons type="search" size="56" color="#619aef"></uni-icons>
+                    </view>
+                    <view class="noResult__title">{{ t('search.noResultTitle') }}</view>
+                    <view class="noResult__text">{{ t('common.noResult') }}</view>
+                    <view class="noResult__code">Error Code: 404_NOT_FOUND</view>
                 </view>
-            </template>
+
+                <template v-if="classList.length">
+                    <view class="toolbar" :style="{ top: `${navBarHeight}px` }">
+                        <scroll-view scroll-x class="toolbar__chips" show-scrollbar="false">
+                            <view class="toolbar__chips-inner">
+                                <view
+                                    class="toolbar__chip"
+                                    :class="{ 'is-active': activeButton === 'recommend' }"
+                                    @click="onRecommend"
+                                >
+                                    {{ t('common.recommend') }}
+                                </view>
+                                <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'score' }" @click="onScore">
+                                    {{ t('common.score') }}
+                                </view>
+                                <view
+                                    class="toolbar__chip"
+                                    :class="{ 'is-active': activeButton === 'date' }"
+                                    @click="onDateSort"
+                                >
+                                    <text>{{ t('common.publishDate') }}</text>
+                                    <uni-icons
+                                        v-if="activeButton === 'date'"
+                                        :type="dateSortAsc ? 'arrow-up' : 'arrow-down'"
+                                        size="13"
+                                        color="#dce8ff"
+                                    ></uni-icons>
+                                </view>
+                            </view>
+                        </scroll-view>
+
+                        <view class="toolbar__actions">
+                            <view class="toolbar__action" @click="onChangeColumn">
+                                <image
+                                    class="toolbar__action-icon"
+                                    v-if="settingsStore.options.column === 3"
+                                    src="/static/icons/numeric-3-box.svg"
+                                    mode="aspectFit"
+                                ></image>
+                                <image
+                                    class="toolbar__action-icon"
+                                    v-else
+                                    src="/static/icons/numeric-2-box.svg"
+                                    mode="aspectFit"
+                                ></image>
+                            </view>
+                            <view class="toolbar__action" @click="onChangeView">
+                                <image
+                                    class="toolbar__action-icon"
+                                    v-if="settingsStore.options.view === 'window'"
+                                    src="/static/icons/view-grid.svg"
+                                    mode="aspectFit"
+                                ></image>
+                                <image
+                                    class="toolbar__action-icon"
+                                    v-else
+                                    src="/static/icons/view-dashboard.svg"
+                                    mode="aspectFit"
+                                ></image>
+                            </view>
+                        </view>
+                    </view>
+
+                    <pics-view :classList="classList"></pics-view>
+
+                    <view class="loadingLayout" v-if="noData || classList.length">
+                        <uni-load-more :status="noData ? 'noMore' : 'loading'" />
+                    </view>
+                </template>
             </template>
         </view>
 
@@ -605,7 +623,8 @@ onPageScroll((e) => {
 .toolbar__action-icon {
     width: 38rpx;
     height: 38rpx;
-    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%) contrast(101%);
+    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%)
+        contrast(101%);
 }
 
 .loadingLayout {

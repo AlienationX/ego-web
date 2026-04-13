@@ -35,7 +35,34 @@
         "notice": "公告",
         "dailyRecommend": "每日推荐",
         "latestRelease": "最新发布",
-        "categoryRecommend": "分类推荐"
+        "categoryRecommend": "分类推荐",
+        "banner": {
+            "defaultTitle": "精选壁纸",
+            "discoverMore": "发现更多",
+            "defaultDesc": "点击进入今日推荐的精选内容。",
+            "bingDesc": "每日同步更新的必应精选画面，适合作为今日壁纸灵感入口。",
+            "classifyDesc": "精选专题合集，聚合高质量视觉内容与每日灵感更新。",
+            "searchDesc": "进入指定关键词主题，快速浏览同风格壁纸内容。",
+            "previewDesc": "直接打开推荐壁纸，并继续探索更多相似内容。",
+            "badge": {
+                "classify": "专题",
+                "search": "关键词",
+                "spotlight": "主推",
+                "miniProgram": "小程序",
+                "default": "精选"
+            },
+            "target": {
+                "self": "站内",
+                "miniProgram": "跨应用",
+                "external": "外部"
+            },
+            "meta": {
+                "classify": "合集入口",
+                "search": "关键词入口",
+                "preview": "直接预览",
+                "default": "打开"
+            }
+        }
     },
     "latest": {
         "title": "最新发布",

@@ -59,6 +59,25 @@
                 </view>
             </view>
 
+            <!-- 协议复选框 -->
+            <view class="agreement-section">
+                <view class="agreement-content" @click="toggleAgreement">
+                    <view class="checkbox-wrapper">
+                        <view class="checkbox" :class="{ checked: isAgreed }">
+                            <view class="checkbox-inner" v-if="isAgreed">
+                                <uni-icons type="checkmarkempty" color="#ffffff" size="16"></uni-icons>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="agreement-text">
+                        <text class="normal-text">{{ t('login.agreePrefix') }}</text>
+                        <text class="link-text" @click.stop="openTerms">{{ t('login.termsOfService') }}</text>
+                        <text class="normal-text"> {{ t('login.and') }} </text>
+                        <text class="link-text" @click.stop="openPrivacy">{{ t('login.privacyPolicy') }}</text>
+                    </view>
+                </view>
+            </view>
+
             <view class="form-options-section">
                 <view class="form-options">
                     <view class="remember-option" @click="toggleRememberPassword">
@@ -112,6 +131,7 @@ const showPassword = ref(false);
 const passwordFocused = ref(false);
 const isSubmitting = ref(false);
 const rememberPassword = ref(false);
+const isAgreed = ref(false);
 
 onMounted(() => {
     const saved = uni.getStorageSync(REMEMBER_STORAGE_KEY);
@@ -133,6 +153,25 @@ const toggleRememberPassword = () => {
     if (!rememberPassword.value) {
         uni.removeStorageSync(REMEMBER_STORAGE_KEY);
     }
+};
+
+// 协议相关
+const toggleAgreement = () => {
+    isAgreed.value = !isAgreed.value;
+};
+
+// 打开服务条款
+const openTerms = () => {
+    uni.navigateTo({
+        url: '/pages/webview/webview?url=user_agreement',
+    });
+};
+
+// 打开隐私政策
+const openPrivacy = () => {
+    uni.navigateTo({
+        url: '/pages/webview/webview?url=privacy_agreement',
+    });
 };
 
 // 忘记密码
@@ -171,6 +210,14 @@ const validateForm = () => {
     if (!form.password || form.password.length < 6) {
         uni.showToast({
             title: t('login.passwordError'),
+            icon: 'none',
+        });
+        return false;
+    }
+
+    if (!isAgreed.value) {
+        uni.showToast({
+            title: t('login.agreeTerms'),
             icon: 'none',
         });
         return false;
@@ -443,6 +490,60 @@ const goBack = () => {
 .remember-text {
     font-size: 24rpx;
     color: #7c8ba0;
+}
+
+.agreement-section {
+    margin: 32rpx 0;
+}
+
+.agreement-content {
+    display: flex;
+    align-items: flex-start;
+    padding: 0 8rpx;
+    gap: 16rpx;
+}
+
+.checkbox-wrapper {
+    margin-top: 4rpx;
+}
+
+.checkbox {
+    width: 32rpx;
+    height: 32rpx;
+    border-radius: 8rpx;
+    border: 2rpx solid #d0d5dd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+
+    &.checked {
+        background: #3461fd;
+        border-color: #3461fd;
+    }
+}
+
+.checkbox-inner {
+    width: 32rpx;
+    height: 32rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.agreement-text {
+    flex: 1;
+    font-size: 24rpx;
+    line-height: 1.5;
+
+    .normal-text {
+        color: #7c8ba0;
+    }
+
+    .link-text {
+        color: #3461fd;
+        text-decoration: underline;
+    }
 }
 
 .submit-section {

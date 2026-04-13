@@ -5,13 +5,49 @@
         <view class="banner">
             <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
                 <swiper-item v-for="item in bannerList" :key="item.id">
-                    <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram" :app-id="item.appid">
+                    <navigator
+                        v-if="item.target == 'miniProgram'"
+                        :url="item.url"
+                        target="miniProgram"
+                        :app-id="item.appid"
+                        :class="['banner-card', item.accentClass]"
+                    >
                         <image :src="item.picurl" mode="aspectFill"></image>
+                        <view class="banner-card__overlay"></view>
+                        <view class="banner-card__content">
+                            <view class="banner-card__tag-row">
+                                <view class="banner-card__tag">{{ item.badge }}</view>
+                                <view class="banner-card__target">{{ item.targetLabel }}</view>
+                            </view>
+                            <view class="banner-card__title">{{ item.title }}</view>
+                            <view class="banner-card__desc">{{ item.desc }}</view>
+                            <view class="banner-card__meta">
+                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                <view class="banner-card__meta-arrow">
+                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                </view>
+                            </view>
+                        </view>
                     </navigator>
 
-                    <navigator v-else :url="`/pages/app/classlist?${item.url}`">
+                    <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
                         <image :src="item.picurl" mode="aspectFill"></image>
-                    </navigator>
+                        <view class="banner-card__overlay"></view>
+                        <view class="banner-card__content">
+                            <view class="banner-card__tag-row">
+                                <view class="banner-card__tag">{{ item.badge }}</view>
+                                <view class="banner-card__target">{{ item.targetLabel }}</view>
+                            </view>
+                            <view class="banner-card__title">{{ item.title }}</view>
+                            <view class="banner-card__desc">{{ item.desc }}</view>
+                            <view class="banner-card__meta">
+                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                <view class="banner-card__meta-arrow">
+                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
                 </swiper-item>
             </swiper>
         </view>
@@ -59,7 +95,7 @@
                         class="box"
                         v-for="item in randomDailyList"
                         :key="item.id"
-                        @click="goPriview(item.id, randomDailyList)"
+                        @click="goPreview(item.id, randomDailyList)"
                     >
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
                     </view>
@@ -80,7 +116,7 @@
             <view class="content">
                 <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
                 <scroll-view scroll-x>
-                    <view class="box" v-for="item in latestPreviewList" :key="item.id" @click="goPriview(item.id, latestList)">
+                    <view class="box" v-for="item in latestPreviewList" :key="item.id" @click="goPreview(item.id, latestList)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
                     </view>
                 </scroll-view>
@@ -89,7 +125,7 @@
 
         <navigator class="top-entry" url="/pages/app/topN">
             <view class="top-entry__content">
-                <view class="top-entry__eyebrow">Top N</view>
+                <!-- <view class="top-entry__eyebrow">Top N</view> -->
                 <view class="top-entry__title">{{ $t('top10.title') }}</view>
                 <view class="top-entry__desc">{{ $t('top10.descViews') }}</view>
                 <view class="top-entry__action">
@@ -119,7 +155,7 @@
             <view class="content">
                 <rotate-loading v-if="!classify" style="height: 100%"></rotate-loading>
                 <scroll-view scroll-x>
-                    <view class="box" v-for="item in classify.data" :key="item.id" @click="goPriview(item.id, classify.data)">
+                    <view class="box" v-for="item in classify.data" :key="item.id" @click="goPreview(item.id, classify.data)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
                     </view>
                 </scroll-view>
@@ -129,28 +165,6 @@
                 <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
             </view>
         </view>
-
-        <!-- <view class="select">
-            <index-title>
-                <template #name>专题精选</template>
-                <template #custom>
-                    <view class="date">
-                        <button class="button" size="mini" @click="refreshRandom" plain>换一批</button>
-                        <uni-icons type="calendar" size="18" color="#28B389"></uni-icons>
-                        <view class="text">
-                            <uni-dateformat :date="Date.now()" format="dd日"></uni-dateformat>
-                        </view>
-                    </view>
-                </template>
-            </index-title>
-            <view class="content">
-                <scroll-view scroll-x>
-                    <view class="box" v-for="item in randomList" :key="item.id" @click="goPriview(item.id)">
-                        <image :src="item.smallPicurl" mode="aspectFill"></image>
-                    </view>
-                </scroll-view>
-            </view>
-        </view> -->
 
         <view class="classify">
             <index-title>
@@ -191,6 +205,8 @@ import {
     apiGetClassList,
 } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 
 const bannerList = ref([]);
 const randomDailyList = ref([]);
@@ -232,6 +248,66 @@ const getLayoutStyleForIndex = (idx) => {
 
 const getLayoutStyleMore = () => ({ gridColumn: '1 / -1', gridRow: '6' });
 
+const getBannerTextMeta = (item) => {
+    const url = String(item.url || '');
+    const decodedUrl = decodeURIComponent(url);
+    const nameMatch = decodedUrl.match(/name=([^&]+)/);
+    const keywordMatch = decodedUrl.match(/keyword=([^&]+)/);
+    const isClassify = url.includes('/pages/app/classlist');
+    const isSearch = url.includes('/wall/search/');
+    const isPreview = url.includes('/preview');
+    const isZh = String(uni.getLocale() || '').startsWith('zh');
+    const rawTitle = nameMatch?.[1] || (keywordMatch?.[1] ? `#${keywordMatch[1]}` : '');
+    const isBing = rawTitle.includes('必应') || rawTitle.toLowerCase().includes('bing');
+
+    const title = rawTitle || (item.target === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle'));
+
+    const desc =
+        item.description ||
+        (isBing
+            ? t('index.banner.bingDesc')
+            : isClassify
+              ? t('index.banner.classifyDesc')
+              : isSearch
+                ? t('index.banner.searchDesc')
+                : isPreview
+                  ? t('index.banner.previewDesc')
+                  : t('index.banner.defaultDesc'));
+
+    const badge = isClassify
+        ? t('index.banner.badge.classify')
+        : isSearch
+          ? t('index.banner.badge.search')
+          : isPreview
+            ? t('index.banner.badge.spotlight')
+            : item.target === 'miniProgram'
+              ? t('index.banner.badge.miniProgram')
+              : t('index.banner.badge.default');
+    const targetLabel =
+        item.target === 'self'
+            ? t('index.banner.target.self')
+            : item.target === 'miniProgram'
+              ? t('index.banner.target.miniProgram')
+              : t('index.banner.target.external');
+    const metaLabel = isClassify
+        ? t('index.banner.meta.classify')
+        : isSearch
+          ? t('index.banner.meta.search')
+          : isPreview
+            ? t('index.banner.meta.preview')
+            : t('index.banner.meta.default');
+    const accentClass = isClassify ? 'is-collection' : isSearch ? 'is-keyword' : isPreview ? 'is-spotlight' : 'is-default';
+
+    return {
+        title,
+        desc,
+        badge,
+        targetLabel,
+        metaLabel,
+        accentClass,
+    };
+};
+
 const getBanner = async () => {
     let res = await apiGetBanner();
     // bannerList.value = res.data.map(item => {
@@ -241,7 +317,13 @@ const getBanner = async () => {
     //         picurl: item.smallPicurl.replace("_small.webp", ".jpg")
     //     }
     // })
-    bannerList.value = res.data.map((item) => handlePicUrl(item));
+    bannerList.value = res.data.map((item) => {
+        const normalized = handlePicUrl(item);
+        return {
+            ...normalized,
+            ...getBannerTextMeta(item),
+        };
+    });
 };
 
 const getRandom = async () => {
@@ -279,8 +361,16 @@ const getLatest = async () => {
     latestList.value = (res.data || []).map((item) => handlePicUrl(item));
 };
 
-const goPriview = (id, data) => {
-    uni.setStorageSync('wallList', data);
+const goBannerPreview = (data) => {
+    if (data.wall) {
+        const wallList = handlePicUrl(data.wall);
+        uni.setStorageSync('wallList', [wallList]); // banner预览存储单个壁纸
+    }
+    uni.navigateTo({ url: data.url });
+};
+
+const goPreview = (id, data) => {
+    uni.setStorageSync('wallList', data); // 预览存储多个壁纸
     uni.navigateTo({
         url: '/pages/app/preview?id=' + id,
     });
@@ -359,28 +449,175 @@ onShareTimeline(() => {
 
     .banner {
         width: 750rpx;
-        padding: 0 0 16rpx;
+        padding: 0 0 20rpx;
 
         swiper {
             width: 750rpx;
-            height: 360rpx;
+            height: 400rpx;
+            margin: 20rpx 0rpx;
 
             &-item {
                 width: 100%;
                 height: 100%;
-                padding: 20rpx 30rpx;
+                padding: 0rpx 30rpx;
 
-                navigator {
+                .banner-card {
                     width: 100%;
                     height: 100%;
+                    display: block;
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 28rpx;
 
                     image {
                         width: 100%;
                         height: 100%;
-                        border-radius: 10rpx;
-                        // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
-                        // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
-                        box-shadow: 0 0 20rpx rgba(0, 0, 0, 0.65);
+                        border-radius: 28rpx;
+                        box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.34);
+                    }
+
+                    .banner-card__overlay {
+                        position: absolute;
+                        inset: 0;
+                        background: linear-gradient(
+                            180deg,
+                            rgba(6, 12, 18, 0.06) 0%,
+                            rgba(6, 12, 18, 0.18) 34%,
+                            rgba(6, 12, 18, 0.78) 100%
+                        );
+                    }
+
+                    .banner-card__content {
+                        position: absolute;
+                        left: 28rpx;
+                        right: 28rpx;
+                        bottom: 26rpx;
+                        z-index: 1;
+                    }
+
+                    .banner-card__tag-row {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 16rpx;
+                        margin-bottom: 14rpx;
+                    }
+
+                    .banner-card__tag,
+                    .banner-card__target {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 40rpx;
+                        padding: 0 16rpx;
+                        border-radius: 999rpx;
+                        font-size: 20rpx;
+                        font-weight: 700;
+                        letter-spacing: 0.03em;
+                    }
+
+                    .banner-card__tag {
+                        color: #7dd3fc;
+                        background: rgba(43, 140, 238, 0.18);
+                        border: 1rpx solid rgba(125, 211, 252, 0.22);
+                    }
+
+                    .banner-card__target {
+                        color: rgba(241, 245, 249, 0.92);
+                        background: rgba(15, 23, 42, 0.28);
+                        border: 1rpx solid rgba(255, 255, 255, 0.14);
+                    }
+
+                    .banner-card__title {
+                        font-size: 42rpx;
+                        line-height: 1.18;
+                        font-weight: 800;
+                        color: #f8fafc;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    .banner-card__desc {
+                        margin-top: 10rpx;
+                        font-size: 24rpx;
+                        line-height: 1.5;
+                        color: rgba(226, 232, 240, 0.84);
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    .banner-card__meta {
+                        margin-top: 18rpx;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    }
+
+                    .banner-card__meta-chip {
+                        display: inline-flex;
+                        align-items: center;
+                        min-height: 42rpx;
+                        padding: 0 16rpx;
+                        border-radius: 999rpx;
+                        font-size: 22rpx;
+                        color: #dbe7f5;
+                        background: rgba(15, 23, 42, 0.26);
+                        border: 1rpx solid rgba(255, 255, 255, 0.12);
+                    }
+
+                    .banner-card__meta-arrow {
+                        width: 56rpx;
+                        height: 56rpx;
+                        border-radius: 16rpx;
+                        background: rgba(20, 28, 39, 0.32);
+                        border: 1rpx solid rgba(255, 255, 255, 0.12);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    &.is-collection {
+                        .banner-card__tag {
+                            color: #f3e8ff;
+                            background: rgba(126, 34, 206, 0.32);
+                            border-color: rgba(216, 180, 254, 0.34);
+                        }
+
+                        .banner-card__meta-chip {
+                            color: #f3e8ff;
+                            background: rgba(15, 23, 42, 0.38);
+                            border-color: rgba(192, 132, 252, 0.24);
+                        }
+                    }
+
+                    &.is-keyword {
+                        .banner-card__tag {
+                            color: #ecfccb;
+                            background: rgba(101, 163, 13, 0.28);
+                            border-color: rgba(190, 242, 100, 0.3);
+                        }
+
+                        .banner-card__meta-chip {
+                            color: #ecfccb;
+                            background: rgba(15, 23, 42, 0.34);
+                            border-color: rgba(163, 230, 53, 0.18);
+                        }
+                    }
+
+                    &.is-spotlight {
+                        .banner-card__tag {
+                            color: #fde68a;
+                            background: rgba(245, 158, 11, 0.18);
+                            border-color: rgba(253, 230, 138, 0.3);
+                        }
+
+                        .banner-card__meta-chip {
+                            color: #fef3c7;
+                        }
                     }
                 }
             }
@@ -595,8 +832,8 @@ onShareTimeline(() => {
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #2994ff;
-        box-shadow: 0 8rpx 18rpx rgba(41, 148, 255, 0.24);
+        background: rgba(20, 28, 39, 0.32);
+        border: 1rpx solid rgba(255, 255, 255, 0.12);
     }
 
     .top-entry__action-text {

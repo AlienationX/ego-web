@@ -469,6 +469,7 @@ const handleSignup = async () => {
     .agreement-content {
         display: flex;
         align-items: center;
+        padding: 0 8rpx;
         gap: 16rpx;
 
         .checkbox-wrapper {

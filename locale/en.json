@@ -37,7 +37,34 @@
         "notice": "Notice",
         "dailyRecommend": "Daily Recommend",
         "latestRelease": "Latest Releases",
-        "categoryRecommend": "Category Recommend"
+        "categoryRecommend": "Category Recommend",
+        "banner": {
+            "defaultTitle": "Featured Wallpaper",
+            "discoverMore": "Discover More",
+            "defaultDesc": "Tap to open a highlighted wallpaper destination selected for today.",
+            "bingDesc": "Fresh daily Bing visuals, curated as a quick entry to today's wallpaper inspiration.",
+            "classifyDesc": "Curated collection with hand-picked visuals and fresh daily inspiration.",
+            "searchDesc": "Jump into a focused search theme and keep browsing similar styles instantly.",
+            "previewDesc": "Open a featured wallpaper directly and continue exploring related picks.",
+            "badge": {
+                "classify": "Collection",
+                "search": "Keyword",
+                "spotlight": "Spotlight",
+                "miniProgram": "Mini Program",
+                "default": "Featured"
+            },
+            "target": {
+                "self": "In App",
+                "miniProgram": "Cross App",
+                "external": "External"
+            },
+            "meta": {
+                "classify": "Collection",
+                "search": "Keyword",
+                "preview": "Direct Preview",
+                "default": "Open"
+            }
+        }
     },
     "latest": {
         "title": "Latest Releases",
