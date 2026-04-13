@@ -132,10 +132,18 @@ export const useAdIntersititial = () => {
     };
     // #endif
 
-    // #ifndef APP
+    // #ifdef MP
     return {
         createInterstitialAd: function () {},
         showInterstitialAd: function (inputPicurl) {downloadPic(inputPicurl);},
+        destroyInterstitialAd: function () {}
+    };
+    // #endif
+
+    // #ifdef WEB
+    return {
+        createInterstitialAd: function () {},
+        showInterstitialAd: function () {},
         destroyInterstitialAd: function () {}
     };
     // #endif
@@ -292,10 +300,18 @@ export const useAdRewardedVideo = () => {
     };
     // #endif
 
-    // #ifndef APP
+    // #ifdef MP
     return {
         createRewardedVideoAd: function () {},
         showRewardedVideoAd: function (inputPicurl) {downloadPic(inputPicurl);},
+        destroyRewardedVideoAd: function () {}
+    };
+    // #endif
+
+    // #ifdef WEB
+    return {
+        createRewardedVideoAd: function () {},
+        showRewardedVideoAd: function () {},
         destroyRewardedVideoAd: function () {}
     };
     // #endif

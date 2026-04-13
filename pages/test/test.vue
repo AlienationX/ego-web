@@ -33,7 +33,6 @@ const testMenus = [
     { name: 'Stream Test', url: '/pages/test/stream-test' },
     { name: 'MDI Icon Test', url: '/pages/test/mdi-icon-test' },
     { name: 'Custom Bars', url: '/pages/test/custom-bars' },
-    { name: 'Top N', url: '/pages/app/topN' },
     { name: 'Edit Cover', url: '/pages/app/edit-cover' },
     { name: 'Interstitial Ad', url: '/pages/test/ad-inter' },
     { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded' },

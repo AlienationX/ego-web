@@ -6,7 +6,7 @@ const APP_INFO = uni.getAppBaseInfo();
 export const getStatusBarHeight = () => {
     // 状态栏高度
     // #ifdef WEB
-    return 0;
+    return 20;
     // #endif
 
     // #ifndef WEB

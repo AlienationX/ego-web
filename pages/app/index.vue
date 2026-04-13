@@ -74,14 +74,14 @@
         </view>
 
         <view class="select">
+            <view class="select-watermark">Daily</view>
             <index-title>
                 <template #name>{{ $t('index.dailyRecommend') }}</template>
                 <template #custom>
                     <view class="date">
-                        <button class="button" size="mini" @click="refreshRandom" plain>{{ $t('common.refresh') }}</button>
-                        <uni-icons type="calendar" size="18" color="#28B389"></uni-icons>
+                        <button class="button is-spotlight" size="mini" @click="refreshRandom" plain>{{ $t('common.refresh') }}</button>
+                        <uni-icons type="calendar" size="18" color="#666"></uni-icons>
                         <view class="text">
-                            <!-- <uni-dateformat :date="Date.now()" locale='en' format="dd日"></uni-dateformat> -->
                             {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
                         </view>
                     </view>
@@ -93,22 +93,35 @@
                 <scroll-view scroll-x>
                     <view
                         class="box"
-                        v-for="item in randomDailyList"
+                        v-for="(item, idx) in randomDailyList"
                         :key="item.id"
+                        :class="{ 'is-hero': idx === 0 }"
                         @click="goPreview(item.id, randomDailyList)"
                     >
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
+                        <block v-if="idx === 0">
+                            <view class="box-hero-overlay"></view>
+                            <view class="box-hero-content">
+                                <view class="day-tag">{{ new Date().getDate() }}</view>
+                                <view class="pick-text">PICK OF THE DAY</view>
+                            </view>
+                        </block>
+                        <view v-else class="box-info">
+                            <view class="label">Today</view>
+                            <view class="value">{{ $t('index.dailyRecommend') }}</view>
+                        </view>
                     </view>
                 </scroll-view>
             </view>
         </view>
 
         <view class="select">
+            <view class="select-watermark">Latest</view>
             <index-title>
                 <template #name>{{ $t('index.latestRelease') }}</template>
                 <template #custom>
                     <navigator class="box" url="/pages/app/timeline">
-                        <button size="mini" plain class="btn" :class="{ active: false }">{{ $t('common.seeAll') }}</button>
+                        <button size="mini" plain class="btn is-default">{{ $t('common.seeAll') }}</button>
                     </navigator>
                 </template>
             </index-title>
@@ -116,8 +129,13 @@
             <view class="content">
                 <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
                 <scroll-view scroll-x>
-                    <view class="box" v-for="item in latestPreviewList" :key="item.id" @click="goPreview(item.id, latestList)">
+                    <view class="box" v-for="(item, idx) in latestPreviewList" :key="item.id" @click="goPreview(item.id, latestList)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
+                        <view v-if="idx < 3" class="box-badge">New</view>
+                        <view class="box-info">
+                            <view class="label">Explore</view>
+                            <view class="value">{{ $t('index.latestRelease') }}</view>
+                        </view>
                     </view>
                 </scroll-view>
             </view>
@@ -141,13 +159,14 @@
         </navigator>
 
         <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
+            <view class="select-watermark">{{ classify.name }}</view>
             <index-title>
                 <template #name>{{ classify.name }}</template>
                 <template #custom>
                     <navigator class="box" :url="'/pages/app/classlist?id=' + classify.id + '&name=' + classify.name">
-                        <!-- <view class="text">{{ $t('common.seeAll') }}</view> -->
-                        <!-- <uni-icons class="text" type="arrow-right" size="22" color="#999" @click="goClassList(classify.id, classify.name)"></uni-icons> -->
-                        <button size="mini" plain class="btn" :class="{ active: false }">{{ $t('common.seeAll') }}</button>
+                        <button size="mini" plain class="btn" :class="themeClasses[idx % themeClasses.length]">
+                            {{ $t('common.seeAll') }}
+                        </button>
                     </navigator>
                 </template>
             </index-title>
@@ -157,6 +176,10 @@
                 <scroll-view scroll-x>
                     <view class="box" v-for="item in classify.data" :key="item.id" @click="goPreview(item.id, classify.data)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
+                        <view class="box-info">
+                            <view class="label">Collection</view>
+                            <view class="value">{{ classify.name }}</view>
+                        </view>
                     </view>
                 </scroll-view>
             </view>
@@ -215,6 +238,7 @@ const latestList = ref([]);
 const noticeList = ref([]);
 const classifyList = ref([]);
 const adVisibleMap = reactive({});
+const themeClasses = ['is-collection', 'is-keyword', 'is-spotlight', 'is-default'];
 
 const randomRecommendComputed = computed(() => {
     return randomRecommendList.value.map((item) => ({
@@ -256,7 +280,6 @@ const getBannerTextMeta = (item) => {
     const isClassify = url.includes('/pages/app/classlist');
     const isSearch = url.includes('/wall/search/');
     const isPreview = url.includes('/preview');
-    const isZh = String(uni.getLocale() || '').startsWith('zh');
     const rawTitle = nameMatch?.[1] || (keywordMatch?.[1] ? `#${keywordMatch[1]}` : '');
     const isBing = rawTitle.includes('必应') || rawTitle.toLowerCase().includes('bing');
 
@@ -629,7 +652,7 @@ onShareTimeline(() => {
         height: 72rpx;
         line-height: 80rpx;
         background: #f9f9f9;
-        margin: 0 auto;
+        margin: 0 auto 30rpx;
         border-radius: 80rpx;
         display: flex;
         // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
@@ -682,77 +705,251 @@ onShareTimeline(() => {
     }
 
     .select {
-        padding: 30rpx 0 0 0;
+        position: relative;
+        // padding: 30rpx 0 0 0;
+        overflow: hidden;
+
+        .select-watermark {
+            position: absolute;
+            top: -30rpx;
+            right: -20rpx;
+            font-size: 140rpx;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.04);
+            text-transform: uppercase;
+            letter-spacing: -4rpx;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+        }
+
+        .index-title {
+            position: relative;
+            z-index: 1;
+        }
 
         .date {
-            color: $wp-theme-color;
             display: flex;
             align-items: center;
+            gap: 12rpx;
 
             .button {
-                border: 0;
-                font-size: 28rpx;
+                margin: 0;
+                padding: 0 16rpx;
+                height: 46rpx;
+                line-height: 44rpx;
+                font-size: 22rpx;
+                font-weight: 700;
+                border-radius: 999rpx;
+                background: rgba(43, 140, 238, 0.08);
                 color: $wp-theme-color;
+                border: 1rpx solid rgba(40, 179, 137, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                &::after {
+                    border: none;
+                }
+
+                &:active {
+                    transform: scale(0.95);
+                    opacity: 0.8;
+                }
+
+                &.is-spotlight {
+                    color: #d97706;
+                    background: rgba(245, 158, 11, 0.1);
+                    border-color: rgba(245, 158, 11, 0.2);
+                }
             }
 
             .text {
-                margin-left: 5rpx;
-                font-size: 28rpx;
+                font-size: 26rpx;
+                font-weight: 600;
+                color: #666;
+                letter-spacing: 0.02em;
             }
         }
 
-        // .text {
-        //     margin-left: 5rpx;
-        //     color: $uni-text-color-grey;;
-        //     font-size: 24rpx;
-        // }
         .btn {
-            padding: 0rpx 16rpx;
-            color: #666;
-            background: $uni-bg-color-grey;
-            height: 42rpx;
-            // width: 96rpx;
-
-            border: none;
-            border-radius: 40rpx;
+            margin: 0;
+            padding: 0 20rpx;
+            height: 46rpx;
+            line-height: 44rpx;
+            font-size: 22rpx;
+            font-weight: 700;
+            border-radius: 999rpx;
+            border: 1rpx solid rgba(0, 0, 0, 0.08);
+            background: #f1f5f9;
+            color: #64748b;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s ease;
 
             &::after {
                 border: none;
             }
+
+            &:active {
+                transform: scale(0.95);
+                filter: brightness(0.95);
+            }
+
+            &.is-default {
+                color: #0284c7;
+                background: rgba(14, 165, 233, 0.1);
+                border-color: rgba(14, 165, 233, 0.15);
+            }
+
+            &.is-collection {
+                color: #7e22ce;
+                background: rgba(168, 85, 247, 0.1);
+                border-color: rgba(168, 85, 247, 0.15);
+            }
+
+            &.is-keyword {
+                color: #65a30d;
+                background: rgba(132, 204, 22, 0.1);
+                border-color: rgba(132, 204, 22, 0.15);
+            }
+
+            &.is-spotlight {
+                color: #d97706;
+                background: rgba(245, 158, 11, 0.1);
+                border-color: rgba(245, 158, 11, 0.2);
+            }
         }
 
         .content {
-            width: 720rpx;
-            height: 520rpx;
-            margin-top: 28rpx;
-            margin-left: 30rpx;
+            width: 750rpx;
+            height: 580rpx;
+            margin-top: 20rpx;
+            position: relative;
+            z-index: 1;
 
             scroll-view {
                 white-space: nowrap;
                 height: 100%;
+                box-sizing: border-box;
 
                 .box {
-                    width: 240rpx;
-                    height: 100%;
+                    width: 280rpx;
+                    height: 90%;
                     display: inline-flex;
-                    justify-content: center; /* 水平居中 */
-                    align-items: center; /* 垂直居中 */
-                    margin-right: 15rpx;
+                    justify-content: center;
+                    align-items: center;
+                    margin: 10rpx 24rpx 10rpx 0;
+                    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    position: relative;
 
                     image {
-                        width: 95%;
-                        height: 98%;
-                        border-radius: 24rpx;
-                        // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
-                        // box-shadow: 0 8px 24rpx rgba(0,0,0,0.15);
-                        box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.85);
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 32rpx;
+                        box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.2);
+                        border: 1rpx solid rgba(255, 255, 255, 0.08);
+                    }
+
+                    // 玻璃拟态信息条
+                    .box-info {
+                        position: absolute;
+                        left: 12rpx;
+                        right: 12rpx;
+                        bottom: 12rpx;
+                        padding: 12rpx 16rpx;
+                        background: rgba(15, 23, 42, 0.4);
+                        backdrop-filter: blur(8px);
+                        border-radius: 20rpx;
+                        border: 1rpx solid rgba(255, 255, 255, 0.1);
+                        display: flex;
+                        flex-direction: column;
+                        gap: 2rpx;
+                        opacity: 0.9;
+
+                        .label {
+                            font-size: 18rpx;
+                            color: rgba(255, 255, 255, 0.6);
+                            text-transform: uppercase;
+                            letter-spacing: 1rpx;
+                            font-weight: 700;
+                        }
+
+                        .value {
+                            font-size: 22rpx;
+                            color: #fff;
+                            font-weight: 600;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+                    }
+
+                    // Hero 模式专属 (大图)
+                    &.is-hero {
+                        width: 440rpx;
+
+                        .box-hero-overlay {
+                            position: absolute;
+                            inset: 0;
+                            border-radius: 32rpx;
+                            background: linear-gradient(
+                                to bottom,
+                                rgba(0, 0, 0, 0) 50%,
+                                rgba(0, 0, 0, 0.7) 100%
+                            );
+                            pointer-events: none;
+                        }
+
+                        .box-hero-content {
+                            position: absolute;
+                            left: 24rpx;
+                            bottom: 30rpx;
+                            right: 24rpx;
+
+                            .day-tag {
+                                font-size: 64rpx;
+                                font-weight: 900;
+                                color: rgba(255, 255, 255, 0.95);
+                                line-height: 1;
+                                margin-bottom: 8rpx;
+                                text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+                            }
+
+                            .pick-text {
+                                font-size: 20rpx;
+                                font-weight: 800;
+                                color: #fde68a;
+                                text-transform: uppercase;
+                                letter-spacing: 4rpx;
+                            }
+                        }
+                    }
+
+                    // New 微标
+                    .box-badge {
+                        position: absolute;
+                        top: 16rpx;
+                        right: 16rpx;
+                        padding: 4rpx 12rpx;
+                        background: rgba(40, 179, 137, 0.9);
+                        color: #fff;
+                        font-size: 18rpx;
+                        font-weight: 800;
+                        border-radius: 8rpx;
+                        box-shadow: 0 4rpx 12rpx rgba(40, 179, 137, 0.4);
+                        z-index: 1;
+                    }
+
+                    &:active {
+                        transform: scale(0.96) translateY(4rpx);
                     }
                 }
 
-                // 最后一个元素的右边距为30rpx，保持一致
+                .box:first-child{
+                    margin-left: 30rpx;
+                }
                 .box:last-child {
                     margin-right: 30rpx;
                 }
@@ -765,7 +962,7 @@ onShareTimeline(() => {
 
     .top-entry {
         position: relative;
-        margin: 30rpx 30rpx 0;
+        margin: 0 30rpx 30rpx;
         padding: 24rpx 24rpx 24rpx 28rpx;
         display: block;
         min-height: 210rpx;
@@ -851,7 +1048,7 @@ onShareTimeline(() => {
     }
 
     .classify {
-        padding: 30rpx 0;
+        padding: 0rpx 0 30rpx;
 
         .content.classify-grid {
             margin-top: 30rpx;

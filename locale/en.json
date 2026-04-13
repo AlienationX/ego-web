@@ -249,6 +249,7 @@
         "imageSelectFailed": "Failed to select image"
     },
     "search": {
+        "placeholder": "Search wallpapers...",
         "clearAll": "Clear All",
         "noResultTitle": "No results found"
     },

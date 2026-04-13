@@ -202,6 +202,7 @@
         "imageSelectFailed": "选择图片失败"
     },
     "search": {
+        "placeholder": "搜索壁纸...",
         "clearAll": "清空",
         "noResultTitle": "未找到相关结果"
     },

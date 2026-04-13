@@ -18,10 +18,10 @@
                 paddingBottom: `${containerBottomSpace}px`,
             }"
         >
-            <view class="intro">
-                <view :style="{ height: getStatusBarHeight() + 'px' }"></view>
-                <view class="intro-title intro-enter-1">{{ $t('discover.subtitle') }}</view>
-                <view class="intro-desc intro-enter-2">{{ $t('discover.desc') }}</view>
+            <view class="hero-section" :style="{ paddingTop: statusBarHeight + 'px' }">
+                <view class="hero-title hero-enter-1">{{ $t('discover.title') }}</view>
+                <view class="hero-subtitle hero-enter-2">{{ $t('discover.subtitle') }}</view>
+                <view class="hero-desc hero-enter-3">{{ $t('discover.desc') }}</view>
             </view>
 
             <view class="chat-panel" v-if="chatMessages.length">
@@ -721,36 +721,52 @@ onUnload(() => {
     bottom: calc(env(safe-area-inset-bottom) + 146rpx);
 }
 
-.intro {
+.hero-section {
     position: relative;
-    z-index: 1;
-    background: transparent;
-    padding: 24rpx 24rpx 28rpx;
-    margin-bottom: 18rpx;
+    z-index: 10;
+    padding: 60rpx 32rpx 32rpx;
+    margin-bottom: 16rpx;
     border-bottom: 1rpx solid var(--discover-border);
+    
+    .hero-title {
+        font-size: 68rpx;
+        font-weight: 900;
+        color: var(--discover-text-main);
+        letter-spacing: -2rpx;
+        line-height: 1.1;
+        margin-bottom: 20rpx;
+        filter: drop-shadow(0 4rpx 8rpx rgba(0,0,0,0.05));
+    }
+
+    .hero-subtitle {
+        font-size: 38rpx;
+        font-weight: 700;
+        color: var(--discover-text-main);
+        margin-bottom: 16rpx;
+        letter-spacing: 0.5rpx;
+        opacity: 0.95;
+    }
+
+    .hero-desc {
+        font-size: 26rpx;
+        color: var(--discover-text-secondary);
+        line-height: 1.7;
+        font-weight: 500;
+    }
 }
 
-.intro-title {
-    font-size: 40rpx;
-    font-weight: 700;
-    color: var(--discover-text-main);
-    margin-bottom: 12rpx;
-    letter-spacing: 1rpx;
+.hero-enter-1 {
+    animation: hero-enter-up 0.5s ease-out both;
 }
 
-.intro-desc {
-    font-size: 26rpx;
-    color: var(--discover-text-secondary);
-    line-height: 1.75;
+.hero-enter-2 {
+    animation: hero-enter-up 0.6s ease-out both;
+    animation-delay: 0.12s;
 }
 
-.intro-enter-1 {
-    animation: intro-enter-up 0.45s ease-out both;
-}
-
-.intro-enter-2 {
-    animation: intro-enter-up 0.55s ease-out both;
-    animation-delay: 0.08s;
+.hero-enter-3 {
+    animation: hero-enter-up 0.7s ease-out both;
+    animation-delay: 0.24s;
 }
 
 .panel {
@@ -1142,14 +1158,14 @@ onUnload(() => {
     gap: 14rpx;
 }
 
-@keyframes intro-enter-up {
+@keyframes hero-enter-up {
     from {
-        transform: translateY(12rpx);
         opacity: 0;
+        transform: translateY(40rpx);
     }
     to {
-        transform: translateY(0);
         opacity: 1;
+        transform: translateY(0);
     }
 }
 </style>

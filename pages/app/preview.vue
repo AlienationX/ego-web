@@ -31,10 +31,10 @@
                 </swiper>
 
                 <view class="mask" v-if="maskState">
-                    <view class="goBack" :style="{ top: getGoBackButtonTop() + 'px' }" @click="goBack">
+                    <view class="goBack" :style="{ top: backButtonTop + 'px' }" @click="goBack">
                         <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
                     </view>
-                    <view class="top-actions" :style="{ top: getGoBackButtonTop() + 'px' }">
+                    <view class="top-actions" :style="{ top: actionsTop + 'px', right: capsuleRightOffset + 'px' }">
                         <view v-if="isAdmin" class="icon-btn" @click="openEdit">
                             <mdi-icon path="/static/icons/pencil.svg" size="20px" color="#fff"></mdi-icon>
                         </view>
@@ -45,7 +45,7 @@
                                 color="#fff"
                             ></mdi-icon>
                         </view>
-                        <button class="icon-btn share-btn" open-type="share" @click="handleShare">
+                        <button class="icon-btn" open-type="share" @click="handleShare">
                             <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
                         </button>
                         <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
@@ -363,12 +363,38 @@ const incrementDownloads = async (id) => {
     // console.log('increment downloads', res);
 };
 
-// 返回按钮高度
-const getGoBackButtonTop = () => {
-    if (getStatusBarHeight() === 0) {
-        return 24;
+// 胶囊避让逻辑
+const capsuleRect = ref(null);
+// #ifdef MP-WEIXIN
+capsuleRect.value = uni.getMenuButtonBoundingClientRect();
+// #endif
+
+const backButtonTop = computed(() => {
+    if (capsuleRect.value) {
+        // 让返回键与胶囊垂直对齐
+        return capsuleRect.value.top + (capsuleRect.value.height - 38) / 2;
     }
+    if (getStatusBarHeight() === 0) return 24;
     return getStatusBarHeight();
+});
+
+const capsuleRightOffset = computed(() => {
+    // #ifdef MP-WEIXIN
+    if (capsuleRect.value) {
+        const windowInfo = uni.getWindowInfo();
+        // 计算胶囊左边缘距离页面右边缘的像素值，并加上额外间隙
+        return (windowInfo.windowWidth - capsuleRect.value.left) + 10;
+    }
+    // #endif
+    return 15; // H5/App 默认 30rpx 约等于 15px
+});
+
+const actionsTop = computed(() => {
+    return backButtonTop.value; // 与返回按钮保持同一高度
+});
+
+const getGoBackButtonTop = () => {
+    return backButtonTop.value;
 };
 const goBack = () => {
     uni.navigateBack({
@@ -914,15 +940,6 @@ onShareTimeline(() => {
             align-items: center;
             justify-content: center;
             padding: 0;
-        }
-
-        .share-btn {
-            border: none;
-            background: rgba(0, 0, 0, 0.55);
-
-            &::after {
-                border: none;
-            }
         }
 
         .count {

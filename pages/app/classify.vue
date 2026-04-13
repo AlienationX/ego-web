@@ -1,15 +1,22 @@
 <template>
     <view class="classLayout">
-        <nav-bar :title="$t('category.title')"></nav-bar>
+        <!-- 装饰性背景层：改为绝对定位并提升层级，确保在 Web 端可见 -->
+        <view class="decorative-layer">
+            <view class="glow-sphere"></view>
+            <view class="glass-mask"></view>
+        </view>
 
-        <!-- 页面头部装饰（仅子标题） -->
-        <view class="page-header">
-            <view class="header-content">
-                <view class="header-desc">{{ $t('category.desc') }}</view>
+        <!-- 沉浸式头部区域 -->
+        <view class="hero-section" :style="{ paddingTop: statusBarHeight + 'px' }">
+            <view class="hero-header">
+                <view class="title-group">
+                    <view class="hero-title">{{ $t('category.title') }}</view>
+                    <view class="hero-desc">{{ $t('category.desc') }}</view>
+                </view>
             </view>
-            <view class="header-decoration">
-                <view class="decoration-circle circle-1"></view>
-                <view class="decoration-circle circle-2"></view>
+            
+            <view class="search-container">
+                <search-bar></search-bar>
             </view>
         </view>
 
@@ -24,11 +31,17 @@
             <view class="empty-text">{{ $t('category.empty') }}</view>
         </view>
 
-        <!-- 分类网格：两列随意布局，部分高/跨列 -->
+        <!-- 分类网格：采用弹性 Span 布局，彻底解决错落有致不生效问题 -->
         <view class="classify" v-if="classifyList.length">
             <template v-for="(item, idx) in classifyComputed" :key="item.id">
-                <classify-item :item="item" :layout-style="getLayoutStyle(idx)"></classify-item>
-                <view v-if="(idx + 1) % 6 === 0" class="ad-row" :style="getAdWrapStyle(idx)">
+                <view 
+                    class="grid-item-wrap" 
+                    :class="['grid-item-' + (idx % 6)]"
+                >
+                    <classify-item :item="item"></classify-item>
+                </view>
+                
+                <view v-if="(idx + 1) % 6 === 0 && isAdVisible(idx)" class="ad-row">
                     <custom-ad-banner
                         style="padding: 15rpx 0"
                         @load="onAdLoad(idx)"
@@ -42,12 +55,15 @@
 
 <script setup>
     import { ref, computed, watch } from 'vue';
+    import { onLoad } from '@dcloudio/uni-app';
     import { apiGetClassify } from '@/api/wallpaper.js';
     import { handlePicUrl } from '@/utils/common.js';
     import { useUserStore } from '@/stores/user.js';
+    import { getStatusBarHeight } from '@/utils/system.js';
 
+    const statusBarHeight = ref(getStatusBarHeight());
     const classifyList = ref([]);
-    const isLoading = ref(true); // 添加加载状态变量
+    const isLoading = ref(true);
     const userStore = useUserStore();
     const adStateMap = ref({});
 
@@ -63,10 +79,9 @@
     const getClassify = async () => {
         try {
             isLoading.value = true;
-            let res = await apiGetClassify({
-                pageSize: 30
-            });
-            classifyList.value = res.data.map((item) => handlePicUrl(item));
+            let res = await apiGetClassify();
+            classifyList.value = (res.data || []).map((item) => handlePicUrl(item));
+            uni.setStorageSync('classifyList', classifyList.value);
         } catch (error) {
             console.error('获取分类数据失败:', error);
         } finally {
@@ -80,7 +95,6 @@
             adStateMap.value = nextState;
             return;
         }
-
         for (let block = 0; block < fullBlockCount.value; block++) {
             nextState[block] = 'pending';
         }
@@ -90,28 +104,7 @@
     watch([fullBlockCount, adEnabled], setupAdBlocks, { immediate: true });
 
     const getBlockByIdx = (idx) => Math.floor(idx / 6);
-
     const isAdBlockVisible = (block) => adEnabled.value && adStateMap.value[block] === 'loaded';
-
-    const getVisibleAdCountBeforeBlock = (block) => {
-        if (!adEnabled.value) return 0;
-        let count = 0;
-        for (let i = 0; i < block; i++) {
-            if (isAdBlockVisible(i)) count++;
-        }
-        return count;
-    };
-
-    const getUsedRowsByFullBlocks = () => {
-        let rows = 0;
-        for (let block = 0; block < fullBlockCount.value; block++) {
-            rows += 4;
-            if (isAdBlockVisible(block)) rows += 1;
-        }
-        return rows;
-    };
-
-    const getBaseRow = (block) => block * 4 + getVisibleAdCountBeforeBlock(block) + 1;
 
     const onAdLoad = (idx) => {
         const block = getBlockByIdx(idx);
@@ -133,163 +126,122 @@
         return isAdBlockVisible(block);
     };
 
-    // 每 6 个为一组，布局如下：
-    // 1: 第1行第1列；2: 第1行第2列；3: 第2-3行第1列；
-    // 4: 第2行第2列；5: 第3-4行第2列；6: 第4行第1列；
-    // 每组 6 个下面增加 1 个横屏广告（第5行整行）
-    // 最后一组不满 6 个时按两列自然流排布
-    const getLayoutStyle = (idx) => {
-        const fullCount = fullBlockCount.value * 6; // 能完整套用布局规则的数量
-
-        // 最后一组不满 6 个：放在完整分组之后的连续行中，避免空白行
-        if (idx >= fullCount) {
-            const local = idx - fullCount;
-            const tailStartRow = getUsedRowsByFullBlocks() + 1;
-            return {
-                gridColumn: String((local % 2) + 1),
-                gridRow: tailStartRow + Math.floor(local / 2)
-            };
-        }
-
-        const block = getBlockByIdx(idx);
-        const baseRow = getBaseRow(block); // 4行分类 + （可见时）1行广告
-        const r = idx % 6;
-        if (r === 0) return { gridColumn: '1', gridRow: baseRow };
-        if (r === 1) return { gridColumn: '2', gridRow: baseRow };
-        if (r === 2) return { gridColumn: '1', gridRow: `${baseRow + 1} / span 2` };
-        if (r === 3) return { gridColumn: '2', gridRow: baseRow + 1 };
-        if (r === 4) return { gridColumn: '2', gridRow: `${baseRow + 2} / span 2` };
-        if (r === 5) return { gridColumn: '1', gridRow: baseRow + 3 };
-        return {};
-    };
-
-    const getAdStyle = (idx) => {
-        const block = getBlockByIdx(idx);
-        const baseRow = getBaseRow(block);
-        return {
-            gridColumn: '1 / -1',
-            gridRow: baseRow + 4
-        };
-    };
-
-    const getAdWrapStyle = (idx) => {
-        if (isAdVisible(idx)) {
-            return getAdStyle(idx);
-        }
-        return {
-            position: 'absolute',
-            left: '-99999rpx',
-            top: '0',
-            width: '1px',
-            height: '1px',
-            overflow: 'hidden',
-            opacity: 0,
-            pointerEvents: 'none'
-        };
-    };
-
-    getClassify();
+    onLoad(() => {
+        getClassify();
+    })
 </script>
 
 <style lang="scss" scoped>
     .classLayout {
-        background: #f5f5f5;
+        background: #fff;
         min-height: 100vh;
+        position: relative;
     }
 
-    .page-header {
-        position: relative;
-        background: transparent;
-        padding: 30rpx 30rpx 20rpx;
-        overflow: hidden;
+    .decorative-layer {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
 
-        .header-content {
-            position: relative;
-            z-index: 1;
-
-            .header-desc {
-                font-size: 28rpx;
-                color: #666;
-            }
+        .glow-sphere {
+            position: absolute;
+            top: 5%;
+            left: -10%;
+            width: 80%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(40, 179, 137, 0.15) 0%, transparent 70%);
+            filter: blur(80px);
+            animation: move 15s infinite alternate ease-in-out;
         }
 
-        .header-decoration {
+        .glass-mask {
             position: absolute;
-            top: 0;
-            right: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(240, 242, 245, 0.5) 100%);
+        }
+    }
 
-            .decoration-circle {
-                position: absolute;
-                border-radius: 50%;
-                background: linear-gradient(135deg, rgba(40, 179, 137, 0.1) 0%, rgba(255, 107, 157, 0.08) 100%);
-            }
+    @keyframes move {
+        0% { transform: translate(0, 0); }
+        100% { transform: translate(10%, 10%); }
+    }
 
-            .circle-1 {
-                width: 200rpx;
-                height: 200rpx;
-                top: -50rpx;
-                right: -30rpx;
-            }
+    .hero-section {
+        position: relative;
+        padding: 50rpx 40rpx 10rpx;
+        z-index: 10;
+        
+        .hero-title {
+            font-size: 68rpx;
+            font-weight: 900;
+            color: #000;
+            letter-spacing: -2rpx;
+            line-height: 1.1;
+            // 针对 Web 端增强投影
+            filter: drop-shadow(0 4rpx 8rpx rgba(0,0,0,0.1));
+        }
 
-            .circle-2 {
-                width: 150rpx;
-                height: 150rpx;
-                bottom: -30rpx;
-                right: 50rpx;
-            }
+        .hero-desc {
+            font-size: 26rpx;
+            color: #666;
+            margin-top: 15rpx;
+            font-weight: 500;
+            letter-spacing: 1rpx;
+        }
+
+        .search-container {
+            margin: 30rpx -30rpx 0;
         }
     }
 
     .classify {
-        padding: 0 24rpx 30rpx;
+        padding: 20rpx 30rpx 100rpx;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        grid-auto-rows: 200rpx;
-        gap: 20rpx;
-        background: transparent;
+        grid-auto-rows: 210rpx;
+        gap: 24rpx;
+        position: relative;
+        z-index: 5;
+    }
+
+    .grid-item-wrap {
+        width: 100%;
+        height: 100%;
+        display: block;
+
+        // 核心布局逻辑：通过 CSS Span 解决杂志感错落
+        // 第3个项目(idx 2)和第5个项目(idx 4)跨两行
+        &.grid-item-2, &.grid-item-4 {
+            grid-row: span 2;
+        }
+
+        // 强制其内部组件撑满父容器（微信小程序不支持 * 通配符，使用具体类名）
+        & > .classify-item,
+        & > view {
+            height: 100%;
+            width: 100%;
+            display: block;
+        }
     }
 
     .ad-row {
-        grid-column: 1 / -1;
+        grid-column: span 2;
+        width: 100%;
     }
 
-    // 加载状态样式
     .loading-container {
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        min-height: 60vh;
-        padding: 40rpx 0;
-
+        min-height: 50vh;
+        z-index: 10;
+        position: relative;
+        
         .loading-text {
-            margin-top: 30rpx;
-            font-size: 28rpx;
-            color: #666;
-        }
-    }
-
-    // 空状态样式
-    .empty-container {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 60vh;
-        padding: 40rpx 0;
-
-        .empty-icon {
-            font-size: 100rpx;
-            margin-bottom: 20rpx;
-            opacity: 0.6;
-        }
-
-        .empty-text {
-            font-size: 28rpx;
+            margin-top: 20rpx;
+            font-size: 24rpx;
             color: #999;
         }
     }

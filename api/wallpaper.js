@@ -55,6 +55,14 @@ export const apiGetClassify = (data = {}) => {
     });
 };
 
+// 获取所有分类接口
+export const apiGetClassifyAll = (data = {}) => {
+    return request({
+        url: '/classify/all/',
+        data,
+    });
+};
+
 // 获取分类列表，也就是分类下的所有图片接口
 export const apiGetClassList = (data = {}) => {
     return request({

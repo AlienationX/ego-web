@@ -24,7 +24,11 @@
                     <view class="hero__desc">{{ t('timeline.desc') }}</view>
                 </view>
 
-                <view v-if="!monthGroups.length" class="empty">
+                <view v-if="isLoading" class="loading-state">
+                    <rotate-loading></rotate-loading>
+                </view>
+
+                <view v-else-if="!monthGroups.length" class="empty">
                     <view class="empty__title">{{ t('timeline.empty') }}</view>
                 </view>
 
@@ -99,6 +103,7 @@ const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px)`);
 const scrollIntoViewTarget = ref('');
 const showScrollTop = ref(false);
+const isLoading = ref(false);
 const latestList = ref([]);
 
 const monthNamesEn = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -186,13 +191,18 @@ const monthGroups = computed(() => {
 });
 
 const getLatest = async () => {
-    const res = await apiGetClassList({
-        pageSize: 18,
-        ordering: '-created',
-    });
-    latestList.value = (res.data || [])
-        .map((item) => handlePicUrl(item))
-        .sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
+    try {
+        isLoading.value = true;
+        const res = await apiGetClassList({
+            pageSize: 18,
+            ordering: '-created',
+        });
+        latestList.value = (res.data || [])
+            .map((item) => handlePicUrl(item))
+            .sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
+    } finally {
+        isLoading.value = false;
+    }
 };
 
 const goPreview = (id) => {
@@ -252,6 +262,14 @@ onLoad(() => {
     max-width: 860rpx;
     margin: 0 auto;
     padding: 18rpx 24rpx 72rpx;
+    position: relative;
+}
+
+.loading-state {
+    padding: 120rpx 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .timeline-top-anchor {
@@ -287,7 +305,7 @@ onLoad(() => {
     font-size: 28rpx;
     font-weight: 800;
     letter-spacing: 8rpx;
-    color: rgba(220, 228, 243, 0.68);
+    color: rgba(220, 228, 243, 0.92);
     padding-left: 8rpx;
 }
 
@@ -311,7 +329,7 @@ onLoad(() => {
     width: 100%;
     font-size: 28rpx;
     line-height: 1.9;
-    color: rgba(214, 223, 239, 0.78);
+    color: rgba(214, 223, 239, 0.9);
     padding: 0 8rpx;
 }
 
@@ -327,7 +345,7 @@ onLoad(() => {
 
 .empty__title {
     font-size: 26rpx;
-    color: rgba(201, 213, 234, 0.74);
+    color: rgba(226, 232, 240, 0.9);
 }
 
 .month-section {
@@ -342,7 +360,7 @@ onLoad(() => {
     font-size: 86rpx;
     line-height: 1;
     font-weight: 900;
-    color: rgba(87, 95, 112, 0.38);
+    color: rgba(148, 163, 184, 0.45);
     letter-spacing: -2rpx;
 }
 
@@ -405,7 +423,7 @@ onLoad(() => {
     line-height: 1.5;
     font-weight: 700;
     letter-spacing: 2rpx;
-    color: rgba(201, 213, 234, 0.7);
+    color: rgba(226, 232, 240, 0.88);
     text-transform: uppercase;
 }
 
@@ -497,7 +515,7 @@ onLoad(() => {
     align-items: center;
     gap: 8rpx;
     font-size: 20rpx;
-    color: #c9d5ea;
+    color: #e2e8f0;
 }
 
 .timeline-card:active {

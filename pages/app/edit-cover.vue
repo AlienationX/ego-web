@@ -142,7 +142,7 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { apiGetClassify, apiGetClassList, apiPostClassifyPicUrl } from '@/api/wallpaper.js';
+import { apiGetClassifyAll, apiGetClassList, apiPostClassifyPicUrl } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 
 const classifyList = ref([]);
@@ -166,7 +166,7 @@ const classifyPreviewList = computed(() => classifyComputed.value);  // classify
 const draftChanged = computed(() => !!selectedClassify.value && !!draftCoverUrl.value && draftCoverUrl.value !== originalCoverUrl.value);
 
 const getClassify = async () => {
-    const res = await apiGetClassify({ pageSize: 30 });
+    const res = await apiGetClassifyAll({ pageSize: 30 });
     classifyList.value = (res.data || []).map((item) => handlePicUrl(item));
     if (classifyList.value.length && !selectedClassifyId.value) {
         await selectClassify(classifyList.value[0].id);

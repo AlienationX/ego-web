@@ -103,7 +103,7 @@ import {
     onShareTimeline,
 } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { apiGetClassList } from '@/api/wallpaper.js';
+import { apiGetClassify, apiGetClassList } from '@/api/wallpaper.js';
 import { gotoHome, handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
@@ -119,6 +119,7 @@ const pendingList = ref([]);
 const activeButton = ref('');
 const dateSortAsc = ref(true);
 const showTopbar = ref(false);
+const currentClassify = ref(null);
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
@@ -129,12 +130,30 @@ const props = defineProps({
     name: String,
 });
 
-const heroImage = computed(
-    () => classList.value[0]?.picurl || classList.value[0]?.smallPicurl || '/static/images/guide/guide1.png',
-);
-const heroTitle = computed(() => (props.name || t('category.title')).toUpperCase());
+const heroImage = computed(() => {
+    // 优先级 1: 分类专属封面 (currentClassify)
+    if (currentClassify.value?.picurl) {
+        return currentClassify.value.picurl;
+    }
+    // 优先级 2: 列表首图 (classList)
+    if (classList.value?.[0]?.picurl) {
+        return classList.value[0].picurl;
+    }
+    // 优先级 3: 默认图
+    return '/static/images/guide/guide1.png';
+});
+
+const heroTitle = computed(() => {
+    const name = props.name || currentClassify.value?.name || t('category.title');
+    return name.toUpperCase();
+});
+
 const heroBadge = computed(() => `${t('common.recommend')} CATEGORY`);
-const heroDesc = computed(() => `${props.name || t('category.title')} · ${t('category.desc')}`);
+
+const heroDesc = computed(() => {
+    const name = props.name || currentClassify.value?.name || t('category.title');
+    return `${name} · ${t('category.desc')}`;
+});
 
 const queryParams = ref({
     classify_id: parseInt(props.id),
@@ -152,6 +171,26 @@ const init = (sortord = '', resetClassList = []) => {
     };
     noData.value = false;
     classList.value = resetClassList;
+};
+
+const fetchClassifyInfo = async (id) => {
+    // 1. 尝试从缓存获取
+    let cacheList = uni.getStorageSync('classifyList') || [];
+    let match = cacheList.find((item) => String(item.id) === String(id));
+
+    if (!match) {
+        // 2. 缓存未命中的话，调用接口获取全部分类
+        try {
+            const res = await apiGetClassify({ pageSize: 100 });
+            cacheList = (res.data || []).map((item) => handlePicUrl(item));
+            uni.setStorageSync('classifyList', cacheList);
+            match = cacheList.find((item) => String(item.id) === String(id));
+        } catch (e) {
+            console.error('Failed to fetch classify info:', e);
+        }
+    } else {
+        currentClassify.value = match;
+    }
 };
 
 const getClassList = async () => {
@@ -228,6 +267,7 @@ onLoad((e) => {
         gotoHome();
         return;
     }
+    fetchClassifyInfo(id);
     getClassList();
 });
 
