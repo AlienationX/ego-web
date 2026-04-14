@@ -17,9 +17,10 @@ export const request = (config = {}) => {
                     await refreshToken();
                     resolve(await sendRequest(config));
                 } catch (err2) {
-                    // 刷新token失败，跳转登录页
+                    // 刷新token失败，清空用户信息，跳转登录页
+                    userStore.clearUserData();
                     if (config.isRedirect) {
-                        uni.navigateTo({ url: '/pages/auth/login' });
+                        uni.navigateTo({ url: '/pages/auth/signin' });
                     }
                     reject(err2);
                 }

@@ -6,7 +6,7 @@ const APP_INFO = uni.getAppBaseInfo();
 export const getStatusBarHeight = () => {
     // 状态栏高度
     // #ifdef WEB
-    return 20;
+    return 10;
     // #endif
 
     // #ifndef WEB
@@ -70,6 +70,8 @@ export const writeAccessLog = async () => {
 
     // 不统计web，主要是用来测试
     if (SYSTEM_INFO.uniPlatform === 'web') return;
+    // 微信小程序调试工具不统计
+    if (SYSTEM_INFO.uniPlatform === 'mp-weixin' && SYSTEM_INFO.deviceBrand === 'devtools') return;
 
     // 无法测试，只能打正式包时必须勾选 渠道包，才能通过 plus.runtime.channel 获取
     // console.log('runtime', plus.runtime.channel);

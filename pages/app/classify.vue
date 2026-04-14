@@ -1,8 +1,9 @@
 <template>
     <view class="classLayout">
-        <!-- 装饰性背景层：改为绝对定位并提升层级，确保在 Web 端可见 -->
         <view class="decorative-layer">
-            <view class="glow-sphere"></view>
+            <view class="sphere sphere-1"></view>
+            <view class="sphere sphere-2"></view>
+            <view class="sphere sphere-3"></view>
             <view class="glass-mask"></view>
         </view>
 
@@ -133,7 +134,7 @@
 
 <style lang="scss" scoped>
     .classLayout {
-        background: #fff;
+        background: #f4f7fd; // 改为更具通透感的浅瓷蓝作为基座
         min-height: 100vh;
         position: relative;
     }
@@ -143,28 +144,63 @@
         inset: 0;
         z-index: 0;
         pointer-events: none;
+        overflow: hidden;
 
-        .glow-sphere {
+        .sphere {
             position: absolute;
-            top: 5%;
-            left: -10%;
-            width: 80%;
-            height: 40%;
-            background: radial-gradient(circle, rgba(40, 179, 137, 0.15) 0%, transparent 70%);
-            filter: blur(80px);
-            animation: move 15s infinite alternate ease-in-out;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.8; // 提升整体可见度
+            will-change: transform;
+        }
+
+        .sphere-1 {
+            top: -15%;
+            right: -10%;
+            width: 90%;
+            height: 60%;
+            background: radial-gradient(circle, rgba(52, 97, 253, 0.28) 0%, transparent 80%);
+            animation: float-1 18s infinite alternate ease-in-out;
+        }
+
+        .sphere-2 {
+            bottom: 5%;
+            left: -15%;
+            width: 100%;
+            height: 70%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.22) 0%, transparent 80%);
+            animation: float-2 22s infinite alternate ease-in-out;
+        }
+
+        .sphere-3 {
+            top: 20%;
+            left: 5%;
+            width: 70%;
+            height: 45%;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.2) 0%, transparent 80%);
+            animation: float-3 15s infinite alternate ease-in-out;
         }
 
         .glass-mask {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(240, 242, 245, 0.5) 100%);
+            // 降低遮罩白色的权重，确保下方流光能透出来
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.6) 100%);
+            backdrop-filter: blur(10rpx);
         }
     }
 
-    @keyframes move {
-        0% { transform: translate(0, 0); }
-        100% { transform: translate(10%, 10%); }
+    @keyframes float-1 {
+        0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+        100% { transform: translate(-15%, 15%) rotate(15deg) scale(1.1); }
+    }
+    @keyframes float-2 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(15%, -15%) scale(1.15); }
+    }
+    @keyframes float-3 {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        100% { transform: translate(-10%, -20%) rotate(-10deg); }
     }
 
     .hero-section {

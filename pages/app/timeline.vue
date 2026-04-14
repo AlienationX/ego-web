@@ -8,6 +8,7 @@
             :style="{ height: contentHeight }"
             :scroll-into-view="scrollIntoViewTarget"
             @scroll="handleScroll"
+            @scrolltolower="onReachLower"
         >
             <view class="timeline-wrap">
                 <view id="timeline-top-anchor" class="timeline-top-anchor"></view>
@@ -80,6 +81,10 @@
                         </view>
                     </view>
                 </view>
+
+                <view v-if="latestList.length" class="load-more-box">
+                    <uni-load-more :status="noMoreData ? 'noMore' : (isLoading ? 'loading' : 'more')"></uni-load-more>
+                </view>
             </view>
         </scroll-view>
 
@@ -104,7 +109,14 @@ const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px)`)
 const scrollIntoViewTarget = ref('');
 const showScrollTop = ref(false);
 const isLoading = ref(false);
+const noMoreData = ref(false);
 const latestList = ref([]);
+
+const queryParams = ref({
+    pageNum: 1,
+    pageSize: 12,
+    ordering: '-created',
+});
 
 const monthNamesEn = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const weekdayNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -113,7 +125,7 @@ const weekdayNamesZh = ['星期日', '星期一', '星期二', '星期三', '星
 const isZh = computed(() => String(locale.value || '').startsWith('zh'));
 
 const toDate = (item) => {
-    const raw = item.created_at || item.created || item.create_time || item.update_time || item.updated_at || Date.now();
+    const raw = item.updated_at || Date.now();
     return new Date(raw);
 };
 
@@ -190,19 +202,37 @@ const monthGroups = computed(() => {
     return list;
 });
 
-const getLatest = async () => {
+const getLatest = async (isAppend = false) => {
+    if (isLoading.value || (isAppend && noMoreData.value)) return;
+
     try {
         isLoading.value = true;
-        const res = await apiGetClassList({
-            pageSize: 18,
-            ordering: '-created',
-        });
-        latestList.value = (res.data || [])
-            .map((item) => handlePicUrl(item))
-            .sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
+        const res = await apiGetClassList(queryParams.value);
+        const newData = (res.data || []).map((item) => handlePicUrl(item));
+
+        if (isAppend) {
+            latestList.value.push(...newData);
+        } else {
+            latestList.value = newData;
+        }
+
+        // 统一排序确保时间轴逻辑严密
+        latestList.value.sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
+
+        if (queryParams.value.pageNum >= res.pagination.total_pages) {
+            noMoreData.value = true;
+        }
+    } catch (error) {
+        console.error('Failed to fetch timeline:', error);
     } finally {
         isLoading.value = false;
     }
+};
+
+const onReachLower = () => {
+    if (noMoreData.value || isLoading.value) return;
+    queryParams.value.pageNum++;
+    getLatest(true);
 };
 
 const goPreview = (id) => {

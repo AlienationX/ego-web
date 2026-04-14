@@ -7,7 +7,7 @@
                 <view class="top10-header">
                     <view class="top10-header__left">
                         <view class="top10-header__back" @click="goBack">
-                            <uni-icons type="left" size="18" color="#f8fafc"></uni-icons>
+                            <uni-icons type="back" size="20" color="#f8fafc"></uni-icons>
                         </view>
                         <view class="top10-header__title">{{ $t('top10.title') }}</view>
                     </view>
@@ -254,13 +254,20 @@ onLoad(() => {
 .top10-header__back {
     width: 68rpx;
     height: 68rpx;
-    border-radius: 999rpx;
+    border-radius: 20rpx;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.08);
-    border: 1rpx solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(14rpx);
+    border: 1rpx solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20rpx);
+    box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+
+    &:active {
+        transform: scale(0.9);
+        background: rgba(255, 255, 255, 0.15);
+    }
 }
 
 .top10-header__title {

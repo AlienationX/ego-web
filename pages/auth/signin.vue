@@ -114,6 +114,7 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostLogin } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { encrypt, decrypt } from '@/utils/encryption.js';
 
 const { t } = useI18n();
 const userStore = useUserStore();
@@ -134,12 +135,23 @@ const rememberPassword = ref(false);
 const isAgreed = ref(false);
 
 onMounted(() => {
+    // 1. 如果已登录，直接跳转到用户页
+    if (userStore.isLoggedIn) {
+        uni.reLaunch({ url: '/pages/user/user' });
+        return;
+    }
+
+    // 2. 检查是否有记住的账号信息
     const saved = uni.getStorageSync(REMEMBER_STORAGE_KEY);
     if (!saved || typeof saved !== 'object') return;
+    
     rememberPassword.value = !!saved.remember;
     if (rememberPassword.value) {
         form.email = saved.email || '';
-        form.password = saved.password || '';
+        // 安全项：解密后回填
+        if (saved.password) {
+            form.password = decrypt(saved.password) || '';
+        }
     }
 });
 
@@ -248,7 +260,8 @@ const handleLogin = async () => {
             uni.setStorageSync(REMEMBER_STORAGE_KEY, {
                 remember: true,
                 email: form.email.trim(),
-                password: form.password,
+                // 安全防线：加密存储密码
+                password: encrypt(form.password),
             });
         } else {
             uni.removeStorageSync(REMEMBER_STORAGE_KEY);
