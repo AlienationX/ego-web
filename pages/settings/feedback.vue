@@ -106,10 +106,12 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { apiPostFeedback } from '@/api/wallpaper.js';
+import { useUserStore } from '@/stores/user';
+import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 
 const { t } = useI18n();
+const userStore = useUserStore();
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
@@ -117,7 +119,7 @@ const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 
 const feedbackForm = reactive({
     type: t('feedback.typeBug'),
     content: '',
-    contact: '',
+    contact: userStore.userinfo?.email || '',
 });
 
 const imageList = ref([]);
@@ -155,7 +157,7 @@ const selectImage = (count) => {
         },
         fail: (err) => {
             console.error('选择图片失败:', err);
-            // #ifdef APP-PLUS
+            // #ifdef APP
             const errMsg = err.errMsg || '';
             if (
                 errMsg.includes('permission') ||
@@ -217,7 +219,7 @@ const selectImage = (count) => {
             }
             // #endif
 
-            // #ifndef APP-PLUS || MP
+            // #ifndef APP || MP
             uni.showToast({
                 title: t('feedback.imageSelectFailed') || '选择图片失败',
                 icon: 'none',
@@ -264,36 +266,18 @@ const handleSubmit = async () => {
     isSubmitting.value = true;
 
     try {
-        let images = [];
-        if (imageList.value.length > 0) {
-            for (const imagePath of imageList.value) {
-                console.log('upload imagePath:', imagePath);
-                try {
-                    const base64 = await new Promise((resolve, reject) => {
-                        uni.getFileSystemManager().readFile({
-                            filePath: imagePath,
-                            encoding: 'base64',
-                            success: (res) => {
-                                resolve(`data:image/jpeg;base64,${res.data}`);
-                            },
-                            fail: reject,
-                        });
-                    });
-                    images.push(base64);
-                } catch (error) {
-                    console.error('图片转换失败:', error);
-                }
-            }
-        }
-
         const data = {
             type: feedbackForm.type,
             content: feedbackForm.content.trim(),
-            contact: feedbackForm.contact.trim() || undefined,
-            images: images.length > 0 ? images : undefined,
+            contact: feedbackForm.contact.trim(),
         };
 
-        await apiPostFeedback(data);
+        if (imageList.value.length > 0) {
+            data.images = imageList.value;
+            await apiUploadFeedback(data);
+        } else {
+            await apiPostFeedback(data);
+        }
 
         uni.showToast({
             title: t('feedback.submitSuccess'),
@@ -302,7 +286,7 @@ const handleSubmit = async () => {
         });
 
         feedbackForm.content = '';
-        feedbackForm.contact = '';
+        feedbackForm.contact = userStore.userinfo?.email || '';
         feedbackForm.type = t('feedback.typeBug');
         imageList.value = [];
     } catch (error) {

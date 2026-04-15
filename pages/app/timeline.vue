@@ -51,11 +51,13 @@
                         </view>
 
                         <view class="editorial-grid">
+                            <!-- 首张且当天壁纸大于1张时，第一张为大图，现在是每天第一张都是大图 -->
+                            <!-- :class="{ 'timeline-card--wide': idx === 0 && day.items.length > 1 }" -->
                             <view
                                 v-for="(item, idx) in day.items"
                                 :key="item.id"
                                 class="timeline-card"
-                                :class="{ 'timeline-card--wide': idx === 0 && day.items.length > 1 }"
+                                :class="{ 'timeline-card--wide': idx === 0 }"
                                 @click="goPreview(item.id)"
                             >
                                 <image class="timeline-card__image" :src="item.smallPicurl" mode="aspectFill" lazy-load></image>
@@ -379,7 +381,7 @@ onLoad(() => {
 }
 
 .month-section {
-    margin-bottom: 56rpx;
+    margin-bottom: 80rpx;
 }
 
 .month-section__head {
@@ -424,7 +426,7 @@ onLoad(() => {
 }
 
 .day-section {
-    margin-bottom: 34rpx;
+    margin-bottom: 50rpx;
 }
 
 .day-section__marker {
@@ -460,7 +462,7 @@ onLoad(() => {
 .editorial-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20rpx;
+    gap: 30rpx;
 }
 
 .timeline-card {

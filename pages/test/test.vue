@@ -25,15 +25,14 @@
 
 <script setup>
 const testMenus = [
-    { name: 'Sign In', url: '/pages/auth/signin' },
-    { name: 'Sign Up', url: '/pages/auth/signup' },
-    { name: 'Forget Password', url: '/pages/auth/forget-password' },
+    { name: 'Log In', url: '/pages/auth/login' },
     { name: 'Access', url: '/pages/access/access' },
     { name: 'Membership', url: '/pages/member/payment' },
     { name: 'Stream Test', url: '/pages/test/stream-test' },
     { name: 'MDI Icon Test', url: '/pages/test/mdi-icon-test' },
     { name: 'Custom Bars', url: '/pages/test/custom-bars' },
     { name: 'Edit Cover', url: '/pages/app/edit-cover' },
+    { name: 'Tabbed Pics View Test', url: '/pages/test/pics-view-test' },
     { name: 'Interstitial Ad', url: '/pages/test/ad-inter' },
     { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded' },
     { name: 'Waterfall View', url: '/pages/test/waterfall-view' },

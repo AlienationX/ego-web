@@ -116,6 +116,7 @@ const chooseAvatar = () => {
         sourceType: ['album', 'camera'],
         success: (res) => {
             const tempFilePath = res.tempFilePaths[0];
+            console.log("tempfilepath", tempFilePath)
             formData.value.avatar = tempFilePath;
         },
         fail: (err) => {
@@ -137,6 +138,7 @@ const saveProfile = async () => {
         return;
     }
 
+    console.log("xasdf", formData.value)
     if (formData.value.avatar === userStore.userinfo.profile.avatar) {
         // 不上传头像，使用普通的接口更新信息
         const { avatar, ...rest } = formData.value;

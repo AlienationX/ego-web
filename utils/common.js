@@ -25,12 +25,14 @@ export function handlePicUrl(item, prefix = PICS_BASE_URL) {
 
     // 2. 生成 smallPicurl 存储小图片（基于添加前缀后的完整 URL）
     const smallPicurl = prefixedUrl.replace('.jpg', '_small.webp');
+    const mediumPicurl = prefixedUrl.replace('.jpg', '_medium.webp');
 
     // 返回新对象（保留原字段(覆盖原字段) + 新增字段）
     return {
         ...item,
         picurl: prefixedUrl, // 覆盖原始的picurl数据
         smallPicurl,
+        mediumPicurl,
     };
 }
 

@@ -273,7 +273,7 @@ onUnload(() => {
 }
 
 .content {
-    padding: 24rpx 32rpx 100rpx;
+    padding: 24rpx 24rpx;
 }
 
 .panel {

@@ -55,14 +55,6 @@ export const apiGetClassify = (data = {}) => {
     });
 };
 
-// 获取所有分类接口
-export const apiGetClassifyAll = (data = {}) => {
-    return request({
-        url: '/classify/all/',
-        data,
-    });
-};
-
 // 获取分类列表，也就是分类下的所有图片接口
 export const apiGetClassList = (data = {}) => {
     return request({
@@ -143,6 +135,23 @@ export const apiPostFeedback = (data = {}) => {
         url: '/feedback/',
         data,
         method: 'POST',
+    });
+};
+
+
+// 上传反馈图片
+export const apiUploadFeedback = (data = {}) => {
+    // uni.uploadFile 的 files 参数需要对象数组格式 [{name, uri}]
+    const files = (data.images || []).map(uri => ({
+        name: 'images',
+        uri: uri,
+    }));
+    // 从 formData 中移除 images（blob URL 字符串），真实文件通过 files 上传
+    const { images, ...formData } = data;
+    return uploadRequest({
+        url: '/feedback/',
+        files: files,
+        data: formData,
     });
 };
 

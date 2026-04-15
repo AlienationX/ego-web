@@ -148,7 +148,8 @@ export const uploadRequest = (config = {}) => {
     return new Promise((resolve, reject) => {
         uni.uploadFile({
             url: config.url.startsWith('http') ? config.url : API_BASE_URL + config.url,
-            filePath: config.filePath,
+            files: config.files,  // 需要上传的文件列表。使用 files 时，filePath 和 name 不生效。
+            filePath: config.filePath, // 要上传文件资源的路径。
             name: config.name, // 关键：与后端约定的文件字段名
             header: { ...setHeader(config.isAuth || false), ...config.header },
             formData: config.data || {},

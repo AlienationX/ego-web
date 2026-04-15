@@ -71,7 +71,7 @@
                         </view>
                         <view class="box" @click="openScore">
                             <uni-icons type="star-filled" size="28"></uni-icons>
-                            <view class="text">{{ currentInfo.score }}</view>
+                            <view class="text">{{ currentInfo.score || "-" }}</view>
                         </view>
                         <view class="box" @click="clickDownload">
                             <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
