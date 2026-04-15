@@ -72,7 +72,7 @@
                                         :class="['img', { loaded: item.loaded, shadow: item.loaded }]"
                                         :style="getImgStyle()"
                                         :src="item.smallPicurl"
-                                        :mode="imageMode"
+                                        :mode="item.imageMode || imageMode"
                                         lazy-load
                                     ></image>
                                     <view :class="['lock', { loaded: item.loaded }]" :style="getLockStyle()">
@@ -224,28 +224,42 @@ const processImages = async (index, list) => {
     }
 
     for (const item of list) {
+        let w = 300;
+        let h = 600; // 默认降级尺寸 (1:2 比例)
+        let mode = isWaterfall.value ? 'widthFix' : 'aspectFill';
+
         try {
             const info = await getImageInfo(item.smallPicurl);
-            item.width = info.width;
-            item.height = info.height;
-            item.loaded = true;
-            
-            if (isWaterfall.value) {
-                const scaledH = (item.height * colWidth) / item.width;
-                const minH = Math.min(...state.waterfall.columnHeights);
-                const colIdx = state.waterfall.columnHeights.indexOf(minH);
-
-                item.position = {
-                    width: `${colWidth}px`,
-                    height: `${scaledH}px`,
-                    left: `${colIdx * (colWidth + gap) + gap}px`,
-                    top: `${state.waterfall.columnHeights[colIdx] + gap}px`,
-                };
-                state.waterfall.columnHeights[colIdx] += scaledH + gap;
-                state.waterfall.height = Math.max(...state.waterfall.columnHeights);
-            }
+            w = info.width || w;
+            h = info.height || h;
         } catch (e) {
-            item.loaded = true;
+            // 小程序端未配置 download 域名时会导致 getImageInfo 失败
+            console.warn('getImageInfo failed, using element fallback', e);
+            // 关键：如果获取实际比例失败，我们强行设置盒子的比例为1:2
+            // 此时必须将 mode 强制切回 aspectFill，否则图片按原比例渲染会溢出/短缺这个盒子，导致锁图标全部错位！
+            if (isWaterfall.value) {
+                mode = 'aspectFill';
+            }
+        }
+        
+        item.width = w;
+        item.height = h;
+        item.imageMode = mode;
+        item.loaded = true;
+        
+        if (isWaterfall.value) {
+            const scaledH = (h * colWidth) / w;
+            const minH = Math.min(...state.waterfall.columnHeights);
+            const colIdx = state.waterfall.columnHeights.indexOf(minH);
+
+            item.position = {
+                width: `${colWidth}px`,
+                height: `${scaledH}px`,
+                left: `${colIdx * (colWidth + gap) + gap}px`,
+                top: `${state.waterfall.columnHeights[colIdx] + gap}px`,
+            };
+            state.waterfall.columnHeights[colIdx] += scaledH + gap;
+            state.waterfall.height = Math.max(...state.waterfall.columnHeights);
         }
     }
 };

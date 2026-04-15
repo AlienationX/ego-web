@@ -60,7 +60,7 @@
                                 :class="{ 'timeline-card--wide': idx === 0 }"
                                 @click="goPreview(item.id)"
                             >
-                                <image class="timeline-card__image" :src="item.smallPicurl" mode="aspectFill" lazy-load></image>
+                                <image class="timeline-card__image" :src="idx === 0 ? (item.mediumPicurl || item.picurl) : item.smallPicurl" mode="aspectFill" lazy-load></image>
                                 <view class="timeline-card__overlay"></view>
                                 <view class="timeline-card__content">
                                     <view class="timeline-card__classify">

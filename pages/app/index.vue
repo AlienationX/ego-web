@@ -31,7 +31,7 @@
                     </navigator>
 
                     <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
-                        <image :src="item.picurl" mode="aspectFill"></image>
+                        <image :src="item.mediumPicurl" mode="aspectFill"></image>
                         <view class="banner-card__overlay"></view>
                         <view class="banner-card__content">
                             <view class="banner-card__tag-row">
@@ -98,7 +98,7 @@
                         :class="{ 'is-hero': idx === 0 }"
                         @click="goPreview(item.id, randomDailyList)"
                     >
-                        <image :src="item.smallPicurl" mode="aspectFill"></image>
+                        <image :src="idx === 0 ? (item.mediumPicurl || item.picurl) : item.smallPicurl" mode="aspectFill"></image>
                         <block v-if="idx === 0">
                             <view class="box-hero-overlay"></view>
                             <view class="box-hero-content">

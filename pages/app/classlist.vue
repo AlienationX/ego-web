@@ -133,11 +133,11 @@ const props = defineProps({
 const heroImage = computed(() => {
     // 优先级 1: 分类专属封面 (currentClassify)
     if (currentClassify.value?.picurl) {
-        return currentClassify.value.picurl;
+        return currentClassify.value.mediumPicurl || currentClassify.value.picurl;
     }
     // 优先级 2: 列表首图 (classList)
     if (classList.value?.[0]?.picurl) {
-        return classList.value[0].picurl;
+        return classList.value[0].mediumPicurl || classList.value[0].picurl;
     }
     // 优先级 3: 默认图
     return '/static/images/guide/guide1.png';

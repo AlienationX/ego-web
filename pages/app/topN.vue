@@ -40,7 +40,7 @@
                 <template v-else-if="rankedList.length">
                     <view class="hero-section">
                         <view class="hero-card hero-card--first" @click="goPreview(rankedList[0].id)">
-                            <image class="hero-card__image" :src="rankedList[0].picurl" mode="aspectFill"></image>
+                            <image class="hero-card__image" :src="rankedList[0].mediumPicurl || rankedList[0].picurl" mode="aspectFill"></image>
                             <view class="hero-card__overlay"></view>
                             <view class="hero-card__rank hero-card__rank--first">1</view>
                             <view class="hero-card__content">
@@ -66,7 +66,7 @@
                                 class="hero-card hero-card--secondary"
                                 @click="goPreview(item.id)"
                             >
-                                <image class="hero-card__image" :src="item.picurl" mode="aspectFill"></image>
+                                <image class="hero-card__image" :src="item.mediumPicurl || item.smallPicurl || item.picurl " mode="aspectFill"></image>
                                 <view class="hero-card__overlay hero-card__overlay--soft"></view>
                                 <view class="hero-card__rank" :class="{ 'hero-card__rank--second': idx === 0 }">{{ idx + 2 }}</view>
                                 <view class="hero-card__content hero-card__content--compact">
