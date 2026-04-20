@@ -322,6 +322,8 @@
         "category": "分类:",
         "publisher": "发布者:",
         "score": "评分:",
+        "views": "浏览量:",
+        "downloads": "下载量:",
         "description": "描述:",
         "tags": "标签:",
         "collect": "收藏",

@@ -19,9 +19,9 @@
                         <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
                         <text class="social-text">{{ t('login.google') }}</text>
                     </view>
-                    <view class="social-btn" @click="handleFacebookLogin">
-                        <image src="/static/icons/brands/facebook.svg" mode="aspectFit" class="social-icon"></image>
-                        <text class="social-text">{{ t('login.facebook') }}</text>
+                    <view class="social-btn" @click="handleWechatLogin">
+                        <image src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
+                        <text class="social-text">{{ t('login.wechat') }}</text>
                     </view>
                 </view>
             </view>
@@ -105,6 +105,17 @@
                 </view>
             </view>
         </view>
+
+        <!-- 通用导航对话框 -->
+        <popup-navigation-dialog
+            ref="navDialog"
+            :title="dialogState.title"
+            :description="dialogState.description"
+            :confirmText="dialogState.confirmText"
+            :cancelText="dialogState.cancelText"
+            @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"
+        ></popup-navigation-dialog>
     </view>
 </template>
 
@@ -112,7 +123,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
-import { apiPostLogin } from '@/api/wallpaper.js';
+import { apiPostLogin, apiPostLoginByWechat } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { encrypt, decrypt } from '@/utils/encryption.js';
 
@@ -120,6 +131,37 @@ const { t } = useI18n();
 const userStore = useUserStore();
 const backTop = ref((getStatusBarHeight() || 0) + 10);
 const REMEMBER_STORAGE_KEY = 'signinRemember';
+
+// 通用导航对话框控制
+const navDialog = ref(null);
+const dialogState = ref({
+    title: '',
+    description: '',
+    confirmText: '',
+    cancelText: '',
+    onConfirm: () => {},
+    onCancel: () => {},
+});
+
+/**
+ * 显示自定义导航对话框
+ * @param {Object} config 配置项 { title, content, confirmText, cancelText, onConfirm, onCancel }
+ */
+const showNavDialog = (config) => {
+    dialogState.value = {
+        title: config.title || t('common.tip'),
+        description: config.content || '',
+        confirmText: config.confirmText || t('common.confirm'),
+        cancelText: config.cancelText || t('common.cancel'),
+        onConfirm: () => {
+            if (config.onConfirm) config.onConfirm();
+        },
+        onCancel: () => {
+            if (config.onCancel) config.onCancel();
+        },
+    };
+    navDialog.value?.open();
+};
 
 // 表单数据
 const form = reactive({
@@ -144,7 +186,7 @@ onMounted(() => {
     // 2. 检查是否有记住的账号信息
     const saved = uni.getStorageSync(REMEMBER_STORAGE_KEY);
     if (!saved || typeof saved !== 'object') return;
-    
+
     rememberPassword.value = !!saved.remember;
     if (rememberPassword.value) {
         form.email = saved.email || '';
@@ -193,11 +235,57 @@ const handleForgotPassword = () => {
     });
 };
 
-// Facebook登录
-const handleFacebookLogin = () => {
+// 微信登录
+const handleWechatLogin = () => {
+    // #ifdef WEB
     uni.showToast({
-        title: t('login.facebookLoginTip'),
+        title: '请在微信环境中使用',
         icon: 'none',
+    });
+    return;
+    // #endif
+
+    showNavDialog({
+        title: '微信登录确认',
+        content: '允许应用获取您的微信公开信息（昵称、头像等）用于账号登录？',
+        confirmText: '允许',
+        cancelText: '拒绝',
+        onConfirm: () => {
+            uni.login({
+                provider: 'weixin',
+                onlyAuthorize: true, // 微信登录仅请求授权认证
+                success: async (loginRes) => {
+                    try {
+                        const res = await apiPostLoginByWechat({
+                            code: loginRes.code,
+                        });
+                        console.log('testing', res);
+                        // 登录成功，保存用户信息并跳转
+                        const { access, refresh } = res.data;
+                        userStore.setToken(access, refresh);
+                        await userStore.setUserInfo();
+
+                        uni.showToast({
+                            title: t('login.loginSuccess'),
+                            icon: 'success',
+                        });
+                        // 跳转到用户页
+                        uni.reLaunch({ url: '/pages/user/user' });
+                    } catch (error) {
+                        uni.showToast({
+                            title: error.message || t('login.loginFailed'),
+                            icon: 'none',
+                        });
+                    }
+                },
+                fail: (err) => {
+                    uni.showToast({
+                        title: t('login.wechatLoginFailed'),
+                        icon: 'none',
+                    });
+                },
+            });
+        },
     });
 };
 
@@ -271,12 +359,8 @@ const handleLogin = async () => {
             title: t('login.loginSuccess'),
             icon: 'success',
         });
-
-        setTimeout(() => {
-            uni.reLaunch({
-                url: '/pages/user/user',
-            });
-        }, 1500);
+        
+        uni.reLaunch({url: '/pages/user/user'});
     } catch (error) {
         uni.showToast({
             title: error.message || t('login.loginFailed'),

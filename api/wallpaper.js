@@ -138,11 +138,10 @@ export const apiPostFeedback = (data = {}) => {
     });
 };
 
-
 // 上传反馈图片
 export const apiUploadFeedback = (data = {}) => {
     // uni.uploadFile 的 files 参数需要对象数组格式 [{name, uri}]
-    const files = (data.images || []).map(uri => ({
+    const files = (data.images || []).map((uri) => ({
         name: 'images',
         uri: uri,
     }));
@@ -252,9 +251,9 @@ export const apiPostUpdateWall = (data = {}) => {
 };
 
 // 更新分类图片接口
-export const apiPostClassifyPicUrl = (data = {}) => {
+export const apiPostClassifyPicUrl = (data = {}, id = '') => {
     return request({
-        url: '/classify/update_picurl/',
+        url: `/classify/${id}/update_picurl/`,
         data,
         method: 'POST',
         isAuth: true,

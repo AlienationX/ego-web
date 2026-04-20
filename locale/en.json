@@ -184,6 +184,8 @@
         "category": "Category:",
         "publisher": "Publisher:",
         "score": "Score:",
+        "views": "Views:",
+        "downloads": "Downloads:",
         "description": "Description:",
         "tags": "Tags:",
         "collect": "Favorite",
@@ -421,7 +423,7 @@
         "submit": "Submit"
     },
     "discover": {
-        "title": "Discover Self",
+        "title": "Discover Oneself",
         "subtitle": "Discover yourself from one image you love",
         "desc": "You can pick from favorites or use local images (VIP required). AI will analyze your aesthetic preferences, personality traits, and provide self-discovery insights.",
         "sourceFavorite": "From Favorites",

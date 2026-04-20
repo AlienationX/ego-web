@@ -71,7 +71,7 @@
                         </view>
                         <view class="box" @click="openScore">
                             <uni-icons type="star-filled" size="28"></uni-icons>
-                            <view class="text">{{ currentInfo.score || "-" }}</view>
+                            <view class="text">{{ currentInfo.score || '-' }}</view>
                         </view>
                         <view class="box" @click="clickDownload">
                             <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
@@ -239,6 +239,23 @@
                             <view class="label">{{ t('previewPage.publisher') }}</view>
                             <input v-model="editForm.publisher" class="input" />
                         </view>
+                        <view class="row row-field">
+                            <view class="label">{{ t('previewPage.score') }}</view>
+                            <view class="rate-input">
+                                <uni-rate v-model="editForm.score" allowHalf></uni-rate>
+                                <text class="rate-input__text">{{ editForm.score || 0 }}</text>
+                            </view>
+                        </view>
+                        <view class="row row-inline">
+                            <view class="inline-item inline-item--metric">
+                                <view class="label">{{ t('previewPage.views') }}</view>
+                                <input v-model="editForm.views" class="input stat-input" type="number" />
+                            </view>
+                            <view class="inline-item inline-item--metric">
+                                <view class="label">{{ t('previewPage.downloads') }}</view>
+                                <input v-model="editForm.downloads" class="input stat-input" type="number" />
+                            </view>
+                        </view>
                         <view class="row row-inline">
                             <view class="inline-item">
                                 <view class="label">{{ t('previewPage.active') }}</view>
@@ -259,6 +276,17 @@
         </uni-popup>
 
         <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
+        
+        <!-- 通用导航对话框 -->
+        <popup-navigation-dialog
+            ref="navDialog"
+            :title="dialogState.title"
+            :description="dialogState.description"
+            :confirmText="dialogState.confirmText"
+            :cancelText="dialogState.cancelText"
+            @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"
+        ></popup-navigation-dialog>
     </scroll-view>
 </template>
 
@@ -281,6 +309,37 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+
+// 通用导航对话框控制
+const navDialog = ref(null);
+const dialogState = ref({
+    title: '',
+    description: '',
+    confirmText: '',
+    cancelText: '',
+    onConfirm: () => {},
+    onCancel: () => {},
+});
+
+/**
+ * 显示自定义导航对话框
+ * @param {Object} config 配置项 { title, content, confirmText, cancelText, onConfirm, onCancel }
+ */
+const showNavDialog = (config) => {
+    dialogState.value = {
+        title: config.title || t('common.tip'),
+        description: config.content || '',
+        confirmText: config.confirmText || t('common.confirm'),
+        cancelText: config.cancelText || t('common.cancel'),
+        onConfirm: () => {
+            if (config.onConfirm) config.onConfirm();
+        },
+        onCancel: () => {
+            if (config.onCancel) config.onCancel();
+        },
+    };
+    navDialog.value?.open();
+};
 const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 const HAS_SEEN_HINT_KEY = 'hasSeenHint';
 
@@ -383,7 +442,7 @@ const capsuleRightOffset = computed(() => {
     if (capsuleRect.value) {
         const windowInfo = uni.getWindowInfo();
         // 计算胶囊左边缘距离页面右边缘的像素值，并加上额外间隙
-        return (windowInfo.windowWidth - capsuleRect.value.left) + 10;
+        return windowInfo.windowWidth - capsuleRect.value.left + 10;
     }
     // #endif
     return 15; // H5/App 默认 30rpx 约等于 15px
@@ -432,15 +491,13 @@ const userScore = ref(0);
 const openScore = () => {
     // 如果未登录，跳转到登录，或增加友好提示
     if (Object.keys(userStore.userinfo).length === 0) {
-        uni.showModal({
+        showNavDialog({
             title: t('common.information'),
             content: t('previewPage.loginPrompt'),
             cancelText: t('previewPage.cancel'),
             confirmText: t('previewPage.login'),
-            success: (res) => {
-                if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/auth/login' });
-                }
+            onConfirm: () => {
+                uni.navigateTo({ url: '/pages/auth/login' });
             },
         });
         return; // 未登录时直接返回，不执行后续操作
@@ -460,6 +517,9 @@ const editForm = ref({
     tabs: '',
     classify_id: '',
     publisher: '',
+    score: 0,
+    views: 0,
+    downloads: 0,
     is_active: true,
     is_locked: false,
 });
@@ -476,6 +536,9 @@ const openEdit = async () => {
         tabs: currentInfo.value.tabs || (currentInfo.value.tabs_list || []).join(','),
         classify_id: currentClassify ? currentClassify.classify_id : '',
         publisher: currentInfo.value.publisher || '',
+        score: currentInfo.value.score || 0,
+        views: currentInfo.value.views || 0,
+        downloads: currentInfo.value.downloads || 0,
         is_active: !!currentInfo.value.is_active,
         is_locked: !!currentInfo.value.is_locked,
     };
@@ -519,21 +582,19 @@ const applyLocalUpdate = (payload) => {
 };
 
 const saveEdit = async () => {
-    // const selectedClassify = classifyList.value.find((item) => item.classify_id === editForm.value.classify_id);
-    // const payload = {
-    //     description: editForm.value.description,
-    //     tabs: editForm.value.tags,
-    //     classify_id: editForm.value.classify_id,
-    //     publisher: editForm.value.publisher,
-    //     is_active: editForm.value.is_active,
-    //     is_locked: editForm.value.is_locked,
-    // };
     try {
-        await apiPostUpdateWall({ id: currentInfo.value.id, ...editForm.value });
-        applyLocalUpdate({
+        const payload = {
+            id: currentInfo.value.id,
             ...editForm.value,
-            tabs_list: editForm.value.tags
-                ? editForm.value.tags
+            score: Number(editForm.value.score) || 0,
+            views: Number(editForm.value.views) || 0,
+            downloads: Number(editForm.value.downloads) || 0,
+        };
+        await apiPostUpdateWall(payload);
+        applyLocalUpdate({
+            ...payload,
+            tabs_list: editForm.value.tabs
+                ? editForm.value.tabs
                       .split(',')
                       .map((t) => t.trim())
                       .filter(Boolean)
@@ -547,13 +608,12 @@ const saveEdit = async () => {
 };
 
 const deleteWall = () => {
-    uni.showModal({
+    showNavDialog({
         title: t('common.tip'),
         content: t('previewPage.adminDeleteConfirm'),
         confirmText: t('previewPage.adminDelete'),
         cancelText: t('previewPage.cancel'),
-        success: async (res) => {
-            if (!res.confirm) return;
+        onConfirm: async () => {
             try {
                 await apiPostUpdateWall({ id: currentInfo.value.id, is_active: false });
                 classList.value = classList.value.filter((item) => item.id !== currentInfo.value.id);
@@ -609,15 +669,13 @@ const handleShare = () => {
 const toggleCollect = async () => {
     // 如果未登录，跳转到登录，或增加友好提示
     if (Object.keys(userStore.userinfo).length === 0) {
-        uni.showModal({
+        showNavDialog({
             title: t('common.information'),
             content: t('previewPage.loginPrompt'),
             cancelText: t('previewPage.cancel'),
             confirmText: t('previewPage.login'),
-            success: (res) => {
-                if (res.confirm) {
-                    uni.navigateTo({ url: '/pages/auth/login' });
-                }
+            onConfirm: () => {
+                uni.navigateTo({ url: '/pages/auth/login' });
             },
         });
         return;
@@ -684,7 +742,7 @@ const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useA
 // const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
 const clickDownload = async () => {
     // #ifdef WEB
-    uni.showModal({
+    showNavDialog({
         content: t('previewPage.savePrompt'),
         showCancel: false,
     });
@@ -1006,13 +1064,6 @@ onShareTimeline(() => {
                 justify-content: center;
                 align-items: center;
                 padding: 2rpx 12rpx;
-
-                // vue深度选择器，强制使用css修改图标颜色
-                :deep() {
-                    .uni-icons {
-                        // color: $wp-font-color-2 !important;
-                    }
-                }
 
                 .text {
                     font-size: 26rpx;
@@ -1359,6 +1410,13 @@ onShareTimeline(() => {
             gap: 24rpx;
         }
 
+        .row-field {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24rpx;
+        }
+
         .inline-item {
             flex: 1;
             display: flex;
@@ -1370,6 +1428,15 @@ onShareTimeline(() => {
             border-radius: 16rpx;
             padding: 16rpx 20rpx;
             box-sizing: border-box;
+        }
+
+        .inline-item--metric {
+            min-height: 88rpx;
+        }
+
+        .inline-item--metric .label {
+            width: 132rpx;
+            flex: 0 0 132rpx;
         }
 
         .label {
@@ -1406,6 +1473,32 @@ onShareTimeline(() => {
         .input-textarea {
             min-height: 80rpx;
             line-height: 1.6;
+        }
+
+        .stat-input {
+            flex: 1;
+            width: auto;
+            height: 40rpx;
+            min-height: 40rpx;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            text-align: right;
+            line-height: 40rpx;
+        }
+
+        .rate-input {
+            display: flex;
+            align-items: center;
+            gap: 16rpx;
+            min-height: 80rpx;
+            flex: 1;
+            // justify-content: flex-end;
+        }
+
+        .rate-input__text {
+            font-size: 28rpx;
+            color: $wp-font-color-2;
         }
 
         .edit-actions {

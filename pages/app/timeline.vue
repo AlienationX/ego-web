@@ -426,7 +426,7 @@ onLoad(() => {
 }
 
 .day-section {
-    margin-bottom: 50rpx;
+    margin-bottom: 80rpx;
 }
 
 .day-section__marker {

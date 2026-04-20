@@ -1,22 +1,18 @@
 <template>
     <uni-popup ref="popupRef" type="center" :mask-click="maskClick" :safe-area="true">
         <view class="dialog">
-            <view class="dialog__close" @click="handleCancel">
-                <mdi-icon path="/static/icons/close.svg" size="16px" color="#f5f7fb"></mdi-icon>
-            </view>
-
             <view class="dialog__content">
                 <text class="dialog__title">{{ title }}</text>
                 <text v-if="description" class="dialog__desc">{{ description }}</text>
             </view>
 
             <view class="dialog__actions">
-                <button class="dialog__button dialog__button--primary" @click="handleConfirm">
-                    {{ confirmText }}
-                </button>
-                <button class="dialog__button dialog__button--secondary" @click="handleCancel">
-                    {{ cancelText }}
-                </button>
+                <view class="dialog__button dialog__button--confirm" @click="handleConfirm">
+                    {{ confirmText || $t('common.confirm') }}
+                </view>
+                <view class="dialog__button dialog__button--cancel" @click="handleCancel">
+                    {{ cancelText || $t('common.cancel') }}
+                </view>
             </view>
         </view>
     </uni-popup>
@@ -28,7 +24,7 @@ import { ref } from 'vue';
 const props = defineProps({
     title: {
         type: String,
-        default: '',
+        default: '提示',
     },
     description: {
         type: String,
@@ -78,77 +74,56 @@ defineExpose({
 
 <style lang="scss" scoped>
 .dialog {
-    width: 620rpx;
-    padding: 42rpx 36rpx 30rpx;
-    position: relative;
-    border-radius: 40rpx;
-    background: #2b2d36;
-    box-shadow: 0 28rpx 80rpx rgba(15, 23, 42, 0.34);
-}
-
-.dialog__close {
-    position: absolute;
-    top: 24rpx;
-    right: 24rpx;
-    width: 54rpx;
-    height: 54rpx;
-    border-radius: 27rpx;
-    border: 2rpx solid rgba(255, 255, 255, 0.24);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.04);
+    width: 600rpx;
+    padding: 50rpx 48rpx 30rpx;
+    background: #ffffff;
+    border-radius: 56rpx;
+    box-shadow: 0 24rpx 60rpx rgba(0, 0, 0, 0.12);
 }
 
 .dialog__content {
-    padding: 10rpx 30rpx 0;
-    text-align: center;
+    text-align: left;
 }
 
 .dialog__title {
     display: block;
-    color: #ffffff;
-    font-size: 52rpx;
-    line-height: 1.18;
+    font-size: 32rpx;
     font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 24rpx;
 }
 
 .dialog__desc {
     display: block;
-    margin-top: 22rpx;
-    color: rgba(255, 255, 255, 0.74);
-    font-size: 30rpx;
-    line-height: 1.6;
+    font-size: 26rpx;
+    color: #475569;
+    line-height: 1.5;
+    margin-bottom: 20rpx;
 }
 
 .dialog__actions {
-    margin-top: 42rpx;
+    margin-top: 32rpx;
     display: flex;
-    flex-direction: column;
-    gap: 18rpx;
+    justify-content: flex-end;
+    gap: 40rpx;
 }
 
 .dialog__button {
-    width: 100%;
-    border: none;
-    border-radius: 30rpx;
-    font-size: 30rpx;
+    padding: 20rpx 10rpx;
+    font-size: 28rpx;
     font-weight: 600;
-    line-height: 96rpx;
+    transition: all 0.2s;
+    
+    // 文字颜色参考截图中的蓝紫色调
+    color: #5c6ac4;
+
+    &:active {
+        opacity: 0.6;
+        transform: scale(0.95);
+    }
 }
 
-.dialog__button::after {
-    border: none;
-}
-
-.dialog__button--primary {
-    color: #ffffff;
-    background: #ce645c;
-    box-shadow: 0 14rpx 30rpx rgba(206, 100, 92, 0.24);
-}
-
-.dialog__button--secondary {
-    color: rgba(255, 255, 255, 0.92);
-    background: transparent;
+.dialog__button--cancel {
+    // 如果需要取消按钮颜色稍淡，可以在此调整，但截图中似乎一致
 }
 </style>

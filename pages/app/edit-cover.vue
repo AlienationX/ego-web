@@ -43,9 +43,7 @@
                         <rotate-loading :size="80"></rotate-loading>
                     </view>
 
-                    <view v-else-if="!classifyImages.length" class="editor-empty">
-                        当前分类下暂无可选图片
-                    </view>
+                    <view v-else-if="!classifyImages.length" class="editor-empty"> 当前分类下暂无可选图片 </view>
 
                     <scroll-view v-else scroll-x class="image-scroll">
                         <view class="image-row">
@@ -56,7 +54,11 @@
                                 :class="{ active: draftCoverUrl === item.picurl }"
                                 @click="selectCover(item)"
                             >
-                                <image class="image-card__thumb" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                <image
+                                    class="image-card__thumb"
+                                    :src="item.smallPicurl || item.picurl"
+                                    mode="aspectFill"
+                                ></image>
                                 <view class="image-card__meta">
                                     <view class="image-card__id">#{{ item.id }}</view>
                                     <view class="image-card__score">评分 {{ item.score ?? '--' }}</view>
@@ -106,11 +108,7 @@
                     </view>
 
                     <view v-else class="preview-time">
-                        <view
-                            v-for="item in classifyPreviewList"
-                            :key="item.id"
-                            class="preview-time__item"
-                        >
+                        <view v-for="item in classifyPreviewList" :key="item.id" class="preview-time__item">
                             <image class="preview-time__thumb" :src="getPreviewCover(item)" mode="aspectFill"></image>
                             <view class="preview-time__body">
                                 <view class="preview-time__name">{{ item.name }}</view>
@@ -142,8 +140,9 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { apiGetClassList, apiPostClassifyPicUrl } from '@/api/wallpaper.js';
+import { apiGetClassList, apiGetClassify, apiPostClassifyPicUrl } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { PICS_BASE_URL } from '@/common/config.js';
 
 const classifyList = ref([]);
 const selectedClassifyId = ref(null);
@@ -162,8 +161,10 @@ const classifyComputed = computed(() =>
 );
 
 const selectedClassify = computed(() => classifyComputed.value.find((item) => item.id === selectedClassifyId.value) || null);
-const classifyPreviewList = computed(() => classifyComputed.value);  // classifyComputed.value.slice(0, 8)
-const draftChanged = computed(() => !!selectedClassify.value && !!draftCoverUrl.value && draftCoverUrl.value !== originalCoverUrl.value);
+const classifyPreviewList = computed(() => classifyComputed.value); // classifyComputed.value.slice(0, 8)
+const draftChanged = computed(
+    () => !!selectedClassify.value && !!draftCoverUrl.value && draftCoverUrl.value !== originalCoverUrl.value,
+);
 
 const getClassify = async () => {
     const res = await apiGetClassify({ pageSize: 30, enable: false });
@@ -229,11 +230,8 @@ const saveCover = async () => {
     if (!selectedClassify.value || !draftChanged.value || saving.value) return;
     saving.value = true;
     try {
-        await apiPostClassifyPicUrl({
-            id: selectedClassify.value.id,
-            classify_id: selectedClassify.value.id,
-            picurl: draftCoverUrl.value,
-        });
+        const picurl = draftCoverUrl.value.replace(PICS_BASE_URL + '/', '');
+        await apiPostClassifyPicUrl({ picurl }, selectedClassify.value.id);
 
         classifyList.value = classifyList.value.map((item) =>
             item.id === selectedClassify.value.id

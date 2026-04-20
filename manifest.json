@@ -1,7 +1,7 @@
 {
-    "name" : "本我壁纸",
+    "name" : "%app.name%",
     "appid" : "__UNI__098B24F",
-    "description" : "探索壁纸，亦探索自我。",
+    "description" : "%app.description%",
     "versionName" : "1.2.3",
     "versionCode" : 123,
     "transformPx" : false,
@@ -164,5 +164,6 @@
             "bundleName" : "com.ego.app.wallpaper",
             "deviceTypes" : [ "phone", "tablet" ]
         }
-    }
+    },
+    "locale" : "auto"
 }

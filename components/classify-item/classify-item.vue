@@ -5,10 +5,14 @@
             <view class="mask">
                 <view class="mask-info">
                     <text class="mask-text">{{ item.name }}</text>
-                    <text class="mask-count" v-if="item.wallpapers_count">{{ item.wallpapers_count }}{{ t('common.items') || '张' }}</text>
+                    <text class="mask-count" v-if="item.wallpapers_count"
+                        >{{ item.wallpapers_count }}{{ t('common.items') || '张' }}</text
+                    >
                 </view>
             </view>
-            <view class="tab" v-if="compareTimestamp(item.updateTime)">{{ compareTimestamp(item.updateTime) }}{{ t('common.ago') || '前' }}更新</view>
+            <view class="tab" v-if="compareTimestamp(item.updateTime)"
+                >{{ compareTimestamp(item.updateTime) }}{{ t('common.ago') || '前' }}更新</view
+            >
             <uni-icons class="vip" v-if="item.is_locked" type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
         </navigator>
 
@@ -76,6 +80,7 @@ defineProps({
         width: 100%;
         height: 100%;
         object-fit: cover;
+        box-shadow: 0 10rpx 10rpx rgba(0, 0, 0, 0.34);
     }
 
     .mask {

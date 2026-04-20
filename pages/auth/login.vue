@@ -341,6 +341,8 @@ const handleRegister = async () => {
 // 微信登录
 const handleWechatLogin = () => {
     uni.login({
+        provider: 'weixin',
+        onlyAuthorize: true, // 微信登录仅请求授权认证
         success: async (loginRes) => {
             try {
                 const res = await apiPostLoginByWechat({

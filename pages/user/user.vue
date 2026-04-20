@@ -168,7 +168,7 @@
                             <mdi-icon
                                 class="icon"
                                 :path="item.left_icon"
-                                size="20px"
+                                size="24px"
                                 :color="item.left_color || '#ff6b6b'"
                             ></mdi-icon>
                         </view>
@@ -366,7 +366,7 @@ const sysMenus = computed(() => [
     // },
     {
         left_icon: '/static/icons/help-circle.svg',
-        left_color: '#28b389',
+        left_color: '#6B7280',
         left_text: t('user.profile.question'),
         right_text: '',
         right_icon: 'right',
@@ -375,7 +375,7 @@ const sysMenus = computed(() => [
     // #ifdef MP-WEIXIN
     {
         left_icon: '/static/icons/forum.svg',
-        left_color: '#28b389',
+        left_color: '#6B7280',
         // left_icon: '/static/icons/forum.svg',
         left_text: t('user.profile.support'),
         right_text: '',
@@ -385,7 +385,7 @@ const sysMenus = computed(() => [
     // #endif
     {
         left_icon: '/static/icons/comment-processing.svg',
-        left_color: '#28b389',
+        left_color: '#6B7280',
         left_text: t('user.profile.feedback'),
         right_text: '',
         right_icon: 'right',
@@ -393,7 +393,7 @@ const sysMenus = computed(() => [
     },
     {
         left_icon: '/static/icons/cog.svg',
-        left_color: '#28b389',
+        left_color: '#6B7280',
         left_text: t('user.profile.settings'),
         right_text: '',
         right_icon: 'right',
@@ -403,7 +403,7 @@ const sysMenus = computed(() => [
         ? [
               {
                   left_icon: '/static/icons/ab-testing.svg',
-                  left_color: '#28b389',
+                  left_color: '#6B7280',
                   left_text: t('user.profile.testLab'),
                   right_text: '',
                   right_icon: 'right',

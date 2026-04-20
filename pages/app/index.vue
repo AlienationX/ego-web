@@ -79,11 +79,11 @@
                 <template #name>{{ $t('index.dailyRecommend') }}</template>
                 <template #custom>
                     <view class="date">
-                        <button class="button is-spotlight" size="mini" @click="refreshRandom" plain>{{ $t('common.refresh') }}</button>
+                        <button class="button is-spotlight" size="mini" @click="refreshRandom">
+                            {{ $t('common.refresh') }}
+                        </button>
                         <uni-icons type="calendar" size="18" color="#666"></uni-icons>
-                        <view class="text">
-                            {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
-                        </view>
+                        <view class="text"> {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }} </view>
                     </view>
                 </template>
             </index-title>
@@ -98,7 +98,7 @@
                         :class="{ 'is-hero': idx === 0 }"
                         @click="goPreview(item.id, randomDailyList)"
                     >
-                        <image :src="idx === 0 ? (item.mediumPicurl || item.picurl) : item.smallPicurl" mode="aspectFill"></image>
+                        <image :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl" mode="aspectFill"></image>
                         <block v-if="idx === 0">
                             <view class="box-hero-overlay"></view>
                             <view class="box-hero-content">
@@ -106,10 +106,9 @@
                                 <view class="pick-text">PICK OF THE DAY</view>
                             </view>
                         </block>
-                        <view v-else class="box-info">
-                            <view class="label">Today</view>
-                            <view class="value">{{ $t('index.dailyRecommend') }}</view>
-                        </view>
+                        <block v-else>
+                            <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{ getTimeBadge(item) }}</view>
+                        </block>
                     </view>
                 </scroll-view>
             </view>
@@ -121,7 +120,7 @@
                 <template #name>{{ $t('index.latestRelease') }}</template>
                 <template #custom>
                     <navigator class="box" url="/pages/app/timeline">
-                        <button size="mini" plain class="btn is-default">{{ $t('common.seeAll') }}</button>
+                        <button size="mini" class="btn is-default">{{ $t('common.seeAll') }}</button>
                     </navigator>
                 </template>
             </index-title>
@@ -129,13 +128,14 @@
             <view class="content">
                 <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
                 <scroll-view scroll-x>
-                    <view class="box" v-for="(item, idx) in latestPreviewList" :key="item.id" @click="goPreview(item.id, latestList)">
+                    <view
+                        class="box"
+                        v-for="(item, idx) in latestPreviewList"
+                        :key="item.id"
+                        @click="goPreview(item.id, latestList)"
+                    >
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
-                        <view v-if="idx < 3" class="box-badge">New</view>
-                        <view class="box-info">
-                            <view class="label">Explore</view>
-                            <view class="value">{{ $t('index.latestRelease') }}</view>
-                        </view>
+                        <view v-if="getTimeBadge(item)" class="box-badge">{{ getTimeBadge(item) }}</view>
                     </view>
                 </scroll-view>
             </view>
@@ -164,7 +164,7 @@
                 <template #name>{{ classify.name }}</template>
                 <template #custom>
                     <navigator class="box" :url="'/pages/app/classlist?id=' + classify.id + '&name=' + classify.name">
-                        <button size="mini" plain class="btn" :class="themeClasses[idx % themeClasses.length]">
+                        <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]">
                             {{ $t('common.seeAll') }}
                         </button>
                     </navigator>
@@ -176,10 +176,7 @@
                 <scroll-view scroll-x>
                     <view class="box" v-for="item in classify.data" :key="item.id" @click="goPreview(item.id, classify.data)">
                         <image :src="item.smallPicurl" mode="aspectFill"></image>
-                        <view class="box-info">
-                            <view class="label">Collection</view>
-                            <view class="value">{{ classify.name }}</view>
-                        </view>
+                        <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{ getTimeBadge(item) }}</view>
                     </view>
                 </scroll-view>
             </view>
@@ -256,6 +253,65 @@ const classifyComputed = computed(() => {
 
 const classifyPreviewList = computed(() => classifyComputed.value.slice(0, 8));
 const latestPreviewList = computed(() => latestList.value.slice(0, 10));
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const getBadgeCopy = () => {
+    const isZh = String(uni.getLocale() || '').startsWith('zh');
+    return isZh
+        ? {
+              justIn: '刚更新',
+              latest: '近期',
+              new: '新',
+          }
+        : {
+              justIn: 'JUST IN',
+              latest: 'LATEST',
+              new: 'NEW',
+          };
+};
+
+const getWallDate = (item) => {
+    const raw = item?.updated_at || item?.created_at || item?.created || null;
+    if (!raw) return null;
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const isUpdatedToday = (item) => {
+    const date = getWallDate(item);
+    if (!date) return false;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+    return date.getTime() >= todayStart.getTime() && date.getTime() < tomorrowStart.getTime();
+};
+
+const isUpdatedYesterday = (item) => {
+    const date = getWallDate(item);
+    if (!date) return false;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    return date.getTime() >= yesterdayStart.getTime() && date.getTime() < todayStart.getTime();
+};
+
+const isUpdatedWithinDays = (item, days = 5) => {
+    const date = getWallDate(item);
+    if (!date) return false;
+    const diff = Date.now() - date.getTime();
+    return diff >= 0 && diff <= days * DAY_MS;
+};
+
+const getTimeBadge = (item) =>
+    isUpdatedToday(item)
+        ? getBadgeCopy().justIn
+        : isUpdatedYesterday(item)
+          ? getBadgeCopy().new
+          : isUpdatedWithinDays(item, 5)
+            ? getBadgeCopy().latest
+            : '';
 
 // 与 classify 页一致：前 6 个 2×3（左高格跨 2 行）+ 第 6 个通栏，第 7、8 个占第 5 行两列，「更多」通栏第 6 行
 const getLayoutStyleForIndex = (idx) => {
@@ -741,9 +797,9 @@ onShareTimeline(() => {
                 font-size: 22rpx;
                 font-weight: 700;
                 border-radius: 999rpx;
-                background: rgba(43, 140, 238, 0.08);
-                color: $wp-theme-color;
-                border: 1rpx solid rgba(40, 179, 137, 0.2);
+                background: #e2e8f0;
+                color: #475569;
+                border: 1rpx solid #cbd5e1;
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -758,9 +814,9 @@ onShareTimeline(() => {
                 }
 
                 &.is-spotlight {
-                    color: #d97706;
-                    background: rgba(245, 158, 11, 0.1);
-                    border-color: rgba(245, 158, 11, 0.2);
+                    color: #475569;
+                    background: #e2e8f0;
+                    border-color: #cbd5e1;
                 }
             }
 
@@ -797,35 +853,19 @@ onShareTimeline(() => {
                 filter: brightness(0.95);
             }
 
-            &.is-default {
-                color: #0284c7;
-                background: rgba(14, 165, 233, 0.1);
-                border-color: rgba(14, 165, 233, 0.15);
-            }
-
-            &.is-collection {
-                color: #7e22ce;
-                background: rgba(168, 85, 247, 0.1);
-                border-color: rgba(168, 85, 247, 0.15);
-            }
-
-            &.is-keyword {
-                color: #65a30d;
-                background: rgba(132, 204, 22, 0.1);
-                border-color: rgba(132, 204, 22, 0.15);
-            }
-
+            &.is-default,
+            &.is-collection,
+            &.is-keyword,
             &.is-spotlight {
-                color: #d97706;
-                background: rgba(245, 158, 11, 0.1);
-                border-color: rgba(245, 158, 11, 0.2);
+                color: #475569;
+                background: #e2e8f0;
+                border-color: #cbd5e1;
             }
         }
 
         .content {
-            width: 750rpx;
+            // width: 750rpx;
             height: 580rpx;
-            margin-top: 20rpx;
             position: relative;
             z-index: 1;
 
@@ -836,69 +876,88 @@ onShareTimeline(() => {
 
                 .box {
                     width: 280rpx;
-                    height: 90%;
+                    height: calc(100% - 46rpx);
+                    padding-bottom: 20rpx;
                     display: inline-flex;
                     justify-content: center;
-                    align-items: center;
-                    margin: 10rpx 24rpx 10rpx 0;
+                    align-items: flex-start;
+                    margin: 20rpx 24rpx 50rpx 0;
                     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
                     position: relative;
+                    overflow: visible;
+                    box-sizing: border-box;
 
                     image {
                         width: 100%;
                         height: 100%;
-                        border-radius: 32rpx;
-                        box-shadow: 0 16rpx 40rpx rgba(0, 0, 0, 0.2);
-                        border: 1rpx solid rgba(255, 255, 255, 0.08);
+                        border-radius: 28rpx;
+                        display: block;
+
+                        box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
                     }
 
-                    // 玻璃拟态信息条
-                    .box-info {
+                    .box-card-tag {
                         position: absolute;
-                        left: 12rpx;
-                        right: 12rpx;
-                        bottom: 12rpx;
-                        padding: 12rpx 16rpx;
-                        background: rgba(15, 23, 42, 0.4);
-                        backdrop-filter: blur(8px);
-                        border-radius: 20rpx;
-                        border: 1rpx solid rgba(255, 255, 255, 0.1);
-                        display: flex;
-                        flex-direction: column;
-                        gap: 2rpx;
-                        opacity: 0.9;
+                        top: 16rpx;
+                        left: 16rpx;
+                        z-index: 1;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 38rpx;
+                        padding: 0 14rpx;
+                        border-radius: 999rpx;
+                        font-size: 18rpx;
+                        font-weight: 800;
+                        letter-spacing: 0.04em;
+                        color: #7dd3fc;
+                        background: rgba(43, 140, 238, 0.18);
+                        border: 1rpx solid rgba(125, 211, 252, 0.22);
+                        box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.18);
+                        text-shadow: 0 2rpx 8rpx rgba(15, 23, 42, 0.18);
+                    }
 
-                        .label {
-                            font-size: 18rpx;
-                            color: rgba(255, 255, 255, 0.6);
-                            text-transform: uppercase;
-                            letter-spacing: 1rpx;
-                            font-weight: 700;
-                        }
+                    .box-card-tag--latest {
+                        color: #fde68a;
+                        background: rgba(245, 158, 11, 0.18);
+                        border-color: rgba(253, 230, 138, 0.28);
+                    }
 
-                        .value {
-                            font-size: 22rpx;
-                            color: #fff;
-                            font-weight: 600;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                        }
+                    .box-card-tag--is-default {
+                        color: #7dd3fc;
+                        background: rgba(43, 140, 238, 0.18);
+                        border-color: rgba(125, 211, 252, 0.22);
+                    }
+
+                    .box-card-tag--is-collection {
+                        color: #f3e8ff;
+                        background: rgba(126, 34, 206, 0.28);
+                        border-color: rgba(216, 180, 254, 0.28);
+                    }
+
+                    .box-card-tag--is-keyword {
+                        color: #ecfccb;
+                        background: rgba(101, 163, 13, 0.24);
+                        border-color: rgba(190, 242, 100, 0.24);
+                    }
+
+                    .box-card-tag--is-spotlight {
+                        color: #fde68a;
+                        background: rgba(245, 158, 11, 0.2);
+                        border-color: rgba(253, 230, 138, 0.3);
                     }
 
                     // Hero 模式专属 (大图)
                     &.is-hero {
                         width: 440rpx;
+                        height: calc(100% - 66rpx);
+                        padding-bottom: 0;
 
                         .box-hero-overlay {
                             position: absolute;
                             inset: 0;
-                            border-radius: 32rpx;
-                            background: linear-gradient(
-                                to bottom,
-                                rgba(0, 0, 0, 0) 50%,
-                                rgba(0, 0, 0, 0.7) 100%
-                            );
+                            border-radius: 28rpx;
+                            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.7) 100%);
                             pointer-events: none;
                         }
 
@@ -942,12 +1001,18 @@ onShareTimeline(() => {
                         z-index: 1;
                     }
 
+                    .box-badge--subtle {
+                        background: rgba(15, 23, 42, 0.72);
+                        color: rgba(255, 255, 255, 0.92);
+                        box-shadow: 0 4rpx 12rpx rgba(15, 23, 42, 0.24);
+                    }
+
                     &:active {
                         transform: scale(0.96) translateY(4rpx);
                     }
                 }
 
-                .box:first-child{
+                .box:first-child {
                     margin-left: 30rpx;
                 }
                 .box:last-child {

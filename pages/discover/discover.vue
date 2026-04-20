@@ -15,10 +15,11 @@
         <view
             class="container"
             :style="{
+                paddingTop: statusBarHeight + 'px',
                 paddingBottom: `${containerBottomSpace}px`,
             }"
         >
-            <view class="hero-section" :style="{ paddingTop: statusBarHeight + 'px' }">
+            <view class="hero-section">
                 <view class="hero-title hero-enter-1">{{ $t('discover.title') }}</view>
                 <view class="hero-subtitle hero-enter-2">{{ $t('discover.subtitle') }}</view>
                 <view class="hero-desc hero-enter-3">{{ $t('discover.desc') }}</view>
@@ -125,7 +126,7 @@ const aiProfile = ref({
 const isThinking = ref(false);
 const thinkingTime = ref(0);
 let thinkingTimer = null;
-const statusBarHeight = ref(getStatusBarHeight());
+const statusBarHeight = ref(getStatusBarHeight() + 10);
 const tabBarHeight = ref(getTabBarHeight());
 
 let typingTimer = null;
@@ -563,8 +564,6 @@ const goFavorite = () => {
 
 onLoad(() => {
     createAiProfile();
-    statusBarHeight.value = getStatusBarHeight();
-    tabBarHeight.value = getTabBarHeight();
 });
 
 onShow(() => {
@@ -608,7 +607,6 @@ onUnload(() => {
 
 .container {
     position: relative;
-    padding: 0 24rpx;
     background: transparent;
     z-index: 1;
 }
@@ -724,10 +722,10 @@ onUnload(() => {
 .hero-section {
     position: relative;
     z-index: 10;
-    padding: 60rpx 32rpx 32rpx;
+    padding: 0rpx 30rpx 30rpx;
     margin-bottom: 16rpx;
     border-bottom: 1rpx solid var(--discover-border);
-    
+
     .hero-title {
         font-size: 68rpx;
         font-weight: 900;
@@ -735,7 +733,7 @@ onUnload(() => {
         letter-spacing: -2rpx;
         line-height: 1.1;
         margin-bottom: 20rpx;
-        filter: drop-shadow(0 4rpx 8rpx rgba(0,0,0,0.05));
+        filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.05));
     }
 
     .hero-subtitle {
