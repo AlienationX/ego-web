@@ -23,6 +23,8 @@
         "clearHistory": "是否清空历史搜索？",
         "hotKeywords": "美女,帅哥,宠物,卡通",
         "tip": "提示",
+        "confirm": "确定",
+        "cancel": "取消",
         "submitting": "提交中...",
         "submitSuccess": "提交成功",
         "submitFailed": "提交失败",
@@ -312,6 +314,8 @@
         "google": "Google",
         "apple": "Apple",
         "wechatLoginFailed": "微信登录失败",
+        "wechatConfirmTitle": "微信登录确认",
+        "wechatConfirmContent": "允许应用获取您的微信公开信息（昵称、头像等）用于账号登录？",
         "facebookLoginTip": "Facebook 登录功能开发中",
         "googleLoginTip": "Google登录功能开发中",
         "appleLoginTip": "Apple登录功能开发中"

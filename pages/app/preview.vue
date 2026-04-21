@@ -497,7 +497,7 @@ const openScore = () => {
             cancelText: t('previewPage.cancel'),
             confirmText: t('previewPage.login'),
             onConfirm: () => {
-                uni.navigateTo({ url: '/pages/auth/login' });
+                uni.navigateTo({ url: '/pages/auth/signin' });
             },
         });
         return; // 未登录时直接返回，不执行后续操作
@@ -646,7 +646,7 @@ const toggleLock = async () => {
 };
 
 const handleShare = () => {
-    // #ifdef APP-PLUS
+    // #ifdef APP
     uni.share({
         provider: 'weixin',
         scene: 'WXSceneSession',
@@ -661,7 +661,11 @@ const handleShare = () => {
     });
     // #endif
 
-    // #ifdef H5
+    // #ifdef MP
+    uni.showToast({ title: t('previewPage.shareHint'), icon: 'none' });
+    // #endif
+
+    // #ifdef WEB
     uni.showToast({ title: t('previewPage.shareHint'), icon: 'none' });
     // #endif
 };
@@ -675,7 +679,7 @@ const toggleCollect = async () => {
             cancelText: t('previewPage.cancel'),
             confirmText: t('previewPage.login'),
             onConfirm: () => {
-                uni.navigateTo({ url: '/pages/auth/login' });
+                uni.navigateTo({ url: '/pages/auth/signin' });
             },
         });
         return;
@@ -993,7 +997,6 @@ onShareTimeline(() => {
             height: 76rpx;
             border-radius: 100rpx;
             background: rgba(0, 0, 0, 0.55);
-            border: 1rpx solid rgba(255, 255, 255, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;

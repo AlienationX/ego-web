@@ -304,6 +304,11 @@ getClassify();
     align-items: center;
     justify-content: space-between;
     gap: 16rpx;
+
+    & > view:first-child {
+        flex: 1;
+        min-width: 0;
+    }
 }
 
 .panel-title {

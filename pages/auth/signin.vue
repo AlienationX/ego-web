@@ -245,11 +245,20 @@ const handleWechatLogin = () => {
     return;
     // #endif
 
+    // 协议校验
+    if (!isAgreed.value) {
+        uni.showToast({
+            title: t('login.agreeRequired'),
+            icon: 'none',
+        });
+        return;
+    }
+
     showNavDialog({
-        title: '微信登录确认',
-        content: '允许应用获取您的微信公开信息（昵称、头像等）用于账号登录？',
-        confirmText: '允许',
-        cancelText: '拒绝',
+        title: t('login.wechatConfirmTitle'),
+        content: t('login.wechatConfirmContent'),
+        confirmText: t('common.confirm'),
+        cancelText: t('common.cancel'),
         onConfirm: () => {
             uni.login({
                 provider: 'weixin',

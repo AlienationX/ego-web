@@ -3,7 +3,7 @@ import { downloadPic } from '@/common/core.js';
 import { useUserStore } from '@/stores/user.js';
 
 export const useAdIntersititial = () => {
-    // #ifdef APP
+    // #ifdef APP-PLUS
     const userStore = useUserStore();
 
     const adOption = {
@@ -132,7 +132,7 @@ export const useAdIntersititial = () => {
     };
     // #endif
 
-    // #ifdef MP
+    // #ifdef MP || APP-HARMONY
     return {
         createInterstitialAd: function () {},
         showInterstitialAd: function (inputPicurl) {downloadPic(inputPicurl);},
@@ -150,7 +150,7 @@ export const useAdIntersititial = () => {
 };
 
 export const useAdRewardedVideo = () => {
-    // #ifdef APP
+    // #ifdef APP-PLUS
     const userStore = useUserStore();
 
     const adOption = {
@@ -300,7 +300,7 @@ export const useAdRewardedVideo = () => {
     };
     // #endif
 
-    // #ifdef MP
+    // #ifdef MP || APP-HARMONY
     return {
         createRewardedVideoAd: function () {},
         showRewardedVideoAd: function (inputPicurl) {downloadPic(inputPicurl);},

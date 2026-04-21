@@ -25,6 +25,8 @@
         "privacy": "Privacy Policy",
         "agreement": "User Agreement",
         "tip": "Tip",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
         "submitting": "Submitting...",
         "submitSuccess": "Submitted successfully",
         "submitFailed": "Submit failed",
@@ -361,6 +363,8 @@
         "google": "Google",
         "apple": "Apple",
         "wechatLoginFailed": "WeChat login failed",
+        "wechatConfirmTitle": "WeChat Login Confirmation",
+        "wechatConfirmContent": "Allow the app to access your WeChat public information (nickname, avatar, etc.) for login?",
         "facebookLoginTip": "Facebook login coming soon",
         "googleLoginTip": "Google login coming soon",
         "appleLoginTip": "Apple login coming soon"

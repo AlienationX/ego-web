@@ -331,59 +331,72 @@ const getLayoutStyleMore = () => ({ gridColumn: '1 / -1', gridRow: '6' });
 const getBannerTextMeta = (item) => {
     const url = String(item.url || '');
     const decodedUrl = decodeURIComponent(url);
+
+    // 1. 提取核心参数
     const nameMatch = decodedUrl.match(/name=([^&]+)/);
     const keywordMatch = decodedUrl.match(/keyword=([^&]+)/);
-    const isClassify = url.includes('/pages/app/classlist');
-    const isSearch = url.includes('/wall/search/');
-    const isPreview = url.includes('/preview');
     const rawTitle = nameMatch?.[1] || (keywordMatch?.[1] ? `#${keywordMatch[1]}` : '');
+
+    // 2. 识别业务类型
+    const type = (() => {
+        if (url.includes('/pages/app/classlist')) return 'classify';
+        if (url.includes('/wall/search/')) return 'search';
+        if (url.includes('/preview')) return 'preview';
+        if (item.target === 'miniProgram') return 'miniProgram';
+        return 'default';
+    })();
+
     const isBing = rawTitle.includes('必应') || rawTitle.toLowerCase().includes('bing');
 
-    const title = rawTitle || (item.target === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle'));
+    // 3. 数据映射配置
+    const configMap = {
+        classify: {
+            desc: t('index.banner.classifyDesc'),
+            badge: t('index.banner.badge.classify'),
+            meta: t('index.banner.meta.classify'),
+            accent: 'is-collection',
+        },
+        search: {
+            desc: t('index.banner.searchDesc'),
+            badge: t('index.banner.badge.search'),
+            meta: t('index.banner.meta.search'),
+            accent: 'is-keyword',
+        },
+        preview: {
+            desc: t('index.banner.previewDesc'),
+            badge: t('index.banner.badge.spotlight'),
+            meta: t('index.banner.meta.preview'),
+            accent: 'is-spotlight',
+        },
+        miniProgram: {
+            desc: t('index.banner.defaultDesc'),
+            badge: t('index.banner.badge.miniProgram'),
+            meta: t('index.banner.meta.default'),
+            accent: 'is-default',
+        },
+        default: {
+            desc: t('index.banner.defaultDesc'),
+            badge: t('index.banner.badge.default'),
+            meta: t('index.banner.meta.default'),
+            accent: 'is-default',
+        },
+    };
 
-    const desc =
-        item.description ||
-        (isBing
-            ? t('index.banner.bingDesc')
-            : isClassify
-              ? t('index.banner.classifyDesc')
-              : isSearch
-                ? t('index.banner.searchDesc')
-                : isPreview
-                  ? t('index.banner.previewDesc')
-                  : t('index.banner.defaultDesc'));
+    const targetMap = {
+        self: t('index.banner.target.self'),
+        miniProgram: t('index.banner.target.miniProgram'),
+        external: t('index.banner.target.external'),
+    };
 
-    const badge = isClassify
-        ? t('index.banner.badge.classify')
-        : isSearch
-          ? t('index.banner.badge.search')
-          : isPreview
-            ? t('index.banner.badge.spotlight')
-            : item.target === 'miniProgram'
-              ? t('index.banner.badge.miniProgram')
-              : t('index.banner.badge.default');
-    const targetLabel =
-        item.target === 'self'
-            ? t('index.banner.target.self')
-            : item.target === 'miniProgram'
-              ? t('index.banner.target.miniProgram')
-              : t('index.banner.target.external');
-    const metaLabel = isClassify
-        ? t('index.banner.meta.classify')
-        : isSearch
-          ? t('index.banner.meta.search')
-          : isPreview
-            ? t('index.banner.meta.preview')
-            : t('index.banner.meta.default');
-    const accentClass = isClassify ? 'is-collection' : isSearch ? 'is-keyword' : isPreview ? 'is-spotlight' : 'is-default';
+    const config = configMap[type];
 
     return {
-        title,
-        desc,
-        badge,
-        targetLabel,
-        metaLabel,
-        accentClass,
+        title: rawTitle || (type === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle')),
+        desc: item.description || (isBing ? t('index.banner.bingDesc') : config.desc),
+        badge: config.badge,
+        targetLabel: targetMap[item.target] || targetMap.external,
+        metaLabel: config.meta,
+        accentClass: config.accent,
     };
 };
 

@@ -56,17 +56,14 @@
             <!-- 签到和能量 -->
             <view v-if="userStore.userinfo.id" class="checkin-section">
                 <view class="energy-info">
-                    <uni-tooltip
+                    <bubble-tooltip
                         :content="t('user.profile.energyHintContent')"
-                        :placement="'right'"
-                        :show-arrow="true"
-                        :trigger="'click'"
-                        class="energy-tooltip"
+                        placement="right"
                     >
                         <view class="energy-hint">
                             <uni-icons type="help" size="20" color="#999"></uni-icons>
                         </view>
-                    </uni-tooltip>
+                    </bubble-tooltip>
                     <text class="energy-text">
                         {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
                     </text>
@@ -195,6 +192,17 @@
             :cancel-text="t('user.profile.loginPromptCancel')"
             @confirm="toLogin"
         ></popup-navigation-dialog>
+
+        <!-- 通用导航对话框 -->
+        <popup-navigation-dialog
+            ref="navDialog"
+            :title="dialogState.title"
+            :description="dialogState.description"
+            :confirmText="dialogState.confirmText"
+            :cancelText="dialogState.cancelText"
+            @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"
+        ></popup-navigation-dialog>
     </view>
 </template>
 
@@ -214,6 +222,37 @@ const userStore = useUserStore();
 
 const hasCheckedInToday = ref(false);
 const loginPromptPopup = ref(null);
+
+// 通用导航对话框控制
+const navDialog = ref(null);
+const dialogState = ref({
+    title: '',
+    description: '',
+    confirmText: '',
+    cancelText: '',
+    onConfirm: () => {},
+    onCancel: () => {},
+});
+
+/**
+ * 显示自定义导航对话框
+ * @param {Object} config 配置项 { title, content, confirmText, cancelText, onConfirm, onCancel }
+ */
+const showNavDialog = (config) => {
+    dialogState.value = {
+        title: config.title || t('common.tip'),
+        description: config.content || '',
+        confirmText: config.confirmText || t('common.confirm'),
+        cancelText: config.cancelText || t('common.cancel'),
+        onConfirm: () => {
+            if (config.onConfirm) config.onConfirm();
+        },
+        onCancel: () => {
+            if (config.onCancel) config.onCancel();
+        },
+    };
+    navDialog.value?.open();
+};
 
 const toLogin = () => {
     uni.navigateTo({ url: '/pages/auth/signin' });
@@ -279,13 +318,10 @@ const toTest = () => {
 };
 
 const onExit = () => {
-    uni.showModal({
-        title: t('common.tip'),
+    showNavDialog({
         content: t('user.profile.exitConfirm'),
-        success: (res) => {
-            if (res.confirm) {
-                userStore.clearUserData();
-            }
+        onConfirm: () => {
+            userStore.clearUserData();
         },
     });
 };
