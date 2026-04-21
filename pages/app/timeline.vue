@@ -381,7 +381,7 @@ onLoad(() => {
 }
 
 .month-section {
-    margin-bottom: 80rpx;
+    margin-bottom: 60rpx;
 }
 
 .month-section__head {
@@ -426,7 +426,7 @@ onLoad(() => {
 }
 
 .day-section {
-    margin-bottom: 80rpx;
+    margin-bottom: 60rpx;
 }
 
 .day-section__marker {
