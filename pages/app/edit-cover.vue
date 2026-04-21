@@ -179,6 +179,7 @@ const getClassifyImages = async (classifyId) => {
     try {
         const res = await apiGetClassList({
             classify_id: classifyId,
+            classify_enable: false,
             pageSize: 30,
         });
         classifyImages.value = (res.data || []).map((item) => handlePicUrl(item));
