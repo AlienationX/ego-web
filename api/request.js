@@ -2,6 +2,8 @@ import { API_DOMAIN, API_BASE_URL, API_SECRET_KEY } from '@/common/config';
 import { useUserStore } from '@/stores/user.js';
 import { decrypt } from '@/utils/encryption.js';
 
+let refreshPromise = null;
+
 // 发送 request 请求函数，如果token过期，刷新后再次发送 request 请求
 export const request = (config = {}) => {
     return new Promise(async (resolve, reject) => {
@@ -12,19 +14,18 @@ export const request = (config = {}) => {
             // 捕获到token过期的401错误或token_not_valid，Token 过期时自动刷新并重试，不是token过期直接返回错误
             if (userStore.refreshToken && (err1.code === 401 || err1.code === 'token_not_valid')) {
                 try {
-                    console.log('retry request ----------->', err1);
-                    // 两次异常捕获，第一次是捕获token过期，第二次是捕获真正异常
                     await refreshToken();
                     resolve(await sendRequest(config));
                 } catch (err2) {
-                    // 刷新token失败，清空用户信息，跳转登录页
                     userStore.clearUserData();
                     if (config.isRedirect) {
                         uni.navigateTo({ url: '/pages/auth/signin' });
                     }
+                    showRequestFeedback(err2, config);
                     reject(err2);
                 }
             } else {
+                showRequestFeedback(err1, config);
                 reject(err1);
             }
         }
@@ -44,6 +45,48 @@ const setHeader = (isAuth) => {
         header.Authorization = `Bearer ${rawToken.trim()}`;
     }
     return header;
+};
+
+const getErrorPayload = (error = {}) => {
+    if (typeof error === 'string') {
+        return { title: '请求失败', message: error };
+    }
+
+    if (error.errMsg) {
+        return { title: '网络异常', message: '当前网络不稳定，请稍后重试' };
+    }
+
+    if (error.code === 401 || error.code === 'token_not_valid') {
+        return { title: '登录状态失效', message: '请重新登录后继续操作' };
+    }
+
+    if (error.code >= 500) {
+        return { title: '服务异常', message: error.message || '服务器开小差了，请稍后再试' };
+    }
+
+    return {
+        title: error.title || '操作失败',
+        message: error.message || error.detail || '请稍后重试',
+    };
+};
+
+const showRequestFeedback = (error, config = {}) => {
+    if (config.silent) return;
+
+    const payload = getErrorPayload(error);
+    if (config.errorMode === 'modal') {
+        uni.showModal({
+            title: payload.title,
+            content: payload.message,
+            showCancel: false,
+        });
+        return;
+    }
+
+    uni.showToast({
+        title: payload.message,
+        icon: 'none',
+    });
 };
 
 // 发送 request 函数
@@ -71,29 +114,14 @@ const sendRequest = (config = {}) => {
                 } else if (res.data.code === 401 || res.data.code === 'token_not_valid') {
                     reject(res.data); // 这里的reject会被外层catch捕获
                 } else {
-                    if (res.data.code === undefined) {
-                        uni.showModal({
-                            title: '未知错误提示',
-                            content: 'Internal Server Error (500)',
-                            showCancel: false,
-                        });
-                    } else {
-                        uni.showModal({
-                            title: '服务器错误提示 - ' + res.data.code,
-                            content: res.data.message || res.data || res,
-                            showCancel: false,
-                        });
-                    }
-                    reject(res.data);
+                    reject({
+                        ...res.data,
+                        title: res.data.code ? `服务器错误 - ${res.data.code}` : '未知错误',
+                        message: res.data.message || '服务器暂时不可用，请稍后重试',
+                    });
                 }
             },
             fail: (err) => {
-                uni.showToast({
-                    title: 'Request Failed',
-                    content: JSON.stringify(err),
-                    icon: 'none',
-                });
-                console.log('Request Failed', err);
                 reject(err);
             },
         });
@@ -112,26 +140,41 @@ const handleRefreshToken = (title) => {
 
 // 刷新 Token 函数
 const refreshToken = async () => {
-    const userStore = useUserStore();
-    try {
-        const res = await uni.request({
-            url: `${API_DOMAIN}/api/token/refresh/`,
-            method: 'POST',
-            data: { refresh: decrypt(userStore.refreshToken) },
-        });
-        console.log('================ refresh token', res);
+    if (refreshPromise) {
+        return refreshPromise;
+    }
 
-        if (res.statusCode === 200) {
-            let { access, refresh } = res.data;
-            userStore.setToken(access, refresh);
-        } else {
+    const userStore = useUserStore();
+    refreshPromise = (async () => {
+        try {
+            const res = await new Promise((resolve, reject) => {
+                uni.request({
+                    url: `${API_DOMAIN}/api/token/refresh/`,
+                    method: 'POST',
+                    data: { refresh: decrypt(userStore.refreshToken) },
+                    success: resolve,
+                    fail: reject,
+                });
+            });
+
+            if (res.statusCode === 200) {
+                let { access, refresh } = res.data;
+                userStore.setToken(access, refresh);
+                return true;
+            }
             if (userStore.refreshToken) {
                 handleRefreshToken('登录过期，请重新登录');
             }
+            throw { code: 401, message: '登录过期，请重新登录' };
+        } catch (error) {
+            handleRefreshToken('刷新登录状态失败，请重新登录');
+            throw error;
+        } finally {
+            refreshPromise = null;
         }
-    } catch (error) {
-        handleRefreshToken('Internal Server Error：刷新Token的接口报错');
-    }
+    })();
+
+    return refreshPromise;
 };
 
 export const uploadRequest = (config = {}) => {
@@ -157,7 +200,7 @@ export const uploadRequest = (config = {}) => {
                 resolve(res.data); // 成功返回数据
             },
             fail: (err) => {
-                uni.showToast({ title: `失败: {err}`, icon: 'none' });
+                showRequestFeedback(err, config);
                 reject(err);
             },
         });

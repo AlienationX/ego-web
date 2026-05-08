@@ -4,7 +4,7 @@
 
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#374151"></mdi-icon>
             </view>
             <text class="header-title">{{ t('settings.revokeAuth.title') }}</text>
             <view class="header-placeholder"></view>
@@ -281,7 +281,7 @@ onShow(() => {
 }
 
 .header-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: #111827;
 }

@@ -1,6 +1,6 @@
 <template>
     <view class="access-page">
-        <view class="hero-section" :style="{ paddingTop: getStatusBarHeight() + 'px' }">
+        <view class="hero-section" :style="{ paddingTop: backTop + 'px' }">
             <view class="hero-head hero-enter-1">
                 <view class="back-btn" @click="goBack">
                     <uni-icons type="back" color="#3461fd" size="20"></uni-icons>
@@ -19,7 +19,11 @@
                             <image class="header-icon" src="/static/icons/video.svg" mode="aspectFit"></image>
                             <text class="item-title">方式一：观看广告生成随机 Key</text>
                         </view>
-                        <image class="arrow-icon" :src="activeIndex === 0 ? '/static/icons/chevron-up.svg' : '/static/icons/chevron-down.svg'" mode="aspectFit"></image>
+                        <image
+                            class="arrow-icon"
+                            :src="activeIndex === 0 ? '/static/icons/chevron-up.svg' : '/static/icons/chevron-down.svg'"
+                            mode="aspectFit"
+                        ></image>
                     </view>
                     <view class="item-body" v-if="activeIndex === 0">
                         <view class="panel">
@@ -44,7 +48,11 @@
                             <image class="header-icon" src="/static/icons/navigation-variant.svg" mode="aspectFit"></image>
                             <text class="item-title">方式二：输入 Key 后观看广告</text>
                         </view>
-                        <image class="arrow-icon" :src="activeIndex === 1 ? '/static/icons/chevron-up.svg' : '/static/icons/chevron-down.svg'" mode="aspectFit"></image>
+                        <image
+                            class="arrow-icon"
+                            :src="activeIndex === 1 ? '/static/icons/chevron-up.svg' : '/static/icons/chevron-down.svg'"
+                            mode="aspectFit"
+                        ></image>
                     </view>
                     <view class="item-body" v-if="activeIndex === 1">
                         <view class="panel">
@@ -170,14 +178,14 @@ onUnload(() => {
         align-items: center;
         margin-bottom: 24rpx;
     }
-    
+
     .hero-title {
         font-size: 64rpx;
         font-weight: 900;
         color: #111827;
         letter-spacing: -2rpx;
         line-height: 1.1;
-        filter: drop-shadow(0 4rpx 10rpx rgba(0,0,0,0.06));
+        filter: drop-shadow(0 4rpx 10rpx rgba(0, 0, 0, 0.06));
     }
 
     .hero-subtitle {
@@ -230,7 +238,7 @@ onUnload(() => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        
+
         &:active {
             background: #f8fbff;
         }
@@ -268,8 +276,14 @@ onUnload(() => {
 }
 
 @keyframes slide-down {
-    from { opacity: 0; transform: translateY(-10rpx); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .content {

@@ -429,6 +429,10 @@ const onBack = () => {
     align-items: center;
     justify-content: center;
     gap: 16rpx;
+
+    &::after {
+        border: none;
+    }
 }
 
 .primary-btn:disabled {
@@ -445,6 +449,13 @@ const onBack = () => {
     color: #374151;
     font-size: 30rpx;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+        border: none;
+    }
 }
 
 .warning-card {
@@ -629,5 +640,12 @@ const onBack = () => {
     color: #fff;
     font-size: 30rpx;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+        border: none;
+    }
 }
 </style>

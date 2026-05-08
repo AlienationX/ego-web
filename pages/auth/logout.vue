@@ -225,6 +225,10 @@ const backToSettings = () => {
     align-items: center;
     justify-content: center;
     gap: 16rpx;
+
+    &::after {
+        border: none;
+    }
 }
 
 .cancel-btn {
@@ -236,6 +240,13 @@ const backToSettings = () => {
     color: #374151;
     font-size: 30rpx;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+        border: none;
+    }
 }
 
 .success-content {
@@ -276,5 +287,12 @@ const backToSettings = () => {
     color: #fff;
     font-size: 30rpx;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+        border: none;
+    }
 }
 </style>

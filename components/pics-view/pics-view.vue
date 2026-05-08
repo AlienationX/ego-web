@@ -34,8 +34,15 @@
                 </view>
 
                 <!-- TODO 每12个图片后插入广告，但是不显示，存在bug -->
-                <view v-if="(idx + 1) % 12 === 0 && canShowAd && !adErrorMap[`slot-${idx}`]" class="ad-row">
-                    <custom-ad-banner @error="onAdError(`slot-${idx}`)"></custom-ad-banner>
+                <view 
+                    v-if="(idx + 1) % 12 === 0 && canShowAd" 
+                    v-show="adLoadMap[`slot-${idx}`]"
+                    class="ad-row"
+                >
+                    <custom-ad-banner 
+                        @load="onAdLoad(`slot-${idx}`)"
+                        @error="onAdError(`slot-${idx}`)"
+                    ></custom-ad-banner>
                 </view>
             </template>
         </view>
@@ -66,6 +73,7 @@ const props = defineProps({
 
 const images = ref([]);
 const adErrorMap = reactive({});
+const adLoadMap = reactive({});
 const canShowAd = computed(() => !userStore.isVip && userStore.showAd);
 
 const openPreview = (id) => {
@@ -329,21 +337,13 @@ async function updatePositions() {
 
 function loadImage(item) {
     return new Promise((resolve, reject) => {
-        // const img = new Image();
-        // img.onload = () => {
-        //     item.width = img.naturalWidth;
-        //     item.height = img.naturalHeight;
-        //     resolve({
-        //         msg: item.id
-        //     });
-        // };
-        // img.onerror = function () {
-        //     reject(new Error('Failed to load image: ' + url)); // 图片加载失败时，抛出错误
-        // };
-        // img.src = item.smallPicurl; // 设置图片的 URL
-
+        if (item.width && item.height) {
+            item.loaded = true;
+            resolve({ msg: item.id });
+            return;
+        }
         uni.getImageInfo({
-            src: item.smallPicurl, // 微信小程序 开发者工具 不支持webp文件格式？使用picurl就不报错
+            src: item.smallPicurl,
             success: (res) => {
                 item.width = res.width;
                 item.height = res.height;
@@ -353,7 +353,6 @@ function loadImage(item) {
                 });
             },
             fail: (err) => {
-                // 获取失败
                 reject(err);
             },
         });
@@ -409,7 +408,12 @@ const toggleLayout = () => {
     }
 };
 
+const onAdLoad = (key) => {
+    adLoadMap[key] = true;
+};
+
 const onAdError = (key) => {
+    adLoadMap[key] = false;
     adErrorMap[key] = true;
 };
 

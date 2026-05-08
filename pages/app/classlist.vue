@@ -35,47 +35,17 @@
             </view>
         </view>
 
-        <view class="toolbar" :style="{ top: `${showTopbar ? navBarHeight : 0}px` }">
-            <scroll-view scroll-x class="toolbar__chips" show-scrollbar="false">
-                <view class="toolbar__chips-inner">
-                    <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'recommend' }" @click="onRecommend">
-                        {{ t('common.recommend') }}
-                    </view>
-                    <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'score' }" @click="onScore">
-                        {{ t('common.score') }}
-                    </view>
-                    <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'date' }" @click="onDateSort">
-                        <text>{{ t('common.publishDate') }}</text>
-                        <uni-icons
-                            v-if="activeButton === 'date'"
-                            :type="dateSortAsc ? 'arrow-up' : 'arrow-down'"
-                            size="13"
-                            color="#dce8ff"
-                        ></uni-icons>
-                    </view>
-                </view>
-            </scroll-view>
-
-            <view class="toolbar__actions">
-                <view class="toolbar__action" @click="onChangeColumn">
-                    <image
-                        class="toolbar__action-icon"
-                        v-if="settingsStore.options.column === 3"
-                        src="/static/icons/numeric-3-box.svg"
-                        mode="aspectFit"
-                    ></image>
-                    <image class="toolbar__action-icon" v-else src="/static/icons/numeric-2-box.svg" mode="aspectFit"></image>
-                </view>
-                <view class="toolbar__action" @click="onChangeView">
-                    <image
-                        class="toolbar__action-icon"
-                        v-if="settingsStore.options.view === 'window'"
-                        src="/static/icons/view-grid.svg"
-                        mode="aspectFit"
-                    ></image>
-                    <image class="toolbar__action-icon" v-else src="/static/icons/view-dashboard.svg" mode="aspectFit"></image>
-                </view>
-            </view>
+        <view v-if="isAdmin" class="toolbar" :style="{ top: `${showTopbar ? navBarHeight : 0}px` }">
+            <sort-toolbar
+                theme="dark"
+                :active-key="activeButton"
+                :date-asc="dateSortAsc"
+                :column="settingsStore.options.column"
+                :view="settingsStore.options.view"
+                @query="onSortQuery"
+                @toggle-column="onChangeColumn"
+                @toggle-view="onChangeView"
+            ></sort-toolbar>
         </view>
 
         <view class="content-wrapper">
@@ -106,10 +76,15 @@ import { useI18n } from 'vue-i18n';
 import { apiGetClassify, apiGetClassList } from '@/api/wallpaper.js';
 import { gotoHome, handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useLibraryStore } from '@/stores/library.js';
+import { useUserStore } from '@/stores/user.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const libraryStore = useLibraryStore();
+const userStore = useUserStore();
+const isAdmin = computed(() => !!userStore.isAdmin);
 
 const backToTopRef = ref(null);
 const isRunning = ref(false);
@@ -120,6 +95,25 @@ const activeButton = ref('');
 const dateSortAsc = ref(true);
 const showTopbar = ref(false);
 const currentClassify = ref(null);
+
+const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
+    if (key === 'recommend') return 'random';
+    if (key === 'score') return 'score';
+    if (key === 'views') return 'views';
+    if (key === 'downloads') return 'downloads';
+    if (key === 'date') return isAsc ? 'date_asc' : 'date_desc';
+    return '';
+};
+
+const syncClassifySortState = () => {
+    settingsStore.options.classifySortKey = activeButton.value;
+    settingsStore.options.classifyDateAsc = dateSortAsc.value;
+};
+
+const restoreClassifySortState = () => {
+    activeButton.value = settingsStore.options.classifySortKey || '';
+    dateSortAsc.value = typeof settingsStore.options.classifyDateAsc === 'boolean' ? settingsStore.options.classifyDateAsc : false;
+};
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
@@ -170,7 +164,7 @@ const init = (sortord = '', resetClassList = []) => {
         classify_id: parseInt(props.id),
         pageNum: 1,
         pageSize: 12,
-        sortord,
+        sortord: sortord || getSortordByKey(activeButton.value, dateSortAsc.value),
     };
     noData.value = false;
     classList.value = resetClassList;
@@ -191,9 +185,9 @@ const fetchClassifyInfo = async (id) => {
         } catch (e) {
             console.error('Failed to fetch classify info:', e);
         }
-    } else {
-        currentClassify.value = match;
     }
+
+    currentClassify.value = match || null;
 };
 
 const getClassList = async () => {
@@ -202,7 +196,9 @@ const getClassList = async () => {
         isRunning.value = true;
 
         const res = await apiGetClassList(queryParams.value);
-        const fullData = (res.data || []).map((item) => handlePicUrl(item));
+        const fullData = (res.data || [])
+            .map((item) => handlePicUrl(item))
+            .filter((item) => !isAdmin.value || !libraryStore.isWallHidden(item));
 
         pendingList.value.push(...fullData);
         classList.value = [...pendingList.value];
@@ -222,22 +218,16 @@ const runQuery = (sortord) => {
     backToTopRef.value?.scrollToTop();
 };
 
-const onRecommend = () => {
-    activeButton.value = 'recommend';
-    dateSortAsc.value = true;
-    runQuery('random');
-};
-
-const onScore = () => {
-    activeButton.value = 'score';
-    dateSortAsc.value = true;
-    runQuery('score');
-};
-
-const onDateSort = () => {
-    activeButton.value = 'date';
-    dateSortAsc.value = !dateSortAsc.value;
-    runQuery(dateSortAsc.value ? 'date_asc' : 'date_desc');
+const onSortQuery = (key) => {
+    if (key === 'date') {
+        activeButton.value = 'date';
+        dateSortAsc.value = !dateSortAsc.value;
+    } else {
+        activeButton.value = key;
+        dateSortAsc.value = false;
+    }
+    syncClassifySortState();
+    runQuery(getSortordByKey(activeButton.value, dateSortAsc.value));
 };
 
 const onChangeColumn = () => {
@@ -269,6 +259,9 @@ onLoad((e) => {
     if (!id) {
         gotoHome();
         return;
+    }
+    if (isAdmin.value) {
+        restoreClassifySortState();
     }
     fetchClassifyInfo(id);
     getClassList();
@@ -480,67 +473,6 @@ onShareTimeline(() => {
     background: rgba(11, 16, 23, 0.94);
     backdrop-filter: blur(18rpx);
     border-bottom: 1rpx solid rgba(255, 255, 255, 0.04);
-}
-
-.toolbar__chips {
-    flex: 1;
-    white-space: nowrap;
-}
-
-.toolbar__chips-inner {
-    display: inline-flex;
-    align-items: center;
-    gap: 14rpx;
-    padding-right: 16rpx;
-}
-
-.toolbar__chip {
-    min-height: 68rpx;
-    padding: 0 26rpx;
-    border-radius: 999rpx;
-    display: inline-flex;
-    align-items: center;
-    gap: 8rpx;
-    font-size: 24rpx;
-    font-weight: 600;
-    color: #c2cfdf;
-    background: rgba(32, 40, 52, 0.92);
-    border: 1rpx solid rgba(255, 255, 255, 0.05);
-}
-
-.toolbar__chip.is-active {
-    color: #f8fbff;
-    background: #619aef;
-    border-color: rgba(97, 154, 239, 0.24);
-    box-shadow: 0 14rpx 30rpx rgba(97, 154, 239, 0.24);
-}
-
-.toolbar__actions {
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-    flex-shrink: 0;
-}
-
-.toolbar__action {
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: 18rpx;
-    background: rgba(41, 52, 68, 0.96);
-    border: 1rpx solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.toolbar__action image {
-    width: 38rpx;
-    height: 38rpx;
-}
-
-.toolbar__action-icon {
-    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%)
-        contrast(101%);
 }
 
 .content-wrapper {

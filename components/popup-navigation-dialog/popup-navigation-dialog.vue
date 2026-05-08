@@ -7,11 +7,11 @@
             </view>
 
             <view class="dialog__actions">
-                <view class="dialog__button dialog__button--confirm" @click="handleConfirm">
-                    {{ confirmText || $t('common.confirm') }}
-                </view>
                 <view class="dialog__button dialog__button--cancel" @click="handleCancel">
                     {{ cancelText || $t('common.cancel') }}
+                </view>
+                <view class="dialog__button dialog__button--confirm" @click="handleConfirm">
+                    {{ confirmText || $t('common.confirm') }}
                 </view>
             </view>
         </view>
@@ -113,7 +113,7 @@ defineExpose({
     font-size: 28rpx;
     font-weight: 600;
     transition: all 0.2s;
-    
+
     // 文字颜色参考截图中的蓝紫色调
     color: #5c6ac4;
 
@@ -124,6 +124,12 @@ defineExpose({
 }
 
 .dialog__button--cancel {
-    // 如果需要取消按钮颜色稍淡，可以在此调整，但截图中似乎一致
+    // 设置取消按钮颜色和大小等
+    font-weight: 400;
+    color: #94a3b8;
+}
+
+.dialog__button--confirm {
+    // 设置确认按钮颜色和大小等
 }
 </style>

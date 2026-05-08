@@ -374,7 +374,7 @@ getClassify();
 
 .editor-loading,
 .editor-empty {
-    min-height: 220rpx;
+    min-height: 360rpx;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -387,9 +387,9 @@ getClassify();
 }
 
 .image-card {
-    width: 220rpx;
+    width: 280rpx;
     flex-shrink: 0;
-    padding: 10rpx;
+    // padding: 10rpx;
     border-radius: 20rpx;
     background: #f3f6fa;
     border: 2rpx solid #edf1f6;
@@ -401,7 +401,7 @@ getClassify();
 
 .image-card__thumb {
     width: 100%;
-    height: 280rpx;
+    height: 480rpx;
     border-radius: 18rpx;
 }
 
@@ -561,6 +561,7 @@ getClassify();
 
 .save-btn[disabled] {
     opacity: 0.45;
+    border: 1rpx solid;
 }
 
 .save-btn::after {

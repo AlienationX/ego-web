@@ -49,6 +49,22 @@
             }
         },
         {
+            "path": "pages/user/subscriptions",
+            "style": {
+                "navigationBarTitleText": "订阅更新",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/user/preferences",
+            "style": {
+                "navigationBarTitleText": "偏好管理",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/app/classlist",
             "style": {
                 "navigationBarTitleText": "分类列表",
@@ -198,6 +214,22 @@
                 "navigationBarTitleText": "我的评分",
                 "navigationStyle": "custom",
                 "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/app/history",
+            "style": {
+                "navigationBarTitleText": "最近浏览",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/app/watch-later",
+            "style": {
+                "navigationBarTitleText": "稍后查看",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
             }
         },
         {

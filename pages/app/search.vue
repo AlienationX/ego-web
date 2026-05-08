@@ -73,65 +73,17 @@
                 </view>
 
                 <template v-if="classList.length">
-                    <view class="toolbar" :style="{ top: `${navBarHeight}px` }">
-                        <scroll-view scroll-x class="toolbar__chips" show-scrollbar="false">
-                            <view class="toolbar__chips-inner">
-                                <view
-                                    class="toolbar__chip"
-                                    :class="{ 'is-active': activeButton === 'recommend' }"
-                                    @click="onRecommend"
-                                >
-                                    {{ t('common.recommend') }}
-                                </view>
-                                <view class="toolbar__chip" :class="{ 'is-active': activeButton === 'score' }" @click="onScore">
-                                    {{ t('common.score') }}
-                                </view>
-                                <view
-                                    class="toolbar__chip"
-                                    :class="{ 'is-active': activeButton === 'date' }"
-                                    @click="onDateSort"
-                                >
-                                    <text>{{ t('common.publishDate') }}</text>
-                                    <uni-icons
-                                        v-if="activeButton === 'date'"
-                                        :type="dateSortAsc ? 'arrow-up' : 'arrow-down'"
-                                        size="13"
-                                        color="#dce8ff"
-                                    ></uni-icons>
-                                </view>
-                            </view>
-                        </scroll-view>
-
-                        <view class="toolbar__actions">
-                            <view class="toolbar__action" @click="onChangeColumn">
-                                <image
-                                    class="toolbar__action-icon"
-                                    v-if="settingsStore.options.column === 3"
-                                    src="/static/icons/numeric-3-box.svg"
-                                    mode="aspectFit"
-                                ></image>
-                                <image
-                                    class="toolbar__action-icon"
-                                    v-else
-                                    src="/static/icons/numeric-2-box.svg"
-                                    mode="aspectFit"
-                                ></image>
-                            </view>
-                            <view class="toolbar__action" @click="onChangeView">
-                                <image
-                                    class="toolbar__action-icon"
-                                    v-if="settingsStore.options.view === 'window'"
-                                    src="/static/icons/view-grid.svg"
-                                    mode="aspectFit"
-                                ></image>
-                                <image
-                                    class="toolbar__action-icon"
-                                    v-else
-                                    src="/static/icons/view-dashboard.svg"
-                                    mode="aspectFit"
-                                ></image>
-                            </view>
-                        </view>
+                    <view v-if="isAdmin" class="toolbar" :style="{ top: `${navBarHeight}px` }">
+                        <sort-toolbar
+                            theme="dark"
+                            :active-key="activeButton"
+                            :date-asc="dateSortAsc"
+                            :column="settingsStore.options.column"
+                            :view="settingsStore.options.view"
+                            @query="onSortQuery"
+                            @toggle-column="onChangeColumn"
+                            @toggle-view="onChangeView"
+                        ></sort-toolbar>
                     </view>
 
                     <pics-view :classList="classList"></pics-view>
@@ -155,10 +107,15 @@ import { useI18n } from 'vue-i18n';
 import { apiGetSearchData } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useLibraryStore } from '@/stores/library.js';
+import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/system.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const libraryStore = useLibraryStore();
+const userStore = useUserStore();
+const isAdmin = computed(() => !!userStore.isAdmin);
 
 const backToTopRef = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
@@ -183,6 +140,25 @@ const pendingList = ref([]);
 const activeButton = ref('');
 const dateSortAsc = ref(true);
 
+const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
+    if (key === 'recommend') return 'random';
+    if (key === 'score') return 'score';
+    if (key === 'views') return 'views';
+    if (key === 'downloads') return 'downloads';
+    if (key === 'date') return isAsc ? 'date_asc' : 'date_desc';
+    return '';
+};
+
+const syncSearchSortState = () => {
+    settingsStore.options.searchSortKey = activeButton.value;
+    settingsStore.options.searchDateAsc = dateSortAsc.value;
+};
+
+const restoreSearchSortState = () => {
+    activeButton.value = settingsStore.options.searchSortKey || '';
+    dateSortAsc.value = typeof settingsStore.options.searchDateAsc === 'boolean' ? settingsStore.options.searchDateAsc : false;
+};
+
 const recommendList = computed(() => {
     const keywordsString = t('common.hotKeywords');
     return keywordsString.split(',');
@@ -195,7 +171,7 @@ const init = (keyword = '', resetShowWordBoard = true, resetNoResult = false, re
         pageNum: 1,
         pageSize: 12,
         keyword,
-        sortord: '',
+        sortord: getSortordByKey(activeButton.value, dateSortAsc.value),
     };
     showWordBoard.value = resetShowWordBoard;
     noResult.value = resetNoResult;
@@ -209,7 +185,9 @@ const searchData = async () => {
         isLoading.value = true;
         const res = await apiGetSearchData(queryParams.value);
         const rows = Array.isArray(res?.data) ? res.data : [];
-        const fullData = rows.map((item) => handlePicUrl(item));
+        const fullData = rows
+            .map((item) => handlePicUrl(item))
+            .filter((item) => !isAdmin.value || !libraryStore.isWallHidden(item));
         pendingList.value.push(...fullData);
         classList.value = [...pendingList.value];
 
@@ -222,7 +200,7 @@ const searchData = async () => {
             noData.value = rows.length < queryParams.value.pageSize;
         }
 
-        if (rows.length === 0 && pendingList.value.length === 0) {
+        if (fullData.length === 0 && pendingList.value.length === 0) {
             showWordBoard.value = true;
             noResult.value = true;
         } else {
@@ -245,8 +223,6 @@ const onSearch = () => {
     uni.setStorageSync('searchHistory', searchHistory.value);
 
     if (lastKeyword.value !== queryParams.value.keyword) {
-        activeButton.value = '';
-        dateSortAsc.value = true;
         pendingList.value = [];
         uni.removeStorageSync('wallList');
     }
@@ -258,8 +234,6 @@ const onSearch = () => {
 
 const onClear = () => {
     init();
-    activeButton.value = '';
-    dateSortAsc.value = true;
     pendingList.value = [];
     uni.removeStorageSync('wallList');
 };
@@ -294,22 +268,16 @@ const runQuery = (sortord) => {
     backToTopRef.value?.scrollToTop();
 };
 
-const onRecommend = () => {
-    activeButton.value = 'recommend';
-    dateSortAsc.value = true;
-    runQuery('random');
-};
-
-const onScore = () => {
-    activeButton.value = 'score';
-    dateSortAsc.value = true;
-    runQuery('score');
-};
-
-const onDateSort = () => {
-    activeButton.value = 'date';
-    dateSortAsc.value = !dateSortAsc.value;
-    runQuery(dateSortAsc.value ? 'date_asc' : 'date_desc');
+const onSortQuery = (key) => {
+    if (key === 'date') {
+        activeButton.value = 'date';
+        dateSortAsc.value = !dateSortAsc.value;
+    } else {
+        activeButton.value = key;
+        dateSortAsc.value = false;
+    }
+    syncSearchSortState();
+    runQuery(getSortordByKey(activeButton.value, dateSortAsc.value));
 };
 
 const onChangeColumn = () => {
@@ -330,7 +298,15 @@ onReachBottom(() => {
     searchData();
 });
 
-onLoad(() => {});
+onLoad((options) => {
+    if (isAdmin.value) {
+        restoreSearchSortState();
+    }
+    const keyword = decodeURIComponent(options?.keyword || '').trim();
+    if (!keyword) return;
+    queryParams.value.keyword = keyword;
+    onSearch();
+});
 
 onUnload(() => {
     uni.removeStorageSync('wallList');
@@ -567,64 +543,6 @@ onPageScroll((e) => {
     background: #0b1017;
     border-top: 1rpx solid rgba(255, 255, 255, 0.03);
     border-bottom: 1rpx solid rgba(255, 255, 255, 0.03);
-}
-
-.toolbar__chips {
-    flex: 1;
-    white-space: nowrap;
-}
-
-.toolbar__chips-inner {
-    display: inline-flex;
-    align-items: center;
-    gap: 14rpx;
-    padding-right: 16rpx;
-}
-
-.toolbar__chip {
-    min-height: 68rpx;
-    padding: 0 26rpx;
-    border-radius: 999rpx;
-    display: inline-flex;
-    align-items: center;
-    gap: 8rpx;
-    font-size: 24rpx;
-    font-weight: 600;
-    color: #c2cfdf;
-    background: rgba(32, 40, 52, 0.92);
-    border: 1rpx solid rgba(255, 255, 255, 0.05);
-}
-
-.toolbar__chip.is-active {
-    color: #f8fbff;
-    background: #619aef;
-    border-color: rgba(97, 154, 239, 0.24);
-    box-shadow: 0 14rpx 30rpx rgba(97, 154, 239, 0.24);
-}
-
-.toolbar__actions {
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-    flex-shrink: 0;
-}
-
-.toolbar__action {
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: 18rpx;
-    background: rgba(41, 52, 68, 0.96);
-    border: 1rpx solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.toolbar__action-icon {
-    width: 38rpx;
-    height: 38rpx;
-    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%)
-        contrast(101%);
 }
 
 .loadingLayout {

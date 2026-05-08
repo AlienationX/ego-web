@@ -141,6 +141,100 @@
             </view>
         </view>
 
+        <!-- 订阅提醒 -->
+        <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout">
+            <view class="signal-callout__main">
+                <view class="signal-callout__content">
+                    <view class="signal-callout__eyebrow">{{ t('index.followingEyebrow') }}</view>
+                    <view class="signal-callout__title">{{ t('index.followingTitle') }}</view>
+                    <view class="signal-callout__desc">{{ followingSummary }}</view>
+                </view>
+                <view class="signal-callout__action" @click="toggleFollowingExpanded">
+                    {{ followingExpanded ? t('index.followingCollapse') : t('index.followingExpand') }}
+                </view>
+            </view>
+
+            <view v-if="followingExpanded" class="signal-callout__panel">
+                <view v-if="subscribedClassifyItems.length" class="signal-group">
+                    <view class="signal-group__title">{{ t('subscriptionPage.classifyTitle') }}</view>
+                    <view class="signal-group__chips">
+                        <view
+                            v-for="item in subscribedClassifyItems"
+                            :key="item.id"
+                            class="signal-chip"
+                            @click="goClassify(item)"
+                        >
+                            {{ item.name }}
+                        </view>
+                    </view>
+                </view>
+
+                <view v-if="libraryStore.subscriptions.tags.length" class="signal-group">
+                    <view class="signal-group__title">{{ t('subscriptionPage.tagTitle') }}</view>
+                    <view class="signal-group__chips">
+                        <view
+                            v-for="tag in libraryStore.subscriptions.tags"
+                            :key="tag"
+                            class="signal-chip signal-chip--tag"
+                            @click="goSearchByTag(tag)"
+                        >
+                            #{{ tag }}
+                        </view>
+                    </view>
+                </view>
+
+                <navigator url="/pages/user/subscriptions" class="signal-manage">
+                    {{ t('index.followingManage') }}
+                    <uni-icons type="right" size="14" color="#dbeafe"></uni-icons>
+                </navigator>
+            </view>
+        </view>
+
+        <!-- 猜你喜欢 -->
+        <!-- <view v-if="isAdmin && forYouList.length" class="select select--compact">
+            <view class="select-watermark">For You</view>
+            <index-title>
+                <template #name>{{ t('index.forYouTitle') }}</template>
+                <template #custom>
+                    <navigator class="box" url="/pages/user/preferences">
+                        <button size="mini" class="btn is-default">{{ t('user.settings.preferences') }}</button>
+                    </navigator>
+                </template>
+            </index-title>
+
+            <view class="for-you-groups">
+                <view v-for="group in forYouGroups" :key="group.key" class="for-you-group">
+                    <view class="for-you-group__head">
+                        <view class="for-you-group__title">{{ group.title }}</view>
+                        <view class="for-you-group__meta">{{ group.meta }}</view>
+                    </view>
+                    <view class="content content--compact">
+                        <scroll-view scroll-x>
+                            <view
+                                class="box"
+                                v-for="item in group.items"
+                                :key="`${group.key}-${item.id}`"
+                                @click="goPreview(item.id, group.items)"
+                            >
+                                <image :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                <view v-if="getTimeBadge(item)" class="box-badge">{{ getTimeBadge(item) }}</view>
+                            </view>
+                        </scroll-view>
+                    </view>
+                </view>
+            </view>
+            <view v-if="signalTags.length" class="tag-strip">
+                <view class="tag-strip__label">{{ t('index.forYouSignals') }}</view>
+                <scroll-view scroll-x class="tag-strip__scroll" show-scrollbar="false">
+                    <view class="tag-strip__inner">
+                        <view v-for="tag in signalTags" :key="tag" class="tag-strip__pill" @click="goSearchByTag(tag)">
+                            #{{ tag }}
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view> -->
+
         <navigator class="top-entry" url="/pages/app/topN">
             <view class="top-entry__content">
                 <!-- <view class="top-entry__eyebrow">Top N</view> -->
@@ -226,7 +320,11 @@ import {
 } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useI18n } from 'vue-i18n';
+import { useLibraryStore } from '@/stores/library.js';
+import { useUserStore } from '@/stores/user.js';
 const { t } = useI18n();
+const libraryStore = useLibraryStore();
+const userStore = useUserStore();
 
 const bannerList = ref([]);
 const randomDailyList = ref([]);
@@ -235,7 +333,109 @@ const latestList = ref([]);
 const noticeList = ref([]);
 const classifyList = ref([]);
 const adVisibleMap = reactive({});
+const followingExpanded = ref(false);
 const themeClasses = ['is-collection', 'is-keyword', 'is-spotlight', 'is-default'];
+const isAdmin = computed(() => !!userStore.isAdmin);
+const recentViewedList = computed(() => libraryStore.recentViewed.slice(0, 8));
+const preferredTagList = computed(() => libraryStore.preferredTags.slice(0, 10));
+const signalTags = computed(() =>
+    [...new Set([...libraryStore.subscriptions.tags, ...libraryStore.preferredTags])].slice(0, 10),
+);
+const subscribedClassifyIds = computed(() => libraryStore.subscriptions.classifyIds || []);
+const hasSubscriptionSignals = computed(
+    () => subscribedClassifyIds.value.length > 0 || libraryStore.subscriptions.tags.length > 0,
+);
+
+const normalizeTags = (item = {}) => {
+    if (Array.isArray(item.tabs_list)) return item.tabs_list.filter(Boolean);
+    if (typeof item.tabs === 'string') {
+        return item.tabs
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter(Boolean);
+    }
+    return [];
+};
+
+const flattenRecommendPool = computed(() => {
+    const merged = [...latestList.value, ...randomRecommendList.value.flatMap((item) => item.data || [])];
+    const seen = new Set();
+    return merged.filter((item) => {
+        if (!item?.id || seen.has(item.id) || (isAdmin.value && libraryStore.isWallHidden(item))) return false;
+        seen.add(item.id);
+        return true;
+    });
+});
+
+const subscribedClassifyNames = computed(() =>
+    classifyComputed.value.filter((item) => subscribedClassifyIds.value.includes(item.id)).map((item) => item.name),
+);
+
+const subscribedClassifyItems = computed(() =>
+    classifyComputed.value.filter((item) => subscribedClassifyIds.value.includes(item.id)),
+);
+
+const followingSummary = computed(() => {
+    const classifyCount = subscribedClassifyIds.value.length;
+    const tagCount = libraryStore.subscriptions.tags.length;
+    return t('index.followingDesc', { classifyCount, tagCount });
+});
+
+const getItemsByClassifyName = (name) =>
+    flattenRecommendPool.value.filter((item) => name && item.classify_name && item.classify_name.includes(name)).slice(0, 8);
+
+const getItemsByTag = (tag) => flattenRecommendPool.value.filter((item) => normalizeTags(item).includes(tag)).slice(0, 8);
+
+const forYouGroups = computed(() => {
+    const groups = [];
+
+    subscribedClassifyItems.value.slice(0, 2).forEach((item) => {
+        const items = getItemsByClassifyName(item.name);
+        if (!items.length) return;
+        groups.push({
+            key: `classify-${item.id}`,
+            title: item.name,
+            meta: t('index.forYouCategory'),
+            items,
+        });
+    });
+
+    libraryStore.subscriptions.tags.slice(0, 2).forEach((tag) => {
+        const items = getItemsByTag(tag);
+        if (!items.length) return;
+        groups.push({
+            key: `tag-${tag}`,
+            title: `#${tag}`,
+            meta: t('index.forYouTag'),
+            items,
+        });
+    });
+
+    libraryStore.preferredTags.slice(0, 2).forEach((tag) => {
+        if (libraryStore.subscriptions.tags.includes(tag)) return;
+        const items = getItemsByTag(tag);
+        if (!items.length) return;
+        groups.push({
+            key: `preference-${tag}`,
+            title: `#${tag}`,
+            meta: t('index.forYouRecentPreference'),
+            items,
+        });
+    });
+
+    return groups.slice(0, 4);
+});
+
+const forYouList = computed(() => {
+    const seen = new Set();
+    return forYouGroups.value
+        .flatMap((group) => group.items)
+        .filter((item) => {
+            if (!item?.id || seen.has(item.id)) return false;
+            seen.add(item.id);
+            return true;
+        });
+});
 
 const randomRecommendComputed = computed(() => {
     return randomRecommendList.value.map((item) => ({
@@ -466,6 +666,26 @@ const goPreview = (id, data) => {
     uni.navigateTo({
         url: '/pages/app/preview?id=' + id,
     });
+};
+
+const goSearchByTag = (tag) => {
+    if (isAdmin.value) {
+        libraryStore.bumpPreferredTag(tag);
+    }
+    uni.navigateTo({
+        url: `/pages/app/search?keyword=${encodeURIComponent(tag)}`,
+    });
+};
+
+const goClassify = (item) => {
+    if (!item?.id) return;
+    uni.navigateTo({
+        url: `/pages/app/classlist?id=${item.id}&name=${encodeURIComponent(item.name || '')}`,
+    });
+};
+
+const toggleFollowingExpanded = () => {
+    followingExpanded.value = !followingExpanded.value;
 };
 
 const onAdLoad = (key) => {
@@ -716,6 +936,134 @@ onShareTimeline(() => {
         }
     }
 
+    .signal-callout {
+        margin: 0 30rpx 28rpx;
+        padding: 26rpx 24rpx;
+        border-radius: 28rpx;
+        background:
+            radial-gradient(circle at top right, rgba(40, 179, 137, 0.18), transparent 28%),
+            linear-gradient(135deg, #18202a 0%, #243244 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 22rpx;
+        box-shadow: 0 18rpx 38rpx rgba(15, 23, 42, 0.16);
+    }
+
+    .signal-callout__main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18rpx;
+
+        .signal-callout__content {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .signal-callout__eyebrow {
+            font-size: 18rpx;
+            font-weight: 800;
+            letter-spacing: 4rpx;
+            color: rgba(125, 211, 252, 0.88);
+            text-transform: uppercase;
+        }
+
+        .signal-callout__title {
+            margin-top: 10rpx;
+            font-size: 32rpx;
+            font-weight: 800;
+            color: #f8fbff;
+        }
+
+        .signal-callout__desc {
+            margin-top: 8rpx;
+            font-size: 23rpx;
+            line-height: 1.7;
+            color: rgba(226, 232, 240, 0.74);
+        }
+
+        .signal-callout__action {
+            flex-shrink: 0;
+            min-height: 64rpx;
+            padding: 0 24rpx;
+            border-radius: 999rpx;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1rpx solid rgba(255, 255, 255, 0.12);
+            color: #f8fbff;
+            font-size: 22rpx;
+            font-weight: 700;
+        }
+    }
+
+    .signal-callout__panel {
+        padding-top: 20rpx;
+        border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+    }
+
+    .signal-group {
+        margin-bottom: 18rpx;
+    }
+
+    .signal-group__title {
+        font-size: 20rpx;
+        font-weight: 800;
+        letter-spacing: 2rpx;
+        color: rgba(226, 232, 240, 0.68);
+        text-transform: uppercase;
+        margin-bottom: 12rpx;
+    }
+
+    .signal-group__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12rpx;
+    }
+
+    .signal-chip {
+        min-height: 58rpx;
+        padding: 0 20rpx;
+        border-radius: 999rpx;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1rpx solid rgba(255, 255, 255, 0.1);
+        color: #f8fbff;
+        font-size: 22rpx;
+        font-weight: 700;
+
+        &:active {
+            transform: scale(0.96);
+            opacity: 0.86;
+        }
+    }
+
+    .signal-chip--tag {
+        color: #bbf7d0;
+        background: rgba(40, 179, 137, 0.14);
+        border-color: rgba(40, 179, 137, 0.18);
+    }
+
+    .signal-manage {
+        margin-top: 6rpx;
+        min-height: 62rpx;
+        padding: 0 20rpx;
+        border-radius: 18rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8rpx;
+        background: rgba(97, 154, 239, 0.14);
+        border: 1rpx solid rgba(147, 197, 253, 0.18);
+        color: #dbeafe;
+        font-size: 22rpx;
+        font-weight: 800;
+    }
+
     .notice {
         width: 690rpx;
         height: 72rpx;
@@ -777,6 +1125,22 @@ onShareTimeline(() => {
         position: relative;
         // padding: 30rpx 0 0 0;
         overflow: hidden;
+
+        &.select--compact {
+            .content.content--compact {
+                height: 360rpx;
+
+                scroll-view {
+                    padding-bottom: 8rpx;
+
+                    .box {
+                        width: 232rpx;
+                        height: calc(100% - 36rpx);
+                        margin-bottom: 24rpx;
+                    }
+                }
+            }
+        }
 
         .select-watermark {
             position: absolute;
@@ -1030,6 +1394,110 @@ onShareTimeline(() => {
                 }
                 .box:last-child {
                     margin-right: 30rpx;
+                }
+            }
+        }
+
+        .for-you-groups {
+            position: relative;
+            z-index: 1;
+        }
+
+        .for-you-group {
+            margin-bottom: 18rpx;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .content.content--compact {
+                height: 330rpx;
+            }
+        }
+
+        .for-you-group__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16rpx;
+            padding: 0 6rpx 4rpx;
+        }
+
+        .for-you-group__title {
+            min-width: 0;
+            font-size: 26rpx;
+            font-weight: 800;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .for-you-group__meta {
+            flex-shrink: 0;
+            min-height: 40rpx;
+            padding: 0 16rpx;
+            border-radius: 999rpx;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19rpx;
+            font-weight: 800;
+            letter-spacing: 1rpx;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1rpx solid #cbd5e1;
+            text-transform: uppercase;
+        }
+
+        .tag-strip {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 20rpx;
+            padding: 0 6rpx 16rpx;
+
+            .tag-strip__label {
+                flex-shrink: 0;
+                font-size: 22rpx;
+                font-weight: 700;
+                color: #64748b;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            .tag-strip__scroll {
+                flex: 1;
+                min-width: 0;
+                white-space: nowrap;
+            }
+
+            .tag-strip__inner {
+                display: inline-flex;
+                align-items: center;
+                gap: 14rpx;
+                padding-right: 24rpx;
+            }
+
+            .tag-strip__pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 22rpx;
+                height: 56rpx;
+                border-radius: 999rpx;
+                background: #f1f5f9;
+                border: 1rpx solid #dbe4ee;
+                color: #334155;
+                font-size: 22rpx;
+                font-weight: 600;
+                line-height: 1;
+                box-shadow: 0 8rpx 18rpx rgba(148, 163, 184, 0.12);
+
+                &:active {
+                    transform: scale(0.96);
+                    opacity: 0.86;
                 }
             }
         }

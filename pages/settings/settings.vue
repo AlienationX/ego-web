@@ -376,6 +376,17 @@ const sections = computed(() => {
             key: 'preferences',
             title: t('settings.sections.preferences'),
             items: [
+                ...(userStore.isAdmin
+                    ? [
+                          {
+                              key: 'preference_center',
+                              icon: '/static/icons/tag.svg',
+                              label: t('user.settings.preferences'),
+                              sublabel: t('user.settings.managePreferences'),
+                              action: () => uni.navigateTo({ url: '/pages/user/preferences' }),
+                          },
+                      ]
+                    : []),
                 {
                     key: 'language',
                     icon: '/static/icons/translate.svg',
@@ -1123,7 +1134,7 @@ function shareApp() {
 .rate-popup__button {
     margin-top: 44rpx;
     min-width: 352rpx;
-    height: 104rpx;
+    height: 88rpx;
     border-radius: 999rpx;
     background: #1f2640;
     color: #ffffff;

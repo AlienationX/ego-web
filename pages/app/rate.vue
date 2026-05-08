@@ -1,15 +1,15 @@
 <template>
     <view class="layout">
-        <menu-bar>
-            <template #title>{{ t('user.profile.myScore') }}</template>
-        </menu-bar>
+        <page-header :title="t('user.profile.myScore')"></page-header>
 
         <view class="content-wrapper">
-            <view v-if="ratingList.length === 0 && !isRunning" class="empty-state">
-                <!-- <image src="/static/images/pics/empty.svg" mode="aspectFit" class="empty-image"></image> -->
-                <text class="empty-text">{{ t('rating.empty') }}</text>
-                <button class="go-browse-btn" @click="goBrowse">{{ t('rating.goBrowse') }}</button>
-            </view>
+            <empty-state
+                v-if="ratingList.length === 0 && !isRunning"
+                icon-path="/static/icons/star.svg"
+                :title="t('rating.empty')"
+                :action-text="t('rating.goBrowse')"
+                @action="goBrowse"
+            ></empty-state>
 
             <view v-else class="rating-list">
                 <view v-for="(item, index) in ratingList" :key="item.id" class="rating-swipe-item">
@@ -59,7 +59,6 @@ import { ref } from 'vue';
 import { onLoad, onUnload, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
 import { apiGetActions, apiPostActions } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { getNavBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -206,54 +205,11 @@ onPullDownRefresh(() => {
 
 <style lang="scss" scoped>
 .layout {
-    background-color: #f5f5f5;
+    background: linear-gradient(180deg, #f8fafc 0%, #f2f6fb 100%);
     min-height: 100vh;
 
     .content-wrapper {
         padding: 20rpx;
-    }
-
-    .empty-state {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 200rpx 0;
-
-        .empty-image {
-            width: 400rpx;
-            height: 400rpx;
-            margin-bottom: 40rpx;
-            opacity: 0.5;
-        }
-
-        .empty-text {
-            font-size: 32rpx;
-            color: #999;
-            margin-bottom: 60rpx;
-        }
-
-        .go-browse-btn {
-            width: 300rpx;
-            height: 80rpx;
-            background: linear-gradient(135deg, $wp-theme-color 0%, darken($wp-theme-color, 8%) 100%);
-            color: #fff;
-            font-size: 32rpx;
-            border-radius: 40rpx;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            &::after {
-                border: none;
-            }
-
-            &:active {
-                transform: scale(0.95);
-                opacity: 0.9;
-            }
-        }
     }
 
     .rating-list {

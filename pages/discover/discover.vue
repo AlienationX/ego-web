@@ -1029,7 +1029,6 @@ onUnload(() => {
 .local-preview {
     margin-bottom: 16rpx;
 }
-
 .local-image {
     width: 180rpx;
     height: 240rpx;
@@ -1046,6 +1045,9 @@ onUnload(() => {
     font-size: 28rpx;
     font-weight: 600;
     box-shadow: 0 16rpx 34rpx rgba(255, 190, 128, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &::after {
         border: none;

@@ -22,6 +22,7 @@
             <view v-for="item in list" :key="item.id" class="recommend-card" @click="openPreview(item)">
                 <image class="recommend-card__image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
                 <view class="recommend-card__body">
+                    <!-- <view v-if="item.reason" class="recommend-card__reason">{{ item.reason }}</view> -->
                     <view class="recommend-card__title">{{ item.description || `#${item.id}` }}</view>
                     <view class="recommend-card__meta">
                         <text class="recommend-card__meta-text">{{ item.classify_name || t('top10.wallpaper') }}</text>
@@ -40,10 +41,12 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiGetSimilarWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { useLibraryStore } from '@/stores/library.js';
+import { useUserStore } from '@/stores/user.js';
 
 const props = defineProps({
     currentInfo: {
@@ -57,8 +60,43 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const libraryStore = useLibraryStore();
+const userStore = useUserStore();
 const list = ref([]);
 const loading = ref(false);
+const isAdmin = computed(() => !!userStore.isAdmin);
+
+const normalizeTags = (wall = {}) => {
+    if (Array.isArray(wall.tabs_list)) return wall.tabs_list.filter(Boolean);
+    if (typeof wall.tabs === 'string') {
+        return wall.tabs
+            .split(',')
+            .map((item) => item.trim())
+            .filter(Boolean);
+    }
+    return [];
+};
+
+const getRecommendReason = (item = {}, current = {}) => {
+    const itemTags = normalizeTags(item);
+    const currentTags = normalizeTags(current);
+    const matchedTag = itemTags.find((tag) => currentTags.includes(tag));
+    if (matchedTag) {
+        return t('previewPage.recommend.reasonTag', { tag: matchedTag });
+    }
+
+    if (item.classify_name && current.classify_name && item.classify_name === current.classify_name) {
+        return t('previewPage.recommend.reasonCategory');
+    }
+
+    const itemScore = Number(item.score);
+    const currentScore = Number(current.score);
+    if (!Number.isNaN(itemScore) && !Number.isNaN(currentScore) && Math.abs(itemScore - currentScore) <= 0.5) {
+        return t('previewPage.recommend.reasonScore');
+    }
+
+    return t('previewPage.recommend.reasonStyle');
+};
 
 const loadRecommend = async () => {
     const current = props.currentInfo || {};
@@ -73,7 +111,16 @@ const loadRecommend = async () => {
     try {
         const res = await apiGetSimilarWall(currentId);
         // 必须添加id字段，否则会报错，因为id字段是必填项
-        list.value = res.data.map((item) => handlePicUrl({ ...item, id: item.wall_id })).slice(0, props.limit);
+        list.value = res.data
+            .map((item) => {
+                const normalized = handlePicUrl({ ...item, id: item.wall_id });
+                return {
+                    ...normalized,
+                    reason: getRecommendReason(normalized, current),
+                };
+            })
+            .filter((item) => !isAdmin.value || !libraryStore.isWallHidden(item))
+            .slice(0, props.limit);
     } catch (error) {
         list.value = [];
     } finally {
@@ -187,6 +234,27 @@ watch(
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+.recommend-card__reason {
+    align-self: flex-start;
+    min-height: 38rpx;
+    max-width: 100%;
+    padding: 0 14rpx;
+    border-radius: 999rpx;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(40, 179, 137, 0.1);
+    border: 1rpx solid rgba(40, 179, 137, 0.14);
+    color: #15805f;
+    font-size: 20rpx;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 10rpx;
 }
 
 .recommend-card__title {

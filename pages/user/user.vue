@@ -212,11 +212,13 @@ import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiPostProfile } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useUserStore } from '@/stores/user.js';
+import { useLibraryStore } from '@/stores/library.js';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
 const userStore = useUserStore();
+const libraryStore = useLibraryStore();
 // const userinfo = reactive(userStore.userinfo);  // 只是userinfo的副本的响应式，和userStore.userinfo不是同一个对象
 // const userinfo = computed(() => userStore.userinfo); // 计算属性需要写userinfo.value，也麻烦
 
@@ -293,6 +295,22 @@ const toMyScore = () => {
         return;
     }
     uni.navigateTo({ url: '/pages/app/rate' });
+};
+
+const toHistory = () => {
+    uni.navigateTo({ url: '/pages/app/history' });
+};
+
+const toWatchLater = () => {
+    uni.navigateTo({ url: '/pages/app/watch-later' });
+};
+
+const toSubscriptions = () => {
+    uni.navigateTo({ url: '/pages/user/subscriptions' });
+};
+
+const toPreferences = () => {
+    uni.navigateTo({ url: '/pages/user/preferences' });
 };
 
 const toMembership = () => {
@@ -392,14 +410,42 @@ const appMenus = computed(() => [
 ]);
 
 const sysMenus = computed(() => [
-    // {
-    //     left_icon: 'vip-filled',
-    //     left_icon: '/static/icons/crown-circle.svg',
-    //     left_text: t('user.profile.subscription'),
-    //     right_text: '',
-    //     right_icon: 'right',
-    //     click: toMembership
-    // },
+    ...(userStore.isAdmin
+        ? [
+              {
+                  left_icon: '/static/icons/bell.svg',
+                  left_color: '#6B7280',
+                  left_text: t('user.profile.subscription'),
+                  right_text: `${libraryStore.subscriptions.classifyIds.length + libraryStore.subscriptions.tags.length}`,
+                  right_icon: 'right',
+                  click: toSubscriptions,
+              },
+              {
+                  left_icon: '/static/icons/tag.svg',
+                  left_color: '#6B7280',
+                  left_text: t('user.settings.preferences'),
+                  right_text: `${libraryStore.preferredTags.length}`,
+                  right_icon: 'right',
+                  click: toPreferences,
+              },
+              {
+                  left_icon: '/static/icons/clock.svg',
+                  left_color: '#6B7280',
+                  left_text: t('history.title'),
+                  right_text: `${libraryStore.recentViewed.length}`,
+                  right_icon: 'right',
+                  click: toHistory,
+              },
+              {
+                  left_icon: '/static/icons/bookmark.svg',
+                  left_color: '#6B7280',
+                  left_text: t('history.watchLaterTitle'),
+                  right_text: `${libraryStore.watchLater.length}`,
+                  right_icon: 'right',
+                  click: toWatchLater,
+              },
+          ]
+        : []),
     {
         left_icon: '/static/icons/help-circle.svg',
         left_color: '#6B7280',

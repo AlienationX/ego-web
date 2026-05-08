@@ -493,7 +493,8 @@ const handleSubmit = async () => {
 }
 
 .submit-wrap {
-    margin-top: 16rpx;
+    margin: 32rpx 0;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .submit-btn {
@@ -501,14 +502,25 @@ const handleSubmit = async () => {
     height: 100rpx;
     border-radius: 24rpx;
     background: #e5322d;
-    border: none;
     color: #fff;
     font-size: 30rpx;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    box-sizing: border-box;
+
+    &::after {
+        border: none;
+    }
 }
 
 .submit-btn.disabled {
-    background: #f3f4f6;
+    background: #f9fafb;
     color: #9ca3af;
+    border: 2rpx solid #e5e7eb;
 }
 </style>

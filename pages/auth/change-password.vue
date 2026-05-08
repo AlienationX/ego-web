@@ -503,12 +503,20 @@ function getStrength(password) {
     color: #fff;
     font-size: 30rpx;
     font-weight: 600;
-    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+
+    &::after {
+        border: none;
+    }
 }
 
 .submit-btn.disabled {
-    background: #f3f4f6;
+    background: #f9fafb;
     color: #9ca3af;
+    border: 2rpx solid #e5e7eb;
 }
 
 .success {
@@ -560,5 +568,12 @@ function getStrength(password) {
     font-size: 30rpx;
     font-weight: 600;
     border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &::after {
+        border: none;
+    }
 }
 </style>

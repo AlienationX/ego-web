@@ -15,6 +15,10 @@ export const useSettingsStore = defineStore(
             theme: 'light',
             language: 'zh-CN',
             previewType: 'classic', // classic / floating
+            searchSortKey: '',
+            searchDateAsc: false,
+            classifySortKey: '',
+            classifyDateAsc: false,
 
             navBarFlat: false, // 导航栏扁平效果
             navBarBehavior: [], // 导航栏行为设置

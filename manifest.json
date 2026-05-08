@@ -1,7 +1,7 @@
 {
-    "name" : "%app.name%",
+    "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
-    "description" : "%app.description%",
+    "description" : "探索壁纸，亦探索自我。",
     "versionName" : "1.2.4",
     "versionCode" : 124,
     "transformPx" : false,
@@ -76,7 +76,9 @@
                     "inmobi" : {},
                     "ironsource" : {},
                     "mintegral" : {},
-                    "applovin" : {}
+                    "applovin" : {},
+                    "ks" : {},
+                    "ks-content" : {}
                 },
                 "oauth" : {
                     "weixin" : {
@@ -119,7 +121,8 @@
                 }
             },
             "splashscreen" : {
-                "useOriginalMsgbox" : true
+                "useOriginalMsgbox" : true,
+                "androidStyle" : "common"
             }
         }
     },
@@ -162,7 +165,24 @@
     "app-harmony" : {
         "distribute" : {
             "bundleName" : "com.ego.app.wallpaper",
-            "deviceTypes" : [ "phone", "tablet" ]
+            "deviceTypes" : [ "phone", "tablet" ],
+            "splashScreens" : {
+                "startWindowIcon" : "/Users/tangzy/Documents/apps/logo/start.png"
+            },
+            "icons" : {
+                "foreground" : "/Users/tangzy/Documents/apps/logo/logo_wp_1024_1024.png"
+            },
+            "signingConfigs" : {
+                "release" : {
+                    "certpath" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.cer",
+                    "keyAlias" : "releaseKey",
+                    "keyPassword" : "00000023FC494B576506C900D9FA68CB38FF28397E1D899918349672ACB004B99D05BA71C7EA07AEC0C96F9EFCDAB934CF8D03",
+                    "profile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaperRelease.p7b",
+                    "signAlg" : "SHA256withECDSA",
+                    "storeFile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.p12",
+                    "storePassword" : "000000236625B8B6BFCB9D0451E260B5E8F7C3B8FFF3204DDCB0BFBF107241C05D535FFC86623E3998F401CC24FEA1A32A16E6"
+                }
+            }
         }
     },
     "locale" : "auto"

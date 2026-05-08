@@ -125,6 +125,11 @@
                 margin-right: 10rpx;
                 display: flex;
                 align-items: center;
+                justify-content: center;
+
+                &::after {
+                    border: none;
+                }
 
                 &:active {
                     opacity: 0.8;

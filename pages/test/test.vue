@@ -24,7 +24,16 @@
 </template>
 
 <script setup>
+import { onLoad } from '@dcloudio/uni-app';
+import { useUserStore } from '@/stores/user.js';
+
+const userStore = useUserStore();
+
 const testMenus = [
+    { name: 'Recent Views', url: '/pages/app/history' },
+    { name: 'Watch Later', url: '/pages/app/watch-later' },
+    { name: 'Subscriptions', url: '/pages/user/subscriptions' },
+    { name: 'Preference Manager', url: '/pages/user/preferences' },
     { name: 'Log In', url: '/pages/auth/login' },
     { name: 'Access', url: '/pages/access/access' },
     { name: 'Membership', url: '/pages/member/payment' },
@@ -42,6 +51,12 @@ const testMenus = [
 const go = (url) => {
     uni.navigateTo({ url });
 };
+
+onLoad(() => {
+    if (userStore.isAdmin) return;
+    uni.showToast({ title: '测试实验室仅管理员可用', icon: 'none' });
+    uni.switchTab({ url: '/pages/user/user' });
+});
 </script>
 
 <style lang="scss" scoped>

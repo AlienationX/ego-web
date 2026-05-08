@@ -21,7 +21,7 @@
                                 class="preview-slide__image"
                                 :class="{ 'is-loaded': isImageLoaded(index) }"
                                 @click="maskChange"
-                                @load="handleImageLoad(index)"
+                                @load="handleImageLoad(index, $event)"
                                 @error="handleImageLoad(index)"
                                 :src="item.picurl"
                                 mode="aspectFill"
@@ -35,6 +35,13 @@
                         <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
                     </view>
                     <view class="top-actions" :style="{ top: actionsTop + 'px', right: capsuleRightOffset + 'px' }">
+                        <view v-if="isAdmin" class="icon-btn" @click="toggleWatchLater">
+                            <mdi-icon
+                                :path="isCurrentInWatchLater ? '/static/icons/check.svg' : '/static/icons/bookmark.svg'"
+                                size="20px"
+                                color="#fff"
+                            ></mdi-icon>
+                        </view>
                         <view v-if="isAdmin" class="icon-btn" @click="openEdit">
                             <mdi-icon path="/static/icons/pencil.svg" size="20px" color="#fff"></mdi-icon>
                         </view>
@@ -153,14 +160,26 @@
                                 <text class="score">{{ currentInfo.score }}</text>
                             </view>
                         </view>
-                        <!-- <view class="row">
-                            <view class="label">预览：</view>
-                            <view class="value">{{ currentInfo.views }}</view>
+                        <view class="row" v-if="publishDateText">
+                            <view class="label">{{ t('common.publishDate') }}</view>
+                            <view class="value">{{ publishDateText }}</view>
                         </view>
-                        <view class="row">
-                            <view class="label">下载：</view>
-                            <view class="value">{{ currentInfo.downloads }}</view>
-                        </view> -->
+                        <view class="row meta-row">
+                            <view class="label">{{ t('previewPage.views') }}</view>
+                            <view class="value">{{ currentInfo.views ?? 0 }}</view>
+                        </view>
+                        <view class="row meta-row">
+                            <view class="label">{{ t('previewPage.downloads') }}</view>
+                            <view class="value">{{ currentInfo.downloads ?? 0 }}</view>
+                        </view>
+                        <view class="row" v-if="resolutionText">
+                            <view class="label">{{ t('previewPage.resolution') }}</view>
+                            <view class="value">{{ resolutionText }}</view>
+                        </view>
+                        <view class="row" v-if="aspectRatioText">
+                            <view class="label">{{ t('previewPage.aspectRatio') }}</view>
+                            <view class="value">{{ aspectRatioText }}</view>
+                        </view>
                         <view class="row" v-if="currentInfo.description">
                             <view class="label">{{ t('previewPage.description') }}</view>
                             <view class="value" selectable>{{ currentInfo.description }}</view>
@@ -168,7 +187,7 @@
                         <view class="row">
                             <view class="label">{{ t('previewPage.tags') }}</view>
                             <view class="value tabs">
-                                <view class="tab" v-for="tab in currentInfo.tabs_list" :key="tab">
+                                <view class="tab" v-for="tab in currentInfo.tabs_list" :key="tab" @click="goSearchByTag(tab)">
                                     {{ tab }}
                                 </view>
                             </view>
@@ -295,8 +314,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { getStatusBarHeight } from '@/utils/system.js';
-import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
-import { downloadPic } from '@/common/core.js';
+import { useAdIntersititial } from '@/hooks/useAd.js';
 import {
     apiPostIncrementViews,
     apiPostIncrementDownloads,
@@ -307,7 +325,9 @@ import {
 import { useSettingsStore } from '@/stores/settings.js';
 
 import { useUserStore } from '@/stores/user.js';
+import { useLibraryStore } from '@/stores/library.js';
 const userStore = useUserStore();
+const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 
 // 通用导航对话框控制
@@ -377,7 +397,9 @@ const dateText = computed(() => {
 });
 const currentPreviewType = computed(() => settingsStore.options.previewType || 'classic');
 const isAdmin = computed(() => !!userStore.isAdmin);
+const isCurrentInWatchLater = computed(() => libraryStore.isInWatchLater(currentInfo.value?.id));
 const publisherName = computed(() => currentInfo.value?.publisher || t('common.appName'));
+const imageSizeMap = ref({});
 const publisherAvatar = computed(() => {
     const rawPublisher = String(currentInfo.value?.publisher || '')
         .trim()
@@ -386,6 +408,58 @@ const publisherAvatar = computed(() => {
     if (rawPublisher === 'pokemon') return '/static/icons/pokeball.svg';
     const seed = `${publisherName.value}-${currentInfo.value?.id || 'wall'}-${avatarSeedSalt}`;
     return `https://api.dicebear.com/9.x/bottts/svg?seed=${encodeURIComponent(seed)}`;
+});
+
+const getNumberField = (keys = []) => {
+    for (const key of keys) {
+        const value = Number(currentInfo.value?.[key]);
+        if (value > 0) return value;
+    }
+    return 0;
+};
+
+const currentImageSize = computed(() => {
+    const fromWall = {
+        width: getNumberField(['width', 'image_width', 'pic_width']),
+        height: getNumberField(['height', 'image_height', 'pic_height']),
+    };
+    if (fromWall.width && fromWall.height) return fromWall;
+    return imageSizeMap.value[currentInfo.value?.id] || { width: 0, height: 0 };
+});
+
+const resolutionText = computed(() => {
+    const { width, height } = currentImageSize.value;
+    if (!width || !height) return '';
+    return `${Math.round(width)} x ${Math.round(height)}`;
+});
+
+const getGreatestCommonDivisor = (a, b) => {
+    let x = Math.abs(Math.round(a));
+    let y = Math.abs(Math.round(b));
+    while (y) {
+        const next = x % y;
+        x = y;
+        y = next;
+    }
+    return x || 1;
+};
+
+const aspectRatioText = computed(() => {
+    const { width, height } = currentImageSize.value;
+    if (!width || !height) return '';
+    const divisor = getGreatestCommonDivisor(width, height);
+    return `${Math.round(width / divisor)}:${Math.round(height / divisor)}`;
+});
+
+const publishDateText = computed(() => {
+    const raw = currentInfo.value?.created_at || currentInfo.value?.created || currentInfo.value?.updated_at || '';
+    if (!raw) return '';
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return '';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
 });
 
 const classList = ref([]);
@@ -483,6 +557,11 @@ const openInfo = () => {
 const closeInfo = () => {
     infoPopup.value.close();
     displayAd.value = false;
+};
+
+const recordCurrentHistory = () => {
+    if (!isAdmin.value || !currentInfo.value?.id) return;
+    libraryStore.recordRecentView(currentInfo.value);
 };
 
 // 点击评分弹窗
@@ -709,6 +788,27 @@ const toggleCollect = async () => {
     }
 };
 
+const toggleWatchLater = () => {
+    if (!currentInfo.value?.id) return;
+    const saved = libraryStore.toggleWatchLater(currentInfo.value);
+    uni.showToast({
+        title: saved ? t('history.savedToast') : t('history.removedToast'),
+        icon: 'none',
+    });
+};
+
+const goSearchByTag = (tag) => {
+    const keyword = String(tag || '').trim();
+    if (!keyword) return;
+    if (isAdmin.value) {
+        libraryStore.bumpPreferredTag(keyword);
+    }
+    closeInfo();
+    uni.navigateTo({
+        url: `/pages/app/search?keyword=${encodeURIComponent(keyword)}`,
+    });
+};
+
 const submitScore = async () => {
     // TODO
     // 接口获取用户评分，没有评分的用户默认为0分
@@ -743,7 +843,16 @@ const submitScore = async () => {
 const adPopup = ref(null);
 
 const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
-// const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
+
+const recordDownloadAction = async () => {
+    incrementDownloads(currentInfo.value.id);
+    if (Object.keys(userStore.userinfo).length === 0) return;
+    await apiPostActions({
+        wall_id: currentInfo.value.id,
+        is_download: true,
+    });
+};
+
 const clickDownload = async () => {
     // #ifdef WEB
     showNavDialog({
@@ -779,17 +888,7 @@ const clickDownload = async () => {
         showInterstitialAd(currentInfo.value.picurl);
         destroyInterstitialAd(); // 销毁插屏广告
 
-        incrementDownloads(currentInfo.value.id);
-
-        // 如果已登录，写入 我的下载 的数据
-        if (Object.keys(userStore.userinfo).length > 0) {
-            let data = {
-                wall_id: currentInfo.value.id,
-                is_download: true,
-            };
-
-            let res = await apiPostActions(data);
-        }
+        await recordDownloadAction();
     }
     // #endif
 };
@@ -810,10 +909,18 @@ function readImgsFun() {
 
 const isImageLoaded = (index) => !!loadedImageMap.value[index];
 
-const handleImageLoad = (index) => {
+const handleImageLoad = (index, event) => {
     loadedImageMap.value = {
         ...loadedImageMap.value,
         [index]: true,
+    };
+    const item = classList.value[index];
+    const width = Number(event?.detail?.width || 0);
+    const height = Number(event?.detail?.height || 0);
+    if (!item?.id || !width || !height) return;
+    imageSizeMap.value = {
+        ...imageSizeMap.value,
+        [item.id]: { width, height },
     };
 };
 
@@ -837,6 +944,7 @@ onLoad((e) => {
     currentInfo.value = classList.value[currentIndex.value];
     if (currentInfo.value) {
         readImgsFun();
+        recordCurrentHistory();
         incrementViews(currentInfo.value.id);
     }
 
@@ -855,6 +963,7 @@ const swiperChange = (e) => {
     currentIndex.value = e.detail.current;
     currentInfo.value = classList.value[currentIndex.value];
     readImgsFun();
+    recordCurrentHistory();
 
     incrementViews(currentInfo.value.id);
 };
