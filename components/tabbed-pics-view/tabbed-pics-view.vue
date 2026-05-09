@@ -1,8 +1,21 @@
 <template>
     <view class="tabbed-container">
-        <!-- 1. 顶部导航栏 (复刻经典 3 按钮布局 + 日期切换) -->
-        <view class="header-bar">
+        <!-- 标签栏 (支持吸顶逻辑) -->
+        <view
+            v-if="
+                showHeader &&
+                (!hideHeaderIfEmpty || tabStates[currentIndex]?.images.length > 0 || tabStates[currentIndex]?.isLoading)
+            "
+            class="header-bar"
+            :style="{
+                transform: `translateY(${Math.max(stickyTop, headerHeight - headerScrollTop)}px)`,
+                position: 'absolute',
+                top: 0,
+                zIndex: 100,
+            }"
+        >
             <scroll-view
+                v-if="tabs.length > 1"
                 scroll-x
                 class="tabs-scroll"
                 :scroll-into-view="'tab-' + (currentIndex > 1 ? currentIndex - 1 : 0)"
@@ -25,12 +38,8 @@
                 </view>
             </scroll-view>
 
-            <!-- 2. 工具栏 (复位列数/视图切换) -->
-            <view class="tool-actions">
-                <!-- <view class="action-btn" @click="onChangeColumn">
-                    <image class="icon-svg" v-if="settingsStore.options.column === 3" src="@/static/icons/numeric-3-box.svg" mode="aspectFit"></image>
-                    <image class="icon-svg" v-else src="@/static/icons/numeric-2-box.svg" mode="aspectFit"></image>
-                </view> -->
+            <!-- 3. 工具栏 (复位列数/视图切换) -->
+            <view class="tool-actions" :class="{ 'is-single': tabs.length <= 1 }">
                 <view class="action-btn" @click="onChangeView">
                     <image
                         class="icon-svg"
@@ -58,6 +67,9 @@
                     @refresherrefresh="onRefresh(index)"
                 >
                     <view class="container">
+                        <!-- 顶部占位，留给可滚动头部 -->
+                        <view :style="{ height: headerHeight + tabsHeight + 'px' }"></view>
+
                         <!-- 布局渲染层 -->
                         <view class="layout" :style="getLayoutStyle(index)">
                             <template v-for="(item, idx) in tabStates[index]?.images" :key="item.id">
@@ -109,8 +121,16 @@
 
                         <!-- 空状态 -->
                         <view class="empty-wrap" v-if="!tabStates[index]?.isLoading && tabStates[index]?.images.length === 0">
-                            <image src="/static/images/pics/empty.png" mode="aspectFit"></image>
-                            <text>换个排序试试，也许有惊喜</text>
+                            <slot name="empty" :index="index">
+                                <view class="default-empty">
+                                    <image
+                                        src="/static/images/pics/empty.png"
+                                        mode="aspectFit"
+                                        class="default-empty__img"
+                                    ></image>
+                                    <text class="default-empty__text">暂无相关内容</text>
+                                </view>
+                            </slot>
                         </view>
 
                         <view class="safe-area-bottom"></view>
@@ -118,13 +138,9 @@
                 </scroll-view>
             </swiper-item>
         </swiper>
-        
+
         <!-- 4. 返回顶部按钮 -->
-        <view 
-            class="back-top" 
-            :class="{ show: tabStates[currentIndex]?.showBackTop }" 
-            @click="handleBackTop"
-        >
+        <view class="back-top" :class="{ show: tabStates[currentIndex]?.showBackTop }" @click="handleBackTop">
             <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
         </view>
     </view>
@@ -132,7 +148,7 @@
 
 <script setup>
 import { ref, reactive, watch, computed, onMounted, nextTick } from 'vue';
-import { apiGetClassList } from '@/api/wallpaper.js';
+import { apiGetClassList, apiGetSearchData, apiGetActions } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -143,16 +159,24 @@ const userStore = useUserStore();
 const props = defineProps({
     tabs: { type: Array, required: true },
     initialIndex: { type: Number, default: 0 },
+    showHeader: { type: Boolean, default: true },
+    apiType: { type: String, default: 'classList' },
+    hideHeaderIfEmpty: { type: Boolean, default: false },
+    headerHeight: { type: Number, default: 0 },
+    tabsHeight: { type: Number, default: 44 },
+    stickyTop: { type: Number, default: 0 },
 });
 
+const emit = defineEmits(['update', 'change', 'scroll']);
+
 const currentIndex = ref(props.initialIndex);
-const dateSortAsc = ref(true); // 时间排序方向标识 (true: 升序, false: 降序)
+const headerScrollTop = ref(0);
+const dateSortAsc = ref(true);
 const canShowAd = computed(() => !userStore.isVip && userStore.showAd);
 const isWaterfall = computed(() => settingsStore.options.view !== 'window');
 const imageMode = computed(() => (isWaterfall.value ? 'widthFix' : 'aspectFill'));
 const lockedSize = computed(() => (settingsStore.options.column === 3 ? 18 : 22));
 
-// 状态深度分区存储
 const tabStates = reactive(
     props.tabs.map(() => ({
         images: [],
@@ -169,7 +193,6 @@ const tabStates = reactive(
     })),
 );
 
-// 1. 数据获取核心
 const fetchData = async (index, init = false) => {
     const state = tabStates[index];
     if (!state || state.isLoading || (state.noMoreData && !init)) return;
@@ -184,19 +207,45 @@ const fetchData = async (index, init = false) => {
 
     try {
         state.isLoading = true;
-        // 动态合并请求参数
+        if (props.apiType === 'local') {
+            const localData = props.tabs[index].data || [];
+            const newData = localData.map((item) => ({
+                ...item,
+                loaded: false,
+                position: {},
+            }));
+            state.images = newData;
+            state.noMoreData = true;
+            await processImages(index, newData);
+            return;
+        }
+
         const requestParams = {
             ...props.tabs[index].query,
             pageNum: state.pageNum,
             pageSize: 12,
         };
 
-        // 特殊处理日期 Tab 的排序动态性
         if (props.tabs[index].isDate) {
             requestParams.sortord = dateSortAsc.value ? 'date_asc' : 'date_desc';
         }
 
-        const res = await apiGetClassList(requestParams);
+        let res;
+        if (props.apiType === 'search') {
+            if (!requestParams.keyword) {
+                state.isLoading = false;
+                return;
+            }
+            res = await apiGetSearchData(requestParams);
+        } else if (props.apiType === 'actions') {
+            res = await apiGetActions(requestParams);
+        } else {
+            if (props.apiType === 'classList' && requestParams.classify_id !== undefined && isNaN(requestParams.classify_id)) {
+                state.isLoading = false;
+                return;
+            }
+            res = await apiGetClassList(requestParams);
+        }
         const newData = (res.data || []).map((item) => ({
             ...handlePicUrl(item),
             loaded: false,
@@ -207,6 +256,10 @@ const fetchData = async (index, init = false) => {
         else state.images.push(...newData);
 
         await processImages(index, newData);
+
+        if (index === currentIndex.value) {
+            emit('update', { images: state.images, index });
+        }
 
         if (state.pageNum >= (res.pagination?.total_pages || 1)) {
             state.noMoreData = true;
@@ -219,10 +272,8 @@ const fetchData = async (index, init = false) => {
     }
 };
 
-// 2. 交互逻辑：Tab 点击处理 (含日期逻辑)
 const handleTabClick = (index) => {
     if (currentIndex.value === index) {
-        // 如果是日期标签且已激活，再次点击切换排序
         if (props.tabs[index].isDate) {
             dateSortAsc.value = !dateSortAsc.value;
             fetchData(index, true);
@@ -234,14 +285,15 @@ const handleTabClick = (index) => {
 
 const onSwiperChange = (e) => {
     currentIndex.value = e.detail.current;
+    emit('change', currentIndex.value);
+    emit('update', { images: tabStates[currentIndex.value].images, index: currentIndex.value });
 };
 
-// 3. 布局重绘与计算逻辑 (略，保持原有高性能方案)
 const processImages = async (index, list) => {
     const state = tabStates[index];
     const { screenWidth } = uni.getSystemInfoSync();
     const colCount = settingsStore.options.column;
-    const gap = colCount === 3 ? 12 : 18;
+    const gap = colCount === 3 ? 12 : 15;
     const colWidth = (screenWidth - (colCount + 1) * gap) / colCount;
 
     if (state.waterfall.columnHeights.length !== colCount) {
@@ -253,14 +305,12 @@ const processImages = async (index, list) => {
         let h = item.height;
         let mode = isWaterfall.value ? 'widthFix' : 'aspectFill';
 
-        // 如果 API 没返回尺寸，才去获取图片信息 (降级处理)
         if (!w || !h) {
             try {
                 const info = await getImageInfo(item.smallPicurl);
                 w = info.width || 300;
                 h = info.height || 600;
             } catch (e) {
-                console.warn('getImageInfo failed, using fallback', e);
                 w = 300;
                 h = 600;
                 if (isWaterfall.value) mode = 'aspectFill';
@@ -270,8 +320,6 @@ const processImages = async (index, list) => {
         item.width = w;
         item.height = h;
         item.imageMode = mode;
-        // 既然已经有了尺寸并计算了布局，标记为加载中，但实际图片显示仍可由 @load 控制
-        // 这里保持 item.loaded = true 意味着布局占位符可以显示了
         item.loaded = true;
 
         if (isWaterfall.value) {
@@ -293,7 +341,7 @@ const processImages = async (index, list) => {
 
 const getLayoutStyle = (index) => {
     const colCount = settingsStore.options.column;
-    const gap = colCount === 3 ? 12 : 18;
+    const gap = colCount === 3 ? 12 : 15;
     if (!isWaterfall.value)
         return { display: 'grid', gridTemplateColumns: `repeat(${colCount}, 1fr)`, gap: `${gap}px`, padding: `${gap}px` };
     return { position: 'relative', height: `${tabStates[index]?.waterfall.height || 0}px`, padding: `${gap}px` };
@@ -326,13 +374,18 @@ const onReachLower = (index) => {
 };
 const onScroll = (e, index) => {
     const state = tabStates[index];
-    state.oldScrollTop = e.detail.scrollTop;
-    // 滚动超过 400 像素显示返回顶部
-    state.showBackTop = e.detail.scrollTop > 400;
+    const scrollTop = e.detail.scrollTop;
+    state.oldScrollTop = scrollTop;
+    state.showBackTop = scrollTop > 400;
+
+    if (index === currentIndex.value) {
+        headerScrollTop.value = Math.min(scrollTop, props.headerHeight);
+    }
+
+    emit('scroll', { scrollTop, index });
 };
 const handleBackTop = () => {
     const state = tabStates[currentIndex.value];
-    // 先设置为旧值，再设置为 0 触发变更监听
     state.scrollTop = state.oldScrollTop;
     nextTick(() => {
         state.scrollTop = 0;
@@ -343,7 +396,6 @@ const onRefresh = (index) => {
     fetchData(index, true);
 };
 
-const onChangeColumn = () => (settingsStore.options.column = settingsStore.options.column === 3 ? 2 : 3);
 const onChangeView = () => (settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window');
 const onAdLoad = (index, slotKey) => {
     tabStates[index].adLoadMap[slotKey] = true;
@@ -357,7 +409,6 @@ const openPreview = (id, index) => {
     uni.navigateTo({ url: `/pages/app/preview?id=${id}` });
 };
 
-// 监听与校准
 const recalculateLayout = async (index) => {
     const state = tabStates[index];
     if (!state || state.images.length === 0) return;
@@ -376,6 +427,47 @@ watch(
 );
 
 watch(
+    () => props.tabs,
+    (newTabs) => {
+        if (newTabs.length !== tabStates.length) {
+            if (newTabs.length > tabStates.length) {
+                for (let i = tabStates.length; i < newTabs.length; i++) {
+                    tabStates.push({
+                        images: [],
+                        pageNum: 1,
+                        isLoading: false,
+                        isRefreshing: false,
+                        noMoreData: false,
+                        scrollTop: 0,
+                        oldScrollTop: 0,
+                        showBackTop: false,
+                        adErrorMap: {},
+                        adLoadMap: {},
+                        waterfall: { height: 0, columnHeights: [] },
+                    });
+                }
+            } else {
+                tabStates.splice(newTabs.length);
+            }
+        }
+        if (props.apiType === 'local') {
+            tabStates.forEach((_, i) => fetchData(i, true));
+        }
+    },
+    { deep: true },
+);
+
+watch(
+    () => props.tabs[currentIndex.value]?.query,
+    (newQuery, oldQuery) => {
+        if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
+            fetchData(currentIndex.value, true);
+        }
+    },
+    { deep: true },
+);
+
+watch(
     () => settingsStore.options.column,
     () => tabStates.forEach((_, i) => recalculateLayout(i)),
 );
@@ -391,208 +483,237 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .tabbed-container {
+    position: relative;
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     background: #0b1017;
+}
 
-    .header-bar {
-        height: 88rpx;
-        background: rgba(15, 23, 42, 0.94);
-        backdrop-filter: blur(24rpx);
-        border-bottom: 1rpx solid rgba(255, 255, 255, 0.04);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 10rpx;
-        position: relative;
-        z-index: 100;
+.header-slot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    pointer-events: auto;
+    overflow: hidden;
+    will-change: transform, opacity;
+}
 
-        .tabs-scroll {
-            width: 0;
-            flex: 1;
-            height: 100%;
-            white-space: nowrap;
-            .tabs-list {
-                display: flex;
-                height: 100%;
-                align-items: center;
-                padding: 0 16rpx;
-                .tab-btn-wrapper {
-                    margin-right: 14rpx;
-                    button {
-                        min-height: 58rpx;
-                        padding: 0 32rpx;
-                        border-radius: 999rpx;
-                        font-size: 26rpx;
-                        font-weight: 600;
-                        color: #919fac;
-                        background: rgba(32, 40, 52, 0.95);
-                        border: 1rpx solid rgba(255, 255, 255, 0.04);
-                        transition: all 0.3s;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 8rpx;
-                        line-height: normal;
+.header-bar {
+    width: 100%;
+    height: 88rpx;
+    z-index: 100;
+    background: rgba(11, 16, 23, 0.95);
+    backdrop-filter: blur(20rpx);
+    border-bottom: 1rpx solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10rpx;
+    will-change: transform;
 
-                        &::after {
-                            border: none;
-                        }
-
-                        &.active {
-                            color: #ffffff;
-                            background: #2b8cee;
-                            border-color: rgba(43, 140, 238, 0.2);
-                            box-shadow: 0 12rpx 28rpx rgba(43, 140, 238, 0.34);
-                        }
-                        .sort-icon {
-                            margin-left: 2rpx;
-                            display: flex;
-                            align-items: center;
-                        }
-                    }
-                }
-            }
-        }
-
-        .tool-actions {
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            gap: 12rpx;
-            padding: 0 20rpx;
-            border-left: 1rpx solid rgba(255, 255, 255, 0.08);
-            background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.8));
-
-            .action-btn {
-                width: 58rpx;
-                height: 58rpx;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(41, 52, 68, 0.98);
-                border: 1rpx solid rgba(255, 255, 255, 0.05);
-                border-radius: 20rpx;
-                transition: all 0.2s;
-                .icon-svg {
-                    width: 38rpx;
-                    height: 38rpx;
-                    filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg)
-                        brightness(103%) contrast(101%);
-                }
-                &:active {
-                    transform: scale(0.9);
-                    background: rgba(255, 255, 255, 0.05);
-                }
-            }
-        }
-    }
-
-    .content-swiper {
+    .tabs-scroll {
+        width: 0;
         flex: 1;
         height: 100%;
-    }
-    .tab-scroll-view {
-        height: 100%;
-        width: 100%;
-    }
-    .container {
-        padding-bottom: 60rpx;
-        .layout {
-            .box {
-                background: rgba(255, 255, 255, 0.02);
-                overflow: hidden;
-                position: relative;
+        white-space: nowrap;
+        .tabs-list {
+            display: flex;
+            height: 100%;
+            align-items: center;
+            padding: 0 16rpx;
+            .tab-btn-wrapper {
+                margin-right: 14rpx;
+                button {
+                    min-height: 58rpx;
+                    padding: 0 32rpx;
+                    border-radius: 999rpx;
+                    font-size: 26rpx;
+                    font-weight: 600;
+                    color: #919fac;
+                    background: rgba(32, 40, 52, 0.95);
+                    border: 1rpx solid rgba(255, 255, 255, 0.04);
+                    transition: all 0.3s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8rpx;
+                    line-height: normal;
 
-                &.loaded-glow {
-                    box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.3);
-                }
-
-                .img {
-                    width: 100%;
-                    height: 100%;
-                    opacity: 0;
-                    transform: scale(1.05);
-                    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-                    &.loaded {
-                        opacity: 1;
-                        transform: scale(1);
+                    &::after {
+                        border: none;
                     }
-                }
 
-                .lock {
-                    position: absolute;
-                    opacity: 0;
-                    transform: scale(0.5);
-                    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-                    z-index: 5;
-                    pointer-events: none;
-                    &.loaded {
-                        opacity: 1;
-                        transform: scale(1);
+                    &.active {
+                        color: #ffffff;
+                        background: #2b8cee;
+                        border-color: rgba(43, 140, 238, 0.2);
+                        box-shadow: 0 12rpx 28rpx rgba(43, 140, 238, 0.34);
+                    }
+                    .sort-icon {
+                        margin-left: 2rpx;
+                        display: flex;
+                        align-items: center;
                     }
                 }
             }
         }
     }
-    .empty-wrap {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding-top: 260rpx;
-        image {
-            width: 180rpx;
-            height: 180rpx;
-            opacity: 0.2;
-        }
-        text {
-            color: #5c6b7a;
-            font-size: 26rpx;
-            margin-top: 32rpx;
-        }
-    }
-    .safe-area-bottom {
-        height: env(safe-area-inset-bottom);
-        width: 100%;
-    }
 
-    .ad-row {
-        grid-column: 1 / -1;
-        width: 100%;
-        min-height: 0;
-        overflow: hidden;
-        margin-bottom: 20rpx;
-    }
-
-    .back-top {
-        position: fixed;
-        right: 40rpx;
-        bottom: calc(60rpx + env(safe-area-inset-bottom));
-        width: 90rpx;
-        height: 90rpx;
-        background: rgba(43, 140, 238, 0.85);
-        backdrop-filter: blur(10rpx);
-        border-radius: 50%;
+    .tool-actions {
+        flex-shrink: 0;
         display: flex;
         align-items: center;
-        justify-content: center;
-        box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.35);
-        opacity: 0;
-        transform: translateY(100rpx) scale(0.5);
-        transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-        z-index: 1000;
-        border: 1rpx solid rgba(255, 255, 255, 0.1);
+        gap: 12rpx;
+        padding: 0 20rpx;
+        border-left: 1rpx solid rgba(255, 255, 255, 0.08);
 
-        &.show {
-            opacity: 1;
-            transform: translateY(0) scale(1);
+        &.is-single {
+            border-left: none;
+            width: 100%;
+            justify-content: flex-end;
         }
 
-        &:active {
-            transform: scale(0.9);
-            background: rgba(43, 140, 238, 1);
+        .action-btn {
+            width: 58rpx;
+            height: 58rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(41, 52, 68, 0.98);
+            border: 1rpx solid rgba(255, 255, 255, 0.05);
+            border-radius: 20rpx;
+            transition: all 0.2s;
+            .icon-svg {
+                width: 38rpx;
+                height: 38rpx;
+                filter: brightness(0) saturate(100%) invert(94%) sepia(10%) saturate(473%) hue-rotate(183deg) brightness(103%)
+                    contrast(101%);
+            }
+            &:active {
+                transform: scale(0.9);
+                background: rgba(255, 255, 255, 0.05);
+            }
         }
+    }
+}
+
+.content-swiper {
+    flex: 1;
+    height: 100%;
+}
+.tab-scroll-view {
+    height: 100%;
+    width: 100%;
+}
+.container {
+    padding-bottom: 60rpx;
+    .layout {
+        .box {
+            background: rgba(255, 255, 255, 0.02);
+            overflow: hidden;
+            position: relative;
+
+            &.loaded-glow {
+                box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.3);
+            }
+
+            .img {
+                width: 100%;
+                height: 100%;
+                opacity: 0;
+                transform: scale(1.05);
+                transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                &.loaded {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+
+            .lock {
+                position: absolute;
+                opacity: 0;
+                transform: scale(0.5);
+                transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+                z-index: 5;
+                pointer-events: none;
+                &.loaded {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+        }
+    }
+}
+.empty-wrap {
+    padding: 160rpx 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.default-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0.3;
+}
+
+.default-empty__img {
+    width: 180rpx;
+    height: 180rpx;
+    margin-bottom: 24rpx;
+}
+
+.default-empty__text {
+    font-size: 26rpx;
+    color: #eef5ff;
+}
+.safe-area-bottom {
+    height: env(safe-area-inset-bottom);
+    width: 100%;
+}
+
+.ad-row {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+    margin-bottom: 20rpx;
+}
+
+.back-top {
+    position: fixed;
+    right: 40rpx;
+    bottom: calc(60rpx + env(safe-area-inset-bottom));
+    width: 90rpx;
+    height: 90rpx;
+    background: rgba(43, 140, 238, 0.85);
+    backdrop-filter: blur(10rpx);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transform: translateY(100rpx) scale(0.5);
+    transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 1000;
+    border: 1rpx solid rgba(255, 255, 255, 0.1);
+
+    &.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    &:active {
+        transform: scale(0.9);
+        background: rgba(43, 140, 238, 1);
     }
 }
 </style>

@@ -303,6 +303,7 @@
             :description="dialogState.description"
             :confirmText="dialogState.confirmText"
             :cancelText="dialogState.cancelText"
+            :showCancel="dialogState.showCancel"
             @confirm="dialogState.onConfirm"
             @cancel="dialogState.onCancel"
         ></popup-navigation-dialog>
@@ -337,6 +338,7 @@ const dialogState = ref({
     description: '',
     confirmText: '',
     cancelText: '',
+    showCancel: true,
     onConfirm: () => {},
     onCancel: () => {},
 });
@@ -351,6 +353,7 @@ const showNavDialog = (config) => {
         description: config.content || '',
         confirmText: config.confirmText || t('common.confirm'),
         cancelText: config.cancelText || t('common.cancel'),
+        showCancel: config.showCancel !== false,
         onConfirm: () => {
             if (config.onConfirm) config.onConfirm();
         },

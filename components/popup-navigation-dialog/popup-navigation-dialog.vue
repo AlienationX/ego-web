@@ -7,7 +7,7 @@
             </view>
 
             <view class="dialog__actions">
-                <view class="dialog__button dialog__button--cancel" @click="handleCancel">
+                <view v-if="showCancel" class="dialog__button dialog__button--cancel" @click="handleCancel">
                     {{ cancelText || $t('common.cancel') }}
                 </view>
                 <view class="dialog__button dialog__button--confirm" @click="handleConfirm">
@@ -39,6 +39,10 @@ const props = defineProps({
         default: '',
     },
     maskClick: {
+        type: Boolean,
+        default: true,
+    },
+    showCancel: {
         type: Boolean,
         default: true,
     },

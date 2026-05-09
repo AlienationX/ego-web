@@ -26,77 +26,57 @@
         <view class="fill" :style="{ height: `${navBarHeight}px` }"></view>
 
         <view class="page-wrap">
-            <view v-if="showInitialLoading" class="search-loading-wrap">
-                <view class="preview-loading">
-                    <view class="preview-loading__glow"></view>
-                    <rotate-loading :size="88"></rotate-loading>
-                    <view class="preview-loading__text">{{ t('message.loading') }}</view>
+            <view v-if="showWordBoard" class="explore-board">
+                <view class="section-head">
+                    <view class="section-head__title">{{ t('common.hotSearch') }}</view>
+                    <uni-icons type="fire-filled" size="16" color="#619aef"></uni-icons>
+                </view>
+                <view class="keyword-cloud">
+                    <view class="keyword-chip" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">
+                        {{ tab }}
+                    </view>
+                </view>
+
+                <view v-if="searchHistory.length" class="history-block">
+                    <view class="section-head">
+                        <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}</view>
+                        <view class="section-head__action" @click="removeHistory">{{ t('search.clearAll') }}</view>
+                    </view>
+                    <view class="history-list">
+                        <view class="history-item" v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">
+                            <view class="history-item__left">
+                                <uni-icons type="refreshempty" size="16" color="#7788a6"></uni-icons>
+                                <text>{{ tab }}</text>
+                            </view>
+                            <uni-icons type="top" size="13" color="#607089"></uni-icons>
+                        </view>
+                    </view>
                 </view>
             </view>
 
-            <template v-else>
-                <view v-if="showWordBoard" class="explore-board">
-                    <view class="section-head">
-                        <view class="section-head__title">{{ t('common.hotSearch') }}</view>
-                        <uni-icons type="fire-filled" size="16" color="#619aef"></uni-icons>
-                    </view>
-                    <view class="keyword-cloud">
-                        <view class="keyword-chip" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">
-                            {{ tab }}
-                        </view>
-                    </view>
-
-                    <view v-if="searchHistory.length" class="history-block">
-                        <view class="section-head">
-                            <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}</view>
-                            <view class="section-head__action" @click="removeHistory">{{ t('search.clearAll') }}</view>
-                        </view>
-                        <view class="history-list">
-                            <view class="history-item" v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">
-                                <view class="history-item__left">
-                                    <uni-icons type="refreshempty" size="16" color="#7788a6"></uni-icons>
-                                    <text>{{ tab }}</text>
-                                </view>
-                                <uni-icons type="top" size="13" color="#607089"></uni-icons>
+            <view v-else class="list-container">
+                <tabbed-pics-view
+                    :show-header="true"
+                    :tabs="tabs"
+                    api-type="search"
+                    :hide-header-if-empty="true"
+                    @update="onListUpdate"
+                >
+                    <template #empty>
+                        <view class="noResult">
+                            <view class="noResult__icon">
+                                <uni-icons type="search" size="56" color="#619aef"></uni-icons>
                             </view>
+                            <view class="noResult__title">{{ t('search.noResultTitle') }}</view>
+                            <view class="noResult__text">{{ t('common.noResult') }}</view>
+                            <view class="noResult__code">404_NOT_FOUND</view>
                         </view>
-                    </view>
-                </view>
-
-                <view v-if="noResult" class="noResult">
-                    <view class="noResult__icon">
-                        <uni-icons type="search" size="56" color="#619aef"></uni-icons>
-                    </view>
-                    <view class="noResult__title">{{ t('search.noResultTitle') }}</view>
-                    <view class="noResult__text">{{ t('common.noResult') }}</view>
-                    <view class="noResult__code">Error Code: 404_NOT_FOUND</view>
-                </view>
-
-                <template v-if="classList.length">
-                    <view v-if="isAdmin" class="toolbar" :style="{ top: `${navBarHeight}px` }">
-                        <sort-toolbar
-                            theme="dark"
-                            :active-key="activeButton"
-                            :date-asc="dateSortAsc"
-                            :column="settingsStore.options.column"
-                            :view="settingsStore.options.view"
-                            @query="onSortQuery"
-                            @toggle-column="onChangeColumn"
-                            @toggle-view="onChangeView"
-                        ></sort-toolbar>
-                    </view>
-
-                    <pics-view :classList="classList"></pics-view>
-
-                    <view class="loadingLayout" v-if="noData || classList.length">
-                        <uni-load-more :status="noData ? 'noMore' : 'loading'" />
-                    </view>
-                </template>
-            </template>
+                    </template>
+                </tabbed-pics-view>
+            </view>
         </view>
 
-        <back-to-top ref="backToTopRef"></back-to-top>
-        <custom-ad-banner v-if="!noResult && !classList.length" class="bottom-ad"></custom-ad-banner>
+        <custom-ad-banner v-if="showWordBoard" class="bottom-ad"></custom-ad-banner>
     </view>
 </template>
 
@@ -128,26 +108,41 @@ const queryParams = ref({
     keyword: '',
     sortord: '',
 });
-const lastKeyword = ref('');
 const searchHistory = ref(uni.getStorageSync('searchHistory') || []);
 const showWordBoard = ref(true);
 const noResult = ref(false);
-const noData = ref(false);
-const isLoading = ref(false);
-const isPaging = ref(false);
-const classList = ref([]);
-const pendingList = ref([]);
 const activeButton = ref('');
 const dateSortAsc = ref(true);
+const classList = ref([]);
 
-const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
-    if (key === 'recommend') return 'random';
-    if (key === 'score') return 'score';
-    if (key === 'views') return 'views';
-    if (key === 'downloads') return 'downloads';
-    if (key === 'date') return isAsc ? 'date_asc' : 'date_desc';
-    return '';
+const onListUpdate = (e) => {
+    classList.value = e.images;
 };
+
+const tabs = computed(() => [
+    {
+        label: t('common.recommend'),
+        query: {
+            keyword: queryParams.value.keyword,
+            sortord: 'random',
+        },
+    },
+    {
+        label: t('common.score'),
+        query: {
+            keyword: queryParams.value.keyword,
+            sortord: 'score',
+        },
+    },
+    {
+        label: t('common.publishDate'),
+        query: {
+            keyword: queryParams.value.keyword,
+            sortord: 'date_desc',
+        },
+        isDate: true,
+    },
+]);
 
 const syncSearchSortState = () => {
     settingsStore.options.searchSortKey = activeButton.value;
@@ -164,53 +159,18 @@ const recommendList = computed(() => {
     return keywordsString.split(',');
 });
 
-const showInitialLoading = computed(() => isLoading.value && !isPaging.value);
+// Loading state managed by tabbed-pics-view
 
-const init = (keyword = '', resetShowWordBoard = true, resetNoResult = false, resetClassList = []) => {
-    queryParams.value = {
-        pageNum: 1,
-        pageSize: 12,
-        keyword,
-        sortord: getSortordByKey(activeButton.value, dateSortAsc.value),
-    };
+const init = (keyword = '', resetShowWordBoard = true, resetNoResult = false) => {
+    queryParams.value.keyword = keyword;
+    queryParams.value.pageNum = 1;
     showWordBoard.value = resetShowWordBoard;
     noResult.value = resetNoResult;
-    noData.value = false;
-    classList.value = resetClassList;
 };
 
 const searchData = async () => {
-    try {
-        isPaging.value = queryParams.value.pageNum > 1 && pendingList.value.length > 0;
-        isLoading.value = true;
-        const res = await apiGetSearchData(queryParams.value);
-        const rows = Array.isArray(res?.data) ? res.data : [];
-        const fullData = rows
-            .map((item) => handlePicUrl(item))
-            .filter((item) => !isAdmin.value || !libraryStore.isWallHidden(item));
-        pendingList.value.push(...fullData);
-        classList.value = [...pendingList.value];
-
-        uni.setStorageSync('wallList', pendingList.value);
-
-        const totalPages = Number(res?.pagination?.total_pages || 0);
-        if (totalPages > 0) {
-            noData.value = queryParams.value.pageNum >= totalPages;
-        } else {
-            noData.value = rows.length < queryParams.value.pageSize;
-        }
-
-        if (fullData.length === 0 && pendingList.value.length === 0) {
-            showWordBoard.value = true;
-            noResult.value = true;
-        } else {
-            showWordBoard.value = false;
-            noResult.value = false;
-        }
-    } finally {
-        isLoading.value = false;
-        isPaging.value = false;
-    }
+    showWordBoard.value = false;
+    noResult.value = false;
 };
 
 const onSearch = () => {
@@ -222,19 +182,12 @@ const onSearch = () => {
     searchHistory.value = [...new Set([queryParams.value.keyword, ...searchHistory.value])].slice(0, 10);
     uni.setStorageSync('searchHistory', searchHistory.value);
 
-    if (lastKeyword.value !== queryParams.value.keyword) {
-        pendingList.value = [];
-        uni.removeStorageSync('wallList');
-    }
-
     init(queryParams.value.keyword);
     searchData();
-    lastKeyword.value = queryParams.value.keyword;
 };
 
 const onClear = () => {
     init();
-    pendingList.value = [];
     uni.removeStorageSync('wallList');
 };
 
@@ -260,14 +213,6 @@ const removeHistory = () => {
     });
 };
 
-const runQuery = (sortord) => {
-    init(queryParams.value.keyword, showWordBoard.value, noResult.value, [...pendingList.value]);
-    queryParams.value.sortord = sortord;
-    pendingList.value = [];
-    searchData();
-    backToTopRef.value?.scrollToTop();
-};
-
 const onSortQuery = (key) => {
     if (key === 'date') {
         activeButton.value = 'date';
@@ -277,7 +222,6 @@ const onSortQuery = (key) => {
         dateSortAsc.value = false;
     }
     syncSearchSortState();
-    runQuery(getSortordByKey(activeButton.value, dateSortAsc.value));
 };
 
 const onChangeColumn = () => {
@@ -293,9 +237,7 @@ const goBack = () => {
 };
 
 onReachBottom(() => {
-    if (noData.value || !classList.value.length) return;
-    queryParams.value.pageNum++;
-    searchData();
+    // 逻辑由 tabbed-pics-view 接管
 });
 
 onLoad((options) => {
@@ -312,29 +254,22 @@ onUnload(() => {
     uni.removeStorageSync('wallList');
 });
 
-onPageScroll((e) => {
-    backToTopRef.value.showBackToTop = e.scrollTop > 200;
-});
+onPageScroll(() => {});
 </script>
 
 <style lang="scss" scoped>
 .layout {
-    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
     background:
         radial-gradient(circle at top right, rgba(97, 154, 239, 0.18), transparent 24%),
         linear-gradient(180deg, #0b1017 0%, #10161f 32%, #0b1017 100%);
 }
 
-.status-bar-bg {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    z-index: 101;
-    background: #0b1017;
-}
-
 .search-shell {
+    flex-shrink: 0;
     position: fixed;
     left: 0;
     right: 0;
@@ -347,24 +282,17 @@ onPageScroll((e) => {
     border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
 }
 
-.search-shell__back {
-    width: 68rpx;
-    height: 68rpx;
-    border-radius: 999rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(97, 154, 239, 0.12);
-    border: 1rpx solid rgba(97, 154, 239, 0.16);
-    flex-shrink: 0;
-}
-
-.fill {
-    height: 1rpx;
-}
-
 .page-wrap {
-    padding: 0 0 60rpx;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.list-container {
+    flex: 1;
+    min-height: 0;
 }
 
 .search-box {
@@ -495,12 +423,13 @@ onPageScroll((e) => {
 .noResult {
     margin: 52rpx 24rpx 0;
     padding: 54rpx 28rpx;
-    border: 2rpx dashed rgba(97, 154, 239, 0.4);
-    background: rgba(97, 154, 239, 0.06);
+    // border: 2rpx dashed rgba(97, 154, 239, 0.4);
+    // background: rgba(97, 154, 239, 0.06);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    // min-width: 500rpx;
 }
 
 .noResult__icon {
@@ -508,7 +437,7 @@ onPageScroll((e) => {
 }
 
 .noResult__title {
-    font-size: 32rpx;
+    font-size: 42rpx;
     font-weight: 800;
     color: #eef5ff;
     text-transform: uppercase;

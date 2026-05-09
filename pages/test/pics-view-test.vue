@@ -30,9 +30,9 @@ import TabbedPicsView from '@/components/tabbed-pics-view/tabbed-pics-view.vue';
 const statusBarHeight = ref(getStatusBarHeight());
 
 const testTabs = ref([
-    { label: '推荐', query: { sortord: 'random' } },
-    { label: '最热', query: { sortord: 'score' } },
-    { label: '日期', query: { sortord: 'date_desc' }, isDate: true }
+    { label: '推荐', query: { classify_id: 1, sortord: 'random' } },
+    { label: '最热', query: { classify_id: 1, sortord: 'score' } },
+    { label: '日期', query: { classify_id: 1, sortord: 'date_desc' }, isDate: true }
 ]);
 
 const goBack = () => {

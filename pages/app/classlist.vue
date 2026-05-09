@@ -20,9 +20,27 @@
             </view>
         </view>
 
-        <view class="fill" :style="{ height: `${showTopbar ? navBarHeight : 0}px` }"></view>
+        <view class="content-wrapper">
+            <tabbed-pics-view
+                v-if="currentId"
+                :show-header="true"
+                :tabs="tabs"
+                api-type="classList"
+                :header-height="heroHeightPx"
+                :tabs-height="44"
+                :sticky-top="navBarHeight"
+                @update="onListUpdate"
+                @scroll="onScroll"
+            ></tabbed-pics-view>
+        </view>
 
-        <view class="hero">
+        <view
+            class="hero"
+            :style="{
+                transform: `translateY(${-headerScrollTop}px)`,
+                opacity: 1 - headerScrollTop / heroHeightPx,
+            }"
+        >
             <image class="hero__image" :src="heroImage" mode="aspectFill"></image>
             <view class="hero__overlay"></view>
             <view class="hero__back" :style="{ top: `${statusBarHeight + 12}px` }" @click="goBack">
@@ -33,30 +51,6 @@
                 <view class="hero__title">{{ heroTitle }}</view>
                 <view class="hero__desc">{{ heroDesc }}</view>
             </view>
-        </view>
-
-        <view v-if="isAdmin" class="toolbar" :style="{ top: `${showTopbar ? navBarHeight : 0}px` }">
-            <sort-toolbar
-                theme="dark"
-                :active-key="activeButton"
-                :date-asc="dateSortAsc"
-                :column="settingsStore.options.column"
-                :view="settingsStore.options.view"
-                @query="onSortQuery"
-                @toggle-column="onChangeColumn"
-                @toggle-view="onChangeView"
-            ></sort-toolbar>
-        </view>
-
-        <view class="content-wrapper">
-            <pics-view :classList="classList"></pics-view>
-
-            <view class="loadingLayout" v-show="noData || isRunning">
-                <uni-load-more :status="noData ? 'noMore' : 'loading'"></uni-load-more>
-            </view>
-
-            <back-to-top ref="backToTopRef"></back-to-top>
-            <view class="safe-area-inset-bottom"></view>
         </view>
     </view>
 </template>
@@ -86,15 +80,23 @@ const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const isAdmin = computed(() => !!userStore.isAdmin);
 
-const backToTopRef = ref(null);
-const isRunning = ref(false);
-const noData = ref(false);
-const classList = ref([]);
-const pendingList = ref([]);
 const activeButton = ref('');
 const dateSortAsc = ref(true);
 const showTopbar = ref(false);
+const headerScrollTop = ref(0);
 const currentClassify = ref(null);
+const classList = ref([]);
+const currentId = ref('');
+
+const onListUpdate = (e) => {
+    classList.value = e.images;
+};
+
+const onScroll = (e) => {
+    const scrollTop = e.scrollTop;
+    headerScrollTop.value = Math.min(scrollTop, heroHeightPx);
+    showTopbar.value = scrollTop > heroHeightPx - 44;
+};
 
 const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
     if (key === 'recommend') return 'random';
@@ -105,6 +107,22 @@ const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
     return '';
 };
 
+const tabs = computed(() => [
+    {
+        label: t('common.recommend'),
+        query: { classify_id: parseInt(currentId.value), sortord: 'random' },
+    },
+    {
+        label: t('common.score'),
+        query: { classify_id: parseInt(currentId.value), sortord: 'score' },
+    },
+    {
+        label: t('common.publishDate'),
+        query: { classify_id: parseInt(currentId.value), sortord: 'date_desc' },
+        isDate: true,
+    },
+]);
+
 const syncClassifySortState = () => {
     settingsStore.options.classifySortKey = activeButton.value;
     settingsStore.options.classifyDateAsc = dateSortAsc.value;
@@ -112,12 +130,14 @@ const syncClassifySortState = () => {
 
 const restoreClassifySortState = () => {
     activeButton.value = settingsStore.options.classifySortKey || '';
-    dateSortAsc.value = typeof settingsStore.options.classifyDateAsc === 'boolean' ? settingsStore.options.classifyDateAsc : false;
+    dateSortAsc.value =
+        typeof settingsStore.options.classifyDateAsc === 'boolean' ? settingsStore.options.classifyDateAsc : false;
 };
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
 const navBarHeight = ref(getNavBarHeight() || 88);
+const heroHeightPx = uni.upx2px(560);
 
 const props = defineProps({
     id: String,
@@ -127,7 +147,7 @@ const props = defineProps({
 const heroImage = computed(() => {
     // 优先级 1: 分类专属封面 (currentClassify)
     if (currentClassify.value?.picurl) {
-        if (currentClassify.value.picurl.includes("classify/") ) {
+        if (currentClassify.value.picurl.includes('classify/')) {
             return currentClassify.value.picurl;
         }
         return currentClassify.value.mediumPicurl;
@@ -159,15 +179,13 @@ const queryParams = ref({
     sortord: '',
 });
 
-const init = (sortord = '', resetClassList = []) => {
+const init = (sortord = '') => {
     queryParams.value = {
         classify_id: parseInt(props.id),
         pageNum: 1,
         pageSize: 12,
         sortord: sortord || getSortordByKey(activeButton.value, dateSortAsc.value),
     };
-    noData.value = false;
-    classList.value = resetClassList;
 };
 
 const fetchClassifyInfo = async (id) => {
@@ -190,34 +208,6 @@ const fetchClassifyInfo = async (id) => {
     currentClassify.value = match || null;
 };
 
-const getClassList = async () => {
-    try {
-        uni.showLoading();
-        isRunning.value = true;
-
-        const res = await apiGetClassList(queryParams.value);
-        const fullData = (res.data || [])
-            .map((item) => handlePicUrl(item))
-            .filter((item) => !isAdmin.value || !libraryStore.isWallHidden(item));
-
-        pendingList.value.push(...fullData);
-        classList.value = [...pendingList.value];
-
-        if (queryParams.value.pageNum >= res.pagination.total_pages) noData.value = true;
-        uni.setStorageSync('wallList', classList.value);
-    } finally {
-        uni.hideLoading();
-        isRunning.value = false;
-    }
-};
-
-const runQuery = (sortord) => {
-    init(sortord, [...pendingList.value]);
-    pendingList.value = [];
-    getClassList();
-    backToTopRef.value?.scrollToTop();
-};
-
 const onSortQuery = (key) => {
     if (key === 'date') {
         activeButton.value = 'date';
@@ -227,7 +217,6 @@ const onSortQuery = (key) => {
         dateSortAsc.value = false;
     }
     syncClassifySortState();
-    runQuery(getSortordByKey(activeButton.value, dateSortAsc.value));
 };
 
 const onChangeColumn = () => {
@@ -260,36 +249,15 @@ onLoad((e) => {
         gotoHome();
         return;
     }
+    currentId.value = id;
     if (isAdmin.value) {
         restoreClassifySortState();
     }
     fetchClassifyInfo(id);
-    getClassList();
 });
 
 onUnload(() => {
     uni.removeStorageSync('wallList');
-});
-
-onReachBottom(() => {
-    if (noData.value) return;
-    queryParams.value.pageNum++;
-    getClassList();
-});
-
-onPullDownRefresh(() => {
-    classList.value = [];
-    pendingList.value = [];
-    uni.removeStorageSync('wallList');
-    getClassList();
-    uni.stopPullDownRefresh();
-    isRunning.value = false;
-});
-
-onPageScroll((e) => {
-    backToTopRef.value.showBackToTop = e.scrollTop > 260;
-    const heroHeightPx = uni.upx2px(560);
-    showTopbar.value = e.scrollTop >= Math.max(heroHeightPx - navBarHeight.value, 0);
 });
 
 onShareAppMessage(() => {
@@ -308,18 +276,19 @@ onShareTimeline(() => {
 
 <style lang="scss" scoped>
 .layout {
-    min-height: 100vh;
-    background:
-        radial-gradient(circle at top right, rgba(97, 154, 239, 0.18), transparent 24%),
-        linear-gradient(180deg, #0b1017 0%, #10161f 32%, #0b1017 100%);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background: #0b1017;
 }
 
 .top-shell {
     position: fixed;
-    left: 0;
-    right: 0;
     top: 0;
-    z-index: 120;
+    left: 0;
+    width: 100%;
+    z-index: 100;
 }
 
 .status-bar-bg {
@@ -328,10 +297,6 @@ onShareTimeline(() => {
 }
 
 .topbar {
-    position: fixed;
-    left: 0;
-    right: 0;
-    z-index: 121;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -387,20 +352,36 @@ onShareTimeline(() => {
 }
 
 .fill {
+    flex-shrink: 0;
+}
+
+.content-wrapper {
+    flex: 1;
     width: 100%;
+    position: relative;
+    overflow: hidden;
 }
 
 .hero {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 560rpx;
-    overflow: hidden;
+    z-index: 10;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+.hero__content,
+.hero__back {
+    pointer-events: auto;
 }
 
 .hero__back {
     position: absolute;
     left: 24rpx;
-    z-index: 2;
+    z-index: 10;
     width: 72rpx;
     height: 72rpx;
     border-radius: 999rpx;
@@ -462,21 +443,10 @@ onShareTimeline(() => {
     color: rgba(226, 232, 240, 0.76);
 }
 
-.toolbar {
-    position: sticky;
-    z-index: 80;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16rpx;
-    padding: 18rpx 24rpx 20rpx;
-    background: rgba(11, 16, 23, 0.94);
-    backdrop-filter: blur(18rpx);
-    border-bottom: 1rpx solid rgba(255, 255, 255, 0.04);
-}
-
 .content-wrapper {
-    padding-bottom: 48rpx;
+    flex: 1;
+    min-height: 0;
+    position: relative;
 }
 
 .loadingLayout {
