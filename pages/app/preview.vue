@@ -164,7 +164,7 @@
                             <view class="label">{{ t('common.publishDate') }}</view>
                             <view class="value">{{ publishDateText }}</view>
                         </view>
-                        <view class="row meta-row">
+                        <!-- <view class="row meta-row">
                             <view class="label">{{ t('previewPage.views') }}</view>
                             <view class="value">{{ currentInfo.views ?? 0 }}</view>
                         </view>
@@ -179,7 +179,7 @@
                         <view class="row" v-if="aspectRatioText">
                             <view class="label">{{ t('previewPage.aspectRatio') }}</view>
                             <view class="value">{{ aspectRatioText }}</view>
-                        </view>
+                        </view> -->
                         <view class="row" v-if="currentInfo.description">
                             <view class="label">{{ t('previewPage.description') }}</view>
                             <view class="value" selectable>{{ currentInfo.description }}</view>
@@ -295,7 +295,7 @@
         </uni-popup>
 
         <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
-        
+
         <!-- 通用导航对话框 -->
         <popup-navigation-dialog
             ref="navDialog"

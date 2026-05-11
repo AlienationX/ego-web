@@ -23,7 +23,7 @@
             </view>
         </view>
 
-        <view class="fill" :style="{ height: `${navBarHeight}px` }"></view>
+        <view class="fill" :style="{ height: `${titleBarHeight}px` }"></view>
 
         <view class="page-wrap">
             <view v-if="showWordBoard" class="explore-board">

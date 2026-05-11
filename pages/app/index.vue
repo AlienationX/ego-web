@@ -1,197 +1,226 @@
 <template>
     <view class="homeLayout pageBackground">
-        <nav-bar :title="$t('index.title')"></nav-bar>
-
-        <view class="banner">
-            <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
-                <swiper-item v-for="item in bannerList" :key="item.id">
-                    <navigator
-                        v-if="item.target == 'miniProgram'"
-                        :url="item.url"
-                        target="miniProgram"
-                        :app-id="item.appid"
-                        :class="['banner-card', item.accentClass]"
-                    >
-                        <image :src="item.picurl" mode="aspectFill"></image>
-                        <view class="banner-card__overlay"></view>
-                        <view class="banner-card__content">
-                            <view class="banner-card__tag-row">
-                                <view class="banner-card__tag">{{ item.badge }}</view>
-                                <view class="banner-card__target">{{ item.targetLabel }}</view>
-                            </view>
-                            <view class="banner-card__title">{{ item.title }}</view>
-                            <view class="banner-card__desc">{{ item.desc }}</view>
-                            <view class="banner-card__meta">
-                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
-                                <view class="banner-card__meta-arrow">
-                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
-                                </view>
-                            </view>
-                        </view>
-                    </navigator>
-
-                    <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
-                        <image :src="item.mediumPicurl" mode="aspectFill"></image>
-                        <view class="banner-card__overlay"></view>
-                        <view class="banner-card__content">
-                            <view class="banner-card__tag-row">
-                                <view class="banner-card__tag">{{ item.badge }}</view>
-                                <view class="banner-card__target">{{ item.targetLabel }}</view>
-                            </view>
-                            <view class="banner-card__title">{{ item.title }}</view>
-                            <view class="banner-card__desc">{{ item.desc }}</view>
-                            <view class="banner-card__meta">
-                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
-                                <view class="banner-card__meta-arrow">
-                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
-                                </view>
-                            </view>
+        <view class="home-titlebar" :style="{ paddingTop: statusBarHeight + 'px' }">
+            <view class="home-titlebar__inner">
+                <scroll-view scroll-x class="home-tabs" show-scrollbar="false">
+                    <view class="home-tabs__inner">
+                        <view
+                            v-for="tab in homeTabs"
+                            :key="tab.key"
+                            class="home-tab"
+                            :class="{ 'is-active': activeHomeTab === tab.key }"
+                            @click="switchHomeTab(tab.key)"
+                        >
+                            {{ tab.label }}
                         </view>
                     </view>
-                </swiper-item>
-            </swiper>
-        </view>
-
-        <view class="notice">
-            <view class="left">
-                <uni-icons type="sound-filled" size="20" color="#28B389"></uni-icons>
-                <text class="text">{{ $t('index.notice') }}</text>
+                </scroll-view>
+                <view class="home-search" @click="goSearch">
+                    <uni-icons type="search" size="17" color="#64748b"></uni-icons>
+                    <text class="home-search__text">{{ t('common.search') }}</text>
+                </view>
             </view>
+        </view>
+        <view class="home-titlebar-spacer" :style="{ height: '96rpx' }"></view>
 
-            <view class="center">
-                <swiper vertical interval="1500" duration="300" autoplay circular>
-                    <swiper-item v-for="item in noticeList" :key="item.id">
-                        <navigator :url="`/pages/app/notice-detail?id=${item.id}&name=${item.title}`">
-                            {{ item.title }}
+        <view v-show="activeHomeTab === 'home'" class="home-channel home-channel--main">
+            <view class="banner">
+                <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
+                    <swiper-item v-for="item in bannerList" :key="item.id">
+                        <navigator
+                            v-if="item.target == 'miniProgram'"
+                            :url="item.url"
+                            target="miniProgram"
+                            :app-id="item.appid"
+                            :class="['banner-card', item.accentClass]"
+                        >
+                            <image :src="item.picurl" mode="aspectFill"></image>
+                            <view class="banner-card__overlay"></view>
+                            <view class="banner-card__content">
+                                <view class="banner-card__tag-row">
+                                    <view class="banner-card__tag">{{ item.badge }}</view>
+                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                </view>
+                                <view class="banner-card__title">{{ item.title }}</view>
+                                <view class="banner-card__desc">{{ item.desc }}</view>
+                                <view class="banner-card__meta">
+                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                    <view class="banner-card__meta-arrow">
+                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                    </view>
+                                </view>
+                            </view>
                         </navigator>
+
+                        <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
+                            <image :src="item.mediumPicurl" mode="aspectFill"></image>
+                            <view class="banner-card__overlay"></view>
+                            <view class="banner-card__content">
+                                <view class="banner-card__tag-row">
+                                    <view class="banner-card__tag">{{ item.badge }}</view>
+                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                </view>
+                                <view class="banner-card__title">{{ item.title }}</view>
+                                <view class="banner-card__desc">{{ item.desc }}</view>
+                                <view class="banner-card__meta">
+                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                    <view class="banner-card__meta-arrow">
+                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
                     </swiper-item>
                 </swiper>
             </view>
 
-            <view class="right">
-                <uni-icons type="right" size="16" color="#333"></uni-icons>
+            <view class="notice">
+                <view class="left">
+                    <uni-icons type="sound-filled" size="20" color="#28B389"></uni-icons>
+                    <text class="text">{{ $t('index.notice') }}</text>
+                </view>
+
+                <view class="center">
+                    <swiper vertical interval="1500" duration="300" autoplay circular>
+                        <swiper-item v-for="item in noticeList" :key="item.id">
+                            <navigator :url="`/pages/app/notice-detail?id=${item.id}&name=${item.title}`">
+                                {{ item.title }}
+                            </navigator>
+                        </swiper-item>
+                    </swiper>
+                </view>
+
+                <view class="right">
+                    <uni-icons type="right" size="16" color="#333"></uni-icons>
+                </view>
             </view>
-        </view>
 
-        <view class="select">
-            <view class="select-watermark">Daily</view>
-            <index-title>
-                <template #name>{{ $t('index.dailyRecommend') }}</template>
-                <template #custom>
-                    <view class="date">
-                        <button class="button is-spotlight" size="mini" @click="refreshRandom">
-                            {{ $t('common.refresh') }}
-                        </button>
-                        <uni-icons type="calendar" size="18" color="#666"></uni-icons>
-                        <view class="text"> {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }} </view>
-                    </view>
-                </template>
-            </index-title>
-
-            <view class="content">
-                <rotate-loading v-if="!randomDailyList.length" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x>
-                    <view
-                        class="box"
-                        v-for="(item, idx) in randomDailyList"
-                        :key="item.id"
-                        :class="{ 'is-hero': idx === 0 }"
-                        @click="goPreview(item.id, randomDailyList)"
-                    >
-                        <image :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl" mode="aspectFill"></image>
-                        <block v-if="idx === 0">
-                            <view class="box-hero-overlay"></view>
-                            <view class="box-hero-content">
-                                <view class="day-tag">{{ new Date().getDate() }}</view>
-                                <view class="pick-text">PICK OF THE DAY</view>
+            <view class="select">
+                <view class="select-watermark">Daily</view>
+                <index-title>
+                    <template #name>{{ $t('index.dailyRecommend') }}</template>
+                    <template #custom>
+                        <view class="date">
+                            <button class="button is-spotlight" size="mini" @click="refreshRandom">
+                                {{ $t('common.refresh') }}
+                            </button>
+                            <uni-icons type="calendar" size="18" color="#666"></uni-icons>
+                            <view class="text">
+                                {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
                             </view>
-                        </block>
-                        <block v-else>
-                            <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{ getTimeBadge(item) }}</view>
-                        </block>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>
+                        </view>
+                    </template>
+                </index-title>
 
-        <view class="select">
-            <view class="select-watermark">Latest</view>
-            <index-title>
-                <template #name>{{ $t('index.latestRelease') }}</template>
-                <template #custom>
-                    <navigator class="box" url="/pages/app/timeline">
-                        <button size="mini" class="btn is-default">{{ $t('common.seeAll') }}</button>
-                    </navigator>
-                </template>
-            </index-title>
-
-            <view class="content">
-                <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x>
-                    <view
-                        class="box"
-                        v-for="(item, idx) in latestPreviewList"
-                        :key="item.id"
-                        @click="goPreview(item.id, latestList)"
-                    >
-                        <image :src="item.smallPicurl" mode="aspectFill"></image>
-                        <view v-if="getTimeBadge(item)" class="box-badge">{{ getTimeBadge(item) }}</view>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>
-
-        <!-- 订阅提醒 -->
-        <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout">
-            <view class="signal-callout__main">
-                <view class="signal-callout__content">
-                    <view class="signal-callout__eyebrow">{{ t('index.followingEyebrow') }}</view>
-                    <view class="signal-callout__title">{{ t('index.followingTitle') }}</view>
-                    <view class="signal-callout__desc">{{ followingSummary }}</view>
-                </view>
-                <view class="signal-callout__action" @click="toggleFollowingExpanded">
-                    {{ followingExpanded ? t('index.followingCollapse') : t('index.followingExpand') }}
-                </view>
-            </view>
-
-            <view v-if="followingExpanded" class="signal-callout__panel">
-                <view v-if="subscribedClassifyItems.length" class="signal-group">
-                    <view class="signal-group__title">{{ t('subscriptionPage.classifyTitle') }}</view>
-                    <view class="signal-group__chips">
+                <view class="content">
+                    <rotate-loading v-if="!randomDailyList.length" style="height: 100%"></rotate-loading>
+                    <scroll-view scroll-x>
                         <view
-                            v-for="item in subscribedClassifyItems"
+                            class="box"
+                            v-for="(item, idx) in randomDailyList"
                             :key="item.id"
-                            class="signal-chip"
-                            @click="goClassify(item)"
+                            :class="{ 'is-hero': idx === 0 }"
+                            @click="goPreview(item.id, randomDailyList)"
                         >
-                            {{ item.name }}
+                            <image
+                                :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
+                                mode="aspectFill"
+                            ></image>
+                            <block v-if="idx === 0">
+                                <view class="box-hero-overlay"></view>
+                                <view class="box-hero-content">
+                                    <view class="day-tag">{{ new Date().getDate() }}</view>
+                                    <view class="pick-text">PICK OF THE DAY</view>
+                                </view>
+                            </block>
+                            <block v-else>
+                                <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{
+                                    getTimeBadge(item)
+                                }}</view>
+                            </block>
                         </view>
-                    </view>
+                    </scroll-view>
                 </view>
-
-                <view v-if="libraryStore.subscriptions.tags.length" class="signal-group">
-                    <view class="signal-group__title">{{ t('subscriptionPage.tagTitle') }}</view>
-                    <view class="signal-group__chips">
-                        <view
-                            v-for="tag in libraryStore.subscriptions.tags"
-                            :key="tag"
-                            class="signal-chip signal-chip--tag"
-                            @click="goSearchByTag(tag)"
-                        >
-                            #{{ tag }}
-                        </view>
-                    </view>
-                </view>
-
-                <navigator url="/pages/user/subscriptions" class="signal-manage">
-                    {{ t('index.followingManage') }}
-                    <uni-icons type="right" size="14" color="#dbeafe"></uni-icons>
-                </navigator>
             </view>
-        </view>
 
-        <!-- 猜你喜欢 -->
-        <!-- <view v-if="isAdmin && forYouList.length" class="select select--compact">
+            <view class="select">
+                <view class="select-watermark">Latest</view>
+                <index-title>
+                    <template #name>{{ $t('index.latestRelease') }}</template>
+                    <template #custom>
+                        <navigator class="box" url="/pages/app/timeline">
+                            <button size="mini" class="btn is-default">{{ $t('common.seeAll') }}</button>
+                        </navigator>
+                    </template>
+                </index-title>
+
+                <view class="content">
+                    <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
+                    <scroll-view scroll-x>
+                        <view
+                            class="box"
+                            v-for="(item, idx) in latestPreviewList"
+                            :key="item.id"
+                            @click="goPreview(item.id, latestList)"
+                        >
+                            <image :src="item.smallPicurl" mode="aspectFill"></image>
+                            <view v-if="getTimeBadge(item)" class="box-badge">{{ getTimeBadge(item) }}</view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- 订阅提醒 -->
+            <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout">
+                <view class="signal-callout__main">
+                    <view class="signal-callout__content">
+                        <view class="signal-callout__eyebrow">{{ t('index.followingEyebrow') }}</view>
+                        <view class="signal-callout__title">{{ t('index.followingTitle') }}</view>
+                        <view class="signal-callout__desc">{{ followingSummary }}</view>
+                    </view>
+                    <view class="signal-callout__action" @click="toggleFollowingExpanded">
+                        {{ followingExpanded ? t('index.followingCollapse') : t('index.followingExpand') }}
+                    </view>
+                </view>
+
+                <view v-if="followingExpanded" class="signal-callout__panel">
+                    <view v-if="subscribedClassifyItems.length" class="signal-group">
+                        <view class="signal-group__title">{{ t('subscriptionPage.classifyTitle') }}</view>
+                        <view class="signal-group__chips">
+                            <view
+                                v-for="item in subscribedClassifyItems"
+                                :key="item.id"
+                                class="signal-chip"
+                                @click="goClassify(item)"
+                            >
+                                {{ item.name }}
+                            </view>
+                        </view>
+                    </view>
+
+                    <view v-if="libraryStore.subscriptions.tags.length" class="signal-group">
+                        <view class="signal-group__title">{{ t('subscriptionPage.tagTitle') }}</view>
+                        <view class="signal-group__chips">
+                            <view
+                                v-for="tag in libraryStore.subscriptions.tags"
+                                :key="tag"
+                                class="signal-chip signal-chip--tag"
+                                @click="goSearchByTag(tag)"
+                            >
+                                #{{ tag }}
+                            </view>
+                        </view>
+                    </view>
+
+                    <navigator url="/pages/user/subscriptions" class="signal-manage">
+                        {{ t('index.followingManage') }}
+                        <uni-icons type="right" size="14" color="#dbeafe"></uni-icons>
+                    </navigator>
+                </view>
+            </view>
+
+            <!-- 猜你喜欢 -->
+            <!-- <view v-if="isAdmin && forYouList.length" class="select select--compact">
             <view class="select-watermark">For You</view>
             <index-title>
                 <template #name>{{ t('index.forYouTitle') }}</template>
@@ -235,81 +264,107 @@
             </view>
         </view> -->
 
-        <navigator class="top-entry" url="/pages/app/topN">
-            <view class="top-entry__content">
-                <!-- <view class="top-entry__eyebrow">Top N</view> -->
-                <view class="top-entry__title">{{ $t('top10.title') }}</view>
-                <view class="top-entry__desc">{{ $t('top10.descViews') }}</view>
-                <view class="top-entry__action">
-                    <text class="top-entry__action-text">{{ $t('common.seeAll') }}</text>
-                    <uni-icons type="right" size="18" color="#ffffff"></uni-icons>
+            <navigator class="top-entry" url="/pages/app/topN">
+                <view class="top-entry__content">
+                    <!-- <view class="top-entry__eyebrow">Top N</view> -->
+                    <view class="top-entry__title">{{ $t('top10.title') }}</view>
+                    <view class="top-entry__desc">{{ $t('top10.descViews') }}</view>
+                    <view class="top-entry__action">
+                        <text class="top-entry__action-text">{{ $t('common.seeAll') }}</text>
+                        <uni-icons type="right" size="18" color="#ffffff"></uni-icons>
+                    </view>
+                </view>
+                <image
+                    class="top-entry__visual"
+                    src="/static/images/inset/1699281368061_2-removebg-preview.png"
+                    mode="heightFix"
+                ></image>
+            </navigator>
+
+            <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
+                <view class="select-watermark">{{ classify.name }}</view>
+                <index-title>
+                    <template #name>{{ classify.name }}</template>
+                    <template #custom>
+                        <navigator class="box" :url="'/pages/app/classlist?id=' + classify.id + '&name=' + classify.name">
+                            <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]">
+                                {{ $t('common.seeAll') }}
+                            </button>
+                        </navigator>
+                    </template>
+                </index-title>
+
+                <view class="content">
+                    <rotate-loading v-if="!classify" style="height: 100%"></rotate-loading>
+                    <scroll-view scroll-x>
+                        <view
+                            class="box"
+                            v-for="item in classify.data"
+                            :key="item.id"
+                            @click="goPreview(item.id, classify.data)"
+                        >
+                            <image :src="item.smallPicurl" mode="aspectFill"></image>
+                            <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{ getTimeBadge(item) }}</view>
+                        </view>
+                    </scroll-view>
+                </view>
+
+                <view v-if="idx % 3 === 0" class="ad-slot" :class="{ ready: adVisibleMap[`mid-${idx}`] }">
+                    <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
                 </view>
             </view>
-            <image
-                class="top-entry__visual"
-                src="/static/images/inset/1699281368061_2-removebg-preview.png"
-                mode="heightFix"
-            ></image>
-        </navigator>
 
-        <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
-            <view class="select-watermark">{{ classify.name }}</view>
-            <index-title>
-                <template #name>{{ classify.name }}</template>
-                <template #custom>
-                    <navigator class="box" :url="'/pages/app/classlist?id=' + classify.id + '&name=' + classify.name">
-                        <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]">
-                            {{ $t('common.seeAll') }}
-                        </button>
-                    </navigator>
-                </template>
-            </index-title>
+            <view class="classify">
+                <index-title>
+                    <template #name>{{ $t('index.categoryRecommend') }}</template>
+                    <template #custom>
+                        <navigator url="/pages/app/classify" open-type="reLaunch" class="more"
+                            >{{ $t('common.more') }}+</navigator
+                        >
+                    </template>
+                </index-title>
 
-            <view class="content">
-                <rotate-loading v-if="!classify" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x>
-                    <view class="box" v-for="item in classify.data" :key="item.id" @click="goPreview(item.id, classify.data)">
-                        <image :src="item.smallPicurl" mode="aspectFill"></image>
-                        <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{ getTimeBadge(item) }}</view>
-                    </view>
-                </scroll-view>
+                <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
+
+                <view class="content classify-grid" v-if="classifyList.length">
+                    <classify-item
+                        v-for="(item, idx) in classifyPreviewList"
+                        :key="item.id"
+                        :item="item"
+                        :layout-style="getLayoutStyleForIndex(idx)"
+                    ></classify-item>
+                    <!-- <classify-item :isMore="true" :layout-style="getLayoutStyleMore()"></classify-item> -->
+                </view>
             </view>
 
-            <view v-if="idx % 3 === 0" class="ad-slot" :class="{ ready: adVisibleMap[`mid-${idx}`] }">
-                <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
+            <view class="ad-slot ad-slot-bottom" :class="{ ready: adVisibleMap.bottom }">
+                <custom-ad-banner @load="onAdLoad('bottom')" @error="onAdError('bottom')"></custom-ad-banner>
             </view>
         </view>
 
-        <view class="classify">
-            <index-title>
-                <template #name>{{ $t('index.categoryRecommend') }}</template>
-                <template #custom>
-                    <navigator url="/pages/app/classify" open-type="reLaunch" class="more">{{ $t('common.more') }}+</navigator>
-                </template>
-            </index-title>
-
-            <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
-
-            <view class="content classify-grid" v-if="classifyList.length">
-                <classify-item
-                    v-for="(item, idx) in classifyPreviewList"
-                    :key="item.id"
-                    :item="item"
-                    :layout-style="getLayoutStyleForIndex(idx)"
-                ></classify-item>
-                <!-- <classify-item :isMore="true" :layout-style="getLayoutStyleMore()"></classify-item> -->
-            </view>
+        <view v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend">
+            <tabbed-pics-view
+                :tabs="recommendTabs"
+                :show-header="false"
+                :tabs-height="0"
+                :header-height="0"
+                api-type="classList"
+            ></tabbed-pics-view>
         </view>
 
-        <view class="ad-slot ad-slot-bottom" :class="{ ready: adVisibleMap.bottom }">
-            <custom-ad-banner @load="onAdLoad('bottom')" @error="onAdError('bottom')"></custom-ad-banner>
+        <view v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest">
+            <timeline-page embedded></timeline-page>
+        </view>
+
+        <view v-show="activeHomeTab === 'hot'" class="home-channel home-channel--hot">
+            <top-n-page embedded></top-n-page>
         </view>
     </view>
 </template>
 
 <script setup>
 import { ref, computed, reactive } from 'vue';
-import { onLoad, onPullDownRefresh, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { onLoad, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import {
     apiGetBanner,
     apiGetRandomDay,
@@ -317,15 +372,27 @@ import {
     apiGetNotice,
     apiGetClassify,
     apiGetClassList,
+    apiGetTopWall,
 } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useI18n } from 'vue-i18n';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
+import { getStatusBarHeight } from '@/utils/system.js';
+import TimelinePage from '@/pages/app/timeline.vue';
+import TopNPage from '@/pages/app/topN.vue';
 const { t } = useI18n();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const activeHomeTab = ref('home');
+const homeTabs = computed(() => [
+    { key: 'home', label: t('index.tabs.home') },
+    { key: 'recommend', label: t('index.tabs.recommend') },
+    { key: 'latest', label: t('index.tabs.latest') },
+    { key: 'hot', label: t('index.tabs.hot') },
+]);
 const bannerList = ref([]);
 const randomDailyList = ref([]);
 const randomRecommendList = ref([]);
@@ -336,6 +403,24 @@ const adVisibleMap = reactive({});
 const followingExpanded = ref(false);
 const themeClasses = ['is-collection', 'is-keyword', 'is-spotlight', 'is-default'];
 const isAdmin = computed(() => !!userStore.isAdmin);
+const latestLoading = ref(false);
+const latestNoMore = ref(false);
+const latestQuery = ref({
+    pageNum: 1,
+    pageSize: 12,
+    ordering: '-created',
+});
+const activeTopMetric = ref('views');
+const topLoading = ref(false);
+const topRankedList = ref([]);
+const recommendTabs = computed(() => [
+    {
+        label: '最新推荐',
+        query: {
+            ordering: '-created',
+        },
+    },
+]);
 const recentViewedList = computed(() => libraryStore.recentViewed.slice(0, 8));
 const preferredTagList = computed(() => libraryStore.preferredTags.slice(0, 10));
 const signalTags = computed(() =>
@@ -513,6 +598,121 @@ const getTimeBadge = (item) =>
             ? getBadgeCopy().latest
             : '';
 
+const monthNamesEn = [
+    'JANUARY',
+    'FEBRUARY',
+    'MARCH',
+    'APRIL',
+    'MAY',
+    'JUNE',
+    'JULY',
+    'AUGUST',
+    'SEPTEMBER',
+    'OCTOBER',
+    'NOVEMBER',
+    'DECEMBER',
+];
+const weekdayNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const weekdayNamesZh = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+const isZhLocale = computed(() => String(uni.getLocale() || '').startsWith('zh'));
+
+const toTimelineDate = (item) => {
+    const raw = item?.updated_at || item?.created_at || item?.created || Date.now();
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? new Date() : date;
+};
+
+const getMonthText = (date) => (isZhLocale.value ? `${date.getMonth() + 1}月` : monthNamesEn[date.getMonth()]);
+const getDayLabel = (date) =>
+    isZhLocale.value
+        ? `${weekdayNamesZh[date.getDay()]} ${date.getMonth() + 1}月`
+        : `${weekdayNamesEn[date.getDay()]} / ${monthNamesEn[date.getMonth()].slice(0, 3)}`;
+const getMonthKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}`;
+const getDayKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+
+const formatTimelineTime = (item) => {
+    const date = toTimelineDate(item);
+    const h = String(date.getHours()).padStart(2, '0');
+    const m = String(date.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
+};
+
+const formatRecentTag = (count) => (isZhLocale.value ? `最新 ${count} 张` : `LATEST ${count}`);
+
+const latestMonthGroups = computed(() => {
+    const list = [];
+    const monthMap = new Map();
+
+    latestList.value.forEach((item) => {
+        const date = toTimelineDate(item);
+        const monthKey = getMonthKey(date);
+        const dayKey = getDayKey(date);
+
+        if (!monthMap.has(monthKey)) {
+            const monthItem = {
+                key: monthKey,
+                year: date.getFullYear(),
+                monthText: getMonthText(date),
+                count: 0,
+                days: [],
+                dayMap: new Map(),
+            };
+            monthMap.set(monthKey, monthItem);
+            list.push(monthItem);
+        }
+
+        const monthItem = monthMap.get(monthKey);
+        monthItem.count += 1;
+
+        if (!monthItem.dayMap.has(dayKey)) {
+            const dayItem = {
+                key: dayKey,
+                day: String(date.getDate()).padStart(2, '0'),
+                label: getDayLabel(date),
+                items: [],
+            };
+            monthItem.dayMap.set(dayKey, dayItem);
+            monthItem.days.push(dayItem);
+        }
+
+        monthItem.dayMap.get(dayKey).items.push(item);
+    });
+
+    return list;
+});
+
+const topMetricBadge = computed(() => (activeTopMetric.value === 'views' ? t('top10.badgeViews') : t('top10.badgeDownloads')));
+const topMetricDescription = computed(() =>
+    activeTopMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads'),
+);
+
+const formatTopCount = (value) => {
+    const num = Number(value) || 0;
+
+    if (typeof Intl !== 'undefined' && Intl?.NumberFormat) {
+        return new Intl.NumberFormat(isZhLocale.value ? 'zh-CN' : 'en-US', {
+            notation: 'compact',
+            maximumFractionDigits: 1,
+        }).format(num);
+    }
+
+    if (isZhLocale.value) {
+        if (num >= 100000000) return `${(num / 100000000).toFixed(num >= 1000000000 ? 0 : 1).replace(/\.0$/, '')}亿`;
+        if (num >= 10000) return `${(num / 10000).toFixed(num >= 100000 ? 0 : 1).replace(/\.0$/, '')}万`;
+        return `${num}`;
+    }
+
+    if (num >= 1000000000) return `${(num / 1000000000).toFixed(1).replace(/\.0$/, '')}B`;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+    return `${num}`;
+};
+
+const formatTopMetric = (item) => {
+    const count = activeTopMetric.value === 'views' ? item.views : item.downloads;
+    return `${formatTopCount(count)} ${activeTopMetric.value === 'views' ? t('top10.metricViews') : t('top10.metricDownloads')}`;
+};
+
 // 与 classify 页一致：前 6 个 2×3（左高格跨 2 行）+ 第 6 个通栏，第 7、8 个占第 5 行两列，「更多」通栏第 6 行
 const getLayoutStyleForIndex = (idx) => {
     if (idx === 0) return { gridColumn: '1', gridRow: '1' };
@@ -645,12 +845,51 @@ const getClassify = async () => {
     classifyList.value = res.data.map((item) => handlePicUrl(item));
 };
 
-const getLatest = async () => {
-    let res = await apiGetClassList({
-        ordering: '-created',
-        page_size: 20,
-    });
-    latestList.value = (res.data || []).map((item) => handlePicUrl(item));
+const getLatest = async (isAppend = false) => {
+    if (latestLoading.value || (isAppend && latestNoMore.value)) return;
+    try {
+        latestLoading.value = true;
+        if (!isAppend) {
+            latestQuery.value.pageNum = 1;
+            latestNoMore.value = false;
+        }
+        const res = await apiGetClassList(latestQuery.value);
+        const nextList = (res.data || []).map((item) => handlePicUrl(item));
+        latestList.value = isAppend ? [...latestList.value, ...nextList] : nextList;
+        latestList.value.sort((a, b) => toTimelineDate(b).getTime() - toTimelineDate(a).getTime());
+        const totalPages = Number(res?.pagination?.total_pages || 1);
+        latestNoMore.value = latestQuery.value.pageNum >= totalPages || nextList.length === 0;
+    } finally {
+        latestLoading.value = false;
+    }
+};
+
+const getTopList = async () => {
+    topLoading.value = true;
+    try {
+        const res = await apiGetTopWall({
+            type: activeTopMetric.value === 'views' ? 'views' : 'downloads',
+            n: 10,
+        });
+        const list = (res.data || []).map((item) => handlePicUrl(item));
+        topRankedList.value = list
+            .sort((a, b) => {
+                const aValue = Number(activeTopMetric.value === 'views' ? a.views : a.downloads) || 0;
+                const bValue = Number(activeTopMetric.value === 'views' ? b.views : b.downloads) || 0;
+                return bValue - aValue;
+            })
+            .slice(0, 10);
+    } catch (error) {
+        topRankedList.value = [];
+    } finally {
+        topLoading.value = false;
+    }
+};
+
+const switchTopMetric = async (metric) => {
+    if (activeTopMetric.value === metric) return;
+    activeTopMetric.value = metric;
+    await getTopList();
 };
 
 const goBannerPreview = (data) => {
@@ -666,6 +905,27 @@ const goPreview = (id, data) => {
     uni.navigateTo({
         url: '/pages/app/preview?id=' + id,
     });
+};
+
+const goTopPreview = (id) => {
+    uni.setStorageSync('wallList', topRankedList.value);
+    uni.navigateTo({
+        url: `/pages/app/preview?id=${id}`,
+    });
+};
+
+const goSearch = () => {
+    uni.navigateTo({ url: '/pages/app/search' });
+};
+
+const switchHomeTab = (key) => {
+    activeHomeTab.value = key;
+    if (key === 'latest' && !latestList.value.length) {
+        getLatest();
+    }
+    if (key === 'hot' && !topRankedList.value.length) {
+        getTopList();
+    }
 };
 
 const goSearchByTag = (tag) => {
@@ -708,17 +968,27 @@ onLoad(() => {
     getRandomRecommend();
     getClassify();
     getLatest();
+    getTopList();
+});
+
+onReachBottom(() => {
+    if (activeHomeTab.value !== 'latest' || latestNoMore.value || latestLoading.value) return;
+    latestQuery.value.pageNum++;
+    getLatest(true);
 });
 
 // 下拉刷新
 onPullDownRefresh(() => {
     console.log('onPullDownRefresh');
 
-    // getBanner();
-    // getNotice();
-    getRandom();
-    getRandomRecommend();
-    // getClassify();
+    if (activeHomeTab.value === 'home') {
+        getRandom();
+        getRandomRecommend();
+    } else if (activeHomeTab.value === 'latest') {
+        getLatest();
+    } else if (activeHomeTab.value === 'hot') {
+        getTopList();
+    }
 
     // uni.hideNavigationBarLoading();
     uni.stopPullDownRefresh();
@@ -742,6 +1012,651 @@ onShareTimeline(() => {
 
 <style lang="scss" scoped>
 .homeLayout {
+    min-height: 100vh;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle at 82% 0%, rgba(43, 140, 238, 0.12), transparent 28%),
+        linear-gradient(180deg, #f5f7fb 0%, #eef3f8 100%);
+
+    .home-titlebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        padding: 0 20rpx;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .home-titlebar__inner {
+        height: 96rpx;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18rpx;
+    }
+
+    .home-tabs {
+        flex: 1;
+        min-width: 0;
+        white-space: nowrap;
+    }
+
+    .home-tabs__inner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 28rpx;
+        padding: 0 8rpx;
+    }
+
+    .home-tab {
+        position: relative;
+        height: 88rpx;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(15, 23, 42, 0.48);
+        font-size: 31rpx;
+        font-weight: 600;
+        letter-spacing: 0;
+        transition: all 0.24s ease;
+
+        &.is-active {
+            color: #111827;
+            font-weight: 800;
+        }
+
+        &.is-active::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 6rpx;
+            width: 48rpx;
+            height: 4rpx;
+            border-radius: 999rpx;
+            background: #111827;
+            transform: translateX(-50%);
+        }
+
+        &:active {
+            opacity: 0.7;
+        }
+    }
+
+    .home-search {
+        flex-shrink: 0;
+        min-width: 170rpx;
+        height: 60rpx;
+        padding: 0 18rpx;
+        border-radius: 999rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8rpx;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1rpx solid rgba(203, 213, 225, 0.56);
+        color: #64748b;
+
+        &:active {
+            transform: scale(0.97);
+            background: rgba(226, 232, 240, 0.82);
+        }
+    }
+
+    .home-search__text {
+        font-size: 23rpx;
+        font-weight: 700;
+    }
+
+    .home-channel {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+
+    .home-channel--recommend {
+        height: calc(100vh - 118rpx);
+        min-height: 900rpx;
+        overflow: hidden;
+        background: #0b1017;
+    }
+
+    .home-channel--latest,
+    .home-channel--hot {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        color: #eaf0fb;
+        background:
+            radial-gradient(circle at 82% 8%, rgba(90, 145, 255, 0.18), transparent 24%),
+            radial-gradient(circle at 16% 10%, rgba(255, 187, 106, 0.1), transparent 20%),
+            linear-gradient(180deg, #0a1018 0%, #101721 46%, #0a0f16 100%);
+        min-height: calc(100vh - 118rpx);
+    }
+
+    .home-channel--hot {
+        background:
+            radial-gradient(circle at top center, rgba(43, 140, 238, 0.22), transparent 24%),
+            radial-gradient(circle at 20% 18%, rgba(244, 114, 182, 0.16), transparent 22%),
+            linear-gradient(180deg, #101922 0%, #13202c 36%, #0c1218 100%);
+    }
+
+    .embedded-hero {
+        padding: 22rpx 8rpx 32rpx;
+    }
+
+    .embedded-hero__eyebrow {
+        font-size: 20rpx;
+        font-weight: 900;
+        letter-spacing: 6rpx;
+        color: rgba(125, 211, 252, 0.88);
+    }
+
+    .embedded-hero__title {
+        margin-top: 16rpx;
+        font-size: 74rpx;
+        line-height: 1.08;
+        font-weight: 900;
+        color: #f5f8ff;
+        letter-spacing: -2rpx;
+        white-space: pre-line;
+    }
+
+    .embedded-hero__desc {
+        margin-top: 18rpx;
+        font-size: 27rpx;
+        line-height: 1.8;
+        color: rgba(214, 223, 239, 0.86);
+    }
+
+    .embedded-loading {
+        padding: 120rpx 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .embedded-empty {
+        min-height: 360rpx;
+        padding: 48rpx;
+        border-radius: 32rpx;
+        background: rgba(18, 28, 41, 0.72);
+        border: 1rpx solid rgba(255, 255, 255, 0.05);
+        color: rgba(226, 232, 240, 0.92);
+        font-size: 28rpx;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 12rpx;
+    }
+
+    .embedded-empty__desc {
+        font-size: 23rpx;
+        line-height: 1.6;
+        color: rgba(148, 163, 184, 0.9);
+    }
+
+    .embedded-load-more {
+        padding: 20rpx 0 0;
+    }
+
+    .home-month {
+        margin-bottom: 56rpx;
+    }
+
+    .home-month__head {
+        margin-bottom: 28rpx;
+    }
+
+    .home-month__ghost {
+        font-size: 82rpx;
+        line-height: 1;
+        font-weight: 900;
+        color: rgba(148, 163, 184, 0.42);
+        letter-spacing: -2rpx;
+    }
+
+    .home-month__meta {
+        margin-top: -20rpx;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+    }
+
+    .home-month__year {
+        font-size: 38rpx;
+        font-weight: 800;
+        color: #f5f8ff;
+    }
+
+    .home-month__line {
+        flex: 1;
+        height: 1rpx;
+        background: rgba(115, 130, 154, 0.34);
+    }
+
+    .home-month__tag {
+        font-size: 20rpx;
+        font-weight: 800;
+        letter-spacing: 3rpx;
+        color: #619aef;
+        text-transform: uppercase;
+    }
+
+    .home-day {
+        margin-bottom: 56rpx;
+    }
+
+    .home-day__marker {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+        margin-bottom: 20rpx;
+    }
+
+    .home-day__number {
+        font-size: 54rpx;
+        line-height: 1;
+        font-weight: 900;
+        color: #f5f8ff;
+    }
+
+    .home-day__divider {
+        width: 4rpx;
+        height: 52rpx;
+        border-radius: 999rpx;
+        background: linear-gradient(180deg, #79a8ff, rgba(121, 168, 255, 0.2));
+    }
+
+    .home-day__label {
+        font-size: 20rpx;
+        line-height: 1.5;
+        font-weight: 700;
+        letter-spacing: 2rpx;
+        color: rgba(226, 232, 240, 0.88);
+        text-transform: uppercase;
+    }
+
+    .home-timeline-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28rpx;
+    }
+
+    .home-timeline-card {
+        position: relative;
+        overflow: hidden;
+        height: 610rpx;
+        border-radius: 28rpx;
+        background: #18222f;
+        box-shadow:
+            0 18rpx 40rpx rgba(0, 0, 0, 0.24),
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .home-timeline-card--wide {
+        grid-column: 1 / -1;
+        height: 430rpx;
+    }
+
+    .home-timeline-card__image {
+        width: 100%;
+        height: 100%;
+    }
+
+    .home-timeline-card__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 60%, rgba(8, 11, 18, 0.88) 100%);
+    }
+
+    .home-timeline-card__content {
+        position: absolute;
+        left: 22rpx;
+        right: 22rpx;
+        bottom: 22rpx;
+        z-index: 1;
+    }
+
+    .home-timeline-card__classify {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34rpx;
+        padding: 0 12rpx;
+        margin-bottom: 12rpx;
+        border-radius: 999rpx;
+        background: rgba(97, 154, 239, 0.16);
+        border: 1rpx solid rgba(97, 154, 239, 0.2);
+        color: #c7dbff;
+        font-size: 18rpx;
+        font-weight: 800;
+    }
+
+    .home-timeline-card__title {
+        font-size: 30rpx;
+        line-height: 1.36;
+        font-weight: 800;
+        color: #f8fafc;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .home-timeline-card__footer {
+        margin-top: 14rpx;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: rgba(226, 232, 240, 0.82);
+        font-size: 22rpx;
+    }
+
+    .home-timeline-card__score {
+        display: flex;
+        align-items: center;
+        gap: 6rpx;
+    }
+
+    .hot-switch {
+        margin: 12rpx auto 24rpx;
+        padding: 8rpx;
+        width: fit-content;
+        display: flex;
+        align-items: center;
+        gap: 10rpx;
+        border-radius: 999rpx;
+        background: rgba(17, 25, 34, 0.9);
+        border: 1rpx solid rgba(148, 163, 184, 0.14);
+    }
+
+    .hot-switch__item {
+        min-width: 220rpx;
+        height: 74rpx;
+        padding: 0 26rpx;
+        border-radius: 999rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 24rpx;
+        font-weight: 700;
+
+        &.is-active {
+            color: #fff;
+            background: linear-gradient(135deg, #2b8cee, #1f6fd1);
+            box-shadow: 0 10rpx 24rpx rgba(43, 140, 238, 0.24);
+        }
+    }
+
+    .hot-intro {
+        margin-bottom: 28rpx;
+    }
+
+    .hot-intro__badge {
+        display: inline-flex;
+        height: 40rpx;
+        padding: 0 14rpx;
+        align-items: center;
+        border-radius: 999rpx;
+        background: rgba(43, 140, 238, 0.16);
+        color: #7dd3fc;
+        font-size: 18rpx;
+        font-weight: 800;
+        letter-spacing: 2rpx;
+        margin-bottom: 16rpx;
+    }
+
+    .hot-intro__desc {
+        font-size: 24rpx;
+        line-height: 1.8;
+        color: #94a3b8;
+    }
+
+    .hot-hero-section {
+        margin-bottom: 40rpx;
+    }
+
+    .hot-hero-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 32rpx;
+        background: #182431;
+        box-shadow: 0 24rpx 56rpx rgba(0, 0, 0, 0.28);
+    }
+
+    .hot-hero-card--first {
+        height: 430rpx;
+        margin-bottom: 30rpx;
+    }
+
+    .hot-hero-grid {
+        margin-top: 18rpx;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 30rpx;
+    }
+
+    .hot-hero-card--secondary {
+        height: 440rpx;
+    }
+
+    .hot-hero-card__image {
+        width: 100%;
+        height: 100%;
+    }
+
+    .hot-hero-card__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 48%, rgba(6, 12, 18, 0.9) 100%);
+    }
+
+    .hot-hero-card__overlay--soft {
+        background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 50%, rgba(6, 12, 18, 0.74) 100%);
+    }
+
+    .hot-hero-card__rank {
+        position: absolute;
+        top: 22rpx;
+        left: 22rpx;
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: 999rpx;
+        background: rgba(30, 41, 59, 0.92);
+        color: #fff;
+        font-size: 30rpx;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.24);
+    }
+
+    .hot-hero-card__rank--first {
+        background: linear-gradient(135deg, #2b8cee, #60a5fa);
+    }
+
+    .hot-hero-card__rank--second {
+        background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    }
+
+    .hot-hero-card__content {
+        position: absolute;
+        left: 28rpx;
+        right: 28rpx;
+        bottom: 28rpx;
+        z-index: 1;
+    }
+
+    .hot-hero-card__content--compact {
+        left: 20rpx;
+        right: 20rpx;
+        bottom: 20rpx;
+    }
+
+    .hot-hero-card__tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36rpx;
+        padding: 0 14rpx;
+        border-radius: 999rpx;
+        background: rgba(43, 140, 238, 0.18);
+        border: 1rpx solid rgba(125, 211, 252, 0.22);
+        color: #7dd3fc;
+        font-size: 18rpx;
+        font-weight: 800;
+        margin-bottom: 14rpx;
+    }
+
+    .hot-hero-card__title {
+        font-size: 42rpx;
+        line-height: 1.2;
+        font-weight: 800;
+        color: #e2e8f0;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hot-hero-card__title--compact {
+        font-size: 28rpx;
+        line-height: 1.38;
+    }
+
+    .hot-hero-card__meta {
+        margin-top: 16rpx;
+        display: flex;
+        align-items: center;
+        gap: 24rpx;
+    }
+
+    .hot-hero-card__meta-item,
+    .hot-hero-card__sub {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        color: #cbd5e1;
+        font-size: 22rpx;
+    }
+
+    .hot-rank-section__title {
+        margin-bottom: 18rpx;
+        display: flex;
+        align-items: center;
+        gap: 14rpx;
+        color: #94a3b8;
+        font-size: 18rpx;
+        font-weight: 800;
+        letter-spacing: 4rpx;
+        text-transform: uppercase;
+    }
+
+    .hot-rank-section__line {
+        flex: 1;
+        height: 1rpx;
+        background: rgba(51, 65, 85, 0.8);
+    }
+
+    .hot-rank-list {
+        display: flex;
+        flex-direction: column;
+        gap: 30rpx;
+    }
+
+    .hot-rank-item {
+        height: 280rpx;
+        border-radius: 28rpx;
+        background: rgba(24, 36, 49, 0.92);
+        border: 1rpx solid rgba(51, 65, 85, 0.56);
+        display: flex;
+        align-items: stretch;
+        overflow: hidden;
+        box-shadow:
+            0 10rpx 24rpx rgba(0, 0, 0, 0.2),
+            0 24rpx 48rpx rgba(0, 0, 0, 0.16);
+    }
+
+    .hot-rank-item__media {
+        position: relative;
+        width: 190rpx;
+        flex-shrink: 0;
+    }
+
+    .hot-rank-item__thumb {
+        width: 100%;
+        height: 100%;
+    }
+
+    .hot-rank-item__index {
+        position: absolute;
+        left: 16rpx;
+        top: 16rpx;
+        width: 50rpx;
+        height: 50rpx;
+        border-radius: 999rpx;
+        background: rgba(15, 23, 42, 0.84);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22rpx;
+        font-weight: 800;
+    }
+
+    .hot-rank-item__body {
+        min-width: 0;
+        flex: 1;
+        padding: 28rpx 22rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .hot-rank-item__title {
+        font-size: 28rpx;
+        line-height: 1.45;
+        font-weight: 800;
+        color: #e2e8f0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hot-rank-item__meta {
+        margin-top: 18rpx;
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+        color: #94a3b8;
+        font-size: 22rpx;
+    }
+
+    .hot-rank-item__metric {
+        color: #7dd3fc;
+        font-weight: 800;
+    }
+
+    .hot-rank-item__action {
+        width: 64rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     .ad-slot {
         padding: 0;
         margin: 0;

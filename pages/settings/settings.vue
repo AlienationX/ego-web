@@ -417,6 +417,17 @@ const sections = computed(() => {
                     action: openPreviewTypePopup,
                 },
                 // {
+                //     key: 'view_type',
+                //     icon:
+                //         settingsStore.options.view === 'view'
+                //             ? '/static/icons/view-grid.svg'
+                //             : '/static/icons/view-dashboard.svg',
+                //     label: t('settings.items.viewType.label'),
+                //     sublabel: t('settings.items.viewType.sublabel'),
+                //     value: settingsStore.options.view === 'view' ? t('settings.view.window') : t('settings.view.waterfall'),
+                //     action: switchView,
+                // },
+                // {
                 //     key: 'availability_status',
                 //     icon: 'calendar',
                 //     label: t('settings.items.availability.label'),

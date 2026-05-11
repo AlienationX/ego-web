@@ -508,7 +508,7 @@ onMounted(() => {
     height: 88rpx;
     z-index: 100;
     background: rgba(11, 16, 23, 0.95);
-    backdrop-filter: blur(20rpx);
+    // backdrop-filter: blur(20rpx);
     border-bottom: 1rpx solid rgba(255, 255, 255, 0.04);
     display: flex;
     align-items: center;

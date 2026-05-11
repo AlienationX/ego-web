@@ -1,6 +1,6 @@
 <template>
-    <view class="layout">
-        <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
+    <view class="layout" :class="{ 'is-embedded': embedded }">
+        <view v-if="!embedded" class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <scroll-view
             scroll-y
@@ -12,7 +12,7 @@
         >
             <view class="timeline-wrap">
                 <view id="timeline-top-anchor" class="timeline-top-anchor"></view>
-                <view class="topbar">
+                <view v-if="!embedded" class="topbar">
                     <view class="topbar__back" @click="goBack">
                         <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#f4f8ff"></mdi-icon>
                     </view>
@@ -90,14 +90,14 @@
             </view>
         </scroll-view>
 
-        <view v-if="showScrollTop" class="floating-top" @click="scrollToTop">
+        <view v-if="!embedded && showScrollTop" class="floating-top" @click="scrollToTop">
             <mdi-icon path="/static/icons/arrow-up.svg" size="18px" color="#0d1b2f"></mdi-icon>
         </view>
     </view>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
@@ -106,8 +106,15 @@ import { getStatusBarHeight } from '@/utils/system.js';
 
 const { t, locale } = useI18n();
 
+const props = defineProps({
+    embedded: {
+        type: Boolean,
+        default: false,
+    },
+});
+
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px)`);
+const contentHeight = computed(() => (props.embedded ? 'calc(100vh - 118rpx)' : `calc(100vh - ${statusBarHeight.value}px)`));
 const scrollIntoViewTarget = ref('');
 const showScrollTop = ref(false);
 const isLoading = ref(false);
@@ -270,6 +277,12 @@ const scrollToTop = () => {
 onLoad(() => {
     getLatest();
 });
+
+onMounted(() => {
+    if (!latestList.value.length) {
+        getLatest();
+    }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -280,6 +293,16 @@ onLoad(() => {
         radial-gradient(circle at 18% 16%, rgba(255, 187, 106, 0.12), transparent 20%),
         linear-gradient(180deg, #0a1018 0%, #0f1621 42%, #0a0f16 100%);
     color: #eaf0fb;
+}
+
+.layout.is-embedded {
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.layout.is-embedded .timeline-wrap {
+    padding-top: 18rpx;
 }
 
 .status-holder {

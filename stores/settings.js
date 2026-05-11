@@ -7,9 +7,9 @@ export const useSettingsStore = defineStore(
         const installBanner = ref(true); // PWA安装应用的按钮提示条，判断是否已安装决定是否显示
 
         const options = reactive({
-            view: 'window',  // window / waterfall
-            column: 3,
-            width: 100,  // 窗口宽度，用来计算瀑布流每列的宽度
+            view: 'window', // window / waterfall
+            column: 2,
+            width: 100, // 窗口宽度，用来计算瀑布流每列的宽度
 
             // vuetify项目的配置，后续修改
             theme: 'light',
@@ -33,7 +33,7 @@ export const useSettingsStore = defineStore(
             showSideBarSetting: false, // 弹出侧边栏的设置界面(全屏对话框)
 
             refresh: false,
-            firstLogin: false
+            firstLogin: false,
 
             // TODO 多个primary等颜色的默认值
         });
@@ -53,7 +53,7 @@ export const useSettingsStore = defineStore(
             // 存储位置，默认 localStorage，还支持sessionStorage，cookie比较复杂
             // storage: sessionStorage,
             // 指定存储的内容
-            paths: ['options']
-        }
-    }
+            paths: ['options'],
+        },
+    },
 );

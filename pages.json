@@ -309,28 +309,14 @@
             }
         },
         {
-            "path": "pages/test/ad-inter",
+            "path": "pages/test/ad-interstitial-test",
             "style": {
                 "navigationBarTitleText": "Test",
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/test/ad-rewarded",
-            "style": {
-                "navigationBarTitleText": "Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/waterfall-view",
-            "style": {
-                "navigationBarTitleText": "Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/demo-view",
+            "path": "pages/test/ad-rewarded-test",
             "style": {
                 "navigationBarTitleText": "Test",
                 "navigationStyle": "custom"

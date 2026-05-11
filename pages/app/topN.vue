@@ -1,10 +1,10 @@
 <template>
-    <view class="top10-page">
-        <view class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
+    <view class="top10-page" :class="{ 'is-embedded': embedded }">
+        <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <scroll-view scroll-y class="top10-scroll">
             <view class="top10-wrap">
-                <view class="top10-header">
+                <view v-if="!embedded" class="top10-header">
                     <view class="top10-header__left">
                         <view class="top10-header__back" @click="goBack">
                             <uni-icons type="back" size="20" color="#f8fafc"></uni-icons>
@@ -116,7 +116,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { apiGetClassList, apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -124,6 +124,13 @@ import { getStatusBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
 
 const { t, locale } = useI18n();
+
+const props = defineProps({
+    embedded: {
+        type: Boolean,
+        default: false,
+    },
+});
 
 const activeMetric = ref('views');
 const loading = ref(false);
@@ -211,6 +218,12 @@ const goBack = () => {
 onLoad(() => {
     getTopList();
 });
+
+onMounted(() => {
+    if (!rankedList.value.length) {
+        getTopList();
+    }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -222,12 +235,22 @@ onLoad(() => {
         linear-gradient(180deg, #101922 0%, #13202c 36%, #0c1218 100%);
 }
 
+.top10-page.is-embedded {
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
 .top10-status {
     width: 100%;
 }
 
 .top10-scroll {
     height: calc(100vh - 1rpx);
+}
+
+.top10-page.is-embedded .top10-scroll {
+    height: calc(100vh - 118rpx);
 }
 
 .top10-wrap {

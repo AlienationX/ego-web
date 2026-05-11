@@ -2,7 +2,7 @@
     <view class="test-layout pageBackground">
         <!-- 沉浸式状态栏占位 -->
         <view class="status-bar" :style="{ height: statusBarHeight + 'px' }"></view>
-        
+
         <!-- 简易返回导航 -->
         <view class="nav-header">
             <view class="back-btn" @click="goBack">
@@ -13,11 +13,7 @@
 
         <!-- Tabbed 组件容器 -->
         <view class="component-wrapper">
-            <tabbed-pics-view 
-                v-if="testTabs.length"
-                :tabs="testTabs" 
-                :initialIndex="0"
-            />
+            <tabbed-pics-view v-if="testTabs.length" :tabs="testTabs" :initialIndex="0" />
         </view>
     </view>
 </template>
@@ -32,7 +28,7 @@ const statusBarHeight = ref(getStatusBarHeight());
 const testTabs = ref([
     { label: '推荐', query: { classify_id: 1, sortord: 'random' } },
     { label: '最热', query: { classify_id: 1, sortord: 'score' } },
-    { label: '日期', query: { classify_id: 1, sortord: 'date_desc' }, isDate: true }
+    { label: '日期', query: { classify_id: 1, sortord: 'date_desc' }, isDate: true },
 ]);
 
 const goBack = () => {
@@ -63,7 +59,7 @@ const goBack = () => {
         background: rgba(15, 23, 42, 0.9);
         backdrop-filter: blur(20rpx);
         border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
-        
+
         .back-btn {
             display: flex;
             align-items: center;
@@ -71,9 +67,11 @@ const goBack = () => {
             width: 60rpx;
             height: 60rpx;
             margin-right: 10rpx;
-            &:active { opacity: 0.7; }
+            &:active {
+                opacity: 0.7;
+            }
         }
-        
+
         .title {
             font-size: 32rpx;
             color: #f1f5f9;

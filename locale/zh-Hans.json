@@ -39,6 +39,12 @@
     "index": {
         "title": "推荐",
         "notice": "公告",
+        "tabs": {
+            "home": "首页",
+            "recommend": "推荐",
+            "latest": "最新",
+            "hot": "最热"
+        },
         "forYouTitle": "猜你喜欢",
         "forYouSignals": "偏好信号",
         "forYouCategory": "订阅分类",

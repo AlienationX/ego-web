@@ -42,10 +42,8 @@ const testMenus = [
     { name: 'Custom Bars', url: '/pages/test/custom-bars' },
     { name: 'Edit Cover', url: '/pages/app/edit-cover' },
     { name: 'Tabbed Pics View Test', url: '/pages/test/pics-view-test' },
-    { name: 'Interstitial Ad', url: '/pages/test/ad-inter' },
-    { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded' },
-    { name: 'Waterfall View', url: '/pages/test/waterfall-view' },
-    { name: 'Demo View', url: '/pages/test/demo-view' },
+    { name: 'Interstitial Ad', url: '/pages/test/ad-interstitial-test' },
+    { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded-test' },
 ];
 
 const go = (url) => {

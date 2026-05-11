@@ -41,6 +41,12 @@
     "index": {
         "title": "Recommend",
         "notice": "Notice",
+        "tabs": {
+            "home": "Home",
+            "recommend": "Recommend",
+            "latest": "Latest",
+            "hot": "Hot"
+        },
         "forYouTitle": "Picked For You",
         "forYouSignals": "Taste Signals",
         "forYouCategory": "Category",
