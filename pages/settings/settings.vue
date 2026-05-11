@@ -416,17 +416,20 @@ const sections = computed(() => {
                             : t('settings.preview.classic'),
                     action: openPreviewTypePopup,
                 },
-                // {
-                //     key: 'view_type',
-                //     icon:
-                //         settingsStore.options.view === 'view'
-                //             ? '/static/icons/view-grid.svg'
-                //             : '/static/icons/view-dashboard.svg',
-                //     label: t('settings.items.viewType.label'),
-                //     sublabel: t('settings.items.viewType.sublabel'),
-                //     value: settingsStore.options.view === 'view' ? t('settings.view.window') : t('settings.view.waterfall'),
-                //     action: switchView,
-                // },
+                {
+                    key: 'view_type',
+                    icon:
+                        settingsStore.options.view === 'window'
+                            ? '/static/icons/view-grid.svg'
+                            : '/static/icons/view-dashboard.svg',
+                    label: t('settings.items.viewType.label'),
+                    sublabel: t('settings.items.viewType.sublabel'),
+                    value:
+                        settingsStore.options.view === 'window'
+                            ? t('settings.items.viewType.window')
+                            : t('settings.items.viewType.waterfall'),
+                    action: switchView,
+                },
                 // {
                 //     key: 'availability_status',
                 //     icon: 'calendar',
@@ -623,6 +626,11 @@ function switchLanguage() {
     locale.value = changeLanguage;
     // 保存语言选择
     uni.setStorageSync('lang', changeLanguage);
+}
+
+function switchView() {
+    const changeView = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
+    settingsStore.options.view = changeView;
 }
 
 function switchTheme() {

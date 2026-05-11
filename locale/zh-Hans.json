@@ -617,6 +617,12 @@
                 "label": "预览方式",
                 "sublabel": "设置壁纸预览布局样式"
             },
+            "viewType": {
+                "label": "布局方式",
+                "sublabel": "设置壁纸显示布局样式",
+                "window": "网格",
+                "waterfall": "瀑布流"
+            },
             "availability": {
                 "label": "在线状态",
                 "available": "当前可用",

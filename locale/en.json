@@ -619,6 +619,12 @@
                 "label": "Preview Type",
                 "sublabel": "Set wallpaper preview layout"
             },
+            "viewType": {
+                "label": "View Type",
+                "sublabel": "Set wallpaper display layout",
+                "window": "Grid",
+                "waterfall": "Waterfall"
+            },
             "availability": {
                 "label": "Availability Status",
                 "available": "Currently available",
