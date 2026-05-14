@@ -12,7 +12,11 @@
                     @click="handleSwitch(item)"
                 >
                     <view class="glass-tab__icon-wrap">
-                        <image class="glass-tab__icon" :src="currentPath === item.pagePath ? item.selectedIconPath : item.iconPath" mode="aspectFit"></image>
+                        <image
+                            class="glass-tab__icon"
+                            :src="currentPath === item.pagePath ? item.selectedIconPath : item.iconPath"
+                            mode="aspectFit"
+                        ></image>
                     </view>
                     <view class="glass-tab__text">{{ item.text }}</view>
                 </view>
@@ -120,8 +124,8 @@ const handleSwitch = (item) => {
 
 .glass-tab {
     position: fixed;
-    left: 24rpx;
-    right: 24rpx;
+    left: 0rpx;
+    right: 0rpx;
     z-index: 45;
 }
 
@@ -131,7 +135,6 @@ const handleSwitch = (item) => {
     justify-content: space-between;
     gap: 8rpx;
     padding: 14rpx;
-    border-radius: 34rpx;
     background: linear-gradient(135deg, var(--glass-tab-shell-start), var(--glass-tab-shell-end));
     border: 1rpx solid var(--glass-tab-shell-border);
     box-shadow:

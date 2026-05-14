@@ -1,27 +1,43 @@
 <template>
-    <view class="homeLayout pageBackground">
-        <view class="home-titlebar" :style="{ paddingTop: statusBarHeight + 'px' }">
-            <view class="home-titlebar__inner">
-                <scroll-view scroll-x class="home-tabs" show-scrollbar="false">
-                    <view class="home-tabs__inner">
-                        <view
-                            v-for="tab in homeTabs"
-                            :key="tab.key"
-                            class="home-tab"
-                            :class="{ 'is-active': activeHomeTab === tab.key }"
-                            @click="switchHomeTab(tab.key)"
-                        >
-                            {{ tab.label }}
+    <view class="homeLayout pageBackground" :class="'homeLayout--' + activeHomeTab">
+        <view
+            class="home-titlebar"
+            :class="{ 'is-hidden': !isTitleBarVisible }"
+            :style="{ paddingTop: statusBarHeight + 'px', height: navBarHeight + 'px', paddingRight: titlebarPaddingRight }"
+        >
+            <view class="home-titlebar__inner" :style="{ height: titleBarHeight + 'px' }">
+                <view class="home-tabs-wrapper">
+                    <scroll-view scroll-x class="home-tabs" show-scrollbar="false">
+                        <view class="home-tabs__inner">
+                            <view
+                                v-for="tab in homeTabs"
+                                :key="tab.key"
+                                class="home-tab"
+                                :class="{ 'is-active': activeHomeTab === tab.key }"
+                                @click="switchHomeTab(tab.key)"
+                            >
+                                {{ tab.label }}
+                            </view>
                         </view>
-                    </view>
-                </scroll-view>
+                    </scroll-view>
+                    <view class="home-tabs-mask"></view>
+                </view>
+
+                <!-- #ifdef MP-WEIXIN -->
+                <view class="home-search home-search--icon" @click="goSearch">
+                    <uni-icons type="search" size="17" color="#64748b"></uni-icons>
+                </view>
+                <!-- #endif -->
+
+                <!-- #ifndef MP-WEIXIN -->
                 <view class="home-search" @click="goSearch">
                     <uni-icons type="search" size="17" color="#64748b"></uni-icons>
                     <text class="home-search__text">{{ t('common.search') }}</text>
                 </view>
+                <!-- #endif -->
             </view>
         </view>
-        <view class="home-titlebar-spacer" :style="{ height: '96rpx' }"></view>
+        <view class="home-titlebar-spacer" :style="{ height: navBarHeight + 'px' }"></view>
 
         <view v-show="activeHomeTab === 'home'" class="home-channel home-channel--main">
             <view class="banner">
@@ -364,7 +380,8 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue';
-import { onLoad, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { onLoad, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onPageScroll } from '@dcloudio/uni-app';
+import { useI18n } from 'vue-i18n';
 import {
     apiGetBanner,
     apiGetRandomDay,
@@ -375,10 +392,9 @@ import {
     apiGetTopWall,
 } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { useI18n } from 'vue-i18n';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/system.js';
 import TimelinePage from '@/pages/app/timeline.vue';
 import TopNPage from '@/pages/app/topN.vue';
 const { t } = useI18n();
@@ -386,6 +402,41 @@ const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
+const navBarHeight = ref(getNavBarHeight() || 0);
+const titleBarHeight = ref(getTitleBarHeight() || 0);
+const isTitleBarVisible = ref(true);
+let lastScrollTop = 0;
+
+onPageScroll((e) => {
+    const currentScrollTop = e.scrollTop;
+    if (currentScrollTop > lastScrollTop && currentScrollTop > titleBarHeight.value) {
+        isTitleBarVisible.value = false;
+    } else if (currentScrollTop < lastScrollTop) {
+        isTitleBarVisible.value = true;
+    }
+    lastScrollTop = currentScrollTop;
+});
+
+uni.$on('app-scroll', (scrollTop) => {
+    if (scrollTop > lastScrollTop && scrollTop > titleBarHeight.value) {
+        isTitleBarVisible.value = false;
+    } else if (scrollTop < lastScrollTop) {
+        isTitleBarVisible.value = true;
+    }
+    lastScrollTop = scrollTop;
+});
+
+const titlebarPaddingRight = computed(() => {
+    // #ifdef MP-WEIXIN
+    const menuButtonInfo = uni.getMenuButtonBoundingClientRect ? uni.getMenuButtonBoundingClientRect() : null;
+    if (menuButtonInfo) {
+        const sysInfo = uni.getSystemInfoSync();
+        return sysInfo.windowWidth - menuButtonInfo.left + 10 + 'px';
+    }
+    // #endif
+    return '20rpx';
+});
+
 const activeHomeTab = ref('home');
 const homeTabs = computed(() => [
     { key: 'home', label: t('index.tabs.home') },
@@ -1013,8 +1064,8 @@ onShareTimeline(() => {
 <style lang="scss" scoped>
 .homeLayout {
     min-height: 100vh;
-    overflow-x: hidden;
     box-sizing: border-box;
+    transition: background 0.3s ease;
     background:
         radial-gradient(circle at 82% 0%, rgba(43, 140, 238, 0.12), transparent 28%),
         linear-gradient(180deg, #f5f7fb 0%, #eef3f8 100%);
@@ -1031,7 +1082,7 @@ onShareTimeline(() => {
     }
 
     .home-titlebar__inner {
-        height: 96rpx;
+        height: getTitleBarHeight() + 'px';
         padding: 0;
         display: flex;
         align-items: center;
@@ -1039,10 +1090,30 @@ onShareTimeline(() => {
         gap: 18rpx;
     }
 
+    .home-tabs-wrapper {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .home-tabs-mask {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 40rpx;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+        pointer-events: none;
+    }
+
     .home-tabs {
         flex: 1;
         min-width: 0;
         white-space: nowrap;
+        height: 100%;
     }
 
     .home-tabs__inner {
@@ -1050,12 +1121,13 @@ onShareTimeline(() => {
         align-items: center;
         justify-content: flex-start;
         gap: 28rpx;
-        padding: 0 8rpx;
+        padding: 0 24rpx 0 8rpx;
+        height: 100%;
     }
 
     .home-tab {
         position: relative;
-        height: 88rpx;
+        height: 100%;
         padding: 0;
         display: inline-flex;
         align-items: center;
@@ -1075,7 +1147,7 @@ onShareTimeline(() => {
             content: '';
             position: absolute;
             left: 50%;
-            bottom: 6rpx;
+            bottom: 4rpx;
             width: 48rpx;
             height: 4rpx;
             border-radius: 999rpx;
@@ -1108,6 +1180,14 @@ onShareTimeline(() => {
         }
     }
 
+    .home-search--icon {
+        min-width: 60rpx;
+        width: 60rpx;
+        height: 60rpx;
+        padding: 0;
+        border-radius: 50%;
+    }
+
     .home-search__text {
         font-size: 23rpx;
         font-weight: 700;
@@ -1124,7 +1204,7 @@ onShareTimeline(() => {
         height: calc(100vh - 118rpx);
         min-height: 900rpx;
         overflow: hidden;
-        background: #0b1017;
+        background: transparent;
     }
 
     .home-channel--latest,
@@ -1133,18 +1213,8 @@ onShareTimeline(() => {
         max-width: 100%;
         box-sizing: border-box;
         color: #eaf0fb;
-        background:
-            radial-gradient(circle at 82% 8%, rgba(90, 145, 255, 0.18), transparent 24%),
-            radial-gradient(circle at 16% 10%, rgba(255, 187, 106, 0.1), transparent 20%),
-            linear-gradient(180deg, #0a1018 0%, #101721 46%, #0a0f16 100%);
+        background: transparent;
         min-height: calc(100vh - 118rpx);
-    }
-
-    .home-channel--hot {
-        background:
-            radial-gradient(circle at top center, rgba(43, 140, 238, 0.22), transparent 24%),
-            radial-gradient(circle at 20% 18%, rgba(244, 114, 182, 0.16), transparent 22%),
-            linear-gradient(180deg, #101922 0%, #13202c 36%, #0c1218 100%);
     }
 
     .embedded-hero {

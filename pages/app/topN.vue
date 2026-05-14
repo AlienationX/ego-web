@@ -40,12 +40,18 @@
                 <template v-else-if="rankedList.length">
                     <view class="hero-section">
                         <view class="hero-card hero-card--first" @click="goPreview(rankedList[0].id)">
-                            <image class="hero-card__image" :src="rankedList[0].mediumPicurl || rankedList[0].picurl" mode="aspectFill"></image>
+                            <image
+                                class="hero-card__image"
+                                :src="rankedList[0].mediumPicurl || rankedList[0].picurl"
+                                mode="aspectFill"
+                            ></image>
                             <view class="hero-card__overlay"></view>
                             <view class="hero-card__rank hero-card__rank--first">1</view>
                             <view class="hero-card__content">
                                 <view class="hero-card__tag">{{ $t('top10.heroTag') }}</view>
-                                <view class="hero-card__title">{{ rankedList[0].description || rankedList[0].classify_name || rankedList[0].id }}</view>
+                                <view class="hero-card__title">{{
+                                    rankedList[0].description || rankedList[0].classify_name || rankedList[0].id
+                                }}</view>
                                 <view class="hero-card__meta">
                                     <view class="hero-card__meta-item">
                                         <uni-icons type="eye" size="14" color="#cbd5e1"></uni-icons>
@@ -66,9 +72,15 @@
                                 class="hero-card hero-card--secondary"
                                 @click="goPreview(item.id)"
                             >
-                                <image class="hero-card__image" :src="item.mediumPicurl || item.smallPicurl || item.picurl " mode="aspectFill"></image>
+                                <image
+                                    class="hero-card__image"
+                                    :src="item.mediumPicurl || item.smallPicurl || item.picurl"
+                                    mode="aspectFill"
+                                ></image>
                                 <view class="hero-card__overlay hero-card__overlay--soft"></view>
-                                <view class="hero-card__rank" :class="{ 'hero-card__rank--second': idx === 0 }">{{ idx + 2 }}</view>
+                                <view class="hero-card__rank" :class="{ 'hero-card__rank--second': idx === 0 }">{{
+                                    idx + 2
+                                }}</view>
                                 <view class="hero-card__content hero-card__content--compact">
                                     <view class="hero-card__title hero-card__title--compact">
                                         {{ item.description || item.classify_name || item.id }}
@@ -86,15 +98,28 @@
                         </view>
 
                         <view class="rank-list">
-                            <view v-for="(item, idx) in rankedList.slice(3)" :key="item.id" class="rank-item" @click="goPreview(item.id)">
+                            <view
+                                v-for="(item, idx) in rankedList.slice(3)"
+                                :key="item.id"
+                                class="rank-item"
+                                @click="goPreview(item.id)"
+                            >
                                 <view class="rank-item__media">
-                                    <image class="rank-item__thumb" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                    <image
+                                        class="rank-item__thumb"
+                                        :src="item.smallPicurl || item.picurl"
+                                        mode="aspectFill"
+                                    ></image>
                                     <view class="rank-item__index">{{ idx + 4 }}</view>
                                 </view>
                                 <view class="rank-item__body">
-                                    <view class="rank-item__title">{{ item.description || item.classify_name || item.id }}</view>
+                                    <view class="rank-item__title">{{
+                                        item.description || item.classify_name || item.id
+                                    }}</view>
                                     <view class="rank-item__meta">
-                                        <text class="rank-item__category">{{ item.classify_name || $t('top10.wallpaper') }}</text>
+                                        <text class="rank-item__category">{{
+                                            item.classify_name || $t('top10.wallpaper')
+                                        }}</text>
                                         <text class="rank-item__metric">{{ formatMetric(item) }}</text>
                                     </view>
                                 </view>
@@ -138,9 +163,7 @@ const rankedList = ref([]);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
 const metricBadge = computed(() => (activeMetric.value === 'views' ? t('top10.badgeViews') : t('top10.badgeDownloads')));
-const metricDescription = computed(() =>
-    activeMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads'),
-);
+const metricDescription = computed(() => (activeMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads')));
 
 const getType = () => (activeMetric.value === 'views' ? 'views' : 'downloads');
 
@@ -246,7 +269,7 @@ onMounted(() => {
 }
 
 .top10-scroll {
-    height: calc(100vh - 1rpx);
+    height: 100vh;
 }
 
 .top10-page.is-embedded .top10-scroll {
@@ -256,7 +279,7 @@ onMounted(() => {
 .top10-wrap {
     max-width: 860rpx;
     margin: 0 auto;
-    padding: 26rpx 24rpx 56rpx;
+    padding: 25rpx;
 }
 
 .top10-header {

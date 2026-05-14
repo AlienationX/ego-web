@@ -73,7 +73,7 @@
                         <view class="box" @click="toggleCollect">
                             <uni-icons type="heart-filled" size="28"></uni-icons>
                             <view class="text">{{
-                                currentInfo.is_collect ? t('previewPage.collected') : t('previewPage.collect')
+                                currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
                             }}</view>
                         </view>
                         <view class="box" @click="openScore">
@@ -100,7 +100,7 @@
                             <view class="action-item" @click="toggleCollect">
                                 <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
                                 <view class="action-text">{{
-                                    currentInfo.is_collect ? t('previewPage.collected') : t('previewPage.collect')
+                                    currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
                                 }}</view>
                             </view>
                             <view class="action-item" @click="clickDownload">
@@ -186,9 +186,9 @@
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.tags') }}</view>
-                            <view class="value tabs">
-                                <view class="tab" v-for="tab in currentInfo.tabs_list" :key="tab" @click="goSearchByTag(tab)">
-                                    {{ tab }}
+                            <view class="value tags">
+                                <view class="tag" v-for="tag in currentInfo.tags_list" :key="tag" @click="goSearchByTag(tag)">
+                                    {{ tag }}
                                 </view>
                             </view>
                         </view>
@@ -239,7 +239,7 @@
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.tags') }}</view>
-                            <input v-model="editForm.tabs" class="input" />
+                            <input v-model="editForm.tags" class="input" />
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.category') }}</view>
@@ -468,11 +468,11 @@ const publishDateText = computed(() => {
 const classList = ref([]);
 const wallList = uni.getStorageSync('wallList') || [];
 classList.value = wallList.map((item) => {
-    // 增加tabs_list字段，将字符串转换成数组
+    // 增加tags_list字段，将字符串转换成数组
     return {
         ...item,
-        is_collect: !!item.is_collect,
-        tabs_list: typeof item.tabs === 'string' ? item.tabs.split(',') : item.tabs_list || [],
+        is_favorited: !!item.is_favorited,
+        tags_list: typeof item.tags === 'string' ? item.tags.split(',') : item.tags_list || [],
     };
 });
 const disableSwipe = ref(false);
@@ -596,7 +596,7 @@ const editPopup = ref(null);
 const classifyList = ref([]);
 const editForm = ref({
     description: '',
-    tabs: '',
+    tags: '',
     classify_id: '',
     publisher: '',
     score: 0,
@@ -615,7 +615,7 @@ const openEdit = async () => {
     const currentClassify = classifyList.value.find((item) => item.classify_name === currentInfo.value.classify_name);
     editForm.value = {
         description: currentInfo.value.description || '',
-        tabs: currentInfo.value.tabs || (currentInfo.value.tabs_list || []).join(','),
+        tags: currentInfo.value.tags || (currentInfo.value.tags_list || []).join(','),
         classify_id: currentClassify ? currentClassify.classify_id : '',
         publisher: currentInfo.value.publisher || '',
         score: currentInfo.value.score || 0,
@@ -675,8 +675,8 @@ const saveEdit = async () => {
         await apiPostUpdateWall(payload);
         applyLocalUpdate({
             ...payload,
-            tabs_list: editForm.value.tabs
-                ? editForm.value.tabs
+            tags_list: editForm.value.tags
+                ? editForm.value.tags
                       .split(',')
                       .map((t) => t.trim())
                       .filter(Boolean)
@@ -767,25 +767,26 @@ const toggleCollect = async () => {
         return;
     }
 
-    const nextCollect = !currentInfo.value.is_collect;
+    const nextCollect = !currentInfo.value.is_favorited;
     try {
         await apiPostActions({
             wall_id: currentInfo.value.id,
-            is_collect: nextCollect,
+            action_key: 'favorite',
+            action_value: nextCollect ? 1 : 0,
         });
 
-        currentInfo.value.is_collect = nextCollect;
+        currentInfo.value.is_favorited = nextCollect;
         if (classList.value[currentIndex.value]) {
-            classList.value[currentIndex.value].is_collect = nextCollect;
+            classList.value[currentIndex.value].is_favorited = nextCollect;
         }
 
         uni.showToast({
-            title: nextCollect ? t('previewPage.collectSuccess') : t('previewPage.uncollectSuccess'),
+            title: nextCollect ? t('previewPage.favoriteSuccess') : t('previewPage.unfavoriteSuccess'),
             icon: 'none',
         });
     } catch (error) {
         uni.showToast({
-            title: t('previewPage.collectFailed'),
+            title: t('previewPage.favoriteFailed'),
             icon: 'none',
         });
     }
@@ -795,7 +796,7 @@ const toggleWatchLater = () => {
     if (!currentInfo.value?.id) return;
     const saved = libraryStore.toggleWatchLater(currentInfo.value);
     uni.showToast({
-        title: saved ? t('history.savedToast') : t('history.removedToast'),
+        title: saved ? t('historyPage.savedToast') : t('historyPage.removedToast'),
         icon: 'none',
     });
 };
@@ -819,14 +820,13 @@ const submitScore = async () => {
     // let userid = ...  // 获取用户id
     // let {classid, _id: wallId} = currentInfo.value;  // 获取分类id和图片id
     // 然后调用接口请求进行增删改等操作
-    const data = {
-        wall_id: currentInfo.value.id,
-        pic_score: userScore.value,
-    };
     try {
-        let res = await apiPostActions(data);
+        let res = await apiPostActions({
+            wall_id: currentInfo.value.id,
+            action_key: 'rate',
+            action_value: userScore.value,
+        });
 
-        // 图片信息增加用户当前评分。不修改当前壁纸的评分
         // classList.value[currentIndex.value].userScore = userScore.value;
         // uni.setStorageSync('wallList', classList.value);
         uni.showToast({
@@ -852,7 +852,8 @@ const recordDownloadAction = async () => {
     if (Object.keys(userStore.userinfo).length === 0) return;
     await apiPostActions({
         wall_id: currentInfo.value.id,
-        is_download: true,
+        action_key: 'download',
+        action_value: 1,
     });
 };
 
@@ -1371,13 +1372,13 @@ onShareTimeline(() => {
                     }
                 }
 
-                .tabs {
+                .tags {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 12rpx;
                     padding-top: 4rpx;
 
-                    .tab {
+                    .tag {
                         color: $wp-theme-color;
                         font-size: 22rpx;
                         padding: 6rpx 20rpx;

@@ -96,7 +96,7 @@
         "empty": "No recent releases yet",
         "wallpaper": "Wallpaper"
     },
-    "history": {
+    "historyPage": {
         "title": "Recent Views",
         "subtitle": "Continue Browsing",
         "empty": "No recent views yet",
@@ -266,11 +266,11 @@
         "aspectRatio": "Ratio:",
         "description": "Description:",
         "tags": "Tags:",
-        "collect": "Favorite",
-        "collected": "Favorited",
-        "collectSuccess": "Added to favorites",
-        "uncollectSuccess": "Removed from favorites",
-        "collectFailed": "Favorite action failed. Please try again.",
+        "favorite": "Favorite",
+        "favorited": "Favorited",
+        "favoriteSuccess": "Added to favorites",
+        "unfavoriteSuccess": "Removed from favorites",
+        "favoriteFailed": "Favorite action failed. Please try again.",
         "wallpaperRating": "Wallpaper Rating",
         "points": "points",
         "confirmRating": "Confirm Rating",

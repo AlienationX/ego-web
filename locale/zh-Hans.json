@@ -94,7 +94,7 @@
         "empty": "暂无最新发布内容",
         "wallpaper": "壁纸"
     },
-    "history": {
+    "historyPage": {
         "title": "最近浏览",
         "subtitle": "继续浏览",
         "empty": "还没有浏览记录",
@@ -406,11 +406,11 @@
         "aspectRatio": "比例:",
         "description": "描述:",
         "tags": "标签:",
-        "collect": "收藏",
-        "collected": "已收藏",
-        "collectSuccess": "收藏成功",
-        "uncollectSuccess": "已取消收藏",
-        "collectFailed": "收藏操作失败，请稍后重试",
+        "favorite": "收藏",
+        "favorited": "已收藏",
+        "favoriteSuccess": "收藏成功",
+        "unfavoriteSuccess": "已取消收藏",
+        "favoriteFailed": "收藏操作失败，请稍后重试",
         "wallpaperRating": "壁纸评分",
         "points": "分",
         "confirmRating": "确认评分",

@@ -3,11 +3,7 @@
         <page-header :title="$t('user.profile.myFavorite')"></page-header>
 
         <view class="content-wrapper">
-            <tabbed-pics-view
-                :show-header="false"
-                :tabs="tabs"
-                api-type="actions"
-            ></tabbed-pics-view>
+            <tabbed-pics-view :show-header="false" :tabs="tabs" api-type="actions"></tabbed-pics-view>
         </view>
     </view>
 </template>
@@ -22,7 +18,7 @@ const tabs = computed(() => [
     {
         label: t('user.profile.myFavorite'),
         query: {
-            action_type: 'collect',
+            action_key: 'favorite',
         },
     },
 ]);

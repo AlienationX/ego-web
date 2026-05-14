@@ -349,7 +349,7 @@ const getFavoriteList = async () => {
         const res = await apiGetActions({
             pageNum: 1,
             pageSize: 30,
-            action_type: 'collect',
+            action_key: 'favorite',
         });
         favoriteList.value = (res.data || []).map((item) => handlePicUrl(item));
         if (favoriteList.value.length) {

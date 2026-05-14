@@ -103,7 +103,7 @@ defineProps({
 
     .mask-text {
         color: #fff;
-        font-size: 30rpx;
+        font-size: 28rpx;
         font-weight: 600;
         letter-spacing: 0.5rpx;
         text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);

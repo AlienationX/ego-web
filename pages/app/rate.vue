@@ -79,7 +79,7 @@ const swipeOptions = ref([
 const queryParams = ref({
     pageNum: 1,
     pageSize: 12,
-    action_type: 'rate',
+    action_key: 'rate',
 });
 
 const getRatingList = async () => {
@@ -153,7 +153,8 @@ const handleSwipeClick = (item, index, e) => {
             try {
                 await apiPostActions({
                     wall_id: item.id,
-                    pic_score: 0,
+                    action_key: 'rate',
+                    action_value: 0,
                 });
                 uni.showToast({
                     title: t('rating.deleteSuccess'),

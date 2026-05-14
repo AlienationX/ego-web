@@ -20,9 +20,3 @@ export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper/media';
 
 // 备案信息
 export const RIGHT_ICP = '粤ICP备15077732号-2';
-
-// layout布局高度设置
-export const STATUS_BAR_HEIGHT = 44;
-export const NAV_BAR_HEIGHT = 44;
-export const APP_BAR_HEIGHT = STATUS_BAR_HEIGHT + NAV_BAR_HEIGHT;
-export const TAB_BAR_HEIGHT = 44;

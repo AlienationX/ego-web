@@ -56,10 +56,7 @@
             <!-- 签到和能量 -->
             <view v-if="userStore.userinfo.id" class="checkin-section">
                 <view class="energy-info">
-                    <bubble-tooltip
-                        :content="t('user.profile.energyHintContent')"
-                        placement="right"
-                    >
+                    <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right">
                         <view class="energy-hint">
                             <uni-icons type="help" size="20" color="#999"></uni-icons>
                         </view>
@@ -94,7 +91,7 @@
                         <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
                     </view>
                     <view class="stats-number">{{
-                        userStore.userinfo.count ? userStore.userinfo.count.collect_count : 0
+                        userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
                     }}</view>
                 </view>
                 <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
@@ -431,7 +428,7 @@ const sysMenus = computed(() => [
               {
                   left_icon: '/static/icons/clock.svg',
                   left_color: '#6B7280',
-                  left_text: t('history.title'),
+                  left_text: t('historyPage.title'),
                   right_text: `${libraryStore.recentViewed.length}`,
                   right_icon: 'right',
                   click: toHistory,
@@ -439,7 +436,7 @@ const sysMenus = computed(() => [
               {
                   left_icon: '/static/icons/bookmark.svg',
                   left_color: '#6B7280',
-                  left_text: t('history.watchLaterTitle'),
+                  left_text: t('historyPage.watchLaterTitle'),
                   right_text: `${libraryStore.watchLater.length}`,
                   right_icon: 'right',
                   click: toWatchLater,

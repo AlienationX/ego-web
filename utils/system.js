@@ -10,6 +10,7 @@ export const getStatusBarHeight = () => {
     // #endif
 
     // #ifndef WEB
+    // MP = 54px, APP = 22px
     return SYSTEM_INFO.statusBarHeight;
     // #endif
 };
@@ -86,6 +87,9 @@ export const writeAccessLog = async () => {
         platform: SYSTEM_INFO.uniPlatform === 'app' ? SYSTEM_INFO.platform : SYSTEM_INFO.uniPlatform,
         channel: channel,
         app_version: APP_INFO.appVersion,
+        device_id: SYSTEM_INFO.deviceId,
+        device_brand: SYSTEM_INFO.deviceBrand,
+        device_model: SYSTEM_INFO.deviceModel,
         remark: JSON.stringify(SYSTEM_INFO),
     };
 

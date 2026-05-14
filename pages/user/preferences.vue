@@ -12,7 +12,7 @@
                     icon-path="/static/icons/tag.svg"
                     :title="t('preferencePage.emptyPreferred')"
                     :description="t('preferencePage.emptyPreferredDesc')"
-                    :action-text="t('history.goBrowse')"
+                    :action-text="t('historyPage.goBrowse')"
                     @action="goBrowse"
                 ></empty-state>
 
@@ -45,12 +45,18 @@
                 <view class="shortcut-list">
                     <view class="shortcut-row" @click="openLanguage">
                         <view class="shortcut-name">{{ t('settings.items.language.label') }}</view>
-                        <view class="shortcut-value">{{ locale === 'en' ? t('settings.items.language.valueEn') : t('settings.items.language.valueZh') }}</view>
+                        <view class="shortcut-value">{{
+                            locale === 'en' ? t('settings.items.language.valueEn') : t('settings.items.language.valueZh')
+                        }}</view>
                     </view>
                     <view class="shortcut-row" @click="openPreviewType">
                         <view class="shortcut-name">{{ t('settings.items.previewType.label') }}</view>
                         <view class="shortcut-value">
-                            {{ settingsStore.options.previewType === 'floating' ? t('settings.preview.floating') : t('settings.preview.classic') }}
+                            {{
+                                settingsStore.options.previewType === 'floating'
+                                    ? t('settings.preview.floating')
+                                    : t('settings.preview.classic')
+                            }}
                         </view>
                     </view>
                 </view>

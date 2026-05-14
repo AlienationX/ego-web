@@ -44,7 +44,7 @@
                     icon-path="/static/icons/tag.svg"
                     :title="t('subscriptionPage.emptyTags')"
                     :description="t('subscriptionPage.emptyTagsDesc')"
-                    :action-text="t('history.goBrowse')"
+                    :action-text="t('historyPage.goBrowse')"
                     @action="goBrowse"
                 ></empty-state>
 

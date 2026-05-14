@@ -1,16 +1,12 @@
 <template>
     <view class="layout">
-        <page-header :title="t('history.title')" :subtitle="t('history.subtitle')"></page-header>
+        <page-header :title="t('historyPage.title')" :subtitle="t('historyPage.subtitle')"></page-header>
 
         <view class="content-wrapper">
-            <tabbed-pics-view
-                :show-header="false"
-                :tabs="tabs"
-                api-type="local"
-            ></tabbed-pics-view>
-            
+            <tabbed-pics-view :show-header="false" :tabs="tabs" api-type="local"></tabbed-pics-view>
+
             <view class="page-actions" v-if="libraryStore.recentViewed.length">
-                <button class="ghost-btn" @click="clearHistory">{{ t('history.clear') }}</button>
+                <button class="ghost-btn" @click="clearHistory">{{ t('historyPage.clear') }}</button>
             </view>
         </view>
     </view>
@@ -26,7 +22,7 @@ const libraryStore = useLibraryStore();
 
 const tabs = computed(() => [
     {
-        label: t('history.title'),
+        label: t('historyPage.title'),
         data: libraryStore.recentViewed,
     },
 ]);
@@ -38,7 +34,7 @@ const clearHistory = () => {
             if (res.confirm) {
                 libraryStore.clearRecentViewed();
                 uni.showToast({
-                    title: t('history.cleared'),
+                    title: t('historyPage.cleared'),
                     icon: 'none',
                 });
             }
@@ -62,13 +58,15 @@ const clearHistory = () => {
 .page-actions {
     padding: 20rpx 30rpx 48rpx;
     background: #0b1017;
-    
+
     .ghost-btn {
         background: rgba(255, 255, 255, 0.05);
         color: #94a3b8;
         font-size: 24rpx;
         border-radius: 12rpx;
-        &::after { border: none; }
+        &::after {
+            border: none;
+        }
     }
 }
 </style>

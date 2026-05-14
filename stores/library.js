@@ -17,25 +17,25 @@ const normalizeWall = (wall = {}) => {
         score: wall.score || 0,
         views: wall.views || 0,
         downloads: wall.downloads || 0,
-        tabs: wall.tabs || '',
-        tabs_list: Array.isArray(wall.tabs_list)
-            ? wall.tabs_list
-            : typeof wall.tabs === 'string'
-              ? wall.tabs
+        tags: wall.tags || '',
+        tags_list: Array.isArray(wall.tags_list)
+            ? wall.tags_list
+            : typeof wall.tags === 'string'
+              ? wall.tags
                     .split(',')
                     .map((item) => item.trim())
                     .filter(Boolean)
               : [],
         updated_at: wall.updated_at || '',
         publisher: wall.publisher || '',
-        is_collect: !!wall.is_collect,
+        is_favorited: !!wall.is_favorited,
     };
 };
 
 const getWallTags = (wall = {}) => {
-    if (Array.isArray(wall.tabs_list)) return wall.tabs_list.filter(Boolean);
-    if (typeof wall.tabs === 'string') {
-        return wall.tabs
+    if (Array.isArray(wall.tags_list)) return wall.tags_list.filter(Boolean);
+    if (typeof wall.tags === 'string') {
+        return wall.tags
             .split(',')
             .map((item) => item.trim())
             .filter(Boolean);
@@ -67,7 +67,7 @@ export const useLibraryStore = defineStore(
                 MAX_RECENT_ITEMS,
             );
 
-            const nextTags = normalized.tabs_list.filter((tag) => !hiddenTags.value.includes(tag));
+            const nextTags = normalized.tags_list.filter((tag) => !hiddenTags.value.includes(tag));
             preferredTags.value = [...new Set([...nextTags, ...preferredTags.value])].slice(0, MAX_TAG_ITEMS);
         };
 
@@ -89,7 +89,10 @@ export const useLibraryStore = defineStore(
         const bumpPreferredTag = (tag) => {
             const normalized = String(tag || '').trim();
             if (!normalized || hiddenTags.value.includes(normalized)) return;
-            preferredTags.value = [normalized, ...preferredTags.value.filter((item) => item !== normalized)].slice(0, MAX_TAG_ITEMS);
+            preferredTags.value = [normalized, ...preferredTags.value.filter((item) => item !== normalized)].slice(
+                0,
+                MAX_TAG_ITEMS,
+            );
         };
 
         const removePreferredTag = (tag) => {
