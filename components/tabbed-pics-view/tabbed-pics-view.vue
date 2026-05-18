@@ -66,7 +66,7 @@
                     :refresher-triggered="tabStates[index]?.isRefreshing"
                     @refresherrefresh="onRefresh(index)"
                 >
-                    <view class="container">
+                    <view class="container" :style="{ minHeight: `calc(100% + ${headerHeight}px)` }">
                         <!-- 顶部占位，留给可滚动头部 -->
                         <view :style="{ height: headerHeight + tabsHeight + 'px' }"></view>
 
@@ -93,6 +93,20 @@
                                             :size="lockedSize"
                                             color="#F9E9B5"
                                         ></uni-icons>
+                                    </view>
+                                    <view v-if="showCardMeta" class="card-info">
+                                        <view class="card-info__title">
+                                            {{ item.description || item.classify_name || `#${item.id}` }}
+                                        </view>
+                                        <view class="card-info__footer">
+                                            <view class="card-info__classify">
+                                                {{ item.classify_name || '壁纸' }}
+                                            </view>
+                                            <view class="card-info__score">
+                                                <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                <text>{{ item.score ?? '--' }}</text>
+                                            </view>
+                                        </view>
                                     </view>
                                 </view>
 
@@ -133,7 +147,7 @@
                             </slot>
                         </view>
 
-                        <view class="safe-area-bottom"></view>
+                        <view class="safe-area-bottom" :style="{ height: `${bottomSafeSpace}rpx` }"></view>
                     </view>
                 </scroll-view>
             </swiper-item>
@@ -148,7 +162,7 @@
 
 <script setup>
 import { ref, reactive, watch, computed, onMounted, nextTick } from 'vue';
-import { apiGetClassList, apiGetSearchData, apiGetActions } from '@/api/wallpaper.js';
+import { apiGetClassList, apiGetSearchData, apiGetActions, apiGetRecommend } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -165,6 +179,9 @@ const props = defineProps({
     headerHeight: { type: Number, default: 0 },
     tabsHeight: { type: Number, default: 44 },
     stickyTop: { type: Number, default: 0 },
+    layoutMode: { type: String, default: '' },
+    showCardMeta: { type: Boolean, default: false },
+    bottomSafeSpace: { type: Number, default: 60 },
 });
 
 const emit = defineEmits(['update', 'change', 'scroll']);
@@ -173,7 +190,7 @@ const currentIndex = ref(props.initialIndex);
 const headerScrollTop = ref(0);
 const dateSortAsc = ref(true);
 const canShowAd = computed(() => !userStore.isVip && userStore.showAd);
-const isWaterfall = computed(() => settingsStore.options.view !== 'window');
+const isWaterfall = computed(() => (props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'));
 const imageMode = computed(() => (isWaterfall.value ? 'widthFix' : 'aspectFill'));
 const lockedSize = computed(() => (settingsStore.options.column === 3 ? 18 : 22));
 
@@ -239,6 +256,14 @@ const fetchData = async (index, init = false) => {
             res = await apiGetSearchData(requestParams);
         } else if (props.apiType === 'actions') {
             res = await apiGetActions(requestParams);
+        } else if (props.apiType === 'recommend') {
+            // 将当前已加载的ID拼起来传给后端做去重
+            if (state.images.length > 0) {
+                requestParams.exclude_ids = state.images.map(img => img.id).join(',');
+            }
+            // 注意：如果在没有拦截器统一处理 device_id 的情况下，也可以手动在这里添加：
+            // requestParams.device_id = uni.getStorageSync('deviceId') || '';
+            res = await apiGetRecommend(requestParams);
         } else {
             if (props.apiType === 'classList' && requestParams.classify_id !== undefined && isNaN(requestParams.classify_id)) {
                 state.isLoading = false;
@@ -420,6 +445,24 @@ const recalculateLayout = async (index) => {
 watch(
     () => currentIndex.value,
     (newIdx) => {
+        // Synchronize headerScrollTop immediately to prevent blank gap after switching tabs
+        const currentScroll = tabStates[newIdx]?.oldScrollTop || 0;
+        
+        if (headerScrollTop.value >= props.headerHeight && currentScroll < props.headerHeight) {
+            // If the hero image was already hidden, keep it hidden on the new tab
+            tabStates[newIdx].scrollTop = currentScroll;
+            setTimeout(() => {
+                tabStates[newIdx].scrollTop = props.headerHeight;
+                tabStates[newIdx].oldScrollTop = props.headerHeight;
+            }, 50);
+            headerScrollTop.value = props.headerHeight;
+        } else {
+            headerScrollTop.value = Math.min(currentScroll, props.headerHeight);
+        }
+
+        // Also emit scroll event so that the parent (classlist.vue) can update its parallax hero animation
+        emit('scroll', { scrollTop: headerScrollTop.value, index: newIdx });
+
         if (tabStates[newIdx].images.length === 0) fetchData(newIdx, true);
         else nextTick(() => recalculateLayout(newIdx));
     },
@@ -473,7 +516,9 @@ watch(
 );
 watch(
     () => settingsStore.options.view,
-    () => tabStates.forEach((_, i) => recalculateLayout(i)),
+    () => {
+        if (!props.layoutMode) tabStates.forEach((_, i) => recalculateLayout(i));
+    },
 );
 
 onMounted(() => {
@@ -611,7 +656,6 @@ onMounted(() => {
     width: 100%;
 }
 .container {
-    padding-bottom: 60rpx;
     .layout {
         .box {
             background: rgba(255, 255, 255, 0.02);
@@ -626,11 +670,16 @@ onMounted(() => {
                 width: 100%;
                 height: 100%;
                 opacity: 0;
-                transform: scale(1.05);
-                transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+                filter: blur(10rpx) saturate(0.82);
+                transform: translateY(22rpx);
+                transition:
+                    opacity 0.55s ease,
+                    filter 0.65s ease,
+                    transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
                 &.loaded {
                     opacity: 1;
-                    transform: scale(1);
+                    filter: blur(0) saturate(1);
+                    transform: translateY(0);
                 }
             }
 
@@ -645,6 +694,65 @@ onMounted(() => {
                     opacity: 1;
                     transform: scale(1);
                 }
+            }
+
+            .card-info {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                padding: 92rpx 18rpx 18rpx;
+                background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0.72) 54%, rgba(8, 11, 18, 0.92) 100%);
+                color: #f8fafc;
+                pointer-events: none;
+            }
+
+            .card-info__footer {
+                margin-top: 12rpx;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14rpx;
+            }
+
+            .card-info__classify {
+                display: inline-flex;
+                align-items: center;
+                flex: 0 1 auto;
+                min-height: 34rpx;
+                min-width: 0;
+                max-width: calc(100% - 96rpx);
+                padding: 0 12rpx;
+                border-radius: 999rpx;
+                background: rgba(97, 154, 239, 0.16);
+                border: 1rpx solid rgba(97, 154, 239, 0.2);
+                color: #c7dbff;
+                font-size: 18rpx;
+                font-weight: 800;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            .card-info__title {
+                font-size: 26rpx;
+                line-height: 1.35;
+                font-weight: 800;
+                color: #f8fafc;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .card-info__score {
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                gap: 8rpx;
+                font-size: 21rpx;
+                font-weight: 700;
+                color: #e2e8f0;
             }
         }
     }
@@ -675,7 +783,6 @@ onMounted(() => {
     color: #eef5ff;
 }
 .safe-area-bottom {
-    height: env(safe-area-inset-bottom);
     width: 100%;
 }
 

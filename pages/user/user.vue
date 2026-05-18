@@ -1,16 +1,30 @@
 <template>
     <view class="layout">
+        <!-- #ifndef WEB -->
         <view
-            class="userInfo"
-            :class="{ 'not-logged-in': !userStore.userinfo.id }"
-            :style="{ paddingTop: getStatusBarHeight() + 20 + 'px' }"
+            class="status-bar-bg"
+            :class="{ 'status-bar-bg--muted': !userStore.userinfo.id }"
+            :style="{ height: `${statusBarHeight}px` }"
         >
-            <!-- 装饰性背景 -->
-            <view class="decorative-bg">
+            <!-- <view v-if="userStore.userinfo.id" class="status-user-decorative">
                 <view class="bg-circle circle-1"></view>
                 <view class="bg-circle circle-2"></view>
                 <view class="bg-circle circle-3"></view>
-            </view>
+            </view> -->
+        </view>
+        <!-- #endif -->
+
+        <view
+            class="userInfo"
+            :class="{ 'not-logged-in': !userStore.userinfo.id }"
+            :style="{ paddingTop: `${userHeaderPaddingTop}px` }"
+        >
+            <!-- 装饰性背景 -->
+            <!-- <view class="decorative-bg">
+                <view class="bg-circle circle-1"></view>
+                <view class="bg-circle circle-2"></view>
+                <view class="bg-circle circle-3"></view>
+            </view> -->
 
             <view v-if="userStore.userinfo.id" class="user-content">
                 <view class="avatar">
@@ -179,7 +193,7 @@
             </view>
         </view>
 
-        <custom-ad-banner style="padding: 0rpx 30rpx 30rpx"></custom-ad-banner>
+        <custom-ad-banner class="user-ad-banner"></custom-ad-banner>
 
         <popup-navigation-dialog
             ref="loginPromptPopup"
@@ -221,6 +235,8 @@ const libraryStore = useLibraryStore();
 
 const hasCheckedInToday = ref(false);
 const loginPromptPopup = ref(null);
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const userHeaderPaddingTop = computed(() => statusBarHeight.value + 10);
 
 // 通用导航对话框控制
 const navDialog = ref(null);
@@ -518,8 +534,63 @@ onShow(() => {
 
 <style lang="scss" scoped>
 .layout {
+    --user-page-bg: #f5f5f5;
+    --user-header-bg: #fff;
     background-color: #f5f5f5;
     min-height: 100vh;
+
+    .status-bar-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: var(--user-header-bg);
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 9999;
+
+        &.status-bar-bg--muted {
+            background: var(--user-page-bg);
+        }
+
+        .status-user-decorative {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+
+            .bg-circle {
+                position: absolute;
+                border-radius: 50%;
+                opacity: 0.05;
+                background: linear-gradient(135deg, $wp-theme-color 0%, darken($wp-theme-color, 8%) 100%);
+            }
+
+            .circle-1 {
+                width: 300rpx;
+                height: 300rpx;
+                top: -100rpx;
+                right: -50rpx;
+            }
+
+            .circle-2 {
+                width: 200rpx;
+                height: 200rpx;
+                bottom: -50rpx;
+                left: -30rpx;
+            }
+
+            .circle-3 {
+                width: 150rpx;
+                height: 150rpx;
+                top: 50%;
+                left: 20%;
+            }
+        }
+    }
 
     .userInfo {
         display: flex;
@@ -839,36 +910,37 @@ onShow(() => {
             margin-top: 20rpx;
             width: 360rpx;
             height: 84rpx;
-            background: $wp-theme-color;
-            color: #fff;
+            background: #111827;
+            color: #f8fafc;
             font-size: 30rpx;
-            font-weight: 600;
-            border-radius: 60rpx;
-            border: 2rpx solid rgba(24, 32, 42, 0.06);
+            font-weight: 800;
+            border-radius: 999rpx;
+            border: 1rpx solid rgba(17, 24, 39, 0.08);
             display: flex;
             align-items: center;
             justify-content: center;
             letter-spacing: 0.4rpx;
-            box-shadow:
-                0 12rpx 28rpx rgba(15, 23, 42, 0.12),
-                0 2rpx 6rpx rgba(15, 23, 42, 0.06);
+            box-shadow: none;
             transition:
                 transform 0.28s ease,
-                box-shadow 0.28s ease,
-                background-color 0.28s ease;
+                background-color 0.28s ease,
+                color 0.28s ease;
 
             &:active {
                 background: #f7f9fc;
+                color: #111827;
                 transform: scale(0.97);
-                box-shadow:
-                    0 8rpx 18rpx rgba(15, 23, 42, 0.1),
-                    0 2rpx 4rpx rgba(15, 23, 42, 0.05);
             }
 
             &::after {
                 border: none;
             }
         }
+    }
+
+    .user-ad-banner {
+        display: block;
+        padding: 0rpx 30rpx 30rpx;
     }
 
     .stats-section {

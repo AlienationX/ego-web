@@ -4,6 +4,24 @@ import { decrypt } from '@/utils/encryption.js';
 
 let refreshPromise = null;
 
+// 获取或生成设备ID
+const getDeviceId = () => {
+    let deviceId = uni.getStorageSync('deviceId');
+    if (!deviceId) {
+        try {
+            const systemInfo = uni.getSystemInfoSync();
+            deviceId = systemInfo.deviceId || (uni.getDeviceInfo ? uni.getDeviceInfo().deviceId : null);
+            if (!deviceId) {
+                deviceId = 'dev_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+            }
+            uni.setStorageSync('deviceId', deviceId);
+        } catch (e) {
+            deviceId = 'dev_unknown';
+        }
+    }
+    return deviceId;
+};
+
 // 发送 request 请求函数，如果token过期，刷新后再次发送 request 请求
 export const request = (config = {}) => {
     return new Promise(async (resolve, reject) => {
@@ -39,6 +57,7 @@ const setHeader = (isAuth) => {
 
     const header = {
         'Access-Key': API_SECRET_KEY,
+        'Device-Id': getDeviceId(),
     };
     // 仅当存在有效 token 时添加 Authorization，避免服务端报 "two space-delimited values"
     if (isAuth && hasValidToken) {
@@ -100,7 +119,6 @@ const sendRequest = (config = {}) => {
     //     isAuth = false/true/undefined (默认不需要认证)
     //     isRedirect = false/true/undefined (默认不需要跳转登录)
     // } = config;
-
     return new Promise((resolve, reject) => {
         uni.request({
             url: config.url.startsWith('http') ? config.url : API_BASE_URL + config.url,

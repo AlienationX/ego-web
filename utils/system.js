@@ -90,12 +90,13 @@ export const writeAccessLog = async () => {
         device_id: SYSTEM_INFO.deviceId,
         device_brand: SYSTEM_INFO.deviceBrand,
         device_model: SYSTEM_INFO.deviceModel,
+        language: SYSTEM_INFO.language,
         remark: JSON.stringify(SYSTEM_INFO),
     };
 
     // console.log(data);
     // console.log(data.remark.toString().length);
 
-    let res = await apiPostAccess((data = data));
+    let res = await apiPostAccess(data = data);
     // console.log('app launch ==> ', res);
 };

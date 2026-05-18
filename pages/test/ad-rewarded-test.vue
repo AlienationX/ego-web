@@ -7,7 +7,7 @@
         <view class="content">
             <!-- #ifndef MP-WEIXIN -->
             <view class="ad-section">
-                <view class="ad-label">基座广告 (1507000689)</view>
+                <view class="ad-label">ad-rewarded-video 基座广告 (1507000689)</view>
                 <ad-rewarded-video
                     ref="adRewardedVideoBase"
                     adpid="1507000689"
@@ -35,7 +35,7 @@
             </view>
 
             <view class="ad-section">
-                <view class="ad-label">正式广告 (1892019135)</view>
+                <view class="ad-label">ad-rewarded-video 正式广告 (1892019135)</view>
                 <ad-rewarded-video
                     ref="adRewardedVideoProd"
                     adpid="1892019135"

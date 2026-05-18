@@ -1,0 +1,1889 @@
+<template>
+    <view class="home-channel home-channel--main">
+        <view class="banner">
+            <swiper 
+                indicator-dots indicator-color="rgba(255,255,255,0.5)" 
+                indicator-active-color="#fff" 
+                autoplay
+                circular>
+                <swiper-item v-for="item in bannerList" :key="item.id">
+                    <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram"
+                        :app-id="item.appid" :class="['banner-card', item.accentClass]">
+                        <image :src="item.picurl" mode="aspectFill"></image>
+                        <view class="banner-card__overlay"></view>
+                        <view class="banner-card__content">
+                            <view class="banner-card__tag-row">
+                                <view class="banner-card__tag">{{ item.badge }}</view>
+                                <view class="banner-card__target">{{ item.targetLabel }}</view>
+                            </view>
+                            <view class="banner-card__title">{{ item.title }}</view>
+                            <view class="banner-card__desc">{{ item.desc }}</view>
+                            <view class="banner-card__meta">
+                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                <view class="banner-card__meta-arrow">
+                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                </view>
+                            </view>
+                        </view>
+                    </navigator>
+
+                    <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
+                        <image :src="item.mediumPicurl" mode="aspectFill"></image>
+                        <view class="banner-card__overlay"></view>
+                        <view class="banner-card__content">
+                            <view class="banner-card__tag-row">
+                                <view class="banner-card__tag">{{ item.badge }}</view>
+                                <view class="banner-card__target">{{ item.targetLabel }}</view>
+                            </view>
+                            <view class="banner-card__title">{{ item.title }}</view>
+                            <view class="banner-card__desc">{{ item.desc }}</view>
+                            <view class="banner-card__meta">
+                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                <view class="banner-card__meta-arrow">
+                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                </swiper-item>
+            </swiper>
+        </view>
+
+        <view class="notice">
+            <view class="left">
+                <uni-icons type="sound-filled" size="20" color="#28B389"></uni-icons>
+                <text class="text">{{ $t('index.notice') }}</text>
+            </view>
+
+            <view class="center">
+                <swiper vertical interval="1500" duration="300" autoplay circular>
+                    <swiper-item v-for="item in noticeList" :key="item.id">
+                        <navigator :url="`/pages/app/notice-detail?id=${item.id}&name=${item.title}`">
+                            {{ item.title }}
+                        </navigator>
+                    </swiper-item>
+                </swiper>
+            </view>
+
+            <view class="right">
+                <uni-icons type="right" size="16" color="#333"></uni-icons>
+            </view>
+        </view>
+
+        <view class="select">
+            <view class="select-watermark">Daily</view>
+            <index-title>
+                <template #name>{{ $t('index.dailyRecommend') }}</template>
+                <template #custom>
+                    <view class="date">
+                        <uni-icons type="calendar" size="22" color="#666"></uni-icons>
+                        <view class="text">
+                            {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
+                        </view>
+                        <button class="button is-spotlight" size="mini" @click="refreshRandom">
+                            {{ $t('common.refresh') }}
+                        </button>
+                    </view>
+                </template>
+            </index-title>
+
+            <view class="content">
+                <rotate-loading v-if="!randomDailyList.length" style="height: 100%"></rotate-loading>
+                <scroll-view scroll-x>
+                    <view class="box" v-for="(item, idx) in randomDailyList" :key="item.id"
+                        :class="{ 'is-hero': idx === 0 }" @click="goPreview(item.id, randomDailyList)">
+                        <image :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl" mode="aspectFill">
+                        </image>
+                        <block v-if="idx === 0">
+                            <view class="box-hero-overlay"></view>
+                            <view class="box-hero-content">
+                                <view class="day-tag">{{ new Date().getDate() }}</view>
+                                <view class="pick-text">PICK OF THE DAY</view>
+                            </view>
+                        </block>
+                        <block v-else>
+                            <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{
+                                getTimeBadge(item)
+                            }}</view>
+                        </block>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
+
+        <view class="select">
+            <view class="select-watermark">Latest</view>
+            <index-title>
+                <template #name>{{ $t('index.latestRelease') }}</template>
+                <template #custom>
+                    <view class="box" @click="goTimeline">
+                        <button size="mini" class="btn is-default">{{ $t('common.seeAll') }}</button>
+                    </view>
+                </template>
+            </index-title>
+
+            <view class="content">
+                <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
+                <scroll-view scroll-x>
+                    <view class="box" v-for="(item, idx) in latestPreviewList" :key="item.id"
+                        @click="goPreview(item.id, latestList)">
+                        <image :src="item.smallPicurl" mode="aspectFill"></image>
+                        <view v-if="getTimeBadge(item)" class="box-badge">{{ getTimeBadge(item) }}</view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
+
+        <!-- 订阅提醒 -->
+        <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout">
+            <view class="signal-callout__main">
+                <view class="signal-callout__content">
+                    <view class="signal-callout__eyebrow">{{ t('index.followingEyebrow') }}</view>
+                    <view class="signal-callout__title">{{ t('index.followingTitle') }}</view>
+                    <view class="signal-callout__desc">{{ followingSummary }}</view>
+                </view>
+                <view class="signal-callout__action" @click="toggleFollowingExpanded">
+                    {{ followingExpanded ? t('index.followingCollapse') : t('index.followingExpand') }}
+                </view>
+            </view>
+
+            <view v-if="followingExpanded" class="signal-callout__panel">
+                <view v-if="subscribedClassifyItems.length" class="signal-group">
+                    <view class="signal-group__title">{{ t('subscriptionPage.classifyTitle') }}</view>
+                    <view class="signal-group__chips">
+                        <view v-for="item in subscribedClassifyItems" :key="item.id" class="signal-chip"
+                            @click="goClassify(item)">
+                            {{ item.name }}
+                        </view>
+                    </view>
+                </view>
+
+                <view v-if="libraryStore.subscriptions.tags.length" class="signal-group">
+                    <view class="signal-group__title">{{ t('subscriptionPage.tagTitle') }}</view>
+                    <view class="signal-group__chips">
+                        <view v-for="tag in libraryStore.subscriptions.tags" :key="tag"
+                            class="signal-chip signal-chip--tag" @click="goSearchByTag(tag)">
+                            #{{ tag }}
+                        </view>
+                    </view>
+                </view>
+
+                <navigator url="/pages/user/subscriptions" class="signal-manage">
+                    {{ t('index.followingManage') }}
+                    <uni-icons type="right" size="14" color="#dbeafe"></uni-icons>
+                </navigator>
+            </view>
+        </view>
+
+        <!-- 猜你喜欢 -->
+        <!-- <view v-if="isAdmin && forYouList.length" class="select select--compact">
+            <view class="select-watermark">For You</view>
+            <index-title>
+                <template #name>{{ t('index.forYouTitle') }}</template>
+                <template #custom>
+                    <navigator class="box" url="/pages/user/preferences">
+                        <button size="mini" class="btn is-default">{{ t('user.settings.preferences') }}</button>
+                    </navigator>
+                </template>
+            </index-title>
+
+            <view class="for-you-groups">
+                <view v-for="group in forYouGroups" :key="group.key" class="for-you-group">
+                    <view class="for-you-group__head">
+                        <view class="for-you-group__title">{{ group.title }}</view>
+                        <view class="for-you-group__meta">{{ group.meta }}</view>
+                    </view>
+                    <view class="content content--compact">
+                        <scroll-view scroll-x>
+                            <view
+                                class="box"
+                                v-for="item in group.items"
+                                :key="`${group.key}-${item.id}`"
+                                @click="goPreview(item.id, group.items)"
+                            >
+                                <image :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                <view v-if="getTimeBadge(item)" class="box-badge">{{ getTimeBadge(item) }}</view>
+                            </view>
+                        </scroll-view>
+                    </view>
+                </view>
+            </view>
+            <view v-if="signalTags.length" class="tag-strip">
+                <view class="tag-strip__label">{{ t('index.forYouSignals') }}</view>
+                <scroll-view scroll-x class="tag-strip__scroll" show-scrollbar="false">
+                    <view class="tag-strip__inner">
+                        <view v-for="tag in signalTags" :key="tag" class="tag-strip__pill" @click="goSearchByTag(tag)">
+                            #{{ tag }}
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view> -->
+
+        <navigator class="top-entry" url="/pages/app/topN">
+            <view class="top-entry__content">
+                <!-- <view class="top-entry__eyebrow">Top N</view> -->
+                <view class="top-entry__title">{{ $t('top10.title') }}</view>
+                <view class="top-entry__desc">{{ $t('top10.descViews') }}</view>
+                <view class="top-entry__action">
+                    <text class="top-entry__action-text">{{ $t('common.seeAll') }}</text>
+                    <uni-icons type="right" size="18" color="#ffffff"></uni-icons>
+                </view>
+            </view>
+            <image class="top-entry__visual" src="/static/images/inset/1699281368061_2-removebg-preview.png"
+                mode="heightFix">
+            </image>
+        </navigator>
+
+        <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
+            <view class="select-watermark">{{ classify.name }}</view>
+            <index-title>
+                <template #name>{{ classify.name }}</template>
+                <template #custom>
+                    <view class="box" @click="goClassify(classify)">
+                        <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]">
+                            {{ $t('common.seeAll') }}
+                        </button>
+                    </view>
+                </template>
+            </index-title>
+
+            <view class="content">
+                <rotate-loading v-if="!classify" style="height: 100%"></rotate-loading>
+                <scroll-view scroll-x>
+                    <view class="box" v-for="item in classify.data" :key="item.id"
+                        @click="goPreview(item.id, classify.data)">
+                        <image :src="item.smallPicurl" mode="aspectFill"></image>
+                        <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{ getTimeBadge(item) }}
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+
+            <view v-if="idx % 3 === 0" class="ad-slot" :class="{ ready: adVisibleMap[`mid-${idx}`] }">
+                <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
+            </view>
+        </view>
+
+        <view class="classify">
+            <index-title>
+                <template #name>{{ $t('index.categoryRecommend') }}</template>
+                <template #custom>
+                    <view class="more" @click="goClassifyPage">{{ $t('common.more') }}+</view>
+                </template>
+            </index-title>
+
+            <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
+
+            <view class="content classify-grid" v-if="classifyList.length">
+                <classify-item v-for="(item, idx) in classifyPreviewList" :key="item.id" :item="item"
+                    :layout-style="getLayoutStyleForIndex(idx)"></classify-item>
+                <!-- <classify-item :isMore="true" :layout-style="getLayoutStyleMore()"></classify-item> -->
+            </view>
+        </view>
+
+        <view class="ad-slot ad-slot-bottom" :class="{ ready: adVisibleMap.bottom }">
+            <custom-ad-banner @load="onAdLoad('bottom')" @error="onAdError('bottom')"></custom-ad-banner>
+        </view>
+    </view>
+</template>
+
+
+<script setup>
+import { ref, computed, onMounted, reactive, nextTick, onActivated } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { onLoad, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onPageScroll } from '@dcloudio/uni-app';
+import {
+    apiGetBanner,
+    apiGetRandomDay,
+    apiGetRandomRecommend,
+    apiGetNotice,
+    apiGetClassify,
+} from '@/api/wallpaper.js';
+import { handlePicUrl } from '@/utils/common.js';
+import { useLibraryStore } from '@/stores/library.js';
+import { useUserStore } from '@/stores/user.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+
+const { t } = useI18n();
+const libraryStore = useLibraryStore();
+const userStore = useUserStore();
+
+const props = defineProps({
+    titlebarSpacerHeight: {
+        type: Number,
+        default: 0
+    }
+});
+
+const isAdmin = computed(() => !!userStore.isAdmin);
+
+const bannerList = ref([]);
+const randomDailyList = ref([]);
+const randomRecommendList = ref([]);
+const noticeList = ref([]);
+const classifyList = ref([]);
+const adVisibleMap = reactive({});
+const followingExpanded = ref(false);
+const themeClasses = ['is-collection', 'is-keyword', 'is-spotlight', 'is-default'];
+
+const recentViewedList = computed(() => libraryStore.recentViewed.slice(0, 8));
+const preferredTagList = computed(() => libraryStore.preferredTags.slice(0, 10));
+const signalTags = computed(() =>
+    [...new Set([...libraryStore.subscriptions.tags, ...libraryStore.preferredTags])].slice(0, 10),
+);
+const subscribedClassifyIds = computed(() => libraryStore.subscriptions.classifyIds || []);
+const hasSubscriptionSignals = computed(
+    () => subscribedClassifyIds.value.length > 0 || libraryStore.subscriptions.tags.length > 0,
+);
+
+const classifyComputed = computed(() => classifyList.value);
+
+const subscribedClassifyNames = computed(() =>
+    classifyComputed.value.filter((item) => subscribedClassifyIds.value.includes(item.id)).map((item) => item.name),
+);
+
+const subscribedClassifyItems = computed(() =>
+    classifyComputed.value.filter((item) => subscribedClassifyIds.value.includes(item.id)),
+);
+
+const followingSummary = computed(() => {
+    const classifyCount = subscribedClassifyIds.value.length;
+    const tagCount = libraryStore.subscriptions.tags.length;
+    return t('index.followingDesc', { classifyCount, tagCount });
+});
+
+const normalizeTags = (item = {}) => {
+    if (Array.isArray(item.tabs_list)) return item.tabs_list.filter(Boolean);
+    if (typeof item.tabs === 'string') {
+        return item.tabs
+            .split(',')
+            .map((tag) => tag.trim())
+            .filter(Boolean);
+    }
+    return [];
+};
+
+const flattenRecommendPool = computed(() => {
+    const merged = [...randomRecommendList.value.flatMap((item) => item.data || [])];
+    const seen = new Set();
+    return merged.filter((item) => {
+        if (!item?.id || seen.has(item.id) || (isAdmin.value && libraryStore.isWallHidden(item))) return false;
+        seen.add(item.id);
+        return true;
+    });
+});
+
+const getItemsByClassifyName = (name) =>
+    flattenRecommendPool.value.filter((item) => name && item.classify_name && item.classify_name.includes(name)).slice(0, 8);
+
+const getItemsByTag = (tag) => flattenRecommendPool.value.filter((item) => normalizeTags(item).includes(tag)).slice(0, 8);
+
+const forYouGroups = computed(() => {
+    const groups = [];
+
+    subscribedClassifyItems.value.slice(0, 2).forEach((item) => {
+        const items = getItemsByClassifyName(item.name);
+        if (!items.length) return;
+        groups.push({
+            key: `classify-${item.id}`,
+            title: item.name,
+            meta: t('index.forYouCategory'),
+            items,
+        });
+    });
+
+    libraryStore.subscriptions.tags.slice(0, 2).forEach((tag) => {
+        const items = getItemsByTag(tag);
+        if (!items.length) return;
+        groups.push({
+            key: `tag-${tag}`,
+            title: tag,
+            meta: t('index.forYouTag'),
+            items,
+        });
+    });
+
+    return groups;
+});
+
+const getBanner = async () => {
+    let res = await apiGetBanner();
+    bannerList.value = res.data;
+};
+
+const getRandomDaily = async () => {
+    let res = await apiGetRandomDay();
+    randomDailyList.value = res.data.map((item) => handlePicUrl(item));
+};
+
+const getRandomRecommend = async () => {
+    let res = await apiGetRandomRecommend({ classify_ids: '30,62,2,3,10,12' });
+    randomRecommendList.value = res.data;
+};
+
+const getNotice = async () => {
+    let res = await apiGetNotice();
+    noticeList.value = res.data;
+};
+
+const getClassify = async () => {
+    let res = await apiGetClassify({
+        select: true,
+    });
+    classifyList.value = res.data;
+};
+
+const getHomeData = async () => {
+    getBanner();
+    getNotice();
+    getRandomDaily();
+    await getClassify();
+    getRandomRecommend();
+};
+
+const goPreview = (id, list) => {
+    uni.setStorageSync('wallList', list);
+    uni.navigateTo({
+        url: '/pages/app/preview?id=' + id,
+    });
+};
+
+const onAdLoad = (e, index) => {
+    adVisibleMap[index] = true;
+};
+const onAdError = (e, index) => {
+    adVisibleMap[index] = false;
+};
+
+const goBannerInfo = (item) => {
+    if (item.target === 'miniProgram') {
+        uni.navigateToMiniProgram({
+            appId: item.url,
+            path: item.appid,
+            success(res) { },
+            fail(err) {
+                console.error(err);
+            },
+        });
+    } else {
+        uni.navigateTo({
+            url: `/pages/app/classlist?id=${item.url}&name=${item.name}`,
+        });
+    }
+};
+
+const toggleFollowingExpand = () => {
+    followingExpanded.value = !followingExpanded.value;
+};
+
+const refreshRecommendGroup = async (group) => {
+    uni.showToast({ title: '刷新推荐', icon: 'none' });
+};
+
+onMounted(() => {
+    getHomeData();
+});
+
+defineExpose({
+    getHomeData
+});
+</script>
+
+
+<style lang="scss" scoped>
+.home-channel {
+.home-tab {
+        position: relative;
+        height: 100%;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(15, 23, 42, 0.48);
+        font-size: 31rpx;
+        font-weight: 600;
+        letter-spacing: 0;
+        transition: all 0.24s ease;
+
+        &.is-active {
+            color: #111827;
+            font-weight: 800;
+        }
+
+        &.is-active::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 4rpx;
+            width: 48rpx;
+            height: 4rpx;
+            border-radius: 999rpx;
+            background: #111827;
+            transform: translateX(-50%);
+        }
+
+        &:active {
+            opacity: 0.7;
+        }
+    }
+
+.home-channel {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        box-sizing: border-box;
+    }
+
+.embedded-loading {
+        padding: 120rpx 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+.embedded-empty {
+        min-height: 360rpx;
+        padding: 48rpx;
+        border-radius: 32rpx;
+        background: rgba(18, 28, 41, 0.72);
+        border: 1rpx solid rgba(255, 255, 255, 0.05);
+        color: rgba(226, 232, 240, 0.92);
+        font-size: 28rpx;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 12rpx;
+    }
+
+.embedded-empty__desc {
+        font-size: 23rpx;
+        line-height: 1.6;
+        color: rgba(148, 163, 184, 0.9);
+    }
+
+.embedded-load-more {
+        padding: 20rpx 0 0;
+    }
+
+.home-month {
+        margin-bottom: 56rpx;
+    }
+
+.home-month__head {
+        margin-bottom: 28rpx;
+    }
+
+.home-month__ghost {
+        font-size: 82rpx;
+        line-height: 1;
+        font-weight: 900;
+        color: rgba(148, 163, 184, 0.42);
+        letter-spacing: -2rpx;
+    }
+
+.home-month__meta {
+        margin-top: -20rpx;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+    }
+
+.home-month__year {
+        font-size: 38rpx;
+        font-weight: 800;
+        color: #f5f8ff;
+    }
+
+.home-month__line {
+        flex: 1;
+        height: 1rpx;
+        background: rgba(115, 130, 154, 0.34);
+    }
+
+.home-month__tag {
+        font-size: 20rpx;
+        font-weight: 800;
+        letter-spacing: 3rpx;
+        color: #619aef;
+        text-transform: uppercase;
+    }
+
+.home-day {
+        margin-bottom: 56rpx;
+    }
+
+.home-day__marker {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+        margin-bottom: 20rpx;
+    }
+
+.home-day__number {
+        font-size: 54rpx;
+        line-height: 1;
+        font-weight: 900;
+        color: #f5f8ff;
+    }
+
+.home-day__divider {
+        width: 4rpx;
+        height: 52rpx;
+        border-radius: 999rpx;
+        background: linear-gradient(180deg, #79a8ff, rgba(121, 168, 255, 0.2));
+    }
+
+.home-day__label {
+        font-size: 20rpx;
+        line-height: 1.5;
+        font-weight: 700;
+        letter-spacing: 2rpx;
+        color: rgba(226, 232, 240, 0.88);
+        text-transform: uppercase;
+    }
+
+.home-timeline-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28rpx;
+    }
+
+.home-timeline-card {
+        position: relative;
+        overflow: hidden;
+        height: 610rpx;
+        border-radius: 28rpx;
+        background: #18222f;
+        box-shadow:
+            0 18rpx 40rpx rgba(0, 0, 0, 0.24),
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+    }
+
+.home-timeline-card--wide {
+        grid-column: 1 / -1;
+        height: 430rpx;
+    }
+
+.home-timeline-card__image {
+        width: 100%;
+        height: 100%;
+    }
+
+.home-timeline-card__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 60%, rgba(8, 11, 18, 0.88) 100%);
+    }
+
+.home-timeline-card__content {
+        position: absolute;
+        left: 22rpx;
+        right: 22rpx;
+        bottom: 22rpx;
+        z-index: 1;
+    }
+
+.home-timeline-card__classify {
+        display: inline-flex;
+        align-items: center;
+        min-height: 34rpx;
+        padding: 0 12rpx;
+        margin-bottom: 12rpx;
+        border-radius: 999rpx;
+        background: rgba(97, 154, 239, 0.16);
+        border: 1rpx solid rgba(97, 154, 239, 0.2);
+        color: #c7dbff;
+        font-size: 18rpx;
+        font-weight: 800;
+    }
+
+.home-timeline-card__title {
+        font-size: 30rpx;
+        line-height: 1.36;
+        font-weight: 800;
+        color: #f8fafc;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+.home-timeline-card__footer {
+        margin-top: 14rpx;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: rgba(226, 232, 240, 0.82);
+        font-size: 22rpx;
+    }
+
+.home-timeline-card__score {
+        display: flex;
+        align-items: center;
+        gap: 6rpx;
+    }
+
+.hot-switch {
+        margin: 12rpx auto 24rpx;
+        padding: 8rpx;
+        width: fit-content;
+        display: flex;
+        align-items: center;
+        gap: 10rpx;
+        border-radius: 999rpx;
+        background: rgba(17, 25, 34, 0.9);
+        border: 1rpx solid rgba(148, 163, 184, 0.14);
+    }
+
+.hot-switch__item {
+        min-width: 220rpx;
+        height: 74rpx;
+        padding: 0 26rpx;
+        border-radius: 999rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 24rpx;
+        font-weight: 700;
+
+        &.is-active {
+            color: #fff;
+            background: linear-gradient(135deg, #2b8cee, #1f6fd1);
+            box-shadow: 0 10rpx 24rpx rgba(43, 140, 238, 0.24);
+        }
+    }
+
+.hot-intro {
+        margin-bottom: 28rpx;
+    }
+
+.hot-intro__badge {
+        display: inline-flex;
+        height: 40rpx;
+        padding: 0 14rpx;
+        align-items: center;
+        border-radius: 999rpx;
+        background: rgba(43, 140, 238, 0.16);
+        color: #7dd3fc;
+        font-size: 18rpx;
+        font-weight: 800;
+        letter-spacing: 2rpx;
+        margin-bottom: 16rpx;
+    }
+
+.hot-intro__desc {
+        font-size: 24rpx;
+        line-height: 1.8;
+        color: #94a3b8;
+    }
+
+.hot-hero-section {
+        margin-bottom: 40rpx;
+    }
+
+.hot-hero-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 32rpx;
+        background: #182431;
+        box-shadow: 0 24rpx 56rpx rgba(0, 0, 0, 0.28);
+    }
+
+.hot-hero-card--first {
+        height: 430rpx;
+        margin-bottom: 30rpx;
+    }
+
+.hot-hero-grid {
+        margin-top: 18rpx;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 30rpx;
+    }
+
+.hot-hero-card--secondary {
+        height: 440rpx;
+    }
+
+.hot-hero-card__image {
+        width: 100%;
+        height: 100%;
+    }
+
+.hot-hero-card__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 48%, rgba(6, 12, 18, 0.9) 100%);
+    }
+
+.hot-hero-card__overlay--soft {
+        background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 50%, rgba(6, 12, 18, 0.74) 100%);
+    }
+
+.hot-hero-card__rank {
+        position: absolute;
+        top: 22rpx;
+        left: 22rpx;
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: 999rpx;
+        background: rgba(30, 41, 59, 0.92);
+        color: #fff;
+        font-size: 30rpx;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.24);
+    }
+
+.hot-hero-card__rank--first {
+        background: linear-gradient(135deg, #2b8cee, #60a5fa);
+    }
+
+.hot-hero-card__rank--second {
+        background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    }
+
+.hot-hero-card__content {
+        position: absolute;
+        left: 28rpx;
+        right: 28rpx;
+        bottom: 28rpx;
+        z-index: 1;
+    }
+
+.hot-hero-card__content--compact {
+        left: 20rpx;
+        right: 20rpx;
+        bottom: 20rpx;
+    }
+
+.hot-hero-card__tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36rpx;
+        padding: 0 14rpx;
+        border-radius: 999rpx;
+        background: rgba(43, 140, 238, 0.18);
+        border: 1rpx solid rgba(125, 211, 252, 0.22);
+        color: #7dd3fc;
+        font-size: 18rpx;
+        font-weight: 800;
+        margin-bottom: 14rpx;
+    }
+
+.hot-hero-card__title {
+        font-size: 42rpx;
+        line-height: 1.2;
+        font-weight: 800;
+        color: #e2e8f0;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+.hot-hero-card__title--compact {
+        font-size: 28rpx;
+        line-height: 1.38;
+    }
+
+.hot-hero-card__meta {
+        margin-top: 16rpx;
+        display: flex;
+        align-items: center;
+        gap: 24rpx;
+    }
+
+.hot-hero-card__meta-item,
+    .hot-hero-card__sub {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        color: #cbd5e1;
+        font-size: 22rpx;
+    }
+
+.hot-rank-section__title {
+        margin-bottom: 18rpx;
+        display: flex;
+        align-items: center;
+        gap: 14rpx;
+        color: #94a3b8;
+        font-size: 18rpx;
+        font-weight: 800;
+        letter-spacing: 4rpx;
+        text-transform: uppercase;
+    }
+
+.hot-rank-section__line {
+        flex: 1;
+        height: 1rpx;
+        background: rgba(51, 65, 85, 0.8);
+    }
+
+.hot-rank-list {
+        display: flex;
+        flex-direction: column;
+        gap: 30rpx;
+    }
+
+.hot-rank-item {
+        height: 280rpx;
+        border-radius: 28rpx;
+        background: rgba(24, 36, 49, 0.92);
+        border: 1rpx solid rgba(51, 65, 85, 0.56);
+        display: flex;
+        align-items: stretch;
+        overflow: hidden;
+        box-shadow:
+            0 10rpx 24rpx rgba(0, 0, 0, 0.2),
+            0 24rpx 48rpx rgba(0, 0, 0, 0.16);
+    }
+
+.hot-rank-item__media {
+        position: relative;
+        width: 190rpx;
+        flex-shrink: 0;
+    }
+
+.hot-rank-item__thumb {
+        width: 100%;
+        height: 100%;
+    }
+
+.hot-rank-item__index {
+        position: absolute;
+        left: 16rpx;
+        top: 16rpx;
+        width: 50rpx;
+        height: 50rpx;
+        border-radius: 999rpx;
+        background: rgba(15, 23, 42, 0.84);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22rpx;
+        font-weight: 800;
+    }
+
+.hot-rank-item__body {
+        min-width: 0;
+        flex: 1;
+        padding: 28rpx 22rpx;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+.hot-rank-item__title {
+        font-size: 28rpx;
+        line-height: 1.45;
+        font-weight: 800;
+        color: #e2e8f0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+.hot-rank-item__meta {
+        margin-top: 18rpx;
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+        color: #94a3b8;
+        font-size: 22rpx;
+    }
+
+.hot-rank-item__metric {
+        color: #7dd3fc;
+        font-weight: 800;
+    }
+
+.hot-rank-item__action {
+        width: 64rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+.ad-slot {
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        min-height: 0;
+
+        &.ready {
+            padding: 30rpx 30rpx 0;
+        }
+    }
+
+.ad-slot-bottom {
+        &.ready {
+            padding: 0 30rpx 30rpx;
+        }
+    }
+
+.banner {
+        width: 750rpx;
+        padding: 0 0 20rpx;
+
+        swiper {
+            width: 750rpx;
+            height: 400rpx;
+            margin: 20rpx 0rpx;
+
+            &-item {
+                width: 100%;
+                height: 100%;
+                padding: 0rpx 30rpx;
+
+                .banner-card {
+                    width: 100%;
+                    height: 100%;
+                    display: block;
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 28rpx;
+
+                    image {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 28rpx;
+                        box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.34);
+                    }
+
+                    .banner-card__overlay {
+                        position: absolute;
+                        inset: 0;
+                        background: linear-gradient(
+                            180deg,
+                            rgba(6, 12, 18, 0.06) 0%,
+                            rgba(6, 12, 18, 0.18) 34%,
+                            rgba(6, 12, 18, 0.78) 100%
+                        );
+                    }
+
+                    .banner-card__content {
+                        position: absolute;
+                        left: 28rpx;
+                        right: 28rpx;
+                        bottom: 26rpx;
+                        z-index: 1;
+                    }
+
+                    .banner-card__tag-row {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 16rpx;
+                        margin-bottom: 14rpx;
+                    }
+
+                    .banner-card__tag,
+                    .banner-card__target {
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 40rpx;
+                        padding: 0 16rpx;
+                        border-radius: 999rpx;
+                        font-size: 20rpx;
+                        font-weight: 700;
+                        letter-spacing: 0.03em;
+                    }
+
+                    .banner-card__tag {
+                        color: #7dd3fc;
+                        background: rgba(43, 140, 238, 0.18);
+                        border: 1rpx solid rgba(125, 211, 252, 0.22);
+                    }
+
+                    .banner-card__target {
+                        color: rgba(241, 245, 249, 0.92);
+                        background: rgba(15, 23, 42, 0.28);
+                        border: 1rpx solid rgba(255, 255, 255, 0.14);
+                    }
+
+                    .banner-card__title {
+                        font-size: 42rpx;
+                        line-height: 1.18;
+                        font-weight: 800;
+                        color: #f8fafc;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    .banner-card__desc {
+                        margin-top: 10rpx;
+                        font-size: 24rpx;
+                        line-height: 1.5;
+                        color: rgba(226, 232, 240, 0.84);
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    .banner-card__meta {
+                        margin-top: 18rpx;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    }
+
+                    .banner-card__meta-chip {
+                        display: inline-flex;
+                        align-items: center;
+                        min-height: 42rpx;
+                        padding: 0 16rpx;
+                        border-radius: 999rpx;
+                        font-size: 22rpx;
+                        color: #dbe7f5;
+                        background: rgba(15, 23, 42, 0.26);
+                        border: 1rpx solid rgba(255, 255, 255, 0.12);
+                    }
+
+                    .banner-card__meta-arrow {
+                        width: 56rpx;
+                        height: 56rpx;
+                        border-radius: 16rpx;
+                        background: rgba(20, 28, 39, 0.32);
+                        border: 1rpx solid rgba(255, 255, 255, 0.12);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    &.is-collection {
+                        .banner-card__tag {
+                            color: #f3e8ff;
+                            background: rgba(126, 34, 206, 0.32);
+                            border-color: rgba(216, 180, 254, 0.34);
+                        }
+
+                        .banner-card__meta-chip {
+                            color: #f3e8ff;
+                            background: rgba(15, 23, 42, 0.38);
+                            border-color: rgba(192, 132, 252, 0.24);
+                        }
+                    }
+
+                    &.is-keyword {
+                        .banner-card__tag {
+                            color: #ecfccb;
+                            background: rgba(101, 163, 13, 0.28);
+                            border-color: rgba(190, 242, 100, 0.3);
+                        }
+
+                        .banner-card__meta-chip {
+                            color: #ecfccb;
+                            background: rgba(15, 23, 42, 0.34);
+                            border-color: rgba(163, 230, 53, 0.18);
+                        }
+                    }
+
+                    &.is-spotlight {
+                        .banner-card__tag {
+                            color: #fde68a;
+                            background: rgba(245, 158, 11, 0.18);
+                            border-color: rgba(253, 230, 138, 0.3);
+                        }
+
+                        .banner-card__meta-chip {
+                            color: #fef3c7;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+.signal-callout {
+        margin: 0 30rpx 28rpx;
+        padding: 26rpx 24rpx;
+        border-radius: 28rpx;
+        background:
+            radial-gradient(circle at top right, rgba(40, 179, 137, 0.18), transparent 28%),
+            linear-gradient(135deg, #18202a 0%, #243244 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 22rpx;
+        box-shadow: 0 18rpx 38rpx rgba(15, 23, 42, 0.16);
+    }
+
+.signal-callout__main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18rpx;
+
+        .signal-callout__content {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .signal-callout__eyebrow {
+            font-size: 18rpx;
+            font-weight: 800;
+            letter-spacing: 4rpx;
+            color: rgba(125, 211, 252, 0.88);
+            text-transform: uppercase;
+        }
+
+        .signal-callout__title {
+            margin-top: 10rpx;
+            font-size: 32rpx;
+            font-weight: 800;
+            color: #f8fbff;
+        }
+
+        .signal-callout__desc {
+            margin-top: 8rpx;
+            font-size: 23rpx;
+            line-height: 1.7;
+            color: rgba(226, 232, 240, 0.74);
+        }
+
+        .signal-callout__action {
+            flex-shrink: 0;
+            min-height: 64rpx;
+            padding: 0 24rpx;
+            border-radius: 999rpx;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1rpx solid rgba(255, 255, 255, 0.12);
+            color: #f8fbff;
+            font-size: 22rpx;
+            font-weight: 700;
+        }
+    }
+
+.signal-callout__panel {
+        padding-top: 20rpx;
+        border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+    }
+
+.signal-group {
+        margin-bottom: 18rpx;
+    }
+
+.signal-group__title {
+        font-size: 20rpx;
+        font-weight: 800;
+        letter-spacing: 2rpx;
+        color: rgba(226, 232, 240, 0.68);
+        text-transform: uppercase;
+        margin-bottom: 12rpx;
+    }
+
+.signal-group__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12rpx;
+    }
+
+.signal-chip {
+        min-height: 58rpx;
+        padding: 0 20rpx;
+        border-radius: 999rpx;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1rpx solid rgba(255, 255, 255, 0.1);
+        color: #f8fbff;
+        font-size: 22rpx;
+        font-weight: 700;
+
+        &:active {
+            transform: scale(0.96);
+            opacity: 0.86;
+        }
+    }
+
+.signal-chip--tag {
+        color: #bbf7d0;
+        background: rgba(40, 179, 137, 0.14);
+        border-color: rgba(40, 179, 137, 0.18);
+    }
+
+.signal-manage {
+        margin-top: 6rpx;
+        min-height: 62rpx;
+        padding: 0 20rpx;
+        border-radius: 18rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8rpx;
+        background: rgba(97, 154, 239, 0.14);
+        border: 1rpx solid rgba(147, 197, 253, 0.18);
+        color: #dbeafe;
+        font-size: 22rpx;
+        font-weight: 800;
+    }
+
+.notice {
+        width: 690rpx;
+        height: 72rpx;
+        line-height: 80rpx;
+        background: #f9f9f9;
+        margin: 0 auto 30rpx;
+        border-radius: 80rpx;
+        display: flex;
+        // x 偏移量 | y 偏移量 | 阴影模糊半径 | 阴影颜色 */
+        box-shadow: 0 0px 6rpx rgba(0, 0, 0, 0.05);
+
+        .left {
+            width: 140rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .text {
+                color: $wp-theme-color;
+                font-weight: 600;
+                font-size: 28rpx;
+            }
+        }
+
+        .center {
+            flex: 1;
+
+            swiper {
+                height: 100%;
+
+                &-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: left;
+
+                    height: 100%;
+                    font-size: 30rpx;
+                    color: #666;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+
+                navigator {
+                    width: 100%;
+                }
+            }
+        }
+
+        .right {
+            width: 70rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+.select {
+        position: relative;
+        // padding: 30rpx 0 0 0;
+        overflow: hidden;
+
+        &.select--compact {
+            .content.content--compact {
+                height: 360rpx;
+
+                scroll-view {
+                    padding-bottom: 8rpx;
+
+                    .box {
+                        width: 232rpx;
+                        height: calc(100% - 36rpx);
+                        margin-bottom: 24rpx;
+                    }
+                }
+            }
+        }
+
+        .select-watermark {
+            position: absolute;
+            top: -30rpx;
+            right: -20rpx;
+            font-size: 140rpx;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.04);
+            text-transform: uppercase;
+            letter-spacing: -4rpx;
+            pointer-events: none;
+            z-index: 0;
+            white-space: nowrap;
+        }
+
+        .index-title {
+            position: relative;
+            z-index: 1;
+        }
+
+        .date {
+            display: flex;
+            align-items: center;
+            gap: 12rpx;
+
+            .button {
+                margin: 0;
+                padding: 0 16rpx;
+                height: 46rpx;
+                line-height: 44rpx;
+                font-size: 22rpx;
+                font-weight: 700;
+                border-radius: 999rpx;
+                background: #e2e8f0;
+                color: #475569;
+                border: 1rpx solid #cbd5e1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                &::after {
+                    border: none;
+                }
+
+                &:active {
+                    transform: scale(0.95);
+                    opacity: 0.8;
+                }
+
+                &.is-spotlight {
+                    color: #475569;
+                    background: #e2e8f0;
+                    border-color: #cbd5e1;
+                }
+            }
+
+            .text {
+                font-size: 26rpx;
+                font-weight: 600;
+                color: #666;
+                letter-spacing: 0.02em;
+            }
+        }
+
+        .btn {
+            margin: 0;
+            padding: 0 20rpx;
+            height: 46rpx;
+            line-height: 44rpx;
+            font-size: 22rpx;
+            font-weight: 700;
+            border-radius: 999rpx;
+            border: 1rpx solid rgba(0, 0, 0, 0.08);
+            background: #f1f5f9;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+
+            &::after {
+                border: none;
+            }
+
+            &:active {
+                transform: scale(0.95);
+                filter: brightness(0.95);
+            }
+
+            &.is-default,
+            &.is-collection,
+            &.is-keyword,
+            &.is-spotlight {
+                color: #475569;
+                background: #e2e8f0;
+                border-color: #cbd5e1;
+            }
+        }
+
+        .content {
+            // width: 750rpx;
+            height: 580rpx;
+            position: relative;
+            z-index: 1;
+
+            scroll-view {
+                white-space: nowrap;
+                height: 100%;
+                box-sizing: border-box;
+
+                .box {
+                    width: 280rpx;
+                    height: calc(100% - 46rpx);
+                    padding-bottom: 20rpx;
+                    display: inline-flex;
+                    justify-content: center;
+                    align-items: flex-start;
+                    margin: 20rpx 24rpx 50rpx 0;
+                    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    position: relative;
+                    overflow: visible;
+                    box-sizing: border-box;
+
+                    image {
+                        width: 100%;
+                        height: 100%;
+                        border-radius: 28rpx;
+                        display: block;
+
+                        box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
+                    }
+
+                    .box-card-tag {
+                        position: absolute;
+                        top: 16rpx;
+                        left: 16rpx;
+                        z-index: 1;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 38rpx;
+                        padding: 0 14rpx;
+                        border-radius: 999rpx;
+                        font-size: 18rpx;
+                        font-weight: 800;
+                        letter-spacing: 0.04em;
+                        color: #7dd3fc;
+                        background: rgba(43, 140, 238, 0.18);
+                        border: 1rpx solid rgba(125, 211, 252, 0.22);
+                        box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.18);
+                        text-shadow: 0 2rpx 8rpx rgba(15, 23, 42, 0.18);
+                    }
+
+                    .box-card-tag--latest {
+                        color: #fde68a;
+                        background: rgba(245, 158, 11, 0.18);
+                        border-color: rgba(253, 230, 138, 0.28);
+                    }
+
+                    .box-card-tag--is-default {
+                        color: #7dd3fc;
+                        background: rgba(43, 140, 238, 0.18);
+                        border-color: rgba(125, 211, 252, 0.22);
+                    }
+
+                    .box-card-tag--is-collection {
+                        color: #f3e8ff;
+                        background: rgba(126, 34, 206, 0.28);
+                        border-color: rgba(216, 180, 254, 0.28);
+                    }
+
+                    .box-card-tag--is-keyword {
+                        color: #ecfccb;
+                        background: rgba(101, 163, 13, 0.24);
+                        border-color: rgba(190, 242, 100, 0.24);
+                    }
+
+                    .box-card-tag--is-spotlight {
+                        color: #fde68a;
+                        background: rgba(245, 158, 11, 0.2);
+                        border-color: rgba(253, 230, 138, 0.3);
+                    }
+
+                    // Hero 模式专属 (大图)
+                    &.is-hero {
+                        width: 440rpx;
+                        height: calc(100% - 66rpx);
+                        padding-bottom: 0;
+
+                        .box-hero-overlay {
+                            position: absolute;
+                            inset: 0;
+                            border-radius: 28rpx;
+                            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.7) 100%);
+                            pointer-events: none;
+                        }
+
+                        .box-hero-content {
+                            position: absolute;
+                            left: 24rpx;
+                            bottom: 30rpx;
+                            right: 24rpx;
+
+                            .day-tag {
+                                font-size: 64rpx;
+                                font-weight: 900;
+                                color: rgba(255, 255, 255, 0.95);
+                                line-height: 1;
+                                margin-bottom: 8rpx;
+                                text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+                            }
+
+                            .pick-text {
+                                font-size: 20rpx;
+                                font-weight: 800;
+                                color: #fde68a;
+                                text-transform: uppercase;
+                                letter-spacing: 4rpx;
+                            }
+                        }
+                    }
+
+                    // New 微标
+                    .box-badge {
+                        position: absolute;
+                        top: 16rpx;
+                        right: 16rpx;
+                        padding: 4rpx 12rpx;
+                        background: rgba(40, 179, 137, 0.9);
+                        color: #fff;
+                        font-size: 18rpx;
+                        font-weight: 800;
+                        border-radius: 8rpx;
+                        box-shadow: 0 4rpx 12rpx rgba(40, 179, 137, 0.4);
+                        z-index: 1;
+                    }
+
+                    .box-badge--subtle {
+                        background: rgba(15, 23, 42, 0.72);
+                        color: rgba(255, 255, 255, 0.92);
+                        box-shadow: 0 4rpx 12rpx rgba(15, 23, 42, 0.24);
+                    }
+
+                    &:active {
+                        transform: scale(0.96) translateY(4rpx);
+                    }
+                }
+
+                .box:first-child {
+                    margin-left: 30rpx;
+                }
+                .box:last-child {
+                    margin-right: 30rpx;
+                }
+            }
+        }
+
+        .for-you-groups {
+            position: relative;
+            z-index: 1;
+        }
+
+        .for-you-group {
+            margin-bottom: 18rpx;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .content.content--compact {
+                height: 330rpx;
+            }
+        }
+
+        .for-you-group__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16rpx;
+            padding: 0 6rpx 4rpx;
+        }
+
+        .for-you-group__title {
+            min-width: 0;
+            font-size: 26rpx;
+            font-weight: 800;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .for-you-group__meta {
+            flex-shrink: 0;
+            min-height: 40rpx;
+            padding: 0 16rpx;
+            border-radius: 999rpx;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19rpx;
+            font-weight: 800;
+            letter-spacing: 1rpx;
+            color: #475569;
+            background: #e2e8f0;
+            border: 1rpx solid #cbd5e1;
+            text-transform: uppercase;
+        }
+
+        .tag-strip {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 20rpx;
+            padding: 0 6rpx 16rpx;
+
+            .tag-strip__label {
+                flex-shrink: 0;
+                font-size: 22rpx;
+                font-weight: 700;
+                color: #64748b;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            .tag-strip__scroll {
+                flex: 1;
+                min-width: 0;
+                white-space: nowrap;
+            }
+
+            .tag-strip__inner {
+                display: inline-flex;
+                align-items: center;
+                gap: 14rpx;
+                padding-right: 24rpx;
+            }
+
+            .tag-strip__pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 22rpx;
+                height: 56rpx;
+                border-radius: 999rpx;
+                background: #f1f5f9;
+                border: 1rpx solid #dbe4ee;
+                color: #334155;
+                font-size: 22rpx;
+                font-weight: 600;
+                line-height: 1;
+                box-shadow: 0 8rpx 18rpx rgba(148, 163, 184, 0.12);
+
+                &:active {
+                    transform: scale(0.96);
+                    opacity: 0.86;
+                }
+            }
+        }
+    }
+
+.subject {
+    }
+
+.top-entry {
+        position: relative;
+        margin: 0 30rpx 30rpx;
+        padding: 24rpx 24rpx 24rpx 28rpx;
+        display: block;
+        min-height: 210rpx;
+        overflow: visible;
+        border-radius: 28rpx;
+        background: linear-gradient(180deg, #40454f 0%, #393f48 100%);
+        border: 1rpx solid rgba(255, 255, 255, 0.04);
+        box-shadow: 0 10rpx 24rpx rgba(15, 23, 42, 0.1);
+        text-align: left;
+    }
+
+.top-entry__content {
+        width: 340rpx;
+        min-width: 340rpx;
+        padding: 4rpx 0;
+        margin-left: 0;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        justify-content: flex-start;
+    }
+
+.top-entry__eyebrow {
+        display: block;
+        width: 100%;
+        font-size: 20rpx;
+        line-height: 1;
+        font-weight: 800;
+        letter-spacing: 2rpx;
+        color: rgba(255, 255, 255, 0.82);
+        text-transform: uppercase;
+    }
+
+.top-entry__title {
+        display: block;
+        width: 100%;
+        margin-top: 10rpx;
+        font-size: 34rpx;
+        line-height: 1.2;
+        font-weight: 800;
+        color: #ffffff;
+    }
+
+.top-entry__desc {
+        display: block;
+        width: 100%;
+        margin-top: 10rpx;
+        font-size: 24rpx;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.56);
+        max-width: 320rpx;
+    }
+
+.top-entry__action {
+        margin-top: 20rpx;
+        margin-left: 0;
+        align-self: flex-start;
+        width: 56rpx;
+        height: 56rpx;
+        border-radius: 16rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(20, 28, 39, 0.32);
+        border: 1rpx solid rgba(255, 255, 255, 0.12);
+    }
+
+.top-entry__action-text {
+        display: none;
+    }
+
+.top-entry__visual {
+        position: absolute;
+        right: 10rpx;
+        bottom: -18rpx;
+        height: 384rpx;
+        width: auto;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+.classify {
+        padding: 0rpx 0 30rpx;
+
+        .content.classify-grid {
+            margin-top: 30rpx;
+            padding: 0 24rpx;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: 200rpx;
+            gap: 20rpx;
+        }
+
+        .more {
+            font-size: 28rpx;
+            color: $uni-text-color-grey;
+        }
+    }
+}
+</style>

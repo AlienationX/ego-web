@@ -11,6 +11,8 @@
             @scrolltolower="onReachLower"
         >
             <view class="timeline-wrap">
+                <!-- Spacer for embedded titlebar -->
+                <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
                 <view id="timeline-top-anchor" class="timeline-top-anchor"></view>
                 <view v-if="!embedded" class="topbar">
                     <view class="topbar__back" @click="goBack">
@@ -111,10 +113,16 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    navBarHeight: {
+        type: Number,
+        default: 0,
+    },
 });
 
+const emit = defineEmits(['scroll']);
+
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const contentHeight = computed(() => (props.embedded ? 'calc(100vh - 118rpx)' : `calc(100vh - ${statusBarHeight.value}px)`));
+const contentHeight = computed(() => (props.embedded ? '100vh' : `calc(100vh - ${statusBarHeight.value}px)`));
 const scrollIntoViewTarget = ref('');
 const showScrollTop = ref(false);
 const isLoading = ref(false);
@@ -124,7 +132,7 @@ const latestList = ref([]);
 const queryParams = ref({
     pageNum: 1,
     pageSize: 12,
-    ordering: '-created',
+    ordering: '-updated_at',
 });
 
 const monthNamesEn = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
@@ -264,6 +272,7 @@ const handleScroll = (e) => {
     if (showScrollTop.value !== nextVisible) {
         showScrollTop.value = nextVisible;
     }
+    emit('scroll', { scrollTop: top });
 };
 
 const scrollToTop = () => {
@@ -275,10 +284,6 @@ const scrollToTop = () => {
 };
 
 onLoad(() => {
-    getLatest();
-});
-
-onMounted(() => {
     if (!latestList.value.length) {
         getLatest();
     }
@@ -288,16 +293,14 @@ onMounted(() => {
 <style lang="scss" scoped>
 .layout {
     min-height: 100vh;
-    background:
-        radial-gradient(circle at 78% 12%, rgba(90, 145, 255, 0.18), transparent 24%),
-        radial-gradient(circle at 18% 16%, rgba(255, 187, 106, 0.12), transparent 20%),
-        linear-gradient(180deg, #0a1018 0%, #0f1621 42%, #0a0f16 100%);
+    background: #0b1017;
     color: #eaf0fb;
 }
 
 .layout.is-embedded {
     min-height: 0;
     width: 100%;
+    height: 100vh;
     overflow: hidden;
 }
 
@@ -352,15 +355,21 @@ onMounted(() => {
 }
 
 .topbar__back {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1rpx solid rgba(220, 228, 243, 0.08);
+    background: rgba(255, 255, 255, 0.16);
+    border: 1rpx solid rgba(255, 255, 255, 0.22);
+    transition: all 0.2s ease;
+
+    &:active {
+        background: rgba(255, 255, 255, 0.28);
+        transform: scale(0.92);
+    }
 }
 
 .topbar__brand {
     font-size: 28rpx;
     font-weight: 800;
     letter-spacing: 8rpx;
-    color: rgba(220, 228, 243, 0.92);
+    color: #ffffff;
     padding-left: 8rpx;
 }
 

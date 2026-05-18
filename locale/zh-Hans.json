@@ -156,7 +156,7 @@
         "recentTag": "最新 {count} 张"
     },
     "top10": {
-        "title": "Top 10 壁纸",
+        "title": "热门壁纸",
         "subtitle": "排行榜",
         "tabs": {
             "views": "最多浏览",
@@ -164,7 +164,7 @@
         },
         "badgeViews": "HOT BY VIEWS",
         "badgeDownloads": "HOT BY DOWNLOADS",
-        "descViews": "实时汇总最受关注的壁纸，用更直观的榜单方式展示当前浏览热度最高的前十张作品。",
+        "descViews": "实时汇总最受关注的壁纸，用更直观的榜单方式展示当前浏览热度最高的作品。",
         "descDownloads": "切换查看最常被保存的壁纸榜单，快速找到真正被用户带走和反复使用的高人气内容。",
         "heroTag": "TOP PICK",
         "listTitle": "后续竞争者",

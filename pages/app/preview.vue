@@ -455,7 +455,7 @@ const aspectRatioText = computed(() => {
 });
 
 const publishDateText = computed(() => {
-    const raw = currentInfo.value?.created_at || currentInfo.value?.created || currentInfo.value?.updated_at || '';
+    const raw = currentInfo.value?.created_at || currentInfo.value?.updated_at || '';
     if (!raw) return '';
     const date = new Date(raw);
     if (Number.isNaN(date.getTime())) return '';

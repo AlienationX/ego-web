@@ -1,5 +1,21 @@
 <template>
     <view class="layout">
+        <!-- #ifndef WEB -->
+        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }">
+            <view class="status-decorative-bg">
+                <view class="bg-circle circle-1"></view>
+                <view class="bg-circle circle-2"></view>
+                <view class="bg-circle circle-3"></view>
+                <view class="bg-circle circle-4"></view>
+                <view class="bg-circle circle-5"></view>
+                <view class="bg-circle circle-6"></view>
+                <view class="bg-circle circle-7"></view>
+                <view class="bg-circle circle-8"></view>
+                <view class="bg-mesh"></view>
+            </view>
+        </view>
+        <!-- #endif -->
+
         <view class="decorative-bg">
             <view class="bg-circle circle-1"></view>
             <view class="bg-circle circle-2"></view>
@@ -15,7 +31,7 @@
         <view
             class="container"
             :style="{
-                paddingTop: statusBarHeight + 'px',
+                paddingTop: `${containerTopPadding}px`,
                 paddingBottom: `${containerBottomSpace}px`,
             }"
         >
@@ -126,7 +142,8 @@ const aiProfile = ref({
 const isThinking = ref(false);
 const thinkingTime = ref(0);
 let thinkingTimer = null;
-const statusBarHeight = ref(getStatusBarHeight() + 10);
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const containerTopPadding = computed(() => statusBarHeight.value + 10);
 const tabBarHeight = ref(getTabBarHeight());
 
 let typingTimer = null;
@@ -605,6 +622,17 @@ onUnload(() => {
     overflow: hidden;
 }
 
+.status-bar-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--discover-bg);
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 9999;
+}
+
 .container {
     position: relative;
     background: transparent;
@@ -620,7 +648,20 @@ onUnload(() => {
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
+}
 
+.status-decorative-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.decorative-bg,
+.status-decorative-bg {
     .bg-circle {
         position: absolute;
         border-radius: 50%;

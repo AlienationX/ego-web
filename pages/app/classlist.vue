@@ -5,7 +5,7 @@
             <view class="topbar" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
                 <view class="topbar__left">
                     <view class="topbar__back topbar__back--bar" @click="goBack">
-                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#eef5ff"></mdi-icon>
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#f8fbff"></mdi-icon>
                     </view>
                     <view class="topbar__title">{{ props.name || t('category.title') }}</view>
                 </view>

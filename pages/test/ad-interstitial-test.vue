@@ -7,7 +7,7 @@
         <view class="content">
             <!-- #ifndef MP-WEIXIN -->
             <view class="ad-section">
-                <view class="ad-label">基座广告 (1111111113)</view>
+                <view class="ad-label">ad-interstitial 基座广告 (1111111113)</view>
                 <ad-interstitial
                     adpid="1111111113"
                     :loadnext="true"
@@ -30,7 +30,7 @@
             </view>
 
             <view class="ad-section">
-                <view class="ad-label">正式广告 (1129226586)</view>
+                <view class="ad-label">ad-interstitial 正式广告 (1129226586)</view>
                 <ad-interstitial
                     adpid="1129226586"
                     :loadnext="true"

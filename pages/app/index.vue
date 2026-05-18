@@ -1,9 +1,27 @@
 <template>
-    <view class="homeLayout pageBackground" :class="'homeLayout--' + activeHomeTab">
+    <view
+        class="homeLayout"
+        :class="'homeLayout--' + activeHomeTab"
+        :style="{
+            '--mask-color': currentTabBackground,
+            backgroundColor: currentTabBackground,
+            height: activeHomeTab !== 'home' ? '100vh' : 'auto',
+            overflow: activeHomeTab !== 'home' ? 'hidden' : 'visible'
+        }"
+    >
+        <!-- #ifndef WEB -->
+        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: currentTabBackground }"></view>
+        <!-- #endif -->
+
         <view
             class="home-titlebar"
-            :class="{ 'is-hidden': !isTitleBarVisible }"
-            :style="{ paddingTop: statusBarHeight + 'px', height: navBarHeight + 'px', paddingRight: titlebarPaddingRight }"
+            :class="{ 'is-hidden': !isTitleBarVisible, 'is-dark': isDarkTab }"
+            :style="{
+                paddingTop: statusBarHeight + 'px',
+                height: navBarHeight + 'px',
+                paddingRight: titlebarPaddingRight,
+                backgroundColor: currentTabBackground,
+            }"
         >
             <view class="home-titlebar__inner" :style="{ height: titleBarHeight + 'px' }">
                 <view class="home-tabs-wrapper">
@@ -25,21 +43,21 @@
 
                 <!-- #ifdef MP-WEIXIN -->
                 <view class="home-search home-search--icon" @click="goSearch">
-                    <uni-icons type="search" size="17" color="#64748b"></uni-icons>
+                    <uni-icons type="search" size="17" :color="searchIconColor"></uni-icons>
                 </view>
                 <!-- #endif -->
 
                 <!-- #ifndef MP-WEIXIN -->
                 <view class="home-search" @click="goSearch">
-                    <uni-icons type="search" size="17" color="#64748b"></uni-icons>
+                    <uni-icons type="search" size="17" :color="searchIconColor"></uni-icons>
                     <text class="home-search__text">{{ t('common.search') }}</text>
                 </view>
                 <!-- #endif -->
             </view>
         </view>
-        <view class="home-titlebar-spacer" :style="{ height: navBarHeight + 'px' }"></view>
 
         <view v-show="activeHomeTab === 'home'" class="home-channel home-channel--main">
+            <view class="home-titlebar-spacer" :style="{ height: navBarHeight + 'px' }"></view>
             <view class="banner">
                 <swiper indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
                     <swiper-item v-for="item in bannerList" :key="item.id">
@@ -117,13 +135,13 @@
                     <template #name>{{ $t('index.dailyRecommend') }}</template>
                     <template #custom>
                         <view class="date">
-                            <button class="button is-spotlight" size="mini" @click="refreshRandom">
-                                {{ $t('common.refresh') }}
-                            </button>
-                            <uni-icons type="calendar" size="18" color="#666"></uni-icons>
+                            <uni-icons type="calendar" size="20" color="#666"></uni-icons>
                             <view class="text">
                                 {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
                             </view>
+                            <button class="button is-spotlight" size="mini" @click="refreshRandom">
+                                {{ $t('common.refresh') }}
+                            </button>
                         </view>
                     </template>
                 </index-title>
@@ -164,9 +182,7 @@
                 <index-title>
                     <template #name>{{ $t('index.latestRelease') }}</template>
                     <template #custom>
-                        <navigator class="box" url="/pages/app/timeline">
-                            <button size="mini" class="btn is-default">{{ $t('common.seeAll') }}</button>
-                        </navigator>
+                        <button size="mini" class="btn is-default" @click="goTimeline">{{ $t('common.seeAll') }}</button>
                     </template>
                 </index-title>
 
@@ -302,11 +318,14 @@
                 <index-title>
                     <template #name>{{ classify.name }}</template>
                     <template #custom>
-                        <navigator class="box" :url="'/pages/app/classlist?id=' + classify.id + '&name=' + classify.name">
-                            <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]">
-                                {{ $t('common.seeAll') }}
-                            </button>
-                        </navigator>
+                        <button
+                            size="mini"
+                            class="btn"
+                            :class="themeClasses[idx % themeClasses.length]"
+                            @click="goClasslist(classify.id, classify.name)"
+                        >
+                            {{ $t('common.seeAll') }}
+                        </button>
                     </template>
                 </index-title>
 
@@ -363,17 +382,18 @@
                 :tabs="recommendTabs"
                 :show-header="false"
                 :tabs-height="0"
-                :header-height="0"
-                api-type="classList"
+                :header-height="navBarHeight"
+                api-type="recommend"
+                @scroll="handleEmbeddedScroll"
             ></tabbed-pics-view>
         </view>
 
         <view v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest">
-            <timeline-page embedded></timeline-page>
+            <timeline-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></timeline-page>
         </view>
 
         <view v-show="activeHomeTab === 'hot'" class="home-channel home-channel--hot">
-            <top-n-page embedded></top-n-page>
+            <top-n-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-n-page>
         </view>
     </view>
 </template>
@@ -389,7 +409,6 @@ import {
     apiGetNotice,
     apiGetClassify,
     apiGetClassList,
-    apiGetTopWall,
 } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
@@ -407,23 +426,57 @@ const titleBarHeight = ref(getTitleBarHeight() || 0);
 const isTitleBarVisible = ref(true);
 let lastScrollTop = 0;
 
-onPageScroll((e) => {
-    const currentScrollTop = e.scrollTop;
-    if (currentScrollTop > lastScrollTop && currentScrollTop > titleBarHeight.value) {
-        isTitleBarVisible.value = false;
-    } else if (currentScrollTop < lastScrollTop) {
-        isTitleBarVisible.value = true;
-    }
-    lastScrollTop = currentScrollTop;
+const tabBackgroundMap = {
+    home: '#f5f7fb',
+    recommend: '#0b1017',
+    latest: '#0b1017',
+    hot: '#0b1017',
+};
+
+const activeHomeTab = ref('home');
+
+const currentTabBackground = computed(() => {
+    return tabBackgroundMap[activeHomeTab.value] || tabBackgroundMap.home;
 });
 
-uni.$on('app-scroll', (scrollTop) => {
-    if (scrollTop > lastScrollTop && scrollTop > titleBarHeight.value) {
-        isTitleBarVisible.value = false;
-    } else if (scrollTop < lastScrollTop) {
-        isTitleBarVisible.value = true;
+const isDarkTab = computed(() => {
+    return ['recommend', 'latest', 'hot'].includes(activeHomeTab.value);
+});
+
+const searchIconColor = computed(() => {
+    return isDarkTab.value ? 'rgba(255, 255, 255, 0.7)' : '#64748b';
+});
+
+const SCROLL_DEAD_ZONE = 5;
+
+const updateTitleBarVisibleByScroll = (scrollTop) => {
+    const currentScrollTop = Math.max(0, Number(scrollTop) || 0);
+    const scrollDelta = currentScrollTop - lastScrollTop;
+    
+    if (Math.abs(scrollDelta) > SCROLL_DEAD_ZONE) {
+        if (currentScrollTop > titleBarHeight.value) {
+            if (scrollDelta > 0) {
+                isTitleBarVisible.value = false;
+            } else {
+                isTitleBarVisible.value = true;
+            }
+        } else {
+            isTitleBarVisible.value = true;
+        }
+        lastScrollTop = currentScrollTop;
     }
-    lastScrollTop = scrollTop;
+};
+
+onPageScroll((e) => {
+    updateTitleBarVisibleByScroll(e.scrollTop);
+});
+
+const handleEmbeddedScroll = (e) => {
+    updateTitleBarVisibleByScroll(e.scrollTop);
+};
+
+uni.$on('app-scroll', (scrollTop) => {
+    updateTitleBarVisibleByScroll(scrollTop);
 });
 
 const titlebarPaddingRight = computed(() => {
@@ -436,8 +489,6 @@ const titlebarPaddingRight = computed(() => {
     // #endif
     return '20rpx';
 });
-
-const activeHomeTab = ref('home');
 const homeTabs = computed(() => [
     { key: 'home', label: t('index.tabs.home') },
     { key: 'recommend', label: t('index.tabs.recommend') },
@@ -459,7 +510,7 @@ const latestNoMore = ref(false);
 const latestQuery = ref({
     pageNum: 1,
     pageSize: 12,
-    ordering: '-created',
+    ordering: '-updated_at',
 });
 const activeTopMetric = ref('views');
 const topLoading = ref(false);
@@ -468,7 +519,7 @@ const recommendTabs = computed(() => [
     {
         label: '最新推荐',
         query: {
-            ordering: '-created',
+            ordering: '-updated_at',
         },
     },
 ]);
@@ -607,7 +658,7 @@ const getBadgeCopy = () => {
 };
 
 const getWallDate = (item) => {
-    const raw = item?.updated_at || item?.created_at || item?.created || null;
+    const raw = item?.updated_at || item?.created_at || null;
     if (!raw) return null;
     const date = new Date(raw);
     return Number.isNaN(date.getTime()) ? null : date;
@@ -668,7 +719,7 @@ const weekdayNamesZh = ['星期日', '星期一', '星期二', '星期三', '星
 const isZhLocale = computed(() => String(uni.getLocale() || '').startsWith('zh'));
 
 const toTimelineDate = (item) => {
-    const raw = item?.updated_at || item?.created_at || item?.created || Date.now();
+    const raw = item?.updated_at || item?.created_at || Date.now();
     const date = new Date(raw);
     return Number.isNaN(date.getTime()) ? new Date() : date;
 };
@@ -732,37 +783,6 @@ const latestMonthGroups = computed(() => {
     return list;
 });
 
-const topMetricBadge = computed(() => (activeTopMetric.value === 'views' ? t('top10.badgeViews') : t('top10.badgeDownloads')));
-const topMetricDescription = computed(() =>
-    activeTopMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads'),
-);
-
-const formatTopCount = (value) => {
-    const num = Number(value) || 0;
-
-    if (typeof Intl !== 'undefined' && Intl?.NumberFormat) {
-        return new Intl.NumberFormat(isZhLocale.value ? 'zh-CN' : 'en-US', {
-            notation: 'compact',
-            maximumFractionDigits: 1,
-        }).format(num);
-    }
-
-    if (isZhLocale.value) {
-        if (num >= 100000000) return `${(num / 100000000).toFixed(num >= 1000000000 ? 0 : 1).replace(/\.0$/, '')}亿`;
-        if (num >= 10000) return `${(num / 10000).toFixed(num >= 100000 ? 0 : 1).replace(/\.0$/, '')}万`;
-        return `${num}`;
-    }
-
-    if (num >= 1000000000) return `${(num / 1000000000).toFixed(1).replace(/\.0$/, '')}B`;
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
-    if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`;
-    return `${num}`;
-};
-
-const formatTopMetric = (item) => {
-    const count = activeTopMetric.value === 'views' ? item.views : item.downloads;
-    return `${formatTopCount(count)} ${activeTopMetric.value === 'views' ? t('top10.metricViews') : t('top10.metricDownloads')}`;
-};
 
 // 与 classify 页一致：前 6 个 2×3（左高格跨 2 行）+ 第 6 个通栏，第 7、8 个占第 5 行两列，「更多」通栏第 6 行
 const getLayoutStyleForIndex = (idx) => {
@@ -915,33 +935,7 @@ const getLatest = async (isAppend = false) => {
     }
 };
 
-const getTopList = async () => {
-    topLoading.value = true;
-    try {
-        const res = await apiGetTopWall({
-            type: activeTopMetric.value === 'views' ? 'views' : 'downloads',
-            n: 10,
-        });
-        const list = (res.data || []).map((item) => handlePicUrl(item));
-        topRankedList.value = list
-            .sort((a, b) => {
-                const aValue = Number(activeTopMetric.value === 'views' ? a.views : a.downloads) || 0;
-                const bValue = Number(activeTopMetric.value === 'views' ? b.views : b.downloads) || 0;
-                return bValue - aValue;
-            })
-            .slice(0, 10);
-    } catch (error) {
-        topRankedList.value = [];
-    } finally {
-        topLoading.value = false;
-    }
-};
 
-const switchTopMetric = async (metric) => {
-    if (activeTopMetric.value === metric) return;
-    activeTopMetric.value = metric;
-    await getTopList();
-};
 
 const goBannerPreview = (data) => {
     if (data.wall) {
@@ -958,25 +952,12 @@ const goPreview = (id, data) => {
     });
 };
 
-const goTopPreview = (id) => {
-    uni.setStorageSync('wallList', topRankedList.value);
-    uni.navigateTo({
-        url: `/pages/app/preview?id=${id}`,
-    });
-};
-
 const goSearch = () => {
     uni.navigateTo({ url: '/pages/app/search' });
 };
 
 const switchHomeTab = (key) => {
     activeHomeTab.value = key;
-    if (key === 'latest' && !latestList.value.length) {
-        getLatest();
-    }
-    if (key === 'hot' && !topRankedList.value.length) {
-        getTopList();
-    }
 };
 
 const goSearchByTag = (tag) => {
@@ -1007,6 +988,16 @@ const onAdError = (key) => {
     adVisibleMap[key] = false;
 };
 
+const goTimeline = () => {
+    uni.navigateTo({ url: '/pages/app/timeline' });
+};
+
+const goClasslist = (id, name) => {
+    uni.navigateTo({
+        url: `/pages/app/classlist?id=${id}&name=${name}`,
+    });
+};
+
 const refreshRandom = () => {
     getRandom();
     getRandomRecommend();
@@ -1019,13 +1010,6 @@ onLoad(() => {
     getRandomRecommend();
     getClassify();
     getLatest();
-    getTopList();
-});
-
-onReachBottom(() => {
-    if (activeHomeTab.value !== 'latest' || latestNoMore.value || latestLoading.value) return;
-    latestQuery.value.pageNum++;
-    getLatest(true);
 });
 
 // 下拉刷新
@@ -1035,13 +1019,8 @@ onPullDownRefresh(() => {
     if (activeHomeTab.value === 'home') {
         getRandom();
         getRandomRecommend();
-    } else if (activeHomeTab.value === 'latest') {
-        getLatest();
-    } else if (activeHomeTab.value === 'hot') {
-        getTopList();
     }
 
-    // uni.hideNavigationBarLoading();
     uni.stopPullDownRefresh();
 });
 
@@ -1065,10 +1044,18 @@ onShareTimeline(() => {
 .homeLayout {
     min-height: 100vh;
     box-sizing: border-box;
-    transition: background 0.3s ease;
-    background:
-        radial-gradient(circle at 82% 0%, rgba(43, 140, 238, 0.12), transparent 28%),
-        linear-gradient(180deg, #f5f7fb 0%, #eef3f8 100%);
+    transition: background-color 0.3s ease;
+    background-color: #f5f7fb;
+
+    .home-statusbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 51;
+        pointer-events: none;
+        transition: background-color 0.3s ease;
+    }
 
     .home-titlebar {
         position: fixed;
@@ -1078,7 +1065,40 @@ onShareTimeline(() => {
         z-index: 50;
         padding: 0 20rpx;
         box-sizing: border-box;
-        background: #fff;
+        background: #f5f7fb;
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
+        
+        &.is-hidden {
+            transform: translateY(-100%);
+        }
+
+        &.is-dark {
+            .home-tab {
+                color: rgba(255, 255, 255, 0.6);
+                
+                &.is-active {
+                    color: #ffffff;
+                }
+                
+                &.is-active::after {
+                    background: #ffffff;
+                }
+            }
+            
+            .home-tabs-mask {
+                background: linear-gradient(to right, transparent, var(--mask-color, #0b1017));
+            }
+
+            .home-search {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 255, 255, 0.15);
+                color: rgba(255, 255, 255, 0.8);
+                
+                &:active {
+                    background: rgba(255, 255, 255, 0.15);
+                }
+            }
+        }
     }
 
     .home-titlebar__inner {
@@ -1105,7 +1125,7 @@ onShareTimeline(() => {
         top: 0;
         bottom: 0;
         width: 40rpx;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+        background: linear-gradient(to right, transparent, var(--mask-color, #f5f7fb));
         pointer-events: none;
     }
 
@@ -1201,8 +1221,7 @@ onShareTimeline(() => {
     }
 
     .home-channel--recommend {
-        height: calc(100vh - 118rpx);
-        min-height: 900rpx;
+        height: 100vh;
         overflow: hidden;
         background: transparent;
     }
@@ -1214,7 +1233,7 @@ onShareTimeline(() => {
         box-sizing: border-box;
         color: #eaf0fb;
         background: transparent;
-        min-height: calc(100vh - 118rpx);
+        height: 100vh;
     }
 
     .embedded-hero {
@@ -2144,43 +2163,33 @@ onShareTimeline(() => {
         .index-title {
             position: relative;
             z-index: 1;
+            margin-bottom: 24rpx;
+
+            :deep(.name) {
+                font-size: 38rpx;
+                font-weight: 850;
+                color: #0f172a;
+                letter-spacing: 0.5rpx;
+                position: relative;
+                padding-bottom: 8rpx;
+                
+                &::after {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                    width: 36rpx;
+                    height: 6rpx;
+                    border-radius: 99rpx;
+                    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                }
+            }
         }
 
         .date {
             display: flex;
             align-items: center;
-            gap: 12rpx;
-
-            .button {
-                margin: 0;
-                padding: 0 16rpx;
-                height: 46rpx;
-                line-height: 44rpx;
-                font-size: 22rpx;
-                font-weight: 700;
-                border-radius: 999rpx;
-                background: #e2e8f0;
-                color: #475569;
-                border: 1rpx solid #cbd5e1;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-
-                &::after {
-                    border: none;
-                }
-
-                &:active {
-                    transform: scale(0.95);
-                    opacity: 0.8;
-                }
-
-                &.is-spotlight {
-                    color: #475569;
-                    background: #e2e8f0;
-                    border-color: #cbd5e1;
-                }
-            }
+            gap: 16rpx;
 
             .text {
                 font-size: 26rpx;
@@ -2190,38 +2199,42 @@ onShareTimeline(() => {
             }
         }
 
-        .btn {
+        .btn,
+        .date .button {
             margin: 0;
-            padding: 0 20rpx;
-            height: 46rpx;
-            line-height: 44rpx;
+            padding: 0 24rpx;
+            height: 52rpx;
+            line-height: 50rpx;
             font-size: 22rpx;
-            font-weight: 700;
+            font-weight: 800;
             border-radius: 999rpx;
-            border: 1rpx solid rgba(0, 0, 0, 0.08);
-            background: #f1f5f9;
-            color: #64748b;
+            border: 1rpx solid rgba(17, 24, 39, 0.08);
+            background: #111827;
+            color: #f8fafc;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            letter-spacing: 0.4rpx;
+            box-shadow: none;
+            transition: transform 0.28s ease, background-color 0.28s ease, color 0.28s ease;
 
             &::after {
                 border: none;
             }
 
             &:active {
-                transform: scale(0.95);
-                filter: brightness(0.95);
+                background: #f7f9fc;
+                color: #111827;
+                transform: scale(0.97);
             }
 
             &.is-default,
             &.is-collection,
             &.is-keyword,
             &.is-spotlight {
-                color: #475569;
-                background: #e2e8f0;
-                border-color: #cbd5e1;
+                background: #111827;
+                color: #f8fafc;
+                border-color: rgba(17, 24, 39, 0.08);
             }
         }
 

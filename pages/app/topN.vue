@@ -2,7 +2,9 @@
     <view class="top10-page" :class="{ 'is-embedded': embedded }">
         <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
 
-        <scroll-view scroll-y class="top10-scroll">
+        <scroll-view scroll-y class="top10-scroll" @scroll="handleScroll">
+            <!-- Spacer for embedded titlebar -->
+            <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
             <view class="top10-wrap">
                 <view v-if="!embedded" class="top10-header">
                     <view class="top10-header__left">
@@ -155,7 +157,17 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    navBarHeight: {
+        type: Number,
+        default: 0,
+    },
 });
+
+const emit = defineEmits(['scroll']);
+
+const handleScroll = (e) => {
+    emit('scroll', { scrollTop: e.detail.scrollTop });
+};
 
 const activeMetric = ref('views');
 const loading = ref(false);
@@ -172,7 +184,7 @@ const getTopList = async () => {
     try {
         const res = await apiGetTopWall({
             type: getType(),
-            n: 10,
+            n: 20,
         });
         const list = (res.data || []).map((item) => handlePicUrl(item));
         rankedList.value = list
@@ -181,7 +193,7 @@ const getTopList = async () => {
                 const bValue = Number(activeMetric.value === 'views' ? b.views : b.downloads) || 0;
                 return bValue - aValue;
             })
-            .slice(0, 10);
+            .slice(0, 20);
     } catch (error) {
         rankedList.value = [];
     } finally {
@@ -239,10 +251,6 @@ const goBack = () => {
 };
 
 onLoad(() => {
-    getTopList();
-});
-
-onMounted(() => {
     if (!rankedList.value.length) {
         getTopList();
     }
@@ -252,15 +260,13 @@ onMounted(() => {
 <style lang="scss" scoped>
 .top10-page {
     min-height: 100vh;
-    background:
-        radial-gradient(circle at top center, rgba(43, 140, 238, 0.22), transparent 24%),
-        radial-gradient(circle at 20% 18%, rgba(244, 114, 182, 0.16), transparent 22%),
-        linear-gradient(180deg, #101922 0%, #13202c 36%, #0c1218 100%);
+    background: #0b1017;
 }
 
 .top10-page.is-embedded {
     min-height: 0;
     width: 100%;
+    height: 100vh;
     overflow: hidden;
 }
 
@@ -273,7 +279,7 @@ onMounted(() => {
 }
 
 .top10-page.is-embedded .top10-scroll {
-    height: calc(100vh - 118rpx);
+    height: 100vh;
 }
 
 .top10-wrap {
@@ -551,7 +557,6 @@ onMounted(() => {
     height: 280rpx;
     border-radius: 28rpx;
     background: rgba(24, 36, 49, 0.92);
-    border: 1rpx solid rgba(51, 65, 85, 0.56);
     display: flex;
     align-items: stretch;
     gap: 0;

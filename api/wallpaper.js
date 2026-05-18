@@ -277,6 +277,15 @@ export const apiGetSimilarWall = (id = '') => {
     });
 };
 
+// 获取推荐壁纸接口
+export const apiGetRecommend = (data = {}) => {
+    return request({
+        url: '/recommend/',
+        data,
+        method: 'GET',
+    });
+};
+
 // 发现分析接口
 export const apiPostDiscoverAnalyze = (data = {}) => {
     return request({
