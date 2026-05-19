@@ -41,16 +41,17 @@
         </view>
 
         <view class="indicator-wrapper">
-            <view
-                class="indicator-dot"
-                v-for="(item, index) in guideList"
-                :key="index"
-                :class="{ active: currentIndex === index }"
-            ></view>
-        </view>
-
-        <view class="enter-btn" v-if="currentIndex === guideList.length - 1" @click="enterApp">
-            {{ t('guide.enter') }}
+            <block v-if="currentIndex < guideList.length - 1">
+                <view
+                    class="indicator-dot"
+                    v-for="(item, index) in guideList"
+                    :key="index"
+                    :class="{ active: currentIndex === index }"
+                ></view>
+            </block>
+            <view class="enter-btn" v-else @click="enterApp">
+                {{ t('guide.enter') }}
+            </view>
         </view>
     </view>
 </template>
@@ -59,6 +60,7 @@
 import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
+import { getStatusBarHeight } from '@/utils/system.js'
 
 const { t } = useI18n();
 
@@ -197,7 +199,7 @@ onLoad(() => {});
     display: block;
     width: 100%;
     max-width: 840rpx;
-    margin: 100rpx auto 0;
+    margin: 200rpx auto 0;
 }
 
 .guide-content {
@@ -247,7 +249,7 @@ onLoad(() => {});
 
 .skip-btn {
     position: fixed;
-    top: calc(env(safe-area-inset-top) + 32rpx);
+    top: calc(env(safe-area-inset-top) + 120rpx);
     right: 28rpx;
     z-index: 8;
     display: flex;
@@ -280,7 +282,7 @@ onLoad(() => {});
 
 .guide-status {
     position: fixed;
-    top: calc(env(safe-area-inset-top) + 32rpx);
+    top: calc(env(safe-area-inset-top) + 120rpx);
     right: 28rpx;
     z-index: 8;
     display: flex;
@@ -334,18 +336,21 @@ onLoad(() => {});
 }
 
 .enter-btn {
-    position: fixed;
-    left: 50%;
-    bottom: calc(env(safe-area-inset-bottom) + 140rpx);
     z-index: 8;
     min-width: 240rpx;
     padding: 22rpx 48rpx;
     border-radius: 999rpx;
-    transform: translateX(-50%);
     text-align: center;
     color: #111111;
     font-size: 28rpx;
     font-weight: 600;
     background: #ffffff;
+    box-shadow: 0 8rpx 24rpx rgba(255, 255, 255, 0.2);
+    transition: all 0.28s ease;
+
+    &:active {
+        transform: scale(0.96);
+        opacity: 0.92;
+    }
 }
 </style>

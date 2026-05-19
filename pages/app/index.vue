@@ -1168,7 +1168,7 @@ onShareTimeline(() => {
             position: absolute;
             left: 50%;
             bottom: 4rpx;
-            width: 48rpx;
+            width: 32rpx;
             height: 4rpx;
             border-radius: 999rpx;
             background: #111827;

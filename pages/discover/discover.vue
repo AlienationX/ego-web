@@ -3,28 +3,12 @@
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }">
             <view class="status-decorative-bg">
-                <view class="bg-circle circle-1"></view>
-                <view class="bg-circle circle-2"></view>
-                <view class="bg-circle circle-3"></view>
-                <view class="bg-circle circle-4"></view>
-                <view class="bg-circle circle-5"></view>
-                <view class="bg-circle circle-6"></view>
-                <view class="bg-circle circle-7"></view>
-                <view class="bg-circle circle-8"></view>
                 <view class="bg-mesh"></view>
             </view>
         </view>
         <!-- #endif -->
 
         <view class="decorative-bg">
-            <view class="bg-circle circle-1"></view>
-            <view class="bg-circle circle-2"></view>
-            <view class="bg-circle circle-3"></view>
-            <view class="bg-circle circle-4"></view>
-            <view class="bg-circle circle-5"></view>
-            <view class="bg-circle circle-6"></view>
-            <view class="bg-circle circle-7"></view>
-            <view class="bg-circle circle-8"></view>
             <view class="bg-mesh"></view>
         </view>
 
@@ -662,75 +646,6 @@ onUnload(() => {
 
 .decorative-bg,
 .status-decorative-bg {
-    .bg-circle {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(6rpx);
-    }
-
-    .circle-1 {
-        width: 420rpx;
-        height: 420rpx;
-        top: 100rpx;
-        right: -120rpx;
-        background: radial-gradient(circle, rgba(255, 154, 158, 0.26) 0%, rgba(255, 154, 158, 0) 72%);
-    }
-
-    .circle-2 {
-        width: 520rpx;
-        height: 520rpx;
-        bottom: 240rpx;
-        left: -200rpx;
-        background: radial-gradient(circle, rgba(127, 219, 255, 0.2) 0%, rgba(127, 219, 255, 0) 72%);
-    }
-
-    .circle-3 {
-        width: 180rpx;
-        height: 180rpx;
-        top: 38%;
-        right: 16%;
-        background: radial-gradient(circle, rgba(255, 214, 143, 0.18) 0%, rgba(255, 214, 143, 0) 72%);
-    }
-
-    .circle-4 {
-        width: 220rpx;
-        height: 220rpx;
-        top: 20%;
-        left: 8%;
-        background: radial-gradient(circle, rgba(143, 119, 255, 0.18) 0%, rgba(143, 119, 255, 0) 72%);
-    }
-
-    .circle-5 {
-        width: 300rpx;
-        height: 300rpx;
-        top: 66%;
-        right: -90rpx;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 72%);
-    }
-
-    .circle-6 {
-        width: 140rpx;
-        height: 140rpx;
-        top: 28%;
-        right: 6%;
-        background: radial-gradient(circle, rgba(125, 247, 196, 0.18) 0%, rgba(125, 247, 196, 0) 72%);
-    }
-
-    .circle-7 {
-        width: 240rpx;
-        height: 240rpx;
-        bottom: 90rpx;
-        left: 22%;
-        background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 72%);
-    }
-
-    .circle-8 {
-        width: 120rpx;
-        height: 120rpx;
-        top: 74%;
-        left: -26rpx;
-        background: radial-gradient(circle, rgba(255, 214, 143, 0.18) 0%, rgba(255, 214, 143, 0) 72%);
-    }
 }
 
 .bg-mesh {
