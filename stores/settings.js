@@ -38,7 +38,7 @@ export const useSettingsStore = defineStore(
             // TODO 多个primary等颜色的默认值
         });
 
-        const systemTheme = ref(uni.getSystemInfoSync().theme || 'light');
+        const systemTheme = computed(() => (uni.getSystemInfoSync().osTheme || 'light'));
 
         // 窗口视图和瀑布流视图的切换
         const switchViewIcon = computed(() => (options.view === 'window' ? 'map-filled' : 'list'));

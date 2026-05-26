@@ -11,7 +11,6 @@ onLaunch(() => {
 
     const savedTheme = uni.getStorageSync('theme') || 'auto';
     settingsStore.options.theme = savedTheme;
-    settingsStore.systemTheme = uni.getSystemInfoSync().theme || 'light';
 
     // #ifdef APP
     const activeUIStyle = savedTheme === 'auto' ? settingsStore.systemTheme : savedTheme;
@@ -30,7 +29,6 @@ onLaunch(() => {
     // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
         console.log('onThemeChange', theme);
-        settingsStore.systemTheme = theme;
 
         // 如果用户设置的是跟随系统，系统切换主题时需要同时更新原生UI风格
         if (settingsStore.options.theme === 'auto') {
