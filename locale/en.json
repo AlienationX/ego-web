@@ -606,14 +606,19 @@
             "language": {
                 "label": "Language",
                 "sublabel": "Switch application language",
+                "auto": "Follow System",
                 "valueZh": "Chinese",
                 "valueEn": "English"
             },
             "theme": {
                 "label": "Dark Mode",
-                "sublabel": "Switch light or dark mode",
-                "light": "Light",
-                "dark": "Dark"
+                "sublabel": "Customize theme or follow system",
+                "light": "Light Mode",
+                "dark": "Dark Mode",
+                "auto": "Follow System",
+                "autoDesc": "Match your device light or dark appearance",
+                "lightDesc": "Always use a bright, clean light background",
+                "darkDesc": "Always use an immersive dark background"
             },
             "previewType": {
                 "label": "Preview Type",
@@ -748,6 +753,7 @@
         },
         "toast": {
             "themeChanged": "Theme changed",
+            "languageChanged": "Language updated",
             "clearing": "Clearing",
             "clearSuccess": "Clear success",
             "loggedOut": "Logged out"

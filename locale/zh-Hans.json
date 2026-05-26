@@ -604,14 +604,19 @@
             "language": {
                 "label": "语言",
                 "sublabel": "切换应用显示语言",
+                "auto": "跟随系统",
                 "valueZh": "中文",
                 "valueEn": "英文"
             },
             "theme": {
                 "label": "暗黑模式",
-                "sublabel": "切换浅色或深色主题",
-                "light": "浅色",
-                "dark": "深色"
+                "sublabel": "自定义深浅色或跟随系统",
+                "light": "浅色模式",
+                "dark": "深色模式",
+                "auto": "跟随系统",
+                "autoDesc": "开启后将跟随系统设置自动切换深浅色",
+                "lightDesc": "始终使用明亮、纯净的浅色背景",
+                "darkDesc": "始终使用护眼、沉浸的深色背景"
             },
             "previewType": {
                 "label": "预览方式",
@@ -746,6 +751,7 @@
         },
         "toast": {
             "themeChanged": "主题已切换",
+            "languageChanged": "语言已切换",
             "clearing": "清理中",
             "clearSuccess": "清理成功",
             "loggedOut": "已退出登录"

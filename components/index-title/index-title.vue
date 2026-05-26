@@ -22,7 +22,7 @@
         .name {
             font-size: 34rpx;
             font-weight: bold;
-            color: $uni-text-color;
+            color: var(--text-primary);
         }
     }
 </style>

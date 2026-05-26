@@ -1,5 +1,5 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }">
             <view class="status-decorative-bg">
@@ -56,7 +56,7 @@
                 <view class="picker-wrap" v-if="pickerOpen">
                     <template v-if="sourceMode === 'favorite'">
                         <view class="picker-title">{{ $t('discover.pickFavorite') }}</view>
-                        <scroll-view v-if="favoriteList.length" class="favorite-scroll" scroll-x>
+                        <scroll-view v-if="favoriteList.length" class="favorite-scroll" scroll-x @scroll="onFavScroll">
                             <view class="favorite-row">
                                 <view
                                     v-for="item in favoriteList"
@@ -66,6 +66,9 @@
                                     @click="onSelect(item.id)"
                                 >
                                     <image class="fav-image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                </view>
+                                <view v-if="favLoadingMore" class="fav-card fav-card--loading">
+                                    <rotate-loading :size="48"></rotate-loading>
                                 </view>
                             </view>
                         </scroll-view>
@@ -108,14 +111,20 @@ import { handlePicUrl } from '@/utils/common.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 
 const isLoading = ref(false);
 const isRunning = ref(false);
 const favoriteList = ref([]);
+const favPageNum = ref(1);
+const favNoMore = ref(false);
+const favLoadingMore = ref(false);
 const selectedId = ref(null);
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.options.theme === 'dark');
 const sourceMode = ref('favorite');
 const localImage = ref('');
 const pickerOpen = ref(true);
@@ -338,30 +347,71 @@ const markdownToHtml = (md = '') => {
     return html;
 };
 
-const getFavoriteList = async () => {
+const getFavoriteList = async (isAppend = false) => {
     if (!userStore.isLoggedIn) {
         favoriteList.value = [];
         selectedId.value = null;
         return;
     }
 
-    isLoading.value = true;
+    if (isAppend) {
+        if (favLoadingMore.value || favNoMore.value) return;
+        favLoadingMore.value = true;
+    } else {
+        isLoading.value = true;
+        favPageNum.value = 1;
+        favNoMore.value = false;
+    }
+
     try {
         const res = await apiGetActions({
-            pageNum: 1,
-            pageSize: 30,
+            pageNum: favPageNum.value,
+            pageSize: 20,
             action_key: 'favorite',
         });
-        favoriteList.value = (res.data || []).map((item) => handlePicUrl(item));
-        if (favoriteList.value.length) {
-            selectedId.value = favoriteList.value[0].id;
+        const newData = (res.data || []).map((item) => handlePicUrl(item));
+        if (isAppend) {
+            favoriteList.value.push(...newData);
+        } else {
+            favoriteList.value = newData;
+            if (favoriteList.value.length) {
+                selectedId.value = favoriteList.value[0].id;
+            }
+        }
+        const totalPages = Number(res?.pagination?.total_pages || 1);
+        if (favPageNum.value >= totalPages) {
+            favNoMore.value = true;
         }
     } catch (error) {
         favoriteList.value = [];
         selectedId.value = null;
     } finally {
         isLoading.value = false;
+        favLoadingMore.value = false;
     }
+};
+
+let favScrollPending = false;
+const onFavScroll = (e) => {
+    if (favLoadingMore.value || favNoMore.value || favScrollPending) return;
+    favScrollPending = true;
+    const { scrollLeft, scrollWidth } = e.detail;
+    uni.createSelectorQuery()
+        .select('.favorite-scroll')
+        .boundingClientRect((rect) => {
+            favScrollPending = false;
+            if (!rect || !scrollWidth) return;
+            if (scrollLeft + rect.width >= scrollWidth - 60) {
+                loadMoreFavorites();
+            }
+        })
+        .exec();
+};
+
+const loadMoreFavorites = () => {
+    if (favLoadingMore.value || favNoMore.value) return;
+    favPageNum.value++;
+    getFavoriteList(true);
 };
 
 const onSelect = async (id) => {
@@ -581,25 +631,50 @@ onUnload(() => {
 
 <style lang="scss" scoped>
 .layout {
-    --discover-bg: #f5f5f8;
-    --discover-panel: rgba(255, 255, 255, 0.9);
-    --discover-panel-strong: rgba(255, 255, 255, 0.98);
-    --discover-border: rgba(17, 17, 17, 0.08);
-    --discover-border-strong: rgba(17, 17, 17, 0.12);
-    --discover-text-main: #15171c;
-    --discover-text-secondary: rgba(21, 23, 28, 0.72);
-    --discover-text-muted: rgba(21, 23, 28, 0.52);
-    --discover-accent: #ff8db3;
-    --discover-accent-strong: #15171c;
-    --discover-success: #28b389;
-    --discover-shadow: rgba(19, 25, 39, 0.12);
-    --discover-user-bubble: rgba(255, 141, 179, 0.12);
-    --discover-code-bg: #0f172a;
-    --discover-code-text: #e2e8f0;
-    --discover-link: #d9487d;
-    --discover-switch-active-text: #15171c;
-    --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
-    --discover-bottom-panel: rgba(255, 255, 255, 0.94);
+    &.theme-light {
+        --discover-bg: #f5f5f8;
+        --discover-panel: rgba(255, 255, 255, 0.9);
+        --discover-panel-strong: rgba(255, 255, 255, 0.98);
+        --discover-border: rgba(17, 17, 17, 0.08);
+        --discover-border-strong: rgba(17, 17, 17, 0.12);
+        --discover-text-main: #15171c;
+        --discover-text-secondary: rgba(21, 23, 28, 0.72);
+        --discover-text-muted: rgba(21, 23, 28, 0.52);
+        --discover-accent: #ff8db3;
+        --discover-accent-strong: #15171c;
+        --discover-success: #28b389;
+        --discover-shadow: rgba(19, 25, 39, 0.12);
+        --discover-user-bubble: rgba(255, 141, 179, 0.12);
+        --discover-code-bg: #0f172a;
+        --discover-code-text: #e2e8f0;
+        --discover-link: #d9487d;
+        --discover-switch-active-text: #15171c;
+        --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
+        --discover-bottom-panel: rgba(255, 255, 255, 0.94);
+    }
+
+    &.theme-dark {
+        --discover-bg: #111111;
+        --discover-panel: rgba(255, 255, 255, 0.06);
+        --discover-panel-strong: rgba(255, 255, 255, 0.08);
+        --discover-border: rgba(255, 255, 255, 0.1);
+        --discover-border-strong: rgba(255, 255, 255, 0.14);
+        --discover-text-main: #f7f7fb;
+        --discover-text-secondary: rgba(247, 247, 251, 0.72);
+        --discover-text-muted: rgba(247, 247, 251, 0.56);
+        --discover-accent: #ffd7e6;
+        --discover-accent-strong: #ffffff;
+        --discover-success: #7df7c4;
+        --discover-shadow: rgba(0, 0, 0, 0.28);
+        --discover-user-bubble: rgba(255, 215, 230, 0.12);
+        --discover-code-bg: #0f172a;
+        --discover-code-text: #e2e8f0;
+        --discover-link: #ffd7e6;
+        --discover-switch-active-text: #111111;
+        --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
+        --discover-bottom-panel: rgba(10, 12, 20, 0.86);
+    }
+
     position: relative;
     min-height: 94vh;
     background: var(--discover-bg);
@@ -763,6 +838,15 @@ onUnload(() => {
     box-shadow:
         0 0 0 4rpx rgba(255, 215, 230, 0.16),
         0 18rpx 36rpx var(--discover-shadow);
+}
+
+.fav-card--loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    box-shadow: none;
 }
 
 .fav-image {
@@ -1057,30 +1141,6 @@ onUnload(() => {
     justify-content: center;
     gap: 8rpx;
     font-weight: 500;
-}
-
-@media (prefers-color-scheme: dark) {
-    .layout {
-        --discover-bg: #111111;
-        --discover-panel: rgba(255, 255, 255, 0.06);
-        --discover-panel-strong: rgba(255, 255, 255, 0.08);
-        --discover-border: rgba(255, 255, 255, 0.1);
-        --discover-border-strong: rgba(255, 255, 255, 0.14);
-        --discover-text-main: #f7f7fb;
-        --discover-text-secondary: rgba(247, 247, 251, 0.72);
-        --discover-text-muted: rgba(247, 247, 251, 0.56);
-        --discover-accent: #ffd7e6;
-        --discover-accent-strong: #ffffff;
-        --discover-success: #7df7c4;
-        --discover-shadow: rgba(0, 0, 0, 0.28);
-        --discover-user-bubble: rgba(255, 215, 230, 0.12);
-        --discover-code-bg: #0f172a;
-        --discover-code-text: #e2e8f0;
-        --discover-link: #ffd7e6;
-        --discover-switch-active-text: #111111;
-        --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
-        --discover-bottom-panel: rgba(10, 12, 20, 0.86);
-    }
 }
 
 .source-item.active {

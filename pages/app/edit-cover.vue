@@ -45,7 +45,7 @@
 
                     <view v-else-if="!classifyImages.length" class="editor-empty"> 当前分类下暂无可选图片 </view>
 
-                    <scroll-view v-else scroll-x class="image-scroll">
+                    <scroll-view v-else scroll-x class="image-scroll" @scroll="onImageScroll">
                         <view class="image-row">
                             <view
                                 v-for="item in classifyImages"
@@ -64,6 +64,9 @@
                                     <view class="image-card__score">评分 {{ item.score ?? '--' }}</view>
                                 </view>
                             </view>
+                            <view v-if="loadingMore" class="image-card image-card--loading">
+                                <rotate-loading :size="60"></rotate-loading>
+                            </view>
                         </view>
                     </scroll-view>
                 </view>
@@ -76,20 +79,22 @@
                         </view>
                     </view>
 
-                    <view class="preview-switch">
-                        <view
-                            class="preview-switch__item"
-                            :class="{ active: previewMode === 'grid' }"
-                            @click="previewMode = 'grid'"
-                        >
-                            classify.vue
-                        </view>
-                        <view
-                            class="preview-switch__item"
-                            :class="{ active: previewMode === 'time' }"
-                            @click="previewMode = 'time'"
-                        >
-                            classify-time
+                    <view class="preview-switch-wrap">
+                        <view class="preview-switch">
+                            <view
+                                class="preview-switch__item"
+                                :class="{ active: previewMode === 'grid' }"
+                                @click="previewMode = 'grid'"
+                            >
+                                classify.vue
+                            </view>
+                            <view
+                                class="preview-switch__item"
+                                :class="{ active: previewMode === 'time' }"
+                                @click="previewMode = 'time'"
+                            >
+                                classify-time
+                            </view>
                         </view>
                     </view>
 
@@ -147,6 +152,9 @@ import { PICS_BASE_URL } from '@/common/config.js';
 const classifyList = ref([]);
 const selectedClassifyId = ref(null);
 const classifyImages = ref([]);
+const imagePageNum = ref(1);
+const imageNoMore = ref(false);
+const loadingMore = ref(false);
 const draftCoverUrl = ref('');
 const originalCoverUrl = ref('');
 const previewMode = ref('grid');
@@ -174,19 +182,37 @@ const getClassify = async () => {
     }
 };
 
-const getClassifyImages = async (classifyId) => {
-    imageLoading.value = true;
+const getClassifyImages = async (classifyId, isAppend = false) => {
+    if (isAppend) {
+        if (loadingMore.value || imageNoMore.value) return;
+        loadingMore.value = true;
+    } else {
+        imageLoading.value = true;
+        imagePageNum.value = 1;
+        imageNoMore.value = false;
+    }
     try {
         const res = await apiGetClassList({
             classify_id: classifyId,
             classify_enable: false,
-            pageSize: 30,
+            pageNum: imagePageNum.value,
+            pageSize: 20,
         });
-        classifyImages.value = (res.data || []).map((item) => handlePicUrl(item));
+        const newData = (res.data || []).map((item) => handlePicUrl(item));
+        if (isAppend) {
+            classifyImages.value.push(...newData);
+        } else {
+            classifyImages.value = newData;
+        }
+        const totalPages = Number(res?.pagination?.total_pages || 1);
+        if (imagePageNum.value >= totalPages) {
+            imageNoMore.value = true;
+        }
     } catch (error) {
         classifyImages.value = [];
     } finally {
         imageLoading.value = false;
+        loadingMore.value = false;
     }
 };
 
@@ -202,6 +228,29 @@ const selectClassify = async (classifyId) => {
 const reloadImages = async () => {
     if (!selectedClassifyId.value) return;
     await getClassifyImages(selectedClassifyId.value);
+};
+
+let scrollQueryPending = false;
+const onImageScroll = (e) => {
+    if (loadingMore.value || imageNoMore.value || scrollQueryPending) return;
+    scrollQueryPending = true;
+    const { scrollLeft, scrollWidth } = e.detail;
+    uni.createSelectorQuery()
+        .select('.image-scroll')
+        .boundingClientRect((rect) => {
+            scrollQueryPending = false;
+            if (!rect || !scrollWidth) return;
+            if (scrollLeft + rect.width >= scrollWidth - 80) {
+                loadMoreImages();
+            }
+        })
+        .exec();
+};
+
+const loadMoreImages = () => {
+    if (!selectedClassifyId.value || loadingMore.value || imageNoMore.value) return;
+    imagePageNum.value++;
+    getClassifyImages(selectedClassifyId.value, true);
 };
 
 const selectCover = (item) => {
@@ -328,10 +377,11 @@ getClassify();
     height: 60rpx;
     padding: 0 24rpx;
     border-radius: 999rpx;
-    border: none;
-    background: rgba(40, 179, 137, 0.08);
-    color: #179d76;
+    border: 1rpx solid #dbe4ee;
+    background: #f8fafc;
+    color: #334155;
     font-size: 22rpx;
+    font-weight: 600;
 }
 
 .mini-btn::after {
@@ -350,26 +400,30 @@ getClassify();
 }
 
 .chip-row {
+    justify-content: center;
     padding-top: 18rpx;
 }
 
 .chip {
     flex-shrink: 0;
-    height: 64rpx;
+    min-height: 64rpx;
     padding: 0 24rpx;
     border-radius: 999rpx;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #eef3f8;
-    color: #53627a;
     font-size: 24rpx;
     font-weight: 600;
+    color: #334155;
+    background: #f8fafc;
+    border: 1rpx solid #dbe4ee;
 }
 
 .chip.active {
-    background: linear-gradient(135deg, #28b389, #179d76);
     color: #fff;
+    background: #18202a;
+    border-color: #18202a;
+    box-shadow: 0 14rpx 30rpx rgba(24, 32, 42, 0.18);
 }
 
 .editor-loading,
@@ -399,6 +453,14 @@ getClassify();
     border-color: #28b389;
 }
 
+.image-card--loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+}
+
 .image-card__thumb {
     width: 100%;
     height: 480rpx;
@@ -421,13 +483,19 @@ getClassify();
     color: #7f8ca4;
 }
 
+.preview-switch-wrap {
+    display: flex;
+    justify-content: center;
+}
+
 .preview-switch {
     margin-top: 18rpx;
     display: inline-flex;
-    padding: 8rpx;
+    padding: 6rpx;
     border-radius: 999rpx;
-    background: #eef3f8;
-    gap: 8rpx;
+    background: #f8fafc;
+    border: 1rpx solid #dbe4ee;
+    gap: 6rpx;
 }
 
 .preview-switch__item {
@@ -438,15 +506,16 @@ getClassify();
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #607089;
+    color: #64748b;
     font-size: 23rpx;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .preview-switch__item.active {
-    background: #fff;
-    color: #18202a;
-    border: 1rpx solid #e7ebf2;
+    background: #18202a;
+    color: #fff;
+    border: 1rpx solid #18202a;
+    box-shadow: 0 14rpx 30rpx rgba(24, 32, 42, 0.18);
 }
 
 .preview-grid {
@@ -552,16 +621,17 @@ getClassify();
     min-width: 220rpx;
     height: 76rpx;
     border-radius: 999rpx;
-    border: none;
-    background: #28b389;
+    border: 1rpx solid #18202a;
+    background: #18202a;
     color: #fff;
     font-size: 26rpx;
     font-weight: 700;
+    box-shadow: 0 14rpx 30rpx rgba(24, 32, 42, 0.18);
 }
 
 .save-btn[disabled] {
     opacity: 0.45;
-    border: 1rpx solid;
+    border: 1rpx solid rgba(24, 32, 42, 0.3);
 }
 
 .save-btn::after {

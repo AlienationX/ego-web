@@ -1,9 +1,9 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"></mdi-icon>
             </view>
             <text class="header-title">{{ t('settings.title') }}</text>
             <view class="header-placeholder"></view>
@@ -34,7 +34,7 @@
                     >
                         <view class="row-left">
                             <view class="icon-box">
-                                <mdi-icon :path="item.icon" size="28px" color="#6B7280"></mdi-icon>
+                                <mdi-icon :path="item.icon" size="28px" :color="settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
                             </view>
                             <view class="label-block">
                                 <text class="label">{{ item.label }}</text>
@@ -42,7 +42,7 @@
                             </view>
                         </view>
                         <view class="row-right">
-                            <mdi-icon path="/static/icons/chevron-right.svg" size="17px" color="#C4C9D4"></mdi-icon>
+                            <mdi-icon path="/static/icons/chevron-right.svg" size="17px" :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"></mdi-icon>
                         </view>
                     </view>
                 </view>
@@ -63,7 +63,7 @@
                                 <mdi-icon
                                     :path="item.icon"
                                     size="28px"
-                                    :color="item.destructive ? '#E5322D' : '#6B7280'"
+                                    :color="item.destructive ? '#E5322D' : (settingsStore.isDark ? '#9ca3af' : '#6B7280')"
                                 ></mdi-icon>
                             </view>
                             <view class="label-block">
@@ -83,7 +83,7 @@
                             </template>
                             <template v-else>
                                 <text v-if="item.value" class="value">{{ item.value }}</text>
-                                <mdi-icon path="/static/icons/chevron-right.svg" size="17px" color="#C4C9D4"></mdi-icon>
+                                <mdi-icon path="/static/icons/chevron-right.svg" size="17px" :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"></mdi-icon>
                             </template>
                         </view>
                     </view>
@@ -112,7 +112,7 @@
         </scroll-view>
 
         <uni-popup ref="previewTypePopup" type="bottom" :safe-area="true">
-            <view class="preview-popup">
+            <view class="preview-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="popup-head">
                     <text class="popup-title">{{ t('settings.preview.title') }}</text>
                     <view class="popup-close" @click="closePreviewTypePopup">
@@ -149,7 +149,7 @@
         </uni-popup>
 
         <uni-popup ref="aboutPopup" type="center" :safe-area="true">
-            <view class="about-popup">
+            <view class="about-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="about-head">
                     <text class="about-title">{{ t('about.title') }}</text>
                     <view class="about-close" @click="closeAboutPopup">
@@ -213,7 +213,7 @@
         </uni-popup>
 
         <uni-popup ref="ratePopup" type="center" :mask-click="true" :safe-area="true">
-            <view class="rate-popup">
+            <view class="rate-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="rate-popup__close" @click="closeRatePopup">
                     <mdi-icon path="/static/icons/close.svg" size="18px" color="#2f3949"></mdi-icon>
                 </view>
@@ -260,16 +260,105 @@
                 </button>
             </view>
         </uni-popup>
+
+        <uni-popup ref="themePopup" type="center" :mask-click="true" :safe-area="true">
+            <view class="choice-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+                <view class="choice-popup__head">
+                    <text class="choice-popup__title">{{ t('settings.items.theme.label') }}</text>
+                    <view class="choice-popup__close" @click="closeThemePopup">
+                        <mdi-icon path="/static/icons/close.svg" size="20px" :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"></mdi-icon>
+                    </view>
+                </view>
+                <view class="choice-list">
+                    <view
+                        v-for="item in themeOptions"
+                        :key="item.value"
+                        class="choice-item"
+                        :class="{ active: settingsStore.options.theme === item.value }"
+                        @click="selectTheme(item.value)"
+                    >
+                        <view class="choice-item__left">
+                            <view class="choice-item__icon">
+                                <mdi-icon
+                                    :path="item.icon"
+                                    size="24px"
+                                    :color="settingsStore.options.theme === item.value ? '#28B389' : (settingsStore.isDark ? '#e5e7eb' : '#374151')"
+                                ></mdi-icon>
+                            </view>
+                            <view class="choice-item__text">
+                                <text class="choice-item__label">{{ item.label }}</text>
+                                <text class="choice-item__desc">{{ item.desc }}</text>
+                            </view>
+                        </view>
+                        <mdi-icon
+                            v-if="settingsStore.options.theme === item.value"
+                            path="/static/icons/check.svg"
+                            size="20px"
+                            color="#28B389"
+                        ></mdi-icon>
+                    </view>
+                </view>
+            </view>
+        </uni-popup>
+
+        <uni-popup ref="languagePopup" type="center" :mask-click="true" :safe-area="true">
+            <view class="choice-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+                <view class="choice-popup__head">
+                    <text class="choice-popup__title">{{ t('settings.items.language.label') }}</text>
+                    <view class="choice-popup__close" @click="closeLanguagePopup">
+                        <mdi-icon path="/static/icons/close.svg" size="20px" :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"></mdi-icon>
+                    </view>
+                </view>
+                <view class="choice-list">
+                    <view
+                        v-for="item in languageOptions"
+                        :key="item.value"
+                        class="choice-item"
+                        :class="{ active: languagePreference === item.value }"
+                        @click="selectLanguage(item.value)"
+                    >
+                        <view class="choice-item__left">
+                            <view class="choice-item__icon">
+                                <mdi-icon
+                                    :path="item.icon"
+                                    size="24px"
+                                    :color="languagePreference === item.value ? '#28B389' : (settingsStore.isDark ? '#e5e7eb' : '#374151')"
+                                ></mdi-icon>
+                            </view>
+                            <view class="choice-item__text">
+                                <text class="choice-item__label">{{ item.label }}</text>
+                                <text v-if="item.desc" class="choice-item__desc">{{ item.desc }}</text>
+                            </view>
+                        </view>
+                        <mdi-icon
+                            v-if="languagePreference === item.value"
+                            path="/static/icons/check.svg"
+                            size="20px"
+                            color="#28B389"
+                        ></mdi-icon>
+                    </view>
+                </view>
+            </view>
+        </uni-popup>
     </view>
 </template>
 
 <script setup>
 import { computed, reactive, ref } from 'vue';
+import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { RIGHT_ICP } from '@/common/config.js';
+import {
+    LANGUAGE_PREF_AUTO,
+    LANGUAGE_PREF_EN,
+    LANGUAGE_PREF_ZH,
+    applyLanguagePreference,
+    getLanguagePreference,
+    resolveAppLocale,
+} from '@/utils/i18n.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -277,11 +366,76 @@ const userStore = useUserStore();
 const previewTypePopup = ref(null);
 const aboutPopup = ref(null);
 const ratePopup = ref(null);
+const themePopup = ref(null);
+const languagePopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
 const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
 const copyrightText = computed(() => t('about.copyright', { year: new Date().getFullYear() }));
+
+const languagePreference = computed(() => {
+    const pref = settingsStore.options.language;
+    if (pref === 'zh-CN') return LANGUAGE_PREF_ZH;
+    if (pref) return pref;
+    return getLanguagePreference();
+});
+
+const languageValueLabel = computed(() => {
+    const pref = languagePreference.value;
+    if (pref === LANGUAGE_PREF_AUTO) return t('settings.items.language.auto');
+    if (pref === LANGUAGE_PREF_EN) return t('settings.items.language.valueEn');
+    return t('settings.items.language.valueZh');
+});
+
+const themeValueLabel = computed(() => {
+    const theme = settingsStore.options.theme;
+    if (theme === 'auto') return t('settings.items.theme.auto');
+    if (theme === 'dark') return t('settings.items.theme.dark');
+    return t('settings.items.theme.light');
+});
+
+const themeOptions = computed(() => [
+    {
+        value: 'auto',
+        icon: '/static/icons/theme-light-dark.svg',
+        label: t('settings.items.theme.auto'),
+        desc: t('settings.items.theme.autoDesc'),
+    },
+    {
+        value: 'light',
+        icon: '/static/icons/weather-sunny.svg',
+        label: t('settings.items.theme.light'),
+        desc: t('settings.items.theme.lightDesc'),
+    },
+    {
+        value: 'dark',
+        icon: '/static/icons/weather-night.svg',
+        label: t('settings.items.theme.dark'),
+        desc: t('settings.items.theme.darkDesc'),
+    },
+]);
+
+const languageOptions = computed(() => [
+    {
+        value: LANGUAGE_PREF_AUTO,
+        icon: '/static/icons/translate.svg',
+        label: t('settings.items.language.auto'),
+        desc: t('settings.items.language.sublabel'),
+    },
+    {
+        value: LANGUAGE_PREF_EN,
+        icon: '/static/icons/translate.svg',
+        label: t('settings.items.language.valueEn'),
+        desc: '',
+    },
+    {
+        value: LANGUAGE_PREF_ZH,
+        icon: '/static/icons/translate.svg',
+        label: t('settings.items.language.valueZh'),
+        desc: '',
+    },
+]);
 
 const toggles = reactive({
     twoFA: true,
@@ -392,19 +546,17 @@ const sections = computed(() => {
                     icon: '/static/icons/translate.svg',
                     label: t('settings.items.language.label'),
                     sublabel: t('settings.items.language.sublabel'),
-                    value: locale.value === 'en' ? t('settings.items.language.valueEn') : t('settings.items.language.valueZh'),
-                    action: switchLanguage,
+                    value: languageValueLabel.value,
+                    action: openLanguagePopup,
                 },
-                // #ifdef APP
                 {
                     key: 'theme',
                     icon: '/static/icons/theme-light-dark.svg',
                     label: t('settings.items.theme.label'),
                     sublabel: t('settings.items.theme.sublabel'),
-                    type: 'toggle',
-                    toggleKey: 'theme',
+                    value: themeValueLabel.value,
+                    action: openThemePopup,
                 },
-                // #endif
                 {
                     key: 'preview_type',
                     icon: '/static/icons/view-carousel.svg',
@@ -604,11 +756,6 @@ const sections = computed(() => {
 function toggleSwitch(key) {
     if (!key) return;
     toggles[key] = !toggles[key];
-
-    // 具体逻辑实现
-    if (key === 'theme') {
-        switchTheme();
-    }
 }
 
 function handleClick(item) {
@@ -620,12 +767,46 @@ function goBack() {
     uni.reLaunch({ url: '/pages/user/user' });
 }
 
-function switchLanguage() {
-    const changeLanguage = uni.getLocale() === 'en' ? 'zh-Hans' : 'en';
-    uni.setLocale(changeLanguage);
-    locale.value = changeLanguage;
-    // 保存语言选择
-    uni.setStorageSync('lang', changeLanguage);
+function syncLanguagePreference() {
+    const storePref = settingsStore.options.language === 'zh-CN' ? LANGUAGE_PREF_ZH : settingsStore.options.language;
+    const stored = getLanguagePreference();
+
+    if (storePref && storePref !== LANGUAGE_PREF_AUTO) {
+        if (stored !== storePref || locale.value !== resolveAppLocale(storePref)) {
+            applyLanguagePreference(storePref, locale);
+        }
+        return;
+    }
+
+    if (stored) {
+        settingsStore.options.language = stored;
+    }
+}
+
+function selectLanguage(pref) {
+    settingsStore.options.language = pref;
+    applyLanguagePreference(pref, locale);
+    uni.showToast({
+        title: t('settings.toast.languageChanged'),
+        icon: 'none',
+    });
+    closeLanguagePopup();
+}
+
+function selectTheme(theme) {
+    settingsStore.options.theme = theme;
+    uni.setStorageSync('theme', theme);
+
+    // #ifdef APP-PLUS
+    const targetStyle = theme === 'auto' ? settingsStore.systemTheme : theme;
+    plus.nativeUI.setUIStyle(targetStyle);
+    // #endif
+
+    uni.showToast({
+        title: t('settings.toast.themeChanged'),
+        icon: 'none',
+    });
+    closeThemePopup();
 }
 
 function switchView() {
@@ -633,23 +814,25 @@ function switchView() {
     settingsStore.options.view = changeView;
 }
 
-function switchTheme() {
-    const changeTheme = uni.getSystemInfoSync().theme === 'light' ? 'dark' : 'light';
-    settingsStore.options.theme = changeTheme;
-    toggles.theme = changeTheme === 'dark';
-
-    // #ifdef APP
-    // APP端触发主题切换，WEB跟随浏览器的默认设置，小程序跟随小程序的默认设置
-    plus.nativeUI.setUIStyle(changeTheme);
-    // #endif
-
-    uni.showToast({
-        title: t('settings.toast.themeChanged'),
-        icon: 'none',
-    });
-    // 保存主题选择
-    uni.setStorageSync('theme', changeTheme);
+function openThemePopup() {
+    themePopup.value?.open();
 }
+
+function closeThemePopup() {
+    themePopup.value?.close();
+}
+
+function openLanguagePopup() {
+    languagePopup.value?.open();
+}
+
+function closeLanguagePopup() {
+    languagePopup.value?.close();
+}
+
+onLoad(() => {
+    syncLanguagePreference();
+});
 
 function openPreviewTypePopup() {
     previewTypePopup.value?.open();
@@ -796,16 +979,20 @@ function shareApp() {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: var(--page-background);
+    color: var(--text-primary);
 }
 .status-holder {
     width: 100%;
+    background: var(--page-background);
 }
 .header {
     height: 112rpx;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     align-items: center;
     padding: 0 32rpx;
@@ -815,8 +1002,8 @@ function shareApp() {
     width: 72rpx;
     height: 72rpx;
     border-radius: 16rpx;
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -826,7 +1013,7 @@ function shareApp() {
     text-align: center;
     font-size: 40rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
 }
 .header-placeholder {
     width: 72rpx;
@@ -846,14 +1033,14 @@ function shareApp() {
     font-size: 22rpx;
     font-weight: 600;
     letter-spacing: 0.07em;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     line-height: 32rpx;
     display: block;
 }
 .card {
     margin: 0 32rpx;
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     border-radius: 24rpx;
     overflow: hidden;
 }
@@ -862,7 +1049,7 @@ function shareApp() {
     display: flex;
     align-items: center;
     gap: 24rpx;
-    border-bottom: 2rpx solid #f3f4f6;
+    border-bottom: 2rpx solid var(--panel-border);
 }
 .avatar-wrap {
     position: relative;
@@ -880,7 +1067,7 @@ function shareApp() {
     height: 24rpx;
     border-radius: 12rpx;
     background: #22c55e;
-    border: 4rpx solid #fff;
+    border: 4rpx solid var(--page-background-secondary);
 }
 .profile-meta {
     flex: 1;
@@ -890,19 +1077,19 @@ function shareApp() {
     display: block;
     font-size: 32rpx;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-primary);
     line-height: 40rpx;
 }
 .profile-line {
     display: block;
     font-size: 24rpx;
     line-height: 32rpx;
-    color: #6b7280;
+    color: var(--text-secondary);
 }
 .row {
     min-height: 108rpx;
-    padding: 24rpx 32rpx;
-    border-bottom: 2rpx solid #f3f4f6;
+    padding: 16rpx 24rpx;
+    border-bottom: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -921,14 +1108,14 @@ function shareApp() {
     width: 72rpx;
     height: 72rpx;
     border-radius: 18rpx;
-    background: #f9fafb;
+    background: var(--panel-background);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 .icon-box.destructive {
-    background: #fef2f2;
+    background: rgba(229, 50, 45, 0.1);
 }
 .label-block {
     flex: 1;
@@ -938,14 +1125,14 @@ function shareApp() {
     display: block;
     font-size: 30rpx;
     line-height: 40rpx;
-    color: #111827;
+    color: var(--text-primary);
     font-weight: 500;
 }
 .sublabel {
     display: block;
     font-size: 24rpx;
     line-height: 32rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     margin-top: 2rpx;
 }
 .destructive .label {
@@ -959,14 +1146,14 @@ function shareApp() {
 }
 .value {
     font-size: 24rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     white-space: nowrap;
 }
 .switch {
     width: 88rpx;
     height: 52rpx;
     border-radius: 26rpx;
-    background: #d1d5db;
+    background: var(--panel-border);
     position: relative;
     transition: background-color 0.2s ease;
 }
@@ -980,7 +1167,7 @@ function shareApp() {
     width: 40rpx;
     height: 40rpx;
     border-radius: 20rpx;
-    background: #fff;
+    background: var(--page-background-secondary);
     transition: left 0.2s ease;
 }
 .switch.on .switch-dot {
@@ -990,11 +1177,11 @@ function shareApp() {
     display: block;
     text-align: center;
     font-size: 24rpx;
-    color: #c4c9d4;
+    color: var(--text-tertiary);
     padding-bottom: 72rpx;
 }
 .preview-popup {
-    background: #fff;
+    background: var(--page-background-secondary);
     border-radius: 24rpx 24rpx 0 0;
     padding: 20rpx 20rpx calc(26rpx + env(safe-area-inset-bottom));
 }
@@ -1007,13 +1194,13 @@ function shareApp() {
 .popup-title {
     font-size: 30rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
 }
 .popup-close {
     width: 56rpx;
     height: 56rpx;
     border-radius: 50%;
-    background: #f3f5f9;
+    background: var(--panel-background);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1024,9 +1211,9 @@ function shareApp() {
 }
 .preview-item {
     flex: 1;
-    border: 2rpx solid #e4e9f2;
+    border: 2rpx solid var(--panel-border);
     border-radius: 14rpx;
-    background: #fafcff;
+    background: var(--panel-background);
     padding: 14rpx 10rpx;
     display: flex;
     flex-direction: column;
@@ -1034,15 +1221,15 @@ function shareApp() {
 }
 .preview-item.active {
     border-color: #e5322d;
-    background: #fff6f6;
+    background: rgba(229, 50, 45, 0.06);
 }
 .phone-mock {
     position: relative;
     width: 120rpx;
     height: 188rpx;
-    border: 6rpx solid #d5dae5;
+    border: 6rpx solid var(--panel-border);
     border-radius: 22rpx;
-    background: #fff;
+    background: var(--page-background-secondary);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1052,12 +1239,12 @@ function shareApp() {
     width: 46rpx;
     height: 10rpx;
     border-radius: 10rpx;
-    background: #e6eaf2;
+    background: var(--panel-border);
     margin-bottom: 10rpx;
 }
 .mock-clock {
     font-size: 16rpx;
-    color: #afb6c4;
+    color: var(--text-tertiary);
 }
 .mock-bar {
     position: absolute;
@@ -1080,20 +1267,20 @@ function shareApp() {
 .preview-name {
     margin-top: 10rpx;
     font-size: 22rpx;
-    color: #4f596d;
+    color: var(--text-secondary);
 }
 
 .rate-popup {
     width: 76vw;
     max-width: 560rpx;
-    background: #ffffff;
+    background: var(--page-background-secondary);
     border-radius: 56rpx;
     padding: 44rpx 36rpx 44rpx;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 48rpx 144rpx rgba(15, 23, 42, 0.18);
+    box-shadow: 0 48rpx 144rpx var(--shadow-color);
 }
 
 .rate-popup__close {
@@ -1103,7 +1290,7 @@ function shareApp() {
     width: 52rpx;
     height: 52rpx;
     border-radius: 60rpx;
-    border: 3rpx solid #31394a;
+    border: 3rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1113,7 +1300,7 @@ function shareApp() {
     font-size: 40rpx;
     line-height: 1.2;
     font-weight: 800;
-    color: #1f2740;
+    color: var(--text-primary);
     text-align: center;
 }
 
@@ -1145,7 +1332,7 @@ function shareApp() {
     margin-top: 36rpx;
     font-size: 36rpx;
     line-height: 1.35;
-    color: #2b3147;
+    color: var(--text-secondary);
     text-align: center;
     white-space: pre-line;
 }
@@ -1155,24 +1342,129 @@ function shareApp() {
     min-width: 352rpx;
     height: 88rpx;
     border-radius: 999rpx;
-    background: #1f2640;
-    color: #ffffff;
+    background: var(--text-primary);
+    color: var(--page-background);
     font-size: 32rpx;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 32rpx 64rpx rgba(31, 38, 64, 0.18);
+    box-shadow: 0 32rpx 64rpx var(--shadow-color);
 }
 
 .rate-popup__button::after {
     border: none;
 }
 
+.choice-popup {
+    width: 86vw;
+    max-width: 620rpx;
+    background: var(--page-background-secondary);
+    border-radius: 32rpx;
+    padding: 32rpx 28rpx;
+    box-shadow: 0 48rpx 144rpx var(--shadow-color);
+}
+
+.choice-popup__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24rpx;
+    padding: 0 6rpx;
+}
+
+.choice-popup__title {
+    font-size: 34rpx;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.choice-popup__close {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 50%;
+    background: var(--panel-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.choice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
+}
+
+.choice-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16rpx;
+    padding: 22rpx 24rpx;
+    border-radius: 24rpx;
+    background: var(--panel-background);
+    border: 2rpx solid var(--panel-border);
+    transition: all 0.2s ease;
+
+    &.active {
+        border-color: #28b389;
+        background: rgba(40, 179, 137, 0.06);
+
+        .choice-item__label {
+            color: #28b389;
+        }
+    }
+
+    &:active {
+        transform: scale(0.99);
+    }
+}
+
+.choice-item__left {
+    display: flex;
+    align-items: center;
+    gap: 20rpx;
+    flex: 1;
+    min-width: 0;
+}
+
+.choice-item__icon {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 18rpx;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.choice-item__text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.choice-item__label {
+    font-size: 30rpx;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+}
+
+.choice-item__desc {
+    margin-top: 4rpx;
+    font-size: 22rpx;
+    color: var(--text-tertiary);
+    line-height: 1.4;
+}
+
 .about-popup {
     width: 86vw;
     max-height: 86vh;
-    background: #ffffff;
+    background: var(--page-background-secondary);
     border-radius: 32rpx;
     padding: 32rpx;
     display: flex;
@@ -1189,14 +1481,14 @@ function shareApp() {
 .about-title {
     font-size: 36rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .about-close {
     width: 64rpx;
     height: 64rpx;
     border-radius: 32rpx;
-    background: #f3f5f9;
+    background: var(--panel-background);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1223,13 +1515,13 @@ function shareApp() {
 .about-name {
     font-size: 32rpx;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-primary);
     margin-bottom: 4rpx;
 }
 
 .about-slogan {
     font-size: 24rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     margin-bottom: 20rpx;
 }
 
@@ -1241,8 +1533,8 @@ function shareApp() {
 
 .about-version-item {
     flex: 1;
-    background: #f9fafb;
-    border: 2rpx solid #eef1f5;
+    background: var(--panel-background);
+    border: 2rpx solid var(--panel-border);
     border-radius: 20rpx;
     padding: 16rpx 20rpx;
 }
@@ -1250,13 +1542,13 @@ function shareApp() {
 .about-version-label {
     display: block;
     font-size: 22rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .about-version-value {
     display: block;
     font-size: 26rpx;
-    color: #111827;
+    color: var(--text-primary);
     font-weight: 600;
     margin-top: 4rpx;
 }
@@ -1269,15 +1561,15 @@ function shareApp() {
     display: block;
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     letter-spacing: 0.07em;
     text-transform: uppercase;
     margin-bottom: 16rpx;
 }
 
 .about-list {
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     border-radius: 24rpx;
     overflow: hidden;
 }
@@ -1285,7 +1577,7 @@ function shareApp() {
 .about-row {
     min-height: 100rpx;
     padding: 24rpx 28rpx;
-    border-bottom: 2rpx solid #f3f4f6;
+    border-bottom: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1305,12 +1597,12 @@ function shareApp() {
 
 .about-row-text {
     font-size: 28rpx;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .about-row-value {
     font-size: 24rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .about-legal {
@@ -1334,7 +1626,7 @@ function shareApp() {
 .about-legal__divider {
     font-size: 36rpx;
     line-height: 1.4;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .about-record {
@@ -1342,7 +1634,7 @@ function shareApp() {
     text-align: center;
     font-size: 24rpx;
     line-height: 1.6;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .about-copyright {
@@ -1350,7 +1642,7 @@ function shareApp() {
     text-align: center;
     font-size: 24rpx;
     line-height: 1.6;
-    color: #b3b8c2;
+    color: var(--text-tertiary);
     white-space: pre-line;
 }
 </style>

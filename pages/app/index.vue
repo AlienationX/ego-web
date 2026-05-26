@@ -1,7 +1,7 @@
 <template>
     <view
         class="homeLayout"
-        :class="'homeLayout--' + activeHomeTab"
+        :class="['homeLayout--' + activeHomeTab, isDark ? 'theme-dark' : 'theme-light']"
         :style="{
             '--mask-color': currentTabBackground,
             backgroundColor: currentTabBackground,
@@ -125,7 +125,7 @@
                 </view>
 
                 <view class="right">
-                    <uni-icons type="right" size="16" color="#333"></uni-icons>
+                    <uni-icons type="right" size="16" :color="isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
                 </view>
             </view>
 
@@ -135,7 +135,7 @@
                     <template #name>{{ $t('index.dailyRecommend') }}</template>
                     <template #custom>
                         <view class="date">
-                            <uni-icons type="calendar" size="20" color="#666"></uni-icons>
+                            <uni-icons type="calendar" size="20" :color="isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
                             <view class="text">
                                 {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
                             </view>
@@ -384,6 +384,8 @@
                 :tabs-height="0"
                 :header-height="navBarHeight"
                 api-type="recommend"
+                layout-mode="waterfall"
+                :show-card-meta="true"
                 @scroll="handleEmbeddedScroll"
             ></tabbed-pics-view>
         </view>
@@ -413,12 +415,16 @@ import {
 import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
+import { useSettingsStore } from '@/stores/settings.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/system.js';
 import TimelinePage from '@/pages/app/timeline.vue';
 import TopNPage from '@/pages/app/topN.vue';
 const { t } = useI18n();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+
+const isDark = computed(() => settingsStore.isDark);
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const navBarHeight = ref(getNavBarHeight() || 0);
@@ -436,10 +442,16 @@ const tabBackgroundMap = {
 const activeHomeTab = ref('home');
 
 const currentTabBackground = computed(() => {
+    if (activeHomeTab.value === 'home') {
+        return isDark.value ? '#111111' : '#f5f7fb';
+    }
     return tabBackgroundMap[activeHomeTab.value] || tabBackgroundMap.home;
 });
 
 const isDarkTab = computed(() => {
+    if (activeHomeTab.value === 'home') {
+        return isDark.value;
+    }
     return ['recommend', 'latest', 'hot'].includes(activeHomeTab.value);
 });
 
@@ -1041,11 +1053,52 @@ onShareTimeline(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .homeLayout {
     min-height: 100vh;
     box-sizing: border-box;
     transition: background-color 0.3s ease;
     background-color: #f5f7fb;
+
+    &.theme-dark {
+        background-color: #111111;
+
+        .notice {
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+        }
+
+        .select-watermark {
+            color: rgba(255, 255, 255, 0.07);
+        }
+
+        .select .content .box .box-badge--subtle {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+        }
+
+        .index-title {
+            :deep(.name) {
+                color: var(--text-primary);
+                
+                &::after {
+                    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+                }
+            }
+        }
+
+        .date .text {
+            color: var(--text-primary);
+        }
+
+        .classify {
+            .more {
+                color: rgba(255, 255, 255, 0.48);
+            }
+        }
+    }
 
     .home-statusbar {
         position: fixed;
@@ -2105,7 +2158,7 @@ onShareTimeline(() => {
 
                     height: 100%;
                     font-size: 30rpx;
-                    color: #666;
+                    color: var(--text-secondary);
                     overflow: hidden;
                     white-space: nowrap;
                     text-overflow: ellipsis;
@@ -2152,7 +2205,7 @@ onShareTimeline(() => {
             right: -20rpx;
             font-size: 140rpx;
             font-weight: 900;
-            color: rgba(0, 0, 0, 0.04);
+            color: rgba(17, 24, 39, 0.07);
             text-transform: uppercase;
             letter-spacing: -4rpx;
             pointer-events: none;
@@ -2168,7 +2221,7 @@ onShareTimeline(() => {
             :deep(.name) {
                 font-size: 38rpx;
                 font-weight: 850;
-                color: #0f172a;
+                color: var(--text-primary);
                 letter-spacing: 0.5rpx;
                 position: relative;
                 padding-bottom: 8rpx;
@@ -2194,11 +2247,13 @@ onShareTimeline(() => {
             .text {
                 font-size: 26rpx;
                 font-weight: 600;
-                color: #666;
+                color: var(--text-primary);
                 letter-spacing: 0.02em;
             }
         }
 
+        button.btn,
+        button.button,
         .btn,
         .date .button {
             margin: 0;
@@ -2206,16 +2261,16 @@ onShareTimeline(() => {
             height: 52rpx;
             line-height: 50rpx;
             font-size: 22rpx;
-            font-weight: 800;
+            font-weight: 600;
             border-radius: 999rpx;
-            border: 1rpx solid rgba(17, 24, 39, 0.08);
-            background: #111827;
-            color: #f8fafc;
+            border: none;
+            background-color: #111111;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
             letter-spacing: 0.4rpx;
-            box-shadow: none;
+            box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
             transition: transform 0.28s ease, background-color 0.28s ease, color 0.28s ease;
 
             &::after {
@@ -2223,18 +2278,18 @@ onShareTimeline(() => {
             }
 
             &:active {
-                background: #f7f9fc;
-                color: #111827;
-                transform: scale(0.97);
+                transform: scale(0.96);
+                opacity: 0.92;
             }
 
             &.is-default,
             &.is-collection,
             &.is-keyword,
             &.is-spotlight {
-                background: #111827;
-                color: #f8fafc;
-                border-color: rgba(17, 24, 39, 0.08);
+                background-color: #111111;
+                color: #ffffff;
+                border: none;
+                box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
             }
         }
 
@@ -2497,6 +2552,39 @@ onShareTimeline(() => {
                     transform: scale(0.96);
                     opacity: 0.86;
                 }
+            }
+        }
+    }
+
+    &.theme-dark .select {
+        button.btn,
+        button.button,
+        .btn,
+        .date .button {
+            background-color: #ffffff;
+            color: #111111;
+            border: none;
+            box-shadow: 0 4rpx 12rpx rgba(255, 255, 255, 0.16);
+
+            &::after {
+                border: none;
+            }
+
+            &.is-default,
+            &.is-collection,
+            &.is-keyword,
+            &.is-spotlight {
+                background-color: #ffffff;
+                color: #111111;
+                border: none;
+                box-shadow: 0 4rpx 12rpx rgba(255, 255, 255, 0.16);
+            }
+
+            &:active {
+                transform: scale(0.96);
+                opacity: 0.92;
+                background-color: #ffffff;
+                color: #111111;
             }
         }
     }

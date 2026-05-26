@@ -72,8 +72,10 @@
                                         {{ item.description || item.classify_name || `#${item.id}` }}
                                     </view>
                                     <view class="timeline-card__footer">
-                                        <view class="timeline-card__time">
-                                            <text>{{ formatTime(item) }}</text>
+                                        <view class="timeline-card__footer-left">
+                                            <view class="timeline-card__time">
+                                                <text>{{ formatTime(item) }}</text>
+                                            </view>
                                         </view>
                                         <view class="timeline-card__score">
                                             <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
@@ -544,7 +546,6 @@ onLoad(() => {
     align-items: center;
     min-height: 34rpx;
     padding: 0 12rpx;
-    margin-bottom: 12rpx;
     border-radius: 999rpx;
     background: rgba(97, 154, 239, 0.16);
     border: 1rpx solid rgba(97, 154, 239, 0.2);
@@ -571,6 +572,15 @@ onLoad(() => {
     align-items: center;
     justify-content: space-between;
     gap: 12rpx;
+}
+
+.timeline-card__footer-left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12rpx;
+    min-width: 0;
+    flex: 1;
 }
 
 .timeline-card__time,

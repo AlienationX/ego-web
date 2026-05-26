@@ -1129,7 +1129,7 @@ onShareTimeline(() => {
 
         .time {
             top: calc(12vh + 80rpx);
-            font-size: 120rpx;
+            font-size: 148rpx;
             font-weight: 400;
             letter-spacing: 2rpx;
             color: rgba(255, 255, 255, 0.95);
@@ -1275,8 +1275,6 @@ onShareTimeline(() => {
             .meta-desc {
                 font-size: 28rpx;
                 line-height: 44rpx;
-                height: 88rpx;
-                max-height: 88rpx;
                 font-weight: 400;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
@@ -1285,6 +1283,7 @@ onShareTimeline(() => {
                 word-break: break-word;
                 overflow-wrap: anywhere;
                 overflow: hidden;
+                text-overflow: ellipsis;
                 opacity: 0.95;
             }
         }
@@ -1406,10 +1405,6 @@ onShareTimeline(() => {
                 line-height: 1.6em;
             }
 
-            .ad-row {
-                // width: 100%;
-                // height: 100%;
-            }
         }
     }
 }

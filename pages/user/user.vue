@@ -1,5 +1,5 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- #ifndef WEB -->
         <view
             class="status-bar-bg"
@@ -56,7 +56,7 @@
 
                     <view class="user-info-row">
                         <view v-if="userStore.userinfo.email" class="info-item">
-                            <uni-icons type="mail-filled" size="16" color="#999"></uni-icons>
+                            <uni-icons type="mail-filled" size="16" :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
                             <text>{{ userStore.userinfo.email }}</text>
                         </view>
                         <!-- <view v-if="userStore.userinfo.profile.region" class="info-item">
@@ -72,7 +72,7 @@
                 <view class="energy-info">
                     <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right">
                         <view class="energy-hint">
-                            <uni-icons type="help" size="20" color="#999"></uni-icons>
+                            <uni-icons type="help" size="20" :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
                         </view>
                     </bubble-tooltip>
                     <text class="energy-text">
@@ -146,7 +146,7 @@
                                 class="icon"
                                 :path="item.left_icon"
                                 size="20px"
-                                :color="item.left_color || '#28B389'"
+                                :color="item.left_color === '#6B7280' ? (settingsStore.isDark ? '#9ca3af' : '#6B7280') : (item.left_color || '#28B389')"
                             ></mdi-icon>
                         </view>
                         <view class="text">
@@ -157,7 +157,7 @@
                         <view class="text">
                             {{ item.right_text }}
                         </view>
-                        <mdi-icon path="/static/icons/chevron-right.svg" size="20px" color="#a3a8b3"></mdi-icon>
+                        <mdi-icon path="/static/icons/chevron-right.svg" size="20px" :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"></mdi-icon>
                     </view>
                     <!-- 微信特有的功能 -->
                     <!-- #ifdef MP-WEIXIN -->
@@ -224,12 +224,14 @@ import { apiPostProfile } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
+import { useSettingsStore } from '@/stores/settings.js';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
 const userStore = useUserStore();
 const libraryStore = useLibraryStore();
+const settingsStore = useSettingsStore();
 // const userinfo = reactive(userStore.userinfo);  // 只是userinfo的副本的响应式，和userStore.userinfo不是同一个对象
 // const userinfo = computed(() => userStore.userinfo); // 计算属性需要写userinfo.value，也麻烦
 
@@ -534,9 +536,9 @@ onShow(() => {
 
 <style lang="scss" scoped>
 .layout {
-    --user-page-bg: #f5f5f5;
-    --user-header-bg: #fff;
-    background-color: #f5f5f5;
+    --user-page-bg: var(--page-background);
+    --user-header-bg: var(--page-background-secondary);
+    background-color: var(--page-background);
     min-height: 100vh;
 
     .status-bar-bg {
@@ -597,14 +599,14 @@ onShow(() => {
         flex-direction: column;
         padding: 0 30rpx 30rpx;
         min-height: 320rpx;
-        background: #fff;
+        background: var(--user-header-bg);
         margin-bottom: 20rpx;
         position: relative;
         overflow: visible;
         z-index: 20;
 
         &.not-logged-in {
-            background: #f5f5f5;
+            background: var(--user-page-bg);
         }
 
         .decorative-bg {
@@ -661,8 +663,8 @@ onShow(() => {
             overflow: hidden;
             position: relative;
             z-index: 1;
-            border: 3rpx solid #fff;
-            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+            border: 3rpx solid var(--user-header-bg);
+            box-shadow: 0 4rpx 16rpx var(--shadow-color);
 
             image {
                 width: 100%;
@@ -708,7 +710,7 @@ onShow(() => {
 
         .name {
             font-size: 36rpx;
-            color: #1a1a1a;
+            color: var(--text-primary);
             font-weight: 700;
             letter-spacing: 0.5rpx;
             white-space: nowrap;
@@ -768,7 +770,7 @@ onShow(() => {
 
         .user-description {
             font-size: 24rpx;
-            color: #666;
+            color: var(--text-secondary);
             line-height: 1.4;
             margin-bottom: 12rpx;
             display: -webkit-box;
@@ -789,7 +791,7 @@ onShow(() => {
             align-items: center;
             gap: 6rpx;
             font-size: 22rpx;
-            color: #999;
+            color: var(--text-tertiary);
             white-space: nowrap;
         }
 
@@ -814,7 +816,7 @@ onShow(() => {
 
         .energy-text {
             font-size: 28rpx;
-            color: #333;
+            color: var(--text-primary);
             font-weight: 600;
         }
 
@@ -895,14 +897,15 @@ onShow(() => {
 
         .app-name {
             font-size: 40rpx;
-            color: #333;
+            color: var(--text-primary);
             font-weight: 600;
+            padding-top: 20rpx;
             padding-bottom: 12rpx;
         }
 
         .app-desc {
             font-size: 28rpx;
-            color: #999;
+            color: var(--text-tertiary);
             margin-bottom: 40rpx;
         }
 
@@ -910,12 +913,12 @@ onShow(() => {
             margin-top: 20rpx;
             width: 360rpx;
             height: 84rpx;
-            background: #111827;
-            color: #f8fafc;
+            background: var(--text-primary);
+            color: var(--page-background-secondary);
             font-size: 30rpx;
             font-weight: 800;
             border-radius: 999rpx;
-            border: 1rpx solid rgba(17, 24, 39, 0.08);
+            border: 1rpx solid var(--panel-border);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -953,7 +956,7 @@ onShow(() => {
 
         .stats-card {
             flex: 1;
-            background: #fff;
+            background: var(--page-background-secondary);
             border-radius: 20rpx;
             padding: 30rpx 20rpx 24rpx;
             display: flex;
@@ -961,11 +964,12 @@ onShow(() => {
             position: relative;
             overflow: hidden;
             transition: all 0.3s;
-            box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4rpx 20rpx var(--shadow-color);
+            border: 2rpx solid var(--panel-border);
 
             &:active {
                 transform: translateY(-4rpx) scale(0.98);
-                box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.12);
+                box-shadow: 0 8rpx 30rpx var(--shadow-color);
             }
 
             .card-bg {
@@ -1068,10 +1072,7 @@ onShow(() => {
             .stats-number {
                 font-size: 40rpx;
                 font-weight: 700;
-                background: linear-gradient(135deg, #333 0%, #666 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
+                color: var(--text-primary);
                 line-height: 1.2;
                 flex: 1;
                 text-align: right;
@@ -1080,7 +1081,7 @@ onShow(() => {
 
             .stats-label {
                 font-size: 24rpx;
-                color: #999;
+                color: var(--text-tertiary);
                 font-weight: 500;
                 text-align: right;
                 position: relative;
@@ -1111,9 +1112,10 @@ onShow(() => {
                 padding: 0 30rpx;
                 height: 100rpx;
                 position: relative;
-                background: #fff;
+                background: var(--page-background-secondary);
                 margin-bottom: 20rpx;
                 border-radius: 16rpx;
+                border: 2rpx solid var(--panel-border);
                 transition: all 0.3s;
 
                 &:active {
@@ -1151,7 +1153,7 @@ onShow(() => {
 
                     .text {
                         padding-left: 20rpx;
-                        color: #4b5563;
+                        color: var(--text-primary);
                         font-size: 30rpx;
                         font-weight: 600;
                     }
@@ -1163,7 +1165,7 @@ onShow(() => {
 
                     .text {
                         font-size: 26rpx;
-                        color: #a3aab5;
+                        color: var(--text-tertiary);
                         margin-right: 12rpx;
                     }
                 }

@@ -1,5 +1,5 @@
 <template>
-    <view class="classLayout">
+    <view class="classLayout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
@@ -56,12 +56,15 @@ import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const heroTopPadding = computed(() => statusBarHeight.value + 10);
 const classifyList = ref([]);
 const isLoading = ref(true);
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.options.theme === 'dark');
 const adStateMap = ref({});
 
 const classifyComputed = computed(() => {
@@ -130,7 +133,7 @@ onLoad(() => {
 
 <style lang="scss" scoped>
 .classLayout {
-    background: #f4f7fd; // 改为更具通透感的浅瓷蓝作为基座
+    background: var(--page-background);
     min-height: 100vh;
     position: relative;
 }
@@ -141,7 +144,7 @@ onLoad(() => {
     left: 0;
     right: 0;
     width: 100%;
-    background: #f4f7fd;
+    background: var(--page-background);
     overflow: hidden;
     pointer-events: none;
     z-index: 9999;
@@ -155,7 +158,7 @@ onLoad(() => {
     .hero-title {
         font-size: 68rpx;
         font-weight: 900;
-        color: #000;
+        color: var(--text-primary);
         letter-spacing: -2rpx;
         line-height: 1.1;
         // 针对 Web 端增强投影
@@ -164,7 +167,7 @@ onLoad(() => {
 
     .hero-desc {
         font-size: 28rpx;
-        color: #666;
+        color: var(--text-secondary);
         margin-top: 15rpx;
         font-weight: 500;
         letter-spacing: 1rpx;

@@ -11,15 +11,15 @@ export const useSettingsStore = defineStore(
             column: 2,
             width: 100, // 窗口宽度，用来计算瀑布流每列的宽度
 
-            // vuetify项目的配置，后续修改
-            theme: 'light',
-            language: 'zh-CN',
+            theme: 'auto',
+            language: 'auto',
             previewType: 'classic', // classic / floating
             searchSortKey: '',
             searchDateAsc: false,
             classifySortKey: '',
             classifyDateAsc: false,
 
+            // vuetify项目的配置，后续修改
             navBarFlat: false, // 导航栏扁平效果
             navBarBehavior: [], // 导航栏行为设置
 
@@ -38,13 +38,23 @@ export const useSettingsStore = defineStore(
             // TODO 多个primary等颜色的默认值
         });
 
+        const systemTheme = ref(uni.getSystemInfoSync().theme || 'light');
+
         // 窗口视图和瀑布流视图的切换
         const switchViewIcon = computed(() => (options.view === 'window' ? 'map-filled' : 'list'));
 
         // 通过theme计算主题切换按钮的图标
         const switchIcon = computed(() => (options.theme === 'light' ? 'mdi-weather-night' : 'mdi-weather-sunny'));
 
-        return { options, switchViewIcon, switchIcon, installBanner };
+        // 全局深色模式判定
+        const isDark = computed(() => {
+            if (options.theme === 'auto') {
+                return systemTheme.value === 'dark';
+            }
+            return options.theme === 'dark';
+        });
+
+        return { options, switchViewIcon, switchIcon, installBanner, isDark, systemTheme };
     },
     {
         persist: {

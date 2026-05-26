@@ -3,13 +3,19 @@ import permissionListener from '@/uni_modules/c-permission-listener';
 import { writeAccessLog } from '@/utils/system.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
+import { useSettingsStore } from '@/stores/settings.js';
 
 onLaunch(() => {
     console.log('App Launch');
+    const settingsStore = useSettingsStore();
 
-    const savedTheme = uni.getStorageSync('theme') || 'light';
+    const savedTheme = uni.getStorageSync('theme') || 'auto';
+    settingsStore.options.theme = savedTheme;
+    settingsStore.systemTheme = uni.getSystemInfoSync().theme || 'light';
+
     // #ifdef APP
-    plus.nativeUI.setUIStyle(savedTheme);
+    const activeUIStyle = savedTheme === 'auto' ? settingsStore.systemTheme : savedTheme;
+    plus.nativeUI.setUIStyle(activeUIStyle);
     // #endif
 
     // 检查是否已看过引导页
@@ -21,25 +27,17 @@ onLaunch(() => {
         });
     }
 
-    // uni.getProvider({
-    //     service: 'oauth',
-    //     success: function (res) {
-    //         console.log(res, 'getProvider'); // ['weixin', qq', 'univerify']
-    //     }
-    // });
-
-    // 监控主题变化。如果是浏览器或小程序使用了暗黑模式，就会触发该监控
-    // 除了APP平台可以手动设置，其他平台都只能跟随系统的主题变化
+    // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
-        // 默认传参的是对象{theme: 'dark'}, 所以需要解构赋值
         console.log('onThemeChange', theme);
+        settingsStore.systemTheme = theme;
 
-        uni.setStorageSync('theme', theme);
-
-        // #ifdef APP
-        // APP端触发主题切换，WEB跟随浏览器的默认设置，小程序跟随小程序的默认设置
-        plus.nativeUI.setUIStyle(theme);
-        // #endif
+        // 如果用户设置的是跟随系统，系统切换主题时需要同时更新原生UI风格
+        if (settingsStore.options.theme === 'auto') {
+            // #ifdef APP
+            plus.nativeUI.setUIStyle(theme);
+            // #endif
+        }
     });
 
     writeAccessLog();

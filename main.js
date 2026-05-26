@@ -3,13 +3,17 @@ import App from './App';
 // 多语言配置。如何需要设置tabbar的变量，文件夹必须是locale，不能是locales
 import en from './locale/en.json';
 import zhHans from './locale/zh-Hans.json';
+import { resolveAppLocale } from './utils/i18n.js';
+
 const messages = {
     en,
     'zh-Hans': zhHans,
 };
 
+const storedLangPref = uni.getStorageSync('lang');
+
 let i18nConfig = {
-    locale: uni.getStorageSync('lang') || uni.getLocale() || 'en', // 获取已设置的语言
+    locale: resolveAppLocale(storedLangPref || 'auto'),
     globalInjection: true, // 全局注入 $t 方法
     messages,
 };

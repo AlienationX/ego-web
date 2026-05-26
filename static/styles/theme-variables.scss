@@ -1,0 +1,31 @@
+/* Unified Light and Dark Theme Variable Definitions */
+
+.theme-light {
+    --page-background: #f5f5f8;
+    --page-background-secondary: #ffffff;
+    --panel-background: rgba(255, 255, 255, 0.92);
+    --panel-background-strong: rgba(255, 255, 255, 0.98);
+    --panel-border: rgba(17, 17, 17, 0.08);
+    --text-primary: #15171c;
+    --text-secondary: rgba(21, 23, 28, 0.72);
+    --text-tertiary: rgba(21, 23, 28, 0.52);
+    --accent-primary: #ff8db3;
+    --accent-secondary: #ffd38f;
+    --accent-highlight: #7df7c4;
+    --shadow-color: rgba(19, 25, 39, 0.12);
+}
+
+.theme-dark {
+    --page-background: #111111;
+    --page-background-secondary: #16161a;
+    --panel-background: rgba(255, 255, 255, 0.06);
+    --panel-background-strong: rgba(255, 255, 255, 0.1);
+    --panel-border: rgba(255, 255, 255, 0.1);
+    --text-primary: #f7f7fb;
+    --text-secondary: rgba(247, 247, 251, 0.72);
+    --text-tertiary: rgba(247, 247, 251, 0.52);
+    --accent-primary: #ffd7e6;
+    --accent-secondary: #ffd38f;
+    --accent-highlight: #7df7c4;
+    --shadow-color: rgba(0, 0, 0, 0.28);
+}

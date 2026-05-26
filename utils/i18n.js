@@ -1,33 +1,63 @@
 import { useI18n } from 'vue-i18n';
 
-/**
- * 获取当前语言
- * @returns {string} 当前语言代码（如 'en' 或 'zh-CN'）
- */
-export const getCurrentLocale = () => {
-    return uni.getStorageSync('lang') || uni.getLocale() || 'en';
+export const LANGUAGE_PREF_AUTO = 'auto';
+export const LANGUAGE_PREF_EN = 'en';
+export const LANGUAGE_PREF_ZH = 'zh-Hans';
+
+const normalizeLanguagePreference = (pref) => {
+    if (!pref || pref === LANGUAGE_PREF_AUTO) return LANGUAGE_PREF_AUTO;
+    if (pref === LANGUAGE_PREF_ZH || pref === 'zh-CN' || pref === 'zh') return LANGUAGE_PREF_ZH;
+    if (pref === LANGUAGE_PREF_EN || pref === 'en-US') return LANGUAGE_PREF_EN;
+    return LANGUAGE_PREF_AUTO;
 };
 
 /**
- * 切换语言
- * @param {string} lang 语言代码（如 'en' 或 'zh-CN'）
- * @returns {Promise<void>}
+ * 根据语言偏好解析实际使用的 locale
+ * @param {string} pref auto | en | zh-Hans
+ */
+export const resolveAppLocale = (pref) => {
+    const normalized = normalizeLanguagePreference(pref);
+    if (normalized === LANGUAGE_PREF_AUTO) {
+        const sys = uni.getSystemInfoSync().language || uni.getLocale() || 'en';
+        return String(sys).toLowerCase().startsWith('zh') ? LANGUAGE_PREF_ZH : LANGUAGE_PREF_EN;
+    }
+    return normalized;
+};
+
+/**
+ * 获取当前语言偏好（auto / en / zh-Hans）
+ */
+export const getLanguagePreference = () => normalizeLanguagePreference(uni.getStorageSync('lang'));
+
+/**
+ * 获取当前生效的语言 locale
+ */
+export const getCurrentLocale = () => resolveAppLocale(getLanguagePreference());
+
+/**
+ * 切换语言偏好
+ * @param {string} pref auto | en | zh-Hans
+ * @param {import('vue').Ref<string>} [localeRef] vue-i18n 的 locale 引用
+ */
+export const applyLanguagePreference = (pref, localeRef) => {
+    const normalized = normalizeLanguagePreference(pref);
+    const effective = resolveAppLocale(normalized);
+
+    uni.setStorageSync('lang', normalized);
+    uni.setLocale(effective);
+
+    if (localeRef) {
+        localeRef.value = effective;
+    }
+
+    uni.$emit('localeChanged', { preference: normalized, locale: effective });
+};
+
+/**
+ * @deprecated 请使用 applyLanguagePreference
  */
 export const changeLocale = async (lang) => {
-    try {
-        // 更新本地存储
-        uni.setStorageSync('lang', lang);
-        
-        // 更新i18n实例的语言
-        const i18n = useI18n();
-        i18n.locale.value = lang;
-        
-        // 触发语言切换事件
-        uni.$emit('localeChanged', lang);
-    } catch (error) {
-        console.error('切换语言失败:', error);
-        throw error;
-    }
+    applyLanguagePreference(lang);
 };
 
 /**
@@ -98,8 +128,8 @@ export const t = (key, params = {}) => {
  */
 export const getSupportedLanguages = () => {
     return [
-        { value: 'en', label: 'English' },
-        { value: 'zh-CN', label: '简体中文' }
+        { value: LANGUAGE_PREF_EN, label: 'English' },
+        { value: LANGUAGE_PREF_ZH, label: '简体中文' },
     ];
 };
 

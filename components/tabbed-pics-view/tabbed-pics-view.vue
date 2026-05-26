@@ -86,6 +86,7 @@
                                         :mode="item.imageMode || imageMode"
                                         lazy-load
                                     ></image>
+                                    <view v-if="showCardMeta" class="card-overlay"></view>
                                     <view :class="['lock', { loaded: item.loaded }]" :style="getLockStyle()">
                                         <uni-icons
                                             v-if="item.is_locked && item.loaded"
@@ -696,53 +697,60 @@ onMounted(() => {
                 }
             }
 
+            .card-overlay {
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 66%, rgba(8, 11, 18, 0.88) 100%);
+                pointer-events: none;
+                z-index: 1;
+            }
+
             .card-info {
                 position: absolute;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                padding: 92rpx 18rpx 18rpx;
-                background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0.72) 54%, rgba(8, 11, 18, 0.92) 100%);
+                left: 22rpx;
+                right: 22rpx;
+                bottom: 22rpx;
+                z-index: 1;
                 color: #f8fafc;
                 pointer-events: none;
             }
 
+            .card-info__title {
+                font-size: 28rpx;
+                line-height: 1.36;
+                font-weight: 700;
+                color: #f7fbff;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
             .card-info__footer {
-                margin-top: 12rpx;
+                margin-top: 14rpx;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                gap: 14rpx;
+                gap: 12rpx;
             }
 
             .card-info__classify {
                 display: inline-flex;
                 align-items: center;
                 flex: 0 1 auto;
-                min-height: 34rpx;
                 min-width: 0;
                 max-width: calc(100% - 96rpx);
-                padding: 0 12rpx;
+                min-height: 34rpx;
+                // padding: 0 12rpx;
                 border-radius: 999rpx;
-                background: rgba(97, 154, 239, 0.16);
-                border: 1rpx solid rgba(97, 154, 239, 0.2);
+                // background: rgba(97, 154, 239, 0.16);
+                // border: 1rpx solid rgba(97, 154, 239, 0.2);
                 color: #c7dbff;
                 font-size: 18rpx;
-                font-weight: 800;
+                font-weight: 700;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
-            }
-
-            .card-info__title {
-                font-size: 26rpx;
-                line-height: 1.35;
-                font-weight: 800;
-                color: #f8fafc;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
             }
 
             .card-info__score {
@@ -750,7 +758,7 @@ onMounted(() => {
                 display: flex;
                 align-items: center;
                 gap: 8rpx;
-                font-size: 21rpx;
+                font-size: 20rpx;
                 font-weight: 700;
                 color: #e2e8f0;
             }

@@ -1,10 +1,10 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <view class="search-shell" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
             <view class="search-shell__back" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#eef5ff"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="isDark ? '#eef5ff' : '#15171c'"></mdi-icon>
             </view>
             <view class="search-box search-box--shell">
                 <view class="search-box__icon">
@@ -14,6 +14,7 @@
                     v-model="queryParams.keyword"
                     class="search-box__input"
                     :placeholder="t('common.search')"
+                    :placeholder-style="isDark ? 'color: #7f94b8' : 'color: rgba(21, 23, 28, 0.4)'"
                     confirm-type="search"
                     @confirm="onSearch"
                 />
@@ -93,6 +94,7 @@ import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.options.theme === 'dark');
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const isAdmin = computed(() => !!userStore.isAdmin);
@@ -258,14 +260,46 @@ onPageScroll(() => {});
 </script>
 
 <style lang="scss" scoped>
+.status-bar-bg {
+    background: var(--search-bg);
+}
+
 .layout {
+    &.theme-light {
+        --search-bg: #f5f5f8;
+        --search-bg-secondary: #ffffff;
+        --search-panel: rgba(255, 255, 255, 0.96);
+        --search-border: rgba(17, 17, 17, 0.08);
+        --search-text-main: #15171c;
+        --search-text-secondary: rgba(21, 23, 28, 0.72);
+        --search-text-muted: rgba(21, 23, 28, 0.52);
+        --search-chip-bg: rgba(0, 0, 0, 0.05);
+        --search-history-bg: rgba(0, 0, 0, 0.03);
+        --search-accent: #619aef;
+        --search-icon-color: #619aef;
+        --search-shadow: rgba(19, 25, 39, 0.12);
+    }
+
+    &.theme-dark {
+        --search-bg: #111111;
+        --search-bg-secondary: #16161a;
+        --search-panel: rgba(29, 37, 49, 0.96);
+        --search-border: rgba(255, 255, 255, 0.06);
+        --search-text-main: #eef5ff;
+        --search-text-secondary: rgba(191, 203, 222, 0.72);
+        --search-text-muted: rgba(151, 164, 186, 0.72);
+        --search-chip-bg: rgba(39, 46, 57, 0.92);
+        --search-history-bg: rgba(20, 26, 36, 0.4);
+        --search-accent: #619aef;
+        --search-icon-color: #619aef;
+        --search-shadow: rgba(0, 0, 0, 0.28);
+    }
+
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    background:
-        radial-gradient(circle at top right, rgba(97, 154, 239, 0.18), transparent 24%),
-        linear-gradient(180deg, #0b1017 0%, #10161f 32%, #0b1017 100%);
+    background: var(--search-bg);
 }
 
 .search-shell {
@@ -278,8 +312,8 @@ onPageScroll(() => {});
     align-items: center;
     gap: 16rpx;
     padding: 0 24rpx;
-    background: #0b1017;
-    border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+    background: var(--search-bg);
+    border-bottom: 1rpx solid var(--search-border);
 }
 
 .page-wrap {
@@ -301,9 +335,9 @@ onPageScroll(() => {});
     display: flex;
     align-items: center;
     border-radius: 24rpx;
-    background: rgba(29, 37, 49, 0.96);
-    border: 1rpx solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 18rpx 40rpx rgba(0, 0, 0, 0.14);
+    background: var(--search-panel);
+    border: 1rpx solid var(--search-border);
+    box-shadow: 0 18rpx 40rpx var(--search-shadow);
     padding: 0 22rpx;
 }
 
@@ -324,7 +358,7 @@ onPageScroll(() => {});
     flex: 1;
     min-width: 0;
     height: 96rpx;
-    color: #eef5ff;
+    color: var(--search-text-main);
     font-size: 28rpx;
 }
 
@@ -357,18 +391,18 @@ onPageScroll(() => {});
     font-size: 20rpx;
     font-weight: 800;
     letter-spacing: 4rpx;
-    color: rgba(97, 154, 239, 0.88);
+    color: var(--search-accent);
     text-transform: uppercase;
 }
 
 .section-head__title--muted {
-    color: rgba(191, 203, 222, 0.72);
+    color: var(--search-text-secondary);
 }
 
 .section-head__action {
     font-size: 18rpx;
     font-weight: 700;
-    color: rgba(151, 164, 186, 0.72);
+    color: var(--search-text-muted);
     text-transform: uppercase;
     letter-spacing: 2rpx;
 }
@@ -387,9 +421,9 @@ onPageScroll(() => {});
     align-items: center;
     font-size: 24rpx;
     font-weight: 600;
-    color: #dbe7ff;
-    background: rgba(39, 46, 57, 0.92);
-    border: 1rpx solid rgba(255, 255, 255, 0.06);
+    color: var(--search-text-main);
+    background: var(--search-chip-bg);
+    border: 1rpx solid var(--search-border);
 }
 
 .history-block {
@@ -409,7 +443,7 @@ onPageScroll(() => {});
     justify-content: space-between;
     padding: 0 12rpx;
     border-radius: 20rpx;
-    background: rgba(20, 26, 36, 0.4);
+    background: var(--search-history-bg);
 }
 
 .history-item__left {
@@ -417,7 +451,7 @@ onPageScroll(() => {});
     align-items: center;
     gap: 16rpx;
     font-size: 26rpx;
-    color: #edf4ff;
+    color: var(--search-text-main);
 }
 
 .noResult {
@@ -439,14 +473,14 @@ onPageScroll(() => {});
 .noResult__title {
     font-size: 42rpx;
     font-weight: 800;
-    color: #eef5ff;
+    color: var(--search-text-main);
     text-transform: uppercase;
 }
 
 .noResult__text {
     margin-top: 12rpx;
     font-size: 24rpx;
-    color: rgba(190, 202, 220, 0.76);
+    color: var(--search-text-secondary);
 }
 
 .noResult__code {
@@ -469,9 +503,9 @@ onPageScroll(() => {});
     justify-content: space-between;
     gap: 16rpx;
     padding: 18rpx 24rpx 20rpx;
-    background: #0b1017;
-    border-top: 1rpx solid rgba(255, 255, 255, 0.03);
-    border-bottom: 1rpx solid rgba(255, 255, 255, 0.03);
+    background: var(--search-bg);
+    border-top: 1rpx solid var(--search-border);
+    border-bottom: 1rpx solid var(--search-border);
 }
 
 .loadingLayout {
@@ -492,9 +526,7 @@ onPageScroll(() => {});
     align-items: center;
     justify-content: center;
     gap: 18rpx;
-    background:
-        radial-gradient(circle at center, rgba(64, 100, 138, 0.18), transparent 28%),
-        linear-gradient(180deg, #0a0f15 0%, #0d141d 100%);
+    background: var(--search-bg-secondary);
     z-index: 1;
     border-radius: 28rpx;
 }
