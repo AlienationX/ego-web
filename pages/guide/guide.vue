@@ -60,15 +60,17 @@
 import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { getStatusBarHeight } from '@/utils/system.js'
+import { getStatusBarHeight } from '@/utils/system.js';
+import { PICS_BASE_URL } from '@/common/config.js';
 
 const { t } = useI18n();
 
 const currentIndex = ref(0);
+const picsUrl = PICS_BASE_URL + '/insets/';
 
 const guideList = computed(() => [
     {
-        visual: '/static/images/guide/guide1.png',
+        visual: picsUrl + 'guide1.png',
         title: t('guide.page1.title'),
         desc: t('guide.page1.desc'),
         placeholder: t('guide.page1.placeholder'),
@@ -76,7 +78,7 @@ const guideList = computed(() => [
         features: [t('guide.page1.feature1'), t('guide.page1.feature2'), t('guide.page1.feature3')],
     },
     {
-        visual: '/static/images/guide/guide2.png',
+        visual: picsUrl + 'guide2.png',
         title: t('guide.page2.title'),
         desc: t('guide.page2.desc'),
         placeholder: t('guide.page2.placeholder'),
@@ -84,7 +86,7 @@ const guideList = computed(() => [
         features: [t('guide.page2.feature1'), t('guide.page2.feature2'), t('guide.page2.feature3')],
     },
     {
-        visual: '/static/images/guide/guide3.png',
+        visual: picsUrl + 'guide3.png',
         title: t('guide.page3.title'),
         desc: t('guide.page3.desc'),
         placeholder: t('guide.page3.placeholder'),

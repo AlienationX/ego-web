@@ -87,7 +87,7 @@
 
             <view v-else class="not-logged-in-content">
                 <view class="avatar">
-                    <image src="/static/images/pics/default_avatar.svg" mode="aspectFill"></image>
+                    <image src="/static/logo.svg" mode="aspectFill"></image>
                     <view class="avatar-ring"></view>
                 </view>
                 <view class="app-name">{{ $t('common.appName') }}</view>

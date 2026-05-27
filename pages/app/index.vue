@@ -308,7 +308,7 @@
                 </view>
                 <image
                     class="top-entry__visual"
-                    src="/static/images/inset/1699281368061_2-removebg-preview.png"
+                    :src="topCardImageURL"
                     mode="heightFix"
                 ></image>
             </navigator>
@@ -412,6 +412,7 @@ import {
     apiGetClassify,
     apiGetClassList,
 } from '@/api/wallpaper.js';
+import { PICS_BASE_URL } from '@/common/config.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
@@ -425,6 +426,8 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 
 const isDark = computed(() => settingsStore.isDark);
+
+const topCardImageURL = ref(PICS_BASE_URL + '/insets/1699281368061_2-removebg-preview.png');
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const navBarHeight = ref(getNavBarHeight() || 0);
