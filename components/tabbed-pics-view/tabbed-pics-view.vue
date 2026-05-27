@@ -68,7 +68,7 @@
                 >
                     <view class="container" :style="{ minHeight: `calc(100% + ${headerHeight}px)` }">
                         <!-- 顶部占位，留给可滚动头部 -->
-                        <view :style="{ height: headerHeight + tabsHeight + 'px' }"></view>
+                        <view :style="{ height: showHeader ? (headerHeight + tabsHeight) + 'px' : '0px' }"></view>
 
                         <!-- 布局渲染层 -->
                         <view class="layout" :style="getLayoutStyle(index)">
