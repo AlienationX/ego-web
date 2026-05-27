@@ -340,6 +340,16 @@
                 </view>
             </view>
         </uni-popup>
+        <popup-navigation-dialog
+            ref="navDialog"
+            :title="dialogState.title"
+            :description="dialogState.description"
+            :confirmText="dialogState.confirmText"
+            :cancelText="dialogState.cancelText"
+            :showCancel="dialogState.showCancel"
+            @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"
+        ></popup-navigation-dialog>
     </view>
 </template>
 
@@ -373,6 +383,34 @@ const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 
 const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
 const copyrightText = computed(() => t('about.copyright', { year: new Date().getFullYear() }));
+
+const navDialog = ref(null);
+const dialogState = ref({
+    title: '',
+    description: '',
+    confirmText: '',
+    cancelText: '',
+    showCancel: true,
+    onConfirm: () => {},
+    onCancel: () => {},
+});
+
+const showNavDialog = (config) => {
+    dialogState.value = {
+        title: config.title || t('common.tip'),
+        description: config.content || '',
+        confirmText: config.confirmText || t('common.confirm'),
+        cancelText: config.cancelText || t('common.cancel'),
+        showCancel: config.showCancel !== false,
+        onConfirm: () => {
+            if (config.onConfirm) config.onConfirm();
+        },
+        onCancel: () => {
+            if (config.onCancel) config.onCancel();
+        },
+    };
+    navDialog.value?.open();
+};
 
 const languagePreference = computed(() => {
     const pref = settingsStore.options.language;
@@ -891,7 +929,7 @@ function openHtmlFile(url) {
 }
 
 function showIntroduction() {
-    uni.showModal({
+    showNavDialog({
         title: t('about.introduction'),
         content: t('about.introText'),
         showCancel: false,
@@ -902,7 +940,7 @@ function checkUpdate() {
     uni.showLoading({ title: t('about.checking') });
     setTimeout(() => {
         uni.hideLoading();
-        uni.showModal({
+        showNavDialog({
             title: t('common.tip'),
             content: t('about.alreadyLatest'),
             showCancel: false,
@@ -1181,9 +1219,10 @@ function shareApp() {
     padding-bottom: 72rpx;
 }
 .preview-popup {
-    background: var(--page-background-secondary);
+    background: var(--popup-background);
     border-radius: 24rpx 24rpx 0 0;
     padding: 20rpx 20rpx calc(26rpx + env(safe-area-inset-bottom));
+    box-shadow: 0 -24rpx 60rpx var(--popup-shadow);
 }
 .popup-head {
     display: flex;
@@ -1273,14 +1312,15 @@ function shareApp() {
 .rate-popup {
     width: 76vw;
     max-width: 560rpx;
-    background: var(--page-background-secondary);
+    background: var(--popup-background);
+    border: 1rpx solid var(--popup-border);
     border-radius: 56rpx;
     padding: 44rpx 36rpx 44rpx;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: 0 48rpx 144rpx var(--shadow-color);
+    box-shadow: 0 48rpx 144rpx var(--popup-shadow);
 }
 
 .rate-popup__close {
@@ -1359,10 +1399,11 @@ function shareApp() {
 .choice-popup {
     width: 86vw;
     max-width: 620rpx;
-    background: var(--page-background-secondary);
+    background: var(--popup-background);
+    border: 1rpx solid var(--popup-border);
     border-radius: 32rpx;
     padding: 32rpx 28rpx;
-    box-shadow: 0 48rpx 144rpx var(--shadow-color);
+    box-shadow: 0 48rpx 144rpx var(--popup-shadow);
 }
 
 .choice-popup__head {
@@ -1464,11 +1505,13 @@ function shareApp() {
 .about-popup {
     width: 86vw;
     max-height: 86vh;
-    background: var(--page-background-secondary);
+    background: var(--popup-background);
+    border: 1rpx solid var(--popup-border);
     border-radius: 32rpx;
     padding: 32rpx;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 48rpx 144rpx var(--popup-shadow);
 }
 
 .about-head {

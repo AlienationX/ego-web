@@ -203,10 +203,16 @@
         </uni-popup>
 
         <uni-popup ref="scorePopup" :is-mask-click="false">
-            <view class="scorePopup">
+            <view class="scorePopup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="popHeader">
                     <view class="title">{{ t('previewPage.wallpaperRating') }}</view>
-                    <uni-icons class="close" type="clear" size="32" @click="closeScore"></uni-icons>
+                    <uni-icons
+                        class="close"
+                        type="clear"
+                        size="32"
+                        color="var(--text-tertiary)"
+                        @click="closeScore"
+                    ></uni-icons>
                 </view>
 
                 <view class="content">
@@ -215,7 +221,7 @@
                 </view>
 
                 <view class="footer">
-                    <button type="default" size="mini" plain :disabled="!userScore" @click="submitScore">
+                    <button class="confirm-btn" :disabled="!userScore" @click="submitScore">
                         {{ t('previewPage.confirmRating') }}
                     </button>
                 </view>
@@ -1404,18 +1410,18 @@ onShareTimeline(() => {
                 margin: 20rpx 0;
                 line-height: 1.6em;
             }
-
         }
     }
 }
 
 .scorePopup {
-    background: #fff;
+    background: var(--popup-background, #fff);
     padding: 30rpx;
     width: 80vw;
     max-width: 500rpx;
     border-radius: 32rpx;
-    box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20rpx 60rpx var(--popup-shadow, rgba(0, 0, 0, 0.15));
+    border: 1rpx solid var(--popup-border, rgba(17, 17, 17, 0.08));
     overflow: hidden;
 
     .popHeader {
@@ -1423,12 +1429,12 @@ onShareTimeline(() => {
         align-items: center;
         justify-content: center;
         padding: 0 10rpx 20rpx 10rpx;
-        border-bottom: 1rpx solid #f0f0f0;
+        border-bottom: 1rpx solid var(--panel-border, #f0f0f0);
 
         .title {
             font-size: 34rpx;
             font-weight: 700;
-            color: #333;
+            color: var(--text-primary, #333);
             text-align: center;
             flex: 1;
         }
@@ -1472,6 +1478,25 @@ onShareTimeline(() => {
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+
+    .confirm-btn {
+        height: 76rpx;
+        padding: 0 48rpx;
+        border-radius: 999rpx;
+        border: 1rpx solid var(--popup-border, rgba(17, 17, 17, 0.08));
+        background: var(--text-primary, #15171c);
+        color: var(--popup-background, #fff);
+        font-size: 28rpx;
+        font-weight: 700;
+    }
+
+    .confirm-btn[disabled] {
+        opacity: 0.4;
+    }
+
+    .confirm-btn::after {
+        border: none;
     }
 }
 

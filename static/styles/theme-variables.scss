@@ -13,6 +13,11 @@
     --accent-secondary: #ffd38f;
     --accent-highlight: #7df7c4;
     --shadow-color: rgba(19, 25, 39, 0.12);
+    
+    // 弹窗专项变量
+    --popup-background: #ffffff;
+    --popup-border: rgba(17, 17, 17, 0.08);
+    --popup-shadow: rgba(0, 0, 0, 0.12);
 }
 
 .theme-dark {
@@ -28,4 +33,9 @@
     --accent-secondary: #ffd38f;
     --accent-highlight: #7df7c4;
     --shadow-color: rgba(0, 0, 0, 0.28);
+
+    // 弹窗专项变量
+    --popup-background: #24252c;
+    --popup-border: rgba(255, 255, 255, 0.15);
+    --popup-shadow: rgba(0, 0, 0, 0.6);
 }

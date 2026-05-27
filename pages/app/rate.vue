@@ -1,6 +1,18 @@
 <template>
-    <view class="layout">
-        <page-header :title="t('user.profile.myScore')"></page-header>
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <!-- Custom Beautiful Header -->
+        <view class="custom-header" :style="{ paddingTop: statusBarHeight + 'px' }">
+            <view class="header-content">
+                <view class="back-btn" @click="goBack">
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="24px" :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
+                </view>
+                <view class="header-title-box">
+                    <text class="header-title">{{ t('user.profile.myScore') }}</text>
+                    <text class="header-subtitle">My Rating</text>
+                </view>
+                <view class="header-placeholder"></view> <!-- For flex centering -->
+            </view>
+        </view>
 
         <view class="content-wrapper">
             <empty-state
@@ -35,7 +47,7 @@
                                     </view>
                                 </view>
                                 <view class="rating-arrow">
-                                    <uni-icons type="right" size="16" color="#ccc"></uni-icons>
+                                    <uni-icons type="right" size="16" :color="settingsStore.isDark ? '#4b5563' : '#cbd5e1'"></uni-icons>
                                 </view>
                             </view>
                         </uni-swipe-action-item>
@@ -60,13 +72,27 @@ import { onLoad, onUnload, onReachBottom, onPullDownRefresh } from '@dcloudio/un
 import { apiGetActions, apiPostActions } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useI18n } from 'vue-i18n';
+import { useSettingsStore } from '@/stores/settings.js';
+import { getStatusBarHeight } from '@/utils/system.js';
 
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
+
+const statusBarHeight = ref(getStatusBarHeight() || 0);
 
 const backToTopRef = ref(null);
 const isRunning = ref(false);
 const noData = ref(false);
 const ratingList = ref([]);
+
+const goBack = () => {
+    uni.navigateBack({
+        fail: () => {
+            uni.switchTab({ url: '/pages/user/user' });
+        }
+    });
+};
+
 const swipeOptions = ref([
     {
         text: t('rating.delete'),
@@ -206,16 +232,81 @@ onPullDownRefresh(() => {
 
 <style lang="scss" scoped>
 .layout {
-    background: linear-gradient(180deg, #f8fafc 0%, #f2f6fb 100%);
+    background: linear-gradient(180deg, var(--page-background, #f8fafc) 0%, var(--page-background-secondary, #f2f6fb) 100%);
     min-height: 100vh;
+    transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+
+    .custom-header {
+        position: relative;
+        z-index: 100;
+        padding-bottom: 20rpx;
+
+        .header-content {
+            height: 110rpx;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30rpx;
+        }
+        
+        .header-title-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .back-btn {
+            width: 84rpx;
+            height: 84rpx;
+            border-radius: 28rpx;
+            background: var(--panel-background, #ffffff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10rpx 30rpx var(--shadow-color, rgba(0, 0, 0, 0.03));
+            border: 1rpx solid var(--panel-border, rgba(0, 0, 0, 0.03));
+            transition: transform 0.2s ease, background 0.2s ease;
+            
+            &:active {
+                transform: scale(0.92);
+                background: var(--panel-background-strong, #f1f5f9);
+            }
+        }
+
+        .header-title {
+            font-size: 36rpx;
+            font-weight: 800;
+            color: var(--text-primary, #1e293b);
+            letter-spacing: 1rpx;
+        }
+        
+        .header-subtitle {
+            font-size: 22rpx;
+            color: var(--text-tertiary, #94a3b8);
+            margin-top: 6rpx;
+            letter-spacing: 2rpx;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .header-placeholder {
+            width: 84rpx;
+        }
+    }
 
     .content-wrapper {
-        padding: 20rpx;
+        padding: 30rpx 24rpx;
     }
 
     .rating-list {
         .rating-swipe-item {
-            margin-bottom: 20rpx;
+            margin-bottom: 24rpx;
+            box-shadow: 0 8rpx 24rpx var(--shadow-color, rgba(19, 25, 39, 0.03));
+            border-radius: 24rpx;
+            overflow: hidden;
+            border: 1rpx solid var(--panel-border, rgba(17, 17, 17, 0.05));
         }
 
         .rating-swipe-item:last-child {
@@ -223,29 +314,31 @@ onPullDownRefresh(() => {
         }
 
         :deep(.uni-swipe_action) {
-            border-radius: 16rpx;
+            border-radius: 24rpx;
             overflow: hidden;
         }
 
         .rating-item {
             display: flex;
             align-items: center;
-            background: #fff;
-            border-radius: 16rpx;
+            background: var(--panel-background-strong, #fff);
+            border-radius: 24rpx;
             padding: 24rpx;
-            transition: all 0.3s;
+            transition: all 0.25s ease-in-out;
 
             &:active {
-                transform: scale(0.99);
-                opacity: 0.9;
+                transform: scale(0.985);
+                opacity: 0.92;
+                background: var(--panel-background, #f8fafc);
             }
 
             .rating-image {
-                width: 160rpx;
-                height: 160rpx;
-                border-radius: 12rpx;
+                width: 150rpx;
+                height: 150rpx;
+                border-radius: 16rpx;
                 overflow: hidden;
                 flex-shrink: 0;
+                border: 1rpx solid var(--panel-border, rgba(17, 17, 17, 0.05));
 
                 image {
                     width: 100%;
@@ -260,9 +353,9 @@ onPullDownRefresh(() => {
 
                 .wallpaper-name {
                     font-size: 30rpx;
-                    color: #333;
-                    font-weight: 500;
-                    margin-bottom: 16rpx;
+                    color: var(--text-primary, #1e293b);
+                    font-weight: 700;
+                    margin-bottom: 12rpx;
                     overflow: hidden;
                     text-overflow: ellipsis;
                     white-space: nowrap;
@@ -272,7 +365,7 @@ onPullDownRefresh(() => {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    margin-bottom: 12rpx;
+                    margin-bottom: 10rpx;
 
                     .score-section {
                         display: flex;
@@ -281,20 +374,20 @@ onPullDownRefresh(() => {
 
                         .score-text {
                             font-size: 28rpx;
-                            color: #ffc107;
-                            font-weight: 600;
+                            color: #ffb300;
+                            font-weight: 700;
                         }
                     }
 
                     .rating-time {
-                        font-size: 24rpx;
-                        color: #999;
+                        font-size: 22rpx;
+                        color: var(--text-tertiary, #94a3b8);
                     }
                 }
 
                 .rating-comment {
-                    font-size: 26rpx;
-                    color: #999;
+                    font-size: 25rpx;
+                    color: var(--text-secondary, #64748b);
                     line-height: 1.5;
                     overflow: hidden;
                     text-overflow: ellipsis;

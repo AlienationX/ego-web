@@ -1,6 +1,6 @@
 <template>
     <uni-popup ref="popupRef" type="center" :mask-click="maskClick" :safe-area="true">
-        <view class="dialog">
+        <view class="dialog" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
             <view class="dialog__content">
                 <text class="dialog__title">{{ title }}</text>
                 <text v-if="description" class="dialog__desc">{{ description }}</text>
@@ -20,6 +20,9 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useSettingsStore } from '@/stores/settings.js';
+
+const settingsStore = useSettingsStore();
 
 const props = defineProps({
     title: {
@@ -80,9 +83,10 @@ defineExpose({
 .dialog {
     width: 600rpx;
     padding: 50rpx 48rpx 30rpx;
-    background: #ffffff;
+    background: var(--popup-background, #ffffff);
+    border: 1rpx solid var(--popup-border, rgba(17, 17, 17, 0.08));
     border-radius: 56rpx;
-    box-shadow: 0 24rpx 60rpx rgba(0, 0, 0, 0.12);
+    box-shadow: 0 24rpx 60rpx var(--popup-shadow, rgba(0, 0, 0, 0.12));
 }
 
 .dialog__content {
@@ -93,14 +97,14 @@ defineExpose({
     display: block;
     font-size: 32rpx;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--text-primary, #1e293b);
     margin-bottom: 24rpx;
 }
 
 .dialog__desc {
     display: block;
     font-size: 26rpx;
-    color: #475569;
+    color: var(--text-secondary, #475569);
     line-height: 1.5;
     margin-bottom: 20rpx;
 }
@@ -119,7 +123,7 @@ defineExpose({
     transition: all 0.2s;
 
     // 文字颜色参考截图中的蓝紫色调
-    color: #5c6ac4;
+    color: #28B389;
 
     &:active {
         opacity: 0.6;
@@ -130,10 +134,11 @@ defineExpose({
 .dialog__button--cancel {
     // 设置取消按钮颜色和大小等
     font-weight: 400;
-    color: #94a3b8;
+    color: var(--text-tertiary, #94a3b8);
 }
 
 .dialog__button--confirm {
     // 设置确认按钮颜色和大小等
+    color: #28B389;
 }
 </style>
