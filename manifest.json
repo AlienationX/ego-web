@@ -170,17 +170,17 @@
                 "startWindowIcon" : "/Users/tangzy/Documents/apps/logo/start.png"
             },
             "icons" : {
-                "foreground" : "/Users/tangzy/Documents/apps/logo/logo_wp_1024_1024.png"
+                "foreground" : "/Users/tangzy/Documents/apps/wallpapers/logo/logo_wp_1024_1024.png"
             },
             "signingConfigs" : {
                 "release" : {
                     "certpath" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.cer",
-                    "keyAlias" : "releaseKey",
-                    "keyPassword" : "00000023FC494B576506C900D9FA68CB38FF28397E1D899918349672ACB004B99D05BA71C7EA07AEC0C96F9EFCDAB934CF8D03",
+                    "keyAlias" : "wp",
+                    "keyPassword" : "00000023DC327F2B24C5A6B5AD0A78C80FCC7E701D3713362E25140F7AF0159D1E80808CC677EBEEE26720FBA81A9D3B7B4234",
                     "profile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaperRelease.p7b",
                     "signAlg" : "SHA256withECDSA",
                     "storeFile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.p12",
-                    "storePassword" : "000000236625B8B6BFCB9D0451E260B5E8F7C3B8FFF3204DDCB0BFBF107241C05D535FFC86623E3998F401CC24FEA1A32A16E6"
+                    "storePassword" : "00000023E5A2CA26358069CADF876CDC9A0A4D2C36C79ABCBF370DDB5A5943C17A1C95190C7BFF3E9B5DA5335FB82B3DD382B9"
                 }
             }
         }
