@@ -1,10 +1,10 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <view class="header">
             <view class="back-btn" @click="onBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" :color="backIconColor"></mdi-icon>
             </view>
             <text class="header-title">{{ headerTitle }}</text>
             <view class="header-placeholder"></view>
@@ -29,7 +29,7 @@
                         :class="{ last: idx === happenList.length - 1 }"
                     >
                         <view class="list-icon">
-                            <mdi-icon :path="item.icon" size="20px" color="#475569"></mdi-icon>
+                            <mdi-icon :path="item.icon" size="20px" :color="listIconColor"></mdi-icon>
                         </view>
                         <view class="list-text">
                             <text class="list-title">{{ item.title }}</text>
@@ -129,9 +129,14 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
+const listIconColor = computed(() => (isDark.value ? '#94a3b8' : '#475569'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const step = ref('warn');
 const confirmText = ref('');
@@ -192,9 +197,11 @@ const onBack = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     flex-direction: column;
 }
@@ -205,7 +212,7 @@ const onBack = () => {
 
 .header {
     height: 112rpx;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     align-items: center;
     padding: 0 32rpx;
@@ -216,8 +223,8 @@ const onBack = () => {
     width: 72rpx;
     height: 72rpx;
     border-radius: 16rpx;
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,7 +235,7 @@ const onBack = () => {
     text-align: center;
     font-size: 36rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .header-placeholder {
@@ -304,13 +311,13 @@ const onBack = () => {
 .hero-title {
     font-size: 36rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     margin-bottom: 16rpx;
 }
 
 .hero-desc {
     font-size: 26rpx;
-    color: #6b7280;
+    color: var(--text-secondary);
     line-height: 40rpx;
 }
 
@@ -318,16 +325,16 @@ const onBack = () => {
     display: block;
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     letter-spacing: 0.07em;
     text-transform: uppercase;
     margin: 0 0 16rpx;
 }
 
 .list-card {
-    background: #fff;
+    background: var(--page-background-secondary);
     border-radius: 24rpx;
-    border: 2rpx solid #f0f1f3;
+    border: 2rpx solid var(--panel-border);
     overflow: hidden;
     margin-bottom: 48rpx;
 }
@@ -337,7 +344,7 @@ const onBack = () => {
     align-items: flex-start;
     gap: 24rpx;
     padding: 26rpx 32rpx;
-    border-bottom: 2rpx solid #f3f4f6;
+    border-bottom: 2rpx solid var(--panel-border);
 }
 
 .list-row.last {
@@ -353,8 +360,8 @@ const onBack = () => {
     width: 56rpx;
     height: 56rpx;
     border-radius: 16rpx;
-    background: #f8fafc;
-    border: 2rpx solid #eef2f7;
+    background: var(--panel-background);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -370,17 +377,17 @@ const onBack = () => {
 .list-title {
     font-size: 28rpx;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .list-desc {
     font-size: 24rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .reason-text {
     font-size: 28rpx;
-    color: #374151;
+    color: var(--text-secondary);
 }
 
 .reason-text.active {
@@ -436,17 +443,17 @@ const onBack = () => {
 }
 
 .primary-btn:disabled {
-    background: #f3f4f6;
-    color: #9ca3af;
+    background: var(--panel-background);
+    color: var(--text-tertiary);
 }
 
 .secondary-btn {
     width: 100%;
     height: 100rpx;
     border-radius: 24rpx;
-    background: #fff;
-    border: 2rpx solid #e5e7eb;
-    color: #374151;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
+    color: var(--text-primary);
     font-size: 30rpx;
     font-weight: 600;
     display: flex;
@@ -504,8 +511,8 @@ const onBack = () => {
 }
 
 .confirm-card {
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     border-radius: 24rpx;
     padding: 28rpx 32rpx;
     margin-bottom: 56rpx;
@@ -522,7 +529,7 @@ const onBack = () => {
     background: transparent;
     font-size: 32rpx;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-primary);
     letter-spacing: 0.1em;
     caret-color: #e5322d;
     outline: none;
@@ -559,7 +566,7 @@ const onBack = () => {
 
 .check-text {
     font-size: 26rpx;
-    color: #596273;
+    color: var(--text-secondary);
     line-height: 1.6;
 }
 
@@ -586,13 +593,13 @@ const onBack = () => {
 .done-title {
     font-size: 40rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     margin-bottom: 20rpx;
 }
 
 .done-desc {
     font-size: 28rpx;
-    color: #6b7280;
+    color: var(--text-secondary);
     line-height: 44rpx;
 }
 
@@ -635,7 +642,7 @@ const onBack = () => {
     width: 100%;
     height: 100rpx;
     border-radius: 24rpx;
-    background: #374151;
+    background: var(--text-primary);
     border: none;
     color: #fff;
     font-size: 30rpx;

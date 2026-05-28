@@ -1,10 +1,10 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#374151"></mdi-icon>
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="backIconColor"></mdi-icon>
             </view>
             <text class="header-title">{{ t('settings.revokeAuth.title') }}</text>
             <view class="header-placeholder"></view>
@@ -25,7 +25,7 @@
                     </view>
                     <view class="auth-row__side" @click.stop="handleItemClick(item)">
                         <text class="auth-row__status" :class="`is-${item.status}`">{{ item.statusText }}</text>
-                        <mdi-icon path="/static/icons/chevron-right.svg" size="16px" color="#C4C9D4"></mdi-icon>
+                        <mdi-icon path="/static/icons/chevron-right.svg" size="16px" :color="chevronColor"></mdi-icon>
                     </view>
                 </view>
             </view>
@@ -39,8 +39,13 @@ import { onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { permissionEnums } from '@/common/app_permission.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
+const chevronColor = computed(() => (isDark.value ? '#64748b' : '#c4c9d4'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
@@ -251,14 +256,16 @@ onShow(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: var(--page-background);
 }
 
 .status-holder {
     width: 100%;
-    background: #ffffff;
+    background: var(--page-background);
 }
 
 .header {
@@ -267,8 +274,8 @@ onShow(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #ffffff;
-    box-shadow: 0 1px 0 rgba(17, 24, 39, 0.06);
+    background: var(--page-background);
+    box-shadow: 0 1px 0 var(--panel-border);
 }
 
 .back-btn,
@@ -283,7 +290,7 @@ onShow(() => {
 .header-title {
     font-size: 18px;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .content {
@@ -292,7 +299,7 @@ onShow(() => {
 
 .auth-list {
     margin-top: 10px;
-    background: #ffffff;
+    background: var(--page-background-secondary);
 }
 
 .auth-row {
@@ -301,7 +308,7 @@ onShow(() => {
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
-    border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+    border-bottom: 1px solid var(--panel-border);
 }
 
 .auth-row--last {
@@ -318,7 +325,7 @@ onShow(() => {
     font-size: 18px;
     line-height: 1.35;
     font-weight: 600;
-    color: #1f2937;
+    color: var(--text-primary);
 }
 
 .auth-row__desc {
@@ -326,7 +333,7 @@ onShow(() => {
     margin-top: 6px;
     font-size: 13px;
     line-height: 1.55;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .auth-row__side {

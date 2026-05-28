@@ -49,8 +49,10 @@ const goBack = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
-    background: var(--page-background, #f5f5f8);
+    background: var(--page-background);
     min-height: 100vh;
     transition: background-color 0.3s ease;
 

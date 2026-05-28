@@ -1,20 +1,30 @@
 <template>
-    <view class="layout">
-        <view v-if="showTopbar" class="top-shell">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+        <view
+            class="top-shell"
+            :style="{
+                opacity: topbarOpacity,
+                pointerEvents: topbarOpacity > 0.2 ? 'auto' : 'none',
+            }"
+        >
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
             <view class="topbar" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
                 <view class="topbar__left">
                     <view class="topbar__back topbar__back--bar" @click="goBack">
-                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#f8fbff"></mdi-icon>
+                        <mdi-icon
+                            path="/static/icons/arrow-left.svg"
+                            size="20px"
+                            :color="isDark ? '#f8fbff' : '#1e293b'"
+                        ></mdi-icon>
                     </view>
                     <view class="topbar__title">{{ props.name || t('category.title') }}</view>
                 </view>
                 <view class="topbar__actions">
                     <view class="topbar__icon" @click="goSearch">
-                        <uni-icons type="search" size="18" color="#94a3b8"></uni-icons>
+                        <uni-icons type="search" size="18" :color="isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                     </view>
                     <view class="topbar__icon">
-                        <uni-icons type="more-filled" size="18" color="#94a3b8"></uni-icons>
+                        <uni-icons type="more-filled" size="18" :color="isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                     </view>
                 </view>
             </view>
@@ -44,7 +54,7 @@
             <image class="hero__image" :src="heroImage" mode="aspectFill"></image>
             <view class="hero__overlay"></view>
             <view class="hero__back" :style="{ top: `${statusBarHeight + 12}px` }" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#eef5ff"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#ffffff"></mdi-icon>
             </view>
             <view class="hero__content">
                 <view class="hero__badge">{{ heroBadge }}</view>
@@ -79,11 +89,12 @@ const settingsStore = useSettingsStore();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const isAdmin = computed(() => !!userStore.isAdmin);
+const isDark = computed(() => settingsStore.isDark);
 
 const activeButton = ref('');
 const dateSortAsc = ref(true);
-const showTopbar = ref(false);
 const headerScrollTop = ref(0);
+const topbarFadeLengthPx = uni.upx2px(180);
 const currentClassify = ref(null);
 const classList = ref([]);
 const currentId = ref('');
@@ -95,7 +106,6 @@ const onListUpdate = (e) => {
 const onScroll = (e) => {
     const scrollTop = e.scrollTop;
     headerScrollTop.value = Math.min(scrollTop, heroHeightPx);
-    showTopbar.value = scrollTop > heroHeightPx - 44;
 };
 
 const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
@@ -138,6 +148,15 @@ const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
 const navBarHeight = ref(getNavBarHeight() || 88);
 const heroHeightPx = uni.upx2px(560);
+
+const topbarOpacity = computed(() => {
+    const revealStart = Math.max(0, heroHeightPx - navBarHeight.value - topbarFadeLengthPx);
+    const revealEnd = heroHeightPx - uni.upx2px(44);
+    const scroll = headerScrollTop.value;
+    if (scroll <= revealStart) return 0;
+    if (scroll >= revealEnd) return 1;
+    return (scroll - revealStart) / (revealEnd - revealStart);
+});
 
 const props = defineProps({
     id: String,
@@ -275,12 +294,18 @@ onShareTimeline(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     display: flex;
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
     background: #0b1017;
+
+    &.theme-light {
+        background: var(--page-background);
+    }
 }
 
 .top-shell {
@@ -289,11 +314,16 @@ onShareTimeline(() => {
     left: 0;
     width: 100%;
     z-index: 100;
+    transition: opacity 0.2s ease;
 }
 
 .status-bar-bg {
     width: 100%;
     background: #0b1017;
+
+    .theme-light & {
+        background: var(--page-background);
+    }
 }
 
 .topbar {
@@ -303,6 +333,11 @@ onShareTimeline(() => {
     padding: 0 24rpx;
     background: #0b1017;
     border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
+
+    .theme-light & {
+        background: var(--page-background);
+        border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
+    }
 }
 
 .topbar__left {
@@ -325,10 +360,19 @@ onShareTimeline(() => {
 .topbar__back {
     background: rgba(97, 154, 239, 0.12);
     border: 1rpx solid rgba(97, 154, 239, 0.16);
+
+    .theme-light & {
+        background: rgba(97, 154, 239, 0.08);
+        border: 1rpx solid rgba(97, 154, 239, 0.12);
+    }
 }
 
 .topbar__back--bar {
     background: rgba(97, 154, 239, 0.08);
+
+    .theme-light & {
+        background: rgba(97, 154, 239, 0.06);
+    }
 }
 
 .topbar__title {
@@ -339,6 +383,10 @@ onShareTimeline(() => {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 420rpx;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
 }
 
 .topbar__actions {
@@ -349,6 +397,10 @@ onShareTimeline(() => {
 
 .topbar__icon {
     background: rgba(255, 255, 255, 0.04);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.04);
+    }
 }
 
 .fill {
@@ -401,6 +453,10 @@ onShareTimeline(() => {
     position: absolute;
     inset: 0;
     background: linear-gradient(180deg, rgba(8, 12, 18, 0.1) 0%, rgba(8, 12, 18, 0.26) 45%, rgba(8, 12, 18, 0.92) 100%);
+
+    .theme-light & {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.15) 45%, rgba(0, 0, 0, 0.7) 100%);
+    }
 }
 
 .hero__content {

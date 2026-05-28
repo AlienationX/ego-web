@@ -1,112 +1,99 @@
 <template>
     <view class="layout">
-        <menu-bar>
-            <template #title>{{ t('user.profile.editProfile') }}</template>
-        </menu-bar>
+        <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
+        <view class="header">
+            <view class="back-btn" @click="goBack">
+                <uni-icons type="back" size="18" color="#374151"></uni-icons>
+            </view>
+            <text class="header-title">{{ t('editProfile1.title') }}</text>
+            <view class="header-placeholder"></view>
+        </view>
 
-        <view class="content">
-            <form>
-                <!-- 头像 -->
-                <view class="avatar-section">
-                    <view class="avatar-wrapper" @click="chooseAvatar">
-                        <image :src="userinfo.profile.avatar" mode="aspectFill" class="avatar-image"></image>
-                        <view class="avatar-overlay">
-                            <uni-icons type="camera-filled" size="32" color="#fff"></uni-icons>
-                            <text class="avatar-tip">{{ t('user.profile.changeAvatar') }}</text>
-                        </view>
+        <scroll-view scroll-y class="content">
+            <view class="avatar-area">
+                <view class="avatar-wrap">
+                    <image class="avatar" :src="form.avatar" mode="aspectFill"></image>
+                    <view class="camera-btn" @click="chooseAvatar">
+                        <uni-icons type="camera-filled" size="13" color="#fff"></uni-icons>
                     </view>
-                    <text class="avatar-hint">{{ t('user.profile.avatarHint') }}</text>
                 </view>
+                <text class="avatar-tip">{{ t('editProfile1.changePhoto') }}</text>
+            </view>
 
-                <!-- 昵称 -->
-                <view class="form-item">
-                    <view class="label">{{ t('user.profile.nickname') }}</view>
-                    <input
-                        v-model="formData.nickname"
-                        type="text"
-                        class="input"
-                        :placeholder="t('user.profile.nicknamePlaceholder')"
-                        maxlength="20"
-                    />
+            <view class="section-title">{{ t('editProfile1.personalInfo') }}</view>
+            <view class="card">
+                <view class="field">
+                    <text class="field-label">{{ t('editProfile1.fullName') }}</text>
+                    <input v-model="form.nickname" class="field-input" :placeholder="t('editProfile1.placeholders.fullName')" />
                 </view>
-
-                <!-- 邮箱 -->
-                <view class="form-item">
-                    <view class="label">{{ t('user.profile.email') }}</view>
+                <view class="field">
+                    <text class="field-label">{{ t('editProfile1.email') }}</text>
                     <input
-                        v-model="formData.email"
-                        type="email"
-                        class="input"
-                        :placeholder="t('user.profile.emailPlaceholder')"
+                        v-model="form.email"
+                        class="field-input"
+                        :placeholder="t('editProfile1.placeholders.email')"
                         disabled
                     />
                 </view>
-
-                <!-- 地区 -->
-                <view class="form-item">
-                    <view class="label">{{ t('user.profile.region') }}</view>
+                <view class="field field-last">
+                    <text class="field-label">{{ t('editProfile1.phone') }}</text>
                     <input
-                        v-model="formData.region"
-                        type="text"
-                        class="input"
-                        :placeholder="t('user.profile.regionPlaceholder')"
+                        v-model="form.phone_number"
+                        class="field-input"
+                        :placeholder="t('editProfile1.placeholders.phone')"
                     />
                 </view>
+            </view>
 
-                <!-- 个人描述 -->
-                <view class="form-item">
-                    <view class="label">{{ t('user.profile.description') }}</view>
-                    <textarea
-                        v-model="formData.description"
-                        class="textarea"
-                        :placeholder="t('user.profile.descriptionPlaceholder')"
-                        maxlength="200"
-                        rows="4"
-                    ></textarea>
-                    <view class="char-count">{{ formData.description.length }}/200</view>
+            <view class="section-title">{{ t('editProfile1.workInfo') }}</view>
+            <view class="card">
+                <view class="field">
+                    <text class="field-label">{{ t('editProfile1.region') }}</text>
+                    <input v-model="form.region" class="field-input" :placeholder="t('editProfile1.placeholders.region')" />
                 </view>
+                <view class="field field-last">
+                    <text class="field-label">{{ t('editProfile1.description') }}</text>
+                    <input
+                        v-model="form.description"
+                        class="field-input"
+                        :placeholder="t('editProfile1.placeholders.description')"
+                    />
+                    <!-- <textarea
+                        v-model="form.description"
+                        class="field-textarea"
+                        :placeholder="t('editProfile1.placeholders.description')"
+                        rows="2"
+                    /> -->
+                </view>
+            </view>
 
-                <!-- 保存按钮 -->
-                <button class="save-btn" @click="saveProfile">
-                    {{ t('user.profile.save') }}
-                </button>
-            </form>
-        </view>
+            <button class="save-btn" @click="handleSave">
+                <uni-icons v-if="saved" type="checkmarkempty" size="16" color="#fff"></uni-icons>
+                <text>{{ saved ? t('editProfile1.profileSaved') : t('editProfile1.saveChanges') }}</text>
+            </button>
+        </scroll-view>
     </view>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
 import { useUserStore } from '@/stores/user.js';
-import { API_BASE_URL } from '@/common/config';
-import { decrypt } from '@/utils/encryption.js';
+import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
+import { getStatusBarHeight } from '@/utils/system.js';
 
-const { t } = useI18n();
 const userStore = useUserStore();
-const userinfo = reactive(userStore.userinfo);
+const { t } = useI18n();
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const saved = ref(false);
 
-const formData = ref({
-    avatar: '',
-    nickname: '',
-    email: '',
-    region: '',
-    description: '',
-});
-
-const data = ref({});
-
-onLoad(() => {
-    // 从用户Store加载当前信息
-    formData.value = {
-        avatar: userinfo.profile.avatar,
-        nickname: userinfo.profile.nickname || '',
-        email: userinfo.email || '',
-        region: userinfo.profile.region || '',
-        description: userinfo.profile.description || '',
-    };
+const form = reactive({
+    avatar: userStore.userinfo?.profile?.avatar || '/static/images/pics/default_avatar.svg',
+    nickname: userStore.userinfo?.profile?.nickname || userStore.userinfo?.nickname || '',
+    email: userStore.userinfo?.email || '',
+    phone_number: userStore.userinfo?.profile?.phone_number || '',
+    region: userStore.userinfo?.profile?.region || '',
+    description: userStore.userinfo?.profile?.description || '',
 });
 
 const chooseAvatar = () => {
@@ -115,267 +102,238 @@ const chooseAvatar = () => {
         sizeType: ['compressed'],
         sourceType: ['album', 'camera'],
         success: (res) => {
-            const tempFilePath = res.tempFilePaths[0];
-            console.log("tempfilepath", tempFilePath)
-            formData.value.avatar = tempFilePath;
-        },
-        fail: (err) => {
-            uni.showToast({
-                title: t('user.profile.chooseAvatarFailed'),
-                icon: 'none',
-            });
+            const file = res.tempFilePaths?.[0];
+            if (!file) return;
+            form.avatar = file;
         },
     });
 };
 
-const saveProfile = async () => {
-    // 1. 验证表单
-    if (!formData.value.nickname.trim()) {
-        uni.showToast({
-            title: t('user.profile.nicknameRequired'),
-            icon: 'none',
-        });
+const handleSave = async () => {
+    if (!form.nickname.trim()) {
+        uni.showToast({ title: t('editProfile1.enterName'), icon: 'none' });
         return;
     }
 
-    console.log("xasdf", formData.value)
-    if (formData.value.avatar === userStore.userinfo.profile.avatar) {
-        // 不上传头像，使用普通的接口更新信息
-        const { avatar, ...rest } = formData.value;
-        data.value = rest;
-        const res = await apiPostProfile(data.value);
-        // console.log(res);
-    } else {
-        // 上传头像，使用upload接口更新信息
-        const res = await apiUploadProfile(formData.value);
-        // console.log(res);
+    try {
+        const payload = {
+            nickname: form.nickname.trim(),
+            region: form.region.trim(),
+            description: form.description.trim(),
+        };
+
+        // 头像变更时优先走上传接口
+        if (String(form.avatar || '').startsWith('http') || String(form.avatar || '').startsWith('/static/')) {
+            await apiPostProfile(payload);
+        } else {
+            await apiUploadProfile({
+                ...payload,
+                avatar: form.avatar,
+            });
+        }
+
+        userStore.userinfo = {
+            ...userStore.userinfo,
+            profile: {
+                ...userStore.userinfo.profile,
+                avatar: form.avatar,
+                nickname: form.nickname,
+                phone_number: form.phone_number,
+                region: form.region,
+                description: form.description,
+            },
+        };
+
+        // 显示成功提示
+        uni.showToast({
+            title: t('user.profile.saveSuccess'),
+            icon: 'none',
+        });
+
+        // 延迟返回上一页
+        setTimeout(() => {
+            uni.navigateBack({
+                fail: () => uni.reLaunch({ url: '/pages/settings/settings' }),
+            });
+        }, 1000);
+    } catch (error) {
+        uni.showToast({
+            title: t('editProfile1.saveFailed'),
+            icon: 'none',
+        });
     }
+};
 
-    // 更新用户信息
-    userStore.userinfo = {
-        ...userStore.userinfo,
-        ...formData.value,
-    };
-
-    // 显示成功提示
-    uni.showToast({
-        title: t('user.profile.saveSuccess'),
-        icon: 'none',
+const goBack = () => {
+    uni.navigateBack({
+        fail: () => {
+            uni.reLaunch({ url: '/pages/settings/settings' });
+        },
     });
-
-    // 延迟返回上一页
-    setTimeout(() => {
-        uni.navigateBack();
-    }, 1000);
-
-    // 2. 上传文件
-    // uni.uploadFile({
-    //     url: `${API_BASE_URL}/user/update_profile/`,
-    //     filePath: formData.value.avatar,
-    //     name: 'avatar', // 关键：与后端约定的文件字段名
-    //     header: {
-    //         'Access-Key': 'secret-insecure-88hefbf6c!mrv5x(xa4swy-h3y41f()(8xh6syj(xi&m!!h$#b',
-    //         Authorization: `Bearer ${decrypt(userStore.accessToken)}`,
-    //     },
-    //     formData: data,
-    //     success: (res) => {
-    //         if (res.code === 200) {
-    //             // 更新用户信息
-    //             userStore.userinfo = {
-    //                 ...userStore.userinfo,
-    //                 ...formData.value,
-    //             };
-
-    //             // 显示成功提示
-    //             uni.showToast({
-    //                 title: t('user.profile.saveSuccess'),
-    //                 icon: 'none',
-    //             });
-
-    //             // 延迟返回上一页
-    //             setTimeout(() => {
-    //                 uni.navigateBack();
-    //             }, 1000);
-    //         }
-    //     },
-    //     fail: (err) => {
-    //         console.error('修改失败:', err);
-    //         uni.showToast({ title: `修改失败: {err}`, icon: 'none' });
-    //     },
-    // });
 };
 </script>
 
 <style lang="scss" scoped>
 .layout {
-    background-color: #f5f5f5;
     min-height: 100vh;
+    background: #f5f6f8;
+}
+
+.status-holder {
     width: 100%;
-    position: relative;
 }
 
-.content {
-    padding: 20rpx 30rpx 40rpx;
-}
-
-.avatar-section {
+.header {
+    height: 112rpx;
+    background: #f5f6f8;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    margin-bottom: 40rpx;
+    justify-content: space-between;
+    padding: 0 32rpx;
 }
 
-.avatar-wrapper {
-    width: 160rpx;
-    height: 160rpx;
-    border-radius: 50%;
-    overflow: hidden;
-    position: relative;
-    cursor: pointer;
-    border: 3rpx solid #e5e5e5;
-    transition: all 0.3s;
-
-    &:active {
-        transform: scale(0.95);
-    }
-}
-
-.avatar-image {
-    width: 100%;
-    height: 100%;
-}
-
-.avatar-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+.back-btn {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 16rpx;
+    background: #fff;
+    border: 1px solid #f0f1f3;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s;
 }
 
-.avatar-wrapper:hover .avatar-overlay,
-.avatar-wrapper:active .avatar-overlay {
-    opacity: 1;
-}
-
-.avatar-tip {
-    color: #fff;
-    font-size: 20rpx;
-    margin-top: 8rpx;
-}
-
-.avatar-hint {
-    margin-top: 16rpx;
-    font-size: 24rpx;
-    color: #999;
+.header-title {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: #111827;
+    flex: 1;
     text-align: center;
 }
 
-.form-item {
-    margin-bottom: 30rpx;
-    position: relative;
-
-    &:last-child {
-        margin-bottom: 40rpx;
-    }
+.header-placeholder {
+    width: 72rpx;
+    height: 72rpx;
 }
 
-.label {
-    font-size: 28rpx;
-    color: #333;
+.save-mini-btn {
+    height: 72rpx;
+    padding: 0 28rpx;
+    border-radius: 16rpx;
+    background: #e5322d;
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    font-size: 26rpx;
     font-weight: 600;
-    margin-bottom: 12rpx;
+}
+
+.content {
+    height: calc(100vh - 112rpx);
+    box-sizing: border-box;
+    padding-top: 16rpx;
+    padding-bottom: 80rpx;
+}
+
+.avatar-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 48rpx;
+    padding-bottom: 56rpx;
+}
+
+.avatar-wrap {
+    position: relative;
+}
+
+.avatar {
+    width: 176rpx;
+    height: 176rpx;
+    border-radius: 88rpx;
+}
+
+.camera-btn {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 28rpx;
+    background: #e5322d;
+    border: 2px solid #f5f6f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-tip {
+    margin-top: 20rpx;
+    font-size: 24rpx;
+    color: #e5322d;
+    font-weight: 500;
+}
+
+.section-title {
+    padding: 0 32rpx;
+    margin-bottom: 16rpx;
+    font-size: 22rpx;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
     display: block;
 }
 
-.input {
-    width: 100%;
-    height: 80rpx;
-    border: 1rpx solid #e5e5e5;
-    border-radius: 12rpx;
-    padding: 0 24rpx;
-    font-size: 28rpx;
-    color: #333;
-    background-color: #fafafa;
-    transition: all 0.3s;
-    box-sizing: border-box;
-
-    &:focus {
-        border-color: #28b389;
-        background-color: #fff;
-        box-shadow: 0 0 0 2rpx rgba(40, 179, 137, 0.1);
-    }
-
-    &:disabled {
-        background-color: #f5f5f5;
-        color: #999;
-        cursor: not-allowed;
-    }
-
-    &::placeholder {
-        color: #999;
-        font-size: 26rpx;
-    }
+.card {
+    background: #fff;
+    border-radius: 24rpx;
+    border: 1px solid #f0f1f3;
+    margin: 0 32rpx 48rpx;
+    overflow: hidden;
 }
 
-.textarea {
-    width: 100%;
-    border: 1rpx solid #e5e5e5;
-    border-radius: 12rpx;
-    padding: 24rpx;
-    font-size: 28rpx;
-    color: #333;
-    background-color: #fafafa;
-    transition: all 0.3s;
-    resize: none;
-    min-height: 160rpx;
-    box-sizing: border-box;
-
-    &:focus {
-        border-color: #28b389;
-        background-color: #fff;
-        box-shadow: 0 0 0 2rpx rgba(40, 179, 137, 0.1);
-    }
-
-    &::placeholder {
-        color: #999;
-        font-size: 26rpx;
-    }
+.field {
+    padding: 24rpx 32rpx;
+    border-bottom: 1px solid #f3f4f6;
 }
 
-.char-count {
-    position: absolute;
-    bottom: 12rpx;
-    right: 20rpx;
+.field-last {
+    border-bottom: none;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 10rpx;
     font-size: 22rpx;
-    color: #999;
+    font-weight: 600;
+    color: #9ca3af;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.field-input {
+    width: 100%;
+    font-size: 30rpx;
+    font-weight: 500;
+    color: #111827;
+    background: transparent;
 }
 
 .save-btn {
-    width: 100%;
-    height: 80rpx;
-    background: linear-gradient(135deg, #28b389 0%, #219a7a 100%);
+    margin: 0 32rpx;
+    height: 100rpx;
+    border-radius: 24rpx;
+    background: #e5322d;
     color: #fff;
-    font-size: 32rpx;
-    font-weight: 600;
-    border-radius: 40rpx;
     border: none;
-    transition: all 0.3s;
-
-    &:active {
-        background: linear-gradient(135deg, #219a7a 0%, #1d8b6a 100%);
-        transform: scale(0.98);
-    }
-
-    &::after {
-        border: none;
-    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16rpx;
+    font-size: 30rpx;
+    font-weight: 600;
 }
 </style>

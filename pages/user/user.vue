@@ -6,11 +6,6 @@
             :class="{ 'status-bar-bg--muted': !userStore.userinfo.id }"
             :style="{ height: `${statusBarHeight}px` }"
         >
-            <!-- <view v-if="userStore.userinfo.id" class="status-user-decorative">
-                <view class="bg-circle circle-1"></view>
-                <view class="bg-circle circle-2"></view>
-                <view class="bg-circle circle-3"></view>
-            </view> -->
         </view>
         <!-- #endif -->
 
@@ -19,13 +14,6 @@
             :class="{ 'not-logged-in': !userStore.userinfo.id }"
             :style="{ paddingTop: `${userHeaderPaddingTop}px` }"
         >
-            <!-- 装饰性背景 -->
-            <!-- <view class="decorative-bg">
-                <view class="bg-circle circle-1"></view>
-                <view class="bg-circle circle-2"></view>
-                <view class="bg-circle circle-3"></view>
-            </view> -->
-
             <view v-if="userStore.userinfo.id" class="user-content">
                 <view class="avatar">
                     <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
@@ -45,9 +33,9 @@
                                 <uni-icons type="arrow-right" size="12" color="#28B389"></uni-icons>
                             </view> -->
                         </view>
-                        <view class="edit-btn" @click="toEditProfile">
+                        <!-- <view class="edit-btn" @click="toEditProfile">
                             {{ t('user.profile.editProfile') }}
-                        </view>
+                        </view> -->
                     </view>
 
                     <view class="user-description">
@@ -535,6 +523,8 @@ onShow(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     --user-page-bg: var(--page-background);
     --user-header-bg: var(--page-background-secondary);

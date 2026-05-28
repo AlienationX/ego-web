@@ -1,5 +1,17 @@
 <template>
-    <scroll-view v-if="currentInfo && currentInfo.id" scroll-y class="previewScroll" @scroll="handlePreviewScroll">
+    <view
+        v-if="currentInfo && currentInfo.id"
+        class="preview-page"
+        :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
+    >
+        <view
+            class="preview-statusbar"
+            :style="{
+                height: `${statusBarHeight}px`,
+                opacity: statusBarFillOpacity,
+            }"
+        ></view>
+        <scroll-view scroll-y class="previewScroll" @scroll="handlePreviewScroll">
         <view class="previewLayout">
             <view class="previewHero">
                 <swiper
@@ -127,6 +139,7 @@
             </view>
             <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
         </view>
+        </scroll-view>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -313,7 +326,7 @@
             @confirm="dialogState.onConfirm"
             @cancel="dialogState.onCancel"
         ></popup-navigation-dialog>
-    </scroll-view>
+    </view>
 </template>
 
 <script setup>
@@ -483,10 +496,18 @@ classList.value = wallList.map((item) => {
 });
 const disableSwipe = ref(false);
 const showScrollHint = ref(!uni.getStorageSync(HAS_SEEN_HINT_KEY));
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const previewHeroHeightPx = uni.getWindowInfo().windowHeight || 667;
+const statusBarFillOpacity = ref(0);
 
 const handlePreviewScroll = (e) => {
-    if (!showScrollHint.value) return;
     const scrollTop = Number(e?.detail?.scrollTop || 0);
+
+    const revealStart = previewHeroHeightPx * 0.78;
+    const revealEnd = previewHeroHeightPx * 0.95;
+    statusBarFillOpacity.value = Math.min(1, Math.max(0, (scrollTop - revealStart) / (revealEnd - revealStart)));
+
+    if (!showScrollHint.value) return;
     if (scrollTop > 60) {
         showScrollHint.value = false;
         uni.setStorageSync(HAS_SEEN_HINT_KEY, true);
@@ -997,6 +1018,24 @@ onShareTimeline(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
+.preview-page {
+    position: relative;
+    height: 100vh;
+}
+
+.preview-statusbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 120;
+    pointer-events: none;
+    background: var(--page-background);
+    transition: opacity 0.22s ease;
+}
+
 .previewLayout {
     width: 100%;
     position: relative;

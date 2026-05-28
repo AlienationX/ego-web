@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="{ 'is-embedded': embedded }">
+    <view class="layout" :class="[isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
         <view v-if="!embedded" class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <scroll-view
@@ -16,7 +16,11 @@
                 <view id="timeline-top-anchor" class="timeline-top-anchor"></view>
                 <view v-if="!embedded" class="topbar">
                     <view class="topbar__back" @click="goBack">
-                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#f4f8ff"></mdi-icon>
+                        <mdi-icon
+                            path="/static/icons/arrow-left.svg"
+                            size="20px"
+                            :color="isDark ? '#f4f8ff' : '#374151'"
+                        ></mdi-icon>
                     </view>
                     <view class="topbar__brand">{{ t('timeline.brand') }}</view>
                     <view class="topbar__placeholder"></view>
@@ -62,7 +66,12 @@
                                 :class="{ 'timeline-card--wide': idx === 0 }"
                                 @click="goPreview(item.id)"
                             >
-                                <image class="timeline-card__image" :src="idx === 0 ? (item.mediumPicurl || item.picurl) : item.smallPicurl" mode="aspectFill" lazy-load></image>
+                                <image
+                                    class="timeline-card__image"
+                                    :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
+                                    mode="aspectFill"
+                                    lazy-load
+                                ></image>
                                 <view class="timeline-card__overlay"></view>
                                 <view class="timeline-card__content">
                                     <view class="timeline-card__classify">
@@ -89,7 +98,7 @@
                 </view>
 
                 <view v-if="latestList.length" class="load-more-box">
-                    <uni-load-more :status="noMoreData ? 'noMore' : (isLoading ? 'loading' : 'more')"></uni-load-more>
+                    <uni-load-more :status="noMoreData ? 'noMore' : isLoading ? 'loading' : 'more'"></uni-load-more>
                 </view>
             </view>
         </scroll-view>
@@ -107,8 +116,11 @@ import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t, locale } = useI18n();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
 
 const props = defineProps({
     embedded: {
@@ -137,7 +149,20 @@ const queryParams = ref({
     ordering: '-updated_at',
 });
 
-const monthNamesEn = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+const monthNamesEn = [
+    'JANUARY',
+    'FEBRUARY',
+    'MARCH',
+    'APRIL',
+    'MAY',
+    'JUNE',
+    'JULY',
+    'AUGUST',
+    'SEPTEMBER',
+    'OCTOBER',
+    'NOVEMBER',
+    'DECEMBER',
+];
 const weekdayNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const weekdayNamesZh = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 
@@ -293,10 +318,16 @@ onLoad(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #0b1017;
+    background: var(--page-background);
     color: #eaf0fb;
+
+    &.theme-light {
+        color: var(--text-primary);
+    }
 }
 
 .layout.is-embedded {
@@ -365,6 +396,17 @@ onLoad(() => {
         background: rgba(255, 255, 255, 0.28);
         transform: scale(0.92);
     }
+
+    .theme-light & {
+        background: #ffffff;
+        border: 1rpx solid rgba(17, 24, 39, 0.08);
+        box-shadow: 0 4rpx 14rpx rgba(15, 23, 42, 0.06);
+        backdrop-filter: none;
+
+        &:active {
+            background: #f1f5f9;
+        }
+    }
 }
 
 .topbar__brand {
@@ -373,6 +415,10 @@ onLoad(() => {
     letter-spacing: 8rpx;
     color: #ffffff;
     padding-left: 8rpx;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
 }
 
 .hero {
@@ -388,6 +434,11 @@ onLoad(() => {
     letter-spacing: -2.5rpx;
     white-space: pre-line;
     text-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.22);
+
+    .theme-light & {
+        color: var(--text-primary);
+        text-shadow: none;
+    }
 }
 
 .hero__desc {
@@ -397,6 +448,10 @@ onLoad(() => {
     line-height: 1.9;
     color: rgba(214, 223, 239, 0.9);
     padding: 0 8rpx;
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
 }
 
 .empty {
@@ -407,11 +462,20 @@ onLoad(() => {
     border-radius: 32rpx;
     background: rgba(18, 28, 41, 0.72);
     border: 1rpx solid rgba(255, 255, 255, 0.05);
+
+    .theme-light & {
+        background: rgba(241, 245, 249, 0.8);
+        border: 1rpx solid rgba(0, 0, 0, 0.06);
+    }
 }
 
 .empty__title {
     font-size: 26rpx;
     color: rgba(226, 232, 240, 0.9);
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
 }
 
 .month-section {
@@ -428,6 +492,10 @@ onLoad(() => {
     font-weight: 900;
     color: rgba(148, 163, 184, 0.45);
     letter-spacing: -2rpx;
+
+    .theme-light & {
+        color: rgba(148, 163, 184, 0.2);
+    }
 }
 
 .month-section__meta {
@@ -443,12 +511,20 @@ onLoad(() => {
     font-size: 38rpx;
     font-weight: 800;
     color: #f5f8ff;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
 }
 
 .month-section__line {
     flex: 1;
     height: 1rpx;
     background: rgba(115, 130, 154, 0.34);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.08);
+    }
 }
 
 .month-section__tag {
@@ -475,6 +551,10 @@ onLoad(() => {
     line-height: 1;
     font-weight: 900;
     color: #f5f8ff;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
 }
 
 .day-section__divider {
@@ -491,6 +571,10 @@ onLoad(() => {
     letter-spacing: 2rpx;
     color: rgba(226, 232, 240, 0.88);
     text-transform: uppercase;
+
+    .theme-light & {
+        color: var(--text-tertiary);
+    }
 }
 
 .editorial-grid {
@@ -510,6 +594,11 @@ onLoad(() => {
     transition:
         transform 0.28s ease,
         box-shadow 0.28s ease;
+
+    .theme-light & {
+        background: #ffffff;
+        box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+    }
 }
 
 .timeline-card--wide {
@@ -531,6 +620,10 @@ onLoad(() => {
     position: absolute;
     inset: 0;
     background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 66%, rgba(8, 11, 18, 0.88) 100%);
+
+    .theme-light & {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%);
+    }
 }
 
 .timeline-card__content {

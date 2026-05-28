@@ -1,6 +1,6 @@
 <template>
-    <view class="layout">
-        <menu-bar class="menubar" :show-border="true" :show-toggle-menu="true">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+        <menu-bar class="menubar" :show-border="false" :show-toggle-menu="true">
             <!-- <template #title>{{ props.name }}</template> -->
             <template #title>{{ $t('index.notice') }}</template>
             <template #menuBtn></template>
@@ -43,91 +43,96 @@
 </template>
 
 <script setup>
-    import { ref, toRefs } from 'vue';
-    import { onLoad } from '@dcloudio/uni-app';
-    import { apiGetNotice } from '@/api/wallpaper.js';
+import { ref, toRefs, computed } from 'vue';
+import { onLoad } from '@dcloudio/uni-app';
+import { apiGetNotice } from '@/api/wallpaper.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
-    // UniApp 会将 URL 中的参数自动注入到 props
-    const props = defineProps({
-        id: String, // 公告id
-        name: String // 公告title
-    });
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
 
-    // const { id:noticeId, name:noticeName } = toRefs(props);
-    const { id, name } = toRefs(props);
+// UniApp 会将 URL 中的参数自动注入到 props
+const props = defineProps({
+    id: String, // 公告id
+    name: String, // 公告title
+});
 
-    const detail = ref({});
+// const { id:noticeId, name:noticeName } = toRefs(props);
+const { id, name } = toRefs(props);
 
-    const getNoticeDetail = async () => {
-        let res = await apiGetNotice({}, id.value);
-        detail.value = res.data;
+const detail = ref({});
 
-        // 如果title存在，则设置navigation bar title
-        if (name.value !== undefined) {
-            uni.setNavigationBarTitle({
-                title: name.value
-            });
-        }
-    };
+const getNoticeDetail = async () => {
+    let res = await apiGetNotice({}, id.value);
+    detail.value = res.data;
 
-    // let noticeId;
-    // let noticeName;
-    onLoad((e) => {
-        // console.log(e);
-        // noticeId = parseInt(e.id);
-        // noticeName = e.name;
-        getNoticeDetail();
-    });
+    // 如果title存在，则设置navigation bar title
+    if (name.value !== undefined) {
+        uni.setNavigationBarTitle({
+            title: name.value,
+        });
+    }
+};
+
+// let noticeId;
+// let noticeName;
+onLoad((e) => {
+    // console.log(e);
+    // noticeId = parseInt(e.id);
+    // noticeName = e.name;
+    getNoticeDetail();
+});
 </script>
 
 <style lang="scss" scoped>
-    .layout {
-        background-color: #f5f5f5;
-        // background-color: #f1f2f7;
-        min-height: 100vh;
-        
+@import '@/static/styles/theme-variables.scss';
 
-        .container {
-            padding: 12rpx 30rpx;
-            
-            .title {
-                font-size: 40rpx;
-                color: #111;
-                line-height: 1.6em;
-                display: flex;
-                align-items: center;
-                
-                .tag {
-                    transform: scale(0.8);
-                    transform-origin: left center;
-                    flex-shrink: 0;
-                }
+.layout {
+    background-color: var(--page-background);
+    min-height: 100vh;
 
-                .font {
-                    padding-left: 6rpx;
-                }
+    .container {
+        padding: 12rpx 30rpx;
+
+        .title {
+            font-size: 40rpx;
+            color: var(--text-primary);
+            line-height: 1.6em;
+            display: flex;
+            align-items: center;
+
+            .tag {
+                transform: scale(0.8);
+                transform-origin: left center;
+                flex-shrink: 0;
             }
 
-            .info {
-                padding-top: 18rpx;
-                display: flex;
-                align-items: center;
-                color: #999;
-                font-size: 28rpx;
-
-                .item {
-                    padding-right: 20rpx;
-                }
-            }
-
-            .content {
-                padding: 30rpx 0;
-            }
-
-            .count {
-                color: #999;
-                font-size: 28rpx;
+            .font {
+                padding-left: 6rpx;
             }
         }
+
+        .info {
+            padding-top: 18rpx;
+            display: flex;
+            align-items: center;
+            color: var(--text-tertiary);
+            font-size: 28rpx;
+
+            .item {
+                padding-right: 20rpx;
+            }
+        }
+
+        .content {
+            padding: 30rpx 0;
+            color: var(--text-secondary);
+        }
+
+        .count {
+            color: var(--text-tertiary);
+            font-size: 28rpx;
+        }
     }
+}
 </style>

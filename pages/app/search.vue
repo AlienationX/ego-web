@@ -260,13 +260,15 @@ onPageScroll(() => {});
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .status-bar-bg {
     background: var(--search-bg);
 }
 
 .layout {
     &.theme-light {
-        --search-bg: #f5f5f8;
+        --search-bg: var(--page-background);
         --search-bg-secondary: #ffffff;
         --search-panel: rgba(255, 255, 255, 0.96);
         --search-border: rgba(17, 17, 17, 0.08);
@@ -281,7 +283,7 @@ onPageScroll(() => {});
     }
 
     &.theme-dark {
-        --search-bg: #111111;
+        --search-bg: var(--page-background);
         --search-bg-secondary: #16161a;
         --search-panel: rgba(29, 37, 49, 0.96);
         --search-border: rgba(255, 255, 255, 0.06);

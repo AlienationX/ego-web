@@ -1,5 +1,5 @@
 <template>
-    <view class="tabbed-container">
+    <view class="tabbed-container" :class="isDark ? 'theme-dark' : 'theme-light'">
         <!-- 标签栏 (支持吸顶逻辑) -->
         <view
             v-if="
@@ -30,7 +30,7 @@
                                 <uni-icons
                                     :type="dateSortAsc ? 'arrow-up' : 'arrow-down'"
                                     size="12"
-                                    color="#ffffff"
+                                    :color="isDark ? '#ffffff' : '#ffffff'"
                                 ></uni-icons>
                             </view>
                         </button>
@@ -68,7 +68,7 @@
                 >
                     <view class="container" :style="{ minHeight: `calc(100% + ${headerHeight}px)` }">
                         <!-- 顶部占位，留给可滚动头部 -->
-                        <view :style="{ height: showHeader ? (headerHeight + tabsHeight) + 'px' : '0px' }"></view>
+                        <view :style="{ height: topSpacerHeight + 'px' }"></view>
 
                         <!-- 布局渲染层 -->
                         <view class="layout" :style="getLayoutStyle(index)">
@@ -170,6 +170,7 @@ import { handlePicUrl } from '@/utils/common.js';
 
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+const isDark = computed(() => settingsStore.isDark);
 
 const props = defineProps({
     tabs: { type: Array, required: true },
@@ -191,9 +192,19 @@ const currentIndex = ref(props.initialIndex);
 const headerScrollTop = ref(0);
 const dateSortAsc = ref(true);
 const canShowAd = computed(() => !userStore.isVip && userStore.showAd);
-const isWaterfall = computed(() => (props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'));
+const isWaterfall = computed(() =>
+    props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window',
+);
 const imageMode = computed(() => (isWaterfall.value ? 'widthFix' : 'aspectFill'));
 const lockedSize = computed(() => (settingsStore.options.column === 3 ? 18 : 22));
+
+/** 顶部占位：有 header 时为 hero+tabs；无 header 时仅用 headerHeight（如首页顶栏 inset） */
+const topSpacerHeight = computed(() => {
+    if (props.showHeader) {
+        return props.headerHeight + props.tabsHeight;
+    }
+    return props.headerHeight || 0;
+});
 
 const tabStates = reactive(
     props.tabs.map(() => ({
@@ -260,7 +271,7 @@ const fetchData = async (index, init = false) => {
         } else if (props.apiType === 'recommend') {
             // 将当前已加载的ID拼起来传给后端做去重
             if (state.images.length > 0) {
-                requestParams.exclude_ids = state.images.map(img => img.id).join(',');
+                requestParams.exclude_ids = state.images.map((img) => img.id).join(',');
             }
             // 注意：如果在没有拦截器统一处理 device_id 的情况下，也可以手动在这里添加：
             // requestParams.device_id = uni.getStorageSync('deviceId') || '';
@@ -448,7 +459,7 @@ watch(
     (newIdx) => {
         // Synchronize headerScrollTop immediately to prevent blank gap after switching tabs
         const currentScroll = tabStates[newIdx]?.oldScrollTop || 0;
-        
+
         if (headerScrollTop.value >= props.headerHeight && currentScroll < props.headerHeight) {
             // If the hero image was already hidden, keep it hidden on the new tab
             tabStates[newIdx].scrollTop = currentScroll;
@@ -528,6 +539,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .tabbed-container {
     position: relative;
     width: 100%;
@@ -535,7 +548,13 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #0b1017;
+    background: var(--page-background);
+}
+
+.content-swiper {
+    flex: 1;
+    height: 100%;
+    background: var(--page-background);
 }
 
 .header-slot {
@@ -553,14 +572,17 @@ onMounted(() => {
     width: 100%;
     height: 88rpx;
     z-index: 100;
-    background: rgba(11, 16, 23, 0.95);
-    // backdrop-filter: blur(20rpx);
+    background: var(--page-background);
     border-bottom: 1rpx solid rgba(255, 255, 255, 0.04);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 10rpx;
     will-change: transform;
+
+    .theme-light & {
+        border-bottom: 1rpx solid var(--panel-border);
+    }
 
     .tabs-scroll {
         width: 0;
@@ -600,6 +622,20 @@ onMounted(() => {
                         border-color: rgba(43, 140, 238, 0.2);
                         box-shadow: 0 12rpx 28rpx rgba(43, 140, 238, 0.34);
                     }
+
+                    .theme-light & {
+                        color: #64748b;
+                        background: #e8ecf2;
+                        border: 1rpx solid rgba(17, 24, 39, 0.06);
+
+                        &.active {
+                            color: #ffffff;
+                            background: #2b8cee;
+                            border-color: rgba(43, 140, 238, 0.2);
+                            box-shadow: 0 12rpx 28rpx rgba(43, 140, 238, 0.2);
+                        }
+                    }
+
                     .sort-icon {
                         margin-left: 2rpx;
                         display: flex;
@@ -624,6 +660,10 @@ onMounted(() => {
             justify-content: flex-end;
         }
 
+        .theme-light & {
+            border-left: 1rpx solid var(--panel-border);
+        }
+
         .action-btn {
             width: 58rpx;
             height: 58rpx;
@@ -644,17 +684,28 @@ onMounted(() => {
                 transform: scale(0.9);
                 background: rgba(255, 255, 255, 0.05);
             }
+
+            .theme-light & {
+                background: #e8ecf2;
+                border: 1rpx solid rgba(17, 24, 39, 0.06);
+
+                .icon-svg {
+                    filter: brightness(0) saturate(100%) invert(20%) sepia(10%) saturate(500%) hue-rotate(183deg)
+                        brightness(60%) contrast(90%);
+                }
+
+                &:active {
+                    background: #dde3eb;
+                }
+            }
         }
     }
 }
 
-.content-swiper {
-    flex: 1;
-    height: 100%;
-}
 .tab-scroll-view {
     height: 100%;
     width: 100%;
+    background: var(--page-background);
 }
 .container {
     .layout {
@@ -665,6 +716,14 @@ onMounted(() => {
 
             &.loaded-glow {
                 box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.3);
+            }
+
+            .theme-light & {
+                background: rgba(0, 0, 0, 0.02);
+
+                &.loaded-glow {
+                    box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+                }
             }
 
             .img {
@@ -789,6 +848,10 @@ onMounted(() => {
 .default-empty__text {
     font-size: 26rpx;
     color: #eef5ff;
+
+    .theme-light & {
+        color: #64748b;
+    }
 }
 .safe-area-bottom {
     width: 100%;
@@ -829,6 +892,16 @@ onMounted(() => {
     &:active {
         transform: scale(0.9);
         background: rgba(43, 140, 238, 1);
+    }
+
+    .theme-light & {
+        background: rgba(43, 140, 238, 0.9);
+        border: 1rpx solid rgba(43, 140, 238, 0.2);
+        box-shadow: 0 12rpx 32rpx rgba(43, 140, 238, 0.2);
+
+        &:active {
+            background: rgba(43, 140, 238, 1);
+        }
     }
 }
 </style>

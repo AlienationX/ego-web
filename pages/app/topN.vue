@@ -1,5 +1,5 @@
 <template>
-    <view class="top10-page" :class="{ 'is-embedded': embedded }">
+    <view class="top10-page" :class="[isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
         <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <scroll-view scroll-y class="top10-scroll" @scroll="handleScroll">
@@ -9,7 +9,7 @@
                 <view v-if="!embedded" class="top10-header">
                     <view class="top10-header__left">
                         <view class="top10-header__back" @click="goBack">
-                            <uni-icons type="back" size="20" color="#f8fafc"></uni-icons>
+                            <uni-icons type="back" size="20" :color="isDark ? '#f8fafc' : '#374151'"></uni-icons>
                         </view>
                         <view class="top10-header__title">{{ $t('top10.title') }}</view>
                     </view>
@@ -149,8 +149,11 @@ import { apiGetClassList, apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t, locale } = useI18n();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
 
 const props = defineProps({
     embedded: {
@@ -258,9 +261,11 @@ onLoad(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .top10-page {
     min-height: 100vh;
-    background: #0b1017;
+    background: var(--page-background);
 }
 
 .top10-page.is-embedded {
@@ -320,6 +325,17 @@ onLoad(() => {
         transform: scale(0.9);
         background: rgba(255, 255, 255, 0.15);
     }
+
+    .theme-light & {
+        background: #ffffff;
+        border: 1rpx solid rgba(17, 24, 39, 0.08);
+        box-shadow: 0 4rpx 14rpx rgba(15, 23, 42, 0.06);
+        backdrop-filter: none;
+
+        &:active {
+            background: #f1f5f9;
+        }
+    }
 }
 
 .top10-header__title {
@@ -327,6 +343,10 @@ onLoad(() => {
     font-weight: 800;
     color: #60a5fa;
     line-height: 1.2;
+
+    .theme-light & {
+        color: #2563eb;
+    }
 }
 
 .metric-switch {
@@ -340,6 +360,12 @@ onLoad(() => {
     background: rgba(17, 25, 34, 0.9);
     border: 1rpx solid rgba(148, 163, 184, 0.14);
     box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.04);
+
+    .theme-light & {
+        background: #e8ecf2;
+        border: 1rpx solid rgba(17, 24, 39, 0.06);
+        box-shadow: none;
+    }
 }
 
 .metric-switch__item {
@@ -353,6 +379,10 @@ onLoad(() => {
     color: #94a3b8;
     font-size: 24rpx;
     font-weight: 700;
+
+    .theme-light & {
+        color: #64748b;
+    }
 }
 
 .metric-switch__item.is-active {
@@ -377,12 +407,21 @@ onLoad(() => {
     font-weight: 800;
     letter-spacing: 2rpx;
     margin-bottom: 16rpx;
+
+    .theme-light & {
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+    }
 }
 
 .top10-intro__desc {
     font-size: 24rpx;
     line-height: 1.8;
     color: #94a3b8;
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
 }
 
 .hero-section {
@@ -398,6 +437,12 @@ onLoad(() => {
     transition:
         transform 0.28s ease,
         box-shadow 0.28s ease;
+
+    .theme-light & {
+        background: #f8fafc;
+        border: 1rpx solid rgba(17, 24, 39, 0.06);
+        box-shadow: 0 8rpx 24rpx rgba(15, 23, 42, 0.05);
+    }
 }
 
 .hero-card--first {
@@ -426,10 +471,18 @@ onLoad(() => {
     position: absolute;
     inset: 0;
     background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 48%, rgba(6, 12, 18, 0.9) 100%);
+
+    .theme-light & {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.6) 100%);
+    }
 }
 
 .hero-card__overlay--soft {
     background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 50%, rgba(6, 12, 18, 0.74) 100%);
+
+    .theme-light & {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
+    }
 }
 
 .hero-card__rank {
@@ -539,12 +592,20 @@ onLoad(() => {
     font-weight: 800;
     letter-spacing: 4rpx;
     text-transform: uppercase;
+
+    .theme-light & {
+        color: var(--text-tertiary);
+    }
 }
 
 .rank-section__line {
     flex: 1;
     height: 1rpx;
     background: rgba(51, 65, 85, 0.8);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.08);
+    }
 }
 
 .rank-list {
@@ -568,6 +629,12 @@ onLoad(() => {
         transform 0.28s ease,
         box-shadow 0.28s ease,
         border-color 0.28s ease;
+
+    .theme-light & {
+        background: #f8fafc;
+        border: 1rpx solid rgba(17, 24, 39, 0.06);
+        box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
+    }
 }
 
 .rank-item__media {
@@ -619,6 +686,10 @@ onLoad(() => {
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
 }
 
 .rank-item__meta {
@@ -629,12 +700,20 @@ onLoad(() => {
     gap: 16rpx;
     color: #94a3b8;
     font-size: 22rpx;
+
+    .theme-light & {
+        color: var(--text-tertiary);
+    }
 }
 
 .rank-item__category {
     color: #9fb4d1;
     min-width: 0;
     flex: 1;
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
 }
 
 .rank-item__metric {
@@ -651,6 +730,10 @@ onLoad(() => {
     background: rgba(159, 180, 209, 0.08);
     align-self: center;
     margin-right: 10rpx;
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.04);
+    }
 }
 
 .rank-item:active {
@@ -703,6 +786,10 @@ onLoad(() => {
     font-size: 34rpx;
     color: #f8fafc;
     font-weight: 700;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
 }
 
 .top10-empty__desc {
@@ -710,5 +797,9 @@ onLoad(() => {
     font-size: 24rpx;
     line-height: 1.8;
     color: #94a3b8;
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
 }
 </style>

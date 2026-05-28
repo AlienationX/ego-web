@@ -41,14 +41,6 @@
             }
         },
         {
-            "path": "pages/user/edit-profile1",
-            "style": {
-                "navigationBarTitleText": "Edit Profile",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
             "path": "pages/user/subscriptions",
             "style": {
                 "navigationBarTitleText": "订阅更新",

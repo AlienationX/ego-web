@@ -1,11 +1,11 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <template v-if="!saved">
             <view class="header">
                 <view class="back-btn" @click="goBack">
-                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px" :color="backIconColor"></mdi-icon>
                 </view>
                 <text class="header-title">{{ t('changePasswordPage.title') }}</text>
                 <view class="header-placeholder"></view>
@@ -37,7 +37,7 @@
                                 <mdi-icon
                                     :path="showCurrent ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
                                     size="20px"
-                                    color="#9ca3af"
+                                    :color="iconMutedColor"
                                 ></mdi-icon>
                             </view>
                         </view>
@@ -61,7 +61,7 @@
                                 <mdi-icon
                                     :path="showNext ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
                                     size="20px"
-                                    color="#9ca3af"
+                                    :color="iconMutedColor"
                                 ></mdi-icon>
                             </view>
                         </view>
@@ -81,7 +81,7 @@
                                 <mdi-icon
                                     :path="showConfirm ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
                                     size="20px"
-                                    color="#9ca3af"
+                                    :color="iconMutedColor"
                                 ></mdi-icon>
                             </view>
                         </view>
@@ -150,8 +150,13 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { apiPostChangePassword } from '@/api/wallpaper.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
+const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#9ca3af'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
 const current = ref('');
@@ -223,9 +228,11 @@ function getStrength(password) {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     flex-direction: column;
 }
@@ -236,7 +243,7 @@ function getStrength(password) {
 
 .header {
     height: 112rpx;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     align-items: center;
     padding: 0 32rpx;
@@ -248,8 +255,8 @@ function getStrength(password) {
     width: 72rpx;
     height: 72rpx;
     border-radius: 16rpx;
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -260,7 +267,7 @@ function getStrength(password) {
     text-align: center;
     font-size: 36rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     margin-right: 88rpx;
 }
 
@@ -303,7 +310,7 @@ function getStrength(password) {
 .section-label {
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     padding: 0 32rpx 16rpx;
@@ -311,15 +318,15 @@ function getStrength(password) {
 
 .card {
     margin: 0 32rpx 40rpx;
-    background: #fff;
+    background: var(--page-background-secondary);
     border-radius: 24rpx;
-    border: 2rpx solid #f0f1f3;
+    border: 2rpx solid var(--panel-border);
     overflow: hidden;
 }
 
 .field {
     padding: 24rpx 32rpx;
-    border-bottom: 2rpx solid #f3f4f6;
+    border-bottom: 2rpx solid var(--panel-border);
 }
 
 .field-last {
@@ -329,7 +336,7 @@ function getStrength(password) {
 .field-label {
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     margin-bottom: 10rpx;
@@ -347,7 +354,7 @@ function getStrength(password) {
     outline: none;
     font-size: 30rpx;
     font-weight: 500;
-    color: #111827;
+    color: var(--text-primary);
     background: transparent;
     padding: 0;
     caret-color: #e5322d;
@@ -423,9 +430,9 @@ function getStrength(password) {
 
 .requirements {
     margin: 0 32rpx 48rpx;
-    background: #fff;
+    background: var(--page-background-secondary);
     border-radius: 24rpx;
-    border: 2rpx solid #f0f1f3;
+    border: 2rpx solid var(--panel-border);
     padding: 24rpx 28rpx;
 }
 
@@ -433,7 +440,7 @@ function getStrength(password) {
     display: block;
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.12em;
     margin-bottom: 20rpx;
@@ -454,7 +461,7 @@ function getStrength(password) {
     width: 32rpx;
     height: 32rpx;
     border-radius: 50%;
-    background: #f3f4f6;
+    background: var(--panel-background);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -471,7 +478,7 @@ function getStrength(password) {
 
 .requirements-text {
     font-size: 24rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .requirements-text.ok {
@@ -514,9 +521,9 @@ function getStrength(password) {
 }
 
 .submit-btn.disabled {
-    background: #f9fafb;
-    color: #9ca3af;
-    border: 2rpx solid #e5e7eb;
+    background: var(--panel-background);
+    color: var(--text-tertiary);
+    border: 2rpx solid var(--panel-border);
 }
 
 .success {
@@ -548,13 +555,13 @@ function getStrength(password) {
 .success-title {
     font-size: 40rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     margin-bottom: 20rpx;
 }
 
 .success-desc {
     font-size: 28rpx;
-    color: #6b7280;
+    color: var(--text-secondary);
     line-height: 40rpx;
     margin-bottom: 64rpx;
 }

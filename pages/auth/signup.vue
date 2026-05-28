@@ -1,7 +1,7 @@
 <template>
-    <view class="signup-container">
+    <view class="signup-container" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
-            <uni-icons type="back" color="#4a5670" size="20"></uni-icons>
+            <uni-icons type="back" :color="backIconColor" size="20"></uni-icons>
         </view>
 
         <!-- 主要内容区域 -->
@@ -51,7 +51,7 @@
                         <mdi-icon
                             :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
                             size="20px"
-                            color="#94a3b8"
+                            :color="iconMutedColor"
                         ></mdi-icon>
                     </view>
                 </view>
@@ -68,7 +68,7 @@
                         <mdi-icon
                             :path="showConfirmPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
                             size="20px"
-                            color="#94a3b8"
+                            :color="iconMutedColor"
                         ></mdi-icon>
                     </view>
                 </view>
@@ -108,11 +108,17 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiPostRegister } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
+
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#94a3b8' : '#4a5670'));
+const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#94a3b8'));
 
 // 表单数据
 const form = reactive({
@@ -283,9 +289,11 @@ const handleSignup = async () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .signup-container {
     min-height: 100vh;
-    background: #ffffff;
+    background: var(--page-background);
     overflow: hidden;
 }
 
@@ -295,9 +303,9 @@ const handleSignup = async () => {
     width: 72rpx;
     height: 72rpx;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1rpx solid rgba(214, 223, 238, 0.95);
-    box-shadow: 0 8rpx 20rpx rgba(31, 44, 72, 0.12);
+    background: var(--page-background-secondary);
+    border: 1rpx solid var(--panel-border);
+    box-shadow: 0 8rpx 20rpx var(--shadow-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -306,12 +314,12 @@ const handleSignup = async () => {
 
 .status-bar-placeholder {
     width: 100%;
-    background: #ffffff;
+    background: var(--page-background);
 }
 
 .top-nav {
     width: 100%;
-    background: #ffffff;
+    background: var(--page-background);
     padding: 0 48rpx;
 
     .nav-content {
@@ -362,7 +370,7 @@ const handleSignup = async () => {
 
     .sub-title {
         font-size: 28rpx;
-        color: #61677d;
+        color: var(--text-secondary);
         line-height: 1.6;
         opacity: 0.8;
     }
@@ -379,7 +387,7 @@ const handleSignup = async () => {
     .social-btn {
         flex: 1;
         height: 112rpx;
-        background: #f5f9fe;
+        background: var(--page-background-secondary);
         border-radius: 28rpx;
         display: flex;
         align-items: center;
@@ -400,7 +408,7 @@ const handleSignup = async () => {
         .social-text {
             font-size: 32rpx;
             font-weight: 500;
-            color: #61677d;
+            color: var(--text-secondary);
         }
     }
 }
@@ -413,13 +421,13 @@ const handleSignup = async () => {
     .divider-line {
         flex: 1;
         height: 1rpx;
-        background: #e0e5ec;
+        background: var(--panel-border);
     }
 
     .divider-text {
         margin: 0 24rpx;
         font-size: 28rpx;
-        color: #262626;
+        color: var(--text-primary);
     }
 }
 
@@ -430,7 +438,7 @@ const handleSignup = async () => {
 
     .form-item {
         height: 120rpx;
-        background: #f5f9fe;
+        background: var(--page-background-secondary);
         border-radius: 28rpx;
         display: flex;
         align-items: center;
@@ -444,7 +452,7 @@ const handleSignup = async () => {
         .form-input {
             flex: 1;
             font-size: 32rpx;
-            color: #333;
+            color: var(--text-primary);
             background: transparent;
         }
 
@@ -506,7 +514,7 @@ const handleSignup = async () => {
             line-height: 1.6;
 
             .normal-text {
-                color: #3b4054;
+                color: var(--text-tertiary);
             }
 
             .link-text {
@@ -554,7 +562,7 @@ const handleSignup = async () => {
         font-size: 28rpx;
 
         .normal-text {
-            color: #3b4054;
+            color: var(--text-secondary);
         }
 
         .link-text {

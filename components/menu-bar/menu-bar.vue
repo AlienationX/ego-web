@@ -11,7 +11,7 @@
             <view class="navbar">
                 <view class="left">
                     <view class="back" @click="goBack">
-                        <uni-icons type="back" color="#333" size="20"></uni-icons>
+                        <uni-icons type="back" :color="isDark ? '#f7f7fb' : '#333'" size="20"></uni-icons>
                     </view>
                     <view class="title">
                         <slot name="title"></slot>
@@ -20,7 +20,11 @@
 
                 <view v-if="showToggleMenu" class="right">
                     <view class="menu" @click="toggleMenu">
-                        <uni-icons type="more-filled" size="20" color="#666"></uni-icons>
+                        <uni-icons
+                            type="more-filled"
+                            size="20"
+                            :color="isDark ? 'rgba(247, 247, 251, 0.72)' : '#666'"
+                        ></uni-icons>
                     </view>
                 </view>
             </view>
@@ -32,7 +36,12 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { getStatusBarHeight, getNavBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
+
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
 
 // 定义props
 const props = defineProps({
@@ -76,6 +85,8 @@ const toggleMenu = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .menu-bar-container {
     width: 100%;
 }
@@ -86,7 +97,7 @@ const toggleMenu = () => {
     top: 0;
     width: 100%;
     z-index: 101;
-    background: $wp-bg-color-grey;
+    background: var(--chrome-background);
 }
 
 .box {
@@ -94,13 +105,13 @@ const toggleMenu = () => {
     left: 0;
     width: 100%;
     z-index: 100;
-    background: $wp-bg-color-grey;
+    background: var(--chrome-background);
     display: flex;
     justify-content: left;
     align-items: center;
 
     &.with-border {
-        border-bottom: 1px solid $wp-border-color-light;
+        border-bottom: 1px solid var(--panel-border);
     }
 
     .navbar {
@@ -119,7 +130,7 @@ const toggleMenu = () => {
             .back {
                 width: 64rpx;
                 height: 64rpx;
-                background: $wp-bg-color;
+                background: var(--panel-background);
                 border-radius: 50%;
                 display: flex;
                 justify-content: center;
@@ -128,7 +139,7 @@ const toggleMenu = () => {
                 transition: all 0.3s;
 
                 &:active {
-                    background: $wp-bg-color-hover;
+                    background: var(--panel-background-strong);
                     transform: scale(0.95);
                 }
             }
@@ -137,7 +148,7 @@ const toggleMenu = () => {
                 padding-left: 24rpx;
                 font-size: 36rpx;
                 font-weight: 600;
-                color: $wp-text-color;
+                color: var(--text-primary);
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -160,7 +171,7 @@ const toggleMenu = () => {
                 transition: all 0.3s;
 
                 &:active {
-                    background: $wp-bg-color-hover;
+                    background: var(--panel-background);
                     transform: scale(0.95);
                 }
             }

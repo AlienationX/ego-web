@@ -1,8 +1,8 @@
 <template>
-    <view class="reset-password-container">
+    <view class="reset-password-container" :class="isDark ? 'theme-dark' : 'theme-light'">
         <!-- 返回按钮 -->
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
-            <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#4a5670"></mdi-icon>
+            <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="backIconColor"></mdi-icon>
         </view>
 
         <view class="step-host">
@@ -99,7 +99,7 @@
                                 <mdi-icon
                                     :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
                                     size="48"
-                                    color="#9ca3af"
+                                    :color="iconMutedColor"
                                 ></mdi-icon>
                             </view>
                         </view>
@@ -140,8 +140,13 @@ import { ref, computed, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { apiPostSendEmailCode, apiPostVerifyCode, apiPostResetPassword } from '@/api/wallpaper.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#94a3b8' : '#4a5670'));
+const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#9ca3af'));
 const currentIndex = ref(0);
 const stepAnimClass = ref('step-anim-left');
 const animTick = ref(0);
@@ -444,11 +449,13 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .reset-password-container {
     width: 750rpx;
     max-width: 100%;
     height: 100vh;
-    background: #ffffff;
+    background: var(--page-background);
     overflow-x: hidden;
     overflow-y: hidden;
     position: relative;
@@ -465,9 +472,9 @@ onUnmounted(() => {
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1rpx solid rgba(214, 223, 238, 0.95);
-    box-shadow: 0 8rpx 20rpx rgba(31, 44, 72, 0.12);
+    background: var(--page-background-secondary);
+    border: 1rpx solid var(--panel-border);
+    box-shadow: 0 8rpx 20rpx var(--shadow-color);
 }
 
 .step-host {
@@ -483,7 +490,7 @@ onUnmounted(() => {
     min-height: 100%;
     box-sizing: border-box;
     overflow-x: hidden;
-    background: #ffffff;
+    background: var(--page-background);
 }
 
 .step-anim-left {
@@ -539,7 +546,7 @@ onUnmounted(() => {
 
     .sub-title {
         font-size: 28rpx;
-        color: #61677d;
+        color: var(--text-secondary);
         line-height: 1.6;
         opacity: 0.8;
         white-space: normal;
@@ -561,7 +568,7 @@ onUnmounted(() => {
         width: 100%;
         max-width: 100%;
         height: 120rpx;
-        background: #f5f9fe;
+        background: var(--page-background-secondary);
         border-radius: 28rpx;
         display: flex;
         align-items: center;
@@ -573,7 +580,7 @@ onUnmounted(() => {
             width: 0;
             min-width: 0;
             font-size: 32rpx;
-            color: #333;
+            color: var(--text-primary);
             background: transparent;
         }
 
@@ -644,7 +651,7 @@ onUnmounted(() => {
         min-width: 0;
         max-width: 96rpx;
         height: 120rpx;
-        background: #f5f9fe;
+        background: var(--page-background-secondary);
         border-radius: 24rpx;
         display: flex;
         align-items: center;
@@ -666,7 +673,7 @@ onUnmounted(() => {
             height: 100%;
             font-size: 44rpx;
             font-weight: 600;
-            color: #333;
+            color: var(--text-primary);
             text-align: center;
             background: transparent;
             border: none;

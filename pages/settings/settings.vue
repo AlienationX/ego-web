@@ -3,7 +3,11 @@
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="18px" :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"></mdi-icon>
+                <mdi-icon
+                    path="/static/icons/arrow-left.svg"
+                    size="18px"
+                    :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"
+                ></mdi-icon>
             </view>
             <text class="header-title">{{ t('settings.title') }}</text>
             <view class="header-placeholder"></view>
@@ -34,7 +38,11 @@
                     >
                         <view class="row-left">
                             <view class="icon-box">
-                                <mdi-icon :path="item.icon" size="28px" :color="settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
+                                <mdi-icon
+                                    :path="item.icon"
+                                    size="28px"
+                                    :color="settingsStore.isDark ? '#9ca3af' : '#6B7280'"
+                                ></mdi-icon>
                             </view>
                             <view class="label-block">
                                 <text class="label">{{ item.label }}</text>
@@ -42,7 +50,11 @@
                             </view>
                         </view>
                         <view class="row-right">
-                            <mdi-icon path="/static/icons/chevron-right.svg" size="17px" :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"></mdi-icon>
+                            <mdi-icon
+                                path="/static/icons/chevron-right.svg"
+                                size="17px"
+                                :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"
+                            ></mdi-icon>
                         </view>
                     </view>
                 </view>
@@ -63,7 +75,7 @@
                                 <mdi-icon
                                     :path="item.icon"
                                     size="28px"
-                                    :color="item.destructive ? '#E5322D' : (settingsStore.isDark ? '#9ca3af' : '#6B7280')"
+                                    :color="item.destructive ? '#E5322D' : settingsStore.isDark ? '#9ca3af' : '#6B7280'"
                                 ></mdi-icon>
                             </view>
                             <view class="label-block">
@@ -83,7 +95,11 @@
                             </template>
                             <template v-else>
                                 <text v-if="item.value" class="value">{{ item.value }}</text>
-                                <mdi-icon path="/static/icons/chevron-right.svg" size="17px" :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"></mdi-icon>
+                                <mdi-icon
+                                    path="/static/icons/chevron-right.svg"
+                                    size="17px"
+                                    :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"
+                                ></mdi-icon>
                             </template>
                         </view>
                     </view>
@@ -266,7 +282,11 @@
                 <view class="choice-popup__head">
                     <text class="choice-popup__title">{{ t('settings.items.theme.label') }}</text>
                     <view class="choice-popup__close" @click="closeThemePopup">
-                        <mdi-icon path="/static/icons/close.svg" size="20px" :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"></mdi-icon>
+                        <mdi-icon
+                            path="/static/icons/close.svg"
+                            size="20px"
+                            :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"
+                        ></mdi-icon>
                     </view>
                 </view>
                 <view class="choice-list">
@@ -282,7 +302,13 @@
                                 <mdi-icon
                                     :path="item.icon"
                                     size="24px"
-                                    :color="settingsStore.options.theme === item.value ? '#28B389' : (settingsStore.isDark ? '#e5e7eb' : '#374151')"
+                                    :color="
+                                        settingsStore.options.theme === item.value
+                                            ? '#28B389'
+                                            : settingsStore.isDark
+                                              ? '#e5e7eb'
+                                              : '#374151'
+                                    "
                                 ></mdi-icon>
                             </view>
                             <view class="choice-item__text">
@@ -306,7 +332,11 @@
                 <view class="choice-popup__head">
                     <text class="choice-popup__title">{{ t('settings.items.language.label') }}</text>
                     <view class="choice-popup__close" @click="closeLanguagePopup">
-                        <mdi-icon path="/static/icons/close.svg" size="20px" :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"></mdi-icon>
+                        <mdi-icon
+                            path="/static/icons/close.svg"
+                            size="20px"
+                            :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"
+                        ></mdi-icon>
                     </view>
                 </view>
                 <view class="choice-list">
@@ -322,7 +352,13 @@
                                 <mdi-icon
                                     :path="item.icon"
                                     size="24px"
-                                    :color="languagePreference === item.value ? '#28B389' : (settingsStore.isDark ? '#e5e7eb' : '#374151')"
+                                    :color="
+                                        languagePreference === item.value
+                                            ? '#28B389'
+                                            : settingsStore.isDark
+                                              ? '#e5e7eb'
+                                              : '#374151'
+                                    "
                                 ></mdi-icon>
                             </view>
                             <view class="choice-item__text">
@@ -500,7 +536,7 @@ const profileItems = computed(() => [
         icon: '/static/icons/account.svg',
         label: t('settings.items.editProfile.label'),
         sublabel: t('settings.items.editProfile.sublabel'),
-        action: () => uni.navigateTo({ url: '/pages/user/edit-profile1' }),
+        action: () => uni.navigateTo({ url: '/pages/user/edit-profile' }),
     },
 ]);
 

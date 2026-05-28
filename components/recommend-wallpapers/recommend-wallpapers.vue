@@ -1,5 +1,5 @@
 <template>
-    <view class="recommend-panel">
+    <view class="recommend-panel" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="recommend-panel__ad">
             <custom-ad-banner></custom-ad-banner>
         </view>
@@ -33,7 +33,7 @@
                     </view>
                 </view>
                 <view class="recommend-card__arrow">
-                    <uni-icons type="right" size="16" color="#7c8aa5"></uni-icons>
+                    <uni-icons type="right" size="16" :color="arrowIconColor"></uni-icons>
                 </view>
             </view>
         </view>
@@ -47,6 +47,7 @@ import { apiGetSimilarWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const props = defineProps({
     currentInfo: {
@@ -62,9 +63,12 @@ const props = defineProps({
 const { t } = useI18n();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
 const list = ref([]);
 const loading = ref(false);
 const isAdmin = computed(() => !!userStore.isAdmin);
+const isDark = computed(() => settingsStore.isDark);
+const arrowIconColor = computed(() => (isDark.value ? '#94a3b8' : '#7c8aa5'));
 
 const normalizeTags = (wall = {}) => {
     if (Array.isArray(wall.tabs_list)) return wall.tabs_list.filter(Boolean);
@@ -145,16 +149,22 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .recommend-panel {
     padding: 32rpx 24rpx 40rpx;
-    background: #f8fafc;
+    background: var(--page-background);
 }
 
 .recommend-panel__ad {
     margin-bottom: 24rpx;
     border-radius: 24rpx;
     overflow: hidden;
-    background: #eef2f7;
+    background: var(--panel-background);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.03);
+    }
 }
 
 .recommend-panel__head {
@@ -168,18 +178,18 @@ watch(
 .recommend-panel__title {
     font-size: 34rpx;
     font-weight: 700;
-    color: #162033;
+    color: var(--text-primary);
 }
 
 .recommend-panel__desc {
     margin-top: 6rpx;
     font-size: 24rpx;
-    color: #7c8aa5;
+    color: var(--text-secondary);
 }
 
 .recommend-panel__count {
     font-size: 22rpx;
-    color: #7c8aa5;
+    color: var(--text-tertiary);
 }
 
 .recommend-panel__loading,
@@ -188,7 +198,7 @@ watch(
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #8b97ac;
+    color: var(--text-tertiary);
     font-size: 24rpx;
 }
 
@@ -202,15 +212,13 @@ watch(
     min-height: 220rpx;
     height: 220rpx;
     border-radius: 22rpx;
-    background: #fff;
-    border: 1rpx solid #e9edf5;
+    background: var(--page-background-secondary);
+    border: 1rpx solid var(--panel-border);
     display: flex;
     align-items: stretch;
     gap: 0;
     overflow: hidden;
-    box-shadow:
-        0 10rpx 24rpx rgba(15, 23, 42, 0.07),
-        0 24rpx 48rpx rgba(15, 23, 42, 0.06);
+    box-shadow: 0 10rpx 24rpx var(--shadow-color);
     transition:
         transform 0.28s ease,
         box-shadow 0.28s ease,
@@ -260,7 +268,7 @@ watch(
 .recommend-card__title {
     font-size: 30rpx;
     font-weight: 600;
-    color: #526173;
+    color: var(--text-primary);
     line-height: 1.32;
     letter-spacing: 0.2rpx;
     display: -webkit-box;
@@ -276,7 +284,7 @@ watch(
     justify-content: space-between;
     gap: 16rpx;
     font-size: 22rpx;
-    color: #7c8aa5;
+    color: var(--text-secondary);
 }
 
 .recommend-card__meta-text {
@@ -294,7 +302,7 @@ watch(
 .recommend-card__score-text {
     font-size: 24rpx;
     font-weight: 600;
-    color: #6b7789;
+    color: var(--text-tertiary);
     line-height: 1;
 }
 
@@ -310,9 +318,7 @@ watch(
 
 .recommend-card:active {
     transform: scale(1.04);
-    box-shadow:
-        0 18rpx 36rpx rgba(15, 23, 42, 0.12),
-        0 34rpx 64rpx rgba(15, 23, 42, 0.12);
+    box-shadow: 0 18rpx 36rpx var(--shadow-color);
     border-color: rgba(40, 179, 137, 0.3);
 }
 
@@ -323,9 +329,7 @@ watch(
 @media (hover: hover) and (pointer: fine) {
     .recommend-card:hover {
         transform: scale(1.04);
-        box-shadow:
-            0 18rpx 36rpx rgba(15, 23, 42, 0.12),
-            0 34rpx 64rpx rgba(15, 23, 42, 0.12);
+        box-shadow: 0 18rpx 36rpx var(--shadow-color);
         border-color: rgba(40, 179, 137, 0.3);
     }
 

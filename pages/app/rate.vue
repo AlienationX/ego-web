@@ -231,8 +231,10 @@ onPullDownRefresh(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
-    background: linear-gradient(180deg, var(--page-background, #f8fafc) 0%, var(--page-background-secondary, #f2f6fb) 100%);
+    background: var(--page-background);
     min-height: 100vh;
     transition: background-color 0.3s ease;
     display: flex;

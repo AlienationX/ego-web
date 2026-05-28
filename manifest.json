@@ -2,8 +2,8 @@
     "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
     "description" : "探索壁纸，亦探索自我。",
-    "versionName" : "1.3.0",
-    "versionCode" : 130,
+    "versionName" : "1.3.1",
+    "versionCode" : 131,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -167,10 +167,11 @@
             "bundleName" : "com.ego.app.wallpaper",
             "deviceTypes" : [ "phone", "tablet" ],
             "splashScreens" : {
-                "startWindowIcon" : "/Users/tangzy/Documents/apps/logo/start.png"
+                "startWindowIcon" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/launch.png"
             },
             "icons" : {
-                "foreground" : "/Users/tangzy/Documents/apps/wallpapers/logo/logo_wp_1024_1024.png"
+                "foreground" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/logo-foreground.png",
+                "background" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/logo-background.png"
             },
             "signingConfigs" : {
                 "release" : {

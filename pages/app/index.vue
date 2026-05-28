@@ -3,14 +3,14 @@
         class="homeLayout"
         :class="['homeLayout--' + activeHomeTab, isDark ? 'theme-dark' : 'theme-light']"
         :style="{
-            '--mask-color': currentTabBackground,
-            backgroundColor: currentTabBackground,
+            '--mask-color': pageBackgroundVar,
+            backgroundColor: pageBackgroundVar,
             height: activeHomeTab !== 'home' ? '100vh' : 'auto',
-            overflow: activeHomeTab !== 'home' ? 'hidden' : 'visible'
+            overflow: activeHomeTab !== 'home' ? 'hidden' : 'visible',
         }"
     >
         <!-- #ifndef WEB -->
-        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: currentTabBackground }"></view>
+        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: pageBackgroundVar }"></view>
         <!-- #endif -->
 
         <view
@@ -20,7 +20,7 @@
                 paddingTop: statusBarHeight + 'px',
                 height: navBarHeight + 'px',
                 paddingRight: titlebarPaddingRight,
-                backgroundColor: currentTabBackground,
+                backgroundColor: pageBackgroundVar,
             }"
         >
             <view class="home-titlebar__inner" :style="{ height: titleBarHeight + 'px' }">
@@ -435,27 +435,16 @@ const titleBarHeight = ref(getTitleBarHeight() || 0);
 const isTitleBarVisible = ref(true);
 let lastScrollTop = 0;
 
-const tabBackgroundMap = {
-    home: '#f5f7fb',
-    recommend: '#0b1017',
-    latest: '#0b1017',
-    hot: '#0b1017',
-};
-
 const activeHomeTab = ref('home');
 
-const currentTabBackground = computed(() => {
-    if (activeHomeTab.value === 'home') {
-        return isDark.value ? '#111111' : '#f5f7fb';
-    }
-    return tabBackgroundMap[activeHomeTab.value] || tabBackgroundMap.home;
-});
+/** 与 theme-variables.scss 的 --page-background 一致，依赖根节点 theme-light/theme-dark */
+const pageBackgroundVar = 'var(--page-background)';
 
 const isDarkTab = computed(() => {
     if (activeHomeTab.value === 'home') {
         return isDark.value;
     }
-    return ['recommend', 'latest', 'hot'].includes(activeHomeTab.value);
+    return isDark.value;
 });
 
 const searchIconColor = computed(() => {
@@ -1062,10 +1051,10 @@ onShareTimeline(() => {
     min-height: 100vh;
     box-sizing: border-box;
     transition: background-color 0.3s ease;
-    background-color: #f5f7fb;
+    background-color: var(--page-background);
 
     &.theme-dark {
-        background-color: #111111;
+        background-color: var(--page-background);
 
         .notice {
             background: rgba(255, 255, 255, 0.05);
@@ -1121,7 +1110,7 @@ onShareTimeline(() => {
         z-index: 50;
         padding: 0 20rpx;
         box-sizing: border-box;
-        background: #f5f7fb;
+        background: var(--page-background);
         transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
         
         &.is-hidden {
@@ -1142,7 +1131,7 @@ onShareTimeline(() => {
             }
             
             .home-tabs-mask {
-                background: linear-gradient(to right, transparent, var(--mask-color, #0b1017));
+                background: linear-gradient(to right, transparent, var(--mask-color, var(--page-background)));
             }
 
             .home-search {
@@ -1181,7 +1170,7 @@ onShareTimeline(() => {
         top: 0;
         bottom: 0;
         width: 40rpx;
-        background: linear-gradient(to right, transparent, var(--mask-color, #f5f7fb));
+        background: linear-gradient(to right, transparent, var(--mask-color, var(--page-background)));
         pointer-events: none;
     }
 

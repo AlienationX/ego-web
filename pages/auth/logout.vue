@@ -1,11 +1,11 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <template v-if="!loggedOut">
             <view class="header">
                 <view class="back-btn" @click="goBack">
-                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px" color="#374151"></mdi-icon>
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px" :color="backIconColor"></mdi-icon>
                 </view>
                 <text class="header-title">{{ t('logoutPage.title') }}</text>
                 <view class="header-placeholder"></view>
@@ -55,9 +55,13 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const loggedOut = ref(false);
 
@@ -85,9 +89,11 @@ const backToSettings = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     flex-direction: column;
 }
@@ -98,7 +104,7 @@ const backToSettings = () => {
 
 .header {
     height: 112rpx;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     align-items: center;
     padding: 0 32rpx;
@@ -109,8 +115,8 @@ const backToSettings = () => {
     width: 72rpx;
     height: 72rpx;
     border-radius: 16rpx;
-    background: #fff;
-    border: 1px solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 1px solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -121,7 +127,7 @@ const backToSettings = () => {
     text-align: center;
     font-size: 36rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .header-placeholder {
@@ -157,14 +163,14 @@ const backToSettings = () => {
 .main-title {
     font-size: 44rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     margin-bottom: 20rpx;
     text-align: center;
 }
 
 .desc {
     font-size: 28rpx;
-    color: #6b7280;
+    color: var(--text-secondary);
     line-height: 44rpx;
     text-align: center;
     margin-bottom: 64rpx;
@@ -174,9 +180,9 @@ const backToSettings = () => {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    background: #fff;
+    background: var(--page-background-secondary);
     border-radius: 24rpx;
-    border: 1px solid #f0f1f3;
+    border: 1px solid var(--panel-border);
     padding: 28rpx 32rpx;
     display: flex;
     align-items: center;
@@ -194,13 +200,13 @@ const backToSettings = () => {
     display: block;
     font-size: 30rpx;
     font-weight: 600;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .account-meta .email {
     display: block;
     font-size: 24rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .btn-group {
@@ -235,9 +241,9 @@ const backToSettings = () => {
     width: 100%;
     height: 100rpx;
     border-radius: 24rpx;
-    background: #fff;
-    border: 2rpx solid #e5e7eb;
-    color: #374151;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
+    color: var(--text-primary);
     font-size: 30rpx;
     font-weight: 600;
     display: flex;
@@ -266,13 +272,13 @@ const backToSettings = () => {
 .success-title {
     font-size: 44rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     margin-bottom: 20rpx;
 }
 
 .success-desc {
     font-size: 28rpx;
-    color: #6b7280;
+    color: var(--text-secondary);
     line-height: 44rpx;
     text-align: center;
     margin-bottom: 72rpx;

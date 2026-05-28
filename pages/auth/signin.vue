@@ -1,7 +1,7 @@
 <template>
-    <view class="signin-container">
+    <view class="signin-container" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
-            <uni-icons type="back" color="#4a5670" size="20"></uni-icons>
+            <uni-icons type="back" :color="backIconColor" size="20"></uni-icons>
         </view>
 
         <!-- 内容区域 -->
@@ -53,7 +53,7 @@
                         <mdi-icon
                             :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
                             size="20px"
-                            color="#94a3b8"
+                            :color="iconMutedColor"
                         ></mdi-icon>
                     </view>
                 </view>
@@ -120,15 +120,20 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostLogin, apiPostLoginByWechat } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { encrypt, decrypt } from '@/utils/encryption.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#94a3b8' : '#4a5670'));
+const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#94a3b8'));
 const backTop = ref((getStatusBarHeight() || 0) + 10);
 const REMEMBER_STORAGE_KEY = 'signinRemember';
 
@@ -369,7 +374,7 @@ const handleLogin = async () => {
             icon: 'success',
         });
         
-        uni.reLaunch({url: '/pages/user/user'});
+        goBack();
     } catch (error) {
         uni.showToast({
             title: error.message || t('login.loginFailed'),
@@ -390,15 +395,17 @@ const goToSignup = () => {
 
 const goBack = () => {
     uni.navigateBack({
-        fail: () => uni.reLaunch({ url: '/pages/app/index' }),
+        fail: () => uni.reLaunch({ url: '/pages/user/user' }),
     });
 };
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .signin-container {
     min-height: 100vh;
-    background: #ffffff;
+    background: var(--page-background);
     padding: 0 48rpx;
 }
 
@@ -408,9 +415,9 @@ const goBack = () => {
     width: 72rpx;
     height: 72rpx;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1rpx solid rgba(214, 223, 238, 0.95);
-    box-shadow: 0 8rpx 20rpx rgba(31, 44, 72, 0.12);
+    background: var(--page-background-secondary);
+    border: 1rpx solid var(--panel-border);
+    box-shadow: 0 8rpx 20rpx var(--shadow-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -437,7 +444,7 @@ const goBack = () => {
 
     .sub-title {
         font-size: 28rpx;
-        color: #61677d;
+        color: var(--text-secondary);
         line-height: 1.6;
         opacity: 0.8;
     }
@@ -454,7 +461,7 @@ const goBack = () => {
     .social-btn {
         flex: 1;
         height: 112rpx;
-        background: #f5f9fe;
+        background: var(--page-background-secondary);
         border-radius: 28rpx;
         display: flex;
         align-items: center;
@@ -475,7 +482,7 @@ const goBack = () => {
         .social-text {
             font-size: 32rpx;
             font-weight: 500;
-            color: #61677d;
+            color: var(--text-secondary);
         }
     }
 }
@@ -488,13 +495,13 @@ const goBack = () => {
     .divider-line {
         flex: 1;
         height: 1rpx;
-        background: #e0e5ec;
+        background: var(--panel-border);
     }
 
     .divider-text {
         margin: 0 24rpx;
         font-size: 28rpx;
-        color: #262626;
+        color: var(--text-primary);
     }
 }
 
@@ -506,7 +513,7 @@ const goBack = () => {
 
     .form-item {
         height: 120rpx;
-        background: #f5f9fe;
+        background: var(--page-background-secondary);
         border-radius: 28rpx;
         display: flex;
         align-items: center;
@@ -515,7 +522,7 @@ const goBack = () => {
         .form-input {
             flex: 1;
             font-size: 32rpx;
-            color: #333;
+            color: var(--text-primary);
             background: transparent;
         }
 
@@ -548,7 +555,7 @@ const goBack = () => {
 
     text {
         font-size: 24rpx;
-        color: #7c8ba0;
+        color: var(--text-tertiary);
     }
 }
 
@@ -595,7 +602,7 @@ const goBack = () => {
 
 .remember-text {
     font-size: 24rpx;
-    color: #7c8ba0;
+    color: var(--text-tertiary);
 }
 
 .agreement-section {
@@ -643,7 +650,7 @@ const goBack = () => {
     line-height: 1.5;
 
     .normal-text {
-        color: #7c8ba0;
+        color: var(--text-tertiary);
     }
 
     .link-text {
@@ -690,7 +697,7 @@ const goBack = () => {
         font-size: 28rpx;
 
         .normal-text {
-            color: #3b4054;
+            color: var(--text-secondary);
         }
 
         .link-text {

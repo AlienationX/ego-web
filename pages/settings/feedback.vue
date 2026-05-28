@@ -1,9 +1,9 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <uni-icons type="back" size="18" color="#374151"></uni-icons>
+                <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
             </view>
             <text class="header-title">{{ t('feedback.title') }}</text>
             <view class="header-placeholder"></view>
@@ -109,9 +109,13 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
@@ -302,9 +306,11 @@ const handleSubmit = async () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     flex-direction: column;
 }
@@ -315,7 +321,7 @@ const handleSubmit = async () => {
 
 .header {
     height: 112rpx;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     align-items: center;
     padding: 0 32rpx;
@@ -326,8 +332,8 @@ const handleSubmit = async () => {
     width: 72rpx;
     height: 72rpx;
     border-radius: 16rpx;
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -338,7 +344,7 @@ const handleSubmit = async () => {
     text-align: center;
     font-size: 36rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .header-placeholder {
@@ -359,7 +365,7 @@ const handleSubmit = async () => {
     display: block;
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     letter-spacing: 0.07em;
     text-transform: uppercase;
     margin-bottom: 16rpx;
@@ -375,10 +381,10 @@ const handleSubmit = async () => {
     height: 68rpx;
     padding: 0 28rpx;
     border-radius: 40rpx;
-    border: 2rpx solid #e5e7eb;
-    background: #fff;
+    border: 2rpx solid var(--panel-border);
+    background: var(--page-background-secondary);
     font-size: 26rpx;
-    color: #6b7280;
+    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -392,8 +398,8 @@ const handleSubmit = async () => {
 }
 
 .card {
-    background: #fff;
-    border: 2rpx solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     border-radius: 24rpx;
     overflow: hidden;
     width: 100%;
@@ -407,13 +413,13 @@ const handleSubmit = async () => {
     background: transparent;
     padding: 28rpx 32rpx;
     font-size: 28rpx;
-    color: #111827;
+    color: var(--text-primary);
     line-height: 44rpx;
     box-sizing: border-box;
 }
 
 .char-row {
-    border-top: 2rpx solid #f3f4f6;
+    border-top: 2rpx solid var(--panel-border);
     padding: 16rpx 32rpx;
     display: flex;
     justify-content: flex-end;
@@ -421,7 +427,7 @@ const handleSubmit = async () => {
 
 .char-count {
     font-size: 22rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .image-list {
@@ -436,18 +442,18 @@ const handleSubmit = async () => {
     width: 176rpx;
     height: 176rpx;
     border-radius: 24rpx;
-    border: 2rpx dashed #e5e7eb;
+    border: 2rpx dashed var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    background: #f9fafb;
+    background: var(--panel-background);
     overflow: hidden;
 }
 
 .image-item {
     border-style: solid;
-    background: #fff;
+    background: var(--page-background-secondary);
 }
 
 .image-preview {
@@ -470,14 +476,14 @@ const handleSubmit = async () => {
 
 .add-text {
     font-size: 22rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     margin-top: 12rpx;
 }
 
 .image-tip {
     padding: 0 24rpx 24rpx;
     font-size: 24rpx;
-    color: #9ca3af;
+    color: var(--text-tertiary);
 }
 
 .input {
@@ -487,7 +493,7 @@ const handleSubmit = async () => {
     background: transparent;
     padding: 0 32rpx;
     font-size: 28rpx;
-    color: #111827;
+    color: var(--text-primary);
     box-sizing: border-box;
     display: block;
 }
@@ -519,8 +525,8 @@ const handleSubmit = async () => {
 }
 
 .submit-btn.disabled {
-    background: #f9fafb;
-    color: #9ca3af;
-    border: 2rpx solid #e5e7eb;
+    background: var(--panel-background);
+    color: var(--text-tertiary);
+    border: 2rpx solid var(--panel-border);
 }
 </style>

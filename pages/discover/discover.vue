@@ -630,9 +630,11 @@ onUnload(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     &.theme-light {
-        --discover-bg: #f5f5f8;
+        --discover-bg: var(--page-background);
         --discover-panel: rgba(255, 255, 255, 0.9);
         --discover-panel-strong: rgba(255, 255, 255, 0.98);
         --discover-border: rgba(17, 17, 17, 0.08);
@@ -654,7 +656,7 @@ onUnload(() => {
     }
 
     &.theme-dark {
-        --discover-bg: #111111;
+        --discover-bg: var(--page-background);
         --discover-panel: rgba(255, 255, 255, 0.06);
         --discover-panel-strong: rgba(255, 255, 255, 0.08);
         --discover-border: rgba(255, 255, 255, 0.1);

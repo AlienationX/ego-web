@@ -64,7 +64,7 @@ const classifyList = ref([]);
 const isLoading = ref(true);
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.options.theme === 'dark');
+const isDark = computed(() => settingsStore.isDark);
 const adStateMap = ref({});
 
 const classifyComputed = computed(() => {
@@ -132,6 +132,8 @@ onLoad(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .classLayout {
     background: var(--page-background);
     min-height: 100vh;
