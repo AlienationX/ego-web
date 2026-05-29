@@ -1,9 +1,9 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <uni-icons type="back" size="18" color="#374151"></uni-icons>
+                <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
             </view>
             <text class="header-title">{{ t('editProfile1.title') }}</text>
             <view class="header-placeholder"></view>
@@ -76,14 +76,18 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const userStore = useUserStore();
 const { t } = useI18n();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
+const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const saved = ref(false);
 
@@ -174,9 +178,11 @@ const goBack = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f5f6f8;
+    background: var(--page-background);
 }
 
 .status-holder {
@@ -185,7 +191,7 @@ const goBack = () => {
 
 .header {
     height: 112rpx;
-    background: #f5f6f8;
+    background: var(--page-background);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -196,8 +202,8 @@ const goBack = () => {
     width: 72rpx;
     height: 72rpx;
     border-radius: 16rpx;
-    background: #fff;
-    border: 1px solid #f0f1f3;
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -206,7 +212,7 @@ const goBack = () => {
 .header-title {
     font-size: 36rpx;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     flex: 1;
     text-align: center;
 }
@@ -214,20 +220,6 @@ const goBack = () => {
 .header-placeholder {
     width: 72rpx;
     height: 72rpx;
-}
-
-.save-mini-btn {
-    height: 72rpx;
-    padding: 0 28rpx;
-    border-radius: 16rpx;
-    background: #e5322d;
-    color: #fff;
-    border: none;
-    display: flex;
-    align-items: center;
-    gap: 12rpx;
-    font-size: 26rpx;
-    font-weight: 600;
 }
 
 .content {
@@ -263,7 +255,7 @@ const goBack = () => {
     height: 56rpx;
     border-radius: 28rpx;
     background: #e5322d;
-    border: 2px solid #f5f6f8;
+    border: 2px solid var(--page-background);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -281,23 +273,23 @@ const goBack = () => {
     margin-bottom: 16rpx;
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     letter-spacing: 0.07em;
     text-transform: uppercase;
     display: block;
 }
 
 .card {
-    background: #fff;
+    background: var(--page-background-secondary);
     border-radius: 24rpx;
-    border: 1px solid #f0f1f3;
+    border: 2rpx solid var(--panel-border);
     margin: 0 32rpx 48rpx;
     overflow: hidden;
 }
 
 .field {
     padding: 24rpx 32rpx;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 2rpx solid var(--panel-border);
 }
 
 .field-last {
@@ -309,7 +301,7 @@ const goBack = () => {
     margin-bottom: 10rpx;
     font-size: 22rpx;
     font-weight: 600;
-    color: #9ca3af;
+    color: var(--text-tertiary);
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -318,7 +310,7 @@ const goBack = () => {
     width: 100%;
     font-size: 30rpx;
     font-weight: 500;
-    color: #111827;
+    color: var(--text-primary);
     background: transparent;
 }
 

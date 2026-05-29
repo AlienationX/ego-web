@@ -1,9 +1,13 @@
 <template>
-    <view class="page-header" :style="{ paddingTop: `${statusBarHeight}px` }">
+    <view class="page-header" :class="isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: `${statusBarHeight}px` }">
         <view class="page-header__inner">
             <view class="page-header__side page-header__side--left">
                 <view v-if="showBack" class="page-header__action" @click="handleBack">
-                    <mdi-icon path="/static/icons/arrow-left.svg" size="26px" color="#101828"></mdi-icon>
+                    <mdi-icon
+                        path="/static/icons/arrow-left.svg"
+                        size="26px"
+                        :color="isDark ? '#f7f7fb' : '#101828'"
+                    ></mdi-icon>
                 </view>
             </view>
 
@@ -15,7 +19,7 @@
 
             <view class="page-header__side page-header__side--right">
                 <navigator v-if="searchable" url="/pages/app/search" class="page-header__action">
-                    <uni-icons type="search" size="18" color="#101828"></uni-icons>
+                    <uni-icons type="search" size="18" :color="isDark ? '#f7f7fb' : '#101828'"></uni-icons>
                 </navigator>
                 <view v-else-if="rightText" class="page-header__pill" @click="$emit('right-click')">{{ rightText }}</view>
                 <view v-else class="page-header__placeholder"></view>
@@ -25,7 +29,12 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useSettingsStore } from '@/stores/settings.js';
+
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
 
 const props = defineProps({
     title: {
@@ -69,6 +78,8 @@ const handleBack = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .page-header {
     position: relative;
     padding-left: 24rpx;
@@ -77,6 +88,12 @@ const handleBack = () => {
     background:
         radial-gradient(circle at top right, rgba(125, 211, 252, 0.12) 0%, rgba(125, 211, 252, 0) 26%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%);
+
+    &.theme-dark {
+        background:
+            radial-gradient(circle at top right, rgba(125, 211, 252, 0.06) 0%, rgba(125, 211, 252, 0) 26%),
+            linear-gradient(180deg, rgba(24, 24, 28, 0.98) 0%, rgba(28, 28, 28, 0.92) 100%);
+    }
 }
 
 .page-header__inner {
@@ -111,6 +128,10 @@ const handleBack = () => {
     color: rgba(16, 24, 40, 0.42);
     text-transform: uppercase;
     margin-bottom: 6rpx;
+
+    .theme-dark & {
+        color: rgba(247, 247, 251, 0.42);
+    }
 }
 
 .page-header__title {
@@ -121,6 +142,10 @@ const handleBack = () => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    .theme-dark & {
+        color: var(--text-primary);
+    }
 }
 
 .page-header__subtitle {
@@ -130,6 +155,10 @@ const handleBack = () => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    .theme-dark & {
+        color: var(--text-tertiary);
+    }
 }
 
 .page-header__action,
@@ -158,5 +187,11 @@ const handleBack = () => {
     color: #0f8b6d;
     background: rgba(40, 179, 137, 0.12);
     border: 1rpx solid rgba(40, 179, 137, 0.16);
+
+    .theme-dark & {
+        color: #7df7c4;
+        background: rgba(125, 247, 196, 0.12);
+        border: 1rpx solid rgba(125, 247, 196, 0.16);
+    }
 }
 </style>

@@ -76,9 +76,7 @@
                     "inmobi" : {},
                     "ironsource" : {},
                     "mintegral" : {},
-                    "applovin" : {},
-                    "ks" : {},
-                    "ks-content" : {}
+                    "applovin" : {}
                 },
                 "oauth" : {
                     "weixin" : {

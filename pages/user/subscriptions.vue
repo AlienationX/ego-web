@@ -1,5 +1,5 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <page-header
             :title="t('subscriptionPage.title')"
             :subtitle="t('subscriptionPage.subtitle')"
@@ -72,10 +72,13 @@ import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
 const classifyList = ref([]);
 
 const hasAnySubscription = computed(
@@ -133,9 +136,15 @@ onLoad(async () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
     background: linear-gradient(180deg, #f8fafc 0%, #f2f6fb 100%);
+
+    &.theme-dark {
+        background: linear-gradient(180deg, var(--page-background) 0%, #111 100%);
+    }
 }
 
 .content {
@@ -157,6 +166,12 @@ onLoad(async () => {
     border: 1rpx solid rgba(15, 23, 42, 0.06);
     border-radius: 28rpx;
     box-shadow: 0 14rpx 30rpx rgba(148, 163, 184, 0.1);
+
+    .theme-dark & {
+        background: var(--panel-background);
+        border: 1rpx solid var(--panel-border);
+        box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.2);
+    }
 }
 
 .summary-item {
@@ -167,12 +182,20 @@ onLoad(async () => {
     font-size: 44rpx;
     font-weight: 800;
     color: #0f172a;
+
+    .theme-dark & {
+        color: var(--text-primary);
+    }
 }
 
 .summary-label {
     margin-top: 8rpx;
     font-size: 22rpx;
     color: #64748b;
+
+    .theme-dark & {
+        color: var(--text-tertiary);
+    }
 }
 
 .section {
@@ -184,6 +207,10 @@ onLoad(async () => {
     font-size: 28rpx;
     font-weight: 800;
     color: #0f172a;
+
+    .theme-dark & {
+        color: var(--text-primary);
+    }
 }
 
 .section-desc {
@@ -191,6 +218,10 @@ onLoad(async () => {
     font-size: 23rpx;
     line-height: 1.7;
     color: #64748b;
+
+    .theme-dark & {
+        color: var(--text-tertiary);
+    }
 }
 
 .chip-wrap {
@@ -212,6 +243,12 @@ onLoad(async () => {
     color: #334155;
     background: #f8fafc;
     border: 1rpx solid #dbe4ee;
+
+    .theme-dark & {
+        color: var(--text-secondary);
+        background: var(--panel-background);
+        border: 1rpx solid var(--panel-border);
+    }
 }
 
 .chip.active {
@@ -219,10 +256,21 @@ onLoad(async () => {
     background: #18202a;
     border-color: #18202a;
     box-shadow: 0 14rpx 30rpx rgba(24, 32, 42, 0.18);
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.3);
+    }
 }
 
 .chip--soft.active {
     background: #28b389;
     border-color: #28b389;
+
+    .theme-dark & {
+        background: #28b389;
+        border-color: #28b389;
+    }
 }
 </style>

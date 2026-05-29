@@ -1,5 +1,5 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <page-header :title="t('preferencePage.title')" :subtitle="t('preferencePage.subtitle')"></page-header>
 
         <scroll-view scroll-y class="content">
@@ -66,6 +66,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useLibraryStore } from '@/stores/library.js';
@@ -76,6 +77,7 @@ const { t, locale } = useI18n();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+const isDark = computed(() => settingsStore.isDark);
 
 const pinTag = (tag) => {
     libraryStore.bumpPreferredTag(tag);
@@ -117,9 +119,15 @@ onLoad(() => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
     background: linear-gradient(180deg, #f8fafc 0%, #f2f6fb 100%);
+
+    &.theme-dark {
+        background: linear-gradient(180deg, var(--page-background) 0%, #111 100%);
+    }
 }
 
 .content {
@@ -135,12 +143,22 @@ onLoad(() => {
     box-shadow: 0 14rpx 30rpx rgba(148, 163, 184, 0.1);
     padding: 28rpx 24rpx;
     margin-bottom: 24rpx;
+
+    .theme-dark & {
+        background: var(--panel-background);
+        border: 1rpx solid var(--panel-border);
+        box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.2);
+    }
 }
 
 .section-title {
     font-size: 28rpx;
     font-weight: 800;
     color: #0f172a;
+
+    .theme-dark & {
+        color: var(--text-primary);
+    }
 }
 
 .section-desc {
@@ -148,6 +166,10 @@ onLoad(() => {
     font-size: 23rpx;
     line-height: 1.7;
     color: #64748b;
+
+    .theme-dark & {
+        color: var(--text-tertiary);
+    }
 }
 
 .tag-list {
@@ -168,6 +190,11 @@ onLoad(() => {
     align-items: center;
     justify-content: space-between;
     gap: 16rpx;
+
+    .theme-dark & {
+        background: var(--panel-background);
+        border: 1rpx solid var(--panel-border);
+    }
 }
 
 .tag-name,
@@ -175,6 +202,10 @@ onLoad(() => {
     font-size: 25rpx;
     font-weight: 700;
     color: #1e293b;
+
+    .theme-dark & {
+        color: var(--text-primary);
+    }
 }
 
 .tag-actions {
@@ -195,12 +226,24 @@ onLoad(() => {
     font-size: 22rpx;
     display: inline-flex;
     align-items: center;
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1rpx solid rgba(255, 255, 255, 0.12);
+        color: var(--text-secondary);
+    }
 }
 
 .tag-btn--warn {
     color: #b45309;
     background: #fff7ed;
     border-color: #fed7aa;
+
+    .theme-dark & {
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.12);
+        border-color: rgba(251, 191, 36, 0.2);
+    }
 }
 
 .chip-wrap {
@@ -225,6 +268,12 @@ onLoad(() => {
     color: #64748b;
     background: #f8fafc;
     border: 1rpx dashed #cbd5e1;
+
+    .theme-dark & {
+        color: var(--text-tertiary);
+        background: var(--panel-background);
+        border: 1rpx dashed var(--panel-border);
+    }
 }
 
 .empty-inline,
@@ -232,6 +281,10 @@ onLoad(() => {
     margin-top: 20rpx;
     font-size: 23rpx;
     color: #64748b;
+
+    .theme-dark & {
+        color: var(--text-tertiary);
+    }
 }
 
 .shortcut-list {
@@ -244,5 +297,9 @@ onLoad(() => {
 .shortcut-value {
     margin-top: 0;
     color: #334155;
+
+    .theme-dark & {
+        color: var(--text-secondary);
+    }
 }
 </style>

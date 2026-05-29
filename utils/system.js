@@ -78,8 +78,17 @@ export const writeAccessLog = async () => {
     // console.log('runtime', plus.runtime.channel);
     // console.log('channel', plus.runtime.channel);
     let channel = '';
+    
     // #ifdef APP
     channel = plus.runtime.channel;
+    // #endif
+    
+    // #ifdef APP-HARMONY
+    channel = 'huawei';
+    // #endif
+    
+    // #ifdef MP-WEIXIN
+    channel = 'wechat';
     // #endif
 
     let data = {

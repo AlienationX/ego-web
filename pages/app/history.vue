@@ -1,5 +1,5 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <page-header :title="t('historyPage.title')" :subtitle="t('historyPage.subtitle')"></page-header>
 
         <view class="content-wrapper">
@@ -16,9 +16,12 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useLibraryStore } from '@/stores/library.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const libraryStore = useLibraryStore();
+const settingsStore = useSettingsStore();
+const isDark = computed(() => settingsStore.isDark);
 
 const tabs = computed(() => [
     {
@@ -44,9 +47,15 @@ const clearHistory = () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/static/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
     background: #0b1017;
+
+    &.theme-light {
+        background: var(--page-background);
+    }
 }
 
 .content-wrapper {
@@ -59,11 +68,21 @@ const clearHistory = () => {
     padding: 20rpx 30rpx 48rpx;
     background: #0b1017;
 
+    .theme-light & {
+        background: var(--page-background);
+    }
+
     .ghost-btn {
         background: rgba(255, 255, 255, 0.05);
         color: #94a3b8;
         font-size: 24rpx;
         border-radius: 12rpx;
+
+        .theme-light & {
+            background: rgba(0, 0, 0, 0.04);
+            color: var(--text-tertiary);
+        }
+
         &::after {
             border: none;
         }
