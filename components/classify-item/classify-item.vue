@@ -1,8 +1,8 @@
 <template>
     <view class="themeItem" :style="layoutStyle">
         <navigator class="box" :url="'/pages/app/classlist?id=' + item.id + '&name=' + item.name" v-if="!isMore">
-            <image class="pic" :src="item.picurl" mode="aspectFill"></image>
-            <view class="mask">
+            <image class="pic" :class="{ 'pic--loaded': isLoaded }" :src="item.picurl" mode="aspectFill" lazy-load @load="onImageLoad"></image>
+            <view class="mask" :class="{ 'is-visible': isLoaded }">
                 <view class="mask-info">
                     <text class="mask-text">{{ item.name }}</text>
                     <text class="mask-count" v-if="item.wallpapers_count"
@@ -10,14 +10,14 @@
                     >
                 </view>
             </view>
-            <view class="tab" v-if="compareTimestamp(item.updateTime)"
+            <view class="tab" :class="{ 'is-visible': isLoaded }" v-if="compareTimestamp(item.updateTime)"
                 >{{ compareTimestamp(item.updateTime) }}{{ t('common.ago') || '前' }}更新</view
             >
-            <uni-icons class="vip" v-if="item.is_locked" type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+            <uni-icons class="vip" :class="{ 'is-visible': isLoaded }" v-if="item.is_locked" type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
         </navigator>
 
         <navigator class="box more" url="/pages/app/classify" open-type="reLaunch" v-if="isMore">
-            <image class="pic" src="/static/images/pics/more.jpg" mode="aspectFill"></image>
+            <image class="pic pic--loaded" src="/static/images/pics/more.jpg" mode="aspectFill"></image>
             <view class="mask mask-full">
                 <mdi-icon path="/static/icons/dots-horizontal.svg" size="34" color="#fff"></mdi-icon>
                 <text class="mask-text">{{ $t('common.more') }}</text>
@@ -27,9 +27,15 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { compareTimestamp } from '@/utils/common.js';
 const { t } = useI18n();
+
+const isLoaded = ref(false);
+const onImageLoad = () => {
+    isLoaded.value = true;
+};
 
 defineProps({
     isMore: {
@@ -59,7 +65,7 @@ defineProps({
     width: 100%;
     border-radius: 24rpx;
     overflow: hidden;
-    background: #f8f8f8;
+    background: transparent;
     display: flex;
     flex-direction: column;
 }
@@ -72,6 +78,9 @@ defineProps({
     position: relative;
     display: block;
     transition: transform 0.3s ease;
+    background: linear-gradient(90deg, rgba(200, 200, 200, 0.08) 25%, rgba(200, 200, 200, 0.18) 50%, rgba(200, 200, 200, 0.08) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s infinite linear;
 
     .pic {
         position: absolute;
@@ -81,6 +90,12 @@ defineProps({
         height: 100%;
         object-fit: cover;
         box-shadow: 0 10rpx 10rpx rgba(0, 0, 0, 0.34);
+        opacity: 0;
+        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+
+        &.pic--loaded {
+            opacity: 1;
+        }
     }
 
     .mask {
@@ -93,6 +108,13 @@ defineProps({
         background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 60%, transparent);
         display: flex;
         align-items: flex-end;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+
+        &.is-visible {
+            opacity: 1;
+        }
     }
 
     .mask-info {
@@ -123,6 +145,8 @@ defineProps({
         align-items: center;
         background: rgba(0, 0, 0, 0.4);
         padding: 0;
+        opacity: 1;
+        z-index: 2;
     }
 
     .tab {
@@ -134,12 +158,26 @@ defineProps({
         font-size: 22rpx;
         padding: 6rpx 14rpx;
         border-radius: 0 0 20rpx 0;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+
+        &.is-visible {
+            opacity: 1;
+        }
     }
 
     .vip {
         position: absolute;
         top: 10rpx;
         right: 10rpx;
+        z-index: 2;
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+
+        &.is-visible {
+            opacity: 1;
+        }
     }
 
     &:active {
@@ -155,6 +193,15 @@ defineProps({
         .box {
             box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.25);
         }
+    }
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
     }
 }
 </style>

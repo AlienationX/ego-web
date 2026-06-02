@@ -56,11 +56,15 @@
                                 }}</view>
                                 <view class="hero-card__meta">
                                     <view class="hero-card__meta-item">
-                                        <uni-icons type="eye" size="14" color="#cbd5e1"></uni-icons>
+                                        <mdi-icon path="/static/icons/fire.svg" size="14" color="#cbd5e1"></mdi-icon>
                                         <text>{{ formatCount(rankedList[0].views) }}</text>
                                     </view>
                                     <view class="hero-card__meta-item">
-                                        <uni-icons type="download" size="14" color="#cbd5e1"></uni-icons>
+                                        <mdi-icon
+                                            path="/static/icons/download.svg"
+                                            size="14"
+                                            color="#cbd5e1"
+                                        ></mdi-icon>
                                         <text>{{ formatCount(rankedList[0].downloads) }}</text>
                                     </view>
                                 </view>

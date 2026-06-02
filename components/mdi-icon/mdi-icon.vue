@@ -1,13 +1,7 @@
 <template>
-    <!-- #ifdef APP -->
     <view class="mdi-icon mdi-icon--app" :style="appContainerStyle">
         <image class="mdi-icon__image" :src="path" :style="appImageStyle" mode="aspectFit"></image>
     </view>
-    <!-- #endif -->
-
-    <!-- #ifndef APP -->
-    <view class="mdi-icon" :style="iconStyle"></view>
-    <!-- #endif -->
 </template>
 
 <script setup>

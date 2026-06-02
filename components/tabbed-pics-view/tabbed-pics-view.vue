@@ -86,7 +86,7 @@
                                         :mode="item.imageMode || imageMode"
                                         lazy-load
                                     ></image>
-                                    <view v-if="showCardMeta" class="card-overlay"></view>
+                                    <view class="card-overlay" :class="{ 'always-visible': showCardMeta }"></view>
                                     <view :class="['lock', { loaded: item.loaded }]" :style="getLockStyle()">
                                         <uni-icons
                                             v-if="item.is_locked && item.loaded"
@@ -95,9 +95,9 @@
                                             color="#F9E9B5"
                                         ></uni-icons>
                                     </view>
-                                    <view v-if="showCardMeta" class="card-info">
+                                    <view class="card-info" :class="{ 'always-visible': showCardMeta }">
                                         <view class="card-info__title">
-                                            {{ item.description || item.classify_name || `#${item.id}` }}
+                                            {{ item.description || item.classify_name || ('壁纸 #' + item.id) }}
                                         </view>
                                         <view class="card-info__footer">
                                             <view class="card-info__classify">
@@ -735,11 +735,16 @@ onMounted(() => {
                 transition:
                     opacity 0.55s ease,
                     filter 0.65s ease,
-                    transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+                    transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1);
                 &.loaded {
                     opacity: 1;
                     filter: blur(0) saturate(1);
                     transform: translateY(0);
+                    // Add smooth transition for hover scale
+                    transition:
+                        opacity 0.55s ease,
+                        filter 0.65s ease,
+                        transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
                 }
             }
 
@@ -759,9 +764,15 @@ onMounted(() => {
             .card-overlay {
                 position: absolute;
                 inset: 0;
-                background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 66%, rgba(8, 11, 18, 0.88) 100%);
+                background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 50%, rgba(8, 11, 18, 0.88) 100%);
                 pointer-events: none;
                 z-index: 1;
+                opacity: 0;
+                transition: opacity 0.35s ease;
+
+                &.always-visible {
+                    opacity: 1;
+                }
             }
 
             .card-info {
@@ -769,9 +780,46 @@ onMounted(() => {
                 left: 22rpx;
                 right: 22rpx;
                 bottom: 22rpx;
-                z-index: 1;
+                z-index: 2;
                 color: #f8fafc;
                 pointer-events: none;
+                opacity: 0;
+                transform: translateY(15rpx);
+                transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+
+                &.always-visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            // Interactive Hover & Click Active Styles
+            &:active {
+                .img.loaded {
+                    transform: scale(1.06);
+                }
+                .card-overlay:not(.always-visible) {
+                    opacity: 1;
+                }
+                .card-info:not(.always-visible) {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @media (hover: hover) and (pointer: fine) {
+                &:hover {
+                    .img.loaded {
+                        transform: scale(1.06);
+                    }
+                    .card-overlay:not(.always-visible) {
+                        opacity: 1;
+                    }
+                    .card-info:not(.always-visible) {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
             }
 
             .card-info__title {

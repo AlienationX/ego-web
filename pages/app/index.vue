@@ -159,10 +159,13 @@
                             <image
                                 :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
                                 mode="aspectFill"
+                                lazy-load
+                                fade-in
+                                @load="idx === 0 ? heroImageLoaded = true : null"
                             ></image>
                             <block v-if="idx === 0">
-                                <view class="box-hero-overlay"></view>
-                                <view class="box-hero-content">
+                                <view class="box-hero-overlay" :class="{ 'is-visible': heroImageLoaded }"></view>
+                                <view class="box-hero-content" :class="{ 'is-visible': heroImageLoaded }">
                                     <view class="day-tag">{{ new Date().getDate() }}</view>
                                     <view class="pick-text">PICK OF THE DAY</view>
                                 </view>
@@ -195,7 +198,7 @@
                             :key="item.id"
                             @click="goPreview(item.id, latestList)"
                         >
-                            <image :src="item.smallPicurl" mode="aspectFill"></image>
+                            <image :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
                             <view v-if="getTimeBadge(item)" class="box-badge">{{ getTimeBadge(item) }}</view>
                         </view>
                     </scroll-view>
@@ -338,7 +341,7 @@
                             :key="item.id"
                             @click="goPreview(item.id, classify.data)"
                         >
-                            <image :src="item.smallPicurl" mode="aspectFill"></image>
+                            <image :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
                             <view v-if="getTimeBadge(item)" class="box-badge box-badge--subtle">{{ getTimeBadge(item) }}</view>
                         </view>
                     </scroll-view>
@@ -501,6 +504,7 @@ const homeTabs = computed(() => [
 ]);
 const bannerList = ref([]);
 const randomDailyList = ref([]);
+const heroImageLoaded = ref(false);
 const randomRecommendList = ref([]);
 const latestList = ref([]);
 const noticeList = ref([]);
@@ -2309,11 +2313,28 @@ onShareTimeline(() => {
                     overflow: visible;
                     box-sizing: border-box;
 
+                    &::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 20rpx;
+                        border-radius: 28rpx;
+                        background: linear-gradient(90deg, rgba(200, 200, 200, 0.08) 25%, rgba(200, 200, 200, 0.18) 50%, rgba(200, 200, 200, 0.08) 75%);
+                        background-size: 200% 100%;
+                        animation: skeleton-shimmer 1.6s infinite linear;
+                        z-index: 0;
+                        pointer-events: none;
+                    }
+
                     image {
                         width: 100%;
                         height: 100%;
                         border-radius: 28rpx;
                         display: block;
+                        position: relative;
+                        z-index: 1;
 
                         box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
                     }
@@ -2375,12 +2396,23 @@ onShareTimeline(() => {
                         height: calc(100% - 66rpx);
                         padding-bottom: 0;
 
+                        &::before {
+                            bottom: 0;
+                        }
+
                         .box-hero-overlay {
                             position: absolute;
                             inset: 0;
                             border-radius: 28rpx;
-                            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.7) 100%);
+                            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.5) 100%);
                             pointer-events: none;
+                            z-index: 2;
+                            opacity: 0;
+                            transition: opacity 0.4s ease-in-out;
+
+                            &.is-visible {
+                                opacity: 1;
+                            }
                         }
 
                         .box-hero-content {
@@ -2388,6 +2420,13 @@ onShareTimeline(() => {
                             left: 24rpx;
                             bottom: 30rpx;
                             right: 24rpx;
+                            z-index: 3;
+                            opacity: 0;
+                            transition: opacity 0.4s ease-in-out;
+
+                            &.is-visible {
+                                opacity: 1;
+                            }
 
                             .day-tag {
                                 font-size: 64rpx;
@@ -2687,6 +2726,15 @@ onShareTimeline(() => {
             font-size: 28rpx;
             color: $uni-text-color-grey;
         }
+    }
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
     }
 }
 </style>

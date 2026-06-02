@@ -17,14 +17,14 @@ onLaunch(() => {
     plus.nativeUI.setUIStyle(activeUIStyle);
     // #endif
 
-    // 检查是否已看过引导页
-    const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
-    if (!hasSeenGuide) {
-        // 未看过引导页，跳转到引导页
-        uni.reLaunch({
-            url: '/pages/guide/guide',
-        });
-    }
+    // TODO 检查是否已看过引导页。目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
+    // const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
+    // if (!hasSeenGuide) {
+    //     // 未看过引导页，跳转到引导页
+    //     uni.reLaunch({
+    //         url: '/pages/guide/guide',
+    //     });
+    // }
 
     // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
