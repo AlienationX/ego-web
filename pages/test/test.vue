@@ -34,7 +34,6 @@ const testMenus = [
     { name: 'Watch Later', url: '/pages/app/watch-later' },
     { name: 'Subscriptions', url: '/pages/user/subscriptions' },
     { name: 'Preference Manager', url: '/pages/user/preferences' },
-    { name: 'Log In', url: '/pages/auth/login' },
     { name: 'Access', url: '/pages/access/access' },
     { name: 'Membership', url: '/pages/member/payment' },
     { name: 'Stream Test', url: '/pages/test/stream-test' },

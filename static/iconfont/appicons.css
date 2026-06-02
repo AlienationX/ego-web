@@ -1,0 +1,127 @@
+@font-face {
+  font-family: "appicons";
+  src: url('appicons.ttf') format('truetype');
+}
+
+[class^="appicons-"], [class*=" appicons-"] {
+  font-family: 'appicons' !important;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+
+
+.appicons-ab-testing::before { content: "\ea01"; }
+.appicons-account-remove::before { content: "\ea02"; }
+.appicons-account::before { content: "\ea03"; }
+.appicons-alert-box::before { content: "\ea04"; }
+.appicons-alert-circle::before { content: "\ea05"; }
+.appicons-arrow-down::before { content: "\ea06"; }
+.appicons-arrow-left::before { content: "\ea07"; }
+.appicons-arrow-right::before { content: "\ea08"; }
+.appicons-arrow-up::before { content: "\ea09"; }
+.appicons-autorenew::before { content: "\ea0a"; }
+.appicons-bat::before { content: "\ea0b"; }
+.appicons-bell::before { content: "\ea0c"; }
+.appicons-bird::before { content: "\ea0d"; }
+.appicons-book-open::before { content: "\ea0e"; }
+.appicons-bookmark-multiple::before { content: "\ea0f"; }
+.appicons-bookmark::before { content: "\ea10"; }
+.appicons-cached::before { content: "\ea11"; }
+.appicons-calendar::before { content: "\ea12"; }
+.appicons-cancel::before { content: "\ea13"; }
+.appicons-cards::before { content: "\ea14"; }
+.appicons-chart-bubble::before { content: "\ea15"; }
+.appicons-chart-donut-variant::before { content: "\ea16"; }
+.appicons-chart-donut::before { content: "\ea17"; }
+.appicons-chart-timeline-variant-shimmer::before { content: "\ea18"; }
+.appicons-check::before { content: "\ea19"; }
+.appicons-checkbox-blank-circle-outline::before { content: "\ea1a"; }
+.appicons-checkbox-blank-outline::before { content: "\ea1b"; }
+.appicons-checkbox-circle-outline::before { content: "\ea1c"; }
+.appicons-checkbox-outline::before { content: "\ea1d"; }
+.appicons-chevron-double-down::before { content: "\ea1e"; }
+.appicons-chevron-down::before { content: "\ea1f"; }
+.appicons-chevron-left::before { content: "\ea20"; }
+.appicons-chevron-right::before { content: "\ea21"; }
+.appicons-chevron-up::before { content: "\ea22"; }
+.appicons-clock::before { content: "\ea23"; }
+.appicons-close-circle::before { content: "\ea24"; }
+.appicons-close::before { content: "\ea25"; }
+.appicons-code-braces::before { content: "\ea26"; }
+.appicons-code-tags::before { content: "\ea27"; }
+.appicons-cog::before { content: "\ea28"; }
+.appicons-comment-processing::before { content: "\ea29"; }
+.appicons-comment-quote::before { content: "\ea2a"; }
+.appicons-content-save::before { content: "\ea2b"; }
+.appicons-credit-card-chip::before { content: "\ea2c"; }
+.appicons-crown-circle::before { content: "\ea2d"; }
+.appicons-database-refresh::before { content: "\ea2e"; }
+.appicons-delete-empty::before { content: "\ea2f"; }
+.appicons-download::before { content: "\ea30"; }
+.appicons-email::before { content: "\ea31"; }
+.appicons-eraser-variant::before { content: "\ea32"; }
+.appicons-exit-to-app::before { content: "\ea33"; }
+.appicons-export::before { content: "\ea34"; }
+.appicons-eye-off::before { content: "\ea35"; }
+.appicons-eye::before { content: "\ea36"; }
+.appicons-fire::before { content: "\ea37"; }
+.appicons-flash::before { content: "\ea38"; }
+.appicons-flower-poppy::before { content: "\ea39"; }
+.appicons-format-quote-close::before { content: "\ea3a"; }
+.appicons-forum::before { content: "\ea3b"; }
+.appicons-heart-broken::before { content: "\ea3c"; }
+.appicons-heart::before { content: "\ea3d"; }
+.appicons-help-circle::before { content: "\ea3e"; }
+.appicons-image-filter-center-focus-strong::before { content: "\ea3f"; }
+.appicons-image::before { content: "\ea40"; }
+.appicons-information-outline::before { content: "\ea41"; }
+.appicons-information-symbol::before { content: "\ea42"; }
+.appicons-information::before { content: "\ea43"; }
+.appicons-lock-open::before { content: "\ea44"; }
+.appicons-lock::before { content: "\ea45"; }
+.appicons-magnify::before { content: "\ea46"; }
+.appicons-map-marker::before { content: "\ea47"; }
+.appicons-menu-open::before { content: "\ea48"; }
+.appicons-monitor-dashboard::before { content: "\ea49"; }
+.appicons-movie-open::before { content: "\ea4a"; }
+.appicons-music-box::before { content: "\ea4b"; }
+.appicons-navigation-variant::before { content: "\ea4c"; }
+.appicons-numeric-2-box::before { content: "\ea4d"; }
+.appicons-numeric-3-box::before { content: "\ea4e"; }
+.appicons-palette-swatch::before { content: "\ea4f"; }
+.appicons-pencil::before { content: "\ea50"; }
+.appicons-pokeball::before { content: "\ea51"; }
+.appicons-refresh::before { content: "\ea52"; }
+.appicons-reload::before { content: "\ea53"; }
+.appicons-reply::before { content: "\ea54"; }
+.appicons-restore::before { content: "\ea55"; }
+.appicons-rocket::before { content: "\ea56"; }
+.appicons-scatter-plot::before { content: "\ea57"; }
+.appicons-security::before { content: "\ea58"; }
+.appicons-share-variant::before { content: "\ea59"; }
+.appicons-share::before { content: "\ea5a"; }
+.appicons-shield-check::before { content: "\ea5b"; }
+.appicons-sitemap-outline::before { content: "\ea5c"; }
+.appicons-snowflake::before { content: "\ea5d"; }
+.appicons-star::before { content: "\ea5e"; }
+.appicons-tag::before { content: "\ea5f"; }
+.appicons-theme-light-dark::before { content: "\ea60"; }
+.appicons-tooltip::before { content: "\ea61"; }
+.appicons-translate-variant::before { content: "\ea62"; }
+.appicons-translate::before { content: "\ea63"; }
+.appicons-update::before { content: "\ea64"; }
+.appicons-upload::before { content: "\ea65"; }
+.appicons-video-box::before { content: "\ea66"; }
+.appicons-video::before { content: "\ea67"; }
+.appicons-view-carousel::before { content: "\ea68"; }
+.appicons-view-dashboard::before { content: "\ea69"; }
+.appicons-view-grid::before { content: "\ea6a"; }
+.appicons-wallet-bifold::before { content: "\ea6b"; }
+.appicons-weather-night::before { content: "\ea6c"; }
+.appicons-weather-sunny::before { content: "\ea6d"; }
+.appicons-youtube::before { content: "\ea6e"; }
+
+

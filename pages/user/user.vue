@@ -134,7 +134,7 @@
                                 class="icon"
                                 :path="item.left_icon"
                                 size="20px"
-                                :color="item.left_color === '#6B7280' ? (settingsStore.isDark ? '#9ca3af' : '#6B7280') : (item.left_color || '#28B389')"
+                                :color="resolveMenuIconColor(item.left_color)"
                             ></mdi-icon>
                         </view>
                         <view class="text">
@@ -383,6 +383,14 @@ const checkin = async () => {
             icon: 'none',
         });
     }
+};
+
+const resolveMenuIconColor = (baseColor) => {
+    if (!baseColor) return '#28B389';
+    if (baseColor === '#6B7280') {
+        return settingsStore.isDark ? '#9ca3af' : '#6B7280';
+    }
+    return baseColor;
 };
 
 const appMenus = computed(() => [
