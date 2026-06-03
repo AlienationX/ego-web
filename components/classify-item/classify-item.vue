@@ -90,8 +90,7 @@ defineProps({
         height: 100%;
         object-fit: cover;
         box-shadow: 0 10rpx 10rpx rgba(0, 0, 0, 0.34);
-        opacity: 0;
-        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 
         &.pic--loaded {
             opacity: 1;
@@ -181,17 +180,22 @@ defineProps({
     }
 
     &:active {
-        transform: scale(0.96);
+        /* 移除了原本的缩小效果 */
+    }
+}
+
+.themeItem {
+    &:active {
+        .pic {
+            transform: scale(1.08);
+        }
     }
 }
 
 @media (hover: hover) {
     .themeItem:hover {
         .pic {
-            transform: scale(1.1);
-        }
-        .box {
-            box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.25);
+            transform: scale(1.08);
         }
     }
 }

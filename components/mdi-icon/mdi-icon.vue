@@ -80,12 +80,13 @@ const appImageStyle = computed(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    line-height: 0;
     vertical-align: middle;
 }
 
 .mdi-icon-font {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     flex-shrink: 0;
 }

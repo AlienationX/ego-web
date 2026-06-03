@@ -102,6 +102,11 @@
                                 ></mdi-icon>
                             </template>
                         </view>
+                        <!-- 微信特有的功能 -->
+                        <!-- #ifdef MP-WEIXIN -->
+                        <button v-if="item.key === 'contact_support_wx'" open-type="contact"></button>
+                        <button v-if="item.key === 'send_feedback_wx'" open-type="feedback"></button>
+                        <!-- #endif -->
                     </view>
                 </view>
             </view>
@@ -294,8 +299,11 @@
                         v-for="item in themeOptions"
                         :key="item.value"
                         class="choice-item"
-                        :class="{ active: settingsStore.options.theme === item.value }"
-                        @click="selectTheme(item.value)"
+                        :class="{ 
+                            active: settingsStore.options.theme === item.value,
+                            disabled: item.disabled
+                        }"
+                        @click="!item.disabled && selectTheme(item.value)"
                     >
                         <view class="choice-item__left">
                             <view class="choice-item__icon">
@@ -303,21 +311,27 @@
                                     :path="item.icon"
                                     size="24px"
                                     :color="
-                                        settingsStore.options.theme === item.value
-                                            ? '#28B389'
-                                            : settingsStore.isDark
-                                              ? '#e5e7eb'
-                                              : '#374151'
+                                        item.disabled
+                                            ? (settingsStore.isDark ? '#4b5563' : '#cbd5e1')
+                                            : settingsStore.options.theme === item.value
+                                                ? '#28B389'
+                                                : settingsStore.isDark
+                                                  ? '#e5e7eb'
+                                                  : '#374151'
                                     "
                                 ></mdi-icon>
                             </view>
                             <view class="choice-item__text">
-                                <text class="choice-item__label">{{ item.label }}</text>
-                                <text class="choice-item__desc">{{ item.desc }}</text>
+                                <text class="choice-item__label" :style="{ color: item.disabled ? 'var(--text-tertiary)' : '' }">
+                                    {{ item.label }}
+                                </text>
+                                <text class="choice-item__desc">
+                                    {{ item.desc }}
+                                </text>
                             </view>
                         </view>
                         <mdi-icon
-                            v-if="settingsStore.options.theme === item.value"
+                            v-if="settingsStore.options.theme === item.value && !item.disabled"
                             path="/static/icons/check.svg"
                             size="20px"
                             color="#28B389"
@@ -469,26 +483,44 @@ const themeValueLabel = computed(() => {
     return t('settings.items.theme.light');
 });
 
-const themeOptions = computed(() => [
-    {
-        value: 'auto',
-        icon: '/static/icons/theme-light-dark.svg',
-        label: t('settings.items.theme.auto'),
-        desc: t('settings.items.theme.autoDesc'),
-    },
-    {
-        value: 'light',
-        icon: '/static/icons/weather-sunny.svg',
-        label: t('settings.items.theme.light'),
-        desc: t('settings.items.theme.lightDesc'),
-    },
-    {
-        value: 'dark',
-        icon: '/static/icons/weather-night.svg',
-        label: t('settings.items.theme.dark'),
-        desc: t('settings.items.theme.darkDesc'),
-    },
-]);
+const themeOptions = computed(() => {
+    // #ifdef APP-PLUS
+    const isApp = true;
+    // #endif
+    // #ifndef APP-PLUS
+    const isApp = false;
+    // #endif
+
+    return [
+        {
+            value: 'auto',
+            icon: '/static/icons/theme-light-dark.svg',
+            label: t('settings.items.theme.auto'),
+            desc: isApp 
+                ? t('settings.items.theme.autoDesc') 
+                : '跟随系统（微信/浏览器）。系统主题改变时自动切换深浅色。',
+            disabled: false,
+        },
+        {
+            value: 'light',
+            icon: '/static/icons/weather-sunny.svg',
+            label: t('settings.items.theme.light'),
+            desc: isApp 
+                ? t('settings.items.theme.lightDesc') 
+                : '当前端不支持手动锁定浅色，请在微信或系统设置中更改主题。',
+            disabled: !isApp,
+        },
+        {
+            value: 'dark',
+            icon: '/static/icons/weather-night.svg',
+            label: t('settings.items.theme.dark'),
+            desc: isApp 
+                ? t('settings.items.theme.darkDesc') 
+                : '当前端不支持手动锁定深色，请在微信或系统设置中更改主题。',
+            disabled: !isApp,
+        },
+    ];
+});
 
 const languageOptions = computed(() => [
     {
@@ -723,13 +755,26 @@ const sections = computed(() => {
                 //     sublabel: t('settings.items.contactSupport.sublabel'),
                 //     action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
                 // },
-                {
-                    key: 'send_feedback',
-                    icon: '/static/icons/comment-processing.svg',
-                    label: t('settings.items.sendFeedback.label'),
-                    sublabel: t('settings.items.sendFeedback.sublabel'),
-                    action: () => uni.navigateTo({ url: '/pages/settings/feedback' }),
-                },
+                // #ifdef MP-WEIXIN
+                ...(userStore.isAdmin
+                    ? [
+                          {
+                              key: 'contact_support_wx',
+                              icon: '/static/icons/forum.svg',
+                              label: t('user.profile.support'),
+                              sublabel: t('settings.items.contactSupport.sublabel'),
+                              action: () => {},
+                          },
+                          {
+                              key: 'send_feedback_wx',
+                              icon: '/static/icons/comment-processing.svg',
+                              label: t('user.profile.feedback'),
+                              sublabel: t('settings.items.sendFeedback.sublabel'),
+                              action: () => {},
+                          },
+                      ]
+                    : []),
+                // #endif
                 {
                     key: 'about_page',
                     icon: '/static/icons/information.svg',
@@ -1161,12 +1206,23 @@ function shareApp() {
     color: var(--text-secondary);
 }
 .row {
+    position: relative;
     min-height: 108rpx;
     padding: 16rpx 24rpx;
     border-bottom: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+        z-index: 10;
+    }
 }
 .row-last {
     border-bottom: none;
@@ -1492,7 +1548,21 @@ function shareApp() {
         }
     }
 
-    &:active {
+    &.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: rgba(var(--panel-background-rgb), 0.5);
+        
+        .choice-item__desc {
+            color: var(--text-tertiary) !important;
+        }
+        
+        &:active {
+            transform: none !important;
+        }
+    }
+
+    &:not(.disabled):active {
         transform: scale(0.99);
     }
 }

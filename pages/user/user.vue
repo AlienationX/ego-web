@@ -147,11 +147,6 @@
                         </view>
                         <mdi-icon path="/static/icons/chevron-right.svg" size="20px" :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"></mdi-icon>
                     </view>
-                    <!-- 微信特有的功能 -->
-                    <!-- #ifdef MP-WEIXIN -->
-                    <button v-if="item.left_text === t('user.profile.support')" open-type="contact"></button>
-                    <button v-if="item.left_text === t('user.profile.feedback')" open-type="feedback"></button>
-                    <!-- #endif -->
                 </view>
             </view>
         </view>
@@ -440,14 +435,6 @@ const sysMenus = computed(() => [
                   click: toPreferences,
               },
               {
-                  left_icon: '/static/icons/clock.svg',
-                  left_color: '#6B7280',
-                  left_text: t('historyPage.title'),
-                  right_text: `${libraryStore.recentViewed.length}`,
-                  right_icon: 'right',
-                  click: toHistory,
-              },
-              {
                   left_icon: '/static/icons/bookmark.svg',
                   left_color: '#6B7280',
                   left_text: t('historyPage.watchLaterTitle'),
@@ -458,6 +445,14 @@ const sysMenus = computed(() => [
           ]
         : []),
     {
+        left_icon: '/static/icons/clock.svg',
+        left_color: '#6B7280',
+        left_text: t('historyPage.title'),
+        right_text: `${libraryStore.recentViewed.length}`,
+        right_icon: 'right',
+        click: toHistory,
+    },
+    {
         left_icon: '/static/icons/help-circle.svg',
         left_color: '#6B7280',
         left_text: t('user.profile.question'),
@@ -465,17 +460,6 @@ const sysMenus = computed(() => [
         right_icon: 'right',
         click: toFAQ,
     },
-    // #ifdef MP-WEIXIN
-    {
-        left_icon: '/static/icons/forum.svg',
-        left_color: '#6B7280',
-        // left_icon: '/static/icons/forum.svg',
-        left_text: t('user.profile.support'),
-        right_text: '',
-        right_icon: 'right',
-        click: onService,
-    },
-    // #endif
     {
         left_icon: '/static/icons/comment-processing.svg',
         left_color: '#6B7280',

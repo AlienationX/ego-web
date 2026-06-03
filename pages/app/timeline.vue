@@ -114,7 +114,7 @@ import { computed, onMounted, ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
-import { handlePicUrl } from '@/utils/common.js';
+import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
@@ -149,23 +149,6 @@ const queryParams = ref({
     ordering: '-updated_at',
 });
 
-const monthNamesEn = [
-    'JANUARY',
-    'FEBRUARY',
-    'MARCH',
-    'APRIL',
-    'MAY',
-    'JUNE',
-    'JULY',
-    'AUGUST',
-    'SEPTEMBER',
-    'OCTOBER',
-    'NOVEMBER',
-    'DECEMBER',
-];
-const weekdayNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const weekdayNamesZh = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-
 const isZh = computed(() => String(locale.value || '').startsWith('zh'));
 
 const toDate = (item) => {
@@ -177,15 +160,10 @@ const getMonthText = (date) => {
     if (isZh.value) {
         return `${date.getMonth() + 1}月`;
     }
-    return monthNamesEn[date.getMonth()];
+    return MONTH_NAMES_UPPER_EN[date.getMonth()];
 };
 
-const getDayLabel = (date) => {
-    if (isZh.value) {
-        return `${weekdayNamesZh[date.getDay()]} ${date.getMonth() + 1}月`;
-    }
-    return `${weekdayNamesEn[date.getDay()]} / ${monthNamesEn[date.getMonth()].slice(0, 3)}`;
-};
+const getDayLabel = (date) => commonGetDayLabel(date, isZh.value);
 
 const getMonthKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}`;
 const getDayKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;

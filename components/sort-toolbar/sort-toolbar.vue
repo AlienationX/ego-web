@@ -78,7 +78,7 @@ const emit = defineEmits(['query', 'toggle-column', 'toggle-view']);
 const { t } = useI18n();
 
 const chips = computed(() => [
-    { key: 'recommend', label: t('common.recommend') },
+    { key: 'random', label: t('common.random') },
     { key: 'score', label: t('common.score') },
     { key: 'views', label: t('common.views') },
     { key: 'downloads', label: t('common.downloads') },

@@ -346,6 +346,7 @@ import { useSettingsStore } from '@/stores/settings.js';
 
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
+import { formatPreviewDate } from '@/utils/common.js';
 const userStore = useUserStore();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -386,22 +387,6 @@ const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 const HAS_SEEN_HINT_KEY = 'hasSeenHint';
 
 const { t, locale } = useI18n();
-const weekNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const weekNamesZh = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-const monthNamesEn = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-];
 const timeText = computed(() => {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
@@ -411,11 +396,7 @@ const timeText = computed(() => {
 const dateText = computed(() => {
     const now = new Date();
     const isZh = String(locale.value || '').startsWith('zh');
-    const week = isZh ? weekNamesZh[now.getDay()] : weekNamesEn[now.getDay()];
-    if (isZh) {
-        return `${week} ${now.getMonth() + 1}月${now.getDate()}日`;
-    }
-    return `${week}, ${monthNamesEn[now.getMonth()]} ${now.getDate()}`;
+    return formatPreviewDate(now, isZh);
 });
 const currentPreviewType = computed(() => settingsStore.options.previewType || 'classic');
 const isAdmin = computed(() => !!userStore.isAdmin);
@@ -593,7 +574,7 @@ const closeInfo = () => {
 };
 
 const recordCurrentHistory = () => {
-    if (!isAdmin.value || !currentInfo.value?.id) return;
+    if (!currentInfo.value?.id) return;
     libraryStore.recordRecentView(currentInfo.value);
 };
 

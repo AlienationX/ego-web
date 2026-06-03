@@ -123,7 +123,7 @@ const onListUpdate = (e) => {
 
 const tabs = computed(() => [
     {
-        label: t('common.recommend'),
+        label: t('common.random'),
         query: {
             keyword: queryParams.value.keyword,
             sortord: 'random',

@@ -29,6 +29,7 @@ const normalizeWall = (wall = {}) => {
         updated_at: wall.updated_at || '',
         publisher: wall.publisher || '',
         is_favorited: !!wall.is_favorited,
+        viewed_at: wall.viewed_at || Date.now(),
     };
 };
 
@@ -62,10 +63,13 @@ export const useLibraryStore = defineStore(
             const normalized = normalizeWall(wall);
             if (!normalized) return;
 
-            recentViewed.value = [normalized, ...recentViewed.value.filter((item) => item.id !== normalized.id)].slice(
-                0,
-                MAX_RECENT_ITEMS,
-            );
+            normalized.viewed_at = Date.now();
+
+            const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+            recentViewed.value = [
+                normalized,
+                ...recentViewed.value.filter((item) => item.id !== normalized.id && (item.viewed_at || Date.now()) >= thirtyDaysAgo)
+            ].slice(0, 1000);
 
             const nextTags = normalized.tags_list.filter((tag) => !hiddenTags.value.includes(tag));
             preferredTags.value = [...new Set([...nextTags, ...preferredTags.value])].slice(0, MAX_TAG_ITEMS);

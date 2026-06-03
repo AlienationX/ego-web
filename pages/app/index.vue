@@ -416,7 +416,7 @@ import {
     apiGetClassList,
 } from '@/api/wallpaper.js';
 import { PICS_BASE_URL } from '@/common/config.js';
-import { handlePicUrl } from '@/utils/common.js';
+import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -708,22 +708,6 @@ const getTimeBadge = (item) =>
             ? getBadgeCopy().latest
             : '';
 
-const monthNamesEn = [
-    'JANUARY',
-    'FEBRUARY',
-    'MARCH',
-    'APRIL',
-    'MAY',
-    'JUNE',
-    'JULY',
-    'AUGUST',
-    'SEPTEMBER',
-    'OCTOBER',
-    'NOVEMBER',
-    'DECEMBER',
-];
-const weekdayNamesEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const weekdayNamesZh = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
 const isZhLocale = computed(() => String(uni.getLocale() || '').startsWith('zh'));
 
 const toTimelineDate = (item) => {
@@ -732,11 +716,8 @@ const toTimelineDate = (item) => {
     return Number.isNaN(date.getTime()) ? new Date() : date;
 };
 
-const getMonthText = (date) => (isZhLocale.value ? `${date.getMonth() + 1}月` : monthNamesEn[date.getMonth()]);
-const getDayLabel = (date) =>
-    isZhLocale.value
-        ? `${weekdayNamesZh[date.getDay()]} ${date.getMonth() + 1}月`
-        : `${weekdayNamesEn[date.getDay()]} / ${monthNamesEn[date.getMonth()].slice(0, 3)}`;
+const getMonthText = (date) => (isZhLocale.value ? `${date.getMonth() + 1}月` : MONTH_NAMES_UPPER_EN[date.getMonth()]);
+const getDayLabel = (date) => commonGetDayLabel(date, isZhLocale.value);
 const getMonthKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}`;
 const getDayKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
@@ -2302,16 +2283,17 @@ onShareTimeline(() => {
 
                 .box {
                     width: 280rpx;
-                    height: calc(100% - 46rpx);
-                    padding-bottom: 20rpx;
+                    height: calc(100% - 66rpx);
                     display: inline-flex;
                     justify-content: center;
                     align-items: flex-start;
                     margin: 20rpx 24rpx 50rpx 0;
-                    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    transition: box-shadow 0.3s ease;
                     position: relative;
-                    overflow: visible;
+                    overflow: hidden;
+                    border-radius: 28rpx;
                     box-sizing: border-box;
+                    box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
 
                     &::before {
                         content: '';
@@ -2319,7 +2301,7 @@ onShareTimeline(() => {
                         top: 0;
                         left: 0;
                         right: 0;
-                        bottom: 20rpx;
+                        bottom: 0;
                         border-radius: 28rpx;
                         background: linear-gradient(90deg, rgba(200, 200, 200, 0.08) 25%, rgba(200, 200, 200, 0.18) 50%, rgba(200, 200, 200, 0.08) 75%);
                         background-size: 200% 100%;
@@ -2335,8 +2317,7 @@ onShareTimeline(() => {
                         display: block;
                         position: relative;
                         z-index: 1;
-
-                        box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
+                        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
                     }
 
                     .box-card-tag {
@@ -2469,7 +2450,18 @@ onShareTimeline(() => {
                     }
 
                     &:active {
-                        transform: scale(0.96) translateY(4rpx);
+                        image {
+                            transform: scale(1.08);
+                        }
+                    }
+                }
+
+                @media (hover: hover) {
+                    .box:hover {
+                        box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.45);
+                        image {
+                            transform: scale(1.08);
+                        }
                     }
                 }
 

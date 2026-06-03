@@ -119,7 +119,7 @@ const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
 
 const tabs = computed(() => [
     {
-        label: t('common.recommend'),
+        label: t('common.random'),
         query: { classify_id: parseInt(currentId.value), sortord: 'random' },
     },
     {
