@@ -9,11 +9,7 @@
         </view>
         <!-- #endif -->
 
-        <view
-            class="userInfo"
-            :class="{ 'not-logged-in': !userStore.userinfo.id }"
-            :style="{ paddingTop: `${userHeaderPaddingTop}px` }"
-        >
+        <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
             <view v-if="userStore.userinfo.id" class="user-content">
                 <view class="avatar">
                     <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
@@ -44,7 +40,11 @@
 
                     <view class="user-info-row">
                         <view v-if="userStore.userinfo.email" class="info-item">
-                            <uni-icons type="mail-filled" size="16" :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
+                            <uni-icons
+                                type="mail-filled"
+                                size="16"
+                                :color="settingsStore.isDark ? '#767d8a' : '#999'"
+                            ></uni-icons>
                             <text>{{ userStore.userinfo.email }}</text>
                         </view>
                         <!-- <view v-if="userStore.userinfo.profile.region" class="info-item">
@@ -131,9 +131,8 @@
                     <view class="left">
                         <view class="icon-wrap">
                             <mdi-icon
-                                class="icon"
                                 :path="item.left_icon"
-                                size="20px"
+                                size="24px"
                                 :color="resolveMenuIconColor(item.left_color)"
                             ></mdi-icon>
                         </view>
@@ -145,23 +144,22 @@
                         <view class="text">
                             {{ item.right_text }}
                         </view>
-                        <mdi-icon path="/static/icons/chevron-right.svg" size="20px" :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"></mdi-icon>
+                        <mdi-icon
+                            path="/static/icons/chevron-right.svg"
+                            size="20px"
+                            :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"
+                        ></mdi-icon>
                     </view>
                 </view>
             </view>
         </view>
 
-        <view class="section exit-section" v-if="userStore.userinfo.id">
+        <!-- <view class="section exit-section" v-if="userStore.userinfo.id">
             <view class="list">
                 <view class="row exit-row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
                         <view class="icon-wrap exit-icon">
-                            <mdi-icon
-                                class="icon"
-                                :path="item.left_icon"
-                                size="24px"
-                                :color="item.left_color || '#ff6b6b'"
-                            ></mdi-icon>
+                            <mdi-icon :path="item.left_icon" size="24px" :color="item.left_color || '#ff6b6b'"></mdi-icon>
                         </view>
                         <view class="text">
                             {{ item.left_text }}
@@ -174,7 +172,7 @@
                     </view>
                 </view>
             </view>
-        </view>
+        </view> -->
 
         <custom-ad-banner class="user-ad-banner"></custom-ad-banner>
 
@@ -518,8 +516,6 @@ onShow(() => {
 @import '@/static/styles/theme-variables.scss';
 
 .layout {
-    --user-page-bg: var(--page-background);
-    --user-header-bg: var(--page-background-secondary);
     background-color: var(--page-background);
     min-height: 100vh;
 
@@ -528,13 +524,13 @@ onShow(() => {
         top: 0;
         left: 0;
         width: 100%;
-        background: var(--user-header-bg);
+        background: var(--page-background);
         overflow: hidden;
         pointer-events: none;
         z-index: 9999;
 
         &.status-bar-bg--muted {
-            background: var(--user-page-bg);
+            background: var(--page-background);
         }
 
         .status-user-decorative {
@@ -580,16 +576,11 @@ onShow(() => {
         display: flex;
         flex-direction: column;
         padding: 0 30rpx 30rpx;
-        min-height: 320rpx;
-        background: var(--user-header-bg);
-        margin-bottom: 20rpx;
+        // min-height: 320rpx;
+        background: var(--page-background);
         position: relative;
         overflow: visible;
         z-index: 20;
-
-        &.not-logged-in {
-            background: var(--user-page-bg);
-        }
 
         .decorative-bg {
             position: absolute;
@@ -645,7 +636,7 @@ onShow(() => {
             overflow: hidden;
             position: relative;
             z-index: 1;
-            border: 3rpx solid var(--user-header-bg);
+            border: 3rpx solid var(--page-background-secondary);
             box-shadow: 0 4rpx 16rpx var(--shadow-color);
 
             image {
@@ -782,7 +773,7 @@ onShow(() => {
             justify-content: space-between;
             align-items: center;
             margin-top: 30rpx;
-            padding: 20rpx;
+            padding: 20rpx 20rpx 0;
             background: rgba($wp-theme-color, 0.05);
             border-radius: 16rpx;
             position: relative;
@@ -1113,25 +1104,20 @@ onShow(() => {
                     display: flex;
                     align-items: center;
 
-                    .icon-wrap {
-                        width: 56rpx;
-                        height: 56rpx;
-                        border-radius: 16rpx;
-                        background: rgba(40, 179, 137, 0.12);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        flex-shrink: 0;
-                    }
+                    // .icon-wrap {
+                    //     width: 56rpx;
+                    //     height: 56rpx;
+                    //     border-radius: 16rpx;
+                    //     background: rgba(40, 179, 137, 0.12);
+                    //     display: flex;
+                    //     align-items: center;
+                    //     justify-content: center;
+                    //     flex-shrink: 0;
+                    // }
 
-                    .icon-wrap.exit-icon {
-                        background: rgba(229, 50, 45, 0.12);
-                    }
-
-                    .icon {
-                        width: 42rpx;
-                        height: 42rpx;
-                    }
+                    // .icon-wrap.exit-icon {
+                    //     background: rgba(229, 50, 45, 0.12);
+                    // }
 
                     .text {
                         padding-left: 20rpx;

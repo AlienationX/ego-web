@@ -1,5 +1,5 @@
 <template>
-    <view class="layout">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <menu-bar>
             <template #title>Test Lab</template>
         </menu-bar>
@@ -26,8 +26,10 @@
 <script setup>
 import { onLoad } from '@dcloudio/uni-app';
 import { useUserStore } from '@/stores/user.js';
+import { useSettingsStore } from '@/stores/settings.js';
 
 const userStore = useUserStore();
+const settingsStore = useSettingsStore();
 
 const testMenus = [
     { name: 'Recent Views', url: '/pages/app/history' },
