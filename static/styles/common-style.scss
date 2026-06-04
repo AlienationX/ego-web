@@ -1,5 +1,10 @@
 @import '@/static/styles/theme-variables.scss';
 
+/* 全局字体 */
+page {
+    font-family: Roboto, -apple-system, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
 view swiper swiper-item {
     box-sizing: border-box; // 内边距放到边框内
 }

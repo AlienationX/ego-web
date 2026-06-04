@@ -9,7 +9,7 @@ export const useAdIntersititial = () => {
     const adOption = {
         // 1111111113 HBuilder基座的测试广告位
         // 1129226586 正式的广告位
-        adpid: '1129226586'
+        adpid: '1129226586',
     };
 
     const shouldBypassAd = () => userStore.isVip || !userStore.showAd;
@@ -50,9 +50,12 @@ export const useAdIntersititial = () => {
 
     const preloadInterstitial = () => {
         if (!interstitialAd || loadingPromise) return loadingPromise;
-        loadingPromise = interstitialAd.load().catch(() => {}).finally(() => {
-            loadingPromise = null;
-        });
+        loadingPromise = interstitialAd
+            .load()
+            .catch(() => {})
+            .finally(() => {
+                loadingPromise = null;
+            });
         return loadingPromise;
     };
 
@@ -96,7 +99,7 @@ export const useAdIntersititial = () => {
         if (isShowing) {
             adminToast({
                 title: 'Ad is showing. Please wait.',
-                icon: 'none'
+                icon: 'none',
             });
             return;
         }
@@ -109,7 +112,7 @@ export const useAdIntersititial = () => {
             .catch(() =>
                 interstitialAd.load().then(() => {
                     return interstitialAd.show();
-                })
+                }),
             )
             .catch(() => {
                 // show失败回退直接下载
@@ -128,15 +131,17 @@ export const useAdIntersititial = () => {
     return {
         createInterstitialAd,
         showInterstitialAd,
-        destroyInterstitialAd
+        destroyInterstitialAd,
     };
     // #endif
 
     // #ifdef MP || APP-HARMONY
     return {
         createInterstitialAd: function () {},
-        showInterstitialAd: function (inputPicurl) {downloadPic(inputPicurl);},
-        destroyInterstitialAd: function () {}
+        showInterstitialAd: function (inputPicurl) {
+            downloadPic(inputPicurl);
+        },
+        destroyInterstitialAd: function () {},
     };
     // #endif
 
@@ -144,7 +149,7 @@ export const useAdIntersititial = () => {
     return {
         createInterstitialAd: function () {},
         showInterstitialAd: function () {},
-        destroyInterstitialAd: function () {}
+        destroyInterstitialAd: function () {},
     };
     // #endif
 };
@@ -160,8 +165,8 @@ export const useAdRewardedVideo = () => {
         urlCallback: {
             // 服务器回调透传参数
             userId: 'uniapp-testuser',
-            extra: 'uniapp-testdata'
-        }
+            extra: 'uniapp-testdata',
+        },
     };
 
     const shouldBypassAd = () => userStore.isVip || !userStore.showAd;
@@ -202,9 +207,12 @@ export const useAdRewardedVideo = () => {
 
     const preloadRewarded = () => {
         if (!rewardedVideoAd || loadingPromise) return loadingPromise;
-        loadingPromise = rewardedVideoAd.load().catch(() => {}).finally(() => {
-            loadingPromise = null;
-        });
+        loadingPromise = rewardedVideoAd
+            .load()
+            .catch(() => {})
+            .finally(() => {
+                loadingPromise = null;
+            });
         return loadingPromise;
     };
 
@@ -229,7 +237,7 @@ export const useAdRewardedVideo = () => {
                 adminToast({
                     title: 'Cannot download without watching the Ad completely.',
                     icon: 'none',
-                    duration: 3000
+                    duration: 3000,
                 });
             }
             clearPending();
@@ -241,7 +249,7 @@ export const useAdRewardedVideo = () => {
             adminToast({
                 title: 'Ad loading failed. Download directly.',
                 icon: 'none',
-                duration: 2500
+                duration: 2500,
             });
             safeDownload(pendingPicurl);
             clearPending();
@@ -263,7 +271,7 @@ export const useAdRewardedVideo = () => {
         if (isShowing) {
             adminToast({
                 title: 'Ad is showing. Please wait.',
-                icon: 'none'
+                icon: 'none',
             });
             return;
         }
@@ -271,20 +279,18 @@ export const useAdRewardedVideo = () => {
         pendingPicurl = inputPicurl || '';
         isShowing = true;
 
-        rewardedVideoAd
-            .show()
-            .catch(() => {
-                // show失败的话 重新load获取
-                rewardedVideoAd
-                    .load()
-                    .then(() => rewardedVideoAd.show())
-                    .catch(() => {
-                        // 再次失败直接回退，防止卡住下载流程
-                        safeDownload(pendingPicurl);
-                        clearPending();
-                        tryDestroyIfNeeded();
-                    });
-            });
+        rewardedVideoAd.show().catch(() => {
+            // show失败的话 重新load获取
+            rewardedVideoAd
+                .load()
+                .then(() => rewardedVideoAd.show())
+                .catch(() => {
+                    // 再次失败直接回退，防止卡住下载流程
+                    safeDownload(pendingPicurl);
+                    clearPending();
+                    tryDestroyIfNeeded();
+                });
+        });
     };
 
     const destroyRewardedVideoAd = () => {
@@ -296,15 +302,17 @@ export const useAdRewardedVideo = () => {
     return {
         createRewardedVideoAd,
         showRewardedVideoAd,
-        destroyRewardedVideoAd
+        destroyRewardedVideoAd,
     };
     // #endif
 
     // #ifdef MP || APP-HARMONY
     return {
         createRewardedVideoAd: function () {},
-        showRewardedVideoAd: function (inputPicurl) {downloadPic(inputPicurl);},
-        destroyRewardedVideoAd: function () {}
+        showRewardedVideoAd: function (inputPicurl) {
+            downloadPic(inputPicurl);
+        },
+        destroyRewardedVideoAd: function () {},
     };
     // #endif
 
@@ -312,7 +320,7 @@ export const useAdRewardedVideo = () => {
     return {
         createRewardedVideoAd: function () {},
         showRewardedVideoAd: function () {},
-        destroyRewardedVideoAd: function () {}
+        destroyRewardedVideoAd: function () {},
     };
     // #endif
 };

@@ -177,7 +177,7 @@ const selectImage = (count) => {
                     cancelText: t('common.cancel') || '取消',
                     success: (res) => {
                         if (res.confirm) {
-                            // #ifdef APP-PLUS
+                            // #ifdef APP
                             if (typeof plus !== 'undefined' && plus.runtime) {
                                 plus.runtime.openURL('app-settings:');
                             } else {

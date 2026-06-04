@@ -7,17 +7,9 @@ import { useSettingsStore } from '@/stores/settings.js';
 
 onLaunch(() => {
     console.log('App Launch');
-    const settingsStore = useSettingsStore();
 
-    const savedTheme = uni.getStorageSync('theme') || 'auto';
-    settingsStore.options.theme = savedTheme;
-
-    // #ifdef APP
-    const activeUIStyle = savedTheme === 'auto' ? settingsStore.systemTheme : savedTheme;
-    plus.nativeUI.setUIStyle(activeUIStyle);
-    // #endif
-
-    // TODO 检查是否已看过引导页。目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
+    // 检查是否已看过引导页。
+    // TODO 目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
     // const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
     // if (!hasSeenGuide) {
     //     // 未看过引导页，跳转到引导页
@@ -26,16 +18,33 @@ onLaunch(() => {
     //     });
     // }
 
+    const settingsStore = useSettingsStore();
+
+    // #ifdef APP
+    const savedTheme = uni.getStorageSync('theme') || 'auto';
+    settingsStore.options.theme = savedTheme;
+    const activeUIStyle = savedTheme === 'auto' ? settingsStore.systemTheme : savedTheme;
+    plus.nativeUI.setUIStyle(activeUIStyle);
+    // #endif
+
+    // #ifndef APP
+    settingsStore.options.theme = settingsStore.systemTheme;
+    // #endif
+
     // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
         console.log('onThemeChange', theme);
 
+        // #ifdef APP
         // 如果用户设置的是跟随系统，系统切换主题时需要同时更新原生UI风格
         if (settingsStore.options.theme === 'auto') {
-            // #ifdef APP
             plus.nativeUI.setUIStyle(theme);
-            // #endif
         }
+        // #endif
+
+        // #ifndef APP
+        settingsStore.options.theme = theme;
+        // #endif
     });
 
     writeAccessLog();

@@ -299,9 +299,9 @@
                         v-for="item in themeOptions"
                         :key="item.value"
                         class="choice-item"
-                        :class="{ 
+                        :class="{
                             active: settingsStore.options.theme === item.value,
-                            disabled: item.disabled
+                            disabled: item.disabled,
                         }"
                         @click="!item.disabled && selectTheme(item.value)"
                     >
@@ -312,17 +312,22 @@
                                     size="24px"
                                     :color="
                                         item.disabled
-                                            ? (settingsStore.isDark ? '#4b5563' : '#cbd5e1')
+                                            ? settingsStore.isDark
+                                                ? '#4b5563'
+                                                : '#cbd5e1'
                                             : settingsStore.options.theme === item.value
-                                                ? '#28B389'
-                                                : settingsStore.isDark
-                                                  ? '#e5e7eb'
-                                                  : '#374151'
+                                              ? '#28B389'
+                                              : settingsStore.isDark
+                                                ? '#e5e7eb'
+                                                : '#374151'
                                     "
                                 ></mdi-icon>
                             </view>
                             <view class="choice-item__text">
-                                <text class="choice-item__label" :style="{ color: item.disabled ? 'var(--text-tertiary)' : '' }">
+                                <text
+                                    class="choice-item__label"
+                                    :style="{ color: item.disabled ? 'var(--text-tertiary)' : '' }"
+                                >
                                     {{ item.label }}
                                 </text>
                                 <text class="choice-item__desc">
@@ -484,10 +489,10 @@ const themeValueLabel = computed(() => {
 });
 
 const themeOptions = computed(() => {
-    // #ifdef APP-PLUS
+    // #ifdef APP
     const isApp = true;
     // #endif
-    // #ifndef APP-PLUS
+    // #ifndef APP
     const isApp = false;
     // #endif
 
@@ -496,27 +501,21 @@ const themeOptions = computed(() => {
             value: 'auto',
             icon: '/static/icons/theme-light-dark.svg',
             label: t('settings.items.theme.auto'),
-            desc: isApp 
-                ? t('settings.items.theme.autoDesc') 
-                : '跟随系统（微信/浏览器）。系统主题改变时自动切换深浅色。',
+            desc: isApp ? t('settings.items.theme.autoDesc') : '跟随系统（微信/浏览器）。系统主题改变时自动切换深浅色。',
             disabled: false,
         },
         {
             value: 'light',
             icon: '/static/icons/weather-sunny.svg',
             label: t('settings.items.theme.light'),
-            desc: isApp 
-                ? t('settings.items.theme.lightDesc') 
-                : '当前端不支持手动锁定浅色，请在微信或系统设置中更改主题。',
+            desc: isApp ? t('settings.items.theme.lightDesc') : '当前端不支持手动锁定浅色，请在微信或系统设置中更改主题。',
             disabled: !isApp,
         },
         {
             value: 'dark',
             icon: '/static/icons/weather-night.svg',
             label: t('settings.items.theme.dark'),
-            desc: isApp 
-                ? t('settings.items.theme.darkDesc') 
-                : '当前端不支持手动锁定深色，请在微信或系统设置中更改主题。',
+            desc: isApp ? t('settings.items.theme.darkDesc') : '当前端不支持手动锁定深色，请在微信或系统设置中更改主题。',
             disabled: !isApp,
         },
     ];
@@ -914,9 +913,9 @@ function selectLanguage(pref) {
 
 function selectTheme(theme) {
     settingsStore.options.theme = theme;
-    uni.setStorageSync('theme', theme);
 
-    // #ifdef APP-PLUS
+    // #ifdef APP
+    uni.setStorageSync('theme', theme);
     const targetStyle = theme === 'auto' ? settingsStore.systemTheme : theme;
     plus.nativeUI.setUIStyle(targetStyle);
     // #endif
@@ -1056,7 +1055,7 @@ function openAppStore() {
         }
         // #endif
 
-        // #ifdef H5
+        // #ifdef WEB
         uni.showToast({
             title: t('settings.ratePopup.webHint'),
             icon: 'none',
@@ -1552,11 +1551,11 @@ function shareApp() {
         opacity: 0.6;
         cursor: not-allowed;
         background: rgba(var(--panel-background-rgb), 0.5);
-        
+
         .choice-item__desc {
             color: var(--text-tertiary) !important;
         }
-        
+
         &:active {
             transform: none !important;
         }

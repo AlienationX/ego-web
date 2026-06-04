@@ -165,7 +165,7 @@ const goAppStore = () => {
         content: t('about.rateTip'),
         success: (res) => {
             if (res.confirm) {
-                // #ifdef APP-PLUS
+                // #ifdef APP
                 plus.runtime.openURL('itms-apps://itunes.apple.com/app/idYOUR_APP_ID');
                 // #endif
             }

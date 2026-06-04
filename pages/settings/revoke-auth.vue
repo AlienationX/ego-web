@@ -4,7 +4,7 @@
 
         <view class="header">
             <view class="back-btn" @click="goBack">
-                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="backIconColor"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="backIconColor"></mdi-icon>
             </view>
             <text class="header-title">{{ t('settings.revokeAuth.title') }}</text>
             <view class="header-placeholder"></view>
@@ -209,7 +209,7 @@ const readAuthorizeSetting = () => {
 };
 
 const getAndroidPermissionStatus = (permissionName) => {
-    // #ifdef APP-PLUS
+    // #ifdef APP
     if (typeof plus !== 'undefined' && plus.os?.name?.toLowerCase() === 'android') {
         const mainActivity = plus.android.runtimeMainActivity();
         const status = mainActivity.checkSelfPermission(`${APP_PLUS_PERMISSION_PREFIX}${permissionName}`);
@@ -221,7 +221,7 @@ const getAndroidPermissionStatus = (permissionName) => {
 };
 
 const readAndroidPermissionStatus = () => {
-    // #ifdef APP-PLUS
+    // #ifdef APP
     if (typeof plus !== 'undefined' && plus.os?.name?.toLowerCase() === 'android') {
         const nextStatus = {};
         ALBUM_PERMISSION_NAMES.forEach((permissionName) => {

@@ -1,6 +1,6 @@
 <template>
     <view>
-        <!-- #ifdef MP-360 -->
+        <!-- #ifdef APP -->
         <!-- 微信小程序广告插件未申请成功，暂时屏蔽 -->
         <view v-if="showAd" class="content">
             <!-- adpid="1111111111" 此广告位标识仅在HBuilderX标准基座中有效，仅用于测试 -->
@@ -17,8 +17,8 @@
 defineProps({
     adpid: {
         type: String,
-        default: '1760125998' // 1760125998
-    }
+        default: '1760125998', // 1760125998
+    },
 });
 const emit = defineEmits(['load', 'close', 'error']);
 
