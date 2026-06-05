@@ -401,7 +401,7 @@ const dateText = computed(() => {
 const currentPreviewType = computed(() => settingsStore.options.previewType || 'classic');
 const isAdmin = computed(() => !!userStore.isAdmin);
 const isCurrentInWatchLater = computed(() => libraryStore.isInWatchLater(currentInfo.value?.id));
-const publisherName = computed(() => currentInfo.value?.publisher || t('common.appName'));
+const publisherName = computed(() => t('common.appName') || currentInfo.value?.publisher);
 const imageSizeMap = ref({});
 const publisherAvatar = computed(() => {
     const rawPublisher = String(currentInfo.value?.publisher || '')

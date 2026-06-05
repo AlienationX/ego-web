@@ -1,16 +1,17 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
-        <view class="header">
-            <view class="back-btn" @click="goBack">
-                <mdi-icon
-                    path="/static/icons/arrow-left.svg"
-                    size="18px"
-                    :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"
-                ></mdi-icon>
+        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: navBarHeight + 'px' }">
+            <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
+                <view class="back-btn" @click="goBack">
+                    <mdi-icon
+                        path="/static/icons/arrow-left.svg"
+                        size="18px"
+                        :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"
+                    ></mdi-icon>
+                </view>
+                <text class="header-title">{{ t('settings.title') }}</text>
+                <view class="header-placeholder"></view>
             </view>
-            <text class="header-title">{{ t('settings.title') }}</text>
-            <view class="header-placeholder"></view>
         </view>
 
         <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
@@ -236,7 +237,11 @@
         <uni-popup ref="ratePopup" type="center" :mask-click="true" :safe-area="true">
             <view class="rate-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="rate-popup__close" @click="closeRatePopup">
-                    <mdi-icon path="/static/icons/close.svg" size="18px" color="#2f3949"></mdi-icon>
+                    <mdi-icon
+                        path="/static/icons/close.svg"
+                        size="18px"
+                        :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"
+                    ></mdi-icon>
                 </view>
 
                 <text class="rate-popup__title">{{ t('settings.ratePopup.title') }}</text>
@@ -414,7 +419,7 @@ import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 import { RIGHT_ICP } from '@/common/config.js';
 import {
     LANGUAGE_PREF_AUTO,
@@ -434,7 +439,9 @@ const ratePopup = ref(null);
 const themePopup = ref(null);
 const languagePopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
+const titleBarHeight = ref(getTitleBarHeight() || 44);
+const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
+const contentHeight = computed(() => `calc(100vh - ${navBarHeight.value}px)`);
 const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
 const copyrightText = computed(() => t('about.copyright', { year: new Date().getFullYear() }));
@@ -489,12 +496,7 @@ const themeValueLabel = computed(() => {
 });
 
 const themeOptions = computed(() => {
-    // #ifdef APP
-    const isApp = true;
-    // #endif
-    // #ifndef APP
-    const isApp = false;
-    // #endif
+    const isApp = uni.getSystemInfoSync().uniPlatform === 'app';
 
     return [
         {
@@ -912,12 +914,14 @@ function selectLanguage(pref) {
 }
 
 function selectTheme(theme) {
-    settingsStore.options.theme = theme;
-
     // #ifdef APP
     uni.setStorageSync('theme', theme);
     const targetStyle = theme === 'auto' ? settingsStore.systemTheme : theme;
     plus.nativeUI.setUIStyle(targetStyle);
+    // #endif
+
+    // #ifndef APP
+    settingsStore.options.theme = 'auto';
     // #endif
 
     uni.showToast({
@@ -1104,38 +1108,46 @@ function shareApp() {
     background: var(--page-background);
     color: var(--text-primary);
 }
-.status-holder {
-    width: 100%;
-    background: var(--page-background);
-}
 .header {
-    height: 112rpx;
+    width: 100%;
     background: var(--page-background);
     display: flex;
     align-items: center;
+}
+
+.header-inner {
+    width: 100%;
     padding: 0 32rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 16rpx;
 }
+
 .back-btn {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
     border-radius: 16rpx;
     background: var(--page-background-secondary);
     border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
+
 .header-title {
     flex: 1;
     text-align: center;
-    font-size: 40rpx;
+    font-size: 32rpx;
     font-weight: 700;
     color: var(--text-primary);
 }
+
 .header-placeholder {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
+    flex-shrink: 0;
 }
 .content {
     box-sizing: border-box;

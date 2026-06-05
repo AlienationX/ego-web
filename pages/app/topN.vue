@@ -60,11 +60,7 @@
                                         <text>{{ formatCount(rankedList[0].views) }}</text>
                                     </view>
                                     <view class="hero-card__meta-item">
-                                        <mdi-icon
-                                            path="/static/icons/download.svg"
-                                            size="14"
-                                            color="#cbd5e1"
-                                        ></mdi-icon>
+                                        <mdi-icon path="/static/icons/download.svg" size="14" color="#cbd5e1"></mdi-icon>
                                         <text>{{ formatCount(rankedList[0].downloads) }}</text>
                                     </view>
                                 </view>
@@ -444,7 +440,6 @@ onLoad(() => {
 
     .theme-light & {
         background: #f8fafc;
-        border: 1rpx solid rgba(17, 24, 39, 0.06);
         box-shadow: 0 8rpx 24rpx rgba(15, 23, 42, 0.05);
     }
 }
@@ -636,7 +631,6 @@ onLoad(() => {
 
     .theme-light & {
         background: #f8fafc;
-        border: 1rpx solid rgba(17, 24, 39, 0.06);
         box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
     }
 }

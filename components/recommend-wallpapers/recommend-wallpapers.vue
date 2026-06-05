@@ -227,7 +227,6 @@ watch(
 
     .theme-light & {
         background: #f8fafc;
-        border: 1rpx solid rgba(17, 24, 39, 0.06);
         box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
     }
 }

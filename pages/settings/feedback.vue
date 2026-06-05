@@ -1,12 +1,13 @@
 <template>
     <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
-        <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
-        <view class="header">
-            <view class="back-btn" @click="goBack">
-                <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
+        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: navBarHeight + 'px' }">
+            <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
+                <view class="back-btn" @click="goBack">
+                    <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
+                </view>
+                <text class="header-title">{{ t('feedback.title') }}</text>
+                <view class="header-placeholder"></view>
             </view>
-            <text class="header-title">{{ t('feedback.title') }}</text>
-            <view class="header-placeholder"></view>
         </view>
 
         <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
@@ -108,7 +109,7 @@ import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
@@ -118,7 +119,9 @@ const isDark = computed(() => settingsStore.isDark);
 const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
+const titleBarHeight = ref(getTitleBarHeight() || 44);
+const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
+const contentHeight = computed(() => `calc(100vh - ${navBarHeight.value}px)`);
 
 const feedbackForm = reactive({
     type: t('feedback.typeBug'),
@@ -315,41 +318,46 @@ const handleSubmit = async () => {
     flex-direction: column;
 }
 
-.status-holder {
-    width: 100%;
-}
-
 .header {
-    height: 112rpx;
+    width: 100%;
     background: var(--page-background);
     display: flex;
     align-items: center;
+}
+
+.header-inner {
+    width: 100%;
     padding: 0 32rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 16rpx;
 }
 
 .back-btn {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
     border-radius: 16rpx;
     background: var(--page-background-secondary);
     border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .header-title {
     flex: 1;
     text-align: center;
-    font-size: 36rpx;
+    font-size: 32rpx;
     font-weight: 700;
     color: var(--text-primary);
 }
 
 .header-placeholder {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
+    flex-shrink: 0;
 }
 
 .content {

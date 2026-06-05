@@ -107,7 +107,8 @@
         "clearAll": "全部清除",
         "cleared": "已清空浏览记录",
         "loading": "加载中...",
-        "loadedAll": "已加载全部记录（最多保留30天）",
+        "loadedAll": "已加载全部记录",
+        "retentionHint": "浏览记录最多保留30天",
         "clearDayConfirm": "确定要清除 {date} 的浏览记录吗？",
         "clearDaySuccess": "已清除该天记录",
         "clearAllConfirm": "确定要清空所有的浏览记录吗？此操作不可撤销。",
@@ -259,7 +260,7 @@
         "saveFailed": "保存失败，请重新点击下载",
         "downloading": "下载中...",
         "loading": "加载中...",
-        "adText": "观看视频广告解锁该壁纸",
+        "adText": "解锁该壁纸",
         "adPrompt": "观看视频广告"
     },
     "feedback": {

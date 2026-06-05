@@ -135,7 +135,11 @@
                     <template #name>{{ $t('index.dailyRecommend') }}</template>
                     <template #custom>
                         <view class="date">
-                            <uni-icons type="calendar" size="20" :color="isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
+                            <uni-icons
+                                type="calendar"
+                                size="20"
+                                :color="isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"
+                            ></uni-icons>
                             <view class="text">
                                 {{ new Date().getDate().toString().padStart(2, '0') }}{{ $t('common.day') }}
                             </view>
@@ -161,7 +165,7 @@
                                 mode="aspectFill"
                                 lazy-load
                                 fade-in
-                                @load="idx === 0 ? heroImageLoaded = true : null"
+                                @load="idx === 0 ? (heroImageLoaded = true) : null"
                             ></image>
                             <block v-if="idx === 0">
                                 <view class="box-hero-overlay" :class="{ 'is-visible': heroImageLoaded }"></view>
@@ -309,11 +313,7 @@
                         <uni-icons type="right" size="18" color="#ffffff"></uni-icons>
                     </view>
                 </view>
-                <image
-                    class="top-entry__visual"
-                    :src="topCardImageURL"
-                    mode="heightFix"
-                ></image>
+                <image class="top-entry__visual" :src="topCardImageURL" mode="heightFix"></image>
             </navigator>
 
             <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
@@ -459,7 +459,7 @@ const SCROLL_DEAD_ZONE = 5;
 const updateTitleBarVisibleByScroll = (scrollTop) => {
     const currentScrollTop = Math.max(0, Number(scrollTop) || 0);
     const scrollDelta = currentScrollTop - lastScrollTop;
-    
+
     if (Math.abs(scrollDelta) > SCROLL_DEAD_ZONE) {
         if (currentScrollTop > titleBarHeight.value) {
             if (scrollDelta > 0) {
@@ -772,7 +772,6 @@ const latestMonthGroups = computed(() => {
     return list;
 });
 
-
 // 与 classify 页一致：前 6 个 2×3（左高格跨 2 行）+ 第 6 个通栏，第 7、8 个占第 5 行两列，「更多」通栏第 6 行
 const getLayoutStyleForIndex = (idx) => {
     if (idx === 0) return { gridColumn: '1', gridRow: '1' };
@@ -924,8 +923,6 @@ const getLatest = async (isAppend = false) => {
     }
 };
 
-
-
 const goBannerPreview = (data) => {
     if (data.wall) {
         const wallList = handlePicUrl(data.wall);
@@ -1059,7 +1056,7 @@ onShareTimeline(() => {
         .index-title {
             :deep(.name) {
                 color: var(--text-primary);
-                
+
                 &::after {
                     background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
                 }
@@ -1096,8 +1093,10 @@ onShareTimeline(() => {
         padding: 0 20rpx;
         box-sizing: border-box;
         background: var(--page-background);
-        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), background-color 0.3s ease;
-        
+        transition:
+            transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+            background-color 0.3s ease;
+
         &.is-hidden {
             transform: translateY(-100%);
         }
@@ -1105,16 +1104,16 @@ onShareTimeline(() => {
         &.is-dark {
             .home-tab {
                 color: rgba(255, 255, 255, 0.6);
-                
+
                 &.is-active {
                     color: #ffffff;
                 }
-                
+
                 &.is-active::after {
                     background: #ffffff;
                 }
             }
-            
+
             .home-tabs-mask {
                 background: linear-gradient(to right, transparent, var(--mask-color, var(--page-background)));
             }
@@ -1123,7 +1122,7 @@ onShareTimeline(() => {
                 background: rgba(255, 255, 255, 0.08);
                 border-color: rgba(255, 255, 255, 0.15);
                 color: rgba(255, 255, 255, 0.8);
-                
+
                 &:active {
                     background: rgba(255, 255, 255, 0.15);
                 }
@@ -1820,6 +1819,7 @@ onShareTimeline(() => {
                         height: 100%;
                         border-radius: 28rpx;
                         box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.34);
+                        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
                     }
 
                     .banner-card__overlay {
@@ -1924,6 +1924,20 @@ onShareTimeline(() => {
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                    }
+
+                    &:active {
+                        image {
+                            transform: scale(1.08);
+                        }
+                    }
+
+                    @media (hover: hover) {
+                        &:hover {
+                            image {
+                                transform: scale(1.08);
+                            }
+                        }
                     }
 
                     &.is-collection {
@@ -2202,7 +2216,7 @@ onShareTimeline(() => {
                 letter-spacing: 0.5rpx;
                 position: relative;
                 padding-bottom: 8rpx;
-                
+
                 &::after {
                     content: '';
                     position: absolute;
@@ -2248,7 +2262,10 @@ onShareTimeline(() => {
             justify-content: center;
             letter-spacing: 0.4rpx;
             box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
-            transition: transform 0.28s ease, background-color 0.28s ease, color 0.28s ease;
+            transition:
+                transform 0.28s ease,
+                background-color 0.28s ease,
+                color 0.28s ease;
 
             &::after {
                 border: none;
@@ -2303,7 +2320,12 @@ onShareTimeline(() => {
                         right: 0;
                         bottom: 0;
                         border-radius: 28rpx;
-                        background: linear-gradient(90deg, rgba(200, 200, 200, 0.08) 25%, rgba(200, 200, 200, 0.18) 50%, rgba(200, 200, 200, 0.08) 75%);
+                        background: linear-gradient(
+                            90deg,
+                            rgba(200, 200, 200, 0.08) 25%,
+                            rgba(200, 200, 200, 0.18) 50%,
+                            rgba(200, 200, 200, 0.08) 75%
+                        );
                         background-size: 200% 100%;
                         animation: skeleton-shimmer 1.6s infinite linear;
                         z-index: 0;

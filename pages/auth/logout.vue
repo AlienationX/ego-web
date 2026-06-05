@@ -41,7 +41,8 @@
 
         <template v-else>
             <view class="success-content">
-                <text class="success-emoji">👋</text>
+                <!-- <text class="success-emoji">👋</text> -->
+                <image class="success-emoji" src="/static/images/successful.svg" mode="aspectFit"></image>
                 <text class="success-title">{{ t('logoutPage.doneTitle') }}</text>
                 <text class="success-desc">{{ t('logoutPage.doneDesc', { name: profileShortName }) }}</text>
                 <button class="back-settings-btn" @click="backToSettings">{{ t('logoutPage.backSettings') }}</button>
@@ -265,8 +266,9 @@ const backToSettings = () => {
 }
 
 .success-emoji {
-    font-size: 104rpx;
-    margin-bottom: 40rpx;
+    width: 280rpx;
+    height: 280rpx;
+    margin-bottom: 50rpx;
 }
 
 .success-title {

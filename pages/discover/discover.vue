@@ -124,7 +124,7 @@ const favLoadingMore = ref(false);
 const selectedId = ref(null);
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.options.theme === 'dark');
+const isDark = computed(() => settingsStore.isDark);
 const sourceMode = ref('favorite');
 const localImage = ref('');
 const pickerOpen = ref(true);
@@ -633,53 +633,24 @@ onUnload(() => {
 @import '@/static/styles/theme-variables.scss';
 
 .layout {
-    &.theme-light {
-        --discover-bg: var(--page-background);
-        --discover-panel: rgba(255, 255, 255, 0.9);
-        --discover-panel-strong: rgba(255, 255, 255, 0.98);
-        --discover-border: rgba(17, 17, 17, 0.08);
-        --discover-border-strong: rgba(17, 17, 17, 0.12);
-        --discover-text-main: #15171c;
-        --discover-text-secondary: rgba(21, 23, 28, 0.72);
-        --discover-text-muted: rgba(21, 23, 28, 0.52);
-        --discover-accent: #ff8db3;
-        --discover-accent-strong: #15171c;
-        --discover-success: #28b389;
-        --discover-shadow: rgba(19, 25, 39, 0.12);
-        --discover-user-bubble: rgba(255, 141, 179, 0.12);
-        --discover-code-bg: #0f172a;
-        --discover-code-text: #e2e8f0;
-        --discover-link: #d9487d;
-        --discover-switch-active-text: #15171c;
-        --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
-        --discover-bottom-panel: rgba(255, 255, 255, 0.94);
-    }
+    // Discover-specific CSS variables (only those differing from global theme)
+    --discover-border-strong: rgba(17, 17, 17, 0.12);
+    --discover-user-bubble: rgba(255, 141, 179, 0.12);
+    --discover-link: #d9487d;
+    --discover-switch-active-text: #15171c;
+    --discover-bottom-panel: rgba(255, 255, 255, 0.94);
 
     &.theme-dark {
-        --discover-bg: var(--page-background);
-        --discover-panel: rgba(255, 255, 255, 0.06);
-        --discover-panel-strong: rgba(255, 255, 255, 0.08);
-        --discover-border: rgba(255, 255, 255, 0.1);
         --discover-border-strong: rgba(255, 255, 255, 0.14);
-        --discover-text-main: #f7f7fb;
-        --discover-text-secondary: rgba(247, 247, 251, 0.72);
-        --discover-text-muted: rgba(247, 247, 251, 0.56);
-        --discover-accent: #ffd7e6;
-        --discover-accent-strong: #ffffff;
-        --discover-success: #7df7c4;
-        --discover-shadow: rgba(0, 0, 0, 0.28);
         --discover-user-bubble: rgba(255, 215, 230, 0.12);
-        --discover-code-bg: #0f172a;
-        --discover-code-text: #e2e8f0;
         --discover-link: #ffd7e6;
         --discover-switch-active-text: #111111;
-        --discover-switch-active-shadow: rgba(255, 190, 128, 0.18);
         --discover-bottom-panel: rgba(10, 12, 20, 0.86);
     }
 
     position: relative;
     min-height: 94vh;
-    background: var(--discover-bg);
+    background: var(--page-background);
     overflow: hidden;
 }
 
@@ -688,7 +659,7 @@ onUnload(() => {
     top: 0;
     left: 0;
     width: 100%;
-    background: var(--discover-bg);
+    background: var(--page-background);
     overflow: hidden;
     pointer-events: none;
     z-index: 9999;
@@ -721,10 +692,6 @@ onUnload(() => {
     pointer-events: none;
 }
 
-.decorative-bg,
-.status-decorative-bg {
-}
-
 .bg-mesh {
     position: absolute;
     inset: 0;
@@ -741,7 +708,7 @@ onUnload(() => {
     left: 40rpx;
     right: 40rpx;
     height: 2rpx;
-    background: var(--discover-border);
+    background: var(--panel-border);
 }
 
 .bg-line--top {
@@ -757,12 +724,12 @@ onUnload(() => {
     z-index: 10;
     padding: 0rpx 30rpx 30rpx;
     margin-bottom: 16rpx;
-    border-bottom: 1rpx solid var(--discover-border);
+    border-bottom: 1rpx solid var(--panel-border);
 
     .hero-title {
         font-size: 68rpx;
         font-weight: 900;
-        color: var(--discover-text-main);
+        color: var(--text-primary);
         letter-spacing: -2rpx;
         line-height: 1.1;
         margin-bottom: 20rpx;
@@ -772,7 +739,7 @@ onUnload(() => {
     .hero-subtitle {
         font-size: 38rpx;
         font-weight: 700;
-        color: var(--discover-text-main);
+        color: var(--text-primary);
         margin-bottom: 16rpx;
         letter-spacing: 0.5rpx;
         opacity: 0.95;
@@ -780,7 +747,7 @@ onUnload(() => {
 
     .hero-desc {
         font-size: 26rpx;
-        color: var(--discover-text-secondary);
+        color: var(--text-secondary);
         line-height: 1.7;
         font-weight: 500;
     }
@@ -803,13 +770,13 @@ onUnload(() => {
 .panel {
     background: transparent;
     padding: 20rpx;
-    border-bottom: 1rpx solid var(--discover-border);
+    border-bottom: 1rpx solid var(--panel-border);
 }
 
 .picker-title {
     font-size: 26rpx;
     font-weight: 600;
-    color: var(--discover-text-main);
+    color: var(--text-primary);
     margin-bottom: 14rpx;
 }
 
@@ -828,18 +795,18 @@ onUnload(() => {
     width: 180rpx;
     height: 320rpx;
     border-radius: 24rpx;
-    border: 2rpx solid var(--discover-border);
+    border: 2rpx solid var(--panel-border);
     overflow: hidden;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 16rpx 32rpx var(--discover-shadow);
+    box-shadow: 0 16rpx 32rpx var(--shadow-color);
 }
 
 .fav-card.active {
     border-color: var(--discover-border-strong);
     box-shadow:
         0 0 0 4rpx rgba(255, 215, 230, 0.16),
-        0 18rpx 36rpx var(--discover-shadow);
+        0 18rpx 36rpx var(--shadow-color);
 }
 
 .fav-card--loading {
@@ -879,9 +846,9 @@ onUnload(() => {
     width: 58rpx;
     height: 58rpx;
     border-radius: 50%;
-    border: 1rpx solid var(--discover-border);
-    background: var(--discover-panel);
-    box-shadow: 0 12rpx 24rpx var(--discover-shadow);
+    border: 1rpx solid var(--panel-border);
+    background: var(--panel-background);
+    box-shadow: 0 12rpx 24rpx var(--shadow-color);
 }
 
 .msg-content {
@@ -910,7 +877,7 @@ onUnload(() => {
     align-items: center;
     min-height: 58rpx;
     padding: 0;
-    color: var(--discover-text-secondary);
+    color: var(--text-secondary);
     font-size: 28rpx;
     font-weight: 600;
     margin-bottom: 8rpx;
@@ -918,22 +885,22 @@ onUnload(() => {
 
 .msg-row.user .msg-label {
     margin-left: auto;
-    color: var(--discover-accent);
+    color: var(--accent-primary);
 }
 
 .msg-text {
     display: inline-block;
     text-align: left;
-    border: 1rpx solid var(--discover-border);
-    background: var(--discover-panel);
+    border: 1rpx solid var(--panel-border);
+    background: var(--panel-background);
     padding: 16rpx 18rpx;
     border-radius: 22rpx;
     font-size: 30rpx;
-    color: var(--discover-text-main);
+    color: var(--text-primary);
     line-height: 1.72;
     white-space: pre-wrap;
     word-break: break-word;
-    box-shadow: 0 14rpx 30rpx var(--discover-shadow);
+    box-shadow: 0 14rpx 30rpx var(--shadow-color);
     backdrop-filter: blur(20rpx);
 }
 
@@ -984,8 +951,8 @@ onUnload(() => {
 }
 
 .markdown :deep(pre) {
-    background: var(--discover-code-bg);
-    color: var(--discover-code-text);
+    background: #0f172a;
+    color: #e2e8f0;
     padding: 12rpx;
     border-radius: 12rpx;
     overflow-x: auto;
@@ -1015,7 +982,7 @@ onUnload(() => {
     margin-top: 2rpx;
     padding: 0;
     font-size: 28rpx;
-    color: var(--discover-text-secondary);
+    color: var(--text-secondary);
     border: none;
     background: transparent;
     box-shadow: none;
@@ -1037,8 +1004,8 @@ onUnload(() => {
     border-radius: 18rpx;
     display: block;
     margin-bottom: 10rpx;
-    border: 1rpx solid var(--discover-border);
-    box-shadow: 0 14rpx 28rpx var(--discover-shadow);
+    border: 1rpx solid var(--panel-border);
+    box-shadow: 0 14rpx 28rpx var(--shadow-color);
 }
 
 .empty {
@@ -1047,7 +1014,7 @@ onUnload(() => {
 }
 
 .empty-text {
-    color: var(--discover-text-muted);
+    color: var(--text-tertiary);
     margin-bottom: 28rpx;
     font-size: 30rpx;
 }
@@ -1075,8 +1042,8 @@ onUnload(() => {
     width: 180rpx;
     height: 240rpx;
     border-radius: 18rpx;
-    border: 1rpx solid var(--discover-border);
-    box-shadow: 0 14rpx 28rpx var(--discover-shadow);
+    border: 1rpx solid var(--panel-border);
+    box-shadow: 0 14rpx 28rpx var(--shadow-color);
 }
 
 .pick-local-btn {
@@ -1103,8 +1070,8 @@ onUnload(() => {
     background: var(--discover-bottom-panel);
     border-top-left-radius: 34rpx;
     border-top-right-radius: 34rpx;
-    border-top: 1rpx solid var(--discover-border);
-    box-shadow: 0 -20rpx 44rpx var(--discover-shadow);
+    border-top: 1rpx solid var(--panel-border);
+    box-shadow: 0 -20rpx 44rpx var(--shadow-color);
     backdrop-filter: blur(24rpx);
     padding-top: 18rpx;
     padding-left: 24rpx;
@@ -1114,12 +1081,12 @@ onUnload(() => {
 }
 
 .picker-wrap {
-    border: 1rpx solid var(--discover-border);
+    border: 1rpx solid var(--panel-border);
     border-radius: 26rpx;
-    background: var(--discover-panel);
+    background: var(--panel-background);
     padding: 22rpx;
     margin-bottom: 14rpx;
-    box-shadow: 0 14rpx 30rpx var(--discover-shadow);
+    box-shadow: 0 14rpx 30rpx var(--shadow-color);
     backdrop-filter: blur(18rpx);
 }
 
@@ -1132,8 +1099,8 @@ onUnload(() => {
     flex: 1;
     text-align: center;
     font-size: 27rpx;
-    color: var(--discover-text-secondary);
-    border: 1rpx solid var(--discover-border);
+    color: var(--text-secondary);
+    border: 1rpx solid var(--panel-border);
     padding: 16rpx 12rpx;
     border-radius: 20rpx;
     background: rgba(255, 255, 255, 0.05);
@@ -1149,7 +1116,7 @@ onUnload(() => {
     color: var(--discover-switch-active-text);
     border-color: var(--discover-border-strong);
     background: linear-gradient(135deg, #ffe0f1 0%, #ffd38f 100%);
-    box-shadow: 0 10rpx 24rpx var(--discover-switch-active-shadow);
+    box-shadow: 0 10rpx 24rpx rgba(255, 190, 128, 0.18);
 }
 
 .lock-icon {
@@ -1160,12 +1127,12 @@ onUnload(() => {
 }
 
 .mini-empty {
-    color: var(--discover-text-muted);
+    color: var(--text-tertiary);
     font-size: 24rpx;
 }
 
 .mini-link {
-    color: var(--discover-accent);
+    color: var(--accent-primary);
     font-weight: 600;
     margin-left: 10rpx;
 }

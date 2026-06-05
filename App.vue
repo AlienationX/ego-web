@@ -28,7 +28,7 @@ onLaunch(() => {
     // #endif
 
     // #ifndef APP
-    settingsStore.options.theme = settingsStore.systemTheme;
+    settingsStore.options.theme = 'auto';
     // #endif
 
     // 监控系统主题变化
@@ -43,7 +43,7 @@ onLaunch(() => {
         // #endif
 
         // #ifndef APP
-        settingsStore.options.theme = theme;
+        settingsStore.options.theme = 'auto';
         // #endif
     });
 
