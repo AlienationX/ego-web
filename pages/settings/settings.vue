@@ -1,6 +1,6 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: navBarHeight + 'px' }">
+        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: titleBarHeight + 'px' }">
             <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
                 <view class="back-btn" @click="goBack">
                     <mdi-icon
@@ -440,8 +440,7 @@ const themePopup = ref(null);
 const languagePopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
-const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
-const contentHeight = computed(() => `calc(100vh - ${navBarHeight.value}px)`);
+const contentHeight = computed(() => `calc(100vh - ${titleBarHeight.value}px)`);
 const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
 const copyrightText = computed(() => t('about.copyright', { year: new Date().getFullYear() }));
@@ -1128,8 +1127,8 @@ function shareApp() {
     width: 64rpx;
     height: 64rpx;
     border-radius: 16rpx;
-    background: var(--page-background-secondary);
-    border: 2rpx solid var(--panel-border);
+    // background: var(--page-background-secondary);
+    // border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -495,15 +495,31 @@ const handlePreviewScroll = (e) => {
     }
 };
 
-// views字段值+1，请求太频繁，labmda次数不够用，暂时搁置
-const incrementViews = async (id) => {
-    let res = await apiPostIncrementViews(id);
-    // console.log('increment views', res);
-    await apiPostActions({
-        wall_id: currentInfo.value.id,
-        action_key: 'view',
-        action_value: 1,
-    });
+// views字段值+1，防抖 + 请求锁，防止快速滑动时重复调用
+const requestingViewIds = new Set();
+let viewDebounceTimer = null;
+
+const incrementViews = (id) => {
+    // 请求锁：同一张图片正在请求中，跳过
+    if (requestingViewIds.has(id)) return;
+
+    // 防抖：清除上一次的定时器
+    clearTimeout(viewDebounceTimer);
+
+    // 设置新的定时器，滑动停止后 800ms 执行
+    viewDebounceTimer = setTimeout(async () => {
+        requestingViewIds.add(id);
+        try {
+            await apiPostIncrementViews(id);
+            await apiPostActions({
+                wall_id: id,
+                action_key: 'view',
+                action_value: 1,
+            });
+        } finally {
+            requestingViewIds.delete(id);
+        }
+    }, 800);
 };
 
 // downloads字段值+1

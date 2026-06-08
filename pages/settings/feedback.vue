@@ -1,6 +1,6 @@
 <template>
     <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
-        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: navBarHeight + 'px' }">
+        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: titleBarHeight + 'px' }">
             <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
                 <view class="back-btn" @click="goBack">
                     <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
@@ -120,8 +120,7 @@ const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
-const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
-const contentHeight = computed(() => `calc(100vh - ${navBarHeight.value}px)`);
+const contentHeight = computed(() => `calc(100vh - ${titleBarHeight.value}px)`);
 
 const feedbackForm = reactive({
     type: t('feedback.typeBug'),
