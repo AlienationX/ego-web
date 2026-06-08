@@ -64,7 +64,7 @@
                                     color="#fff"
                                 ></mdi-icon>
                             </view>
-                            <button class="icon-btn" open-type="share" @click="handleShare">
+                            <button v-if="isAdmin" class="icon-btn" open-type="share" @click="handleShare">
                                 <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
                             </button>
                             <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
@@ -77,8 +77,8 @@
                         <view class="date">{{ dateText }}</view>
 
                         <view v-if="showScrollHint" class="scrollHint">
-                            <uni-icons type="down" size="18" color="#ffffff"></uni-icons>
-                            <uni-icons type="down" size="18" color="#ffffff"></uni-icons>
+                            <uni-icons type="up" size="18" color="#ffffff"></uni-icons>
+                            <uni-icons type="up" size="18" color="#ffffff"></uni-icons>
                         </view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
