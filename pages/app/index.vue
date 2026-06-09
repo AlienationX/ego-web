@@ -348,7 +348,9 @@
                 </view>
 
                 <view v-if="idx % 3 === 0" class="ad-slot" :class="{ ready: adVisibleMap[`mid-${idx}`] }">
-                    <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
+                    <view class="ad-slot__inner">
+                        <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
+                    </view>
                 </view>
             </view>
 
@@ -375,8 +377,10 @@
                 </view>
             </view>
 
-            <view class="ad-slot ad-slot-bottom" :class="{ ready: adVisibleMap.bottom }">
-                <custom-ad-banner @load="onAdLoad('bottom')" @error="onAdError('bottom')"></custom-ad-banner>
+            <view class="ad-slot" :class="{ ready: adVisibleMap.bottom }">
+                <view class="ad-slot__inner">
+                    <custom-ad-banner @load="onAdLoad('bottom')" @error="onAdError('bottom')"></custom-ad-banner>
+                </view>
             </view>
         </view>
 
@@ -1778,17 +1782,16 @@ onShareTimeline(() => {
     .ad-slot {
         padding: 0;
         margin: 0;
-        overflow: hidden;
         min-height: 0;
+        box-sizing: border-box;
 
-        &.ready {
-            padding: 30rpx 30rpx 0;
+        &__inner {
+            display: none;
         }
-    }
 
-    .ad-slot-bottom {
-        &.ready {
-            padding: 0 30rpx 30rpx;
+        &.ready &__inner {
+            display: block;
+            margin: 0 30rpx 30rpx;
         }
     }
 
@@ -2725,11 +2728,11 @@ onShareTimeline(() => {
     }
 
     .classify {
-        padding: 0rpx 0 30rpx;
+        padding-bottom: 30rpx;
 
         .content.classify-grid {
             margin-top: 30rpx;
-            padding: 0 24rpx;
+            padding: 0 30rpx;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-auto-rows: 200rpx;

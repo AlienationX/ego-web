@@ -33,17 +33,6 @@
                         ></mdi-icon>
                         <text class="retention-hint__text">{{ t('historyPage.retentionHint') }}</text>
                     </view>
-
-                    <view class="clear-all" v-if="libraryStore.recentViewed.length" @click="clearAllHistory">
-                        <!-- <mdi-icon
-                            path="/static/icons/delete-empty.svg"
-                            size="16px"
-                            :color="isDark ? '#ff6b6b' : '#ef4444'"
-                        ></mdi-icon> -->
-                        <text class="clear-all__text" :style="{ color: isDark ? '#ff6b6b' : '#ef4444' }">{{
-                            t('historyPage.clearAll')
-                        }}</text>
-                    </view>
                 </view>
 
                 <view v-for="day in visibleDays" :key="day.dateStr" class="day-section">
@@ -72,6 +61,13 @@
                 </view>
             </view>
         </scroll-view>
+
+        <view class="bottom-action-area" v-if="libraryStore.recentViewed.length">
+            <view class="bottom-blur-mask"></view>
+            <view class="clear-all-bar" @click="clearAllHistory">
+                <text class="clear-all-bar__text">{{ t('historyPage.clearAll') }}</text>
+            </view>
+        </view>
 
         <popup-navigation-dialog
             ref="deleteDialogRef"
@@ -302,7 +298,7 @@ const clearAllHistory = () => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16rpx 32rpx;
+    padding: 30rpx 30rpx 0;
 }
 
 .retention-hint {
@@ -316,28 +312,51 @@ const clearAllHistory = () => {
     }
 }
 
-.clear-all {
-    height: 56rpx;
-    padding: 0 24rpx;
-    border-radius: 999rpx;
+.bottom-action-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 99;
+    padding: 20rpx 30rpx;
+    padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+    pointer-events: none;
+}
+
+.bottom-blur-mask {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, var(--page-background) 60%, transparent 100%);
+    pointer-events: none;
+}
+
+.clear-all-bar {
+    position: relative;
+    pointer-events: auto;
+    height: 96rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6rpx;
-    background: var(--page-background-secondary);
-    border: 1rpx solid var(--panel-border);
-    box-sizing: border-box;
-    transition: all 0.2s;
-    box-shadow: 0 2rpx 8rpx var(--shadow-color);
+    gap: 12rpx;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border-radius: 28rpx;
+    box-shadow:
+        0 8rpx 32rpx rgba(239, 68, 68, 0.38),
+        0 2rpx 8rpx rgba(239, 68, 68, 0.18),
+        inset 0 1rpx 0 rgba(255, 255, 255, 0.18);
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
 
     &:active {
+        opacity: 0.88;
         transform: scale(0.97);
-        opacity: 0.8;
+        box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.28);
     }
 
     &__text {
-        font-size: 22rpx;
-        font-weight: 600;
+        font-size: 28rpx;
+        font-weight: 700;
+        color: #ffffff;
+        letter-spacing: 2rpx;
     }
 }
 
@@ -436,7 +455,7 @@ const clearAllHistory = () => {
 }
 
 .load-more-status {
-    padding: 40rpx 0 60rpx;
+    padding: 40rpx 0 160rpx;
     text-align: center;
 
     .status-text {

@@ -69,15 +69,12 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "gg" : {},
-                    "pg" : {},
-                    "unity" : {},
-                    "liftoff" : {},
-                    "inmobi" : {},
-                    "ironsource" : {},
-                    "mintegral" : {},
-                    "applovin" : {},
-                    "ks" : {}
+                    "ks" : {},
+                    "bz" : {},
+                    "fl" : {},
+                    "jl" : {},
+                    "yt" : {},
+                    "ks-content" : {}
                 },
                 "oauth" : {
                     "weixin" : {
@@ -163,7 +160,7 @@
     },
     "app-harmony" : {
         "distribute" : {
-            "bundleName" : "com.ego.app.wallpaper",
+            "bundleName" : "com.wallpaper.app.ego",
             "deviceTypes" : [ "phone", "tablet" ],
             "splashScreens" : {
                 "startWindowIcon" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/launch.png"

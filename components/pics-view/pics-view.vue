@@ -493,10 +493,7 @@ defineExpose({
 
         .ad-row {
             grid-column: 1 / -1;
-            width: 100%;
-            // display: flex;
-            // justify-content: center;
-            // align-items: center;
+            margin: 0 30rpx 20rpx;
         }
     }
 }

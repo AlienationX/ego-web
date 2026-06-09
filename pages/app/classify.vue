@@ -16,6 +16,11 @@
             <view class="search-container">
                 <search-bar></search-bar>
             </view>
+
+            <!-- 广告位 -->
+            <view v-if="heroAdVisible" class="hero-ad">
+                <custom-ad-banner @load="heroAdLoaded = true" @error="heroAdLoaded = false"></custom-ad-banner>
+            </view>
         </view>
 
         <!-- 加载状态 -->
@@ -31,26 +36,20 @@
 
         <!-- 分类网格：采用弹性 Span 布局，彻底解决错落有致不生效问题 -->
         <view class="classify" v-if="classifyList.length">
-            <template v-for="(item, idx) in classifyComputed" :key="item.id">
-                <view class="grid-item-wrap" :class="['grid-item-' + (idx % 6)]">
-                    <classify-item :item="item"></classify-item>
-                </view>
-
-                <view v-if="(idx + 1) % 6 === 0 && isAdVisible(idx)" class="ad-row">
-                    <custom-ad-banner
-                        style="padding: 15rpx 0"
-                        @load="onAdLoad(idx)"
-                        @error="onAdError(idx)"
-                        @close="onAdClose(idx)"
-                    ></custom-ad-banner>
-                </view>
-            </template>
+            <view
+                class="grid-item-wrap"
+                v-for="(item, idx) in classifyComputed"
+                :key="item.id"
+                :class="['grid-item-' + (idx % 6)]"
+            >
+                <classify-item :item="item"></classify-item>
+            </view>
         </view>
     </view>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -65,7 +64,8 @@ const isLoading = ref(true);
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
-const adStateMap = ref({});
+const heroAdLoaded = ref(false);
+const heroAdVisible = computed(() => adEnabled.value && heroAdLoaded.value);
 
 const classifyComputed = computed(() => {
     return classifyList.value.map((item) => ({
@@ -74,7 +74,6 @@ const classifyComputed = computed(() => {
     }));
 });
 const adEnabled = computed(() => !userStore.isVip && userStore.showAd);
-const fullBlockCount = computed(() => Math.floor(classifyComputed.value.length / 6));
 
 const getClassify = async () => {
     try {
@@ -87,43 +86,6 @@ const getClassify = async () => {
     } finally {
         isLoading.value = false;
     }
-};
-
-const setupAdBlocks = () => {
-    const nextState = {};
-    if (!adEnabled.value) {
-        adStateMap.value = nextState;
-        return;
-    }
-    for (let block = 0; block < fullBlockCount.value; block++) {
-        nextState[block] = 'pending';
-    }
-    adStateMap.value = nextState;
-};
-
-watch([fullBlockCount, adEnabled], setupAdBlocks, { immediate: true });
-
-const getBlockByIdx = (idx) => Math.floor(idx / 6);
-const isAdBlockVisible = (block) => adEnabled.value && adStateMap.value[block] === 'loaded';
-
-const onAdLoad = (idx) => {
-    const block = getBlockByIdx(idx);
-    adStateMap.value = { ...adStateMap.value, [block]: 'loaded' };
-};
-
-const onAdError = (idx) => {
-    const block = getBlockByIdx(idx);
-    adStateMap.value = { ...adStateMap.value, [block]: 'hidden' };
-};
-
-const onAdClose = (idx) => {
-    const block = getBlockByIdx(idx);
-    adStateMap.value = { ...adStateMap.value, [block]: 'hidden' };
-};
-
-const isAdVisible = (idx) => {
-    const block = getBlockByIdx(idx);
-    return isAdBlockVisible(block);
 };
 
 onLoad(() => {
@@ -178,6 +140,11 @@ onLoad(() => {
     .search-container {
         margin: 10rpx -30rpx 0;
     }
+
+    .hero-ad {
+        margin-top: 20rpx;
+        padding-bottom: 30rpx;
+    }
 }
 
 .classify {
@@ -209,11 +176,6 @@ onLoad(() => {
         width: 100%;
         display: block;
     }
-}
-
-.ad-row {
-    grid-column: span 2;
-    width: 100%;
 }
 
 .loading-container {

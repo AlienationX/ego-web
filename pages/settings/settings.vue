@@ -917,6 +917,7 @@ function selectTheme(theme) {
     uni.setStorageSync('theme', theme);
     const targetStyle = theme === 'auto' ? settingsStore.systemTheme : theme;
     plus.nativeUI.setUIStyle(targetStyle);
+    settingsStore.options.theme = theme;
     // #endif
 
     // #ifndef APP

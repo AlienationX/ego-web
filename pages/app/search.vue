@@ -551,6 +551,6 @@ onPageScroll(() => {});
 }
 
 .bottom-ad {
-    padding: 30rpx;
+    // padding: 30rpx;
 }
 </style>

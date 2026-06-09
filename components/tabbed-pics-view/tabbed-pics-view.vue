@@ -114,8 +114,8 @@
                                 <!-- 广告注入 -->
                                 <view
                                     v-if="(idx + 1) % 12 === 0 && canShowAd"
-                                    v-show="tabStates[index].adLoadMap[`slot-${idx}`]"
                                     class="ad-row"
+                                    :class="{ 'ad-row--ready': tabStates[index].adLoadMap[`slot-${idx}`] }"
                                 >
                                     <custom-ad-banner
                                         @load="onAdLoad(index, `slot-${idx}`)"
@@ -907,10 +907,11 @@ onMounted(() => {
 
 .ad-row {
     grid-column: 1 / -1;
-    width: 100%;
     min-height: 0;
-    overflow: hidden;
-    margin-bottom: 20rpx;
+
+    // &--ready {
+    //     margin: 0 30rpx 20rpx;
+    // }
 }
 
 .back-top {

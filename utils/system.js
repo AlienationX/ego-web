@@ -73,20 +73,22 @@ export const writeAccessLog = async () => {
     if (SYSTEM_INFO.uniPlatform === 'web') return;
     // 微信小程序调试工具不统计
     if (SYSTEM_INFO.uniPlatform === 'mp-weixin' && SYSTEM_INFO.deviceBrand === 'devtools') return;
+    // Android Studio 不统计, sdk_gphone64_arm64
+    if (SYSTEM_INFO.deviceModel.startsWith('sdk')) return;
 
     // 无法测试，只能打正式包时必须勾选 渠道包，才能通过 plus.runtime.channel 获取
     // console.log('runtime', plus.runtime.channel);
     // console.log('channel', plus.runtime.channel);
     let channel = '';
-    
+
     // #ifdef APP
     channel = plus.runtime.channel;
     // #endif
-    
+
     // #ifdef APP-HARMONY
     channel = 'huawei';
     // #endif
-    
+
     // #ifdef MP-WEIXIN
     channel = 'wechat';
     // #endif
@@ -106,6 +108,6 @@ export const writeAccessLog = async () => {
     // console.log(data);
     // console.log(data.remark.toString().length);
 
-    let res = await apiPostAccess(data = data);
+    let res = await apiPostAccess(data);
     // console.log('app launch ==> ', res);
 };

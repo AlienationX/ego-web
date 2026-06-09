@@ -64,9 +64,11 @@
                                     color="#fff"
                                 ></mdi-icon>
                             </view>
-                            <button v-if="isAdmin" class="icon-btn" open-type="share" @click="handleShare">
+                            <!-- #ifdef MP-WEIXIN -->
+                            <button class="icon-btn" open-type="share" @click="handleShare">
                                 <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
                             </button>
+                            <!-- #endif -->
                             <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
                                 <mdi-icon path="/static/icons/information-symbol.svg" size="32px" color="#fff"></mdi-icon>
                             </view>
@@ -207,9 +209,10 @@
                         </view>
                         <view class="copyright">{{ t('message.copyrightStatement') }}</view>
 
-                        <view v-if="displayAd" class="ad-row">
+                        <!-- TODO 弹窗广告目前存在BUG，关闭后广告还存在，且位置异常 -->
+                        <!-- <view v-if="displayAd" class="ad-row">
                             <custom-ad-banner></custom-ad-banner>
-                        </view>
+                        </view> -->
                     </view>
                 </scroll-view>
             </view>
@@ -401,7 +404,13 @@ const dateText = computed(() => {
 const currentPreviewType = computed(() => settingsStore.options.previewType || 'classic');
 const isAdmin = computed(() => !!userStore.isAdmin);
 const isCurrentInWatchLater = computed(() => libraryStore.isInWatchLater(currentInfo.value?.id));
-const publisherName = computed(() => t('common.appName') || currentInfo.value?.publisher);
+const publisherName = computed(() => {
+    const publisher = currentInfo.value?.publisher;
+    if (publisher === 'Admin') {
+        return t('common.appName');
+    }
+    return publisher || '';
+});
 const imageSizeMap = ref({});
 const publisherAvatar = computed(() => {
     const rawPublisher = String(currentInfo.value?.publisher || '')
@@ -756,22 +765,23 @@ const toggleLock = async () => {
 
 const handleShare = () => {
     // #ifdef APP
+    // TODO https://uniapp.dcloud.net.cn/api/plugins/share.html#share
     uni.share({
         provider: 'weixin',
-        scene: 'WXSceneSession',
+        // WXSceneSession	分享到聊天界面
+        // WXSceneTimeline	分享到朋友圈
+        // WXSceneFavorite	分享到微信收藏
+        scene: 'WXSceneSession',  
         type: 0,
         summary: t('common.appName'),
         success: () => {
             uni.showToast({ title: t('previewPage.shareSuccess'), icon: 'success' });
         },
-        fail: () => {
+        fail: (e) => {
+            console.log(e)
             uni.showToast({ title: t('previewPage.shareFailed'), icon: 'none' });
         },
     });
-    // #endif
-
-    // #ifdef MP
-    uni.showToast({ title: t('previewPage.shareHint'), icon: 'none' });
     // #endif
 
     // #ifdef WEB
