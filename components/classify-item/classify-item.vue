@@ -1,7 +1,14 @@
 <template>
-    <view class="themeItem" :style="layoutStyle">
+    <view class="classify-item">
         <navigator class="box" :url="'/pages/app/classlist?id=' + item.id + '&name=' + item.name" v-if="!isMore">
-            <image class="pic" :class="{ 'pic--loaded': isLoaded }" :src="item.picurl" mode="aspectFill" lazy-load @load="onImageLoad"></image>
+            <image
+                class="pic"
+                :class="{ 'pic--loaded': isLoaded }"
+                :src="item.picurl"
+                mode="aspectFill"
+                lazy-load
+                @load="onImageLoad"
+            ></image>
             <view class="mask" :class="{ 'is-visible': isLoaded }">
                 <view class="mask-info">
                     <text class="mask-text">{{ item.name }}</text>
@@ -13,7 +20,14 @@
             <view class="tab" :class="{ 'is-visible': isLoaded }" v-if="compareTimestamp(item.updateTime)"
                 >{{ compareTimestamp(item.updateTime) }}{{ t('common.ago') || '前' }}更新</view
             >
-            <uni-icons class="vip" :class="{ 'is-visible': isLoaded }" v-if="item.is_locked" type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+            <uni-icons
+                class="vip"
+                :class="{ 'is-visible': isLoaded }"
+                v-if="item.is_locked"
+                type="vip-filled"
+                size="18"
+                color="#F9E9B5"
+            ></uni-icons>
         </navigator>
 
         <navigator class="box more" url="/pages/app/classify" open-type="reLaunch" v-if="isMore">
@@ -52,15 +66,11 @@ defineProps({
             };
         },
     },
-    layoutStyle: {
-        type: Object,
-        default: () => ({}),
-    },
 });
 </script>
 
 <style lang="scss" scoped>
-.themeItem {
+.classify-item {
     height: 100%;
     width: 100%;
     border-radius: 24rpx;
@@ -78,7 +88,12 @@ defineProps({
     position: relative;
     display: block;
     transition: transform 0.3s ease;
-    background: linear-gradient(90deg, rgba(200, 200, 200, 0.08) 25%, rgba(200, 200, 200, 0.18) 50%, rgba(200, 200, 200, 0.08) 75%);
+    background: linear-gradient(
+        90deg,
+        rgba(200, 200, 200, 0.08) 25%,
+        rgba(200, 200, 200, 0.18) 50%,
+        rgba(200, 200, 200, 0.08) 75%
+    );
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s infinite linear;
 
@@ -90,7 +105,9 @@ defineProps({
         height: 100%;
         object-fit: cover;
         box-shadow: 0 10rpx 10rpx rgba(0, 0, 0, 0.34);
-        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        transition:
+            opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+            transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 
         &.pic--loaded {
             opacity: 1;
@@ -178,13 +195,9 @@ defineProps({
             opacity: 1;
         }
     }
-
-    &:active {
-        /* 移除了原本的缩小效果 */
-    }
 }
 
-.themeItem {
+.classify-item {
     &:active {
         .pic {
             transform: scale(1.08);
@@ -193,7 +206,7 @@ defineProps({
 }
 
 @media (hover: hover) {
-    .themeItem:hover {
+    .classify-item:hover {
         .pic {
             transform: scale(1.08);
         }

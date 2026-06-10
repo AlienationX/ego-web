@@ -101,13 +101,13 @@ export const formatRelativeTime = (date, options = {}) => {
     const i18n = useI18n();
     
     if (days > 0) {
-        return i18n.t('common.daysAgo', { count: days });
+        return `${days}${i18n.t('rating.daysAgo')}`;
     } else if (hours > 0) {
-        return i18n.t('common.hoursAgo', { count: hours });
+        return `${hours}${i18n.t('rating.hoursAgo')}`;
     } else if (minutes > 0) {
-        return i18n.t('common.minutesAgo', { count: minutes });
+        return `${minutes}${i18n.t('rating.minutesAgo')}`;
     } else {
-        return i18n.t('common.justNow');
+        return i18n.t('rating.justNow');
     }
 };
 
@@ -120,6 +120,32 @@ export const formatRelativeTime = (date, options = {}) => {
 export const t = (key, params = {}) => {
     const i18n = useI18n();
     return i18n.t(key, params);
+};
+
+/**
+ * 跨平台兼容的参数插值翻译（推荐用于含变量的消息）
+ *
+ * - Web/H5：vue-i18n 通过 t(key, params) 替换命名参数
+ * - App/小程序：t(key, params) 不处理命名参数，由手动 replace 兜底
+ *
+ * 两端都能正确显示，互不干扰。
+ *
+ * @returns {{ t, tp }} t 为普通翻译，tp 为带参数翻译
+ */
+export const useTranslateParams = () => {
+    const { t } = useI18n();
+    const tp = (key, params = {}) => {
+        // 先通过 vue-i18n 命名参数替换（Web/H5 生效）
+        let result = t(key, params);
+        // 再手动 replace 兜底（App/MP 生效；Web 端 {param} 已被消费，为 no-op）
+        if (typeof result === 'string' && params) {
+            for (const [k, v] of Object.entries(params)) {
+                result = result.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v ?? ''));
+            }
+        }
+        return result;
+    };
+    return { t, tp };
 };
 
 /**

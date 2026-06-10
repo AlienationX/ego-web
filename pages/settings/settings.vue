@@ -1,5 +1,11 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <!-- #ifndef WEB -->
+        <view
+            class="status-bar-bg"
+            :style="{ height: `${statusBarHeight}px` }"
+        ></view>
+        <!-- #endif -->
         <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: titleBarHeight + 'px' }">
             <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
                 <view class="back-btn" @click="goBack">
@@ -14,7 +20,7 @@
             </view>
         </view>
 
-        <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
+        <view class="content">
             <view class="section" v-if="userStore.isLoggedIn">
                 <view class="section-title">{{ t('settings.sections.profile') }}</view>
                 <view class="card">
@@ -131,7 +137,7 @@
                 >{{ t('settings.version') }} {{ APP_INFO.appVersion }} · {{ t('settings.build') }}
                 {{ APP_INFO.appVersionCode }}</text
             > -->
-        </scroll-view>
+        </view>
 
         <uni-popup ref="previewTypePopup" type="bottom" :safe-area="true">
             <view class="preview-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
@@ -428,9 +434,11 @@ import {
     applyLanguagePreference,
     getLanguagePreference,
     resolveAppLocale,
+    useTranslateParams,
 } from '@/utils/i18n.js';
 
 const { t, locale } = useI18n();
+const { tp } = useTranslateParams();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const previewTypePopup = ref(null);
@@ -439,11 +447,11 @@ const ratePopup = ref(null);
 const themePopup = ref(null);
 const languagePopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const titleBarHeight = ref(getTitleBarHeight() || 44);
-const contentHeight = computed(() => `calc(100vh - ${titleBarHeight.value}px)`);
+const titleBarHeight = ref(getTitleBarHeight() + 10 || 44);
+
 const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
-const copyrightText = computed(() => t('about.copyright', { year: new Date().getFullYear() }));
+const copyrightText = computed(() => tp('about.copyright', { year: new Date().getFullYear() }));
 
 const navDialog = ref(null);
 const dialogState = ref({
@@ -1101,12 +1109,20 @@ function shareApp() {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
-    min-height: 100vh;
     background: var(--page-background);
     color: var(--text-primary);
+}
+
+.status-bar-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--page-background);
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 9999;
 }
 .header {
     width: 100%;
@@ -1128,8 +1144,8 @@ function shareApp() {
     width: 64rpx;
     height: 64rpx;
     border-radius: 16rpx;
-    // background: var(--page-background-secondary);
-    // border: 2rpx solid var(--panel-border);
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;

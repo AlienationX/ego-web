@@ -73,7 +73,7 @@
                     <view class="resend-section">
                         <text class="resend-text">{{ t('login.didntGetOtp') }}</text>
                         <text class="resend-link" :class="{ disabled: isResendDisabled }" @click="handleResend">
-                            {{ isResendDisabled ? t('login.resendIn', { seconds: countdown }) : t('login.resendOtp') }}
+                            {{ isResendDisabled ? tp('login.resendIn', { seconds: countdown }) : t('login.resendOtp') }}
                         </text>
                     </view>
                 </view>
@@ -138,11 +138,13 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { apiPostSendEmailCode, apiPostVerifyCode, apiPostResetPassword } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
+const { tp } = useTranslateParams();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
 const backIconColor = computed(() => (isDark.value ? '#94a3b8' : '#4a5670'));

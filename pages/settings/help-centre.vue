@@ -4,7 +4,7 @@
             <template #title>{{ t('helpCentre.title') }}</template>
         </menu-bar>
 
-        <scroll-view scroll-y class="content">
+        <view class="content">
             <view class="intro">
                 <text class="intro-title">{{ t('helpCentre.introTitle') }}</text>
                 <text class="intro-desc">{{ t('helpCentre.introDesc') }}</text>
@@ -34,7 +34,7 @@
                     <uni-icons type="forward" size="15" :color="iconForwardColor"></uni-icons>
                 </view>
             </view>
-        </scroll-view>
+        </view>
     </view>
 </template>
 
@@ -78,7 +78,6 @@ const openHtml = (path) => {
     background: var(--page-background);
 }
 .content {
-    height: calc(100vh - 88rpx);
     padding: 20rpx 24rpx 34rpx;
     box-sizing: border-box;
 }

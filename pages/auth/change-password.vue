@@ -11,7 +11,7 @@
                 <view class="header-placeholder"></view>
             </view>
 
-            <scroll-view scroll-y class="content">
+            <view class="content">
                 <view class="info-banner">
                     <view class="info-icon">
                         <mdi-icon path="/static/icons/lock.svg" size="18px" color="#0369a1"></mdi-icon>
@@ -129,7 +129,7 @@
                         {{ t('changePasswordPage.submit') }}
                     </button>
                 </view>
-            </scroll-view>
+            </view>
         </template>
 
         <template v-else>
@@ -276,7 +276,6 @@ function getStrength(password) {
 }
 
 .content {
-    flex: 1;
     padding: 24rpx 0 80rpx;
 }
 

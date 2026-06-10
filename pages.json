@@ -163,7 +163,7 @@
             }
         },
         {
-            "path": "pages/app/edit-cover",
+            "path": "pages/app/cover",
             "style": {
                 "navigationBarTitleText": "Edit Cover",
                 "navigationStyle": "custom",
@@ -319,14 +319,6 @@
             "style": {
                 "navigationBarTitleText": "Custom Bars",
                 "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/pics-view-test",
-            "style": {
-                "navigationBarTitleText": "Tabbed Pics Test",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
             }
         }
     ],

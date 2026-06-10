@@ -15,7 +15,7 @@
         </view>
         <view class="nav-placeholder" :style="{ height: `${statusBarHeight + titleBarHeight}px` }"></view>
 
-        <scroll-view scroll-y class="content" @scrolltolower="loadMore">
+        <view class="content">
             <view v-if="libraryStore.recentViewed.length === 0" class="empty-state">
                 <image class="empty-icon" src="/static/images/photos_empty.svg" mode="aspectFit"></image>
                 <text class="empty-title">{{ t('historyPage.empty') }}</text>
@@ -60,7 +60,7 @@
                     <text class="status-text">{{ hasMore ? t('historyPage.loading') : t('historyPage.loadedAll') }}</text>
                 </view>
             </view>
-        </scroll-view>
+        </view>
 
         <view class="bottom-action-area" v-if="libraryStore.recentViewed.length">
             <view class="bottom-blur-mask"></view>
@@ -82,13 +82,16 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { onReachBottom } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 import { formatDateKey, formatHistoryDayLabel } from '@/utils/common.js';
 
 const { t, locale } = useI18n();
+const { tp } = useTranslateParams();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
@@ -104,7 +107,7 @@ const titlebarPaddingRight = computed(() => {
         return sysInfo.windowWidth - menuButtonInfo.left + 10 + 'px';
     }
     // #endif
-    return '32rpx';
+    return '16px';
 });
 
 const visibleDaysCount = ref(5);
@@ -192,11 +195,13 @@ const loadMore = () => {
     }
 };
 
+onReachBottom(() => loadMore());
+
 const clearDayHistory = (dateStr) => {
     showDeleteDialog({
         title: t('common.tip') || '提示',
         description:
-            t('historyPage.clearDayConfirm', { date: getDayLabel(dateStr) }) ||
+            tp('historyPage.clearDayConfirm', { date: getDayLabel(dateStr) }) ||
             `确定要清除 ${getDayLabel(dateStr)} 的浏览记录吗？`,
         onConfirm: () => {
             libraryStore.recentViewed = libraryStore.recentViewed.filter(
@@ -290,8 +295,7 @@ const clearAllHistory = () => {
 }
 
 .content {
-    flex: 1;
-    height: 0;
+    padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 }
 
 .list-header {
@@ -340,11 +344,14 @@ const clearAllHistory = () => {
     gap: 12rpx;
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     border-radius: 28rpx;
-    box-shadow:
-        0 8rpx 32rpx rgba(239, 68, 68, 0.38),
-        0 2rpx 8rpx rgba(239, 68, 68, 0.18),
-        inset 0 1rpx 0 rgba(255, 255, 255, 0.18);
-    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    // box-shadow:
+    //     0 8rpx 32rpx rgba(239, 68, 68, 0.38),
+    //     0 2rpx 8rpx rgba(239, 68, 68, 0.18),
+    //     inset 0 1rpx 0 rgba(255, 255, 255, 0.18);
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s,
+        opacity 0.2s;
 
     &:active {
         opacity: 0.88;

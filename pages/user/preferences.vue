@@ -2,7 +2,7 @@
     <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
         <page-header :title="t('preferencePage.title')" :subtitle="t('preferencePage.subtitle')"></page-header>
 
-        <scroll-view scroll-y class="content">
+        <view class="content">
             <view class="section">
                 <view class="section-title">{{ t('preferencePage.preferredTitle') }}</view>
                 <view class="section-desc">{{ t('preferencePage.preferredDesc') }}</view>
@@ -61,7 +61,7 @@
                     </view>
                 </view>
             </view>
-        </scroll-view>
+        </view>
     </view>
 </template>
 
@@ -131,7 +131,6 @@ onLoad(() => {
 }
 
 .content {
-    height: calc(100vh - 180rpx);
     box-sizing: border-box;
     padding: 8rpx 24rpx 48rpx;
 }

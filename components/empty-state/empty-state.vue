@@ -51,6 +51,12 @@ defineProps({
     background: rgba(255, 255, 255, 0.82);
     border: 1rpx solid rgba(16, 24, 40, 0.05);
     box-shadow: 0 12rpx 24rpx rgba(15, 23, 42, 0.06);
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1rpx solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.3);
+    }
 }
 
 .empty-state__title {
@@ -58,6 +64,10 @@ defineProps({
     font-size: 32rpx;
     font-weight: 700;
     color: #101828;
+
+    .theme-dark & {
+        color: var(--text-primary);
+    }
 }
 
 .empty-state__description {
@@ -65,6 +75,10 @@ defineProps({
     font-size: 24rpx;
     line-height: 1.7;
     color: #667085;
+
+    .theme-dark & {
+        color: var(--text-tertiary);
+    }
 }
 
 .empty-state__action {
@@ -84,6 +98,11 @@ defineProps({
 
     &::after {
         border: none;
+    }
+
+    .theme-dark & {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+        color: var(--text-primary);
     }
 }
 </style>

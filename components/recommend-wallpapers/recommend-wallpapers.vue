@@ -43,6 +43,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import { apiGetSimilarWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
@@ -61,6 +62,7 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const { tp } = useTranslateParams();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
@@ -86,7 +88,7 @@ const getRecommendReason = (item = {}, current = {}) => {
     const currentTags = normalizeTags(current);
     const matchedTag = itemTags.find((tag) => currentTags.includes(tag));
     if (matchedTag) {
-        return t('previewPage.recommend.reasonTag', { tag: matchedTag });
+        return tp('previewPage.recommend.reasonTag', { tag: matchedTag });
     }
 
     if (item.classify_name && current.classify_name && item.classify_name === current.classify_name) {

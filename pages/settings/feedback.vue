@@ -10,7 +10,7 @@
             </view>
         </view>
 
-        <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
+        <view class="content">
             <view class="section">
                 <text class="section-title">{{ t('feedback.type') }}</text>
                 <view class="chip-group">
@@ -70,7 +70,7 @@
                         </view>
                     </view>
                     <view class="image-tip" v-if="imageList.length > 0">
-                        {{ t('feedback.imageTip').replace('{count}', imageList.length).replace('{max}', maxImages) }}
+                        {{ tp('feedback.imageTip', { count: imageList.length, max: maxImages }) }}
                     </view>
                 </view>
             </view>
@@ -100,19 +100,21 @@
                     {{ isSubmitting ? t('feedback.submitting') : t('feedback.submit') }}
                 </button>
             </view>
-        </scroll-view>
+        </view>
     </view>
 </template>
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
+const { tp } = useTranslateParams();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
@@ -120,8 +122,6 @@ const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
-const contentHeight = computed(() => `calc(100vh - ${titleBarHeight.value}px)`);
-
 const feedbackForm = reactive({
     type: t('feedback.typeBug'),
     content: '',
@@ -144,7 +144,7 @@ const chooseImage = () => {
     const remaining = maxImages - imageList.value.length;
     if (remaining <= 0) {
         uni.showToast({
-            title: t('feedback.maxImagesReached').replace('{max}', maxImages),
+            title: tp('feedback.maxImagesReached', { max: maxImages }),
             icon: 'none',
         });
         return;

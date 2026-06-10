@@ -105,7 +105,7 @@
             </view>
 
             <view class="footer">
-                <text class="copyright">{{ t('about.copyright').replace('{year}', currentYear) }}</text>
+                <text class="copyright">{{ tp('about.copyright', { year: currentYear }) }}</text>
             </view>
 
             <view class="safe-area-inset-bottom"></view>
@@ -117,8 +117,10 @@
 import { ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 
 const { t } = useI18n();
+const { tp } = useTranslateParams();
 
 const APP_INFO = uni.getAppBaseInfo();
 const currentYear = new Date().getFullYear();

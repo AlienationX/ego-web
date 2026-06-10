@@ -9,7 +9,7 @@
             <view class="header-placeholder"></view>
         </view>
 
-        <scroll-view scroll-y class="content">
+        <view class="content">
             <view class="avatar-area">
                 <view class="avatar-wrap">
                     <image class="avatar" :src="form.avatar" mode="aspectFill"></image>
@@ -71,7 +71,7 @@
                 <uni-icons v-if="saved" type="checkmarkempty" size="16" color="#fff"></uni-icons>
                 <text>{{ saved ? t('editProfile1.profileSaved') : t('editProfile1.saveChanges') }}</text>
             </button>
-        </scroll-view>
+        </view>
     </view>
 </template>
 
@@ -223,7 +223,6 @@ const goBack = () => {
 }
 
 .content {
-    height: calc(100vh - 112rpx);
     box-sizing: border-box;
     padding-top: 16rpx;
     padding-bottom: 80rpx;

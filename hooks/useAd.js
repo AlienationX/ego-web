@@ -107,19 +107,12 @@ export const useAdIntersititial = () => {
         pendingPicurl = inputPicurl || '';
         isShowing = true;
 
-        interstitialAd
-            .show()
-            .catch(() =>
-                interstitialAd.load().then(() => {
-                    return interstitialAd.show();
-                }),
-            )
-            .catch(() => {
-                // show失败回退直接下载
-                safeDownload(pendingPicurl);
-                clearPending();
-                tryDestroyIfNeeded();
-            });
+        interstitialAd.show().catch(() => {
+            // show 失败直接回退下载，不再重试（避免重试导致广告二次展示）
+            safeDownload(pendingPicurl);
+            clearPending();
+            tryDestroyIfNeeded();
+        });
     };
 
     const destroyInterstitialAd = () => {
@@ -280,16 +273,10 @@ export const useAdRewardedVideo = () => {
         isShowing = true;
 
         rewardedVideoAd.show().catch(() => {
-            // show失败的话 重新load获取
-            rewardedVideoAd
-                .load()
-                .then(() => rewardedVideoAd.show())
-                .catch(() => {
-                    // 再次失败直接回退，防止卡住下载流程
-                    safeDownload(pendingPicurl);
-                    clearPending();
-                    tryDestroyIfNeeded();
-                });
+            // show 失败直接回退下载，不再重试（避免重试导致广告二次展示）
+            safeDownload(pendingPicurl);
+            clearPending();
+            tryDestroyIfNeeded();
         });
     };
 

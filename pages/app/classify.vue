@@ -34,16 +34,9 @@
             <view class="empty-text">{{ $t('category.empty') }}</view>
         </view>
 
-        <!-- 分类网格：采用弹性 Span 布局，彻底解决错落有致不生效问题 -->
-        <view class="classify" v-if="classifyList.length">
-            <view
-                class="grid-item-wrap"
-                v-for="(item, idx) in classifyComputed"
-                :key="item.id"
-                :class="['grid-item-' + (idx % 6)]"
-            >
-                <classify-item :item="item"></classify-item>
-            </view>
+        <!-- 分类网格 -->
+        <view class="classify-grid-padding">
+            <classify-grid v-if="classifyList.length" :items="classifyComputed" />
         </view>
     </view>
 </template>
@@ -147,37 +140,6 @@ onLoad(() => {
     }
 }
 
-.classify {
-    padding: 20rpx 30rpx 100rpx;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: 210rpx;
-    gap: 24rpx;
-    position: relative;
-    z-index: 5;
-}
-
-.grid-item-wrap {
-    width: 100%;
-    height: 100%;
-    display: block;
-
-    // 核心布局逻辑：通过 CSS Span 解决杂志感错落
-    // 第3个项目(idx 2)和第5个项目(idx 4)跨两行
-    &.grid-item-2,
-    &.grid-item-4 {
-        grid-row: span 2;
-    }
-
-    // 强制其内部组件撑满父容器（微信小程序不支持 * 通配符，使用具体类名）
-    & > .classify-item,
-    & > view {
-        height: 100%;
-        width: 100%;
-        display: block;
-    }
-}
-
 .loading-container {
     display: flex;
     flex-direction: column;
@@ -192,5 +154,9 @@ onLoad(() => {
         font-size: 24rpx;
         color: #999;
     }
+}
+
+.classify-grid-padding {
+    padding: 30rpx;
 }
 </style>

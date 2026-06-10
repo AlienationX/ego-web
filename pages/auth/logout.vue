@@ -44,7 +44,7 @@
                 <!-- <text class="success-emoji">👋</text> -->
                 <image class="success-emoji" src="/static/images/successful.svg" mode="aspectFit"></image>
                 <text class="success-title">{{ t('logoutPage.doneTitle') }}</text>
-                <text class="success-desc">{{ t('logoutPage.doneDesc', { name: profileShortName }) }}</text>
+                <text class="success-desc">{{ tp('logoutPage.doneDesc', { name: profileShortName }) }}</text>
                 <button class="back-settings-btn" @click="backToSettings">{{ t('logoutPage.backSettings') }}</button>
             </view>
         </template>
@@ -54,11 +54,13 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
+const { tp } = useTranslateParams();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);

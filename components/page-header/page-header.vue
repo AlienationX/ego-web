@@ -1,5 +1,8 @@
 <template>
     <view class="page-header" :class="isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: `${statusBarHeight}px` }">
+        <!-- #ifndef WEB -->
+        <view class="page-header__status-bg" :style="{ height: `${statusBarHeight}px` }"></view>
+        <!-- #endif -->
         <view class="page-header__inner">
             <view class="page-header__side page-header__side--left">
                 <view v-if="showBack" class="page-header__action" @click="handleBack">
@@ -90,6 +93,25 @@ const handleBack = () => {
         linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%);
 
     &.theme-dark {
+        background:
+            radial-gradient(circle at top right, rgba(125, 211, 252, 0.06) 0%, rgba(125, 211, 252, 0) 26%),
+            linear-gradient(180deg, rgba(24, 24, 28, 0.98) 0%, rgba(28, 28, 28, 0.92) 100%);
+    }
+}
+
+.page-header__status-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background:
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.12) 0%, rgba(125, 211, 252, 0) 26%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%);
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 9999;
+
+    .theme-dark & {
         background:
             radial-gradient(circle at top right, rgba(125, 211, 252, 0.06) 0%, rgba(125, 211, 252, 0) 26%),
             linear-gradient(180deg, rgba(24, 24, 28, 0.98) 0%, rgba(28, 28, 28, 0.92) 100%);

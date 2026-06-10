@@ -7,7 +7,7 @@
             @right-click="clearAllSubscriptions"
         ></page-header>
 
-        <scroll-view scroll-y class="content">
+        <view class="content">
             <view class="summary-card">
                 <view class="summary-item">
                     <view class="summary-value">{{ libraryStore.subscriptions.classifyIds.length }}</view>
@@ -60,7 +60,7 @@
                     </view>
                 </view>
             </view>
-        </scroll-view>
+        </view>
     </view>
 </template>
 
@@ -148,7 +148,6 @@ onLoad(async () => {
 }
 
 .content {
-    height: calc(100vh - 180rpx);
     box-sizing: border-box;
     padding: 8rpx 24rpx 48rpx;
 }

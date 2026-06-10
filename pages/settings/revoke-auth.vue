@@ -10,7 +10,7 @@
             <view class="header-placeholder"></view>
         </view>
 
-        <scroll-view scroll-y class="content" :style="{ height: contentHeight }">
+        <view class="content">
             <view class="auth-list">
                 <view
                     v-for="(item, index) in permissionItems"
@@ -29,7 +29,7 @@
                     </view>
                 </view>
             </view>
-        </scroll-view>
+        </view>
     </view>
 </template>
 
@@ -48,7 +48,6 @@ const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
 const chevronColor = computed(() => (isDark.value ? '#64748b' : '#c4c9d4'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const contentHeight = computed(() => `calc(100vh - ${statusBarHeight.value}px - 56px)`);
 const appAuthorizeSetting = ref({});
 const androidPermissionStatus = ref({});
 

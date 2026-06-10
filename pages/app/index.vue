@@ -366,15 +366,7 @@
 
                 <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
 
-                <view class="content classify-grid" v-if="classifyList.length">
-                    <classify-item
-                        v-for="(item, idx) in classifyPreviewList"
-                        :key="item.id"
-                        :item="item"
-                        :layout-style="getLayoutStyleForIndex(idx)"
-                    ></classify-item>
-                    <!-- <classify-item :isMore="true" :layout-style="getLayoutStyleMore()"></classify-item> -->
-                </view>
+                <classify-grid v-if="classifyList.length" class="classify-grid-padding" :items="classifyPreviewList" />
             </view>
 
             <view class="ad-slot" :class="{ ready: adVisibleMap.bottom }">
@@ -411,6 +403,7 @@
 import { ref, computed, reactive } from 'vue';
 import { onLoad, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onPageScroll } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import {
     apiGetBanner,
     apiGetRandomDay,
@@ -428,6 +421,7 @@ import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/
 import TimelinePage from '@/pages/app/timeline.vue';
 import TopNPage from '@/pages/app/topN.vue';
 const { t } = useI18n();
+const { tp } = useTranslateParams();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
@@ -577,7 +571,7 @@ const subscribedClassifyItems = computed(() =>
 const followingSummary = computed(() => {
     const classifyCount = subscribedClassifyIds.value.length;
     const tagCount = libraryStore.subscriptions.tags.length;
-    return t('index.followingDesc', { classifyCount, tagCount });
+    return tp('index.followingDesc', { classifyCount, tagCount });
 });
 
 const getItemsByClassifyName = (name) =>
@@ -775,21 +769,6 @@ const latestMonthGroups = computed(() => {
 
     return list;
 });
-
-// 与 classify 页一致：前 6 个 2×3（左高格跨 2 行）+ 第 6 个通栏，第 7、8 个占第 5 行两列，「更多」通栏第 6 行
-const getLayoutStyleForIndex = (idx) => {
-    if (idx === 0) return { gridColumn: '1', gridRow: '1' };
-    if (idx === 1) return { gridColumn: '2', gridRow: '1' };
-    if (idx === 2) return { gridColumn: '1', gridRow: '2 / span 2' };
-    if (idx === 3) return { gridColumn: '2', gridRow: '2' };
-    if (idx === 4) return { gridColumn: '2', gridRow: '3' };
-    if (idx === 5) return { gridColumn: '1 / -1', gridRow: '4' };
-    if (idx === 6) return { gridColumn: '1', gridRow: '5' };
-    if (idx === 7) return { gridColumn: '2', gridRow: '5' };
-    return {};
-};
-
-const getLayoutStyleMore = () => ({ gridColumn: '1 / -1', gridRow: '6' });
 
 const getBannerTextMeta = (item) => {
     const url = String(item.url || '');
@@ -2730,18 +2709,13 @@ onShareTimeline(() => {
     .classify {
         padding-bottom: 30rpx;
 
-        .content.classify-grid {
-            margin-top: 30rpx;
-            padding: 0 30rpx;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-auto-rows: 200rpx;
-            gap: 20rpx;
-        }
-
         .more {
             font-size: 28rpx;
             color: $uni-text-color-grey;
+        }
+
+        .classify-grid-padding {
+            padding: 30rpx;
         }
     }
 }

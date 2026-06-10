@@ -1,5 +1,9 @@
 <template>
-    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+    <view
+        class="layout"
+        :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
+        :style="{ '--tab-bar-height': `${tabBarHeight}px` }"
+    >
         <!-- #ifndef WEB -->
         <view
             class="status-bar-bg"
@@ -202,7 +206,7 @@
 import { ref, reactive, computed } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiPostProfile } from '@/api/wallpaper.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -219,6 +223,7 @@ const settingsStore = useSettingsStore();
 const hasCheckedInToday = ref(false);
 const loginPromptPopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
+const tabBarHeight = ref(getTabBarHeight() || 0);
 const userHeaderPaddingTop = computed(() => statusBarHeight.value + 10);
 
 // 通用导航对话框控制
@@ -513,11 +518,9 @@ onShow(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     background-color: var(--page-background);
-    min-height: 100vh;
+    min-height: calc(100vh - var(--tab-bar-height));
 
     .status-bar-bg {
         position: fixed;
