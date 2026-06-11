@@ -81,8 +81,6 @@ const handleBack = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .page-header {
     position: relative;
     padding-left: 24rpx;

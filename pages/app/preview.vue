@@ -1017,8 +1017,6 @@ onShareTimeline(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .preview-page {
     position: relative;
     height: 100vh;
@@ -1459,7 +1457,6 @@ onShareTimeline(() => {
     max-width: 500rpx;
     border-radius: 32rpx;
     box-shadow: 0 20rpx 60rpx var(--popup-shadow, rgba(0, 0, 0, 0.15));
-    border: 1rpx solid var(--popup-border, rgba(17, 17, 17, 0.08));
     overflow: hidden;
 
     .popHeader {

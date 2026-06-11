@@ -561,6 +561,8 @@ const toggles = reactive({
     autoSave: true,
     syncWifiOnly: true,
     theme: uni.getSystemInfoSync().theme === 'dark',
+    // 瀑布流开关：true = 瀑布流，false = 网格
+    waterfallView: settingsStore.options.view === 'waterfall',
 });
 
 const profileName = computed(
@@ -684,17 +686,13 @@ const sections = computed(() => {
                 },
                 {
                     key: 'view_type',
-                    icon:
-                        settingsStore.options.view === 'window'
-                            ? '/static/icons/view-grid.svg'
-                            : '/static/icons/view-dashboard.svg',
+                    icon: '/static/icons/view-dashboard.svg',
                     label: t('settings.items.viewType.label'),
-                    sublabel: t('settings.items.viewType.sublabel'),
-                    value:
-                        settingsStore.options.view === 'window'
-                            ? t('settings.items.viewType.window')
-                            : t('settings.items.viewType.waterfall'),
-                    action: switchView,
+                    sublabel: toggles.waterfallView
+                        ? t('settings.items.viewType.waterfall')
+                        : t('settings.items.viewType.window'),
+                    type: 'toggle',
+                    toggleKey: 'waterfallView',
                 },
                 // {
                 //     key: 'availability_status',
@@ -883,6 +881,11 @@ const sections = computed(() => {
 function toggleSwitch(key) {
     if (!key) return;
     toggles[key] = !toggles[key];
+
+    // waterfallView 开关同步到 settingsStore
+    if (key === 'waterfallView') {
+        settingsStore.options.view = toggles.waterfallView ? 'waterfall' : 'window';
+    }
 }
 
 function handleClick(item) {
@@ -939,10 +942,6 @@ function selectTheme(theme) {
     closeThemePopup();
 }
 
-function switchView() {
-    const changeView = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
-    settingsStore.options.view = changeView;
-}
 
 function openThemePopup() {
     themePopup.value?.open();
@@ -1124,6 +1123,7 @@ function shareApp() {
     pointer-events: none;
     z-index: 9999;
 }
+
 .header {
     width: 100%;
     background: var(--page-background);
@@ -1165,14 +1165,15 @@ function shareApp() {
     height: 64rpx;
     flex-shrink: 0;
 }
+
 .content {
     box-sizing: border-box;
-    // padding-top: 16px;
-    // padding-bottom: 40px;
 }
+
 .section {
     margin-bottom: 48rpx;
 }
+
 .section-title {
     padding: 0 36rpx;
     margin-bottom: 20rpx;
@@ -1183,6 +1184,7 @@ function shareApp() {
     line-height: 32rpx;
     display: block;
 }
+
 .card {
     margin: 0 32rpx;
     background: var(--page-background-secondary);
@@ -1190,6 +1192,7 @@ function shareApp() {
     border-radius: 24rpx;
     overflow: hidden;
 }
+
 .profile-card {
     padding: 32rpx;
     display: flex;
@@ -1197,14 +1200,17 @@ function shareApp() {
     gap: 24rpx;
     border-bottom: 2rpx solid var(--panel-border);
 }
+
 .avatar-wrap {
     position: relative;
 }
+
 .avatar {
     width: 112rpx;
     height: 112rpx;
     border-radius: 50%;
 }
+
 .avatar-dot {
     position: absolute;
     bottom: 2rpx;
@@ -1215,10 +1221,12 @@ function shareApp() {
     background: #22c55e;
     border: 4rpx solid var(--page-background-secondary);
 }
+
 .profile-meta {
     flex: 1;
     min-width: 0;
 }
+
 .profile-name {
     display: block;
     font-size: 32rpx;
@@ -1226,16 +1234,18 @@ function shareApp() {
     color: var(--text-primary);
     line-height: 40rpx;
 }
+
 .profile-line {
     display: block;
     font-size: 24rpx;
     line-height: 32rpx;
     color: var(--text-secondary);
 }
+
 .row {
     position: relative;
     min-height: 108rpx;
-    padding: 16rpx 24rpx;
+    padding: 12rpx 24rpx;
     border-bottom: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
@@ -1251,9 +1261,11 @@ function shareApp() {
         z-index: 10;
     }
 }
+
 .row-last {
     border-bottom: none;
 }
+
 .row-left {
     display: flex;
     align-items: center;
@@ -1261,23 +1273,27 @@ function shareApp() {
     flex: 1;
     min-width: 0;
 }
+
 .icon-box {
     width: 72rpx;
     height: 72rpx;
     border-radius: 18rpx;
-    background: var(--panel-background);
+    // background: var(--panel-background);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
+
 .icon-box.destructive {
     background: rgba(229, 50, 45, 0.1);
 }
+
 .label-block {
     flex: 1;
     min-width: 0;
 }
+
 .label {
     display: block;
     font-size: 30rpx;
@@ -1285,6 +1301,7 @@ function shareApp() {
     color: var(--text-primary);
     font-weight: 500;
 }
+
 .sublabel {
     display: block;
     font-size: 24rpx;
@@ -1292,20 +1309,24 @@ function shareApp() {
     color: var(--text-tertiary);
     margin-top: 2rpx;
 }
+
 .destructive .label {
     color: #e5322d;
 }
+
 .row-right {
     display: flex;
     align-items: center;
     gap: 16rpx;
     margin-left: 16rpx;
 }
+
 .value {
     font-size: 24rpx;
     color: var(--text-tertiary);
     white-space: nowrap;
 }
+
 .switch {
     width: 88rpx;
     height: 52rpx;
@@ -1314,9 +1335,11 @@ function shareApp() {
     position: relative;
     transition: background-color 0.2s ease;
 }
+
 .switch.on {
     background: #e5322d;
 }
+
 .switch-dot {
     position: absolute;
     top: 6rpx;
@@ -1327,9 +1350,11 @@ function shareApp() {
     background: var(--page-background-secondary);
     transition: left 0.2s ease;
 }
+
 .switch.on .switch-dot {
     left: 42rpx;
 }
+
 .app-version {
     display: block;
     text-align: center;
@@ -1337,23 +1362,27 @@ function shareApp() {
     color: var(--text-tertiary);
     padding-bottom: 72rpx;
 }
+
 .preview-popup {
     background: var(--popup-background);
     border-radius: 24rpx 24rpx 0 0;
     padding: 20rpx 20rpx calc(26rpx + env(safe-area-inset-bottom));
     box-shadow: 0 -24rpx 60rpx var(--popup-shadow);
 }
+
 .popup-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 12rpx;
 }
+
 .popup-title {
     font-size: 30rpx;
     font-weight: 700;
     color: var(--text-primary);
 }
+
 .popup-close {
     width: 56rpx;
     height: 56rpx;
@@ -1363,10 +1392,12 @@ function shareApp() {
     align-items: center;
     justify-content: center;
 }
+
 .preview-list {
     display: flex;
     gap: 14rpx;
 }
+
 .preview-item {
     flex: 1;
     border: 2rpx solid var(--panel-border);
@@ -1377,10 +1408,12 @@ function shareApp() {
     flex-direction: column;
     align-items: center;
 }
+
 .preview-item.active {
     border-color: #e5322d;
     background: rgba(229, 50, 45, 0.06);
 }
+
 .phone-mock {
     position: relative;
     width: 120rpx;
@@ -1393,6 +1426,7 @@ function shareApp() {
     align-items: center;
     padding-top: 16rpx;
 }
+
 .mock-time {
     width: 46rpx;
     height: 10rpx;
@@ -1400,15 +1434,18 @@ function shareApp() {
     background: var(--panel-border);
     margin-bottom: 10rpx;
 }
+
 .mock-clock {
     font-size: 16rpx;
     color: var(--text-tertiary);
 }
+
 .mock-bar {
     position: absolute;
     background: #e5322d;
     border-radius: 8rpx;
 }
+
 .mock-bar.classic {
     width: 82rpx;
     height: 18rpx;
@@ -1416,12 +1453,14 @@ function shareApp() {
     transform: translateX(-50%);
     bottom: 44rpx;
 }
+
 .mock-bar.floating {
     width: 20rpx;
     height: 64rpx;
     right: 12rpx;
     bottom: 22rpx;
 }
+
 .preview-name {
     margin-top: 10rpx;
     font-size: 22rpx;
@@ -1578,7 +1617,6 @@ function shareApp() {
     &.disabled {
         opacity: 0.6;
         cursor: not-allowed;
-        background: rgba(var(--panel-background-rgb), 0.5);
 
         .choice-item__desc {
             color: var(--text-tertiary) !important;
@@ -1635,6 +1673,412 @@ function shareApp() {
     line-height: 1.4;
 }
 
+.about-popup {
+    width: 86vw;
+    max-height: 86vh;
+    background: var(--popup-background);
+    border: 1rpx solid var(--popup-border);
+    border-radius: 32rpx;
+    padding: 32rpx;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 48rpx 144rpx var(--popup-shadow);
+}
+
+.about-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24rpx;
+}
+
+.about-title {
+    font-size: 36rpx;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.about-close {
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: 32rpx;
+    background: var(--panel-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-body {
+    max-height: 72vh;
+}
+
+.about-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16rpx 0 24rpx;
+}
+
+.about-logo {
+    width: 144rpx;
+    height: 144rpx;
+    border-radius: 32rpx;
+    margin-bottom: 16rpx;
+}
+
+.about-name {
+    font-size: 32rpx;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4rpx;
+}
+
+.about-slogan {
+    font-size: 24rpx;
+    color: var(--text-tertiary);
+    margin-bottom: 20rpx;
+}
+
+.about-version {
+    width: 100%;
+    display: flex;
+    gap: 16rpx;
+}
+
+.about-version-item {
+    flex: 1;
+    background: var(--panel-background);
+    border: 2rpx solid var(--panel-border);
+    border-radius: 20rpx;
+    padding: 16rpx 20rpx;
+}
+
+.about-version-label {
+    display: block;
+    font-size: 22rpx;
+    color: var(--text-tertiary);
+}
+
+.about-version-value {
+    display: block;
+    font-size: 26rpx;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-top: 4rpx;
+}
+
+.about-group {
+    margin-top: 32rpx;
+}
+
+.about-group-title {
+    display: block;
+    font-size: 22rpx;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 16rpx;
+}
+
+.about-list {
+    background: var(--page-background-secondary);
+    border: 2rpx solid var(--panel-border);
+    border-radius: 24rpx;
+    overflow: hidden;
+}
+
+.about-row {
+    min-height: 100rpx;
+    padding: 24rpx 28rpx;
+    border-bottom: 2rpx solid var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.about-row:last-child {
+    border-bottom: none;
+}
+
+.about-row-left {
+    display: flex;
+    align-items: center;
+    gap: 20rpx;
+    flex: 1;
+    min-width: 0;
+}
+
+.about-row-text {
+    font-size: 28rpx;
+    color: var(--text-primary);
+}
+
+.about-row-value {
+    font-size: 24rpx;
+    color: var(--text-tertiary);
+}
+
+.about-legal {
+    text-align: center;
+}
+
+.about-legal__links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24rpx;
+}
+
+.about-legal__link {
+    font-size: 24rpx;
+    line-height: 1.4;
+    font-weight: 500;
+    color: #3d7fdd;
+}
+
+.about-legal__divider {
+    font-size: 36rpx;
+    line-height: 1.4;
+    color: var(--text-tertiary);
+}
+
+.about-record {
+    margin-top: 16rpx;
+    text-align: center;
+    font-size: 24rpx;
+    line-height: 1.6;
+    color: var(--text-tertiary);
+}
+
+.about-copyright {
+    margin-top: 8rpx;
+    text-align: center;
+    font-size: 24rpx;
+    line-height: 1.6;
+    color: var(--text-tertiary);
+    white-space: pre-line;
+}
+
+// ─────────────────────────────────────────────
+// 暗色模式专属覆盖
+// 策略：去掉所有边框线，用背景色差区分层级，增加质感
+// ─────────────────────────────────────────────
+.theme-dark {
+
+    // 页面背景：比 card 更深，形成"内容浮起"的沉层感
+    &.layout {
+        background: #111114;
+    }
+
+    .status-bar-bg {
+        background: #111114;
+    }
+
+    .header {
+        background: #111114;
+    }
+
+    // 返回按钮：毛玻璃质感，去掉描边
+    .back-btn {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    }
+
+    // section 标题：更克制的颜色
+    .section-title {
+        color: rgba(255, 255, 255, 0.35);
+        letter-spacing: 0.1em;
+    }
+
+    // card：比页面背景亮一个层级，无边框，轻微上浮阴影
+    .card {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            0 2rpx 0 rgba(255, 255, 255, 0.04) inset,
+            0 16rpx 40rpx rgba(0, 0, 0, 0.3);
+    }
+
+    // 头像区分隔线 → 用更暗的背景替代
+    .profile-card {
+        border-bottom: none;
+        padding-bottom: 28rpx;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+    }
+
+    .avatar-dot {
+        border-color: #1e1e22;
+    }
+
+    // row 之间不用线，用轻微的背景微分代替
+    .row {
+        border-bottom: none;
+
+        // 相邻 row 之间加一条极细的分隔，仅靠色差体现
+        &:not(.row-last)::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0; // left: 88rpx; 从 icon 右侧开始，对齐文字
+            right: 0;
+            height: 1rpx;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        &:active {
+            background: rgba(255, 255, 255, 0.04);
+        }
+    }
+
+    .row-last {
+        &::after {
+            display: none;
+        }
+    }
+
+    // icon-box：带轻微色调，按功能分区域感知
+    .icon-box {
+        // background: rgba(255, 255, 255, 0.08);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .icon-box.destructive {
+        background: rgba(229, 50, 45, 0.14);
+    }
+
+    // value 文字颜色更低调
+    .value {
+        color: rgba(255, 255, 255, 0.38);
+    }
+
+    // switch 未激活：深色轨道
+    .switch {
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .switch.on {
+        background: #28b389;
+        box-shadow: 0 0 16rpx rgba(40, 179, 137, 0.4);
+    }
+
+    .switch-dot {
+        background: #f0f0f4;
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.4);
+    }
+
+    // popup 系列：统一深色背景，无边框，重阴影
+    .preview-popup {
+        background: #1e1e22;
+        box-shadow: 0 -32rpx 80rpx rgba(0, 0, 0, 0.7);
+    }
+
+    .popup-close {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .preview-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .preview-item.active {
+        background: rgba(229, 50, 45, 0.1);
+        box-shadow: inset 0 0 0 1rpx rgba(229, 50, 45, 0.5);
+    }
+
+    .phone-mock {
+        background: #111114;
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .mock-time {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    // rate popup
+    .rate-popup {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            0 48rpx 144rpx rgba(0, 0, 0, 0.8),
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .rate-popup__close {
+        border: none;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .rate-popup__button {
+        background: #ffffff;
+        color: #111114;
+    }
+
+    // choice popup（主题/语言）
+    .choice-popup {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            0 48rpx 144rpx rgba(0, 0, 0, 0.8),
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .choice-popup__close {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .choice-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
+
+        &.active {
+            background: rgba(40, 179, 137, 0.1);
+            // box-shadow: inset 0 0 0 1rpx rgba(40, 179, 137, 0.4);
+        }
+    }
+
+    .choice-item__icon {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+    }
+
+    // about popup
+    .about-popup {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            0 48rpx 144rpx rgba(0, 0, 0, 0.8),
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .about-close {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .about-version-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .about-list {
+        background: rgba(255, 255, 255, 0.04);
+        border: none;
+    }
+
+    .about-row {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+
+        &:last-child {
+            border-bottom: none;
+        }
+    }
+}
 .about-popup {
     width: 86vw;
     max-height: 86vh;

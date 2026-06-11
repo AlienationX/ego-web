@@ -151,8 +151,6 @@ watch(
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .recommend-panel {
     padding: 32rpx 24rpx 40rpx;
     background: var(--page-background);

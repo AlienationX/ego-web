@@ -71,8 +71,6 @@ const openHtml = (path) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     min-height: 100vh;
     background: var(--page-background);

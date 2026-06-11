@@ -334,8 +334,6 @@ getClassify();
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .edit-cover-page {
     min-height: 100vh;
     background: var(--page-background);

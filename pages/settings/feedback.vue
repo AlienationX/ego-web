@@ -308,8 +308,6 @@ const handleSubmit = async () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     min-height: 100vh;
     background: var(--page-background);
@@ -535,5 +533,61 @@ const handleSubmit = async () => {
     background: var(--panel-background);
     color: var(--text-tertiary);
     border: 2rpx solid var(--panel-border);
+}
+</style>
+
+<style lang="scss" scoped>
+// ── 暗色模式覆盖 ──
+.theme-dark {
+    &.layout {
+        background: #111114;
+    }
+
+    .header {
+        background: #111114;
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .chip {
+        background: #1e1e22;
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .chip.active {
+        background: #e5322d;
+        box-shadow: 0 4rpx 16rpx rgba(229, 50, 45, 0.3);
+        color: #fff;
+    }
+
+    .card {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
+            0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+    }
+
+    .char-row {
+        border-top-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .image-item,
+    .image-add {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .submit-btn.disabled {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+        color: rgba(255, 255, 255, 0.3);
+    }
 }
 </style>

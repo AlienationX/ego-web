@@ -84,7 +84,6 @@ defineExpose({
     width: 520rpx;
     padding: 50rpx 48rpx 30rpx;
     background: var(--popup-background, #ffffff);
-    border: 1rpx solid var(--popup-border, rgba(17, 17, 17, 0.08));
     border-radius: 56rpx;
     box-shadow: 0 24rpx 60rpx var(--popup-shadow, rgba(0, 0, 0, 0.12));
 }

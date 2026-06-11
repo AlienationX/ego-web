@@ -451,8 +451,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .reset-password-container {
     width: 750rpx;
     max-width: 100%;

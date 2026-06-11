@@ -20,6 +20,7 @@
 - 公共组件放在 `components/` 目录
 - 工具函数放在 `utils/` 目录，按功能模块拆分
 - 接口请求统一封装在 `api/` 目录
+- light/dark模式 的样式需要便于维护和复用
 
 ## 接口约定
 
@@ -31,5 +32,6 @@
 
 - 不要使用 `window`、`document` 等浏览器专有 API，请使用 uni 提供的跨平台 API
 - css单位统一使用 rpx，避免使用 px 单位
+- light/dark模式，尽量使用 theme-variables.scss 里面的变量，没有的添加，但是也不能添加的太多，一定要便于修改和维护
 - icon图标统一放在 `static/icons/` 目录，优先使用自定义组件 mdi-icon,size属性使用px单位。没有的再使用网络上的material-design-icons 图标库中的图标，并提示我下载到本地目录
 - 涉及支付、授权等敏感功能，修改前请先查阅 `docs/` 目录下的相关说明文档

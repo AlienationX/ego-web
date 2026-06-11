@@ -85,8 +85,6 @@ const toggleMenu = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .menu-bar-container {
     width: 100%;
 }

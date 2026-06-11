@@ -85,8 +85,6 @@ onLoad((e) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     background-color: var(--page-background);
     min-height: 100vh;

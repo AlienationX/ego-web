@@ -1153,4 +1153,44 @@ onShow(() => {
         }
     }
 }
+
+// ─────────────────────────────────────────────
+// 暗色模式专属覆盖（user.vue）
+// 每个 row 是独立卡片，用背景色差 + 顶部高光代替边框
+// ─────────────────────────────────────────────
+.theme-dark {
+
+    // 页面底色更深，让卡片浮起来
+    &.layout {
+        background-color: #111114;
+    }
+
+    .status-bar-bg {
+        background: #111114;
+    }
+
+    // stats 卡片：去边框，换深色背景 + 顶部高光
+    .stats-section .stats-card {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
+            0 8rpx 24rpx rgba(0, 0, 0, 0.32);
+    }
+
+    // menu row：独立卡片，去边框，深色背景 + 顶部高光
+    .section .list .row {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
+            0 4rpx 16rpx rgba(0, 0, 0, 0.28);
+
+        &:active {
+            background: rgba(255, 255, 255, 0.04);
+            opacity: 1; // 覆盖原来的 opacity:0.8，避免和背景变化叠加
+            transform: scale(0.99);
+        }
+    }
+}
 </style>

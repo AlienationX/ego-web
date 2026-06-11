@@ -289,8 +289,6 @@ const handleSignup = async () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .signup-container {
     min-height: 100vh;
     background: var(--page-background);

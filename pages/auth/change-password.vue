@@ -228,8 +228,6 @@ function getStrength(password) {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     min-height: 100vh;
     background: var(--page-background);
@@ -252,8 +250,8 @@ function getStrength(password) {
 }
 
 .back-btn {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
     border-radius: 16rpx;
     background: var(--page-background-secondary);
     border: 2rpx solid var(--panel-border);
@@ -580,6 +578,84 @@ function getStrength(password) {
 
     &::after {
         border: none;
+    }
+}
+</style>
+
+<style lang="scss" scoped>
+// ── 暗色模式覆盖 ──
+.theme-dark {
+    &.layout {
+        background: #111114;
+    }
+
+    .header {
+        background: #111114;
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    }
+
+    // info-banner 在暗色下换成深蓝调
+    .info-banner {
+        background: rgba(3, 105, 161, 0.12);
+        border-color: rgba(3, 105, 161, 0.24);
+    }
+
+    .info-icon {
+        background: rgba(3, 105, 161, 0.16);
+    }
+
+    .info-text {
+        color: #7dd3fc;
+    }
+
+    .card {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
+            0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+    }
+
+    .field {
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .requirements {
+        background: #1e1e22;
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .requirements-dot {
+        background: rgba(255, 255, 255, 0.07);
+    }
+
+    .requirements-dot.ok {
+        background: rgba(34, 197, 94, 0.15);
+    }
+
+    .error-box {
+        background: rgba(220, 38, 38, 0.1);
+        border-color: rgba(220, 38, 38, 0.24);
+    }
+
+    .error-text {
+        color: #fca5a5;
+    }
+
+    .submit-btn.disabled {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .success-icon {
+        background: rgba(34, 197, 94, 0.12);
     }
 }
 </style>

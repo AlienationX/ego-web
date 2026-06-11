@@ -539,8 +539,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .tabbed-container {
     position: relative;
     width: 100%;

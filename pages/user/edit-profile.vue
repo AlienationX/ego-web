@@ -178,8 +178,6 @@ const goBack = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     min-height: 100vh;
     background: var(--page-background);
@@ -199,8 +197,8 @@ const goBack = () => {
 }
 
 .back-btn {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
     border-radius: 16rpx;
     background: var(--page-background-secondary);
     border: 2rpx solid var(--panel-border);
@@ -326,5 +324,36 @@ const goBack = () => {
     gap: 16rpx;
     font-size: 30rpx;
     font-weight: 600;
+}
+</style>
+
+<style lang="scss" scoped>
+// ── 暗色模式覆盖 ──
+.theme-dark {
+    &.layout {
+        background: #111114;
+    }
+
+    .header {
+        background: #111114;
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .card {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
+            0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+    }
+
+    .field {
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
 }
 </style>

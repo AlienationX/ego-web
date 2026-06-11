@@ -446,8 +446,6 @@ const goBack = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .signin-container {
     min-height: 100vh;
     background: var(--page-background);

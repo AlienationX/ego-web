@@ -276,8 +276,6 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .top10-page {
     min-height: 100vh;
     background: var(--page-background);

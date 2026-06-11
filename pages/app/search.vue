@@ -260,8 +260,6 @@ onPageScroll(() => {});
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .status-bar-bg {
     background: var(--search-bg);
 }

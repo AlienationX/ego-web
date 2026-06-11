@@ -136,8 +136,6 @@ onLoad(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     min-height: 100vh;
     background: linear-gradient(180deg, #f8fafc 0%, #f2f6fb 100%);

@@ -49,8 +49,6 @@ const goBack = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     background: var(--page-background);
     min-height: 100vh;

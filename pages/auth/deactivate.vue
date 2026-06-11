@@ -197,8 +197,6 @@ const onBack = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     min-height: 100vh;
     background: var(--page-background);
@@ -220,8 +218,8 @@ const onBack = () => {
 }
 
 .back-btn {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
     border-radius: 16rpx;
     background: var(--page-background-secondary);
     border: 2rpx solid var(--panel-border);
@@ -653,6 +651,106 @@ const onBack = () => {
 
     &::after {
         border: none;
+    }
+}
+</style>
+
+<style lang="scss" scoped>
+// ── 暗色模式覆盖 ──
+.theme-dark {
+    &.layout {
+        background: #111114;
+    }
+
+    .header {
+        background: #111114;
+    }
+
+    .back-btn {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-icon {
+        background: rgba(229, 50, 45, 0.12);
+        border-color: rgba(229, 50, 45, 0.24);
+    }
+
+    .list-card {
+        background: #1e1e22;
+        border: none;
+        box-shadow:
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
+            0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+    }
+
+    .list-row {
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .list-icon {
+        background: rgba(255, 255, 255, 0.07);
+        border: none;
+    }
+
+    .secondary-btn {
+        background: #1e1e22;
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .warning-card {
+        background: rgba(220, 38, 38, 0.1);
+        border-color: rgba(220, 38, 38, 0.2);
+        color: #fca5a5;
+    }
+
+    .warning-title {
+        color: #fca5a5;
+    }
+
+    .warning-desc {
+        color: rgba(252, 165, 165, 0.8);
+    }
+
+    .confirm-card {
+        background: #1e1e22;
+        border: none;
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .confirm-card.confirmed {
+        box-shadow:
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
+            inset 0 0 0 1rpx rgba(229, 50, 45, 0.4);
+    }
+
+    .check-box {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .done-card {
+        background: rgba(229, 50, 45, 0.1);
+        border-color: rgba(229, 50, 45, 0.2);
+    }
+
+    .done-card-title {
+        color: #fca5a5;
+    }
+
+    .done-item-text {
+        color: rgba(252, 165, 165, 0.8);
+    }
+
+    .done-icon {
+        background: rgba(34, 197, 94, 0.12);
+    }
+
+    .dark-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
     }
 }
 </style>

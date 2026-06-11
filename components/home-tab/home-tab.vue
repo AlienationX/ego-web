@@ -967,7 +967,7 @@ onMounted(() => {
     width: 690rpx;
     height: 72rpx;
     line-height: 80rpx;
-    background: #f9f9f9;
+    background: var(--page-background-secondary);
     margin: 0 auto 30rpx;
     border-radius: 80rpx;
     display: flex;
@@ -1088,8 +1088,8 @@ onMounted(() => {
         font-weight: 600;
         border-radius: 999rpx;
         border: none;
-        background-color: #111111;
-        color: #ffffff;
+        background-color: var(--text-primary);
+        color: var(--page-background);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1113,8 +1113,8 @@ onMounted(() => {
         &.is-collection,
         &.is-keyword,
         &.is-spotlight {
-            background-color: #111111;
-            color: #ffffff;
+            background-color: var(--text-primary);
+            color: var(--page-background);
             border: none;
             box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
         }

@@ -630,8 +630,6 @@ onUnload(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     // Discover-specific CSS variables (only those differing from global theme)
     --discover-border-strong: rgba(17, 17, 17, 0.12);

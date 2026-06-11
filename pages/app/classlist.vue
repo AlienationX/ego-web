@@ -294,8 +294,6 @@ onShareTimeline(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/theme-variables.scss';
-
 .layout {
     display: flex;
     flex-direction: column;
