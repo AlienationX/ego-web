@@ -144,7 +144,6 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
 import { apiGetClassList, apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/system.js';
@@ -177,26 +176,42 @@ const loading = ref(false);
 const rankedList = ref([]);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
+// 两个 metric 的数据分别缓存，切换时命中缓存直接渲染，无需重复请求
+const cache = {
+    views: null,
+    downloads: null,
+};
+
 const metricBadge = computed(() => (activeMetric.value === 'views' ? t('top10.badgeViews') : t('top10.badgeDownloads')));
 const metricDescription = computed(() => (activeMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads')));
 
-const getType = () => (activeMetric.value === 'views' ? 'views' : 'downloads');
-
 const getTopList = async () => {
+    const metric = activeMetric.value;
+
+    // 命中缓存直接渲染，跳过请求
+    if (cache[metric]) {
+        rankedList.value = cache[metric];
+        return;
+    }
+
     loading.value = true;
     try {
         const res = await apiGetTopWall({
-            type: getType(),
+            type: metric === 'views' ? 'views' : 'downloads',
             n: 20,
         });
-        const list = (res.data || []).map((item) => handlePicUrl(item));
-        rankedList.value = list
+        const list = (res.data || [])
+            .map((item) => handlePicUrl(item))
             .sort((a, b) => {
-                const aValue = Number(activeMetric.value === 'views' ? a.views : a.downloads) || 0;
-                const bValue = Number(activeMetric.value === 'views' ? b.views : b.downloads) || 0;
+                const aValue = Number(metric === 'views' ? a.views : a.downloads) || 0;
+                const bValue = Number(metric === 'views' ? b.views : b.downloads) || 0;
                 return bValue - aValue;
             })
             .slice(0, 20);
+
+        // 写入缓存
+        cache[metric] = list;
+        rankedList.value = list;
     } catch (error) {
         rankedList.value = [];
     } finally {
@@ -253,7 +268,7 @@ const goBack = () => {
     });
 };
 
-onLoad(() => {
+onMounted(() => {
     if (!rankedList.value.length) {
         getTopList();
     }

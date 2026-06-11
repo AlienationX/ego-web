@@ -1,10 +1,7 @@
 <template>
     <view class="edit-cover-page" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- #ifndef WEB -->
-        <view
-            class="status-bar-bg"
-            :style="{ height: `${statusBarHeight}px` }"
-        ></view>
+        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
         <view class="nav-container">
             <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
@@ -378,7 +375,7 @@ getClassify();
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 50%;
+        border-radius: 16rpx;
         background: var(--page-background-secondary);
         border: 1rpx solid var(--panel-border);
     }

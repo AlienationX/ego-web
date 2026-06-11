@@ -111,7 +111,6 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
 import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } from '@/utils/common.js';
@@ -288,7 +287,7 @@ const scrollToTop = () => {
     }, 80);
 };
 
-onLoad(() => {
+onMounted(() => {
     if (!latestList.value.length) {
         getLatest();
     }

@@ -160,7 +160,7 @@
     },
     "app-harmony" : {
         "distribute" : {
-            "bundleName" : "com.wallpaper.app.ego",
+            "bundleName" : "com.ego.app.wallpaper",
             "deviceTypes" : [ "phone", "tablet" ],
             "splashScreens" : {
                 "startWindowIcon" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/launch.png"
