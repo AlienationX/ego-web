@@ -23,20 +23,25 @@
             </view>
         </view>
 
-        <!-- 加载状态 -->
-        <view v-if="isLoading" class="loading-container">
-            <rotate-loading :size="100"></rotate-loading>
-            <view class="loading-text">{{ $t('message.loading') }}</view>
+        <!-- 加载骨架屏 -->
+        <view v-if="isLoading" class="classify-grid-padding">
+            <view class="skeleton-grid">
+                <view v-for="i in 8" :key="i" class="skeleton-item">
+                    <view class="skeleton-pic"></view>
+                    <view class="skeleton-label"></view>
+                </view>
+            </view>
         </view>
 
         <!-- 空状态 -->
         <view v-else-if="!classifyList.length" class="empty-container">
-            <view class="empty-text">{{ $t('category.empty') }}</view>
+            <view class="empty-title">{{ $t('category.empty') }}</view>
+            <view class="empty-desc">{{ $t('category.emptyDesc') }}</view>
         </view>
 
         <!-- 分类网格 -->
-        <view class="classify-grid-padding">
-            <classify-grid v-if="classifyList.length" :items="classifyComputed" />
+        <view v-else class="classify-grid-padding">
+            <classify-grid :items="classifyComputed" />
         </view>
     </view>
 </template>
@@ -154,7 +159,87 @@ onLoad(() => {
     }
 }
 
+.empty-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 120rpx 60rpx;
+    text-align: center;
+}
+
+.empty-icon {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: 50%;
+    background: var(--panel-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 36rpx;
+}
+
+.empty-title {
+    font-size: 34rpx;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 16rpx;
+}
+
+.empty-desc {
+    font-size: 26rpx;
+    line-height: 1.7;
+    color: var(--text-tertiary);
+    max-width: 520rpx;
+}
+
 .classify-grid-padding {
     padding: 30rpx;
+}
+
+// ── 骨架屏 ──
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24rpx;
+}
+
+.skeleton-item {
+    display: flex;
+    flex-direction: column;
+    gap: 14rpx;
+}
+
+.skeleton-pic {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 24rpx;
+    background: linear-gradient(
+        90deg,
+        var(--panel-background) 25%,
+        rgba(200, 200, 200, 0.12) 50%,
+        var(--panel-background) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s infinite linear;
+}
+
+.skeleton-label {
+    width: 60%;
+    height: 28rpx;
+    border-radius: 8rpx;
+    background: linear-gradient(
+        90deg,
+        var(--panel-background) 25%,
+        rgba(200, 200, 200, 0.12) 50%,
+        var(--panel-background) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s infinite linear;
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 </style>

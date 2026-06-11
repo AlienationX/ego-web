@@ -190,7 +190,8 @@
     "category": {
         "title": "Category",
         "desc": "Explore more beautiful wallpaper categories",
-        "empty": "Loading category data..."
+        "empty": "No categories",
+        "emptyDesc": "Category data is temporarily unavailable, please try again later"
     },
     "user": {
         "profile": {

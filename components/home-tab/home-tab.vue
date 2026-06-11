@@ -9,7 +9,22 @@
 
         <!-- Banner -->
         <view class="banner">
-            <swiper class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
+            <!-- Banner 骨架屏 -->
+            <view v-if="!bannerList.length" class="banner-swiper">
+                <view class="sk-banner">
+                    <view class="sk-banner__img"></view>
+                    <view class="sk-banner__content">
+                        <view class="sk-banner__tag-row">
+                            <view class="sk-bar sk-bar--tag"></view>
+                            <view class="sk-bar sk-bar--tag sk-bar--short"></view>
+                        </view>
+                        <view class="sk-bar sk-bar--title"></view>
+                        <view class="sk-bar sk-bar--title sk-bar--medium"></view>
+                        <view class="sk-bar sk-bar--desc"></view>
+                    </view>
+                </view>
+            </view>
+            <swiper v-else class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
                 <swiper-item class="banner-swiper-item" v-for="item in bannerList" :key="item.id">
                     <navigator
                         v-if="item.target == 'miniProgram'"
@@ -65,7 +80,11 @@
                 <text class="text">{{ $t('index.notice') }}</text>
             </view>
             <view class="center">
-                <swiper class="notice-swiper" vertical interval="1500" duration="300" autoplay circular>
+                <!-- Notice 骨架屏 -->
+                <view v-if="!noticeList.length" class="sk-notice-bar">
+                    <view class="sk-bar sk-bar--notice"></view>
+                </view>
+                <swiper v-else class="notice-swiper" vertical interval="1500" duration="300" autoplay circular>
                     <swiper-item class="notice-swiper-item" v-for="item in noticeList" :key="item.id">
                         <navigator :url="`/pages/app/notice-detail?id=${item.id}&name=${item.title}`">
                             {{ item.title }}
@@ -99,8 +118,12 @@
             </index-title>
 
             <view class="content">
-                <rotate-loading v-if="!randomDailyList.length" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x>
+                <!-- Daily 骨架屏：1个大卡 + 4个小卡 -->
+                <view v-if="!randomDailyList.length" class="sk-scroll-row">
+                    <view class="sk-card sk-card--hero"></view>
+                    <view v-for="i in 4" :key="i" class="sk-card"></view>
+                </view>
+                <scroll-view v-else scroll-x>
                     <view
                         class="box"
                         v-for="(item, idx) in randomDailyList"
@@ -141,8 +164,11 @@
             </index-title>
 
             <view class="content">
-                <rotate-loading v-if="!latestList.length" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x>
+                <!-- Latest 骨架屏：5个小卡 -->
+                <view v-if="!latestList.length" class="sk-scroll-row">
+                    <view v-for="i in 5" :key="i" class="sk-card"></view>
+                </view>
+                <scroll-view v-else scroll-x>
                     <view
                         class="box"
                         v-for="(item, idx) in latestList"
@@ -623,6 +649,7 @@ onMounted(() => {
     // P1 立即：首屏可见的关键数据
     getBanner();
     getRandom();
+    getLatest();
 
     // P2 延时 300ms：首屏次要数据，让 P1 的渲染先跑起来
     setTimeout(() => {
@@ -632,7 +659,6 @@ onMounted(() => {
     
     // P3 延时 800ms：需要滚动才能看到，完全错峰
     setTimeout(() => {
-        getLatest();
         getClassify();
     }, 800);
 })
@@ -1387,6 +1413,119 @@ onMounted(() => {
     }
     100% {
         background-position: -200% 0;
+    }
+}
+
+// ── 骨架屏公共 mixin ──
+$sk-base: rgba(148, 163, 184, 0.12);
+$sk-shine: rgba(148, 163, 184, 0.22);
+
+%sk-shimmer {
+    background: linear-gradient(90deg, $sk-base 25%, $sk-shine 50%, $sk-base 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s infinite linear;
+}
+
+// ── Banner 骨架 ──
+.sk-banner {
+    margin: 0 30rpx;
+    width: calc(100% - 60rpx);
+    height: 100%;
+    border-radius: 28rpx;
+    overflow: hidden;
+    position: relative;
+    @extend %sk-shimmer;
+
+    .sk-banner__img {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        inset: 0;
+    }
+
+    .sk-banner__content {
+        position: absolute;
+        left: 28rpx;
+        right: 28rpx;
+        bottom: 26rpx;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 14rpx;
+    }
+
+    .sk-banner__tag-row {
+        display: flex;
+        gap: 16rpx;
+    }
+}
+
+// ── 通用骨架条 ──
+.sk-bar {
+    @extend %sk-shimmer;
+    border-radius: 8rpx;
+    opacity: 0.5;
+
+    &--tag {
+        height: 40rpx;
+        width: 120rpx;
+        border-radius: 999rpx;
+    }
+
+    &--short {
+        width: 80rpx;
+    }
+
+    &--title {
+        height: 32rpx;
+        width: 90%;
+    }
+
+    &--medium {
+        width: 60%;
+    }
+
+    &--desc {
+        height: 24rpx;
+        width: 75%;
+    }
+
+    &--notice {
+        height: 32rpx;
+        width: 80%;
+        border-radius: 6rpx;
+    }
+}
+
+// ── Notice 骨架 ──
+.sk-notice-bar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 8rpx;
+}
+
+// ── 横向卡片骨架（Daily/Latest）──
+.sk-scroll-row {
+    display: inline-flex;
+    align-items: flex-start;
+    height: calc(100% - 66rpx);
+    padding: 20rpx 30rpx 50rpx;
+    gap: 24rpx;
+    white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sk-card {
+    width: 280rpx;
+    height: 514rpx;
+    flex-shrink: 0;
+    border-radius: 28rpx;
+    @extend %sk-shimmer;
+
+    &--hero {
+        width: 440rpx;
     }
 }
 </style>

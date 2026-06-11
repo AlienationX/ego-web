@@ -842,13 +842,17 @@ const sections = computed(() => {
                     sublabel: t('settings.items.rateUs.sublabel'),
                     action: openRatePopup,
                 },
-                {
-                    key: 'share_app',
-                    icon: '/static/icons/share.svg',
-                    label: t('settings.items.share.label'),
-                    sublabel: t('settings.items.share.sublabel'),
-                    action: shareApp,
-                },
+                ...(userStore.isAdmin
+                    ? [
+                          {
+                            key: 'share_app',
+                            icon: '/static/icons/share.svg',
+                            label: t('settings.items.share.label'),
+                            sublabel: t('settings.items.share.sublabel'),
+                            action: shareApp,
+                        },
+                      ]
+                    : []),
             ],
         },
         {
@@ -1088,7 +1092,7 @@ function confirmRateNow() {
 function shareApp() {
     uni.share({
         provider: 'weixin',
-        scene: 'WXSceneSession',
+        scene: 'WXSceneTimeline',
         type: 0,
         summary: t('about.shareText'),
         success: () => {

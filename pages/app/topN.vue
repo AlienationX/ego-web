@@ -37,7 +37,27 @@
                     <view class="top10-intro__desc">{{ metricDescription }}</view>
                 </view>
 
-                <rotate-loading v-if="loading" style="height: 360rpx"></rotate-loading>
+                <!-- 骨架屏 -->
+                <view v-if="loading" class="skeleton-wrap">
+                    <!-- 大卡骨架 -->
+                    <view class="skeleton-hero-first"></view>
+                    <!-- 两小卡骨架 -->
+                    <view class="skeleton-hero-grid">
+                        <view class="skeleton-hero-secondary"></view>
+                        <view class="skeleton-hero-secondary"></view>
+                    </view>
+                    <!-- 列表项骨架 -->
+                    <view class="skeleton-rank-list">
+                        <view v-for="i in 4" :key="i" class="skeleton-rank-item">
+                            <view class="skeleton-rank-thumb"></view>
+                            <view class="skeleton-rank-body">
+                                <view class="skeleton-rank-title"></view>
+                                <view class="skeleton-rank-title skeleton-rank-title--short"></view>
+                                <view class="skeleton-rank-meta"></view>
+                            </view>
+                        </view>
+                    </view>
+                </view>
 
                 <template v-else-if="rankedList.length">
                     <view class="hero-section">
@@ -812,5 +832,119 @@ onMounted(() => {
     .theme-light & {
         color: var(--text-secondary);
     }
+}
+
+// ── 骨架屏 ──
+@mixin shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.06) 25%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: top10-shimmer 1.6s infinite linear;
+
+    .theme-light & {
+        background: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.06) 25%,
+            rgba(0, 0, 0, 0.10) 50%,
+            rgba(0, 0, 0, 0.06) 75%
+        );
+        background-size: 200% 100%;
+        animation: top10-shimmer 1.6s infinite linear;
+    }
+}
+
+.skeleton-wrap {
+    padding: 0;
+}
+
+.skeleton-hero-first {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 32rpx;
+    margin-bottom: 30rpx;
+    @include shimmer;
+}
+
+.skeleton-hero-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30rpx;
+    margin-bottom: 40rpx;
+}
+
+.skeleton-hero-secondary {
+    aspect-ratio: 3 / 4;
+    border-radius: 32rpx;
+    @include shimmer;
+}
+
+.skeleton-rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30rpx;
+}
+
+.skeleton-rank-item {
+    height: 280rpx;
+    border-radius: 28rpx;
+    overflow: hidden;
+    display: flex;
+    gap: 0;
+    @include shimmer;
+}
+
+.skeleton-rank-thumb {
+    width: 214rpx;
+    height: 100%;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.04);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.04);
+    }
+}
+
+.skeleton-rank-body {
+    flex: 1;
+    padding: 28rpx 22rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16rpx;
+}
+
+.skeleton-rank-title {
+    height: 28rpx;
+    border-radius: 8rpx;
+    width: 85%;
+    background: rgba(255, 255, 255, 0.08);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.07);
+    }
+
+    &--short {
+        width: 55%;
+    }
+}
+
+.skeleton-rank-meta {
+    height: 22rpx;
+    width: 40%;
+    border-radius: 6rpx;
+    background: rgba(255, 255, 255, 0.05);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.05);
+    }
+}
+
+@keyframes top10-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 </style>
