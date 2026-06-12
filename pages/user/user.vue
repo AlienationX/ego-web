@@ -506,7 +506,8 @@ const exitMenus = computed(() => [
 
 onShow(() => {
     // 检查是否已登录，已登录则获取最新用户信息
-    if (userStore.userinfo.id) {
+    // isFetchedRecently 防止刚登录时 signin 已拉过一次，onShow 再重复拉
+    if (userStore.userinfo.id && !userStore.isFetchedRecently(3000)) {
         userStore.setUserInfo();
     }
 

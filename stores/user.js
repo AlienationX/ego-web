@@ -9,7 +9,8 @@ export const useUserStore = defineStore(
     () => {
         const accessToken = ref('');
         const refreshToken = ref('');
-        const userinfo = ref({}); // const 声明的变量不能被整体重新赋值userinfo=res.data，只能修改其属性。Object.assign(userinfo, res.data);
+        const userinfo = ref({});
+        const lastFetchTime = ref(0); // 上次请求 /me 的时间戳，用于防重复
         const preferences = reactive({
             language: 'zh-CN',
             fontSize: 14,
@@ -38,6 +39,7 @@ export const useUserStore = defineStore(
         //     })();
 
         const setUserInfo = async () => {
+            lastFetchTime.value = Date.now(); // 记录本次请求时间，用于去重
             let res = await apiGetProfile();
             userinfo.value = res.data;
 
@@ -75,6 +77,9 @@ export const useUserStore = defineStore(
             console.log('已下载次数', downloadCnt.value);
         };
 
+        // 判断 10s 内是否执行过 setUserInfo
+        const isFetchedRecently = (ms = 10000) => Date.now() - lastFetchTime.value < ms;
+
         return {
             accessToken,
             refreshToken,
@@ -85,6 +90,7 @@ export const useUserStore = defineStore(
             isAdmin,
             setToken,
             setUserInfo,
+            isFetchedRecently,
             clearUserData,
             downloadCnt,
             downloadCntAdd,

@@ -70,6 +70,28 @@
                         <!-- 顶部占位，留给可滚动头部 -->
                         <view :style="{ height: topSpacerHeight + 'px' }"></view>
 
+                        <!-- 首次加载骨架屏：仅在 images 为空且正在加载时显示 -->
+                        <template v-if="tabStates[index]?.isLoading && tabStates[index]?.images.length === 0">
+                            <!-- 瀑布流骨架：两列，高度错落，每列4张共8张 -->
+                            <view v-if="isWaterfall" class="sk-waterfall">
+                                <view class="sk-col">
+                                    <view class="sk-card sk-card--tall"></view>
+                                    <view class="sk-card sk-card--short"></view>
+                                    <view class="sk-card sk-card--medium"></view>
+                                    <view class="sk-card sk-card--tall"></view>
+                                </view>
+                                <view class="sk-col">
+                                    <view class="sk-card sk-card--short"></view>
+                                    <view class="sk-card sk-card--tall"></view>
+                                    <view class="sk-card sk-card--medium"></view>
+                                    <view class="sk-card sk-card--short"></view>
+                                </view>
+                            </view>
+                            <!-- 网格骨架：2列，等高，共8张 -->
+                            <view v-else class="sk-grid">
+                                <view v-for="i in 8" :key="i" class="sk-card sk-card--grid"></view>
+                            </view>
+                        </template>
                         <!-- 布局渲染层 -->
                         <view class="layout" :style="getLayoutStyle(index)">
                             <template v-for="(item, idx) in tabStates[index]?.images" :key="item.id">
@@ -163,7 +185,7 @@
 
 <script setup>
 import { ref, reactive, watch, computed, onMounted, nextTick } from 'vue';
-import { apiGetClassList, apiGetSearchData, apiGetActions, apiGetRecommend } from '@/api/wallpaper.js';
+import { apiGetClassList, apiGetSearchData, apiGetActions, apiPostRecommend } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -269,13 +291,11 @@ const fetchData = async (index, init = false) => {
         } else if (props.apiType === 'actions') {
             res = await apiGetActions(requestParams);
         } else if (props.apiType === 'recommend') {
-            // 将当前已加载的ID拼起来传给后端做去重
+            // exclude_ids 放 body（POST），避免 URL 超长限制
             if (state.images.length > 0) {
-                requestParams.exclude_ids = state.images.map((img) => img.id).join(',');
+                requestParams.exclude_ids = state.images.map((img) => img.id);
             }
-            // 注意：如果在没有拦截器统一处理 device_id 的情况下，也可以手动在这里添加：
-            // requestParams.device_id = uni.getStorageSync('deviceId') || '';
-            res = await apiGetRecommend(requestParams);
+            res = await apiPostRecommend(requestParams);
         } else {
             if (props.apiType === 'classList' && requestParams.classify_id !== undefined && isNaN(requestParams.classify_id)) {
                 state.isLoading = false;
@@ -705,6 +725,7 @@ onMounted(() => {
     width: 100%;
     background: var(--page-background);
 }
+
 .container {
     .layout {
         .box {
@@ -951,4 +972,63 @@ onMounted(() => {
         }
     }
 }
+
+// ── 首次加载骨架屏 ──
+@keyframes sk-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+%sk-card-base {
+    border-radius: 24rpx;
+    background: linear-gradient(
+        90deg,
+        rgba(148, 163, 184, 0.10) 25%,
+        rgba(148, 163, 184, 0.20) 50%,
+        rgba(148, 163, 184, 0.10) 75%
+    );
+    background-size: 200% 100%;
+    animation: sk-shimmer 1.6s infinite linear;
+}
+
+// 瀑布流骨架
+.sk-waterfall {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sk-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+// 网格骨架
+.sk-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.sk-card {
+    @extend %sk-card-base;
+    width: 100%;
+
+    // 瀑布流卡片高度
+    &--tall   { height: 620rpx; }
+    &--medium { height: 540rpx; }
+    &--short  { height: 480rpx; }
+
+    // 网格卡片高度（等高）
+    &--grid   { height: 540rpx; }
+}
 </style>
+
+

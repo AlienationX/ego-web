@@ -2,7 +2,7 @@
     <view class="glass-tab-layout" :class="[`theme-${theme}`]">
         <view v-if="placeholder" class="glass-tab__placeholder" :style="{ height: `${tabBarSpace}px` }"></view>
 
-        <view class="glass-tab" :style="{ bottom: `${safeBottom}px` }">
+        <view class="glass-tab" :style="{ bottom: `${bottom}px` }">
             <view class="glass-tab__shell">
                 <view
                     v-for="item in items"
@@ -47,6 +47,11 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    // 覆盖底部偏移量（px），默认跟随系统 tabBar 高度，非 tabBar 页传 0
+    bottomOffset: {
+        type: Number,
+        default: -1,
+    },
 });
 const emit = defineEmits(['change']);
 
@@ -81,6 +86,8 @@ const items = computed(() => [
 
 const safeBottom = computed(() => Math.max(getTabBarHeight(), 0));
 const tabBarSpace = computed(() => safeBottom.value + 122);
+// bottomOffset=-1 表示使用默认值，否则使用传入值
+const bottom = computed(() => props.bottomOffset >= 0 ? props.bottomOffset : safeBottom.value);
 
 const handleSwitch = (item) => {
     if (props.currentPath === item.pagePath) return;

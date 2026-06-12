@@ -277,12 +277,12 @@ export const apiGetSimilarWall = (id = '') => {
     });
 };
 
-// 获取推荐壁纸接口
-export const apiGetRecommend = (data = {}) => {
+// 获取推荐壁纸接口（POST，exclude_ids 放 body 避免 URL 超长）
+export const apiPostRecommend = (data = {}) => {
     return request({
         url: '/recommend/',
         data,
-        method: 'GET',
+        method: 'POST',
     });
 };
 

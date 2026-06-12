@@ -515,7 +515,7 @@ const incrementViews = (id) => {
     // 防抖：清除上一次的定时器
     clearTimeout(viewDebounceTimer);
 
-    // 设置新的定时器，滑动停止后 800ms 执行
+    // 设置新的定时器，滑动停止后 N ms 执行
     viewDebounceTimer = setTimeout(async () => {
         requestingViewIds.add(id);
         try {
@@ -528,7 +528,7 @@ const incrementViews = (id) => {
         } finally {
             requestingViewIds.delete(id);
         }
-    }, 800);
+    }, 2000);
 };
 
 // downloads字段值+1
