@@ -499,20 +499,26 @@ const clearAllHistory = () => {
     }
 
     .browse-btn {
+        align-self: center;
         padding: 0 60rpx;
-        height: 88rpx;
-        line-height: 88rpx;
-        background: linear-gradient(135deg, #28b389 0%, #1e8767 100%);
-        color: #ffffff;
-        font-size: 28rpx;
-        font-weight: 600;
-        border-radius: 44rpx;
-        box-shadow: 0 8rpx 20rpx rgba(40, 179, 137, 0.3);
-        border: none;
+        height: 84rpx;
+        line-height: 84rpx;
+        background: var(--text-primary);
+        color: var(--page-background-secondary);
+        font-size: 30rpx;
+        font-weight: 800;
+        border-radius: 999rpx;
+        border: 1rpx solid var(--panel-border);
+        box-shadow: none;
+        letter-spacing: 0.4rpx;
+        transition:
+            transform 0.28s ease,
+            background-color 0.28s ease,
+            color 0.28s ease;
 
         &:active {
             opacity: 0.9;
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
 
         &::after {

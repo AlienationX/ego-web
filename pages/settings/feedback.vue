@@ -153,86 +153,85 @@ const chooseImage = () => {
 };
 
 const selectImage = (count) => {
-    uni.chooseImage({
+    // #ifdef APP
+    // App 端用 chooseMedia（Android 照片选择器，无需 READ_MEDIA_IMAGES 权限）
+    uni.chooseMedia({
         count: count,
-        sizeType: ['compressed'],
+        mediaType: ['image'],
         sourceType: ['camera', 'album'],
         success: (res) => {
-            const tempFilePaths = res.tempFilePaths;
-            imageList.value.push(...tempFilePaths);
+            imageList.value.push(...res.tempFiles.map(f => f.tempFilePath));
         },
         fail: (err) => {
-            console.error('选择图片失败:', err);
-            // #ifdef APP
             const errMsg = err.errMsg || '';
-            if (
-                errMsg.includes('permission') ||
-                errMsg.includes('权限') ||
-                errMsg.includes('denied') ||
-                errMsg.includes('拒绝')
-            ) {
+            if (errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
                 uni.showModal({
                     title: t('feedback.permissionTitle') || '需要访问相册',
-                    content:
-                        t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
                     confirmText: t('feedback.goToSettings') || '去设置',
                     cancelText: t('common.cancel') || '取消',
                     success: (res) => {
                         if (res.confirm) {
-                            // #ifdef APP
                             if (typeof plus !== 'undefined' && plus.runtime) {
                                 plus.runtime.openURL('app-settings:');
                             } else {
                                 uni.openSetting();
                             }
-                            // #endif
                         }
                     },
                 });
             } else {
-                uni.showToast({
-                    title: t('feedback.imageSelectFailed') || '选择图片失败',
-                    icon: 'none',
-                });
+                uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
             }
-            // #endif
+        },
+    });
+    // #endif
 
-            // #ifdef MP
+    // #ifdef MP
+    uni.chooseImage({
+        count: count,
+        sizeType: ['compressed'],
+        sourceType: ['camera', 'album'],
+        success: (res) => {
+            imageList.value.push(...res.tempFilePaths);
+        },
+        fail: (err) => {
             if (err.errMsg && (err.errMsg.includes('permission') || err.errMsg.includes('权限'))) {
                 uni.showModal({
                     title: t('feedback.permissionTitle') || '需要访问相册',
-                    content:
-                        t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
+                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
                     confirmText: t('feedback.goToSettings') || '去设置',
                     cancelText: t('common.cancel') || '取消',
                     success: (res) => {
                         if (res.confirm) {
                             uni.openSetting({
                                 success: (settingRes) => {
-                                    if (settingRes.authSetting['scope.album']) {
-                                        selectImage(count);
-                                    }
+                                    if (settingRes.authSetting['scope.album']) selectImage(count);
                                 },
                             });
                         }
                     },
                 });
             } else {
-                uni.showToast({
-                    title: t('feedback.imageSelectFailed') || '选择图片失败',
-                    icon: 'none',
-                });
+                uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
             }
-            // #endif
-
-            // #ifndef APP || MP
-            uni.showToast({
-                title: t('feedback.imageSelectFailed') || '选择图片失败',
-                icon: 'none',
-            });
-            // #endif
         },
     });
+    // #endif
+
+    // #ifndef APP || MP
+    uni.chooseImage({
+        count: count,
+        sizeType: ['compressed'],
+        sourceType: ['camera', 'album'],
+        success: (res) => {
+            imageList.value.push(...res.tempFilePaths);
+        },
+        fail: () => {
+            uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
+        },
+    });
+    // #endif
 };
 
 const previewImage = (index) => {

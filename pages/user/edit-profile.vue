@@ -5,7 +5,7 @@
             <view class="back-btn" @click="goBack">
                 <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
             </view>
-            <text class="header-title">{{ t('editProfile1.title') }}</text>
+            <text class="header-title">{{ t('editProfile.title') }}</text>
             <view class="header-placeholder"></view>
         </view>
 
@@ -17,51 +17,51 @@
                         <uni-icons type="camera-filled" size="13" color="#fff"></uni-icons>
                     </view>
                 </view>
-                <text class="avatar-tip">{{ t('editProfile1.changePhoto') }}</text>
+                <text class="avatar-tip">{{ t('editProfile.changePhoto') }}</text>
             </view>
 
-            <view class="section-title">{{ t('editProfile1.personalInfo') }}</view>
+            <view class="section-title">{{ t('editProfile.personalInfo') }}</view>
             <view class="card">
                 <view class="field">
-                    <text class="field-label">{{ t('editProfile1.fullName') }}</text>
-                    <input v-model="form.nickname" class="field-input" :placeholder="t('editProfile1.placeholders.fullName')" />
+                    <text class="field-label">{{ t('editProfile.fullName') }}</text>
+                    <input v-model="form.nickname" class="field-input" :placeholder="t('editProfile.placeholders.fullName')" />
                 </view>
                 <view class="field">
-                    <text class="field-label">{{ t('editProfile1.email') }}</text>
+                    <text class="field-label">{{ t('editProfile.email') }}</text>
                     <input
                         v-model="form.email"
                         class="field-input"
-                        :placeholder="t('editProfile1.placeholders.email')"
+                        :placeholder="t('editProfile.placeholders.email')"
                         disabled
                     />
                 </view>
                 <view class="field field-last">
-                    <text class="field-label">{{ t('editProfile1.phone') }}</text>
+                    <text class="field-label">{{ t('editProfile.phone') }}</text>
                     <input
                         v-model="form.phone_number"
                         class="field-input"
-                        :placeholder="t('editProfile1.placeholders.phone')"
+                        :placeholder="t('editProfile.placeholders.phone')"
                     />
                 </view>
             </view>
 
-            <view class="section-title">{{ t('editProfile1.workInfo') }}</view>
+            <view class="section-title">{{ t('editProfile.workInfo') }}</view>
             <view class="card">
                 <view class="field">
-                    <text class="field-label">{{ t('editProfile1.region') }}</text>
-                    <input v-model="form.region" class="field-input" :placeholder="t('editProfile1.placeholders.region')" />
+                    <text class="field-label">{{ t('editProfile.region') }}</text>
+                    <input v-model="form.region" class="field-input" :placeholder="t('editProfile.placeholders.region')" />
                 </view>
                 <view class="field field-last">
-                    <text class="field-label">{{ t('editProfile1.description') }}</text>
+                    <text class="field-label">{{ t('editProfile.description') }}</text>
                     <input
                         v-model="form.description"
                         class="field-input"
-                        :placeholder="t('editProfile1.placeholders.description')"
+                        :placeholder="t('editProfile.placeholders.description')"
                     />
                     <!-- <textarea
                         v-model="form.description"
                         class="field-textarea"
-                        :placeholder="t('editProfile1.placeholders.description')"
+                        :placeholder="t('editProfile.placeholders.description')"
                         rows="2"
                     /> -->
                 </view>
@@ -69,7 +69,7 @@
 
             <button class="save-btn" @click="handleSave">
                 <uni-icons v-if="saved" type="checkmarkempty" size="16" color="#fff"></uni-icons>
-                <text>{{ saved ? t('editProfile1.profileSaved') : t('editProfile1.saveChanges') }}</text>
+                <text>{{ saved ? t('editProfile.profileSaved') : t('editProfile.saveChanges') }}</text>
             </button>
         </view>
     </view>
@@ -101,6 +101,21 @@ const form = reactive({
 });
 
 const chooseAvatar = () => {
+    // #ifdef APP
+    // App 端用 chooseMedia（Android 照片选择器，无需 READ_MEDIA_IMAGES 权限）
+    uni.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album', 'camera'],
+        success: (res) => {
+            const file = res.tempFiles?.[0]?.tempFilePath;
+            if (!file) return;
+            form.avatar = file;
+        },
+    });
+    // #endif
+
+    // #ifndef APP
     uni.chooseImage({
         count: 1,
         sizeType: ['compressed'],
@@ -111,11 +126,12 @@ const chooseAvatar = () => {
             form.avatar = file;
         },
     });
+    // #endif
 };
 
 const handleSave = async () => {
     if (!form.nickname.trim()) {
-        uni.showToast({ title: t('editProfile1.enterName'), icon: 'none' });
+        uni.showToast({ title: t('editProfile.enterName'), icon: 'none' });
         return;
     }
 
@@ -162,7 +178,7 @@ const handleSave = async () => {
         }, 1000);
     } catch (error) {
         uni.showToast({
-            title: t('editProfile1.saveFailed'),
+            title: t('editProfile.saveFailed'),
             icon: 'none',
         });
     }

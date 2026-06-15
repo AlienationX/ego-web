@@ -4,7 +4,7 @@
         <view class="custom-header" :style="{ paddingTop: statusBarHeight + 'px' }">
             <view class="header-content">
                 <view class="back-btn" @click="goBack">
-                    <mdi-icon path="/static/icons/arrow-left.svg" size="24px" :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
                 </view>
                 <view class="header-title-box">
                     <text class="header-title">{{ $t('user.profile.myDownload') }}</text>
@@ -74,8 +74,8 @@ const goBack = () => {
         }
 
         .back-btn {
-            width: 84rpx;
-            height: 84rpx;
+            width: 64rpx;
+            height: 64rpx;
             border-radius: 28rpx;
             background: var(--panel-background, #ffffff);
             display: flex;

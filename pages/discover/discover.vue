@@ -466,6 +466,20 @@ const pickLocalImage = () => {
         return;
     }
 
+    // #ifdef APP
+    // App 端用 chooseMedia（Android 照片选择器，无需 READ_MEDIA_IMAGES 权限）
+    uni.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['album'],
+        success: async (res) => {
+            localImage.value = res.tempFiles?.[0]?.tempFilePath || '';
+            await onAnalyze();
+        },
+    });
+    // #endif
+
+    // #ifndef APP
     uni.chooseImage({
         count: 1,
         sizeType: ['compressed'],
@@ -475,6 +489,7 @@ const pickLocalImage = () => {
             await onAnalyze();
         },
     });
+    // #endif
 };
 
 const onAnalyze = async () => {

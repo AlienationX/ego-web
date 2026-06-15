@@ -771,7 +771,7 @@
             "loggedOut": "Logged out"
         }
     },
-    "editProfile1": {
+    "editProfile": {
         "title": "Edit Profile",
         "save": "Save",
         "saved": "Saved",

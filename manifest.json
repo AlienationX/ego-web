@@ -1,9 +1,9 @@
 {
-    "name" : "本我壁纸",
+    "name" : "Ego Wallpapers",
     "appid" : "__UNI__098B24F",
-    "description" : "探索壁纸，亦探索自我。",
-    "versionName" : "1.3.5",
-    "versionCode" : 135,
+    "description" : "Explore wallpapers, and explore yourself.",
+    "versionName" : "1.3.4",
+    "versionCode" : 134,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -20,8 +20,7 @@
         },
         /* 模块配置 */
         "modules" : {
-            "OAuth" : {},
-            "Camera" : {}
+            "OAuth" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
