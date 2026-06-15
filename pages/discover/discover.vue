@@ -618,7 +618,9 @@ onLoad(() => {
 });
 
 onShow(() => {
-    getFavoriteList();
+    if (userStore.isLoggedIn) {
+        getFavoriteList();
+    }
 });
 
 onUnload(() => {
