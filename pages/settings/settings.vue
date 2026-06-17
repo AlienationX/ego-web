@@ -898,7 +898,9 @@ function handleClick(item) {
 }
 
 function goBack() {
-    uni.reLaunch({ url: '/pages/user/user' });
+    uni.navigateBack({
+        fail: () => uni.redirectTo({ url: '/pages/user/user' }),
+    });
 }
 
 function syncLanguagePreference() {

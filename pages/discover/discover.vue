@@ -35,7 +35,9 @@
                             <view class="msg-label">{{ msg.name }}</view>
                         </view>
                         <view class="msg-content full-width">
-                            <rich-text class="msg-text markdown" :nodes="msg.html"></rich-text>
+                            <view class="msg-text markdown">
+                                <mp-html :content="msg.html" :tag-style="markdownTagStyle"></mp-html>
+                            </view>
                         </view>
                     </template>
                     <template v-else>
@@ -161,6 +163,22 @@ let msgSeed = 1;
 let streamFlushTimer = null;
 const streamBufferMap = new Map();
 
+const markdownTagStyle = {
+    h1: 'font-weight: 700; font-size: 44rpx; margin: 56rpx 0 28rpx; line-height: 1.4; color: var(--text-primary);',
+    h2: 'font-weight: 700; font-size: 40rpx; margin: 48rpx 0 24rpx; line-height: 1.4; color: var(--text-primary);',
+    h3: 'font-weight: 700; font-size: 36rpx; margin: 40rpx 0 20rpx; line-height: 1.4; color: var(--text-primary);',
+    h4: 'font-weight: 700; font-size: 34rpx; margin: 32rpx 0 16rpx; line-height: 1.4; color: var(--text-primary);',
+    h5: 'font-weight: 700; font-size: 32rpx; margin: 24rpx 0 12rpx; line-height: 1.4; color: var(--text-primary);',
+    h6: 'font-weight: 700; font-size: 30rpx; margin: 16rpx 0 8rpx; line-height: 1.4; color: var(--text-primary);',
+    p: 'margin: 0 0 16rpx; line-height: 1.6;',
+    ul: 'padding-left: 36rpx; margin: 0 0 16rpx;',
+    ol: 'padding-left: 36rpx; margin: 0 0 16rpx;',
+    li: 'margin-bottom: 8rpx; line-height: 1.6;',
+    code: 'background: rgba(120, 120, 120, 0.1); border-radius: 8rpx; padding: 4rpx 8rpx; font-size: 26rpx; font-family: monospace;',
+    pre: 'background: #1e1e1e; color: #d4d4d4; padding: 20rpx; border-radius: 12rpx; overflow-x: auto; margin: 16rpx 0;',
+    strong: 'font-weight: 700;'
+};
+
 const selectedItem = computed(() => favoriteList.value.find((item) => item.id === selectedId.value));
 const userName = computed(() => userStore.userinfo?.profile?.nickname || 'User');
 const userAvatar = computed(() => userStore.userinfo?.profile?.avatar || '/static/images/pics/default_avatar.svg');
@@ -188,6 +206,83 @@ const stopStreamFlush = () => {
     }
 };
 
+const escapeHtml = (str = '') =>
+    String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+const markdownToHtml = (md = '', isStreaming = false) => {
+    let html = escapeHtml(String(md));
+
+    // 对块级元素前后追加双换行，确保后续拆分段落时能正确断开并包裹 <p>
+    html = html.replace(/```([\s\S]*?)```/g, '\n\n<pre><code>$1</code></pre>\n\n');
+    html = html.replace(/^######\s*(.*)$/gm, '\n\n<h6>$1</h6>\n\n');
+    html = html.replace(/^#####\s*(.*)$/gm, '\n\n<h5>$1</h5>\n\n');
+    html = html.replace(/^####\s*(.*)$/gm, '\n\n<h4>$1</h4>\n\n');
+    html = html.replace(/^###\s*(.*)$/gm, '\n\n<h3>$1</h3>\n\n');
+    html = html.replace(/^##\s*(.*)$/gm, '\n\n<h2>$1</h2>\n\n');
+    html = html.replace(/^#\s*(.*)$/gm, '\n\n<h1>$1</h1>\n\n');
+    
+    // 内联元素恢复使用标准标签，mp-html 在包裹于 p 内时会合并为单个 rich-text 避免换行
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    
+    // 无序列表
+    html = html.replace(/(?:^|\n)((?:[-*•]\s+.+(?:\n|$))+)/g, (m, p1) => {
+        const items = p1
+            .trim()
+            .split('\n')
+            .map((line) => `<li>${line.replace(/^[-*•]\s+/, '')}</li>`)
+            .join('');
+        return `\n\n<ul>${items}</ul>\n\n`;
+    });
+
+    // 有序列表
+    html = html.replace(/(?:^|\n)((?:\d+\.\s+.+(?:\n|$))+)/g, (m, p1) => {
+        const items = p1
+            .trim()
+            .split('\n')
+            .map((line) => `<li>${line.replace(/^\d+\.\s+/, '')}</li>`)
+            .join('');
+        return `\n\n<ol>${items}</ol>\n\n`;
+    });
+
+    // 段落处理
+    html = html
+        .split(/\n{2,}/)
+        .map(block => {
+            block = block.trim();
+            if (!block) return '';
+            // 如果已经是块级标签，不作处理
+            if (/^<(h[1-6]|ul|ol|pre|blockquote)/.test(block)) {
+                return block;
+            }
+            // 普通文本包裹 p，内部单换行转 br
+            return `<p>${block.replace(/\n/g, '<br/>')}</p>`;
+        })
+        .join('\n');
+    
+    if (isStreaming) {
+        // 使用省略号代替带 class 的 span，防止 mp-html 停止合并 rich-text 节点
+        const cursor = '......';
+        if (html.endsWith('</p>')) {
+            html = html.slice(0, -4) + cursor + '</p>';
+        } else if (html.endsWith('</li></ul>')) {
+            html = html.slice(0, -10) + cursor + '</li></ul>';
+        } else if (html.endsWith('</li></ol>')) {
+            html = html.slice(0, -10) + cursor + '</li></ol>';
+        } else {
+            html += cursor;
+        }
+    }
+    return html;
+};
+
 const updateAssistantHtml = (id, force = false) => {
     const idx = chatMessages.value.findIndex((m) => m.id === id);
     if (idx === -1) return;
@@ -195,6 +290,7 @@ const updateAssistantHtml = (id, force = false) => {
     const now = Date.now();
     const lastMarkdownAt = target.lastMarkdownAt || 0;
     if (!force && now - lastMarkdownAt < 120) return;
+    
     chatMessages.value[idx] = {
         ...target,
         html: markdownToHtml(String(target.text || ''), target.isStreaming),
@@ -357,67 +453,6 @@ const startTypingToMessage = (targetId, text) => {
     }, 80);
 };
 
-const escapeHtml = (str = '') =>
-    String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-
-const markdownToHtml = (md = '', isStreaming = false) => {
-    let html = escapeHtml(String(md));
-
-    html = html.replace(/```([\s\S]*?)```/g, (_m, code) => `<pre><code>${code}</code></pre>`);
-    html = html.replace(/^######\s*(.*)$/gm, '<h6>$1</h6>');
-    html = html.replace(/^#####\s*(.*)$/gm, '<h5>$1</h5>');
-    html = html.replace(/^####\s*(.*)$/gm, '<h4>$1</h4>');
-    html = html.replace(/^###\s*(.*)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^##\s*(.*)$/gm, '<h2>$1</h2>');
-    html = html.replace(/^#\s*(.*)$/gm, '<h1>$1</h1>');
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-    
-    // Unordered Lists
-    html = html.replace(/(?:^|\n)((?:[-*]\s+.+(?:\n|$))+)/g, (m, p1) => {
-        const items = p1
-            .trim()
-            .split('\n')
-            .map((line) => `<li>${line.replace(/^[-*]\s+/, '')}</li>`)
-            .join('');
-        return `\n<ul>${items}</ul>\n`;
-    });
-
-    // Ordered Lists
-    html = html.replace(/(?:^|\n)((?:\d+\.\s+.+(?:\n|$))+)/g, (m, p1) => {
-        const items = p1
-            .trim()
-            .split('\n')
-            .map((line) => `<li>${line.replace(/^\d+\.\s+/, '')}</li>`)
-            .join('');
-        return `\n<ol>${items}</ol>\n`;
-    });
-
-    // Paragraphs
-    html = html
-        .split(/\n{2,}/)
-        .map(block => {
-            block = block.trim();
-            if (!block) return '';
-            if (/^<(h[1-6]|ul|ol|pre|blockquote)/.test(block)) {
-                return block;
-            }
-            return `<p>${block.replace(/\n/g, '<br/>')}</p>`;
-        })
-        .join('\n');
-    
-    if (isStreaming) {
-        html += '<span class="typing-ellipsis">...</span>';
-    }
-    return html;
-};
 
 const getFavoriteList = async (isAppend = false) => {
     if (!userStore.isLoggedIn) {
@@ -1075,31 +1110,18 @@ onUnload(() => {
 .markdown :deep(h5),
 .markdown :deep(h6) {
     font-weight: 700;
-    margin: 12rpx 0 6rpx;
     line-height: 1.4;
     color: var(--text-primary);
 }
 
-.markdown :deep(h1) { font-size: 78rpx; }
-.markdown :deep(h2) { font-size: 70rpx; }
-.markdown :deep(h3) { font-size: 62rpx; }
-.markdown :deep(h4) { font-size: 54rpx; }
-.markdown :deep(h5) { font-size: 46rpx; }
-.markdown :deep(h6) { font-size: 38rpx; }
+.markdown :deep(h1) { font-size: 44rpx; margin: 56rpx 0 28rpx; }
+.markdown :deep(h2) { font-size: 40rpx; margin: 48rpx 0 24rpx; }
+.markdown :deep(h3) { font-size: 36rpx; margin: 40rpx 0 20rpx; }
+.markdown :deep(h4) { font-size: 34rpx; margin: 32rpx 0 16rpx; }
+.markdown :deep(h5) { font-size: 32rpx; margin: 24rpx 0 12rpx; }
+.markdown :deep(h6) { font-size: 30rpx; margin: 16rpx 0 8rpx; }
 
-.markdown :deep(.typing-ellipsis) {
-    display: inline-block;
-    animation: ellipsis-blink 1.4s infinite both;
-    margin-left: 4rpx;
-    font-weight: bold;
-    color: var(--accent-primary);
-}
 
-@keyframes ellipsis-blink {
-    0% { opacity: 0.2; }
-    20% { opacity: 1; }
-    100% { opacity: 0.2; }
-}
 
 .markdown :deep(p) {
     margin: 0 0 16rpx;

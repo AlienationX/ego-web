@@ -263,7 +263,7 @@ const removeImage = (index) => {
 
 const goBack = () => {
     uni.navigateBack({
-        fail: () => uni.reLaunch({ url: '/pages/settings/settings' }),
+        fail: () => uni.redirectTo({ url: '/pages/settings/settings' }),
     });
 };
 
