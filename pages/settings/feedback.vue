@@ -153,18 +153,20 @@ const chooseImage = () => {
 };
 
 const selectImage = (count) => {
-    // #ifdef APP
-    // App 端用 chooseMedia（Android 照片选择器，无需 READ_MEDIA_IMAGES 权限）
-    uni.chooseMedia({
+    // 由于受google play 照片和视频权限政策的影响，使用uni.chooseImage选择图片会调用READ_MEDIA_IMAGES/READ_MEDIA_VIDEO权限，该权限需在Google Play Console中申请
+
+    // #ifdef APP-ANDROID
+    uni.chooseSystemMedia({
         count: count,
         mediaType: ['image'],
-        sourceType: ['camera', 'album'],
         success: (res) => {
-            imageList.value.push(...res.tempFiles.map(f => f.tempFilePath));
+            imageList.value.push(...(res.filePaths || []));
         },
         fail: (err) => {
-            const errMsg = err.errMsg || '';
-            if (errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
+            if (err?.errCode === 2101001) return;
+
+            const errMsg = err?.errMsg || '';
+            if (err?.errCode === 2101005 || errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
                 uni.showModal({
                     title: t('feedback.permissionTitle') || '需要访问相册',
                     content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
@@ -183,6 +185,20 @@ const selectImage = (count) => {
             } else {
                 uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
             }
+        },
+    });
+    // #endif
+
+    // #ifdef APP-IOS || APP-HARMONY
+    uni.chooseImage({
+        count: count,
+        sizeType: ['compressed'],
+        sourceType: ['camera', 'album'],
+        success: (res) => {
+            imageList.value.push(...res.tempFilePaths);
+        },
+        fail: () => {
+            uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
         },
     });
     // #endif
@@ -219,7 +235,7 @@ const selectImage = (count) => {
     });
     // #endif
 
-    // #ifndef APP || MP
+    // #ifdef WEB
     uni.chooseImage({
         count: count,
         sizeType: ['compressed'],

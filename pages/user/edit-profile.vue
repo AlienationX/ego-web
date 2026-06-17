@@ -45,9 +45,9 @@
                 </view>
             </view>
 
-            <view class="section-title">{{ t('editProfile.workInfo') }}</view>
+            <view class="section-title">{{ t('editProfile.details') }}</view>
             <view class="card">
-                <view class="field">
+                <view class="field" v-if="settingsStore.isAdmin">
                     <text class="field-label">{{ t('editProfile.region') }}</text>
                     <input v-model="form.region" class="field-input" :placeholder="t('editProfile.placeholders.region')" />
                 </view>
@@ -101,21 +101,19 @@ const form = reactive({
 });
 
 const chooseAvatar = () => {
-    // #ifdef APP
-    // App 端用 chooseMedia（Android 照片选择器，无需 READ_MEDIA_IMAGES 权限）
-    uni.chooseMedia({
+    // #ifdef APP-ANDROID
+    uni.chooseSystemMedia({
         count: 1,
         mediaType: ['image'],
-        sourceType: ['album', 'camera'],
         success: (res) => {
-            const file = res.tempFiles?.[0]?.tempFilePath;
+            const file = res.filePaths?.[0];
             if (!file) return;
             form.avatar = file;
         },
     });
     // #endif
 
-    // #ifndef APP
+    // #ifndef APP-ANDROID
     uni.chooseImage({
         count: 1,
         sizeType: ['compressed'],
@@ -138,31 +136,34 @@ const handleSave = async () => {
     try {
         const payload = {
             nickname: form.nickname.trim(),
+            phone_number: form.phone_number.trim(),
             region: form.region.trim(),
             description: form.description.trim(),
         };
 
+        let res;
         // 头像变更时优先走上传接口
         if (String(form.avatar || '').startsWith('http') || String(form.avatar || '').startsWith('/static/')) {
-            await apiPostProfile(payload);
+            res = await apiPostProfile(payload);
         } else {
-            await apiUploadProfile({
+            res = await apiUploadProfile({
                 ...payload,
                 avatar: form.avatar,
             });
         }
 
+        // 用后端返回的最新 profile 数据更新 store，避免本地临时路径污染
+        const updatedProfile = res?.data || {};
         userStore.userinfo = {
             ...userStore.userinfo,
             profile: {
                 ...userStore.userinfo.profile,
-                avatar: form.avatar,
-                nickname: form.nickname,
-                phone_number: form.phone_number,
-                region: form.region,
-                description: form.description,
+                ...updatedProfile,
             },
         };
+
+        // 重新拉取完整用户信息，刷新设置页头像等数据
+        await userStore.setUserInfo();
 
         // 显示成功提示
         uni.showToast({

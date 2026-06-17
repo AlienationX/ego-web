@@ -234,7 +234,6 @@ export const useAdRewardedVideo = () => {
                 });
             }
             clearPending();
-            preloadRewarded();
             tryDestroyIfNeeded();
         });
         ad.onError(() => {
@@ -246,7 +245,6 @@ export const useAdRewardedVideo = () => {
             });
             safeDownload(pendingPicurl);
             clearPending();
-            preloadRewarded();
             tryDestroyIfNeeded();
         });
 

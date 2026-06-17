@@ -2,8 +2,8 @@
     "name" : "Ego Wallpapers",
     "appid" : "__UNI__098B24F",
     "description" : "Explore wallpapers, and explore yourself.",
-    "versionName" : "1.3.4",
-    "versionCode" : 134,
+    "versionName" : "1.3.5",
+    "versionCode" : 135,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -20,7 +20,8 @@
         },
         /* 模块配置 */
         "modules" : {
-            "OAuth" : {}
+            "OAuth" : {},
+            "Camera" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
@@ -47,7 +48,10 @@
                 "abiFilters" : [ "arm64-v8a", "x86" ],
                 "minSdkVersion" : 24,
                 "targetSdkVersion" : 35,
-                "excludePermissions" : []
+                "excludePermissions" : [
+                    "<uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\"/>",
+                    "<uses-permission android:name=\"android.permission.READ_MEDIA_VIDEO\"/>"
+                ]
             },
             /* ios打包配置 */
             "ios" : {
@@ -161,7 +165,7 @@
     },
     "app-harmony" : {
         "distribute" : {
-            "bundleName" : "com.ego.app.wallpaper",
+            "bundleName" : "com.ego.app.hmos.wallpaper",
             "deviceTypes" : [ "phone", "tablet" ],
             "splashScreens" : {
                 "startWindowIcon" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/launch.png"

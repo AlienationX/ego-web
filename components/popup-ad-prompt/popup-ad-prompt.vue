@@ -20,7 +20,7 @@
 import { ref, computed } from 'vue';
 import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { useAdRewardedVideo } from '@/hooks/useAd.js';
-import { apiPostIncrementDownloads } from '@/api/wallpaper.js';
+import { apiPostIncrementDownloads, apiPostActions } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const props = defineProps({
@@ -34,6 +34,11 @@ const isDark = computed(() => settingsStore.isDark);
 // views字段值+1
 const incrementDownloads = async (id) => {
     await apiPostIncrementDownloads(id);
+    await apiPostActions({
+        wall_id: id,
+        action_key: 'download',
+        action_value: 1,
+    });
 };
 
 const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();

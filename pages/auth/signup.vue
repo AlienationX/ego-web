@@ -12,26 +12,6 @@
                 <view class="sub-title">{{ t('login.signUpSubtitle') }}</view>
             </view>
 
-            <!-- 社交登录按钮 -->
-            <view class="social-section">
-                <view class="social-buttons">
-                    <view class="social-btn" @click="handleGoogleLogin">
-                        <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
-                        <text class="social-text">{{ t('login.google') }}</text>
-                    </view>
-                    <view class="social-btn" @click="handleFacebookLogin">
-                        <image src="/static/icons/brands/facebook.svg" mode="aspectFit" class="social-icon"></image>
-                        <text class="social-text">{{ t('login.facebook') }}</text>
-                    </view>
-                </view>
-            </view>
-
-            <!-- 分割线 -->
-            <view class="divider">
-                <view class="divider-line"></view>
-                <text class="divider-text">{{ t('login.or') }}</text>
-                <view class="divider-line"></view>
-            </view>
 
             <!-- 注册表单 -->
             <view class="form-section">
@@ -174,21 +154,7 @@ const openPrivacy = () => {
     });
 };
 
-// Facebook登录
-const handleFacebookLogin = () => {
-    uni.showToast({
-        title: t('login.facebookLoginTip'),
-        icon: 'none',
-    });
-};
 
-// Google登录
-const handleGoogleLogin = () => {
-    uni.showToast({
-        title: t('login.googleLoginTip'),
-        icon: 'none',
-    });
-};
 
 // 表单验证
 const validateForm = () => {
@@ -354,6 +320,7 @@ const handleSignup = async () => {
 }
 
 .title-section {
+    margin-bottom: 60rpx;
     text-align: center;
 
     .main-title {
@@ -374,60 +341,7 @@ const handleSignup = async () => {
     }
 }
 
-.social-section {
-    margin-top: 60rpx;
 
-    .social-buttons {
-        display: flex;
-        gap: 24rpx;
-    }
-
-    .social-btn {
-        flex: 1;
-        height: 112rpx;
-        background: var(--page-background-secondary);
-        border-radius: 28rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 16rpx;
-        transition: all 0.3s;
-
-        &:active {
-            opacity: 0.8;
-            transform: scale(0.98);
-        }
-
-        .social-icon {
-            width: 48rpx;
-            height: 48rpx;
-        }
-
-        .social-text {
-            font-size: 32rpx;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-    }
-}
-
-.divider {
-    display: flex;
-    align-items: center;
-    margin: 44rpx 0;
-
-    .divider-line {
-        flex: 1;
-        height: 1rpx;
-        background: var(--panel-border);
-    }
-
-    .divider-text {
-        margin: 0 24rpx;
-        font-size: 28rpx;
-        color: var(--text-primary);
-    }
-}
 
 .form-section {
     display: flex;

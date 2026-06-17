@@ -7,7 +7,7 @@
         <!-- 内容区域 -->
         <view class="content">
             <!-- 标题区域 -->
-            <view class="title-section">
+            <view class="title-section" @click="handleTitleTap">
                 <view class="main-title">{{ t('login.signInTitle') }}</view>
                 <view class="sub-title">{{ t('login.signInSubtitle') }}</view>
             </view>
@@ -17,10 +17,10 @@
             <view v-if="!showEmailForm" class="weixin-quick-section">
                 <button class="weixin-quick-btn" @click="handleWechatLogin">
                     <image src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
-                    <text>微信授权一键登录</text>
+                    <text>{{ t('login.wechatQuickLogin') }}</text>
                 </button>
                 <view class="weixin-agreement-hint">
-                    点击登录即代表您已同意下方《用户服务协议》与《隐私政策》
+                    {{ t('login.wechatAgreementHint') }}
                 </view>
 
                 <!-- 协议复选框 -->
@@ -43,34 +43,13 @@
                 </view>
                 
                 <view class="toggle-other-methods" @click="showEmailForm = true">
-                    <text>使用邮箱/密码登录</text>
+                    <text>{{ t('login.useEmailLogin') }}</text>
                     <uni-icons type="arrowdown" size="12" color="#3461fd"></uni-icons>
                 </view>
             </view>
             <!-- #endif -->
 
             <view v-show="showEmailForm" class="email-form-area">
-                <!-- 社交登录按钮 -->
-                <view class="social-section">
-                    <view class="social-buttons">
-                        <view class="social-btn" @click="handleGoogleLogin">
-                            <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
-                            <text class="social-text">{{ t('login.google') }}</text>
-                        </view>
-                        <view class="social-btn" @click="handleWechatLogin">
-                            <image src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
-                            <text class="social-text">{{ t('login.wechat') }}</text>
-                        </view>
-                    </view>
-                </view>
-
-                <!-- 分割线 -->
-                <view class="divider">
-                    <view class="divider-line"></view>
-                    <text class="divider-text">{{ t('login.or') }}</text>
-                    <view class="divider-line"></view>
-                </view>
-
                 <!-- 登录表单 -->
                 <view class="form-section">
                     <view class="form-item">
@@ -141,6 +120,35 @@
                     <view class="signup-link">
                         <text class="normal-text">{{ t('login.noAccount') }}</text>
                         <text class="link-text" @click="goToSignup">{{ t('login.register') }}</text>
+                    </view>
+                </view>
+
+                <!-- 分割线 -->
+                <view class="divider" v-if="showDevFeatures || isWeixin">
+                    <view class="divider-line"></view>
+                    <text class="divider-text">{{ t('login.or') }}</text>
+                    <view class="divider-line"></view>
+                </view>
+
+                <!-- 社交登录按钮 -->
+                <view class="social-section" v-if="showDevFeatures || isWeixin">
+                    <view class="social-buttons">
+                        <view class="social-btn" @click="handleWechatLogin" v-if="showDevFeatures || isWeixin">
+                            <image src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
+                            <text class="social-text">{{ t('login.wechat') }}</text>
+                        </view>
+                        <view class="social-btn" @click="handleGoogleLogin" v-if="showDevFeatures">
+                            <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
+                            <text class="social-text">{{ t('login.google') }}</text>
+                        </view>
+                        <view class="social-btn" @click="handleAppleLogin" v-if="showDevFeatures">
+                            <image src="/static/icons/brands/apple.svg" mode="aspectFit" class="social-icon" :class="{ 'invert-icon': isDark }"></image>
+                            <text class="social-text">{{ t('login.apple') }}</text>
+                        </view>
+                        <view class="social-btn" @click="handleFacebookLogin" v-if="showDevFeatures">
+                            <image src="/static/icons/brands/facebook.svg" mode="aspectFit" class="social-icon"></image>
+                            <text class="social-text">{{ t('login.facebook') }}</text>
+                        </view>
                     </view>
                 </view>
             </view>
@@ -225,9 +233,34 @@ const isAgreed = ref(false);
 
 // 控制邮箱密码表单显隐：微信小程序环境默认不展开邮箱表单以优先展示微信一键登录，其他端默认直接显示
 const showEmailForm = ref(true);
+const isWeixin = ref(false);
 // #ifdef MP-WEIXIN
 showEmailForm.value = false;
+isWeixin.value = true;
 // #endif
+
+// 开发者选项（用于隐藏审核期间的未完成功能）
+const tapCount = ref(0);
+const lastTapTime = ref(0);
+const showDevFeatures = ref(false);
+
+const handleTitleTap = () => {
+    const now = Date.now();
+    if (now - lastTapTime.value > 1000) {
+        tapCount.value = 1;
+    } else {
+        tapCount.value++;
+    }
+    lastTapTime.value = now;
+
+    if (tapCount.value >= 5 && !showDevFeatures.value) {
+        showDevFeatures.value = true;
+        uni.showToast({
+            title: '开发者选项已开启',
+            icon: 'none',
+        });
+    }
+};
 
 onMounted(() => {
     // 1. 如果已登录，直接跳转到用户页
@@ -356,6 +389,22 @@ const handleGoogleLogin = () => {
     });
 };
 
+// Apple登录
+const handleAppleLogin = () => {
+    uni.showToast({
+        title: t('login.appleLoginTip'),
+        icon: 'none',
+    });
+};
+
+// Facebook登录
+const handleFacebookLogin = () => {
+    uni.showToast({
+        title: t('login.facebookLoginTip'),
+        icon: 'none',
+    });
+};
+
 // 表单验证
 const validateForm = () => {
     if (!form.email || form.email.trim().length < 5) {
@@ -462,18 +511,18 @@ const goBack = () => {
 
     .weixin-quick-btn {
         width: 100%;
-        height: 108rpx;
+        height: 96rpx;
         background: var(--page-background-secondary);
         border: 2rpx solid var(--panel-border);
         color: var(--text-primary);
-        font-size: 32rpx;
+        font-size: 30rpx;
         font-weight: 600;
-        border-radius: 28rpx;
+        border-radius: 999rpx;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 18rpx;
-        box-shadow: 0 8rpx 20rpx var(--shadow-color);
+        gap: 16rpx;
+        box-shadow: 0 6rpx 16rpx var(--shadow-color);
         transition: all 0.28s ease;
 
         &::after {
@@ -481,13 +530,14 @@ const goBack = () => {
         }
 
         &:active {
-            transform: scale(0.98);
-            opacity: 0.9;
+            background: var(--page-background-secondary);
+            opacity: 0.8;
+            transform: scale(0.97);
         }
 
         .social-icon {
-            width: 48rpx;
-            height: 48rpx;
+            width: 44rpx;
+            height: 44rpx;
         }
     }
 
@@ -584,38 +634,49 @@ const goBack = () => {
 }
 
 .social-section {
-    margin-bottom: 44rpx;
+    // padding-top: 44rpx;
+    padding-bottom: 44rpx;
 
     .social-buttons {
         display: flex;
+        flex-direction: column;
         gap: 24rpx;
     }
 
     .social-btn {
-        flex: 1;
-        height: 112rpx;
+        width: 100%;
+        height: 96rpx;
         background: var(--page-background-secondary);
-        border-radius: 28rpx;
+        color: var(--text-primary);
+        border-radius: 999rpx;
+        border: 2rpx solid var(--panel-border);
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 16rpx;
-        transition: all 0.3s;
+        letter-spacing: 0.4rpx;
+        box-shadow: 0 6rpx 16rpx var(--shadow-color);
+        transition: all 0.28s ease;
 
         &:active {
+            background: var(--page-background-secondary);
             opacity: 0.8;
-            transform: scale(0.98);
+            transform: scale(0.97);
+        }
+
+        &::after {
+            border: none;
         }
 
         .social-icon {
-            width: 48rpx;
-            height: 48rpx;
+            width: 44rpx;
+            height: 44rpx;
         }
 
         .social-text {
-            font-size: 32rpx;
-            font-weight: 500;
-            color: var(--text-secondary);
+            font-size: 30rpx;
+            font-weight: 600;
+            color: inherit;
         }
     }
 }
@@ -837,5 +898,8 @@ const goBack = () => {
             color: #3461fd;
         }
     }
+}
+.invert-icon {
+    filter: invert(1);
 }
 </style>

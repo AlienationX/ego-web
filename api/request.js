@@ -239,6 +239,24 @@ export const streamRequest = (config = {}) => {
             }
         };
 
+        const decodeChunkData = (data) => {
+            if (!data) return '';
+            if (typeof data === 'string') return data;
+            try {
+                if (typeof TextDecoder !== 'undefined') {
+                    return new TextDecoder('utf-8').decode(data);
+                }
+                const buffer = new Uint8Array(data);
+                let str = '';
+                for (let i = 0; i < buffer.length; i++) {
+                    str += String.fromCharCode(buffer[i]);
+                }
+                return decodeURIComponent(escape(str));
+            } catch (e) {
+                return String(data);
+            }
+        };
+
         const safeResolve = (payload) => {
             if (settled) return;
             settled = true;
@@ -459,37 +477,6 @@ export const streamRequest = (config = {}) => {
             });
         } else {
             log('app.onChunkReceived.missing', true);
-        }
-        // #endif
-
-        // #ifdef MP-WEIXIN
-        log('mp.request', { url: requestUrl, method: requestMethod, enableChunked: true });
-        const mpTask = wx.request({
-            url: requestUrl,
-            data: requestData,
-            method: requestMethod,
-            timeout: config.timeout || 180000,
-            enableChunked: true,
-            responseType: 'text',
-            header: requestHeader,
-            success: (res) => {
-                if (res.statusCode < 200 || res.statusCode >= 300) {
-                    safeReject(res.data || res);
-                    return;
-                }
-                log('mp.success', { statusCode: res.statusCode, dataLength: String(res.data || '').length });
-                finalize(res);
-            },
-            fail: (err) => safeReject(err),
-        });
-        if (mpTask && typeof mpTask.onChunkReceived === 'function') {
-            log('mp.onChunkReceived.ready', true);
-            mpTask.onChunkReceived((res) => {
-                log('mp.onChunkReceived', { size: String(res?.data || '').length });
-                parseChunk(decodeChunkData(res?.data));
-            });
-        } else {
-            log('mp.onChunkReceived.missing', true);
         }
         // #endif
     });

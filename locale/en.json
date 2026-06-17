@@ -382,6 +382,9 @@
         }
     },
     "login": {
+        "wechatQuickLogin": "WeChat One-Click Login",
+        "wechatAgreementHint": "By clicking login, you agree to the Terms of Service and Privacy Policy below.",
+        "useEmailLogin": "Login with Email/Password",
         "title": "Login",
         "login": "Login",
         "register": "Register",
@@ -777,7 +780,7 @@
         "saved": "Saved",
         "changePhoto": "Change Photo",
         "personalInfo": "Personal Information",
-        "workInfo": "Work Details",
+        "details": "Details",
         "fullName": "Full Name",
         "email": "Email Address",
         "phone": "Phone Number",

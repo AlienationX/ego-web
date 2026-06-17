@@ -67,7 +67,7 @@
                 </view>
             </view>
 
-            <view v-for="section in sections" :key="section.key" class="section">
+            <view v-for="section in sections" v-show="section.items.length > 0" :key="section.key" class="section">
                 <view class="section-title">{{ section.title }}</view>
                 <view class="card">
                     <view
@@ -569,7 +569,7 @@ const profileName = computed(
     () => userStore.userinfo?.profile?.nickname || userStore.userinfo?.username || t('settings.defaultName'),
 );
 const profileEmail = computed(() => userStore.userinfo?.email || 'sarah.example@company.com');
-const profilePhone = computed(() => userStore.userinfo?.profile?.phone || '+1 (555) 248-0391');
+const profilePhone = computed(() => userStore.userinfo?.profile?.phone_number || '+1 (555) 248-0391');
 const profileAvatar = computed(() => userStore.userinfo?.profile?.avatar);
 
 const profileItems = computed(() => [
@@ -835,16 +835,16 @@ const sections = computed(() => {
             key: 'others',
             title: t('settings.sections.others'),
             items: [
-                {
-                    key: 'rate_us',
-                    icon: '/static/icons/star.svg',
-                    label: t('settings.items.rateUs.label'),
-                    sublabel: t('settings.items.rateUs.sublabel'),
-                    action: openRatePopup,
-                },
                 ...(userStore.isAdmin
                     ? [
-                          {
+                        {
+                            key: 'rate_us',
+                            icon: '/static/icons/star.svg',
+                            label: t('settings.items.rateUs.label'),
+                            sublabel: t('settings.items.rateUs.sublabel'),
+                            action: openRatePopup,
+                        },
+                        {
                             key: 'share_app',
                             icon: '/static/icons/share.svg',
                             label: t('settings.items.share.label'),
@@ -1061,13 +1061,19 @@ function copyEmail() {
 
 function openAppStore() {
     try {
+        // TODO: 打开应用商店的链接
+
         // #ifdef APP
-        const channel = plus.runtime.channel;
-        if (channel === 'google') {
-            plus.runtime.openURL('market://details?id=com.wallpaper.app.ego');
-        } else {
-            plus.runtime.openURL('itms-apps://itunes.apple.com/app/idYOUR_APP_ID');
-        }
+        // const channel = plus.runtime.channel;
+        // if (channel === 'google') {
+        //     plus.runtime.openURL('market://details?id=com.wallpaper.app.ego');
+        // } else {
+        //     plus.runtime.openURL('itms-apps://itunes.apple.com/app/idYOUR_APP_ID');
+        // }
+        uni.showToast({
+            title: t('settings.ratePopup.webHint'),
+            icon: 'none',
+        });
         // #endif
 
         // #ifdef WEB

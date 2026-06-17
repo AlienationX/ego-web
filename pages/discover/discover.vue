@@ -14,6 +14,8 @@
 
         <view
             class="container"
+            @touchstart="onChatTouchStart"
+            @touchend="onChatTouchEnd"
             :style="{
                 paddingTop: `${containerTopPadding}px`,
                 paddingBottom: `${containerBottomSpace}px`,
@@ -26,24 +28,38 @@
             </view>
 
             <view class="chat-panel" v-if="chatMessages.length">
-                <view v-for="msg in chatMessages" :id="`msg-${msg.id}`" :key="msg.id" class="msg-row" :class="msg.role">
-                    <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
-                    <view class="msg-content">
-                        <view class="msg-label">{{ msg.name }}</view>
-                        <template v-if="msg.image">
-                            <image class="msg-image" :src="msg.image" mode="aspectFill"></image>
-                        </template>
-                        <template v-if="msg.text">
-                            <rich-text v-if="msg.role === 'assistant'" class="msg-text markdown" :nodes="msg.html"></rich-text>
-                            <view v-else class="msg-text">{{ msg.text }}</view>
-                        </template>
-                    </view>
+                <view v-for="msg in chatMessages" :id="`msg-${msg.id}`" :key="msg.id" class="msg-item" :class="msg.role">
+                    <template v-if="msg.role === 'assistant'">
+                        <view class="msg-header">
+                            <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
+                            <view class="msg-label">{{ msg.name }}</view>
+                        </view>
+                        <view class="msg-content full-width">
+                            <rich-text class="msg-text markdown" :nodes="msg.html"></rich-text>
+                        </view>
+                    </template>
+                    <template v-else>
+                        <view class="msg-row user">
+                            <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
+                            <view class="msg-content">
+                                <view class="msg-label">{{ msg.name }}</view>
+                                <template v-if="msg.image">
+                                    <image class="msg-image" :src="msg.image" mode="aspectFill"></image>
+                                </template>
+                                <template v-if="msg.text">
+                                    <view class="msg-text">{{ msg.text }}</view>
+                                </template>
+                            </view>
+                        </view>
+                    </template>
                 </view>
 
-                <view v-if="isThinking" class="msg-row assistant">
-                    <image class="msg-avatar" :src="aiProfile.avatar" mode="aspectFill"></image>
-                    <view class="msg-content">
+                <view v-if="isThinking" class="msg-item assistant">
+                    <view class="msg-header">
+                        <image class="msg-avatar" :src="aiProfile.avatar" mode="aspectFill"></image>
                         <view class="msg-label">{{ aiProfile.name }}</view>
+                    </view>
+                    <view class="msg-content full-width">
                         <view class="thinking-text">
                             <rotate-loading :size="30" :speed="1.2"></rotate-loading>
                             <text>{{ $t('discover.analyzingMessage') }} {{ thinkingTime }}s</text>
@@ -181,7 +197,7 @@ const updateAssistantHtml = (id, force = false) => {
     if (!force && now - lastMarkdownAt < 120) return;
     chatMessages.value[idx] = {
         ...target,
-        html: markdownToHtml(String(target.text || '')),
+        html: markdownToHtml(String(target.text || ''), target.isStreaming),
         lastMarkdownAt: now,
     };
 };
@@ -194,7 +210,7 @@ const finishAssistantMessage = (id) => {
     chatMessages.value[idx] = {
         ...target,
         isStreaming: false,
-        html: markdownToHtml(text),
+        html: markdownToHtml(text, false),
         lastMarkdownAt: Date.now(),
     };
     streamBufferMap.delete(id);
@@ -267,11 +283,35 @@ const stopThinkingTimer = () => {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const isAutoScrollPaused = ref(false);
+let autoScrollResumeTimer = null;
+
+const onChatTouchStart = () => {
+    isAutoScrollPaused.value = true;
+    if (autoScrollResumeTimer) {
+        clearTimeout(autoScrollResumeTimer);
+        autoScrollResumeTimer = null;
+    }
+};
+
+const onChatTouchEnd = () => {
+    autoScrollResumeTimer = setTimeout(() => {
+        isAutoScrollPaused.value = false;
+    }, 5000);
+};
+
+let scrollTimer = null;
 const scrollToBottom = (duration = 0) => {
-    uni.pageScrollTo({
-        scrollTop: 999999,
-        duration,
-    });
+    if (isAutoScrollPaused.value) return;
+    if (scrollTimer) return;
+    
+    scrollTimer = setTimeout(() => {
+        uni.pageScrollTo({
+            scrollTop: 999999,
+            duration,
+        });
+        scrollTimer = null;
+    }, 200);
 };
 
 const appendMessage = (msg) => {
@@ -293,7 +333,7 @@ const appendTextToMessage = (id, text) => {
     if (idx === -1) return;
     const current = String(chatMessages.value[idx].text || '');
     const nextText = current + text;
-    const html = chatMessages.value[idx].role === 'assistant' ? markdownToHtml(nextText) : undefined;
+    const html = chatMessages.value[idx].role === 'assistant' ? markdownToHtml(nextText, chatMessages.value[idx].isStreaming) : undefined;
     chatMessages.value[idx] = { ...chatMessages.value[idx], text: nextText, html };
     scrollToBottom(0);
 };
@@ -325,25 +365,57 @@ const escapeHtml = (str = '') =>
         .replace(/\"/g, '&quot;')
         .replace(/'/g, '&#39;');
 
-const markdownToHtml = (md = '') => {
-    let html = escapeHtml(md);
+const markdownToHtml = (md = '', isStreaming = false) => {
+    let html = escapeHtml(String(md));
+
     html = html.replace(/```([\s\S]*?)```/g, (_m, code) => `<pre><code>${code}</code></pre>`);
-    html = html.replace(/^### (.*)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^## (.*)$/gm, '<h2>$1</h2>');
-    html = html.replace(/^# (.*)$/gm, '<h1>$1</h1>');
+    html = html.replace(/^######\s*(.*)$/gm, '<h6>$1</h6>');
+    html = html.replace(/^#####\s*(.*)$/gm, '<h5>$1</h5>');
+    html = html.replace(/^####\s*(.*)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^###\s*(.*)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^##\s*(.*)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^#\s*(.*)$/gm, '<h1>$1</h1>');
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-    html = html.replace(/(?:^|\n)(- .+(?:\n- .+)*)/g, (m) => {
-        const items = m
+    
+    // Unordered Lists
+    html = html.replace(/(?:^|\n)((?:[-*]\s+.+(?:\n|$))+)/g, (m, p1) => {
+        const items = p1
             .trim()
             .split('\n')
-            .map((line) => `<li>${line.replace(/^- /, '')}</li>`)
+            .map((line) => `<li>${line.replace(/^[-*]\s+/, '')}</li>`)
             .join('');
-        return `\n<ul>${items}</ul>`;
+        return `\n<ul>${items}</ul>\n`;
     });
-    html = html.replace(/\n/g, '<br/>');
+
+    // Ordered Lists
+    html = html.replace(/(?:^|\n)((?:\d+\.\s+.+(?:\n|$))+)/g, (m, p1) => {
+        const items = p1
+            .trim()
+            .split('\n')
+            .map((line) => `<li>${line.replace(/^\d+\.\s+/, '')}</li>`)
+            .join('');
+        return `\n<ol>${items}</ol>\n`;
+    });
+
+    // Paragraphs
+    html = html
+        .split(/\n{2,}/)
+        .map(block => {
+            block = block.trim();
+            if (!block) return '';
+            if (/^<(h[1-6]|ul|ol|pre|blockquote)/.test(block)) {
+                return block;
+            }
+            return `<p>${block.replace(/\n/g, '<br/>')}</p>`;
+        })
+        .join('\n');
+    
+    if (isStreaming) {
+        html += '<span class="typing-ellipsis">...</span>';
+    }
     return html;
 };
 
@@ -415,6 +487,10 @@ const loadMoreFavorites = () => {
 };
 
 const onSelect = async (id) => {
+    if (isRunning.value) {
+        uni.showToast({ title: t('discover.analyzingMessage'), icon: 'none' });
+        return;
+    }
     selectedId.value = id;
     await onAnalyze();
 };
@@ -453,6 +529,11 @@ const createAiProfile = () => {
 };
 
 const pickLocalImage = () => {
+    if (isRunning.value) {
+        uni.showToast({ title: t('discover.analyzingMessage'), icon: 'none' });
+        return;
+    }
+
     if (!userStore.isVip) {
         uni.showModal({
             title: t('common.tip'),
@@ -466,20 +547,18 @@ const pickLocalImage = () => {
         return;
     }
 
-    // #ifdef APP
-    // App 端用 chooseMedia（Android 照片选择器，无需 READ_MEDIA_IMAGES 权限）
-    uni.chooseMedia({
+    // #ifdef APP-ANDROID
+    uni.chooseSystemMedia({
         count: 1,
         mediaType: ['image'],
-        sourceType: ['album'],
         success: async (res) => {
-            localImage.value = res.tempFiles?.[0]?.tempFilePath || '';
+            localImage.value = res.filePaths?.[0] || '';
             await onAnalyze();
         },
     });
     // #endif
 
-    // #ifndef APP
+    // #ifndef APP-ANDROID
     uni.chooseImage({
         count: 1,
         sizeType: ['compressed'],
@@ -522,10 +601,33 @@ const onAnalyze = async () => {
     await sleep(2000);
 
     try {
+        let finalPicUrl = currentPicUrl;
+
+        // 如果是本地图片，转为 Base64 再发给后端（因为 Zhipu AI 需要公网 URL 或 Base64）
+        if (sourceMode.value === 'local' && finalPicUrl) {
+            // #ifdef MP || APP-PLUS
+            const fs = uni.getFileSystemManager();
+            const base64Data = fs.readFileSync(finalPicUrl, 'base64');
+            // 简单拼接，大模型一般能识别 data:image/... 的 base64
+            finalPicUrl = 'data:image/jpeg;base64,' + base64Data;
+            // #endif
+            
+            // #ifdef WEB
+            const resBlob = await fetch(finalPicUrl);
+            const blob = await resBlob.blob();
+            finalPicUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+            // #endif
+        }
+
         let aiMsgId = null;
         const result = await apiPostDiscoverStream(
             {
-                img_url: currentPicUrl,
+                img_url: finalPicUrl,
                 lang: uni.getStorageSync('lang') || uni.getLocale(),
             },
             {
@@ -867,7 +969,7 @@ onUnload(() => {
 }
 
 .msg-content {
-    max-width: calc(100% - 80rpx);
+    max-width: calc(100% - 140rpx);
     padding-top: 0;
     display: flex;
     flex-direction: column;
@@ -919,6 +1021,45 @@ onUnload(() => {
     backdrop-filter: blur(20rpx);
 }
 
+.msg-row.assistant .msg-text,
+.msg-item.assistant .msg-text {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding: 8rpx 20rpx;
+}
+
+.msg-item {
+    margin-top: 30rpx;
+}
+
+.msg-header {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    margin-bottom: 8rpx;
+}
+
+.msg-header .msg-avatar {
+    width: 58rpx;
+    height: 58rpx;
+    border-radius: 50%;
+    border: 1rpx solid var(--panel-border);
+    background: var(--panel-background);
+    box-shadow: 0 12rpx 24rpx var(--shadow-color);
+}
+
+.msg-header .msg-label {
+    color: var(--text-secondary);
+    font-size: 28rpx;
+    font-weight: 600;
+}
+
+.msg-content.full-width {
+    max-width: 100%;
+}
+
 .streaming-text {
     white-space: pre-wrap;
 }
@@ -929,55 +1070,87 @@ onUnload(() => {
 
 .markdown :deep(h1),
 .markdown :deep(h2),
-.markdown :deep(h3) {
+.markdown :deep(h3),
+.markdown :deep(h4),
+.markdown :deep(h5),
+.markdown :deep(h6) {
     font-weight: 700;
     margin: 12rpx 0 6rpx;
     line-height: 1.4;
+    color: var(--text-primary);
 }
 
-.markdown :deep(h1) {
-    font-size: 34rpx;
+.markdown :deep(h1) { font-size: 78rpx; }
+.markdown :deep(h2) { font-size: 70rpx; }
+.markdown :deep(h3) { font-size: 62rpx; }
+.markdown :deep(h4) { font-size: 54rpx; }
+.markdown :deep(h5) { font-size: 46rpx; }
+.markdown :deep(h6) { font-size: 38rpx; }
+
+.markdown :deep(.typing-ellipsis) {
+    display: inline-block;
+    animation: ellipsis-blink 1.4s infinite both;
+    margin-left: 4rpx;
+    font-weight: bold;
+    color: var(--accent-primary);
 }
-.markdown :deep(h2) {
-    font-size: 32rpx;
-}
-.markdown :deep(h3) {
-    font-size: 30rpx;
+
+@keyframes ellipsis-blink {
+    0% { opacity: 0.2; }
+    20% { opacity: 1; }
+    100% { opacity: 0.2; }
 }
 
 .markdown :deep(p) {
-    margin: 6rpx 0;
+    margin: 0 0 16rpx;
+    line-height: 1.6;
 }
 
-.markdown :deep(ul) {
-    padding-left: 26rpx;
-    margin: 6rpx 0;
+.markdown :deep(p:last-child) {
+    margin-bottom: 0;
+}
+
+.markdown :deep(ul),
+.markdown :deep(ol) {
+    padding-left: 36rpx;
+    margin: 0 0 16rpx;
 }
 
 .markdown :deep(li) {
-    margin: 4rpx 0;
+    margin-bottom: 8rpx;
+    line-height: 1.6;
+}
+
+.markdown :deep(li:last-child) {
+    margin-bottom: 0;
+}
+
+.markdown :deep(strong) {
+    font-weight: 700;
 }
 
 .markdown :deep(code) {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(120, 120, 120, 0.1);
     border-radius: 8rpx;
-    padding: 2rpx 6rpx;
+    padding: 4rpx 8rpx;
     font-size: 26rpx;
+    font-family: monospace;
 }
 
 .markdown :deep(pre) {
-    background: #0f172a;
-    color: #e2e8f0;
-    padding: 12rpx;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 20rpx;
     border-radius: 12rpx;
     overflow-x: auto;
-    margin: 8rpx 0;
+    margin: 16rpx 0;
 }
 
 .markdown :deep(pre code) {
     background: transparent;
     color: inherit;
     padding: 0;
+    font-size: 26rpx;
 }
 
 .markdown :deep(a) {
