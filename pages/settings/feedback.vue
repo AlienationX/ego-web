@@ -112,6 +112,9 @@ import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
+// #ifdef APP
+import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
+// #endif
 
 const { t } = useI18n();
 const { tp } = useTranslateParams();
@@ -152,58 +155,51 @@ const chooseImage = () => {
     selectImage(remaining);
 };
 
+const showPermissionModal = () => {
+    uni.showModal({
+        title: t('feedback.permissionTitle') || '需要访问相册',
+        content: t('feedback.permissionContent') || '为了选择本地图片，需要访问您的相册权限。请在设置中开启相册权限。',
+        confirmText: t('feedback.goToSettings') || '去设置',
+        cancelText: t('common.cancel') || '取消',
+        success: (res) => {
+            if (res.confirm) {
+                uni.openAppAuthorizeSetting({
+                    fail: () => {
+                        uni.openSetting();
+                    },
+                });
+            }
+        },
+    });
+};
+
 const selectImage = (count) => {
-    // 由于受google play 照片和视频权限政策的影响，使用uni.chooseImage选择图片会调用READ_MEDIA_IMAGES/READ_MEDIA_VIDEO权限，该权限需在Google Play Console中申请
+    // #ifdef APP
+    const channel = plus.runtime.channel;
+    if (channel === 'google') {
+        // 由于受google play 照片和视频权限政策的影响，使用uni.chooseImage选择图片会调用READ_MEDIA_IMAGES/READ_MEDIA_VIDEO权限，该权限需在Google Play Console中申请
+        chooseSystemMedia({
+            count: count,
+            mediaType: ['image'],
+            success: (res) => {
+                imageList.value.push(...(res.filePaths || []));
+            },
+            fail: (err) => {
+                // 2101001	用户取消
+                if (err?.errCode === 2101001) return;
 
-    // #ifdef APP-ANDROID
-    uni.chooseSystemMedia({
-        count: count,
-        mediaType: ['image'],
-        success: (res) => {
-            imageList.value.push(...(res.filePaths || []));
-        },
-        fail: (err) => {
-            if (err?.errCode === 2101001) return;
-
-            const errMsg = err?.errMsg || '';
-            if (err?.errCode === 2101005 || errMsg.includes('permission') || errMsg.includes('权限') || errMsg.includes('denied') || errMsg.includes('拒绝')) {
-                uni.showModal({
-                    title: t('feedback.permissionTitle') || '需要访问相册',
-                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
-                    confirmText: t('feedback.goToSettings') || '去设置',
-                    cancelText: t('common.cancel') || '取消',
-                    success: (res) => {
-                        if (res.confirm) {
-                            if (typeof plus !== 'undefined' && plus.runtime) {
-                                plus.runtime.openURL('app-settings:');
-                            } else {
-                                uni.openSetting();
-                            }
-                        }
-                    },
-                });
-            } else {
-                uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
-            }
-        },
-    });
+                // 2101005	权限申请失败
+                if (err?.errCode === 2101005 || /permission|权限|denied|拒绝/i.test(err?.errMsg || '')) {
+                    showPermissionModal();
+                } else {
+                    uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败'+JSON.stringify(err), icon: 'none' });
+                }
+            },
+        });
+        return;
+    }
     // #endif
 
-    // #ifdef APP-IOS || APP-HARMONY
-    uni.chooseImage({
-        count: count,
-        sizeType: ['compressed'],
-        sourceType: ['camera', 'album'],
-        success: (res) => {
-            imageList.value.push(...res.tempFilePaths);
-        },
-        fail: () => {
-            uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
-        },
-    });
-    // #endif
-
-    // #ifdef MP
     uni.chooseImage({
         count: count,
         sizeType: ['compressed'],
@@ -212,42 +208,14 @@ const selectImage = (count) => {
             imageList.value.push(...res.tempFilePaths);
         },
         fail: (err) => {
-            if (err.errMsg && (err.errMsg.includes('permission') || err.errMsg.includes('权限'))) {
-                uni.showModal({
-                    title: t('feedback.permissionTitle') || '需要访问相册',
-                    content: t('feedback.permissionContent') || '为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。',
-                    confirmText: t('feedback.goToSettings') || '去设置',
-                    cancelText: t('common.cancel') || '取消',
-                    success: (res) => {
-                        if (res.confirm) {
-                            uni.openSetting({
-                                success: (settingRes) => {
-                                    if (settingRes.authSetting['scope.album']) selectImage(count);
-                                },
-                            });
-                        }
-                    },
-                });
+            // console.log("XXXXX", err)
+            if (err.errMsg && (err.errMsg.toLowerCase().includes('permission') || err.errMsg.includes('权限'))) {
+                showPermissionModal();
             } else {
                 uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
             }
         },
     });
-    // #endif
-
-    // #ifdef WEB
-    uni.chooseImage({
-        count: count,
-        sizeType: ['compressed'],
-        sourceType: ['camera', 'album'],
-        success: (res) => {
-            imageList.value.push(...res.tempFilePaths);
-        },
-        fail: () => {
-            uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
-        },
-    });
-    // #endif
 };
 
 const previewImage = (index) => {

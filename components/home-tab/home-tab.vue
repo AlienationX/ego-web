@@ -85,8 +85,8 @@
                     <view class="sk-bar sk-bar--notice"></view>
                 </view>
                 <swiper v-else class="notice-swiper" vertical interval="1500" duration="300" autoplay circular>
-                    <swiper-item class="notice-swiper-item" v-for="item in noticeList" :key="item.id">
-                        <navigator :url="`/pages/app/notice-detail?id=${item.id}&name=${item.title}`">
+                    <swiper-item class="notice-swiper-item" v-for="item in noticeComputed" :key="item.id">
+                        <navigator :url="`/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(item.title)}`">
                             {{ item.title }}
                         </navigator>
                     </swiper-item>
@@ -354,12 +354,26 @@ const todayDate = _today.getDate();
 const todayDateStr = todayDate.toString().padStart(2, '0');
 
 // --- Data ---
-const bannerList = ref([]);
+const rawBannerList = ref([]);
+const bannerList = computed(() => {
+    return rawBannerList.value.map((item) => {
+        const normalized = handlePicUrl(item);
+        return { ...normalized, ...getBannerTextMeta(normalized) };
+    });
+});
+
 const randomDailyList = ref([]);
 const heroImageLoaded = ref(false);
 const randomRecommendList = ref([]);
 const latestList = ref([]);
 const noticeList = ref([]);
+const noticeComputed = computed(() => {
+    const isEn = locale.value === 'en';
+    return noticeList.value.map((item) => ({
+        ...item,
+        title: isEn && item.title_en ? item.title_en : item.title,
+    }));
+});
 const classifyList = ref([]);
 const adVisibleMap = reactive({});
 const followingExpanded = ref(false);
@@ -395,7 +409,7 @@ const randomRecommendComputed = computed(() => {
     const isEn = locale.value === 'en';
     return randomRecommendList.value.map((item) => ({
         ...item,
-        name: isEn ? item.name_en : item.name,
+        name: isEn && item.name_en ? item.name_en : item.name,
     }));
 });
 
@@ -403,7 +417,7 @@ const classifyComputed = computed(() => {
     const isEn = locale.value === 'en';
     return classifyList.value.map((item) => ({
         ...item,
-        name: isEn ? item.name_en : item.name,
+        name: isEn && item.name_en ? item.name_en : item.name,
     }));
 });
 
@@ -476,8 +490,10 @@ const getBannerTextMeta = (item) => {
     const decodedUrl = decodeURIComponent(url);
 
     const nameMatch = decodedUrl.match(/name=([^&]+)/);
+    const nameEnMatch = decodedUrl.match(/name_en=([^&]+)/);
     const keywordMatch = decodedUrl.match(/keyword=([^&]+)/);
     const rawTitle = nameMatch?.[1] || (keywordMatch?.[1] ? `#${keywordMatch[1]}` : '');
+    const rawTitleEn = nameEnMatch?.[1] || rawTitle;
 
     const type = (() => {
         if (url.includes('/pages/app/classlist')) return 'classify';
@@ -528,10 +544,13 @@ const getBannerTextMeta = (item) => {
 
     const config = configMap[type];
 
+    const isEn = locale.value === 'en';
+
     return {
-        title: rawTitle || (type === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle')),
+        title: (isEn && rawTitleEn ? rawTitleEn : rawTitle) || (type === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle')),
         desc:
-            item.description || (item && item.title && item.title.includes('必应') ? t('index.banner.bingDesc') : config.desc),
+            (isEn && item.description_en ? item.description_en : item.description) || 
+            (item && item.title && item.title.includes('必应') ? t('index.banner.bingDesc') : config.desc),
         badge: config.badge,
         targetLabel: targetMap[item.target] || targetMap.external,
         metaLabel: config.meta,
@@ -542,10 +561,7 @@ const getBannerTextMeta = (item) => {
 // --- Data fetching ---
 const getBanner = async () => {
     let res = await apiGetBanner();
-    bannerList.value = res.data.map((item) => {
-        const normalized = handlePicUrl(item);
-        return { ...normalized, ...getBannerTextMeta(item) };
-    });
+    rawBannerList.value = res.data;
 };
 
 const getRandom = async () => {

@@ -165,7 +165,7 @@
                         </view>
                         <view class="row" v-if="currentInfo.publisher">
                             <view class="label">{{ t('previewPage.publisher') }}</view>
-                            <view class="value classify">{{ currentInfo.publisher }}</view>
+                            <view class="value classify">{{ publisherName }}</view>
                             <!-- <view class="value classify">{{currentInfo.nickname}}</view> -->
                         </view>
                         <view class="row">

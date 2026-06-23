@@ -13,16 +13,17 @@
 
             <view class="title">
                 <view class="tag" v-if="detail.select">
-                    <uni-tag text="置顶" type="error" inverted></uni-tag>
+                    <uni-tag :text="isEn ? 'Top' : '置顶'" type="error" inverted></uni-tag>
                 </view>
                 <view class="font">
-                    {{ detail.title }}
+                    {{ isEn && detail.title_en ? detail.title_en : detail.title }}
                 </view>
             </view>
 
             <view class="info">
                 <view class="item">
-                    {{ detail.author }}
+                    <!-- {{ detail.author }} -->
+                    {{ $t('common.admin') }}
                 </view>
                 <view class="item">
                     <uni-dateformat :date="detail.publish_date" format="yyyy/MM/dd"></uni-dateformat>
@@ -31,25 +32,28 @@
 
             <view class="content">
                 <!-- 内置组件，可以显示html格式 -->
-                <rich-text :nodes="detail.content"></rich-text>
+                <rich-text :nodes="isEn && detail.content_en ? detail.content_en : detail.content"></rich-text>
 
                 <!-- 安装第三方组件 mp-html -->
-                <!-- <mp-html :content="detail.content"></mp-html> -->
+                <!-- <mp-html :content="isEn && detail.content_en ? detail.content_en : detail.content"></mp-html> -->
             </view>
 
-            <view class="count" v-if="detail.view_count">阅读 {{ detail.view_count }}</view>
+            <view class="count" v-if="detail.view_count">{{ isEn ? 'Views' : '阅读' }} {{ detail.view_count }}</view>
         </view>
     </view>
 </template>
 
 <script setup>
 import { ref, toRefs, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { onLoad } from '@dcloudio/uni-app';
 import { apiGetNotice } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
+const { locale } = useI18n();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
+const isEn = computed(() => locale.value === 'en');
 
 // UniApp 会将 URL 中的参数自动注入到 props
 const props = defineProps({

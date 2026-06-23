@@ -37,7 +37,8 @@
         "submitFailed": "提交失败",
         "downloading": "下载中...",
         "downloadSuccess": "下载成功",
-        "downloadFailed": "下载失败"
+        "downloadFailed": "下载失败",
+        "admin": "管理员"
     },
     "index": {
         "title": "推荐",

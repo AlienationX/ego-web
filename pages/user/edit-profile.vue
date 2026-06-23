@@ -82,6 +82,9 @@ import { useUserStore } from '@/stores/user.js';
 import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
+// #ifdef APP
+import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
+// #endif
 
 const userStore = useUserStore();
 const { t } = useI18n();
@@ -100,20 +103,63 @@ const form = reactive({
     description: userStore.userinfo?.profile?.description || '',
 });
 
-const chooseAvatar = () => {
-    // #ifdef APP-ANDROID
-    uni.chooseSystemMedia({
-        count: 1,
-        mediaType: ['image'],
+const showPermissionModal = () => {
+    uni.showModal({
+        title: t('editProfile.permissionTitle') || '需要访问相册',
+        content: t('editProfile.permissionContent') || '为了更换头像，需要访问您的相册权限。请在设置中开启相册权限。',
+        confirmText: t('editProfile.goToSettings') || '去设置',
+        cancelText: t('common.cancel') || '取消',
         success: (res) => {
-            const file = res.filePaths?.[0];
-            if (!file) return;
-            form.avatar = file;
+            if (res.confirm) {
+                // #ifdef APP
+                if (typeof plus !== 'undefined' && plus.runtime) {
+                    plus.runtime.openURL('app-settings:');
+                } else {
+                    uni.openSetting();
+                }
+                // #endif
+                // #ifndef APP
+                uni.openAppAuthorizeSetting({
+                    fail: () => {
+                        uni.openSetting();
+                    },
+                });
+                // #endif
+            }
         },
     });
+};
+
+const chooseAvatar = () => {
+    // #ifdef APP
+    const channel = plus.runtime.channel;
+    console.log('channel', channel);
+    if (channel === 'google') {
+        console.log('google');
+        // 由于受google play 照片和视频权限政策的影响，使用uni.chooseImage选择图片会调用READ_MEDIA_IMAGES/READ_MEDIA_VIDEO权限，该权限需在Google Play Console中申请
+        chooseSystemMedia({
+            count: 1,
+            mediaType: ['image'],
+            success: (res) => {
+                const file = res.filePaths?.[0];
+                if (!file) return;
+                form.avatar = file;
+            },
+            fail: (err) => {
+                // 2101001 用户取消
+                if (err?.errCode === 2101001) return;
+                // 2101005 权限申请失败
+                if (err?.errCode === 2101005 || /permission|权限|denied|拒绝/i.test(err?.errMsg || '')) {
+                    showPermissionModal();
+                } else {
+                    uni.showToast({ title: t('editProfile.imageSelectFailed') || '选择图片失败', icon: 'none' });
+                }
+            },
+        });
+        return;
+    }
     // #endif
 
-    // #ifndef APP-ANDROID
     uni.chooseImage({
         count: 1,
         sizeType: ['compressed'],
@@ -123,8 +169,16 @@ const chooseAvatar = () => {
             if (!file) return;
             form.avatar = file;
         },
+        fail: (err) => {
+            if (err?.errMsg && (err.errMsg.toLowerCase().includes('permission') || err.errMsg.includes('权限') || err.errMsg.includes('denied'))) {
+                showPermissionModal();
+            } else if (err?.errMsg && err.errMsg.includes('cancel')) {
+                // 用户取消，忽略
+            } else {
+                uni.showToast({ title: t('editProfile.imageSelectFailed') || '选择图片失败', icon: 'none' });
+            }
+        },
     });
-    // #endif
 };
 
 const handleSave = async () => {

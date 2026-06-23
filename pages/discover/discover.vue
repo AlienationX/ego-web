@@ -130,6 +130,9 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+// #ifdef APP
+import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
+// #endif
 
 const { t } = useI18n();
 
@@ -563,6 +566,33 @@ const createAiProfile = () => {
     };
 };
 
+const showPickerPermissionModal = () => {
+    uni.showModal({
+        title: t('feedback.permissionTitle') || '需要访问相册',
+        content: t('feedback.permissionContent') || '为了选择本地图片，需要访问您的相册权限。请在设置中开启相册权限。',
+        confirmText: t('feedback.goToSettings') || '去设置',
+        cancelText: t('common.cancel') || '取消',
+        success: (res) => {
+            if (res.confirm) {
+                // #ifdef APP
+                if (typeof plus !== 'undefined' && plus.runtime) {
+                    plus.runtime.openURL('app-settings:');
+                } else {
+                    uni.openSetting();
+                }
+                // #endif
+                // #ifndef APP
+                uni.openAppAuthorizeSetting({
+                    fail: () => {
+                        uni.openSetting();
+                    },
+                });
+                // #endif
+            }
+        },
+    });
+};
+
 const pickLocalImage = () => {
     if (isRunning.value) {
         uni.showToast({ title: t('discover.analyzingMessage'), icon: 'none' });
@@ -582,18 +612,31 @@ const pickLocalImage = () => {
         return;
     }
 
-    // #ifdef APP-ANDROID
-    uni.chooseSystemMedia({
-        count: 1,
-        mediaType: ['image'],
-        success: async (res) => {
-            localImage.value = res.filePaths?.[0] || '';
-            await onAnalyze();
-        },
-    });
+    // #ifdef APP
+    const channel = plus.runtime.channel;
+    if (channel === 'google') {
+        chooseSystemMedia({
+            count: 1,
+            mediaType: ['image'],
+            success: async (res) => {
+                localImage.value = res.filePaths?.[0] || '';
+                await onAnalyze();
+            },
+            fail: (err) => {
+                // 2101001 用户取消
+                if (err?.errCode === 2101001) return;
+                // 2101005 权限申请失败
+                if (err?.errCode === 2101005 || /permission|权限|denied|拒绝/i.test(err?.errMsg || '')) {
+                    showPickerPermissionModal();
+                } else {
+                    uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
+                }
+            },
+        });
+        return;
+    }
     // #endif
 
-    // #ifndef APP-ANDROID
     uni.chooseImage({
         count: 1,
         sizeType: ['compressed'],
@@ -602,8 +645,16 @@ const pickLocalImage = () => {
             localImage.value = res.tempFilePaths?.[0] || '';
             await onAnalyze();
         },
+        fail: (err) => {
+            if (err?.errMsg && (err.errMsg.toLowerCase().includes('permission') || err.errMsg.includes('权限') || err.errMsg.includes('denied'))) {
+                showPickerPermissionModal();
+            } else if (err?.errMsg && err.errMsg.includes('cancel')) {
+                // 用户取消，忽略
+            } else {
+                uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
+            }
+        },
     });
-    // #endif
 };
 
 const onAnalyze = async () => {

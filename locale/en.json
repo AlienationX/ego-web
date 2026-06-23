@@ -39,7 +39,8 @@
         "submitFailed": "Submit failed",
         "downloading": "Downloading...",
         "downloadSuccess": "Downloaded successfully",
-        "downloadFailed": "Download failed"
+        "downloadFailed": "Download failed",
+        "admin": "Administrator"
     },
     "index": {
         "title": "Recommend",
