@@ -17,7 +17,7 @@
                             :color="isDark ? '#f8fbff' : '#1e293b'"
                         ></mdi-icon>
                     </view>
-                    <view class="topbar__title">{{ props.name || t('category.title') }}</view>
+                    <view class="topbar__title">{{ heroTitle }}</view>
                 </view>
                 <view class="topbar__actions">
                     <view class="topbar__icon" @click="goSearch">
@@ -84,12 +84,19 @@ import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 const userStore = useUserStore();
 const isAdmin = computed(() => !!userStore.isAdmin);
 const isDark = computed(() => settingsStore.isDark);
+const isEn = computed(() => locale.value === 'en');
+
+const props = defineProps({
+    id: String,
+    name: String,
+    name_en: String,
+});
 
 const activeButton = ref('');
 const dateSortAsc = ref(true);
@@ -158,11 +165,6 @@ const topbarOpacity = computed(() => {
     return (scroll - revealStart) / (revealEnd - revealStart);
 });
 
-const props = defineProps({
-    id: String,
-    name: String,
-});
-
 const heroImage = computed(() => {
     // 优先级 1: 分类专属封面 (currentClassify)
     if (currentClassify.value?.picurl) {
@@ -179,16 +181,15 @@ const heroImage = computed(() => {
     return '/static/images/guide/guide1.png';
 });
 
+const heroBadge = computed(() => `${t('common.recommend')} CATEGORY`);
+
 const heroTitle = computed(() => {
-    const name = props.name || currentClassify.value?.name || t('category.title');
+    const name = (isEn.value ? currentClassify.value?.name_en : currentClassify.value?.name) || t('category.title');
     return name.toUpperCase();
 });
 
-const heroBadge = computed(() => `${t('common.recommend')} CATEGORY`);
-
 const heroDesc = computed(() => {
-    const name = props.name || currentClassify.value?.name || t('category.title');
-    return `${name} · ${t('category.desc')}`;
+    return `${heroTitle.value} · ${t('category.desc')}`;
 });
 
 const queryParams = ref({

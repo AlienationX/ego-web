@@ -176,7 +176,7 @@
                             </view>
                         </view>
                         <view class="row" v-if="publishDateText">
-                            <view class="label">{{ t('common.publishDate') }}</view>
+                            <view class="label">{{ t('previewPage.publishDate') }}</view>
                             <view class="value">{{ publishDateText }}</view>
                         </view>
                         <!-- <view class="row meta-row">
@@ -1187,7 +1187,7 @@ onShareTimeline(() => {
 
         .time {
             top: calc(12vh + 80rpx);
-            font-size: 148rpx;
+            font-size: 168rpx;
             font-weight: 400;
             letter-spacing: 2rpx;
             color: rgba(255, 255, 255, 0.95);
@@ -1196,7 +1196,7 @@ onShareTimeline(() => {
         }
 
         .date {
-            top: calc(12vh + 230rpx);
+            top: calc(12vh + 280rpx);
             font-size: 30rpx;
             font-weight: 500;
             letter-spacing: 1rpx;
