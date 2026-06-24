@@ -49,13 +49,13 @@ onLaunch(() => {
 
     writeAccessLog();
 
-    console.log(import.meta.env, 'env');
-    console.log(import.meta.env.VITE_SOME_KEY, 'test'); // "123"
-    console.log(import.meta.env.VUE_APP_DEBUG_MODE, 'debug'); // TODO 未显示，如何加载
+    // console.log(import.meta.env, 'env');
+    // console.log(import.meta.env.VITE_SOME_KEY, 'test'); // "123"
+    // console.log(import.meta.env.VUE_APP_DEBUG_MODE, 'debug'); // TODO 未显示，如何加载
 
     // #ifndef MP
-    console.log(process.env, 'process.env'); // 小程序不支持
-    console.log(process.env.VUE_APP_DEBUG_MODE, 'debug');
+    // console.log(process.env, 'process.env'); // 小程序不支持
+    // console.log(process.env.VUE_APP_DEBUG_MODE, 'debug');
     // #endif
 });
 

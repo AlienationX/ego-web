@@ -320,12 +320,14 @@ import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 
 const isDark = computed(() => settingsStore.isDark);
 const isAdmin = computed(() => !!userStore.isAdmin);
@@ -440,24 +442,38 @@ const getWallDate = (item) => {
     return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const timeCache = {
+    todayStart: 0,
+    tomorrowStart: 0,
+    yesterdayStart: 0,
+    lastUpdate: 0
+};
+
+const updateTimeCache = () => {
+    const now = Date.now();
+    if (now - timeCache.lastUpdate < 60000) return; // 每分钟刷新一次即可
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    timeCache.todayStart = today.getTime();
+    timeCache.tomorrowStart = timeCache.todayStart + 86400000;
+    timeCache.yesterdayStart = timeCache.todayStart - 86400000;
+    timeCache.lastUpdate = now;
+};
+
 const isUpdatedToday = (item) => {
     const date = getWallDate(item);
     if (!date) return false;
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const tomorrowStart = new Date(todayStart);
-    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-    return date.getTime() >= todayStart.getTime() && date.getTime() < tomorrowStart.getTime();
+    updateTimeCache();
+    const t = date.getTime();
+    return t >= timeCache.todayStart && t < timeCache.tomorrowStart;
 };
 
 const isUpdatedYesterday = (item) => {
     const date = getWallDate(item);
     if (!date) return false;
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-    const yesterdayStart = new Date(todayStart);
-    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
-    return date.getTime() >= yesterdayStart.getTime() && date.getTime() < todayStart.getTime();
+    updateTimeCache();
+    const t = date.getTime();
+    return t >= timeCache.yesterdayStart && t < timeCache.todayStart;
 };
 
 const isUpdatedWithinDays = (item, days = 5) => {
@@ -612,13 +628,13 @@ const getLatest = async (isAppend = false) => {
 const goBannerPreview = (data) => {
     if (data.wall) {
         const wallList = handlePicUrl(data.wall);
-        uni.setStorageSync('wallList', [wallList]);
+        appStore.wallList = [wallList];
     }
     uni.navigateTo({ url: data.url });
 };
 
 const goPreview = (id, data) => {
-    uni.setStorageSync('wallList', data);
+    appStore.wallList = data;
     uni.navigateTo({ url: '/pages/app/preview?id=' + id });
 };
 

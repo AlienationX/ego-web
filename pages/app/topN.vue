@@ -72,7 +72,7 @@
                             <view class="hero-card__content">
                                 <view class="hero-card__tag">{{ $t('top10.heroTag') }}</view>
                                 <view class="hero-card__title">{{
-                                    rankedList[0].description || rankedList[0].classify_name || rankedList[0].id
+                                    getLocalizedItem(rankedList[0]).description || getLocalizedItem(rankedList[0]).classify_name || rankedList[0].id
                                 }}</view>
                                 <view class="hero-card__meta">
                                     <view class="hero-card__meta-item">
@@ -104,11 +104,11 @@
                                     idx + 2
                                 }}</view>
                                 <view class="hero-card__content hero-card__content--compact">
-                                    <view class="hero-card__title hero-card__title--compact">
-                                        {{ item.description || item.classify_name || item.id }}
+                                        <view class="hero-card__title hero-card__title--compact">
+                                            {{ getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id }}
+                                        </view>
+                                        <view class="hero-card__sub">{{ formatMetric(item) }}</view>
                                     </view>
-                                    <view class="hero-card__sub">{{ formatMetric(item) }}</view>
-                                </view>
                             </view>
                         </view>
                     </view>
@@ -136,11 +136,11 @@
                                 </view>
                                 <view class="rank-item__body">
                                     <view class="rank-item__title">{{
-                                        item.description || item.classify_name || item.id
+                                        getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id
                                     }}</view>
                                     <view class="rank-item__meta">
                                         <text class="rank-item__category">{{
-                                            item.classify_name || $t('top10.wallpaper')
+                                            getLocalizedItem(item).classify_name || $t('top10.wallpaper')
                                         }}</text>
                                         <text class="rank-item__metric">{{ formatMetric(item) }}</text>
                                     </view>
@@ -164,15 +164,26 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { apiGetClassList, apiGetTopWall } from '@/api/wallpaper.js';
+import { apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
+const isEn = computed(() => locale.value === 'en');
+
+const getLocalizedItem = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        description: isEn.value && item.description_en ? item.description_en : item.description,
+        classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
+    };
+};
 
 const props = defineProps({
     embedded: {
@@ -274,7 +285,8 @@ const formatMetric = (item) => {
 };
 
 const goPreview = (id) => {
-    uni.setStorageSync('wallList', rankedList.value);
+    const appStore = useAppStore();
+    appStore.wallList = rankedList.value;
     uni.navigateTo({
         url: `/pages/app/preview?id=${id}`,
     });
@@ -577,7 +589,7 @@ onMounted(() => {
     font-weight: 800;
     color: #e2e8f0;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }

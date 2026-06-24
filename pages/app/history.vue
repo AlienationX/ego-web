@@ -89,6 +89,7 @@ import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 import { formatDateKey, formatHistoryDayLabel } from '@/utils/common.js';
+import { useAppStore } from '@/stores/app.js';
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -142,7 +143,8 @@ const goHome = () => {
 };
 
 const goPreview = (id, data) => {
-    uni.setStorageSync('wallList', data);
+    const appStore = useAppStore();
+    appStore.wallList = data;
     uni.navigateTo({
         url: '/pages/app/preview?id=' + id,
     });

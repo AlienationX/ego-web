@@ -23,7 +23,7 @@
                     <view class="topbar__icon" @click="goSearch">
                         <uni-icons type="search" size="18" :color="isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                     </view>
-                    <view class="topbar__icon">
+                    <view class="topbar__icon" v-if="isAdmin">
                         <uni-icons type="more-filled" size="18" :color="isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                     </view>
                 </view>
@@ -80,13 +80,13 @@ import { useI18n } from 'vue-i18n';
 import { apiGetClassify, apiGetClassList } from '@/api/wallpaper.js';
 import { gotoHome, handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
-import { useLibraryStore } from '@/stores/library.js';
+import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const libraryStore = useLibraryStore();
+const appStore = useAppStore();
 const userStore = useUserStore();
 const isAdmin = computed(() => !!userStore.isAdmin);
 const isDark = computed(() => settingsStore.isDark);
@@ -209,7 +209,7 @@ const init = (sortord = '') => {
 
 const fetchClassifyInfo = async (id) => {
     // 1. 尝试从缓存获取
-    let cacheList = uni.getStorageSync('classifyList') || [];
+    let cacheList = appStore.classifyList || [];
     let match = cacheList.find((item) => String(item.id) === String(id));
 
     if (!match) {
@@ -217,7 +217,7 @@ const fetchClassifyInfo = async (id) => {
         try {
             const res = await apiGetClassify({ pageSize: 100 });
             cacheList = (res.data || []).map((item) => handlePicUrl(item));
-            uni.setStorageSync('classifyList', cacheList);
+            appStore.classifyList = cacheList;
             match = cacheList.find((item) => String(item.id) === String(id));
         } catch (e) {
             console.error('Failed to fetch classify info:', e);
@@ -276,7 +276,7 @@ onLoad((e) => {
 });
 
 onUnload(() => {
-    uni.removeStorageSync('wallList');
+    appStore.wallList = [];
 });
 
 onShareAppMessage(() => {

@@ -12,7 +12,7 @@
                 ></image>
                 <view class="mask" :class="{ 'is-visible': loadedMap[item.id] }">
                     <view class="mask-info">
-                        <text class="mask-text">{{ item.name }}</text>
+                        <text class="mask-text">{{ isEn ? (item.name_en || item.name) : item.name }}</text>
                         <text class="mask-count" v-if="item.wallpapers_count"
                             >{{ item.wallpapers_count }}{{ t('common.items') || '张' }}</text
                         >
@@ -35,13 +35,14 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { compareTimestamp } from '@/utils/common.js';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const isEn = computed(() => locale.value === 'en');
 
-defineProps({
+const props = defineProps({
     items: {
         type: Array,
         default: () => [],

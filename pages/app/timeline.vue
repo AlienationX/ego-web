@@ -75,10 +75,10 @@
                                 <view class="timeline-card__overlay"></view>
                                 <view class="timeline-card__content">
                                     <view class="timeline-card__classify">
-                                        {{ item.classify_name || t('top10.wallpaper') }}
+                                        {{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}
                                     </view>
                                     <view class="timeline-card__title">
-                                        {{ item.description || item.classify_name || `#${item.id}` }}
+                                        {{ getLocalizedItem(item).description || getLocalizedItem(item).classify_name || `#${item.id}` }}
                                     </view>
                                     <view class="timeline-card__footer">
                                         <view class="timeline-card__footer-left">
@@ -116,10 +116,21 @@ import { apiGetClassList } from '@/api/wallpaper.js';
 import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
+const isEn = computed(() => locale.value === 'en');
+
+const getLocalizedItem = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        description: isEn.value && item.description_en ? item.description_en : item.description,
+        classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
+    };
+};
 
 const props = defineProps({
     embedded: {
@@ -257,7 +268,8 @@ const onReachLower = () => {
 };
 
 const goPreview = (id) => {
-    uni.setStorageSync('wallList', latestList.value);
+    const appStore = useAppStore();
+    appStore.wallList = latestList.value;
     uni.navigateTo({
         url: `/pages/app/preview?id=${id}`,
     });

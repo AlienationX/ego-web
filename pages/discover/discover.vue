@@ -356,7 +356,7 @@ const ensureStreamFlush = () => {
     if (streamFlushTimer) return;
     streamFlushTimer = setInterval(() => {
         flushStreamText();
-    }, 32);
+    }, 50);
 };
 
 const queueStreamText = (id, text) => {
@@ -827,6 +827,7 @@ onShow(() => {
 });
 
 onUnload(() => {
+    if (scrollTimer) clearTimeout(scrollTimer);
     stopTyping();
     stopStreamFlush();
     streamBufferMap.clear();

@@ -88,12 +88,14 @@ import { useI18n } from 'vue-i18n';
 import { apiGetSearchData } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/system.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 const isDark = computed(() => settingsStore.options.theme === 'dark');
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
@@ -190,7 +192,7 @@ const onSearch = () => {
 
 const onClear = () => {
     init();
-    uni.removeStorageSync('wallList');
+    appStore.wallList = [];
 };
 
 const clearKeyword = () => {
@@ -253,7 +255,7 @@ onLoad((options) => {
 });
 
 onUnload(() => {
-    uni.removeStorageSync('wallList');
+    appStore.wallList = [];
 });
 
 onPageScroll(() => {});

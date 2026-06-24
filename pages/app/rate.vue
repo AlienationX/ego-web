@@ -74,6 +74,7 @@ import { handlePicUrl } from '@/utils/common.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { getStatusBarHeight } from '@/utils/system.js';
+import { useAppStore } from '@/stores/app.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -151,7 +152,8 @@ const formatTime = (time) => {
 };
 
 const goPreview = (item) => {
-    uni.setStorageSync('wallList', ratingList.value);
+    const appStore = useAppStore();
+    appStore.wallList = ratingList.value;
     uni.navigateTo({
         url: '/pages/app/preview?id=' + item.id,
     });
@@ -174,7 +176,8 @@ const handleSwipeClick = (item, index, e) => {
 
             const prevItem = ratingList.value[index];
             ratingList.value.splice(index, 1);
-            uni.setStorageSync('wallList', ratingList.value);
+            const appStore = useAppStore();
+            appStore.wallList = ratingList.value;
 
             try {
                 await apiPostActions({
@@ -188,7 +191,8 @@ const handleSwipeClick = (item, index, e) => {
                 });
             } catch (error) {
                 ratingList.value.splice(index, 0, prevItem);
-                uni.setStorageSync('wallList', ratingList.value);
+                const appStore = useAppStore();
+                appStore.wallList = ratingList.value;
                 uni.showToast({
                     title: t('rating.deleteFailed'),
                     icon: 'none',
@@ -213,7 +217,8 @@ onLoad(() => {
 });
 
 onUnload(() => {
-    uni.removeStorageSync('wallList');
+    const appStore = useAppStore();
+    appStore.wallList = [];
 });
 
 onReachBottom(() => {

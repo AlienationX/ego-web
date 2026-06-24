@@ -119,11 +119,11 @@
                                     </view>
                                     <view class="card-info" :class="{ 'always-visible': showCardMeta }">
                                         <view class="card-info__title">
-                                            {{ item.description || item.classify_name || ('壁纸 #' + item.id) }}
+                                            {{ getLocalizedItem(item).description || getLocalizedItem(item).classify_name || ('壁纸 #' + item.id) }}
                                         </view>
                                         <view class="card-info__footer">
                                             <view class="card-info__classify">
-                                                {{ item.classify_name || '壁纸' }}
+                                                {{ getLocalizedItem(item).classify_name || '壁纸' }}
                                             </view>
                                             <view class="card-info__score">
                                                 <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
@@ -185,14 +185,27 @@
 
 <script setup>
 import { ref, reactive, watch, computed, onMounted, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { apiGetClassList, apiGetSearchData, apiGetActions, apiPostRecommend } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
+import { useAppStore } from '@/stores/app.js';
 import { handlePicUrl } from '@/utils/common.js';
 
+const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const isDark = computed(() => settingsStore.isDark);
+const isEn = computed(() => locale.value === 'en');
+
+const getLocalizedItem = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        description: isEn.value && item.description_en ? item.description_en : item.description,
+        classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
+    };
+};
 
 const props = defineProps({
     tabs: { type: Array, required: true },
@@ -357,22 +370,25 @@ const processImages = async (index, list) => {
         state.waterfall.columnHeights = new Array(colCount).fill(0);
     }
 
+    await Promise.all(list.map(async (item) => {
+        if (!item.width || !item.height) {
+            try {
+                const info = await getImageInfo(item.smallPicurl);
+                item.width = info.width || 300;
+                item.height = info.height || 600;
+            } catch (e) {
+                item.width = 300;
+                item.height = 600;
+                item._fetchError = true;
+            }
+        }
+    }));
+
     for (const item of list) {
         let w = item.width;
         let h = item.height;
         let mode = isWaterfall.value ? 'widthFix' : 'aspectFill';
-
-        if (!w || !h) {
-            try {
-                const info = await getImageInfo(item.smallPicurl);
-                w = info.width || 300;
-                h = info.height || 600;
-            } catch (e) {
-                w = 300;
-                h = 600;
-                if (isWaterfall.value) mode = 'aspectFill';
-            }
-        }
+        if (item._fetchError && isWaterfall.value) mode = 'aspectFill';
 
         item.width = w;
         item.height = h;
@@ -462,7 +478,8 @@ const onAdError = (index, slotKey) => {
     tabStates[index].adErrorMap[slotKey] = true;
 };
 const openPreview = (id, index) => {
-    uni.setStorageSync('wallList', tabStates[index].images);
+    const appStore = useAppStore();
+    appStore.wallList = tabStates[index].images;
     uni.navigateTo({ url: `/pages/app/preview?id=${id}` });
 };
 
@@ -535,7 +552,13 @@ watch(
 watch(
     () => props.tabs[currentIndex.value]?.query,
     (newQuery, oldQuery) => {
-        if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
+        if (!newQuery || !oldQuery) {
+            if (newQuery !== oldQuery) fetchData(currentIndex.value, true);
+            return;
+        }
+        const keys1 = Object.keys(newQuery);
+        const keys2 = Object.keys(oldQuery);
+        if (keys1.length !== keys2.length || keys1.some((k) => newQuery[k] !== oldQuery[k])) {
             fetchData(currentIndex.value, true);
         }
     },

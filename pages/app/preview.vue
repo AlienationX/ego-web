@@ -134,7 +134,7 @@
                                     <image class="meta-avatar" :src="publisherAvatar" mode="aspectFill"></image>
                                     <text class="meta-user-name">{{ publisherName }}</text>
                                 </view>
-                                <view class="meta-desc">{{ currentInfo.description || currentInfo.classify_name || '' }}</view>
+                                <view class="meta-desc">{{ getLocalizedItem(currentInfo).description || getLocalizedItem(currentInfo).classify_name || '' }}</view>
                             </view>
                         </template>
                     </view>
@@ -159,9 +159,9 @@
                             <view class="label">{{ t('previewPage.wallpaperId') }}</view>
                             <view class="value" selectable>{{ currentInfo.id }}</view>
                         </view>
-                        <view class="row" v-if="currentInfo.classify_name">
+                        <view class="row" v-if="getLocalizedItem(currentInfo).classify_name">
                             <view class="label">{{ t('previewPage.category') }}</view>
-                            <view class="value classify">{{ currentInfo.classify_name }}</view>
+                            <view class="value classify">{{ getLocalizedItem(currentInfo).classify_name }}</view>
                         </view>
                         <view class="row" v-if="currentInfo.publisher">
                             <view class="label">{{ t('previewPage.publisher') }}</view>
@@ -195,19 +195,19 @@
                             <view class="label">{{ t('previewPage.aspectRatio') }}</view>
                             <view class="value">{{ aspectRatioText }}</view>
                         </view> -->
-                        <view class="row" v-if="currentInfo.description">
+                        <view class="row" v-if="getLocalizedItem(currentInfo).description">
                             <view class="label">{{ t('previewPage.description') }}</view>
-                            <view class="value" selectable>{{ currentInfo.description }}</view>
+                            <view class="value" selectable>{{ getLocalizedItem(currentInfo).description }}</view>
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.tags') }}</view>
                             <view class="value tags">
-                                <view class="tag" v-for="tag in currentInfo.tags_list" :key="tag" @click="goSearchByTag(tag)">
+                                <view class="tag" v-for="tag in currentTags" :key="tag" @click="goSearchByTag(tag)">
                                     {{ tag }}
                                 </view>
                             </view>
                         </view>
-                        <view class="copyright">{{ t('message.copyrightStatement') }}</view>
+                        <view class="copyright">{{ tp('message.copyrightStatement', { email: '735003439@qq.com' }) }}</view>
 
                         <!-- TODO 弹窗广告目前存在BUG，关闭后广告还存在，且位置异常 -->
                         <!-- <view v-if="displayAd" class="ad-row">
@@ -335,6 +335,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useAdIntersititial } from '@/hooks/useAd.js';
@@ -346,6 +347,7 @@ import {
     apiGetClassify,
 } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
@@ -390,16 +392,34 @@ const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 const HAS_SEEN_HINT_KEY = 'hasSeenHint';
 
 const { t, locale } = useI18n();
+const { tp } = useTranslateParams();
+const isEn = computed(() => locale.value === 'en');
+
+const getLocalizedItem = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        description: isEn.value && item.description_en ? item.description_en : item.description,
+        classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
+    };
+};
+
+const currentTags = computed(() => {
+    const item = currentInfo.value || {};
+    if (isEn.value && item.tags_en_list?.length) {
+        return item.tags_en_list;
+    }
+    return item.tags_list || [];
+});
+const initDate = new Date();
 const timeText = computed(() => {
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
+    const hh = String(initDate.getHours()).padStart(2, '0');
+    const mm = String(initDate.getMinutes()).padStart(2, '0');
     return `${hh}:${mm}`;
 });
 const dateText = computed(() => {
-    const now = new Date();
     const isZh = String(locale.value || '').startsWith('zh');
-    return formatPreviewDate(now, isZh);
+    return formatPreviewDate(initDate, isZh);
 });
 const currentPreviewType = computed(() => settingsStore.options.previewType || 'classic');
 const isAdmin = computed(() => !!userStore.isAdmin);
@@ -475,13 +495,15 @@ const publishDateText = computed(() => {
 });
 
 const classList = ref([]);
-const wallList = uni.getStorageSync('wallList') || [];
+const appStore = useAppStore();
+const wallList = appStore.wallList || [];
 classList.value = wallList.map((item) => {
     // 增加tags_list字段，将字符串转换成数组
     return {
         ...item,
         is_favorited: !!item.is_favorited,
         tags_list: typeof item.tags === 'string' ? item.tags.split(',') : item.tags_list || [],
+        tags_en_list: typeof item.tags_en === 'string' ? item.tags_en.split(',') : item.tags_en_list || [],
     };
 });
 const disableSwipe = ref(false);
@@ -864,8 +886,6 @@ const submitScore = async () => {
             action_value: userScore.value,
         });
 
-        // classList.value[currentIndex.value].userScore = userScore.value;
-        // uni.setStorageSync('wallList', classList.value);
         uni.showToast({
             title: t('previewPage.ratingSuccess'),
             icon: 'none',
@@ -941,18 +961,12 @@ function readImgsFun() {
 const isImageLoaded = (index) => !!loadedImageMap.value[index];
 
 const handleImageLoad = (index, event) => {
-    loadedImageMap.value = {
-        ...loadedImageMap.value,
-        [index]: true,
-    };
+    loadedImageMap.value[index] = true;
     const item = classList.value[index];
     const width = Number(event?.detail?.width || 0);
     const height = Number(event?.detail?.height || 0);
     if (!item?.id || !width || !height) return;
-    imageSizeMap.value = {
-        ...imageSizeMap.value,
-        [item.id]: { width, height },
-    };
+    imageSizeMap.value[item.id] = { width, height };
 };
 
 // OnLoad接收参数
@@ -984,6 +998,8 @@ onLoad((e) => {
 });
 
 onUnload(() => {
+    clearTimeout(viewDebounceTimer);
+    viewDebounceTimer = null;
     // destroyInterstitialAd(); // 销毁插屏广告
     // destroyRewardedVideoAd(); // 销毁激励视频广告
 });

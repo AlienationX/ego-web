@@ -23,9 +23,9 @@
                 <image class="recommend-card__image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
                 <view class="recommend-card__body">
                     <!-- <view v-if="item.reason" class="recommend-card__reason">{{ item.reason }}</view> -->
-                    <view class="recommend-card__title">{{ item.description || `#${item.id}` }}</view>
+                    <view class="recommend-card__title">{{ getLocalizedItem(item).description || `#${item.id}` }}</view>
                     <view class="recommend-card__meta">
-                        <text class="recommend-card__meta-text">{{ item.classify_name || t('top10.wallpaper') }}</text>
+                        <text class="recommend-card__meta-text">{{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}</text>
                         <view class="recommend-card__score">
                             <mdi-icon path="/static/icons/star.svg" size="16px" color="#f4b400"></mdi-icon>
                             <text class="recommend-card__score-text">{{ item.score ?? '--' }}</text>
@@ -49,6 +49,7 @@ import { handlePicUrl } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 
 const props = defineProps({
     currentInfo: {
@@ -57,19 +58,32 @@ const props = defineProps({
     },
     limit: {
         type: Number,
-        default: 8,
+        default: 20,
     },
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 const list = ref([]);
 const loading = ref(false);
 const isAdmin = computed(() => !!userStore.isAdmin);
 const isDark = computed(() => settingsStore.isDark);
+
+// 语言切换支持
+const isEn = computed(() => locale.value === 'en');
+
+const getLocalizedItem = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        description: isEn.value && item.description_en ? item.description_en : item.description,
+        classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
+    };
+};
 const arrowIconColor = computed(() => (isDark.value ? '#94a3b8' : '#7c8aa5'));
 
 const normalizeTags = (wall = {}) => {
@@ -135,7 +149,7 @@ const loadRecommend = async () => {
 };
 
 const openPreview = (item) => {
-    uni.setStorageSync('wallList', [item]);
+    appStore.wallList = [item];
     uni.navigateTo({
         url: `/pages/app/preview?id=${item.id}&mode=recommend`,
     });

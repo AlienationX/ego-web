@@ -49,15 +49,24 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
+import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
+
+const { locale } = useI18n();
+const isEn = computed(() => locale.value === 'en');
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const heroTopPadding = computed(() => statusBarHeight.value + 10);
-const classifyList = ref([]);
+const appStore = useAppStore();
+const classifyList = computed({
+    get: () => appStore.classifyList,
+    set: (val) => { appStore.classifyList = val; }
+});
 const isLoading = ref(true);
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
@@ -68,7 +77,7 @@ const heroAdVisible = computed(() => adEnabled.value && heroAdLoaded.value);
 const classifyComputed = computed(() => {
     return classifyList.value.map((item) => ({
         ...item,
-        name: uni.getLocale() === 'en' ? item.name_en : item.name,
+        name: isEn.value ? item.name_en || item.name : item.name,
     }));
 });
 const adEnabled = computed(() => !userStore.isVip && userStore.showAd);
@@ -78,7 +87,6 @@ const getClassify = async () => {
         isLoading.value = true;
         let res = await apiGetClassify();
         classifyList.value = (res.data || []).map((item) => handlePicUrl(item));
-        uni.setStorageSync('classifyList', classifyList.value);
     } catch (error) {
         console.error('获取分类数据失败:', error);
     } finally {

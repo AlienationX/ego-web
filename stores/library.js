@@ -9,15 +9,10 @@ const normalizeWall = (wall = {}) => {
 
     return {
         id: wall.id,
-        picurl: wall.picurl || wall.mediumPicurl || wall.smallPicurl || '',
         smallPicurl: wall.smallPicurl || wall.picurl || '',
-        mediumPicurl: wall.mediumPicurl || wall.picurl || wall.smallPicurl || '',
         description: wall.description || '',
         classify_name: wall.classify_name || '',
         score: wall.score || 0,
-        views: wall.views || 0,
-        downloads: wall.downloads || 0,
-        tags: wall.tags || '',
         tags_list: Array.isArray(wall.tags_list)
             ? wall.tags_list
             : typeof wall.tags === 'string'
@@ -26,9 +21,6 @@ const normalizeWall = (wall = {}) => {
                     .map((item) => item.trim())
                     .filter(Boolean)
               : [],
-        updated_at: wall.updated_at || '',
-        publisher: wall.publisher || '',
-        is_favorited: !!wall.is_favorited,
         viewed_at: wall.viewed_at || Date.now(),
     };
 };
@@ -69,7 +61,7 @@ export const useLibraryStore = defineStore(
             recentViewed.value = [
                 normalized,
                 ...recentViewed.value.filter((item) => item.id !== normalized.id && (item.viewed_at || Date.now()) >= thirtyDaysAgo)
-            ].slice(0, 1000);
+            ].slice(0, 400);
 
             const nextTags = normalized.tags_list.filter((tag) => !hiddenTags.value.includes(tag));
             preferredTags.value = [...new Set([...nextTags, ...preferredTags.value])].slice(0, MAX_TAG_ITEMS);
