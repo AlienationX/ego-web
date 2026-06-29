@@ -425,7 +425,7 @@ const validateForm = () => {
 
     if (!isAgreed.value) {
         uni.showToast({
-            title: t('login.agreeTerms'),
+            title: t('login.agreeRequired'),
             icon: 'none',
         });
         return false;
@@ -626,7 +626,7 @@ const goBack = () => {
     }
 
     .sub-title {
-        font-size: 28rpx;
+        font-size: 32rpx;
         color: var(--text-secondary);
         line-height: 1.6;
         opacity: 0.8;

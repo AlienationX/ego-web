@@ -334,7 +334,7 @@ const handleSignup = async () => {
     }
 
     .sub-title {
-        font-size: 28rpx;
+        font-size: 32rpx;
         color: var(--text-secondary);
         line-height: 1.6;
         opacity: 0.8;

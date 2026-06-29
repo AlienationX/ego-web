@@ -112,7 +112,7 @@ import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
-// #ifdef APP
+// #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
 
@@ -174,7 +174,7 @@ const showPermissionModal = () => {
 };
 
 const selectImage = (count) => {
-    // #ifdef APP
+    // #ifdef APP-PLUS
     const channel = plus.runtime.channel;
     if (channel === 'google') {
         // 由于受google play 照片和视频权限政策的影响，使用uni.chooseImage选择图片会调用READ_MEDIA_IMAGES/READ_MEDIA_VIDEO权限，该权限需在Google Play Console中申请

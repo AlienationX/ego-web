@@ -1,6 +1,6 @@
 <template>
     <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
-        <menu-bar class="menubar" :show-border="false" :show-toggle-menu="true">
+        <menu-bar class="menubar" :show-border="false" :show-toggle-menu="false">
             <!-- <template #title>{{ props.name }}</template> -->
             <template #title>{{ $t('index.notice') }}</template>
             <template #menuBtn></template>

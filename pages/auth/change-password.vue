@@ -209,7 +209,7 @@ function goBack() {
 }
 
 function backToSettings() {
-    uni.reLaunch({ url: '/pages/settings/settings' });
+    uni.redirectTo({ url: '/pages/settings/settings' });
 }
 
 function getStrength(password) {

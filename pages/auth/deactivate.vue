@@ -190,7 +190,7 @@ const onBack = () => {
     }
     uni.navigateBack({
         fail: () => {
-            uni.reLaunch({ url: '/pages/settings/settings' });
+            uni.redirectTo({ url: '/pages/settings/settings' });
         },
     });
 };

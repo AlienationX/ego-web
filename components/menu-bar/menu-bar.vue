@@ -128,7 +128,7 @@ const toggleMenu = () => {
             .back {
                 width: 64rpx;
                 height: 64rpx;
-                background: var(--panel-background);
+                // background: var(--panel-background);
                 border-radius: 50%;
                 display: flex;
                 justify-content: center;

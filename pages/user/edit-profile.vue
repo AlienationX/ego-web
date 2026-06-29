@@ -82,7 +82,7 @@ import { useUserStore } from '@/stores/user.js';
 import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
-// #ifdef APP
+// #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
 
@@ -131,7 +131,7 @@ const showPermissionModal = () => {
 };
 
 const chooseAvatar = () => {
-    // #ifdef APP
+    // #ifdef APP-PLUS
     const channel = plus.runtime.channel;
     console.log('channel', channel);
     if (channel === 'google') {

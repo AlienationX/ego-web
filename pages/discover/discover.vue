@@ -130,7 +130,7 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
-// #ifdef APP
+// #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
 
@@ -612,7 +612,7 @@ const pickLocalImage = () => {
         return;
     }
 
-    // #ifdef APP
+    // #ifdef APP-PLUS
     const channel = plus.runtime.channel;
     if (channel === 'google') {
         chooseSystemMedia({

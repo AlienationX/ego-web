@@ -17,6 +17,7 @@ export const useAdIntersititial = () => {
         if (url) downloadPic(url);
     };
     const adminToast = (options) => {
+        // 只有管理员才能看到提示
         if (!userStore.isAdmin) return;
         uni.showToast(options);
     };
@@ -167,6 +168,7 @@ export const useAdRewardedVideo = () => {
         if (url) downloadPic(url);
     };
     const adminToast = (options) => {
+        // 只有管理员才能看到提示
         if (!userStore.isAdmin) return;
         uni.showToast(options);
     };

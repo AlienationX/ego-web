@@ -1,7 +1,7 @@
 {
-    "name" : "Ego Wallpapers",
+    "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
-    "description" : "Explore wallpapers, and explore yourself.",
+    "description" : "探索壁纸，亦探索自我。",
     "versionName" : "1.3.8",
     "versionCode" : 138,
     "transformPx" : false,
@@ -175,11 +175,20 @@
                 "background" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/logo-background.png"
             },
             "signingConfigs" : {
+                "default" : {
+                    "certpath" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.cer",
+                    "keyAlias" : "debugKey",
+                    "keyPassword" : "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4",
+                    "profile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1782699924419.p7b",
+                    "signAlg" : "SHA256withECDSA",
+                    "storeFile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.p12",
+                    "storePassword" : "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4"
+                },
                 "release" : {
                     "certpath" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.cer",
                     "keyAlias" : "wp",
                     "keyPassword" : "00000023DC327F2B24C5A6B5AD0A78C80FCC7E701D3713362E25140F7AF0159D1E80808CC677EBEEE26720FBA81A9D3B7B4234",
-                    "profile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaperRelease.p7b",
+                    "profile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper-profileRelease.p7b",
                     "signAlg" : "SHA256withECDSA",
                     "storeFile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.p12",
                     "storePassword" : "00000023E5A2CA26358069CADF876CDC9A0A4D2C36C79ABCBF370DDB5A5943C17A1C95190C7BFF3E9B5DA5335FB82B3DD382B9"

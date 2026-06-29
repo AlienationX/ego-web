@@ -1703,6 +1703,12 @@ onShareTimeline(() => {
             color: #fff;
             font-size: 30rpx;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
             border: none;
 
             &::after {
@@ -1718,6 +1724,12 @@ onShareTimeline(() => {
             color: #e5322d;
             font-size: 30rpx;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            line-height: 1;
             border: 1rpx solid #fecaca;
 
             &::after {
