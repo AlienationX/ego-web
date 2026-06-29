@@ -5,7 +5,7 @@
                 <image
                     class="pic"
                     :class="{ 'pic--loaded': loadedMap[item.id] }"
-                    :src="item.picurl"
+                    :src="item.mediumPicurl"
                     mode="aspectFill"
                     lazy-load
                     @load="onImageLoad(item.id)"

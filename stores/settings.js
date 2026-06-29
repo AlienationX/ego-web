@@ -49,7 +49,7 @@ export const useSettingsStore = defineStore(
         // 全局深色模式判定
         const isDark = computed(() => {
             if (options.theme === 'auto') {
-                return systemTheme.value === 'dark';
+                return (uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme) === 'dark';
             }
             return options.theme === 'dark';
         });

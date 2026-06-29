@@ -35,11 +35,30 @@ export const getLanguagePreference = () => normalizeLanguagePreference(uni.getSt
 export const getCurrentLocale = () => resolveAppLocale(getLanguagePreference());
 
 /**
+ * 更新 tabBar 文字（小程序端原生 tabBar 不支持运行时自动切换，需手动更新）
+ * @param {string} effective 生效的 locale
+ * @param {Function} t 国际化翻译函数
+ */
+const updateTabBarText = (effective, t) => {
+    // #ifdef MP
+    if (!t) return;
+    const tabKeys = ['tabbar.index', 'tabbar.category', 'tabbar.discover', 'tabbar.user'];
+    tabKeys.forEach((key, index) => {
+        uni.setTabBarItem({
+            index,
+            text: t(key),
+        });
+    });
+    // #endif
+};
+
+/**
  * 切换语言偏好
  * @param {string} pref auto | en | zh-Hans
  * @param {import('vue').Ref<string>} [localeRef] vue-i18n 的 locale 引用
+ * @param {Function} [t] 国际化翻译函数（用于更新 tabBar 文字）
  */
-export const applyLanguagePreference = (pref, localeRef) => {
+export const applyLanguagePreference = (pref, localeRef, t) => {
     const normalized = normalizeLanguagePreference(pref);
     const effective = resolveAppLocale(normalized);
 
@@ -50,6 +69,7 @@ export const applyLanguagePreference = (pref, localeRef) => {
         localeRef.value = effective;
     }
 
+    updateTabBarText(effective, t);
     uni.$emit('localeChanged', { preference: normalized, locale: effective });
 };
 

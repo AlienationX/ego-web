@@ -910,7 +910,7 @@ function syncLanguagePreference() {
 
     if (storePref && storePref !== LANGUAGE_PREF_AUTO) {
         if (stored !== storePref || locale.value !== resolveAppLocale(storePref)) {
-            applyLanguagePreference(storePref, locale);
+            applyLanguagePreference(storePref, locale, t);
         }
         return;
     }
@@ -922,7 +922,7 @@ function syncLanguagePreference() {
 
 function selectLanguage(pref) {
     settingsStore.options.language = pref;
-    applyLanguagePreference(pref, locale);
+    applyLanguagePreference(pref, locale, t);
     uni.showToast({
         title: t('settings.toast.languageChanged'),
         icon: 'none',
@@ -933,8 +933,8 @@ function selectLanguage(pref) {
 function selectTheme(theme) {
     // #ifdef APP
     uni.setStorageSync('theme', theme);
-    // console.log('systemTheme', settingsStore.systemTheme);
-    const targetStyle = theme === 'auto' ? settingsStore.systemTheme : theme;
+    // console.log('systemTheme', uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme);
+    const targetStyle = theme === 'auto' ? uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme : theme;
     plus.nativeUI.setUIStyle(targetStyle);
     settingsStore.options.theme = theme;
     // #endif

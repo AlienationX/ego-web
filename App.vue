@@ -23,7 +23,7 @@ onLaunch(() => {
     // #ifdef APP
     const savedTheme = uni.getStorageSync('theme') || 'auto';
     settingsStore.options.theme = savedTheme;
-    const activeUIStyle = savedTheme === 'auto' ? settingsStore.systemTheme : savedTheme;
+    const activeUIStyle = savedTheme === 'auto' ? (uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme) : savedTheme;
     plus.nativeUI.setUIStyle(activeUIStyle);
     // #endif
 

@@ -42,7 +42,7 @@
                         </swiper-item>
                     </swiper>
 
-                    <view class="mask" v-if="maskState">
+                    <view class="mask" :class="{ 'mask--loading': isCurrentSlideLoading }" v-if="maskState">
                         <view class="goBack" :style="{ top: backButtonTop + 'px' }" @click="goBack">
                             <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
                         </view>
@@ -972,6 +972,10 @@ const handleImageLoad = (index, event) => {
 // OnLoad接收参数
 const currentId = ref(null);
 const currentIndex = ref(0);
+
+const isCurrentSlideLoading = computed(
+    () => readImgs.value.includes(currentIndex.value) && !loadedImageMap.value[currentIndex.value],
+);
 const currentInfo = ref(null);
 onLoad((e) => {
     currentId.value = e.id;
@@ -1053,7 +1057,11 @@ onShareTimeline(() => {
     width: 100%;
     position: relative;
     min-height: 100vh;
-    background: #0b0f14;
+    background: var(--page-background);
+
+    .theme-dark & {
+        background: #0b0f14;
+    }
 }
 
 .previewScroll {
@@ -1073,7 +1081,11 @@ onShareTimeline(() => {
             width: 100%;
             height: 100%;
             position: relative;
-            background: #0b0f14;
+            background: var(--page-background);
+
+            .theme-dark & {
+                background: #0b0f14;
+            }
         }
 
         .preview-slide__image {
@@ -1096,9 +1108,15 @@ onShareTimeline(() => {
             justify-content: center;
             gap: 18rpx;
             background:
-                radial-gradient(circle at center, rgba(64, 100, 138, 0.18), transparent 28%),
-                linear-gradient(180deg, #0a0f15 0%, #0d141d 100%);
+                radial-gradient(circle at center, rgba(64, 100, 138, 0.08), transparent 28%),
+                linear-gradient(180deg, var(--page-background) 0%, var(--page-background-secondary) 100%);
             z-index: 1;
+
+            .theme-dark & {
+                background:
+                    radial-gradient(circle at center, rgba(64, 100, 138, 0.18), transparent 28%),
+                    linear-gradient(180deg, #0a0f15 0%, #0d141d 100%);
+            }
         }
 
         .preview-loading__glow {
@@ -1106,16 +1124,24 @@ onShareTimeline(() => {
             width: 360rpx;
             height: 360rpx;
             border-radius: 999rpx;
-            background: radial-gradient(circle, rgba(110, 168, 255, 0.18) 0%, rgba(110, 168, 255, 0) 72%);
+            background: radial-gradient(circle, rgba(110, 168, 255, 0.12) 0%, rgba(110, 168, 255, 0) 72%);
             filter: blur(10rpx);
+
+            .theme-dark & {
+                background: radial-gradient(circle, rgba(110, 168, 255, 0.18) 0%, rgba(110, 168, 255, 0) 72%);
+            }
         }
 
         .preview-loading__text {
             position: relative;
             z-index: 1;
             font-size: 24rpx;
-            color: rgba(255, 255, 255, 0.72);
+            color: var(--text-secondary);
             letter-spacing: 1rpx;
+
+            .theme-dark & {
+                color: rgba(255, 255, 255, 0.72);
+            }
         }
     }
 
@@ -1202,6 +1228,30 @@ onShareTimeline(() => {
             letter-spacing: 1rpx;
             color: rgba(255, 255, 255, 0.9);
             text-shadow: 0 2rpx rgba(0, 0, 0, 0.3);
+        }
+
+        &.mask--loading {
+            .time {
+                color: var(--text-primary);
+                text-shadow: none;
+            }
+
+            .date {
+                color: var(--text-secondary);
+                text-shadow: none;
+            }
+
+            .theme-dark & {
+                .time {
+                    color: rgba(255, 255, 255, 0.95);
+                    text-shadow: 0 4rpx rgba(0, 0, 0, 0.3);
+                }
+
+                .date {
+                    color: rgba(255, 255, 255, 0.9);
+                    text-shadow: 0 2rpx rgba(0, 0, 0, 0.3);
+                }
+            }
         }
 
         .scrollHint {
