@@ -403,7 +403,7 @@ export const streamRequest = (config = {}) => {
         })();
         // #endif
 
-        // #ifdef APP
+        // #ifdef APP-PLUS
         log('app.request', { url: requestUrl, method: requestMethod, mode: 'plus.net.XMLHttpRequest' });
         const xhr = new plus.net.XMLHttpRequest();
         let lastIndex = 0;
@@ -449,7 +449,7 @@ export const streamRequest = (config = {}) => {
         xhr.send(JSON.stringify(requestData));
         // #endif
 
-        // #ifdef MP
+        // #ifdef MP || APP-HARMONY
         log('app.request', { url: requestUrl, method: requestMethod, enableChunked: true });
         const appTask = uni.request({
             url: requestUrl,

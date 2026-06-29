@@ -295,7 +295,7 @@ onShow(() => {
 }
 
 .auth-list {
-    margin-top: 10px;
+    // margin-top: 10px;
     background: var(--page-background-secondary);
 }
 

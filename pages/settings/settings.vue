@@ -933,6 +933,7 @@ function selectLanguage(pref) {
 function selectTheme(theme) {
     // #ifdef APP
     uni.setStorageSync('theme', theme);
+    // console.log('systemTheme', settingsStore.systemTheme);
     const targetStyle = theme === 'auto' ? settingsStore.systemTheme : theme;
     plus.nativeUI.setUIStyle(targetStyle);
     settingsStore.options.theme = theme;
