@@ -34,20 +34,62 @@ export const getLanguagePreference = () => normalizeLanguagePreference(uni.getSt
  */
 export const getCurrentLocale = () => resolveAppLocale(getLanguagePreference());
 
+import { useSettingsStore } from '@/stores/settings.js';
+
 /**
- * 更新 tabBar 文字（小程序端原生 tabBar 不支持运行时自动切换，需手动更新）
- * @param {string} effective 生效的 locale
+ * 更新 tabBar 文字和图标（小程序端原生 tabBar 不支持运行时自动切换，需手动更新）
+ * 注意：此函数只能在 TabBar 页面（pages.json tabBar.list 中列出的页面）内调用，
+ * 否则小程序端会抛出 "setTabBarItem:fail not TabBar page" 错误。
  * @param {Function} t 国际化翻译函数
  */
-const updateTabBarText = (effective, t) => {
-    // #ifdef MP
+export const updateTabBarText = (t) => {
+    // #ifdef MP || APP-HARMONY
     if (!t) return;
-    const tabKeys = ['tabbar.index', 'tabbar.category', 'tabbar.discover', 'tabbar.user'];
-    tabKeys.forEach((key, index) => {
+    const settingsStore = useSettingsStore();
+    const isDark = settingsStore.isDark;
+
+    const tabConfigs = [
+        {
+            key: 'tabbar.index',
+            iconPathLight: '/static/tabbar/Light_Home.png',
+            iconPathDark: '/static/tabbar/Dark_Home.png',
+            selectedIconPath: '/static/tabbar/Fill_Home_Green.png'
+        },
+        {
+            key: 'tabbar.category',
+            iconPathLight: '/static/tabbar/Light_Category.png',
+            iconPathDark: '/static/tabbar/Dark_Category.png',
+            selectedIconPath: '/static/tabbar/Fill_Category_Green.png'
+        },
+        {
+            key: 'tabbar.discover',
+            iconPathLight: '/static/tabbar/Light_Discover.png',
+            iconPathDark: '/static/tabbar/Dark_Discover.png',
+            selectedIconPath: '/static/tabbar/Fill_Discover_Green.png'
+        },
+        {
+            key: 'tabbar.user',
+            iconPathLight: '/static/tabbar/Light_User.png',
+            iconPathDark: '/static/tabbar/Dark_User.png',
+            selectedIconPath: '/static/tabbar/Fill_User_Green.png'
+        }
+    ];
+
+    tabConfigs.forEach((config, index) => {
         uni.setTabBarItem({
             index,
-            text: t(key),
+            text: t(config.key),
+            iconPath: isDark ? config.iconPathDark : config.iconPathLight,
+            selectedIconPath: config.selectedIconPath
         });
+    });
+    
+    // 同步更新 TabBar 的颜色样式
+    uni.setTabBarStyle({
+        color: isDark ? '#c9cbd1' : '#9799a5',
+        selectedColor: '#28b389',
+        backgroundColor: isDark ? '#1c1c1c' : '#f5f5f8',
+        borderStyle: isDark ? 'black' : 'white'
     });
     // #endif
 };
@@ -56,9 +98,8 @@ const updateTabBarText = (effective, t) => {
  * 切换语言偏好
  * @param {string} pref auto | en | zh-Hans
  * @param {import('vue').Ref<string>} [localeRef] vue-i18n 的 locale 引用
- * @param {Function} [t] 国际化翻译函数（用于更新 tabBar 文字）
  */
-export const applyLanguagePreference = (pref, localeRef, t) => {
+export const applyLanguagePreference = (pref, localeRef) => {
     const normalized = normalizeLanguagePreference(pref);
     const effective = resolveAppLocale(normalized);
 
@@ -69,7 +110,8 @@ export const applyLanguagePreference = (pref, localeRef, t) => {
         localeRef.value = effective;
     }
 
-    updateTabBarText(effective, t);
+    // 不在此处调用 updateTabBarText，因为 settings 等非 TabBar 页面调用会报错。
+    // 发送事件，由各 TabBar 页面在 onShow 中自行调用 updateTabBarText。
     uni.$emit('localeChanged', { preference: normalized, locale: effective });
 };
 

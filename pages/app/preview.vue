@@ -1218,7 +1218,11 @@ onShareTimeline(() => {
             letter-spacing: 2rpx;
             color: rgba(255, 255, 255, 0.95);
             line-height: 1em;
-            text-shadow: 0 4rpx rgba(0, 0, 0, 0.3);
+            // 多层文字阴影：近距重阴影提升对比 + 大模糊光晕扩散，任he背景道可读
+            text-shadow:
+                0 2rpx 6rpx rgba(0, 0, 0, 0.55),
+                0 6rpx 20rpx rgba(0, 0, 0, 0.40),
+                0 16rpx 48rpx rgba(0, 0, 0, 0.28);
         }
 
         .date {
@@ -1227,32 +1231,12 @@ onShareTimeline(() => {
             font-weight: 500;
             letter-spacing: 1rpx;
             color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 2rpx rgba(0, 0, 0, 0.3);
+            text-shadow:
+                0 1rpx 4rpx rgba(0, 0, 0, 0.60),
+                0 4rpx 14rpx rgba(0, 0, 0, 0.40);
         }
 
-        &.mask--loading {
-            .time {
-                color: var(--text-primary);
-                text-shadow: none;
-            }
 
-            .date {
-                color: var(--text-secondary);
-                text-shadow: none;
-            }
-
-            .theme-dark & {
-                .time {
-                    color: rgba(255, 255, 255, 0.95);
-                    text-shadow: 0 4rpx rgba(0, 0, 0, 0.3);
-                }
-
-                .date {
-                    color: rgba(255, 255, 255, 0.9);
-                    text-shadow: 0 2rpx rgba(0, 0, 0, 0.3);
-                }
-            }
-        }
 
         .scrollHint {
             bottom: calc(env(safe-area-inset-bottom) + 24rpx);
@@ -1270,17 +1254,26 @@ onShareTimeline(() => {
         }
 
         .footer {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             bottom: 10vh;
             width: 80vw;
             height: 120rpx;
             border-radius: 120rpx;
-            color: #000;
+            color: #1a1a1a;
             display: flex;
             justify-content: space-around;
             align-items: center;
-            box-shadow: 0 2rpx rgba(0, 0, 0, 0.1);
+            /* 增强阴影和细微边框，确保在全白背景下也能看清药丸轮廓 */
+            box-shadow: 
+                0 4rpx 24rpx rgba(0, 0, 0, 0.12),
+                0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+            border: 1rpx solid rgba(0, 0, 0, 0.04);
             backdrop-filter: blur(20rpx);
+
+            :deep(.uni-icons) {
+                color: #1a1a1a !important;
+                text-shadow: none;
+            }
 
             .box {
                 display: flex;
@@ -1288,10 +1281,13 @@ onShareTimeline(() => {
                 justify-content: center;
                 align-items: center;
                 padding: 2rpx 12rpx;
+                gap: 4rpx;
 
                 .text {
                     font-size: 26rpx;
-                    // color: $wp-font-color-2;
+                    font-weight: 500;
+                    color: #1a1a1a;
+                    text-shadow: none;
                 }
             }
         }

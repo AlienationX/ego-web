@@ -38,7 +38,8 @@ export const useSettingsStore = defineStore(
             // TODO 多个primary等颜色的默认值
         });
 
-        const systemTheme = computed(() => (uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme || 'light'));
+        // WEB和MP获取宿主主题 hostTheme，APP获取操作系统主题 osTheme
+        const osTheme = ref(uni.getSystemInfoSync().hostTheme || uni.getSystemInfoSync().osTheme || 'light');
 
         // 窗口视图和瀑布流视图的切换
         const switchViewIcon = computed(() => (options.view === 'window' ? 'map-filled' : 'list'));
@@ -49,12 +50,12 @@ export const useSettingsStore = defineStore(
         // 全局深色模式判定
         const isDark = computed(() => {
             if (options.theme === 'auto') {
-                return (uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme) === 'dark';
+                return osTheme.value === 'dark';
             }
             return options.theme === 'dark';
         });
 
-        return { options, switchViewIcon, switchIcon, installBanner, isDark, systemTheme };
+        return { options, switchViewIcon, switchIcon, installBanner, isDark, osTheme };
     },
     {
         persist: {

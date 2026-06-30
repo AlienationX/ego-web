@@ -130,6 +130,7 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { updateTabBarText } from '@/utils/i18n.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
@@ -821,6 +822,9 @@ onLoad(() => {
 });
 
 onShow(() => {
+    // #ifdef MP || APP-HARMONY
+    updateTabBarText(t);
+    // #endif
     if (userStore.isLoggedIn) {
         getFavoriteList();
     }

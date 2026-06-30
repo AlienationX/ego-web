@@ -5,6 +5,9 @@ import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
 import { useSettingsStore } from '@/stores/settings.js';
 
+const settingsStore = useSettingsStore();
+
+
 onLaunch(() => {
     console.log('App Launch');
 
@@ -18,13 +21,10 @@ onLaunch(() => {
     //     });
     // }
 
-    const settingsStore = useSettingsStore();
-
     // #ifdef APP
     const savedTheme = uni.getStorageSync('theme') || 'auto';
     settingsStore.options.theme = savedTheme;
-    const activeUIStyle = savedTheme === 'auto' ? (uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme) : savedTheme;
-    plus.nativeUI.setUIStyle(activeUIStyle);
+    plus.nativeUI.setUIStyle(savedTheme);
     // #endif
 
     // #ifndef APP
@@ -34,16 +34,12 @@ onLaunch(() => {
     // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
         console.log('onThemeChange', theme);
+        console.log('osTheme: ', settingsStore.osTheme);
+        settingsStore.osTheme = theme;
 
         // #ifdef APP
-        // 如果用户设置的是跟随系统，系统切换主题时需要同时更新原生UI风格
-        if (settingsStore.options.theme === 'auto') {
-            plus.nativeUI.setUIStyle(theme);
-        }
-        // #endif
-
-        // #ifndef APP
-        settingsStore.options.theme = 'auto';
+        // 在 App 上需要先调用 plus.nativeUI.setUIStyle('auto') 开启跟随系统主题切换的功能，才能监听到主题切换事件，值为light或dark
+        plus.nativeUI.setUIStyle(theme);
         // #endif
     });
 
@@ -61,6 +57,16 @@ onLaunch(() => {
 
 onShow(() => {
     console.log('App Show');
+
+    // 从后台切回时 onThemeChange 可能未触发，重新同步系统主题
+    const currentOsTheme = uni.getSystemInfoSync().osTheme || uni.getSystemInfoSync().hostTheme || 'light';
+    if (settingsStore.osTheme !== currentOsTheme) {
+        console.log('onShow sync osTheme:', settingsStore.osTheme, '->', currentOsTheme);
+        // #ifdef APP
+        plus.nativeUI.setUIStyle(currentOsTheme);
+        // #endif
+        settingsStore.osTheme = currentOsTheme;
+    }
 
     // permissionEnums枚举建议单独一个js文件，然后引入
     // const permissionEnums = {

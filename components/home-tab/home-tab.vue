@@ -1200,7 +1200,8 @@ onMounted(() => {
                 overflow: hidden;
                 border-radius: 28rpx;
                 box-sizing: border-box;
-                box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
+                // box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
+                box-shadow: none;
 
                 &::before {
                     content: '';

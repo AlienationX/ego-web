@@ -96,7 +96,7 @@ import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
-const isDark = computed(() => settingsStore.options.theme === 'dark');
+const isDark = computed(() => settingsStore.isDark);
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const isAdmin = computed(() => !!userStore.isAdmin);

@@ -211,6 +211,7 @@ import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useI18n } from 'vue-i18n';
+import { updateTabBarText } from '@/utils/i18n.js';
 
 const { t } = useI18n();
 
@@ -505,6 +506,10 @@ const exitMenus = computed(() => [
 ]);
 
 onShow(() => {
+    // #ifdef MP || APP-HARMONY
+    updateTabBarText(t);
+    // #endif
+    
     // 检查是否已登录，已登录则获取最新用户信息
     // isFetchedRecently 防止刚登录时 signin 已拉过一次，onShow 再重复拉
     if (userStore.userinfo.id && !userStore.isFetchedRecently(3000)) {

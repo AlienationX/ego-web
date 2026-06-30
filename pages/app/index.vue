@@ -89,9 +89,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { onLoad, onShow, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { updateTabBarText } from '@/utils/i18n.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/system.js';
 import TimelinePage from '@/pages/app/timeline.vue';
 import TopNPage from '@/pages/app/topN.vue';
@@ -170,6 +171,12 @@ const handleEmbeddedScroll = (e) => {
 };
 
 // ── 优化：在 onLoad 中注册事件，避免模块顶层重复注册；传入函数引用精确移除 ──
+onShow(() => {
+    // #ifdef MP || APP-HARMONY
+    updateTabBarText(t);
+    // #endif
+});
+
 onLoad(() => {
     uni.$on('app-scroll', updateTitleBarVisibleByScroll);
 });

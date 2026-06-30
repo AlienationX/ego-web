@@ -48,8 +48,9 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
+import { updateTabBarText } from '@/utils/i18n.js';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useUserStore } from '@/stores/user.js';
@@ -57,7 +58,7 @@ import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 const isEn = computed(() => locale.value === 'en');
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
@@ -93,6 +94,12 @@ const getClassify = async () => {
         isLoading.value = false;
     }
 };
+
+onShow(() => {
+    // #ifdef MP || APP-HARMONY
+    updateTabBarText(t);
+    // #endif
+});
 
 onLoad(() => {
     getClassify();

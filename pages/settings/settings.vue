@@ -933,10 +933,9 @@ function selectLanguage(pref) {
 function selectTheme(theme) {
     // #ifdef APP
     uni.setStorageSync('theme', theme);
-    // console.log('systemTheme', uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme);
-    const targetStyle = theme === 'auto' ? uni.getSystemInfoSync().theme || uni.getSystemInfoSync().osTheme : theme;
-    plus.nativeUI.setUIStyle(targetStyle);
     settingsStore.options.theme = theme;
+    // 更新原生UI风格，支持跟随系统主题auto、dark、light主题
+    plus.nativeUI.setUIStyle(theme);
     // #endif
 
     // #ifndef APP

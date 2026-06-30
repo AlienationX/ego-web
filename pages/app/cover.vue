@@ -63,10 +63,10 @@
                             v-for="item in classifyImages"
                             :key="item.id"
                             class="image-card"
-                            :class="{ active: draftCoverUrl === item.picurl }"
+                            :class="{ active: draftCoverUrl === (item.mediumPicurl || item.picurl) }"
                             @click="selectCover(item)"
                         >
-                            <image class="image-card__thumb" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                            <image class="image-card__thumb" :src="item.smallPicurl || item.mediumPicurl || item.picurl" mode="aspectFill"></image>
                             <view class="image-card__meta">
                                 <view class="image-card__id">#{{ item.id }}</view>
                                 <view class="image-card__score">评分 {{ item.score ?? '--' }}</view>
@@ -186,6 +186,7 @@ const imagePageNum = ref(1);
 const imageNoMore = ref(false);
 const loadingMore = ref(false);
 const draftCoverUrl = ref('');
+const draftCoverPicUrl = ref('');
 const originalCoverUrl = ref('');
 const previewMode = ref('grid');
 const imageLoading = ref(false);
@@ -255,8 +256,9 @@ const selectClassify = async (classifyId) => {
     if (selectedClassifyId.value === classifyId && classifyImages.value.length) return;
     selectedClassifyId.value = classifyId;
     const current = classifyList.value.find((item) => item.id === classifyId);
-    originalCoverUrl.value = current?.picurl || '';
-    draftCoverUrl.value = current?.picurl || '';
+    originalCoverUrl.value = current?.mediumPicurl || current?.picurl || '';
+    draftCoverUrl.value = current?.mediumPicurl || current?.picurl || '';
+    draftCoverPicUrl.value = current?.picurl || '';
     await getClassifyImages(classifyId);
 };
 
@@ -289,21 +291,22 @@ const loadMoreImages = () => {
 };
 
 const selectCover = (item) => {
-    draftCoverUrl.value = item.picurl;
+    draftCoverUrl.value = item.mediumPicurl || item.picurl;
+    draftCoverPicUrl.value = item.picurl;
 };
 
 const getPreviewCover = (item) => {
     if (item.id === selectedClassifyId.value && draftCoverUrl.value) {
         return draftCoverUrl.value;
     }
-    return item.picurl;
+    return item.mediumPicurl || item.picurl;
 };
 
 const saveCover = async () => {
     if (!selectedClassify.value || !draftChanged.value || saving.value) return;
     saving.value = true;
     try {
-        const picurl = draftCoverUrl.value.replace(PICS_BASE_URL + '/', '');
+        const picurl = draftCoverPicUrl.value.replace(PICS_BASE_URL + '/', '');
         await apiPostClassifyPicUrl({ picurl }, selectedClassify.value.id);
 
         classifyList.value = classifyList.value.map((item) =>
