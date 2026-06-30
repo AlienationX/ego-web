@@ -20,8 +20,11 @@
 import { ref, computed } from 'vue';
 import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { useAdRewardedVideo } from '@/hooks/useAd.js';
-import { apiPostIncrementDownloads, apiPostActions } from '@/api/wallpaper.js';
+import { apiPostIncrementDownloads, apiPostActions, apiPostEarnEnergy } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useUserStore } from '@/stores/user.js';
+import { VIDEO_REWARD_ENERGY } from '@/common/config.js';
+import { downloadPic } from '@/common/core.js';
 
 const props = defineProps({
     id: Number,
@@ -29,6 +32,7 @@ const props = defineProps({
 });
 
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const isDark = computed(() => settingsStore.isDark);
 
 // views字段值+1
@@ -54,18 +58,30 @@ const close = () => {
 
 const onWatch = () => {
     close();
-    uni.showLoading({
-        title: 'Downloading...',
-        mask: true,
+
+    showRewardedVideoAd(props.picurl, {
+        onSuccess: async (picurl) => {
+            // 观看完整视频后发放能量
+            const res = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
+            if (res.data?.energy !== undefined) {
+                userStore.updateEnergy(res.data.energy);
+                // 发放成功后自动扣除1点并下载
+                const consumeRes = await userStore.consumeEnergy(props.id);
+                if (consumeRes.data?.energy !== undefined) {
+                    downloadPic(picurl);
+                    incrementDownloads(props.id);
+                } else {
+                    uni.showToast({ title: 'Consume energy failed', icon: 'none' });
+                }
+            } else {
+                uni.showToast({ title: 'Earn energy failed', icon: 'none' });
+            }
+        },
+        onFallback: (picurl) => {
+            downloadPic(picurl);
+            incrementDownloads(props.id);
+        }
     });
-
-    // createRewardedVideoAd(); // 创建激励视频广告
-    showRewardedVideoAd(props.picurl);
-    // destroyRewardedVideoAd(); // 销毁激励视频广告
-
-    incrementDownloads(props.id);
-
-    uni.hideLoading();
 };
 
 onLoad(() => {

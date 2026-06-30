@@ -1,6 +1,6 @@
 import { ref, reactive, computed } from 'vue';
 import { defineStore } from 'pinia';
-import { apiGetProfile } from '@/api/wallpaper';
+import { apiGetProfile, apiPostConsumeEnergy } from '@/api/wallpaper';
 import { encrypt } from '@/utils/encryption.js';
 import { PICS_BASE_URL } from '@/common/config.js';
 
@@ -32,6 +32,9 @@ export const useUserStore = defineStore(
                 ['le7yi_ss@163.com', 'dev@123.com'].includes(userinfo.value.username) ||
                 false,
         );
+
+        // 当前能量值
+        const energy = computed(() => userinfo.value.profile?.energy || 0);
 
         const setToken = (access, refresh) => {
             accessToken.value = encrypt(access);
@@ -86,6 +89,22 @@ export const useUserStore = defineStore(
         // 判断 10s 内是否执行过 setUserInfo
         const isFetchedRecently = (ms = 10000) => Date.now() - lastFetchTime.value < ms;
 
+        // 更新本地能量值
+        const updateEnergy = (newEnergy) => {
+            if (userinfo.value.profile) {
+                userinfo.value.profile.energy = newEnergy;
+            }
+        };
+
+        // 扣除能量（调用后端接口）
+        const consumeEnergy = async (wallId) => {
+            const res = await apiPostConsumeEnergy({ wall_id: wallId });
+            if (res.data?.energy !== undefined) {
+                updateEnergy(res.data.energy);
+            }
+            return res;
+        };
+
         return {
             accessToken,
             refreshToken,
@@ -95,12 +114,15 @@ export const useUserStore = defineStore(
             isLoggedIn,
             isDeveloper,
             isAdmin,
+            energy,
             setToken,
             setUserInfo,
             isFetchedRecently,
             clearUserData,
             downloadCnt,
             downloadCntAdd,
+            updateEnergy,
+            consumeEnergy,
         };
     },
     {

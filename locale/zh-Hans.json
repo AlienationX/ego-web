@@ -217,6 +217,8 @@
             "editProfile": "编辑个人信息",
             "checkin": "每日签到",
             "checkedIn": "已签到",
+            "checkinSuccess": "签到成功",
+            "checkinFailed": "签到失败",
             "alreadyCheckedInToday": "今日已签到",
             "noDescription": "这个人很懒，还没有填写个人描述",
             "nickname": "昵称",

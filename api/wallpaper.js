@@ -129,6 +129,26 @@ export const apiGetProfile = () => {
     });
 };
 
+// 扣除能量接口
+export const apiPostConsumeEnergy = (data = {}) => {
+    return request({
+        url: '/user/consume_energy/',
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
+// 获取能量接口
+export const apiPostEarnEnergy = (data = {}) => {
+    return request({
+        url: '/user/earn_energy/',
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
 // 反馈接口
 export const apiPostFeedback = (data = {}) => {
     return request({

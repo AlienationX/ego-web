@@ -205,7 +205,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
-import { apiPostProfile } from '@/api/wallpaper.js';
+import { apiPostProfile, apiPostEarnEnergy } from '@/api/wallpaper.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
@@ -355,26 +355,26 @@ const checkin = async () => {
         return;
     }
 
-    const currentEnergy = userStore.userinfo.profile.energy || 0;
-
     // 发送签到请求
-    const res = await apiPostProfile({
-        energy: currentEnergy + 1,
+    const res = await apiPostEarnEnergy({
+        action_type: 'check_in',
+        amount: 1,
     });
 
-    if (res.code === 200) {
+    if (res.data?.energy !== undefined) {
         // 存储签到状态
-        userStore.userinfo.profile.energy = currentEnergy + 1;
+        userStore.updateEnergy(res.data.energy);
 
         // 标记今日已签到
         hasCheckedInToday.value = true;
 
+        // 保存签到日期到本地存储
         const today = new Date().toISOString().split('T')[0];
         uni.setStorageSync('lastCheckinDate', today);
 
         uni.showToast({
-            title: '签到成功，获得1点能量',
-            icon: 'none',
+            title: t('user.profile.checkinSuccess'),
+            icon: 'success',
         });
     } else {
         uni.showToast({
@@ -782,7 +782,7 @@ onShow(() => {
             justify-content: space-between;
             align-items: center;
             margin-top: 30rpx;
-            padding: 20rpx 20rpx 0;
+            padding: 20rpx 20rpx;
             background: rgba($wp-theme-color, 0.05);
             border-radius: 16rpx;
             position: relative;

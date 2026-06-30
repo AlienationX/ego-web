@@ -34,7 +34,7 @@ onLaunch(() => {
     // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
         console.log('onThemeChange', theme);
-        console.log('osTheme: ', settingsStore.osTheme);
+        console.log('osTheme', settingsStore.osTheme);
         settingsStore.osTheme = theme;
 
         // #ifdef APP

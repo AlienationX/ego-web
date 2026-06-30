@@ -72,8 +72,8 @@ export const useAdIntersititial = () => {
             // 广告加载成功，不需要额外处理
         });
         ad.onClose(() => {
-            // 用户关闭广告后继续业务流程
-            safeDownload(pendingPicurl);
+            // 用户关闭广告不执行下载
+            // safeDownload(pendingPicurl);
             clearPending();
             preloadInterstitial();
             tryDestroyIfNeeded();
@@ -129,20 +129,12 @@ export const useAdIntersititial = () => {
     };
     // #endif
 
-    // #ifdef MP || APP-HARMONY
+    // #ifdef MP || WEB || APP-HARMONY
     return {
         createInterstitialAd: function () {},
         showInterstitialAd: function (inputPicurl) {
             downloadPic(inputPicurl);
         },
-        destroyInterstitialAd: function () {},
-    };
-    // #endif
-
-    // #ifdef WEB
-    return {
-        createInterstitialAd: function () {},
-        showInterstitialAd: function () {},
         destroyInterstitialAd: function () {},
     };
     // #endif
@@ -179,6 +171,8 @@ export const useAdRewardedVideo = () => {
     let isShowing = false;
     let pendingDestroy = false;
     let pendingPicurl = '';
+    let pendingOnSuccess = null; // 业务回调：广告看完后执行
+    let pendingOnFallback = null; // 业务回调：广告异常回退时执行
 
     const ensureRewardedAd = () => {
         if (rewardedVideoAd) return rewardedVideoAd;
@@ -188,6 +182,8 @@ export const useAdRewardedVideo = () => {
 
     const clearPending = () => {
         pendingPicurl = '';
+        pendingOnSuccess = null;
+        pendingOnFallback = null;
         isShowing = false;
     };
 
@@ -225,8 +221,12 @@ export const useAdRewardedVideo = () => {
         ad.onClose((e) => {
             // 用户点击了【关闭广告】按钮
             if (e?.isEnded) {
-                // 正常播放结束
-                safeDownload(pendingPicurl);
+                // 正常播放结束，优先执行业务回调
+                if (pendingOnSuccess) {
+                    pendingOnSuccess(pendingPicurl);
+                } else {
+                    safeDownload(pendingPicurl);
+                }
             } else {
                 // 播放中途退出
                 adminToast({
@@ -236,6 +236,7 @@ export const useAdRewardedVideo = () => {
                 });
             }
             clearPending();
+            preloadRewarded();
             tryDestroyIfNeeded();
         });
         ad.onError(() => {
@@ -245,7 +246,11 @@ export const useAdRewardedVideo = () => {
                 icon: 'none',
                 duration: 2500,
             });
-            safeDownload(pendingPicurl);
+            if (pendingOnFallback) {
+                pendingOnFallback(pendingPicurl);
+            } else {
+                safeDownload(pendingPicurl);
+            }
             clearPending();
             tryDestroyIfNeeded();
         });
@@ -253,10 +258,23 @@ export const useAdRewardedVideo = () => {
         preloadRewarded();
     };
 
-    const showRewardedVideoAd = (inputPicurl) => {
-        // 如果用户是VIP或广告开关关闭，直接下载图片
+    /**
+     * 展示激励视频广告
+     * @param {string} inputPicurl 待下载的图片地址
+     * @param {object} options 可选配置
+     * @param {Function} options.onSuccess 广告看完后的业务回调（如发放能量再下载）
+     * @param {Function} options.onFallback 广告无法展示时的回退回调（直接下载）
+     */
+    const showRewardedVideoAd = (inputPicurl, options = {}) => {
+        const { onSuccess, onFallback } = options;
+
+        // 如果用户是VIP或广告开关关闭，直接执行回退回调或下载
         if (shouldBypassAd()) {
-            safeDownload(inputPicurl);
+            if (onFallback) {
+                onFallback(inputPicurl);
+            } else {
+                safeDownload(inputPicurl);
+            }
             return;
         }
 
@@ -270,11 +288,17 @@ export const useAdRewardedVideo = () => {
         }
 
         pendingPicurl = inputPicurl || '';
+        pendingOnSuccess = onSuccess || null;
+        pendingOnFallback = onFallback || null;
         isShowing = true;
 
         rewardedVideoAd.show().catch(() => {
-            // show 失败直接回退下载，不再重试（避免重试导致广告二次展示）
-            safeDownload(pendingPicurl);
+            // show 失败直接回退，不再重试
+            if (pendingOnFallback) {
+                pendingOnFallback(pendingPicurl);
+            } else {
+                safeDownload(pendingPicurl);
+            }
             clearPending();
             tryDestroyIfNeeded();
         });
@@ -293,20 +317,16 @@ export const useAdRewardedVideo = () => {
     };
     // #endif
 
-    // #ifdef MP || APP-HARMONY
+    // #ifdef MP || WEB || APP-HARMONY
     return {
         createRewardedVideoAd: function () {},
-        showRewardedVideoAd: function (inputPicurl) {
-            downloadPic(inputPicurl);
+        showRewardedVideoAd: function (inputPicurl, options = {}) {
+            if (options.onFallback) {
+                options.onFallback(inputPicurl);
+            } else {
+                downloadPic(inputPicurl);
+            }
         },
-        destroyRewardedVideoAd: function () {},
-    };
-    // #endif
-
-    // #ifdef WEB
-    return {
-        createRewardedVideoAd: function () {},
-        showRewardedVideoAd: function () {},
         destroyRewardedVideoAd: function () {},
     };
     // #endif

@@ -11,8 +11,8 @@
         "themeLocation" : "theme.json",
         "safearea" : {
             // iOS平台的安全区域
-            "background" : "#eef1f5",
-            "backgroundDark" : "#181818",
+            "background" : "#9799a5",
+            "backgroundDark" : "#c9cbd1",
             "bottom" : {
                 "offset" : "none" // 在没有 tabBar 时，底部区域是否需要占位
             }
@@ -176,8 +176,8 @@
         "themeLocation" : "theme.json",
         "safearea" : {
             // HarmonyOS 平台的安全区域
-            "background" : "#eef1f5",
-            "backgroundDark" : "#181818",
+            "background" : "#9799a5",
+            "backgroundDark" : "#c9cbd1",
             "bottom" : {
                 "offset" : "none" // 在没有 tabBar 时，底部区域是否需要占位
             }

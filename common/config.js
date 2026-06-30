@@ -20,3 +20,6 @@ export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper/media';
 
 // 备案信息
 export const RIGHT_ICP = '粤ICP备15077732号-2';
+
+// 看一次视频广告奖励的能量点数
+export const VIDEO_REWARD_ENERGY = 3;

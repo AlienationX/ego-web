@@ -219,6 +219,8 @@
             "editProfile": "Edit Profile",
             "checkin": "Daily Check-in",
             "checkedIn": "Checked In",
+            "checkinSuccess": "Check-in successful",
+            "checkinFailed": "Check-in failed",
             "alreadyCheckedInToday": "Already checked in today",
             "noDescription": "This user is lazy and hasn't filled in a personal description yet",
             "nickname": "Nickname",

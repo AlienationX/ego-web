@@ -104,9 +104,12 @@ const generatedKey = ref('');
 const inputKey = ref('');
 
 const handleGenerateKeyByAd = async () => {
-    showRewardedVideoAd();
-    const res = await apiPostRewards();
-    generatedKey.value = res.data.access_key;
+    showRewardedVideoAd('', {
+        onSuccess: async () => {
+            const res = await apiPostRewards();
+            generatedKey.value = res.data.access_key;
+        }
+    });
 };
 
 const handleWatchAdWithInputKey = () => {
@@ -118,10 +121,17 @@ const handleWatchAdWithInputKey = () => {
         return;
     }
 
-    showRewardedVideoAd();
     uni.showToast({
         title: 'Loading...',
         icon: 'none',
+    });
+    
+    showRewardedVideoAd('', {
+        onSuccess: () => {
+            // Watch ad finished, the backend handles the callback
+            uni.showToast({ title: 'Watching ad recorded for Key', icon: 'success' });
+            inputKey.value = '';
+        }
     });
 };
 

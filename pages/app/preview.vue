@@ -339,12 +339,14 @@ import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useAdIntersititial } from '@/hooks/useAd.js';
+import { downloadPic } from '@/common/core.js';
 import {
     apiPostIncrementViews,
     apiPostIncrementDownloads,
     apiPostActions,
     apiPostUpdateWall,
     apiGetClassify,
+    apiPostEarnEnergy,
 } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -886,6 +888,14 @@ const submitScore = async () => {
             action_value: userScore.value,
         });
 
+        if (userStore.isAdmin) {
+            apiPostEarnEnergy({ action_type: 'wallpaper_rate', amount: 1 }).then(energyRes => {
+                if (energyRes.data?.energy !== undefined) {
+                    userStore.updateEnergy(energyRes.data.energy);
+                }
+            });
+        }
+
         uni.showToast({
             title: t('previewPage.ratingSuccess'),
             icon: 'none',
@@ -927,12 +937,23 @@ const clickDownload = async () => {
     //     showInterstitialAd();
     // }
 
-    // downloadPic(currentInfo.value.picurl);
-
     if (currentInfo.value.is_locked) {
-        // 弹出观看视频提示框
-        adPopup.value.open();
-        // downloadPic(currentInfo.value.picurl)
+        if (userStore.energy > 0) {
+            uni.showLoading({ title: 'Processing...', mask: true });
+            const res = await userStore.consumeEnergy(currentInfo.value.id);
+            uni.hideLoading();
+            
+            if (res.data?.energy !== undefined) {
+                downloadPic(currentInfo.value.picurl);
+                incrementDownloads(currentInfo.value.id);
+            } else {
+                uni.showToast({ title: res.data?.error || 'Consume energy failed', icon: 'none' });
+            }
+        } else {
+            // 弹出观看视频提示框
+            adPopup.value.open();
+        }
+        // adPopup.value.open();
     } else {
         // 展示插屏广告，之后下载图片
         createInterstitialAd(); // 创建插屏广告
@@ -1020,6 +1041,18 @@ const swiperChange = (e) => {
 
 //分享给好友
 onShareAppMessage((e) => {
+    // 分享图片奖励1点能量
+    apiPostEarnEnergy({ action_type: 'share_image', amount: 1 }).then(res => {
+        if (res.data?.energy !== undefined) {
+            userStore.updateEnergy(res.data.energy);
+            if (res.data.msg) {
+                uni.showToast({ title: res.data.msg, icon: 'none' });
+            } else {
+                uni.showToast({ title: '分享成功，能量+1', icon: 'none' });
+            }
+        }
+    });
+
     // 读取缓存数据的话需要增加type=share，分享到的用户就可以不读缓存，直接读取数据库数据
     return {
         title: t('common.appName'),
@@ -1029,6 +1062,18 @@ onShareAppMessage((e) => {
 
 //分享朋友圈
 onShareTimeline(() => {
+    // 分享朋友圈奖励3点能量
+    apiPostEarnEnergy({ action_type: 'share_timeline', amount: 3 }).then(res => {
+        if (res.data?.energy !== undefined) {
+            userStore.updateEnergy(res.data.energy);
+            if (res.data.msg) {
+                uni.showToast({ title: res.data.msg, icon: 'none' });
+            } else {
+                uni.showToast({ title: '分享朋友圈成功，能量+3', icon: 'none' });
+            }
+        }
+    });
+
     return {
         title: t('common.appName'),
         query: 'id=' + currentId.value + '&type=share',
