@@ -19,11 +19,17 @@ export const useUserStore = defineStore(
         const showAd = ref(true); // 全局控制
         const isLoggedIn = computed(() => Boolean(userinfo.value.id) || false); // 登录状态控制
         const isVip = computed(() => userinfo.value.profile?.is_vip || false); // 用户级别控制
+        const isDeveloper = computed(
+            () =>
+                userinfo.value.profile?.is_dev ||
+                ['le7yi_ss@163.com', 'dev@123.com'].includes(userinfo.value.username) ||
+                false,
+        );
         const isAdmin = computed(
             () =>
                 userinfo.value.is_superuser ||
                 userinfo.value.is_staff ||
-                ['le7yi_ss@163.com', 'test@123.com'].includes(userinfo.value.username) ||
+                ['le7yi_ss@163.com', 'dev@123.com'].includes(userinfo.value.username) ||
                 false,
         );
 
@@ -87,6 +93,7 @@ export const useUserStore = defineStore(
             showAd,
             isVip,
             isLoggedIn,
+            isDeveloper,
             isAdmin,
             setToken,
             setUserInfo,

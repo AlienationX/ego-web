@@ -865,7 +865,7 @@
         "confirm": "Yes, Log Me Out",
         "cancel": "Cancel",
         "doneTitle": "You've been logged out",
-        "doneDesc": "See you next time, {name}! Your data and settings are safely stored.",
+        "doneDesc": "See you next time! Your data and settings are safely stored.",
         "backSettings": "Back to Settings"
     },
     "changePasswordPage": {

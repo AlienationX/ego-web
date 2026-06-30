@@ -863,7 +863,7 @@
         "confirm": "确认退出",
         "cancel": "取消",
         "doneTitle": "你已退出登录",
-        "doneDesc": "下次再见，{name}！你的数据和设置已安全保存。",
+        "doneDesc": "下次再见！你的数据和设置已安全保存。",
         "backSettings": "返回设置"
     },
     "changePasswordPage": {
