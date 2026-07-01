@@ -335,7 +335,7 @@ onMounted(() => {
 .top10-wrap {
     max-width: 860rpx;
     margin: 0 auto;
-    padding: 25rpx;
+    padding: 20rpx;
 }
 
 .top10-header {

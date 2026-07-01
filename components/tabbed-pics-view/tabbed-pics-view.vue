@@ -363,7 +363,7 @@ const processImages = async (index, list) => {
     const state = tabStates[index];
     const { screenWidth } = uni.getSystemInfoSync();
     const colCount = settingsStore.options.column;
-    const gap = colCount === 3 ? 12 : 15;
+    const gap = colCount === 3 ? 12 : 12;
     const colWidth = (screenWidth - (colCount + 1) * gap) / colCount;
 
     if (state.waterfall.columnHeights.length !== colCount) {
@@ -414,7 +414,7 @@ const processImages = async (index, list) => {
 
 const getLayoutStyle = (index) => {
     const colCount = settingsStore.options.column;
-    const gap = colCount === 3 ? 12 : 15;
+    const gap = colCount === 3 ? 12 : 12;
     if (!isWaterfall.value)
         return { display: 'grid', gridTemplateColumns: `repeat(${colCount}, 1fr)`, gap: `${gap}px`, padding: `${gap}px` };
     return { position: 'relative', height: `${tabStates[index]?.waterfall.height || 0}px`, padding: `${gap}px` };

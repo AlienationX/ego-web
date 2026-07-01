@@ -127,7 +127,7 @@ onLoad(() => {
 
 .hero-section {
     position: relative;
-    padding: 0rpx 30rpx;
+    padding: 0rpx 20rpx;
     z-index: 10;
 
     .hero-title {
@@ -209,7 +209,7 @@ onLoad(() => {
 }
 
 .classify-grid-padding {
-    padding: 30rpx;
+    padding: 20rpx;
 }
 
 // ── 骨架屏 ──

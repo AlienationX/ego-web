@@ -708,8 +708,7 @@ onMounted(() => {
 
 .banner {
     width: 750rpx;
-    padding: 0 0 20rpx;
-
+    padding: 0 0 8rpx;
     // ── 优化8：使用 class 选择器替代 swiper 标签名，小程序端更可靠 ──
     .banner-swiper {
         width: 750rpx;
@@ -720,7 +719,7 @@ onMounted(() => {
     // swiper-item 在小程序端编译为原生容器，用后代 class 控制内部布局
     // 通过 padding 保证左右间距，避免 margin 在 overflow:hidden 容器内右侧被裁掉
     .banner-swiper-item {
-        padding: 0 30rpx;
+        padding: 0 20rpx;
         box-sizing: border-box;
     }
 
@@ -1022,11 +1021,11 @@ onMounted(() => {
 }
 
 .notice {
-    width: 690rpx;
+    width: 710rpx;
     height: 72rpx;
     line-height: 80rpx;
     background: var(--page-background-secondary);
-    margin: 0 auto 30rpx;
+    margin: 0 auto 24rpx;
     border-radius: 80rpx;
     display: flex;
     box-shadow: 0 0px 6rpx rgba(0, 0, 0, 0.05);
@@ -1194,7 +1193,7 @@ onMounted(() => {
                 display: inline-flex;
                 justify-content: center;
                 align-items: flex-start;
-                margin: 20rpx 24rpx 50rpx 0;
+                margin: 20rpx 20rpx 50rpx 0;
                 transition: box-shadow 0.3s ease;
                 position: relative;
                 overflow: hidden;
@@ -1327,10 +1326,10 @@ onMounted(() => {
             }
 
             .box:first-child {
-                margin-left: 30rpx;
+                margin-left: 20rpx;
             }
             .box:last-child {
-                margin-right: 30rpx;
+                margin-right: 20rpx;
             }
         }
     }
@@ -1338,7 +1337,7 @@ onMounted(() => {
 
 .top-entry {
     position: relative;
-    margin: 0 30rpx 30rpx;
+    margin: 0 20rpx 30rpx;
     padding: 24rpx 24rpx 24rpx 28rpx;
     display: block;
     min-height: 210rpx;
@@ -1413,14 +1412,13 @@ onMounted(() => {
 }
 
 .classify {
-
     .more {
         font-size: 28rpx;
         color: $uni-text-color-grey;
     }
 
     .classify-grid-padding {
-        padding: 30rpx;
+        padding: 20rpx;
     }
 }
 
@@ -1461,7 +1459,7 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
 // ── Banner 骨架 ──
 .sk-banner {
-    margin: 0 30rpx;
+    margin: 0 20rpx;
     width: calc(100% - 60rpx);
     height: 100%;
     border-radius: 28rpx;
@@ -1543,7 +1541,7 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     display: inline-flex;
     align-items: flex-start;
     height: calc(100% - 66rpx);
-    padding: 20rpx 30rpx 50rpx;
+    padding: 20rpx 20rpx 50rpx;
     gap: 24rpx;
     white-space: nowrap;
     width: 100%;

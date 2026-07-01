@@ -61,7 +61,7 @@ const onImageLoad = (id) => {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: 210rpx;
-    gap: 24rpx;
+    gap: 20rpx;
 
     // 7 个为一组循环：第 3、5 个跨 2 行
     .classify-item:nth-child(7n + 3),
