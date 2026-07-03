@@ -186,7 +186,7 @@ watch(
     align-items: center;
     justify-content: space-between;
     gap: 20rpx;
-    margin-bottom: 20rpx;
+    margin-bottom: 30rpx;
 }
 
 .recommend-panel__title {

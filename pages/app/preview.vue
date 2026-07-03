@@ -1340,7 +1340,8 @@ onShareTimeline(() => {
         .right-actions {
             position: absolute;
             right: 8rpx;
-            bottom: calc(env(safe-area-inset-bottom) + 76rpx);
+            // bottom: calc(env(safe-area-inset-bottom) + 76rpx);
+            bottom: 88rpx;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -1362,21 +1363,31 @@ onShareTimeline(() => {
 
             .action-text {
                 font-size: 24rpx;
-                font-weight: 500;
-                text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+                font-weight: 600;
                 text-align: center;
                 white-space: nowrap;
+                color: rgba(255, 255, 255, 0.95);
+                // 苹果风格：近距描边光晕 + 中距阴影 + 大范围扩散
+                text-shadow:
+                    0 0 2rpx rgba(0, 0, 0, 0.60),
+                    0 1rpx 4rpx rgba(0, 0, 0, 0.50),
+                    0 4rpx 14rpx rgba(0, 0, 0, 0.40),
+                    0 10rpx 28rpx rgba(0, 0, 0, 0.30);
             }
 
             :deep(.uni-icons) {
                 color: #fff !important;
+                // 给图标也加同款阴影，浅色背景下轮廓清晰
+                filter: drop-shadow(0 0 2rpx rgba(0, 0, 0, 0.55))
+                        drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45))
+                        drop-shadow(0 6rpx 18rpx rgba(0, 0, 0, 0.30));
             }
         }
 
         .left-meta {
             position: absolute;
             left: 44rpx;
-            bottom: calc(env(safe-area-inset-bottom) + 100rpx);
+            bottom: 0;
             right: 170rpx;
             width: auto;
             min-width: 0;
@@ -1384,7 +1395,7 @@ onShareTimeline(() => {
             color: #fff;
             text-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.55);
             z-index: 2;
-            padding: 20rpx;
+            padding: 20rpx 20rpx 100rpx;
             margin: 0;
 
             &::before {
@@ -1392,7 +1403,7 @@ onShareTimeline(() => {
                 position: absolute;
                 left: -44rpx;
                 right: -170rpx;
-                bottom: -100rpx;
+                bottom: 0;
                 top: -20rpx;
                 background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.4) 54%, transparent 100%);
                 pointer-events: none;

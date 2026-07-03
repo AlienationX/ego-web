@@ -80,11 +80,14 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "ks" : {},
-                    "bz" : {},
-                    "fl" : {},
-                    "jl" : {},
-                    "yt" : {}
+                    "gg" : {},
+                    "pg" : {},
+                    "unity" : {},
+                    "liftoff" : {},
+                    "inmobi" : {},
+                    "ironsource" : {},
+                    "mintegral" : {},
+                    "applovin" : {}
                 },
                 "oauth" : {
                     "weixin" : {

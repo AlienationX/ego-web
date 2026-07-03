@@ -62,9 +62,6 @@
                     scroll-with-animation
                     @scroll="onScroll($event, index)"
                     @scrolltolower="onReachLower(index)"
-                    :refresher-enabled="true"
-                    :refresher-triggered="tabStates[index]?.isRefreshing"
-                    @refresherrefresh="onRefresh(index)"
                 >
                     <view class="container" :style="{ minHeight: `calc(100% + ${headerHeight}px)` }">
                         <!-- 顶部占位，留给可滚动头部 -->
@@ -246,7 +243,6 @@ const tabStates = reactive(
         images: [],
         pageNum: 1,
         isLoading: false,
-        isRefreshing: false,
         noMoreData: false,
         scrollTop: 0,
         oldScrollTop: 0,
@@ -338,7 +334,6 @@ const fetchData = async (index, init = false) => {
         console.error('Fetch Error:', e);
     } finally {
         state.isLoading = false;
-        state.isRefreshing = false;
     }
 };
 
@@ -464,10 +459,6 @@ const handleBackTop = () => {
         state.scrollTop = 0;
     });
 };
-const onRefresh = (index) => {
-    tabStates[index].isRefreshing = true;
-    fetchData(index, true);
-};
 
 const onChangeView = () => (settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window');
 const onAdLoad = (index, slotKey) => {
@@ -528,7 +519,6 @@ watch(
                         images: [],
                         pageNum: 1,
                         isLoading: false,
-                        isRefreshing: false,
                         noMoreData: false,
                         scrollTop: 0,
                         oldScrollTop: 0,
