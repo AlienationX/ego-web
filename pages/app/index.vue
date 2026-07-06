@@ -10,7 +10,7 @@
         }"
     >
         <!-- #ifndef WEB -->
-        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: pageBackgroundVar }"></view>
+        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: pageBackgroundVar }"> </view>
         <!-- #endif -->
 
         <view
@@ -65,16 +65,7 @@
 
         <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
         <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend">
-            <tabbed-pics-view
-                :tabs="recommendTabs"
-                :show-header="false"
-                :tabs-height="0"
-                :header-height="navBarHeight"
-                api-type="recommend"
-                layout-mode="waterfall"
-                :show-card-meta="true"
-                @scroll="handleEmbeddedScroll"
-            ></tabbed-pics-view>
+            <recommend-tab :header-height="navBarHeight" @scroll="handleEmbeddedScroll"></recommend-tab>
         </view>
 
         <view v-if="latestLoaded" v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest">
@@ -102,10 +93,22 @@ const { t } = useI18n();
 const isDark = computed(() => settingsStore.isDark);
 
 const homeTabList = computed(() => [
-    { key: 'home', label: t('index.tabs.home') },
-    { key: 'recommend', label: t('index.tabs.recommend') },
-    { key: 'latest', label: t('index.tabs.latest') },
-    { key: 'hot', label: t('index.tabs.hot') },
+    {
+        key: 'home',
+        label: t('index.tabs.home'),
+    },
+    {
+        key: 'recommend',
+        label: t('index.tabs.recommend'),
+    },
+    {
+        key: 'latest',
+        label: t('index.tabs.latest'),
+    },
+    {
+        key: 'hot',
+        label: t('index.tabs.hot'),
+    },
 ]);
 
 const searchIconColor = computed(() => (isDark.value ? 'rgba(255, 255, 255, 0.7)' : '#64748b'));
@@ -181,17 +184,10 @@ onLoad(() => {
     uni.$on('app-scroll', updateTitleBarVisibleByScroll);
 });
 
-const recommendTabs = computed(() => [
-    {
-        label: '最新推荐',
-        query: {
-            ordering: '-updated_at',
-        },
-    },
-]);
-
 const goSearch = () => {
-    uni.navigateTo({ url: '/pages/app/search' });
+    uni.navigateTo({
+        url: '/pages/app/search',
+    });
 };
 
 // ── 优化：$off 传入函数引用，只移除本页监听，不影响其他页面的同名监听 ──

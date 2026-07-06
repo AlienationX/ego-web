@@ -116,7 +116,11 @@
                                     </view>
                                     <view class="card-info" :class="{ 'always-visible': showCardMeta }">
                                         <view class="card-info__title">
-                                            {{ getLocalizedItem(item).description || getLocalizedItem(item).classify_name || ('壁纸 #' + item.id) }}
+                                            {{
+                                                getLocalizedItem(item).description ||
+                                                getLocalizedItem(item).classify_name ||
+                                                '壁纸 #' + item.id
+                                            }}
                                         </view>
                                         <view class="card-info__footer">
                                             <view class="card-info__classify">
@@ -158,7 +162,7 @@
                             <slot name="empty" :index="index">
                                 <view class="default-empty">
                                     <image
-                                        src="/static/images/pics/empty.png"
+                                        src="/static/images/photos_empty.svg"
                                         mode="aspectFit"
                                         class="default-empty__img"
                                     ></image>
@@ -228,7 +232,7 @@ const isWaterfall = computed(() =>
     props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window',
 );
 const imageMode = computed(() => (isWaterfall.value ? 'widthFix' : 'aspectFill'));
-const lockedSize = computed(() => (settingsStore.options.column === 3 ? 18 : 22));
+const lockedSize = computed(() => (settingsStore.options.column === 3 ? 18 : 20));
 
 /** 顶部占位：有 header 时为 hero+tabs；无 header 时仅用 headerHeight（如首页顶栏 inset） */
 const topSpacerHeight = computed(() => {
@@ -365,19 +369,21 @@ const processImages = async (index, list) => {
         state.waterfall.columnHeights = new Array(colCount).fill(0);
     }
 
-    await Promise.all(list.map(async (item) => {
-        if (!item.width || !item.height) {
-            try {
-                const info = await getImageInfo(item.smallPicurl);
-                item.width = info.width || 300;
-                item.height = info.height || 600;
-            } catch (e) {
-                item.width = 300;
-                item.height = 600;
-                item._fetchError = true;
+    await Promise.all(
+        list.map(async (item) => {
+            if (!item.width || !item.height) {
+                try {
+                    const info = await getImageInfo(item.smallPicurl);
+                    item.width = info.width || 300;
+                    item.height = info.height || 600;
+                } catch (e) {
+                    item.width = 300;
+                    item.height = 600;
+                    item._fetchError = true;
+                }
             }
-        }
-    }));
+        }),
+    );
 
     for (const item of list) {
         let w = item.width;
@@ -817,7 +823,9 @@ onMounted(() => {
                 pointer-events: none;
                 opacity: 0;
                 transform: translateY(15rpx);
-                transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+                transition:
+                    opacity 0.35s ease,
+                    transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 
                 &.always-visible {
                     opacity: 1;
@@ -988,17 +996,21 @@ onMounted(() => {
 
 // ── 首次加载骨架屏 ──
 @keyframes sk-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 %sk-card-base {
     border-radius: 24rpx;
     background: linear-gradient(
         90deg,
-        rgba(148, 163, 184, 0.10) 25%,
-        rgba(148, 163, 184, 0.20) 50%,
-        rgba(148, 163, 184, 0.10) 75%
+        rgba(148, 163, 184, 0.1) 25%,
+        rgba(148, 163, 184, 0.2) 50%,
+        rgba(148, 163, 184, 0.1) 75%
     );
     background-size: 200% 100%;
     animation: sk-shimmer 1.6s infinite linear;
@@ -1035,13 +1047,19 @@ onMounted(() => {
     width: 100%;
 
     // 瀑布流卡片高度
-    &--tall   { height: 620rpx; }
-    &--medium { height: 540rpx; }
-    &--short  { height: 480rpx; }
+    &--tall {
+        height: 620rpx;
+    }
+    &--medium {
+        height: 540rpx;
+    }
+    &--short {
+        height: 480rpx;
+    }
 
     // 网格卡片高度（等高）
-    &--grid   { height: 540rpx; }
+    &--grid {
+        height: 540rpx;
+    }
 }
 </style>
-
-
