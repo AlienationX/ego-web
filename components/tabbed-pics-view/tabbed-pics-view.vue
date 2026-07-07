@@ -89,13 +89,72 @@
                                 <view v-for="i in 8" :key="i" class="sk-card sk-card--grid"></view>
                             </view>
                         </template>
-                        <!-- 布局渲染层 -->
-                        <view class="layout" :style="getLayoutStyle(index)">
-                            <template v-for="(item, idx) in tabStates[index]?.images" :key="item.id">
+                        <!-- 布局渲染层：网格模式 -->
+                        <view v-if="!isWaterfall" class="layout grid-layout" :style="getLayoutStyle(index)">
+                            <template v-for="(item, idx) in tabStates[index]?.images" :key="'grid-' + item.id">
                                 <view
                                     class="box"
                                     :class="{ 'loaded-glow': item.loaded }"
-                                    :style="[getBoxStyle(index), isWaterfall ? item.position : '']"
+                                    :style="getBoxStyle(index)"
+                                    @click="openPreview(item.id, index)"
+                                >
+                                    <image
+                                        :class="['img', { loaded: item.loaded }]"
+                                        :style="getImgStyle()"
+                                        :src="item.smallPicurl"
+                                        :mode="item.imageMode || imageMode"
+                                        lazy-load
+                                    ></image>
+                                    <view class="card-overlay" :class="{ 'always-visible': showCardMeta }"></view>
+                                    <view :class="['lock', { loaded: item.loaded }]" :style="getLockStyle()">
+                                        <uni-icons
+                                            v-if="item.is_locked && item.loaded"
+                                            type="locked-filled"
+                                            :size="lockedSize"
+                                            color="#F9E9B5"
+                                        ></uni-icons>
+                                    </view>
+                                    <view class="card-info" :class="{ 'always-visible': showCardMeta }">
+                                        <view class="card-info__title">
+                                            {{
+                                                getLocalizedItem(item).description ||
+                                                getLocalizedItem(item).classify_name ||
+                                                '壁纸 #' + item.id
+                                            }}
+                                        </view>
+                                        <view class="card-info__footer">
+                                            <view class="card-info__classify">
+                                                {{ getLocalizedItem(item).classify_name || '壁纸' }}
+                                            </view>
+                                            <view class="card-info__score">
+                                                <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                <text>{{ item.score ?? '--' }}</text>
+                                            </view>
+                                        </view>
+                                    </view>
+                                </view>
+
+                                <!-- 广告注入 -->
+                                <view
+                                    v-if="(idx + 1) % 12 === 0 && canShowAd"
+                                    class="ad-row"
+                                    :class="{ 'ad-row--ready': tabStates[index].adLoadMap[`slot-${idx}`] }"
+                                >
+                                    <custom-ad-banner
+                                        @load="onAdLoad(index, `slot-${idx}`)"
+                                        @error="onAdError(index, `slot-${idx}`)"
+                                    ></custom-ad-banner>
+                                </view>
+                            </template>
+                        </view>
+
+                        <!-- 布局渲染层：瀑布流模式 -->
+                        <view v-else class="layout waterfall-layout" :style="getLayoutStyle(index)">
+                            <template v-for="(item, idx) in tabStates[index]?.images" :key="'waterfall-' + item.id">
+                                <view
+                                    class="box"
+                                    :class="{ 'loaded-glow': item.loaded }"
+                                    :style="item.position"
                                     @click="openPreview(item.id, index)"
                                 >
                                     <image
@@ -278,9 +337,12 @@ const fetchData = async (index, init = false) => {
                 loaded: false,
                 position: {},
             }));
-            state.images = newData;
             state.noMoreData = true;
+            
+            // 必须先等待图片位置计算完毕
             await processImages(index, newData);
+            // 然后再将数据推入 state.images，防止元素带着空的 position 进入 DOM
+            state.images = newData;
             return;
         }
 
@@ -322,10 +384,11 @@ const fetchData = async (index, init = false) => {
             position: {},
         }));
 
+        // 必须先等待图片位置计算完毕，防止元素带着空的 position 进入 DOM
+        await processImages(index, newData);
+
         if (init) state.images = newData;
         else state.images.push(...newData);
-
-        await processImages(index, newData);
 
         if (index === currentIndex.value) {
             emit('update', { images: state.images, index });
@@ -402,10 +465,13 @@ const processImages = async (index, list) => {
             const colIdx = state.waterfall.columnHeights.indexOf(minH);
 
             item.position = {
+                position: 'absolute',
                 width: `${colWidth}px`,
                 height: `${scaledH}px`,
                 left: `${colIdx * (colWidth + gap) + gap}px`,
                 top: `${state.waterfall.columnHeights[colIdx] + gap}px`,
+                borderRadius: colCount === 3 ? '24rpx' : '42rpx',
+                transition: 'all 0.4s ease'
             };
             state.waterfall.columnHeights[colIdx] += scaledH + gap;
             state.waterfall.height = Math.max(...state.waterfall.columnHeights);

@@ -56,7 +56,7 @@
             </view>
 
             <view v-else class="list-container">
-                <tabbed-pics-view
+                <modern-pics-view
                     :show-header="true"
                     :tabs="tabs"
                     api-type="search"
@@ -73,7 +73,7 @@
                             <view class="noResult__code">404_NOT_FOUND</view>
                         </view>
                     </template>
-                </tabbed-pics-view>
+                </modern-pics-view>
             </view>
         </view>
 

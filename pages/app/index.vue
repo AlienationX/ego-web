@@ -65,7 +65,14 @@
 
         <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
         <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend">
-            <recommend-tab :header-height="navBarHeight" @scroll="handleEmbeddedScroll"></recommend-tab>
+            <modern-pics-view 
+                :show-header="false" 
+                :tabs="[{ label: t('index.tabs.recommend') }]" 
+                api-type="recommend"
+                :show-card-meta="true"
+                :header-height="navBarHeight" 
+                @scroll="handleEmbeddedScroll"
+            ></modern-pics-view>
         </view>
 
         <view v-if="latestLoaded" v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest">

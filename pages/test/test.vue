@@ -43,6 +43,7 @@ const testMenus = [
     { name: 'Custom Bars', url: '/pages/test/custom-bars' },
     { name: 'Interstitial Ad', url: '/pages/test/ad-interstitial-test' },
     { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded-test' },
+    { name: 'PicsView Test', url: '/pages/test/pics-view-test' },
 ];
 
 const go = (url) => {

@@ -15,7 +15,7 @@
         </view>
 
         <view class="content-wrapper">
-            <tabbed-pics-view :show-header="false" :tabs="tabs" api-type="actions"></tabbed-pics-view>
+            <modern-pics-view :show-header="false" :tabs="tabs" api-type="actions"></modern-pics-view>
         </view>
     </view>
 </template>
@@ -76,14 +76,13 @@ const goBack = () => {
         .back-btn {
             width: 64rpx;
             height: 64rpx;
-            border-radius: 28rpx;
-            background: var(--panel-background, #ffffff);
+            border-radius: 16rpx;
+            background: var(--page-background-secondary);
+            border: 2rpx solid var(--panel-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10rpx 30rpx var(--shadow-color, rgba(0, 0, 0, 0.03));
-            border: 1rpx solid var(--panel-border, rgba(0, 0, 0, 0.03));
-            transition: transform 0.2s ease, background 0.2s ease;
+            flex-shrink: 0;
             
             &:active {
                 transform: scale(0.92);

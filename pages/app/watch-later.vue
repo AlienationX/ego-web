@@ -3,7 +3,7 @@
         <page-header :title="t('historyPage.watchLaterTitle')" :subtitle="t('historyPage.watchLaterSubtitle')"></page-header>
 
         <view class="content-wrapper">
-            <tabbed-pics-view :show-header="false" :tabs="tabs" api-type="local"></tabbed-pics-view>
+            <modern-pics-view :show-header="false" :tabs="tabs" api-type="local"></modern-pics-view>
 
             <view class="page-actions" v-if="libraryStore.watchLater.length">
                 <button class="ghost-btn" @click="clearWatchLater">{{ t('historyPage.clearSaved') }}</button>

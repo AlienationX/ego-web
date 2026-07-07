@@ -320,6 +320,13 @@
                 "navigationBarTitleText": "Custom Bars",
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/test/pics-view-test",
+            "style": {
+                "navigationBarTitleText": "PicsView Test",
+                "navigationStyle": "custom"
+            }
         }
     ],
     "globalStyle": {

@@ -31,8 +31,8 @@
         </view>
 
         <view class="content-wrapper">
-            <tabbed-pics-view
-                v-if="currentId"
+            <modern-pics-view
+                v-if="tabs.length > 0"
                 :show-header="true"
                 :tabs="tabs"
                 api-type="classList"
@@ -41,7 +41,7 @@
                 :sticky-top="navBarHeight"
                 @update="onListUpdate"
                 @scroll="onScroll"
-            ></tabbed-pics-view>
+            ></modern-pics-view>
         </view>
 
         <view
