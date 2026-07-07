@@ -14,6 +14,7 @@
         <scroll-view scroll-y class="previewScroll" @scroll="handlePreviewScroll">
             <view class="previewLayout">
                 <view class="previewHero">
+                    <!-- swiper and mask content unchanged -->
                     <swiper
                         class="preview-swiper"
                         :circular="!disableSwipe && classList.length > 1"
@@ -139,9 +140,18 @@
                         </template>
                     </view>
                 </view>
-                <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
             </view>
+
+            <!-- 推荐壁纸：放在 scroll-view 中，可滚动查看 -->
+            <recommend-wallpapers
+                :key="currentInfo.id"
+                :current-info="currentInfo"
+                :style="{ paddingBottom: adLoaded ? '120rpx' : '0' }"
+            ></recommend-wallpapers>
         </scroll-view>
+        
+        <!-- 吸底广告：放在 scroll-view 外部，避免原生 ad 组件在 scroll-view 中的兼容问题 -->
+        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -208,11 +218,6 @@
                             </view>
                         </view>
                         <view class="copyright">{{ tp('message.copyrightStatement', { email: '735003439@qq.com' }) }}</view>
-
-                        <!-- TODO 弹窗广告目前存在BUG，关闭后广告还存在，且位置异常 -->
-                        <!-- <view v-if="displayAd" class="ad-row">
-                            <custom-ad-banner></custom-ad-banner>
-                        </view> -->
                     </view>
                 </scroll-view>
             </view>
@@ -513,6 +518,11 @@ const showScrollHint = ref(!uni.getStorageSync(HAS_SEEN_HINT_KEY));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const previewHeroHeightPx = uni.getWindowInfo().windowHeight || 667;
 const statusBarFillOpacity = ref(0);
+
+// ── 广告加载状态，控制底部留白 ──
+const adLoaded = ref(false);
+const onAdLoad = () => { adLoaded.value = true; };
+const onAdHide = () => { adLoaded.value = false; };
 
 const handlePreviewScroll = (e) => {
     const scrollTop = Number(e?.detail?.scrollTop || 0);

@@ -26,7 +26,7 @@
 
         <view class="fill" :style="{ height: `${titleBarHeight}px` }"></view>
 
-        <view class="page-wrap">
+        <view class="page-wrap" :style="{ paddingBottom: (adLoaded && showWordBoard) ? '120rpx' : '0' }">
             <view v-if="showWordBoard" class="explore-board">
                 <view class="section-head">
                     <view class="section-head__title">{{ t('common.hotSearch') }}</view>
@@ -77,7 +77,7 @@
             </view>
         </view>
 
-        <custom-ad-banner v-if="showWordBoard" class="bottom-ad"></custom-ad-banner>
+        <custom-ad-banner v-if="showWordBoard" class="bottom-ad" @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
     </view>
 </template>
 
@@ -114,6 +114,12 @@ const queryParams = ref({
 });
 const searchHistory = ref(uni.getStorageSync('searchHistory') || []);
 const showWordBoard = ref(true);
+
+// ── 广告加载状态，控制底部留白 ──
+const adLoaded = ref(false);
+const onAdLoad = () => { adLoaded.value = true; };
+const onAdHide = () => { adLoaded.value = false; };
+
 const noResult = ref(false);
 const activeButton = ref('');
 const dateSortAsc = ref(true);

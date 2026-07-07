@@ -1,5 +1,5 @@
 <template>
-    <view class="classLayout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="classLayout" :class="isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingBottom: adLoaded ? '120rpx' : '0' }">
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
@@ -17,10 +17,6 @@
                 <search-bar></search-bar>
             </view>
 
-            <!-- 广告位 -->
-            <view v-if="heroAdVisible" class="hero-ad">
-                <custom-ad-banner @load="heroAdLoaded = true" @error="heroAdLoaded = false"></custom-ad-banner>
-            </view>
         </view>
 
         <!-- 加载骨架屏 -->
@@ -43,6 +39,9 @@
         <view v-else class="classify-grid-padding">
             <classify-grid :items="classifyComputed" />
         </view>
+
+        <!-- 吸底全局广告 (在 tabBar 之上) -->
+        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
     </view>
 </template>
 
@@ -82,6 +81,11 @@ const classifyComputed = computed(() => {
     }));
 });
 const adEnabled = computed(() => !userStore.isVip && userStore.showAd);
+
+// ── 广告加载状态，控制底部留白 ──
+const adLoaded = ref(false);
+const onAdLoad = () => { adLoaded.value = true; };
+const onAdHide = () => { adLoaded.value = false; };
 
 const getClassify = async () => {
     try {

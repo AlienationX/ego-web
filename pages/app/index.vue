@@ -59,12 +59,12 @@
         </view>
 
         <!-- home tab：与其他 tab 一致，用 scroll-view 自管滚动，v-show 切换位置天然保留 -->
-        <view v-show="activeHomeTab === 'home'" class="home-channel home-channel--home">
+        <view v-show="activeHomeTab === 'home'" class="home-channel home-channel--home" :style="channelBottomStyle">
             <home-tab :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></home-tab>
         </view>
 
         <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
-        <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend">
+        <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend" :style="channelBottomStyle">
             <modern-pics-view 
                 :show-header="false" 
                 :tabs="[{ label: t('index.tabs.recommend') }]" 
@@ -75,13 +75,16 @@
             ></modern-pics-view>
         </view>
 
-        <view v-if="latestLoaded" v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest">
+        <view v-if="latestLoaded" v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest" :style="channelBottomStyle">
             <timeline-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></timeline-page>
         </view>
 
-        <view v-if="hotLoaded" v-show="activeHomeTab === 'hot'" class="home-channel home-channel--hot">
+        <view v-if="hotLoaded" v-show="activeHomeTab === 'hot'" class="home-channel home-channel--hot" :style="channelBottomStyle">
             <top-n-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-n-page>
         </view>
+
+        <!-- 吸底全局广告 (在 tabBar 之上) -->
+        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
     </view>
 </template>
 
@@ -179,6 +182,12 @@ const updateTitleBarVisibleByScroll = (scrollTop) => {
 const handleEmbeddedScroll = (e) => {
     updateTitleBarVisibleByScroll(e.scrollTop);
 };
+
+// ── 广告加载状态，控制底部留白 ──
+const adLoaded = ref(false);
+const onAdLoad = () => { adLoaded.value = true; };
+const onAdHide = () => { adLoaded.value = false; };
+const channelBottomStyle = computed(() => adLoaded.value ? { paddingBottom: '120rpx' } : {});
 
 // ── 优化：在 onLoad 中注册事件，避免模块顶层重复注册；传入函数引用精确移除 ──
 onShow(() => {

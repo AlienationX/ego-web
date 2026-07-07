@@ -2,7 +2,7 @@
     <view
         class="layout"
         :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
-        :style="{ '--tab-bar-height': `${tabBarHeight}px` }"
+        :style="{ '--tab-bar-height': `${tabBarHeight}px`, paddingBottom: adLoaded ? '120rpx' : '0' }"
     >
         <!-- #ifndef WEB -->
         <view
@@ -178,7 +178,8 @@
             </view>
         </view> -->
 
-        <custom-ad-banner class="user-ad-banner"></custom-ad-banner>
+        <!-- 吸底全局广告 (在 tabBar 之上) -->
+        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
 
         <popup-navigation-dialog
             ref="loginPromptPopup"
@@ -226,6 +227,11 @@ const loginPromptPopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const tabBarHeight = ref(getTabBarHeight() || 0);
 const userHeaderPaddingTop = computed(() => statusBarHeight.value + 10);
+
+// ── 广告加载状态，控制底部留白 ──
+const adLoaded = ref(false);
+const onAdLoad = () => { adLoaded.value = true; };
+const onAdHide = () => { adLoaded.value = false; };
 
 // 通用导航对话框控制
 const navDialog = ref(null);
@@ -921,11 +927,6 @@ onShow(() => {
                 border: none;
             }
         }
-    }
-
-    .user-ad-banner {
-        display: block;
-        padding: 0rpx 30rpx 30rpx;
     }
 
     .stats-section {

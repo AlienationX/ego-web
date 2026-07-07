@@ -106,6 +106,9 @@
         <view v-if="!embedded && showScrollTop" class="floating-top" @click="scrollToTop">
             <mdi-icon path="/static/icons/arrow-up.svg" size="18px" color="#0d1b2f"></mdi-icon>
         </view>
+
+        <!-- 吸底全局广告 -->
+        <custom-ad-banner v-if="!embedded"></custom-ad-banner>
     </view>
 </template>
 

@@ -159,6 +159,9 @@
                 </view>
             </view>
         </scroll-view>
+
+        <!-- 吸底全局广告 -->
+        <custom-ad-banner v-if="!embedded"></custom-ad-banner>
     </view>
 </template>
 

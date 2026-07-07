@@ -57,7 +57,7 @@
 
                 <view v-else-if="!classifyImages.length" class="editor-empty"> 当前分类下暂无可选图片 </view>
 
-                <scroll-view v-else scroll-x class="image-scroll" @scroll="onImageScroll">
+                <scroll-view v-else scroll-x class="image-scroll" :lower-threshold="80" @scrolltolower="loadMoreImages">
                     <view class="image-row">
                         <view
                             v-for="item in classifyImages"
@@ -265,23 +265,6 @@ const selectClassify = async (classifyId) => {
 const reloadImages = async () => {
     if (!selectedClassifyId.value) return;
     await getClassifyImages(selectedClassifyId.value);
-};
-
-let scrollQueryPending = false;
-const onImageScroll = (e) => {
-    if (loadingMore.value || imageNoMore.value || scrollQueryPending) return;
-    scrollQueryPending = true;
-    const { scrollLeft, scrollWidth } = e.detail;
-    uni.createSelectorQuery()
-        .select('.image-scroll')
-        .boundingClientRect((rect) => {
-            scrollQueryPending = false;
-            if (!rect || !scrollWidth) return;
-            if (scrollLeft + rect.width >= scrollWidth - 80) {
-                loadMoreImages();
-            }
-        })
-        .exec();
 };
 
 const loadMoreImages = () => {

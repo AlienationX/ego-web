@@ -1,8 +1,5 @@
 <template>
     <view class="recommend-panel" :class="isDark ? 'theme-dark' : 'theme-light'">
-        <view class="recommend-panel__ad">
-            <custom-ad-banner></custom-ad-banner>
-        </view>
 
         <view class="recommend-panel__head">
             <view>

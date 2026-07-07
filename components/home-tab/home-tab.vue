@@ -270,12 +270,6 @@
                     </view>
                 </scroll-view>
             </view>
-
-            <view v-if="idx % 3 === 0" class="ad-slot" :class="{ ready: adVisibleMap[`mid-${idx}`] }">
-                <view class="ad-slot__inner">
-                    <custom-ad-banner @load="onAdLoad(`mid-${idx}`)" @error="onAdError(`mid-${idx}`)"></custom-ad-banner>
-                </view>
-            </view>
         </view>
 
         <!-- Classify Grid -->

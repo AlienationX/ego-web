@@ -74,7 +74,13 @@
                 <view class="picker-wrap" v-if="pickerOpen">
                     <template v-if="sourceMode === 'favorite'">
                         <view class="picker-title">{{ $t('discover.pickFavorite') }}</view>
-                        <scroll-view v-if="favoriteList.length" class="favorite-scroll" scroll-x @scroll="onFavScroll">
+                        <scroll-view
+                            v-if="favoriteList.length"
+                            class="favorite-scroll"
+                            scroll-x
+                            :lower-threshold="60"
+                            @scrolltolower="loadMoreFavorites"
+                        >
                             <view class="favorite-row">
                                 <view
                                     v-for="item in favoriteList"
@@ -500,23 +506,6 @@ const getFavoriteList = async (isAppend = false) => {
         isLoading.value = false;
         favLoadingMore.value = false;
     }
-};
-
-let favScrollPending = false;
-const onFavScroll = (e) => {
-    if (favLoadingMore.value || favNoMore.value || favScrollPending) return;
-    favScrollPending = true;
-    const { scrollLeft, scrollWidth } = e.detail;
-    uni.createSelectorQuery()
-        .select('.favorite-scroll')
-        .boundingClientRect((rect) => {
-            favScrollPending = false;
-            if (!rect || !scrollWidth) return;
-            if (scrollLeft + rect.width >= scrollWidth - 60) {
-                loadMoreFavorites();
-            }
-        })
-        .exec();
 };
 
 const loadMoreFavorites = () => {
