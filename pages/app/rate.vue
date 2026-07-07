@@ -249,7 +249,7 @@ onPullDownRefresh(() => {
         padding-bottom: 20rpx;
 
         .header-content {
-            height: 110rpx;
+            height: 88rpx;
             display: flex;
             align-items: center;
             justify-content: space-between;
