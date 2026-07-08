@@ -78,7 +78,11 @@
                                         {{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}
                                     </view>
                                     <view class="timeline-card__title">
-                                        {{ getLocalizedItem(item).description || getLocalizedItem(item).classify_name || `#${item.id}` }}
+                                        {{
+                                            getLocalizedItem(item).description ||
+                                            getLocalizedItem(item).classify_name ||
+                                            `#${item.id}`
+                                        }}
                                     </view>
                                     <view class="timeline-card__footer">
                                         <view class="timeline-card__footer-left">
@@ -103,12 +107,11 @@
             </view>
         </scroll-view>
 
+        <custom-ad-banner v-if="!embedded" @height-change="onAdHeightChange"></custom-ad-banner>
+
         <view v-if="!embedded && showScrollTop" class="floating-top" @click="scrollToTop">
             <mdi-icon path="/static/icons/arrow-up.svg" size="18px" color="#0d1b2f"></mdi-icon>
         </view>
-
-        <!-- 吸底全局广告 -->
-        <custom-ad-banner v-if="!embedded"></custom-ad-banner>
     </view>
 </template>
 
@@ -149,7 +152,13 @@ const props = defineProps({
 const emit = defineEmits(['scroll']);
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const contentHeight = computed(() => (props.embedded ? '100vh' : `calc(100vh - ${statusBarHeight.value}px)`));
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const contentHeight = computed(() =>
+    props.embedded ? '100vh' : `calc(100vh - ${statusBarHeight.value}px - ${adHeight.value}px)`,
+);
 const scrollIntoViewTarget = ref('');
 const showScrollTop = ref(false);
 const isLoading = ref(false);

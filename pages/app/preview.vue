@@ -135,23 +135,20 @@
                                     <image class="meta-avatar" :src="publisherAvatar" mode="aspectFill"></image>
                                     <text class="meta-user-name">{{ publisherName }}</text>
                                 </view>
-                                <view class="meta-desc">{{ getLocalizedItem(currentInfo).description || getLocalizedItem(currentInfo).classify_name || '' }}</view>
+                                <view class="meta-desc">{{
+                                    getLocalizedItem(currentInfo).description ||
+                                    getLocalizedItem(currentInfo).classify_name ||
+                                    ''
+                                }}</view>
                             </view>
                         </template>
                     </view>
                 </view>
             </view>
-
-            <!-- 推荐壁纸：放在 scroll-view 中，可滚动查看 -->
-            <recommend-wallpapers
-                :key="currentInfo.id"
-                :current-info="currentInfo"
-                :style="{ paddingBottom: adLoaded ? '120rpx' : '0' }"
-            ></recommend-wallpapers>
         </scroll-view>
-        
-        <!-- 吸底广告：放在 scroll-view 外部，避免原生 ad 组件在 scroll-view 中的兼容问题 -->
-        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
+
+        <!-- ad广告无法在<swiper> 、<scroll-view> 组件中使用，因此放在这里 -->
+        <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -521,8 +518,12 @@ const statusBarFillOpacity = ref(0);
 
 // ── 广告加载状态，控制底部留白 ──
 const adLoaded = ref(false);
-const onAdLoad = () => { adLoaded.value = true; };
-const onAdHide = () => { adLoaded.value = false; };
+const onAdLoad = () => {
+    adLoaded.value = true;
+};
+const onAdHide = () => {
+    adLoaded.value = false;
+};
 
 const handlePreviewScroll = (e) => {
     const scrollTop = Number(e?.detail?.scrollTop || 0);
@@ -805,14 +806,14 @@ const handleShare = () => {
         // WXSceneSession	分享到聊天界面
         // WXSceneTimeline	分享到朋友圈
         // WXSceneFavorite	分享到微信收藏
-        scene: 'WXSceneSession',  
+        scene: 'WXSceneSession',
         type: 0,
         summary: t('common.appName'),
         success: () => {
             uni.showToast({ title: t('previewPage.shareSuccess'), icon: 'success' });
         },
         fail: (e) => {
-            console.log(e)
+            console.log(e);
             uni.showToast({ title: t('previewPage.shareFailed'), icon: 'none' });
         },
     });
@@ -899,7 +900,7 @@ const submitScore = async () => {
         });
 
         if (userStore.isAdmin) {
-            apiPostEarnEnergy({ action_type: 'wallpaper_rate', amount: 1 }).then(energyRes => {
+            apiPostEarnEnergy({ action_type: 'wallpaper_rate', amount: 1 }).then((energyRes) => {
                 if (energyRes.data?.energy !== undefined) {
                     userStore.updateEnergy(energyRes.data.energy);
                 }
@@ -952,7 +953,7 @@ const clickDownload = async () => {
             uni.showLoading({ title: 'Processing...', mask: true });
             const res = await userStore.consumeEnergy(currentInfo.value.id);
             uni.hideLoading();
-            
+
             if (res.data?.energy !== undefined) {
                 downloadPic(currentInfo.value.picurl);
                 incrementDownloads(currentInfo.value.id);
@@ -1052,7 +1053,7 @@ const swiperChange = (e) => {
 //分享给好友
 onShareAppMessage((e) => {
     // 分享图片奖励1点能量
-    apiPostEarnEnergy({ action_type: 'share_image', amount: 1 }).then(res => {
+    apiPostEarnEnergy({ action_type: 'share_image', amount: 1 }).then((res) => {
         if (res.data?.energy !== undefined) {
             userStore.updateEnergy(res.data.energy);
             if (res.data.msg) {
@@ -1073,7 +1074,7 @@ onShareAppMessage((e) => {
 //分享朋友圈
 onShareTimeline(() => {
     // 分享朋友圈奖励3点能量
-    apiPostEarnEnergy({ action_type: 'share_timeline', amount: 3 }).then(res => {
+    apiPostEarnEnergy({ action_type: 'share_timeline', amount: 3 }).then((res) => {
         if (res.data?.energy !== undefined) {
             userStore.updateEnergy(res.data.energy);
             if (res.data.msg) {
@@ -1276,7 +1277,7 @@ onShareTimeline(() => {
             // 多层文字阴影：近距重阴影提升对比 + 大模糊光晕扩散，任he背景道可读
             text-shadow:
                 0 2rpx 6rpx rgba(0, 0, 0, 0.55),
-                0 6rpx 20rpx rgba(0, 0, 0, 0.40),
+                0 6rpx 20rpx rgba(0, 0, 0, 0.4),
                 0 16rpx 48rpx rgba(0, 0, 0, 0.28);
         }
 
@@ -1287,11 +1288,9 @@ onShareTimeline(() => {
             letter-spacing: 1rpx;
             color: rgba(255, 255, 255, 0.9);
             text-shadow:
-                0 1rpx 4rpx rgba(0, 0, 0, 0.60),
-                0 4rpx 14rpx rgba(0, 0, 0, 0.40);
+                0 1rpx 4rpx rgba(0, 0, 0, 0.6),
+                0 4rpx 14rpx rgba(0, 0, 0, 0.4);
         }
-
-
 
         .scrollHint {
             bottom: calc(env(safe-area-inset-bottom) + 24rpx);
@@ -1319,7 +1318,7 @@ onShareTimeline(() => {
             justify-content: space-around;
             align-items: center;
             /* 增强阴影和细微边框，确保在全白背景下也能看清药丸轮廓 */
-            box-shadow: 
+            box-shadow:
                 0 4rpx 24rpx rgba(0, 0, 0, 0.12),
                 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
             border: 1rpx solid rgba(0, 0, 0, 0.04);
@@ -1379,18 +1378,17 @@ onShareTimeline(() => {
                 color: rgba(255, 255, 255, 0.95);
                 // 苹果风格：近距描边光晕 + 中距阴影 + 大范围扩散
                 text-shadow:
-                    0 0 2rpx rgba(0, 0, 0, 0.60),
-                    0 1rpx 4rpx rgba(0, 0, 0, 0.50),
-                    0 4rpx 14rpx rgba(0, 0, 0, 0.40),
-                    0 10rpx 28rpx rgba(0, 0, 0, 0.30);
+                    0 0 2rpx rgba(0, 0, 0, 0.6),
+                    0 1rpx 4rpx rgba(0, 0, 0, 0.5),
+                    0 4rpx 14rpx rgba(0, 0, 0, 0.4),
+                    0 10rpx 28rpx rgba(0, 0, 0, 0.3);
             }
 
             :deep(.uni-icons) {
                 color: #fff !important;
                 // 给图标也加同款阴影，浅色背景下轮廓清晰
-                filter: drop-shadow(0 0 2rpx rgba(0, 0, 0, 0.55))
-                        drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45))
-                        drop-shadow(0 6rpx 18rpx rgba(0, 0, 0, 0.30));
+                filter: drop-shadow(0 0 2rpx rgba(0, 0, 0, 0.55)) drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45))
+                    drop-shadow(0 6rpx 18rpx rgba(0, 0, 0, 0.3));
             }
         }
 

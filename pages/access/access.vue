@@ -10,7 +10,7 @@
             <view class="hero-subtitle hero-enter-2">{{ pageSubtitle }}</view>
         </view>
 
-        <view class="content">
+        <view class="content" :style="contentStyle">
             <view class="custom-accordion">
                 <!-- 方式一 -->
                 <view class="accordion-item" :class="{ active: activeIndex === 0 }">
@@ -80,15 +80,14 @@
                 <text>提示：广告能力受平台与网络影响，若无法弹出广告请稍后重试。</text>
             </view>
 
-            <view class="bottom-ad">
-                <custom-ad-banner></custom-ad-banner>
-            </view>
+            <!-- 吸底广告 -->
+            <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
         </view>
     </view>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useAdRewardedVideo } from '@/hooks/useAd.js';
@@ -102,13 +101,21 @@ const pageSubtitle = '两种方式，快速获取或使用 Key';
 
 const generatedKey = ref('');
 const inputKey = ref('');
+const adHeight = ref(0);
+const baseContentBottomPadding = uni.upx2px(24);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const contentStyle = computed(() => ({
+    paddingBottom: `${baseContentBottomPadding + adHeight.value}px`,
+}));
 
 const handleGenerateKeyByAd = async () => {
     showRewardedVideoAd('', {
         onSuccess: async () => {
             const res = await apiPostRewards();
             generatedKey.value = res.data.access_key;
-        }
+        },
     });
 };
 
@@ -125,13 +132,13 @@ const handleWatchAdWithInputKey = () => {
         title: 'Loading...',
         icon: 'none',
     });
-    
+
     showRewardedVideoAd('', {
         onSuccess: () => {
             // Watch ad finished, the backend handles the callback
             uni.showToast({ title: 'Watching ad recorded for Key', icon: 'success' });
             inputKey.value = '';
-        }
+        },
     });
 };
 
@@ -413,13 +420,5 @@ onUnload(() => {
     width: 30rpx;
     height: 30rpx;
     flex-shrink: 0;
-}
-
-.bottom-ad {
-    margin-top: 8rpx;
-}
-
-.bottom-ad {
-    margin-top: 8rpx;
 }
 </style>

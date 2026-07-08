@@ -1,9 +1,9 @@
 {
-    "name" : "本我壁纸",
+    "name" : "%app.name%",
     "appid" : "__UNI__098B24F",
-    "description" : "探索壁纸，亦探索自我。",
-    "versionName" : "1.4.1",
-    "versionCode" : 141,
+    "description" : "%app.description%",
+    "versionName" : "1.4.2",
+    "versionCode" : 142,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -80,6 +80,13 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
+                    "ks" : {},
+                    "zy" : {},
+                    "bz" : {},
+                    "fl" : {},
+                    "yt" : {},
+                    "jt" : {},
+                    "wa" : {},
                     "gg" : {},
                     "pg" : {},
                     "unity" : {},

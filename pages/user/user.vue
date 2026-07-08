@@ -1,9 +1,5 @@
 <template>
-    <view
-        class="layout"
-        :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
-        :style="{ '--tab-bar-height': `${tabBarHeight}px`, paddingBottom: adLoaded ? '120rpx' : '0' }"
-    >
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="layoutStyle">
         <!-- #ifndef WEB -->
         <view
             class="status-bar-bg"
@@ -179,16 +175,7 @@
         </view> -->
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
-
-        <popup-navigation-dialog
-            ref="loginPromptPopup"
-            :title="t('user.profile.loginPromptTitle')"
-            :description="t('user.profile.loginRequired')"
-            :confirm-text="t('user.profile.loginPromptConfirm')"
-            :cancel-text="t('user.profile.loginPromptCancel')"
-            @confirm="toLogin"
-        ></popup-navigation-dialog>
+        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
 
         <!-- 通用导航对话框 -->
         <popup-navigation-dialog
@@ -223,15 +210,19 @@ const settingsStore = useSettingsStore();
 // const userinfo = computed(() => userStore.userinfo); // 计算属性需要写userinfo.value，也麻烦
 
 const hasCheckedInToday = ref(false);
-const loginPromptPopup = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const tabBarHeight = ref(getTabBarHeight() || 0);
 const userHeaderPaddingTop = computed(() => statusBarHeight.value + 10);
 
-// ── 广告加载状态，控制底部留白 ──
-const adLoaded = ref(false);
-const onAdLoad = () => { adLoaded.value = true; };
-const onAdHide = () => { adLoaded.value = false; };
+// ── 广告高度，控制底部留白 ──
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const layoutStyle = computed(() => ({
+    '--tab-bar-height': `${tabBarHeight.value}px`,
+    paddingBottom: adHeight.value > 0 ? `${adHeight.value}px` : '2px',
+}));
 
 // 通用导航对话框控制
 const navDialog = ref(null);
@@ -270,7 +261,13 @@ const toLogin = () => {
 };
 
 const openLoginPrompt = () => {
-    loginPromptPopup.value?.open();
+    showNavDialog({
+        title: t('user.profile.loginPromptTitle'),
+        content: t('user.profile.loginRequired'),
+        confirmText: t('user.profile.loginPromptConfirm'),
+        cancelText: t('user.profile.loginPromptCancel'),
+        onConfirm: toLogin,
+    });
 };
 
 const toSettings = () => {
@@ -515,7 +512,7 @@ onShow(() => {
     // #ifdef MP || APP-HARMONY
     updateTabBarText(t);
     // #endif
-    
+
     // 检查是否已登录，已登录则获取最新用户信息
     // isFetchedRecently 防止刚登录时 signin 已拉过一次，onShow 再重复拉
     if (userStore.userinfo.id && !userStore.isFetchedRecently(3000)) {
@@ -1166,7 +1163,6 @@ onShow(() => {
 // 每个 row 是独立卡片，用背景色差 + 顶部高光代替边框
 // ─────────────────────────────────────────────
 .theme-dark {
-
     // 页面底色更深，让卡片浮起来
     &.layout {
         background-color: #111114;

@@ -1,9 +1,5 @@
 <template>
-    <scroll-view
-        scroll-y
-        class="home-tab-layout"
-        @scroll="handleScroll"
-    >
+    <scroll-view scroll-y class="home-tab-layout" @scroll="handleScroll">
         <!-- 静态 spacer，与其他嵌入式 tab 保持一致，不随 titlebar 显隐变化 -->
         <view :style="{ height: navBarHeight + 'px' }"></view>
 
@@ -24,7 +20,15 @@
                     </view>
                 </view>
             </view>
-            <swiper v-else class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay circular>
+            <swiper
+                v-else
+                class="banner-swiper"
+                indicator-dots
+                indicator-color="rgba(255,255,255,0.5)"
+                indicator-active-color="#fff"
+                autoplay
+                circular
+            >
                 <swiper-item class="banner-swiper-item" v-for="item in bannerList" :key="item.id">
                     <navigator
                         v-if="item.target == 'miniProgram'"
@@ -169,12 +173,7 @@
                     <view v-for="i in 5" :key="i" class="sk-card"></view>
                 </view>
                 <scroll-view v-else scroll-x>
-                    <view
-                        class="box"
-                        v-for="(item, idx) in latestList"
-                        :key="item.id"
-                        @click="goPreview(item.id, latestList)"
-                    >
+                    <view class="box" v-for="(item, idx) in latestList" :key="item.id" @click="goPreview(item.id, latestList)">
                         <image :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
                         <view v-if="item._timeBadge" class="box-badge">{{ item._timeBadge }}</view>
                     </view>
@@ -287,13 +286,6 @@
                 <classify-grid v-if="classifyList.length" :items="classifyPreviewList" />
             </view>
         </view>
-
-        <!-- Bottom Ad -->
-        <view class="ad-slot" :class="{ ready: adVisibleMap.bottom }">
-            <view class="ad-slot__inner">
-                <custom-ad-banner @load="onAdLoad('bottom')" @error="onAdError('bottom')"></custom-ad-banner>
-            </view>
-        </view>
     </scroll-view>
 </template>
 
@@ -380,7 +372,7 @@ const latestLoading = ref(false);
 const latestNoMore = ref(false);
 const latestQuery = ref({
     pageNum: 1,
-    pageSize: 12,  // ── 优化6：与 latestPreviewList 截取数对齐，避免多拉无用数据 ──
+    pageSize: 12, // ── 优化6：与 latestPreviewList 截取数对齐，避免多拉无用数据 ──
     ordering: '-updated_at',
 });
 
@@ -440,7 +432,7 @@ const timeCache = {
     todayStart: 0,
     tomorrowStart: 0,
     yesterdayStart: 0,
-    lastUpdate: 0
+    lastUpdate: 0,
 };
 
 const updateTimeCache = () => {
@@ -479,10 +471,13 @@ const isUpdatedWithinDays = (item, days = 5) => {
 
 // ── 优化2：使用缓存的 badgeCopy，不再每次构造新对象 ──
 const getTimeBadge = (item) =>
-    isUpdatedToday(item) ? badgeCopy.justIn
-    : isUpdatedYesterday(item) ? badgeCopy.new
-    : isUpdatedWithinDays(item, 5) ? badgeCopy.latest
-    : '';
+    isUpdatedToday(item)
+        ? badgeCopy.justIn
+        : isUpdatedYesterday(item)
+          ? badgeCopy.new
+          : isUpdatedWithinDays(item, 5)
+            ? badgeCopy.latest
+            : '';
 
 const addTimeBadge = (item) => {
     item._timeBadge = getTimeBadge(item);
@@ -557,9 +552,11 @@ const getBannerTextMeta = (item) => {
     const isEn = locale.value === 'en';
 
     return {
-        title: (isEn && rawTitleEn ? rawTitleEn : rawTitle) || (type === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle')),
+        title:
+            (isEn && rawTitleEn ? rawTitleEn : rawTitle) ||
+            (type === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle')),
         desc:
-            (isEn && item.description_en ? item.description_en : item.description) || 
+            (isEn && item.description_en ? item.description_en : item.description) ||
             (item && item.title && item.title.includes('必应') ? t('index.banner.bingDesc') : config.desc),
         badge: config.badge,
         targetLabel: targetMap[item.target] || targetMap.external,
@@ -682,13 +679,12 @@ onMounted(() => {
         getRandomRecommend();
         getNotice();
     }, 300);
-    
+
     // P3 延时 800ms：需要滚动才能看到，完全错峰
     setTimeout(() => {
         getClassify();
     }, 800);
-})
-
+});
 </script>
 
 <style lang="scss" scoped>

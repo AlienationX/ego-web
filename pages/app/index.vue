@@ -84,7 +84,7 @@
         </view>
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
+        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -183,11 +183,12 @@ const handleEmbeddedScroll = (e) => {
     updateTitleBarVisibleByScroll(e.scrollTop);
 };
 
-// ── 广告加载状态，控制底部留白 ──
-const adLoaded = ref(false);
-const onAdLoad = () => { adLoaded.value = true; };
-const onAdHide = () => { adLoaded.value = false; };
-const channelBottomStyle = computed(() => adLoaded.value ? { paddingBottom: '120rpx' } : {});
+// ── 广告高度，控制底部留白 ──
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const channelBottomStyle = computed(() => adHeight.value > 0 ? { paddingBottom: `${adHeight.value}px` } : {});
 
 // ── 优化：在 onLoad 中注册事件，避免模块顶层重复注册；传入函数引用精确移除 ──
 onShow(() => {

@@ -2,7 +2,7 @@
     <view class="top10-page" :class="[isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
         <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
 
-        <scroll-view scroll-y class="top10-scroll" @scroll="handleScroll">
+        <scroll-view scroll-y class="top10-scroll" :style="{ height: scrollHeight }" @scroll="handleScroll">
             <!-- Spacer for embedded titlebar -->
             <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
             <view class="top10-wrap">
@@ -72,7 +72,9 @@
                             <view class="hero-card__content">
                                 <view class="hero-card__tag">{{ $t('top10.heroTag') }}</view>
                                 <view class="hero-card__title">{{
-                                    getLocalizedItem(rankedList[0]).description || getLocalizedItem(rankedList[0]).classify_name || rankedList[0].id
+                                    getLocalizedItem(rankedList[0]).description ||
+                                    getLocalizedItem(rankedList[0]).classify_name ||
+                                    rankedList[0].id
                                 }}</view>
                                 <view class="hero-card__meta">
                                     <view class="hero-card__meta-item">
@@ -104,11 +106,15 @@
                                     idx + 2
                                 }}</view>
                                 <view class="hero-card__content hero-card__content--compact">
-                                        <view class="hero-card__title hero-card__title--compact">
-                                            {{ getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id }}
-                                        </view>
-                                        <view class="hero-card__sub">{{ formatMetric(item) }}</view>
+                                    <view class="hero-card__title hero-card__title--compact">
+                                        {{
+                                            getLocalizedItem(item).description ||
+                                            getLocalizedItem(item).classify_name ||
+                                            item.id
+                                        }}
                                     </view>
+                                    <view class="hero-card__sub">{{ formatMetric(item) }}</view>
+                                </view>
                             </view>
                         </view>
                     </view>
@@ -160,8 +166,7 @@
             </view>
         </scroll-view>
 
-        <!-- 吸底全局广告 -->
-        <custom-ad-banner v-if="!embedded"></custom-ad-banner>
+        <custom-ad-banner v-if="!embedded" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -209,6 +214,13 @@ const activeMetric = ref('views');
 const loading = ref(false);
 const rankedList = ref([]);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const scrollHeight = computed(() =>
+    props.embedded ? '100vh' : `calc(100vh - ${statusBarHeight.value}px - ${adHeight.value}px)`,
+);
 
 // 两个 metric 的数据分别缓存，切换时命中缓存直接渲染，无需重复请求
 const cache = {
@@ -328,11 +340,7 @@ onMounted(() => {
 }
 
 .top10-scroll {
-    height: 100vh;
-}
-
-.top10-page.is-embedded .top10-scroll {
-    height: 100vh;
+    width: 100%;
 }
 
 .top10-wrap {
@@ -861,12 +869,7 @@ onMounted(() => {
     animation: top10-shimmer 1.6s infinite linear;
 
     .theme-light & {
-        background: linear-gradient(
-            90deg,
-            rgba(0, 0, 0, 0.06) 25%,
-            rgba(0, 0, 0, 0.10) 50%,
-            rgba(0, 0, 0, 0.06) 75%
-        );
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.06) 75%);
         background-size: 200% 100%;
         animation: top10-shimmer 1.6s infinite linear;
     }
@@ -959,7 +962,11 @@ onMounted(() => {
 }
 
 @keyframes top10-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 </style>

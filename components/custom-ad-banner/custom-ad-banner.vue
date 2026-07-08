@@ -1,7 +1,7 @@
 <template>
-    <view 
-        v-if="showAd && !isError" 
-        class="custom-ad-container" 
+    <view
+        v-if="showAd && !isError"
+        class="custom-ad-container"
         :class="[isFixed ? 'is-fixed' : '', isDark ? 'theme-dark' : 'theme-light']"
         :style="{ bottom: isFixed ? `${bottomOffset}rpx` : 'auto' }"
     >
@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
@@ -30,9 +30,9 @@ const props = defineProps({
     bottomOffset: {
         type: Number,
         default: 0,
-    }
+    },
 });
-const emit = defineEmits(['load', 'close', 'error']);
+const emit = defineEmits(['load', 'close', 'error', 'height-change']);
 
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
@@ -42,24 +42,46 @@ const isDark = computed(() => settingsStore.isDark);
 
 const isLoaded = ref(false);
 const isError = ref(false);
+const currentHeight = ref(0);
+const defaultBannerHeight = uni.upx2px(200);
+
+const updateHeight = (height = 0) => {
+    const nextHeight = Math.max(0, Math.round(Number(height) || 0));
+    if (currentHeight.value === nextHeight) return;
+    currentHeight.value = nextHeight;
+    emit('height-change', nextHeight);
+};
 
 // 导出 isLoaded 供父组件通过 ref 访问
 defineExpose({ isLoaded });
 
 const onload = (e) => {
+    isError.value = false;
     isLoaded.value = true;
     emit('load', e);
+    const fallbackHeight = Math.max(defaultBannerHeight, Number(e?.detail?.height || e?.detail?.adHeight || 0));
+    updateHeight(fallbackHeight);
 };
 const onclose = (e) => {
     isError.value = true;
     isLoaded.value = false;
+    updateHeight(0);
     emit('close', e);
 };
 const onerror = (e) => {
     isError.value = true;
     isLoaded.value = false;
+    updateHeight(0);
     emit('error', e);
 };
+
+watch(showAd, (visible) => {
+    if (!visible) {
+        isLoaded.value = false;
+        isError.value = false;
+        updateHeight(0);
+    }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -76,7 +98,6 @@ const onerror = (e) => {
         left: 0;
         right: 0;
         bottom: 0;
-        padding-bottom: env(safe-area-inset-bottom);
         pointer-events: none; /* Let clicks pass through the container except for the ad */
     }
 }
@@ -85,6 +106,10 @@ const onerror = (e) => {
     width: 100%;
     pointer-events: auto;
     transition: opacity 0.24s ease;
+
+    &.is-loaded {
+        min-height: 180rpx;
+    }
 
     &:not(.is-loaded) {
         height: 0;

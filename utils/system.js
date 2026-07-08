@@ -1,8 +1,29 @@
 import { apiPostAccess } from '@/api/wallpaper.js';
-import { isDev, logger } from '@/utils/logger.js';
 
 const SYSTEM_INFO = uni.getSystemInfoSync();
 const APP_INFO = uni.getAppBaseInfo();
+
+export const isDevelopment = () => {
+    if (import.meta.env.DEV) return true;
+
+    const SYSTEM_INFO = uni.getSystemInfoSync();
+    // 不统计web，主要是用来测试
+    if (SYSTEM_INFO.uniPlatform === 'web') return true;
+    // 微信小程序调试工具不统计
+    if (SYSTEM_INFO.uniPlatform === 'mp-weixin' && SYSTEM_INFO.deviceBrand === 'devtools') return true;
+    // Android Studio 不统计, sdk_gphone64_arm64
+    if (SYSTEM_INFO.deviceModel.startsWith('sdk')) return true;
+
+    return false;
+};
+
+export const isInternational = () => {
+    // #ifdef APP
+    return plus.runtime.channel === 'google';
+    // #endif
+
+    return false;
+};
 
 export const getStatusBarHeight = () => {
     // 状态栏高度
@@ -67,11 +88,11 @@ export const getRightIconWidth = () => {
 };
 
 export const writeAccessLog = async () => {
-    logger.log(SYSTEM_INFO, 'system_info');
-    logger.log(APP_INFO, 'app_info');
+    console.log(SYSTEM_INFO, 'system_info');
+    console.log(APP_INFO, 'app_info');
 
     // 开发环境下不统计访问日志
-    if (isDev()) return;
+    if (isDevelopment()) return;
 
     // 无法测试，只能打正式包时必须勾选 渠道包，才能通过 plus.runtime.channel 获取
     // console.log('runtime', plus.runtime.channel);

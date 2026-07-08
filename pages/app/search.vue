@@ -26,7 +26,7 @@
 
         <view class="fill" :style="{ height: `${titleBarHeight}px` }"></view>
 
-        <view class="page-wrap" :style="{ paddingBottom: (adLoaded && showWordBoard) ? '120rpx' : '0' }">
+        <view class="page-wrap" :style="pageWrapStyle">
             <view v-if="showWordBoard" class="explore-board">
                 <view class="section-head">
                     <view class="section-head__title">{{ t('common.hotSearch') }}</view>
@@ -77,7 +77,8 @@
             </view>
         </view>
 
-        <custom-ad-banner v-if="showWordBoard" class="bottom-ad" @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
+        <!-- 吸底广告 -->
+        <custom-ad-banner v-if="showWordBoard" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -115,10 +116,14 @@ const queryParams = ref({
 const searchHistory = ref(uni.getStorageSync('searchHistory') || []);
 const showWordBoard = ref(true);
 
-// ── 广告加载状态，控制底部留白 ──
-const adLoaded = ref(false);
-const onAdLoad = () => { adLoaded.value = true; };
-const onAdHide = () => { adLoaded.value = false; };
+// ── 广告高度，控制底部留白 ──
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const pageWrapStyle = computed(() => ({
+    paddingBottom: showWordBoard.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
+}));
 
 const noResult = ref(false);
 const activeButton = ref('');
@@ -199,6 +204,7 @@ const onSearch = () => {
 const onClear = () => {
     init();
     appStore.wallList = [];
+    adHeight.value = 0;
 };
 
 const clearKeyword = () => {
@@ -554,9 +560,5 @@ onPageScroll(() => {});
     font-size: 24rpx;
     color: rgba(255, 255, 255, 0.72);
     letter-spacing: 1rpx;
-}
-
-.bottom-ad {
-    // padding: 30rpx;
 }
 </style>

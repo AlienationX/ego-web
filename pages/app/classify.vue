@@ -1,5 +1,5 @@
 <template>
-    <view class="classLayout" :class="isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingBottom: adLoaded ? '120rpx' : '0' }">
+    <view class="classLayout" :class="isDark ? 'theme-dark' : 'theme-light'" :style="pageStyle">
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
@@ -41,7 +41,7 @@
         </view>
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @load="onAdLoad" @close="onAdHide" @error="onAdHide"></custom-ad-banner>
+        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -52,7 +52,6 @@ import { useI18n } from 'vue-i18n';
 import { updateTabBarText } from '@/utils/i18n.js';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/system.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -68,11 +67,8 @@ const classifyList = computed({
     set: (val) => { appStore.classifyList = val; }
 });
 const isLoading = ref(true);
-const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);
-const heroAdLoaded = ref(false);
-const heroAdVisible = computed(() => adEnabled.value && heroAdLoaded.value);
 
 const classifyComputed = computed(() => {
     return classifyList.value.map((item) => ({
@@ -80,12 +76,13 @@ const classifyComputed = computed(() => {
         name: isEn.value ? item.name_en || item.name : item.name,
     }));
 });
-const adEnabled = computed(() => !userStore.isVip && userStore.showAd);
 
-// ── 广告加载状态，控制底部留白 ──
-const adLoaded = ref(false);
-const onAdLoad = () => { adLoaded.value = true; };
-const onAdHide = () => { adLoaded.value = false; };
+// ── 广告高度，控制底部留白 ──
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const pageStyle = computed(() => (adHeight.value > 0 ? { paddingBottom: `${adHeight.value}px` } : {}));
 
 const getClassify = async () => {
     try {
