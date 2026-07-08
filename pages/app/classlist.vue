@@ -30,7 +30,7 @@
             </view>
         </view>
 
-        <view class="content-wrapper">
+        <view class="content-wrapper" :style="contentWrapperStyle">
             <modern-pics-view
                 v-if="tabs.length > 0"
                 :show-header="true"
@@ -62,6 +62,8 @@
                 <view class="hero__desc">{{ heroDesc }}</view>
             </view>
         </view>
+
+        <custom-ad-banner v-if="shouldShowHeroHiddenAd" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -70,14 +72,11 @@ import { ref, computed } from 'vue';
 import {
     onLoad,
     onUnload,
-    onReachBottom,
-    onPullDownRefresh,
-    onPageScroll,
     onShareAppMessage,
     onShareTimeline,
 } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { apiGetClassify, apiGetClassList } from '@/api/wallpaper.js';
+import { apiGetClassify } from '@/api/wallpaper.js';
 import { gotoHome, handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -98,8 +97,6 @@ const props = defineProps({
     name_en: String,
 });
 
-const activeButton = ref('');
-const dateSortAsc = ref(true);
 const headerScrollTop = ref(0);
 const topbarFadeLengthPx = uni.upx2px(180);
 const currentClassify = ref(null);
@@ -113,15 +110,6 @@ const onListUpdate = (e) => {
 const onScroll = (e) => {
     const scrollTop = e.scrollTop;
     headerScrollTop.value = Math.min(scrollTop, heroHeightPx);
-};
-
-const getSortordByKey = (key, isAsc = dateSortAsc.value) => {
-    if (key === 'recommend') return 'random';
-    if (key === 'score') return 'score';
-    if (key === 'views') return 'views';
-    if (key === 'downloads') return 'downloads';
-    if (key === 'date') return isAsc ? 'date_asc' : 'date_desc';
-    return '';
 };
 
 const tabs = computed(() => [
@@ -140,21 +128,21 @@ const tabs = computed(() => [
     },
 ]);
 
-const syncClassifySortState = () => {
-    settingsStore.options.classifySortKey = activeButton.value;
-    settingsStore.options.classifyDateAsc = dateSortAsc.value;
-};
-
-const restoreClassifySortState = () => {
-    activeButton.value = settingsStore.options.classifySortKey || '';
-    dateSortAsc.value =
-        typeof settingsStore.options.classifyDateAsc === 'boolean' ? settingsStore.options.classifyDateAsc : false;
-};
-
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
 const navBarHeight = ref(getNavBarHeight() || 88);
 const heroHeightPx = uni.upx2px(560);
+const adHeight = ref(0);
+
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+
+const shouldShowHeroHiddenAd = computed(() => headerScrollTop.value >= heroHeightPx);
+
+const contentWrapperStyle = computed(() => ({
+    paddingBottom: shouldShowHeroHiddenAd.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
+}));
 
 const topbarOpacity = computed(() => {
     const revealStart = Math.max(0, heroHeightPx - navBarHeight.value - topbarFadeLengthPx);
@@ -192,22 +180,6 @@ const heroDesc = computed(() => {
     return `${heroTitle.value} · ${t('category.desc')}`;
 });
 
-const queryParams = ref({
-    classify_id: parseInt(props.id),
-    pageNum: 1,
-    pageSize: 12,
-    sortord: '',
-});
-
-const init = (sortord = '') => {
-    queryParams.value = {
-        classify_id: parseInt(props.id),
-        pageNum: 1,
-        pageSize: 12,
-        sortord: sortord || getSortordByKey(activeButton.value, dateSortAsc.value),
-    };
-};
-
 const fetchClassifyInfo = async (id) => {
     // 1. 尝试从缓存获取
     let cacheList = appStore.classifyList || [];
@@ -226,25 +198,6 @@ const fetchClassifyInfo = async (id) => {
     }
 
     currentClassify.value = match || null;
-};
-
-const onSortQuery = (key) => {
-    if (key === 'date') {
-        activeButton.value = 'date';
-        dateSortAsc.value = !dateSortAsc.value;
-    } else {
-        activeButton.value = key;
-        dateSortAsc.value = false;
-    }
-    syncClassifySortState();
-};
-
-const onChangeColumn = () => {
-    settingsStore.options.column = settingsStore.options.column === 3 ? 2 : 3;
-};
-
-const onChangeView = () => {
-    settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
 };
 
 const goBack = () => {
@@ -270,9 +223,6 @@ onLoad((e) => {
         return;
     }
     currentId.value = id;
-    if (isAdmin.value) {
-        restoreClassifySortState();
-    }
     fetchClassifyInfo(id);
 });
 
@@ -283,7 +233,7 @@ onUnload(() => {
 onShareAppMessage(() => {
     return {
         title: '本我壁纸: ' + props.name,
-        path: '/pages/app/classlist?id=' + queryParams.value.classify_id + '&name=' + props.name,
+        path: '/pages/app/classlist?id=' + currentId.value + '&name=' + props.name,
     };
 });
 

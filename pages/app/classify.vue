@@ -4,41 +4,44 @@
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
 
-        <!-- 沉浸式头部区域 -->
-        <view class="hero-section" :style="{ paddingTop: `${heroTopPadding}px` }">
-            <view class="hero-header">
-                <view class="title-group">
-                    <view class="hero-title">{{ $t('category.title') }}</view>
-                    <view class="hero-desc">{{ $t('category.desc') }}</view>
+        <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
+            <view class="page-scroll__content">
+                <!-- 沉浸式头部区域 -->
+                <view class="hero-section" :style="{ paddingTop: `${heroTopPadding}px` }">
+                    <view class="hero-header">
+                        <view class="title-group">
+                            <view class="hero-title">{{ $t('category.title') }}</view>
+                            <view class="hero-desc">{{ $t('category.desc') }}</view>
+                        </view>
+                    </view>
+
+                    <view class="search-container">
+                        <search-bar></search-bar>
+                    </view>
+                </view>
+
+                <!-- 加载骨架屏 -->
+                <view v-if="isLoading" class="classify-grid-padding">
+                    <view class="skeleton-grid">
+                        <view v-for="i in 8" :key="i" class="skeleton-item">
+                            <view class="skeleton-pic"></view>
+                            <view class="skeleton-label"></view>
+                        </view>
+                    </view>
+                </view>
+
+                <!-- 空状态 -->
+                <view v-else-if="!classifyList.length" class="empty-container">
+                    <view class="empty-title">{{ $t('category.empty') }}</view>
+                    <view class="empty-desc">{{ $t('category.emptyDesc') }}</view>
+                </view>
+
+                <!-- 分类网格 -->
+                <view v-else class="classify-grid-padding">
+                    <classify-grid :items="classifyComputed" />
                 </view>
             </view>
-
-            <view class="search-container">
-                <search-bar></search-bar>
-            </view>
-
-        </view>
-
-        <!-- 加载骨架屏 -->
-        <view v-if="isLoading" class="classify-grid-padding">
-            <view class="skeleton-grid">
-                <view v-for="i in 8" :key="i" class="skeleton-item">
-                    <view class="skeleton-pic"></view>
-                    <view class="skeleton-label"></view>
-                </view>
-            </view>
-        </view>
-
-        <!-- 空状态 -->
-        <view v-else-if="!classifyList.length" class="empty-container">
-            <view class="empty-title">{{ $t('category.empty') }}</view>
-            <view class="empty-desc">{{ $t('category.emptyDesc') }}</view>
-        </view>
-
-        <!-- 分类网格 -->
-        <view v-else class="classify-grid-padding">
-            <classify-grid :items="classifyComputed" />
-        </view>
+        </scroll-view>
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
         <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
@@ -82,7 +85,10 @@ const adHeight = ref(0);
 const onAdHeightChange = (height) => {
     adHeight.value = Math.max(0, Number(height) || 0);
 };
-const pageStyle = computed(() => (adHeight.value > 0 ? { paddingBottom: `${adHeight.value}px` } : {}));
+const pageStyle = computed(() => ({}));
+const pageScrollStyle = computed(() => ({
+    height: `calc(100vh - ${adHeight.value}px)`,
+}));
 
 const getClassify = async () => {
     try {
@@ -110,8 +116,19 @@ onLoad(() => {
 <style lang="scss" scoped>
 .classLayout {
     background: var(--page-background);
-    min-height: 100vh;
     position: relative;
+    height: 100vh;
+    overflow: hidden;
+    overflow-x: hidden; // 防止任意子元素的水平溢出撑出横向滚动条
+}
+
+.page-scroll {
+    width: 100%;
+}
+
+.page-scroll__content {
+    min-height: 100%;
+    padding-bottom: 2rpx;
 }
 
 .status-bar-bg {
@@ -130,6 +147,7 @@ onLoad(() => {
     position: relative;
     padding: 0rpx 20rpx;
     z-index: 10;
+    overflow: hidden; // 防止内部子元素负 margin 撑出滚动条
 
     .hero-title {
         font-size: 68rpx;

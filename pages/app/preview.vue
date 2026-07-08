@@ -11,8 +11,14 @@
                 opacity: statusBarFillOpacity,
             }"
         ></view>
-        <scroll-view scroll-y class="previewScroll" @scroll="handlePreviewScroll">
-            <view class="previewLayout">
+        <scroll-view
+            scroll-y
+            class="previewScroll"
+            show-scrollbar="false"
+            :style="previewScrollStyle"
+            @scroll="handlePreviewScroll"
+        >
+            <view class="previewLayout" :style="previewLayoutStyle">
                 <view class="previewHero">
                     <!-- swiper and mask content unchanged -->
                     <swiper
@@ -144,11 +150,13 @@
                         </template>
                     </view>
                 </view>
+
+                <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
             </view>
         </scroll-view>
 
-        <!-- ad广告无法在<swiper> 、<scroll-view> 组件中使用，因此放在这里 -->
-        <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
+        <!-- ad广告无法在<swiper>、<scroll-view> 中使用，因此保持在滚动容器外固定展示 -->
+        <custom-ad-banner v-if="shouldShowBottomAd" @height-change="onAdHeightChange"></custom-ad-banner>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -514,23 +522,38 @@ const disableSwipe = ref(false);
 const showScrollHint = ref(!uni.getStorageSync(HAS_SEEN_HINT_KEY));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const previewHeroHeightPx = uni.getWindowInfo().windowHeight || 667;
+const previewViewportHeightPx = uni.getWindowInfo().windowHeight || 667;
 const statusBarFillOpacity = ref(0);
 
-// ── 广告加载状态，控制底部留白 ──
-const adLoaded = ref(false);
-const onAdLoad = () => {
-    adLoaded.value = true;
+// ── 广告高度，控制预览页滚动区域 ──
+const adHeight = ref(0);
+const shouldShowBottomAd = ref(false);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
 };
-const onAdHide = () => {
-    adLoaded.value = false;
+const resetBottomAdBanner = () => {
+    shouldShowBottomAd.value = false;
+    adHeight.value = 0;
 };
+const previewScrollStyle = computed(() => ({
+    height: '100vh',
+}));
+const previewLayoutStyle = computed(() => ({
+    paddingBottom: shouldShowBottomAd.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
+}));
 
 const handlePreviewScroll = (e) => {
     const scrollTop = Number(e?.detail?.scrollTop || 0);
+    const scrollHeight = Number(e?.detail?.scrollHeight || 0);
 
     const revealStart = previewHeroHeightPx * 0.78;
     const revealEnd = previewHeroHeightPx * 0.95;
     statusBarFillOpacity.value = Math.min(1, Math.max(0, (scrollTop - revealStart) / (revealEnd - revealStart)));
+
+    const recommendScrollTop = Math.max(0, scrollTop - previewHeroHeightPx);
+    const recommendScrollableDistance = Math.max(1, scrollHeight - previewViewportHeightPx - previewHeroHeightPx);
+    const recommendProgress = Math.min(1, recommendScrollTop / recommendScrollableDistance);
+    shouldShowBottomAd.value = recommendProgress >= 0.7;
 
     if (!showScrollHint.value) return;
     if (scrollTop > 60) {
@@ -1024,6 +1047,7 @@ onLoad((e) => {
     }
     currentInfo.value = classList.value[currentIndex.value];
     if (currentInfo.value) {
+        resetBottomAdBanner();
         readImgsFun();
         recordCurrentHistory();
         incrementViews(currentInfo.value.id);
@@ -1045,6 +1069,7 @@ const swiperChange = (e) => {
     if (disableSwipe.value) return;
     currentIndex.value = e.detail.current;
     currentInfo.value = classList.value[currentIndex.value];
+    resetBottomAdBanner();
     readImgsFun();
     recordCurrentHistory();
     incrementViews(currentInfo.value.id);

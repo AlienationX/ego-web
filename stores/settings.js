@@ -14,10 +14,6 @@ export const useSettingsStore = defineStore(
             theme: 'auto',
             language: 'auto',
             previewType: 'classic', // classic / floating
-            searchSortKey: '',
-            searchDateAsc: false,
-            classifySortKey: '',
-            classifyDateAsc: false,
 
             // vuetify项目的配置，后续修改
             navBarFlat: false, // 导航栏扁平效果

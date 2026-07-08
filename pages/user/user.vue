@@ -9,150 +9,160 @@
         </view>
         <!-- #endif -->
 
-        <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
-            <view v-if="userStore.userinfo.id" class="user-content">
-                <view class="avatar">
-                    <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
-                    <view class="avatar-ring"></view>
-                </view>
+        <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
+            <view class="page-scroll__content">
+                <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
+                    <view v-if="userStore.userinfo.id" class="user-content">
+                        <view class="avatar">
+                            <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
+                            <view class="avatar-ring"></view>
+                        </view>
 
-                <view class="user-details">
-                    <view class="details-top">
-                        <view class="name-row">
-                            <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
-                            <!-- <view v-if="userStore.userinfo.profile.is_vip" class="vip-badge">
-                                <uni-icons type="vip-filled" size="14" color="#fff"></uni-icons>
-                                <text>{{ t('user.profile.member') }}</text>
+                        <view class="user-details">
+                            <view class="details-top">
+                                <view class="name-row">
+                                    <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
+                                    <!-- <view v-if="userStore.userinfo.profile.is_vip" class="vip-badge">
+                                        <uni-icons type="vip-filled" size="14" color="#fff"></uni-icons>
+                                        <text>{{ t('user.profile.member') }}</text>
+                                    </view>
+                                    <view v-else class="non-vip-badge" @click="toMembership">
+                                        <text>成为会员</text>
+                                        <uni-icons type="arrow-right" size="12" color="#28B389"></uni-icons>
+                                    </view> -->
+                                </view>
+                                <!-- <view class="edit-btn" @click="toEditProfile">
+                                    {{ t('user.profile.editProfile') }}
+                                </view> -->
                             </view>
-                            <view v-else class="non-vip-badge" @click="toMembership">
-                                <text>成为会员</text>
-                                <uni-icons type="arrow-right" size="12" color="#28B389"></uni-icons>
-                            </view> -->
-                        </view>
-                        <!-- <view class="edit-btn" @click="toEditProfile">
-                            {{ t('user.profile.editProfile') }}
-                        </view> -->
-                    </view>
 
-                    <view class="user-description">
-                        {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
-                    </view>
+                            <view class="user-description">
+                                {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
+                            </view>
 
-                    <view class="user-info-row">
-                        <view v-if="userStore.userinfo.email" class="info-item">
-                            <uni-icons
-                                type="mail-filled"
-                                size="16"
-                                :color="settingsStore.isDark ? '#767d8a' : '#999'"
-                            ></uni-icons>
-                            <text>{{ userStore.userinfo.email }}</text>
-                        </view>
-                        <!-- <view v-if="userStore.userinfo.profile.region" class="info-item">
-                            <uni-icons type="location" size="16" color="#999"></uni-icons>
-                            <text>{{ userStore.userinfo.profile.region }}</text>
-                        </view> -->
-                    </view>
-                </view>
-            </view>
-
-            <!-- 签到和能量 -->
-            <view v-if="userStore.userinfo.id" class="checkin-section">
-                <view class="energy-info">
-                    <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right">
-                        <view class="energy-hint">
-                            <uni-icons type="help" size="20" :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
-                        </view>
-                    </bubble-tooltip>
-                    <text class="energy-text">
-                        {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
-                    </text>
-                </view>
-                <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
-                    <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
-                    <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
-                </view>
-            </view>
-
-            <view v-else class="not-logged-in-content">
-                <view class="avatar">
-                    <image src="/static/logo.svg" mode="aspectFill"></image>
-                    <view class="avatar-ring"></view>
-                </view>
-                <view class="app-name">{{ $t('common.appName') }}</view>
-                <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
-                <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
-            </view>
-        </view>
-
-        <!-- 统计卡片 -->
-        <view class="stats-section">
-            <view class="stats-card heart-card" @click="toMyFavorite">
-                <view class="card-bg"></view>
-                <view class="stats-row">
-                    <view class="stats-icon heart">
-                        <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
-                    </view>
-                    <view class="stats-number">{{
-                        userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
-                    }}</view>
-                </view>
-                <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
-                <view class="card-decoration decoration-1"></view>
-            </view>
-            <view class="stats-card download-card" @click="toMyDownload">
-                <view class="card-bg"></view>
-                <view class="stats-row">
-                    <view class="stats-icon download">
-                        <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
-                    </view>
-                    <view class="stats-number">{{
-                        userStore.userinfo.count ? userStore.userinfo.count.download_count : 0
-                    }}</view>
-                </view>
-                <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
-                <view class="card-decoration decoration-2"></view>
-            </view>
-            <view class="stats-card star-card" @click="toMyScore">
-                <view class="card-bg"></view>
-                <view class="stats-row">
-                    <view class="stats-icon star">
-                        <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
-                    </view>
-                    <view class="stats-number">{{ userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0 }}</view>
-                </view>
-                <view class="stats-label">{{ t('user.profile.myScore') }}</view>
-                <view class="card-decoration decoration-3"></view>
-            </view>
-        </view>
-
-        <view class="section">
-            <view class="list">
-                <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
-                    <view class="left">
-                        <view class="icon-wrap">
-                            <mdi-icon
-                                :path="item.left_icon"
-                                size="24px"
-                                :color="resolveMenuIconColor(item.left_color)"
-                            ></mdi-icon>
-                        </view>
-                        <view class="text">
-                            {{ item.left_text }}
+                            <view class="user-info-row">
+                                <view v-if="userStore.userinfo.email" class="info-item">
+                                    <uni-icons
+                                        type="mail-filled"
+                                        size="16"
+                                        :color="settingsStore.isDark ? '#767d8a' : '#999'"
+                                    ></uni-icons>
+                                    <text>{{ userStore.userinfo.email }}</text>
+                                </view>
+                                <!-- <view v-if="userStore.userinfo.profile.region" class="info-item">
+                                    <uni-icons type="location" size="16" color="#999"></uni-icons>
+                                    <text>{{ userStore.userinfo.profile.region }}</text>
+                                </view> -->
+                            </view>
                         </view>
                     </view>
-                    <view class="right">
-                        <view class="text">
-                            {{ item.right_text }}
+
+                    <!-- 签到和能量 -->
+                    <view v-if="userStore.userinfo.id" class="checkin-section">
+                        <view class="energy-info">
+                            <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right">
+                                <view class="energy-hint">
+                                    <uni-icons
+                                        type="help"
+                                        size="20"
+                                        :color="settingsStore.isDark ? '#767d8a' : '#999'"
+                                    ></uni-icons>
+                                </view>
+                            </bubble-tooltip>
+                            <text class="energy-text">
+                                {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
+                            </text>
                         </view>
-                        <mdi-icon
-                            path="/static/icons/chevron-right.svg"
-                            size="20px"
-                            :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"
-                        ></mdi-icon>
+                        <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
+                            <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
+                            <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
+                        </view>
+                    </view>
+
+                    <view v-else class="not-logged-in-content">
+                        <view class="avatar">
+                            <image src="/static/logo.svg" mode="aspectFill"></image>
+                            <view class="avatar-ring"></view>
+                        </view>
+                        <view class="app-name">{{ $t('common.appName') }}</view>
+                        <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
+                        <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
+                    </view>
+                </view>
+
+                <!-- 统计卡片 -->
+                <view class="stats-section">
+                    <view class="stats-card heart-card" @click="toMyFavorite">
+                        <view class="card-bg"></view>
+                        <view class="stats-row">
+                            <view class="stats-icon heart">
+                                <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
+                            </view>
+                            <view class="stats-number">{{
+                                userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
+                            }}</view>
+                        </view>
+                        <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
+                        <view class="card-decoration decoration-1"></view>
+                    </view>
+                    <view class="stats-card download-card" @click="toMyDownload">
+                        <view class="card-bg"></view>
+                        <view class="stats-row">
+                            <view class="stats-icon download">
+                                <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
+                            </view>
+                            <view class="stats-number">{{
+                                userStore.userinfo.count ? userStore.userinfo.count.download_count : 0
+                            }}</view>
+                        </view>
+                        <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
+                        <view class="card-decoration decoration-2"></view>
+                    </view>
+                    <view class="stats-card star-card" @click="toMyScore">
+                        <view class="card-bg"></view>
+                        <view class="stats-row">
+                            <view class="stats-icon star">
+                                <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
+                            </view>
+                            <view class="stats-number">{{
+                                userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0
+                            }}</view>
+                        </view>
+                        <view class="stats-label">{{ t('user.profile.myScore') }}</view>
+                        <view class="card-decoration decoration-3"></view>
+                    </view>
+                </view>
+
+                <view class="section">
+                    <view class="list">
+                        <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
+                            <view class="left">
+                                <view class="icon-wrap">
+                                    <mdi-icon
+                                        :path="item.left_icon"
+                                        size="24px"
+                                        :color="resolveMenuIconColor(item.left_color)"
+                                    ></mdi-icon>
+                                </view>
+                                <view class="text">
+                                    {{ item.left_text }}
+                                </view>
+                            </view>
+                            <view class="right">
+                                <view class="text">
+                                    {{ item.right_text }}
+                                </view>
+                                <mdi-icon
+                                    path="/static/icons/chevron-right.svg"
+                                    size="20px"
+                                    :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"
+                                ></mdi-icon>
+                            </view>
+                        </view>
                     </view>
                 </view>
             </view>
-        </view>
+        </scroll-view>
 
         <!-- <view class="section exit-section" v-if="userStore.userinfo.id">
             <view class="list">
@@ -221,7 +231,9 @@ const onAdHeightChange = (height) => {
 };
 const layoutStyle = computed(() => ({
     '--tab-bar-height': `${tabBarHeight.value}px`,
-    paddingBottom: adHeight.value > 0 ? `${adHeight.value}px` : '2px',
+}));
+const pageScrollStyle = computed(() => ({
+    height: `calc(100vh - ${adHeight.value}px)`,
 }));
 
 // 通用导航对话框控制
@@ -529,7 +541,17 @@ onShow(() => {
 <style lang="scss" scoped>
 .layout {
     background-color: var(--page-background);
-    min-height: calc(100vh - var(--tab-bar-height));
+    height: 100vh;
+    overflow: hidden;
+
+    .page-scroll {
+        width: 100%;
+    }
+
+    .page-scroll__content {
+        min-height: 100%;
+        padding-bottom: 2rpx;
+    }
 
     .status-bar-bg {
         position: fixed;

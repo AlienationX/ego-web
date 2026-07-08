@@ -12,6 +12,7 @@
             <view class="bg-mesh"></view>
         </view>
 
+        <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
         <view
             class="container"
             @touchstart="onChatTouchStart"
@@ -70,7 +71,10 @@
                 </view>
             </view>
 
-            <view class="bottom-panel" :style="{ bottom: `${tabBarHeight}px` }">
+            </view>
+        </scroll-view>
+
+        <view class="bottom-panel" :style="{ bottom: `${tabBarHeight}px` }">
                 <view class="picker-wrap" v-if="pickerOpen">
                     <template v-if="sourceMode === 'favorite'">
                         <view class="picker-title">{{ $t('discover.pickFavorite') }}</view>
@@ -122,7 +126,6 @@
                         <uni-icons class="lock-icon" type="vip-filled" size="14" color="#b7791f"></uni-icons>
                     </view> -->
                 </view>
-            </view>
         </view>
     </view>
 </template>
@@ -201,6 +204,9 @@ const containerBottomSpace = computed(() => {
     // return tabBarHeight.value + 0;
     return 80;
 });
+const pageScrollStyle = computed(() => ({
+    height: '100vh',
+}));
 
 const stopTyping = () => {
     if (typingTimer) {
@@ -846,9 +852,14 @@ onUnload(() => {
     }
 
     position: relative;
-    min-height: 94vh;
+    height: 100vh;
     background: var(--page-background);
     overflow: hidden;
+}
+
+.page-scroll {
+    width: 100%;
+    height: 100%;
 }
 
 .status-bar-bg {

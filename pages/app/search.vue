@@ -61,7 +61,6 @@
                     :tabs="tabs"
                     api-type="search"
                     :hide-header-if-empty="true"
-                    @update="onListUpdate"
                 >
                     <template #empty>
                         <view class="noResult">
@@ -78,34 +77,25 @@
         </view>
 
         <!-- 吸底广告 -->
-        <custom-ad-banner v-if="showWordBoard" @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad, onUnload, onReachBottom, onPageScroll } from '@dcloudio/uni-app';
+import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { apiGetSearchData } from '@/api/wallpaper.js';
-import { handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
-import { useLibraryStore } from '@/stores/library.js';
-import { useUserStore } from '@/stores/user.js';
-import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/system.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 const isDark = computed(() => settingsStore.isDark);
-const libraryStore = useLibraryStore();
-const userStore = useUserStore();
-const isAdmin = computed(() => !!userStore.isAdmin);
 
-const backToTopRef = ref(null);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(56);
-const navBarHeight = ref(getNavBarHeight() || 88);
 
 const queryParams = ref({
     pageNum: 1,
@@ -122,17 +112,8 @@ const onAdHeightChange = (height) => {
     adHeight.value = Math.max(0, Number(height) || 0);
 };
 const pageWrapStyle = computed(() => ({
-    paddingBottom: showWordBoard.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
+    paddingBottom: adHeight.value > 0 ? `${adHeight.value}px` : '0px',
 }));
-
-const noResult = ref(false);
-const activeButton = ref('');
-const dateSortAsc = ref(true);
-const classList = ref([]);
-
-const onListUpdate = (e) => {
-    classList.value = e.images;
-};
 
 const tabs = computed(() => [
     {
@@ -159,16 +140,6 @@ const tabs = computed(() => [
     },
 ]);
 
-const syncSearchSortState = () => {
-    settingsStore.options.searchSortKey = activeButton.value;
-    settingsStore.options.searchDateAsc = dateSortAsc.value;
-};
-
-const restoreSearchSortState = () => {
-    activeButton.value = settingsStore.options.searchSortKey || '';
-    dateSortAsc.value = typeof settingsStore.options.searchDateAsc === 'boolean' ? settingsStore.options.searchDateAsc : false;
-};
-
 const recommendList = computed(() => {
     const keywordsString = t('common.hotKeywords');
     return keywordsString.split(',');
@@ -176,16 +147,14 @@ const recommendList = computed(() => {
 
 // Loading state managed by tabbed-pics-view
 
-const init = (keyword = '', resetShowWordBoard = true, resetNoResult = false) => {
+const init = (keyword = '', resetShowWordBoard = true) => {
     queryParams.value.keyword = keyword;
     queryParams.value.pageNum = 1;
     showWordBoard.value = resetShowWordBoard;
-    noResult.value = resetNoResult;
 };
 
 const searchData = async () => {
     showWordBoard.value = false;
-    noResult.value = false;
 };
 
 const onSearch = () => {
@@ -229,37 +198,11 @@ const removeHistory = () => {
     });
 };
 
-const onSortQuery = (key) => {
-    if (key === 'date') {
-        activeButton.value = 'date';
-        dateSortAsc.value = !dateSortAsc.value;
-    } else {
-        activeButton.value = key;
-        dateSortAsc.value = false;
-    }
-    syncSearchSortState();
-};
-
-const onChangeColumn = () => {
-    settingsStore.options.column = settingsStore.options.column === 3 ? 2 : 3;
-};
-
-const onChangeView = () => {
-    settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
-};
-
 const goBack = () => {
     uni.navigateBack();
 };
 
-onReachBottom(() => {
-    // 逻辑由 tabbed-pics-view 接管
-});
-
 onLoad((options) => {
-    if (isAdmin.value) {
-        restoreSearchSortState();
-    }
     const keyword = decodeURIComponent(options?.keyword || '').trim();
     if (!keyword) return;
     queryParams.value.keyword = keyword;
@@ -269,8 +212,6 @@ onLoad((options) => {
 onUnload(() => {
     appStore.wallList = [];
 });
-
-onPageScroll(() => {});
 </script>
 
 <style lang="scss" scoped>
@@ -341,6 +282,12 @@ onPageScroll(() => {});
 .list-container {
     flex: 1;
     min-height: 0;
+}
+
+.list-container :deep(.empty-state) {
+    justify-content: flex-start;
+    align-items: stretch;
+    padding-top: 120rpx;
 }
 
 .search-box {
@@ -469,15 +416,17 @@ onPageScroll(() => {});
 }
 
 .noResult {
-    margin: 52rpx 24rpx 0;
-    padding: 54rpx 28rpx;
+    margin: 0 24rpx;
+    padding: 24rpx 28rpx 40rpx;
     // border: 2rpx dashed rgba(97, 154, 239, 0.4);
     // background: rgba(97, 154, 239, 0.06);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    // min-width: 500rpx;
+    max-width: 620rpx;
+    align-self: center;
+    transform: translateY(-32rpx);
 }
 
 .noResult__icon {
