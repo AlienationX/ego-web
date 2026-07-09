@@ -180,7 +180,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue';
+import { ref, reactive, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList, apiGetSearchData, apiGetActions, apiPostRecommend } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -249,7 +249,7 @@ const createTabState = () => ({
     pageNum: 1,
     isLoading: false,
     noMoreData: false,
-    scrollTop: 0,
+    scrollTop: null,
     oldScrollTop: 0,
     showBackTop: false,
     lastQueryStr: '',
@@ -266,17 +266,31 @@ watch(() => props.tabs, (newTabs) => {
         tabStates.splice(newTabs.length);
     }
     
+    let activeQueryChanged = false;
+
     newTabs.forEach((tab, index) => {
         const state = tabStates[index];
         if (!state) return;
         const queryStr = JSON.stringify(tab.query || {});
+
         if (state.lastQueryStr && state.lastQueryStr !== queryStr) {
+            if (props.apiType === 'search') {
+                Object.assign(state, createTabState(), { lastQueryStr: queryStr });
+                if (index === currentIndex.value) activeQueryChanged = true;
+                return;
+            }
+
             fetchData(index, true);
         }
+
         state.lastQueryStr = queryStr;
     });
 
     if (props.apiType === 'local') tabStates.forEach((_, i) => fetchData(i, true));
+
+    if (props.apiType === 'search' && activeQueryChanged) {
+        fetchData(currentIndex.value, true);
+    }
 }, { deep: true, immediate: true });
 
 // --- Data Fetching & Layout Engine ---
@@ -431,10 +445,6 @@ watch(() => currentIndex.value, (newIdx) => {
 
     if (tabStates[newIdx].images.length === 0) fetchData(newIdx, true);
 }, { immediate: true });
-
-onMounted(() => {
-    if (tabStates[currentIndex.value].images.length === 0) fetchData(currentIndex.value, true);
-});
 
 </script>
 

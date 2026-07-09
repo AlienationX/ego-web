@@ -64,22 +64,37 @@
         </view>
 
         <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
-        <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend" :style="channelBottomStyle">
-            <modern-pics-view 
-                :show-header="false" 
-                :tabs="[{ label: t('index.tabs.recommend') }]" 
+        <view
+            v-if="recommendLoaded"
+            v-show="activeHomeTab === 'recommend'"
+            class="home-channel home-channel--recommend"
+            :style="channelBottomStyle"
+        >
+            <modern-pics-view
+                :show-header="false"
+                :tabs="[{ label: t('index.tabs.recommend') }]"
                 api-type="recommend"
                 :show-card-meta="true"
-                :header-height="navBarHeight" 
+                :header-height="navBarHeight"
                 @scroll="handleEmbeddedScroll"
             ></modern-pics-view>
         </view>
 
-        <view v-if="latestLoaded" v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest" :style="channelBottomStyle">
+        <view
+            v-if="latestLoaded"
+            v-show="activeHomeTab === 'latest'"
+            class="home-channel home-channel--latest"
+            :style="channelBottomStyle"
+        >
             <timeline-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></timeline-page>
         </view>
 
-        <view v-if="hotLoaded" v-show="activeHomeTab === 'hot'" class="home-channel home-channel--hot" :style="channelBottomStyle">
+        <view
+            v-if="hotLoaded"
+            v-show="activeHomeTab === 'hot'"
+            class="home-channel home-channel--hot"
+            :style="channelBottomStyle"
+        >
             <top-n-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-n-page>
         </view>
 
@@ -188,7 +203,7 @@ const adHeight = ref(0);
 const onAdHeightChange = (height) => {
     adHeight.value = Math.max(0, Number(height) || 0);
 };
-const channelBottomStyle = computed(() => adHeight.value > 0 ? { paddingBottom: `${adHeight.value}px` } : {});
+const channelBottomStyle = computed(() => (adHeight.value > 0 ? { paddingBottom: `${adHeight.value}px` } : {}));
 
 // ── 优化：在 onLoad 中注册事件，避免模块顶层重复注册；传入函数引用精确移除 ──
 onShow(() => {
@@ -327,7 +342,7 @@ onShareTimeline(() => {
     align-items: center;
     justify-content: center;
     color: rgba(15, 23, 42, 0.48);
-    font-size: 31rpx;
+    font-size: 36rpx;
     font-weight: 600;
     letter-spacing: 0;
     transition: all 0.24s ease;

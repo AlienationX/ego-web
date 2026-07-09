@@ -7,7 +7,6 @@ import { useSettingsStore } from '@/stores/settings.js';
 
 const settingsStore = useSettingsStore();
 
-
 onLaunch(() => {
     console.log('App Launch');
 
@@ -59,13 +58,15 @@ onShow(() => {
     console.log('App Show');
 
     // 从后台切回时 onThemeChange 可能未触发，重新同步系统主题
-    const currentOsTheme = uni.getSystemInfoSync().osTheme || uni.getSystemInfoSync().hostTheme || 'light';
-    if (settingsStore.osTheme !== currentOsTheme) {
-        console.log('onShow sync osTheme:', settingsStore.osTheme, '->', currentOsTheme);
-        // #ifdef APP
-        plus.nativeUI.setUIStyle(currentOsTheme);
-        // #endif
-        settingsStore.osTheme = currentOsTheme;
+    if (settingsStore.options.theme === 'auto') {
+        const currentOsTheme = uni.getSystemInfoSync().osTheme || uni.getSystemInfoSync().hostTheme || 'light';
+        if (settingsStore.osTheme !== currentOsTheme) {
+            console.log('onShow sync osTheme:', settingsStore.osTheme, '->', currentOsTheme);
+            // #ifdef APP
+            plus.nativeUI.setUIStyle(currentOsTheme);
+            // #endif
+            settingsStore.osTheme = currentOsTheme;
+        }
     }
 
     // permissionEnums枚举建议单独一个js文件，然后引入

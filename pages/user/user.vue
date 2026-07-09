@@ -1194,6 +1194,15 @@ onShow(() => {
         background: #111114;
     }
 
+    .userInfo {
+        background: #111114;
+    }
+
+    .userInfo .checkin-section {
+        background: rgba(255, 255, 255, 0.04);
+        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
+    }
+
     // stats 卡片：去边框，换深色背景 + 顶部高光
     .stats-section .stats-card {
         background: #1e1e22;

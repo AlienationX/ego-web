@@ -16,7 +16,7 @@
                         <view class="name">{{ item.name }}</view>
                         <view class="path">{{ item.url }}</view>
                     </view>
-                    <uni-icons type="right" size="18" color="#98a2b3"></uni-icons>
+                    <uni-icons type="right" size="18" :color="arrowColor"></uni-icons>
                 </view>
             </view>
         </view>
@@ -25,11 +25,13 @@
 
 <script setup>
 import { onLoad } from '@dcloudio/uni-app';
+import { computed } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+const arrowColor = computed(() => (settingsStore.isDark ? '#6b7280' : '#98a2b3'));
 
 const testMenus = [
     { name: 'Edit Cover', url: '/pages/app/cover' },
@@ -60,7 +62,28 @@ onLoad(() => {
 <style lang="scss" scoped>
 .layout {
     min-height: 100vh;
-    background: #f5f7fa;
+
+    &.theme-light {
+        --test-bg: #f5f7fa;
+        --test-panel-bg: #ffffff;
+        --test-panel-border: #e8edf3;
+        --test-divider: #edf2f7;
+        --test-title: #1f2937;
+        --test-text: #64748b;
+        --test-muted: #94a3b8;
+    }
+
+    &.theme-dark {
+        --test-bg: #111114;
+        --test-panel-bg: #1b1c20;
+        --test-panel-border: rgba(255, 255, 255, 0.08);
+        --test-divider: rgba(255, 255, 255, 0.06);
+        --test-title: #f3f4f6;
+        --test-text: rgba(243, 244, 246, 0.72);
+        --test-muted: rgba(243, 244, 246, 0.42);
+    }
+
+    background: var(--test-bg);
 }
 
 .container {
@@ -68,15 +91,15 @@ onLoad(() => {
 }
 
 .intro {
-    background: #fff;
+    background: var(--test-panel-bg);
     border-radius: 16rpx;
-    border: 1rpx solid #e8edf3;
+    border: 1rpx solid var(--test-panel-border);
     padding: 22rpx;
     margin-bottom: 18rpx;
 
     .title {
         font-size: 32rpx;
-        color: #1f2937;
+        color: var(--test-title);
         font-weight: 700;
         margin-bottom: 8rpx;
     }
@@ -84,14 +107,14 @@ onLoad(() => {
     .desc {
         font-size: 24rpx;
         line-height: 1.6;
-        color: #64748b;
+        color: var(--test-text);
     }
 }
 
 .list {
-    background: #fff;
+    background: var(--test-panel-bg);
     border-radius: 16rpx;
-    border: 1rpx solid #e8edf3;
+    border: 1rpx solid var(--test-panel-border);
     overflow: hidden;
 
     .row {
@@ -100,7 +123,7 @@ onLoad(() => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: 1rpx solid #edf2f7;
+        border-bottom: 1rpx solid var(--test-divider);
 
         &:last-child {
             border-bottom: none;
@@ -113,14 +136,14 @@ onLoad(() => {
 
             .name {
                 font-size: 30rpx;
-                color: #1f2937;
+                color: var(--test-title);
                 font-weight: 600;
                 margin-bottom: 4rpx;
             }
 
             .path {
                 font-size: 22rpx;
-                color: #94a3b8;
+                color: var(--test-muted);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;

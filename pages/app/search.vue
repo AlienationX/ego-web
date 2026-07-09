@@ -105,6 +105,7 @@ const queryParams = ref({
 });
 const searchHistory = ref(uni.getStorageSync('searchHistory') || []);
 const showWordBoard = ref(true);
+const lastSearchedKeyword = ref('');
 
 // ── 广告高度，控制底部留白 ──
 const adHeight = ref(0);
@@ -158,20 +159,28 @@ const searchData = async () => {
 };
 
 const onSearch = () => {
-    if (!queryParams.value.keyword?.trim()) {
+    const keyword = queryParams.value.keyword?.trim() || '';
+
+    if (!keyword) {
         onClear();
         return;
     }
 
-    searchHistory.value = [...new Set([queryParams.value.keyword, ...searchHistory.value])].slice(0, 10);
+    if (!showWordBoard.value && lastSearchedKeyword.value === keyword) return;
+
+    queryParams.value.keyword = keyword;
+    lastSearchedKeyword.value = keyword;
+
+    searchHistory.value = [...new Set([keyword, ...searchHistory.value])].slice(0, 10);
     uni.setStorageSync('searchHistory', searchHistory.value);
 
-    init(queryParams.value.keyword);
+    init(keyword);
     searchData();
 };
 
 const onClear = () => {
     init();
+    lastSearchedKeyword.value = '';
     appStore.wallList = [];
     adHeight.value = 0;
 };

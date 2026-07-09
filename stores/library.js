@@ -7,20 +7,44 @@ const MAX_TAG_ITEMS = 24;
 const normalizeWall = (wall = {}) => {
     if (!wall || !wall.id) return null;
 
+    const tagsList = Array.isArray(wall.tags_list)
+        ? wall.tags_list
+        : typeof wall.tags === 'string'
+          ? wall.tags
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean)
+          : [];
+
+    const tagsEnList = Array.isArray(wall.tags_en_list)
+        ? wall.tags_en_list
+        : typeof wall.tags_en === 'string'
+          ? wall.tags_en
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean)
+          : [];
+
     return {
         id: wall.id,
-        smallPicurl: wall.smallPicurl || wall.picurl || '',
+        picurl: wall.picurl || '',
+        smallPicurl: wall.smallPicurl || '',
         description: wall.description || '',
+        description_en: wall.description_en || '',
         classify_name: wall.classify_name || '',
+        classify_name_en: wall.classify_name_en || '',
+        tags: wall.tags || tagsList.join(','),
+        tags_list: tagsList,
+        tags_en: wall.tags_en || tagsEnList.join(','),
+        tags_en_list: tagsEnList,
         score: wall.score || 0,
-        tags_list: Array.isArray(wall.tags_list)
-            ? wall.tags_list
-            : typeof wall.tags === 'string'
-              ? wall.tags
-                    .split(',')
-                    .map((item) => item.trim())
-                    .filter(Boolean)
-              : [],
+        publisher: wall.publisher || '',
+        created_at: wall.created_at || '',
+        updated_at: wall.updated_at || '',
+        is_locked: !!wall.is_locked,
+        is_favorited: !!wall.is_favorited,
+        views: wall.views || 0,
+        downloads: wall.downloads || 0,
         viewed_at: wall.viewed_at || Date.now(),
     };
 };
@@ -60,7 +84,9 @@ export const useLibraryStore = defineStore(
             const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
             recentViewed.value = [
                 normalized,
-                ...recentViewed.value.filter((item) => item.id !== normalized.id && (item.viewed_at || Date.now()) >= thirtyDaysAgo)
+                ...recentViewed.value.filter(
+                    (item) => item.id !== normalized.id && (item.viewed_at || Date.now()) >= thirtyDaysAgo,
+                ),
             ].slice(0, 400);
 
             const nextTags = normalized.tags_list.filter((tag) => !hiddenTags.value.includes(tag));
