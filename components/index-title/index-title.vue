@@ -9,20 +9,19 @@
     </view>
 </template>
 
-<script setup>
-</script>
+<script setup></script>
 
 <style lang="scss" scoped>
-    .common-title {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 30rpx;
+.common-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30rpx;
 
-        .name {
-            font-size: 34rpx;
-            font-weight: bold;
-            color: var(--text-primary);
-        }
+    .name {
+        font-size: 34rpx;
+        font-weight: 600;
+        color: var(--text-primary);
     }
+}
 </style>

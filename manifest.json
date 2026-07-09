@@ -1,7 +1,7 @@
 {
-    "name" : "%app.name%",
+    "name" : "Ego Wallpapers",
     "appid" : "__UNI__098B24F",
-    "description" : "%app.description%",
+    "description" : "Explore wallpapers, and explore yourself.",
     "versionName" : "1.4.2",
     "versionCode" : 142,
     "transformPx" : false,

@@ -28,6 +28,8 @@ export const useAdIntersititial = () => {
     let isShowing = false;
     let pendingDestroy = false;
     let pendingPicurl = '';
+    let pendingOnSuccess = null; // 广告关闭后的业务回调
+    let pendingOnFallback = null; // 广告异常时的回退回调
 
     const ensureInterstitialAd = () => {
         if (interstitialAd) return interstitialAd;
@@ -37,6 +39,8 @@ export const useAdIntersititial = () => {
 
     const clearPending = () => {
         pendingPicurl = '';
+        pendingOnSuccess = null;
+        pendingOnFallback = null;
         isShowing = false;
     };
 
@@ -72,15 +76,23 @@ export const useAdIntersititial = () => {
             // 广告加载成功，不需要额外处理
         });
         ad.onClose(() => {
-            // 用户关闭广告不执行下载
-            // safeDownload(pendingPicurl);
+            // 用户关闭广告后执行业务回调（下载等）
+            if (pendingOnSuccess) {
+                pendingOnSuccess(pendingPicurl);
+            } else {
+                safeDownload(pendingPicurl);
+            }
             clearPending();
             preloadInterstitial();
             tryDestroyIfNeeded();
         });
         ad.onError(() => {
             // 广告异常时回退，不阻塞主流程
-            safeDownload(pendingPicurl);
+            if (pendingOnFallback) {
+                pendingOnFallback(pendingPicurl);
+            } else {
+                safeDownload(pendingPicurl);
+            }
             clearPending();
             preloadInterstitial();
             tryDestroyIfNeeded();
@@ -89,10 +101,23 @@ export const useAdIntersititial = () => {
         preloadInterstitial();
     };
 
-    const showInterstitialAd = (inputPicurl) => {
-        // 如果用户是VIP或广告开关关闭，直接下载图片
+    /**
+     * 展示插屏广告，关闭后自动下载或执行业务回调
+     * @param {string} inputPicurl 待下载的图片地址
+     * @param {object} options 可选配置
+     * @param {Function} options.onSuccess 广告关闭后的业务回调（如增加下载计数）
+     * @param {Function} options.onFallback 广告异常时的回退回调（直接执行下载+业务）
+     */
+    const showInterstitialAd = (inputPicurl, options = {}) => {
+        const { onSuccess, onFallback } = options;
+
+        // 如果用户是VIP或广告开关关闭，直接下载图片并执行业务回调
         if (shouldBypassAd()) {
-            safeDownload(inputPicurl);
+            if (onFallback) {
+                onFallback(inputPicurl);
+            } else {
+                safeDownload(inputPicurl);
+            }
             return;
         }
 
@@ -106,11 +131,17 @@ export const useAdIntersititial = () => {
         }
 
         pendingPicurl = inputPicurl || '';
+        pendingOnSuccess = onSuccess || null;
+        pendingOnFallback = onFallback || null;
         isShowing = true;
 
         interstitialAd.show().catch(() => {
-            // show 失败直接回退下载，不再重试（避免重试导致广告二次展示）
-            safeDownload(pendingPicurl);
+            // show 失败直接回退，不再重试（避免重试导致广告二次展示）
+            if (pendingOnFallback) {
+                pendingOnFallback(pendingPicurl);
+            } else {
+                safeDownload(pendingPicurl);
+            }
             clearPending();
             tryDestroyIfNeeded();
         });
@@ -132,8 +163,13 @@ export const useAdIntersititial = () => {
     // #ifdef MP || WEB || APP-HARMONY
     return {
         createInterstitialAd: function () {},
-        showInterstitialAd: function (inputPicurl) {
-            downloadPic(inputPicurl);
+        showInterstitialAd: function (inputPicurl, options = {}) {
+            const cb = options.onFallback || options.onSuccess;
+            if (cb) {
+                cb(inputPicurl);
+            } else {
+                downloadPic(inputPicurl);
+            }
         },
         destroyInterstitialAd: function () {},
     };

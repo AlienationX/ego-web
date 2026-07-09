@@ -150,7 +150,6 @@
                         </template>
                     </view>
                 </view>
-
                 <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
             </view>
         </scroll-view>
@@ -521,8 +520,9 @@ classList.value = wallList.map((item) => {
 const disableSwipe = ref(false);
 const showScrollHint = ref(!uni.getStorageSync(HAS_SEEN_HINT_KEY));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const previewHeroHeightPx = uni.getWindowInfo().windowHeight || 667;
-const previewViewportHeightPx = uni.getWindowInfo().windowHeight || 667;
+// 优先使用 getWindowInfo（新 API），不可用时回退到 getSystemInfoSync，确保 windowHeight 可靠
+const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || uni.getSystemInfoSync().windowHeight || 667;
+const previewViewportHeightPx = previewHeroHeightPx;
 const statusBarFillOpacity = ref(0);
 
 // ── 广告高度，控制预览页滚动区域 ──
@@ -546,7 +546,7 @@ const handlePreviewScroll = (e) => {
     const scrollTop = Number(e?.detail?.scrollTop || 0);
     const scrollHeight = Number(e?.detail?.scrollHeight || 0);
 
-    const revealStart = previewHeroHeightPx * 0.78;
+    const revealStart = previewHeroHeightPx * 0.05;
     const revealEnd = previewHeroHeightPx * 0.95;
     statusBarFillOpacity.value = Math.min(1, Math.max(0, (scrollTop - revealStart) / (revealEnd - revealStart)));
 
@@ -989,12 +989,21 @@ const clickDownload = async () => {
         }
         // adPopup.value.open();
     } else {
-        // 展示插屏广告，之后下载图片
-        createInterstitialAd(); // 创建插屏广告
-        showInterstitialAd(currentInfo.value.picurl);
-        destroyInterstitialAd(); // 销毁插屏广告
-
-        incrementDownloads(currentInfo.value.id);
+        // 展示插屏广告，关闭后再下载图片（不再出现广告挡住下载提示的问题）
+        createInterstitialAd();
+        showInterstitialAd(currentInfo.value.picurl, {
+            onSuccess: (picurl) => {
+                // 广告关闭后执行下载
+                downloadPic(picurl);
+                incrementDownloads(currentInfo.value.id);
+            },
+            onFallback: (picurl) => {
+                // 广告异常直接下载
+                downloadPic(picurl);
+                incrementDownloads(currentInfo.value.id);
+            },
+        });
+        destroyInterstitialAd();
     }
     // #endif
 };

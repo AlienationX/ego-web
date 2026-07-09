@@ -342,8 +342,8 @@ onShareTimeline(() => {
     align-items: center;
     justify-content: center;
     color: rgba(15, 23, 42, 0.48);
-    font-size: 36rpx;
-    font-weight: 600;
+    font-size: 35rpx;
+    font-weight: 700;
     letter-spacing: 0;
     transition: all 0.24s ease;
 
