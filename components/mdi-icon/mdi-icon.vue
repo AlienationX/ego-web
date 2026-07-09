@@ -74,7 +74,7 @@ const appImageStyle = computed(() => {
 </script>
 
 <style>
-@import '@/static/iconfont/appicons.css';
+/* appicons.css 已移至 App.vue 全局样式，避免属性选择器 [class^="appicons-"] 触犯微信小程序组件 wxss 限制 */
 
 .mdi-icon {
     display: inline-flex;

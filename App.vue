@@ -112,4 +112,5 @@ onHide(() => {
 <style lang="scss">
 /*每个页面公共css */
 @import '@/static/styles/common-style.scss';
+@import '@/static/iconfont/appicons.css';
 </style>

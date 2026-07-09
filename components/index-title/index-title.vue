@@ -20,7 +20,7 @@
 
     .name {
         font-size: 34rpx;
-        font-weight: 600;
+        font-weight: 500;
         color: var(--text-primary);
     }
 }

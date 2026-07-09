@@ -37,7 +37,7 @@
                         :app-id="item.appid"
                         :class="['banner-card', item.accentClass]"
                     >
-                        <image :src="item.mediumPicurl" mode="aspectFill"></image>
+                        <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
                         <view class="banner-card__overlay"></view>
                         <view class="banner-card__content">
                             <view class="banner-card__tag-row">
@@ -56,7 +56,7 @@
                     </navigator>
 
                     <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
-                        <image :src="item.mediumPicurl" mode="aspectFill"></image>
+                        <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
                         <view class="banner-card__overlay"></view>
                         <view class="banner-card__content">
                             <view class="banner-card__tag-row">
@@ -90,7 +90,7 @@
                 </view>
                 <swiper v-else class="notice-swiper" vertical interval="1500" duration="300" autoplay circular>
                     <swiper-item class="notice-swiper-item" v-for="item in noticeComputed" :key="item.id">
-                        <navigator :url="`/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(item.title)}`">
+                        <navigator class="notice-nav" :url="`/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(item.title)}`">
                             {{ item.title }}
                         </navigator>
                     </swiper-item>
@@ -127,7 +127,7 @@
                     <view class="sk-card sk-card--hero"></view>
                     <view v-for="i in 4" :key="i" class="sk-card"></view>
                 </view>
-                <scroll-view v-else scroll-x>
+                <scroll-view v-else scroll-x class="home-scroll">
                     <view
                         class="box"
                         v-for="(item, idx) in randomDailyList"
@@ -136,6 +136,7 @@
                         @click="goPreview(item.id, randomDailyList)"
                     >
                         <image
+                            class="box-image"
                             :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
                             mode="aspectFill"
                             lazy-load
@@ -172,9 +173,9 @@
                 <view v-if="!latestList.length" class="sk-scroll-row">
                     <view v-for="i in 5" :key="i" class="sk-card"></view>
                 </view>
-                <scroll-view v-else scroll-x>
+                <scroll-view v-else scroll-x class="home-scroll">
                     <view class="box" v-for="(item, idx) in latestList" :key="item.id" @click="goPreview(item.id, latestList)">
-                        <image :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
+                        <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
                         <view v-if="item._timeBadge" class="box-badge">{{ item._timeBadge }}</view>
                     </view>
                 </scroll-view>
@@ -262,9 +263,9 @@
 
             <view class="content">
                 <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x>
+                <scroll-view scroll-x class="home-scroll">
                     <view class="box" v-for="item in classify.data" :key="item.id" @click="goPreview(item.id, classify.data)">
-                        <image :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
+                        <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
                         <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}</view>
                     </view>
                 </scroll-view>
@@ -722,7 +723,7 @@ onMounted(() => {
         border-radius: 28rpx;
         box-sizing: border-box;
 
-        image {
+        .banner-card__image {
             width: 100%;
             height: 100%;
             box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.34);
@@ -833,12 +834,12 @@ onMounted(() => {
             justify-content: center;
         }
 
-        &:active image {
+        &:active .banner-card__image {
             transform: scale(1.08);
         }
 
         @media (hover: hover) {
-            &:hover image {
+            &:hover .banner-card__image {
                 transform: scale(1.08);
             }
         }
@@ -1053,8 +1054,9 @@ onMounted(() => {
             text-overflow: ellipsis;
         }
 
-        navigator {
+        .notice-nav {
             width: 100%;
+            display: block;
         }
     }
 
@@ -1123,8 +1125,6 @@ onMounted(() => {
         }
     }
 
-    button.btn,
-    button.button,
     .btn,
     .date .button {
         margin: 0;
@@ -1172,7 +1172,7 @@ onMounted(() => {
         position: relative;
         z-index: 1;
 
-        scroll-view {
+        .home-scroll {
             white-space: nowrap;
             height: 100%;
             box-sizing: border-box;
@@ -1212,7 +1212,7 @@ onMounted(() => {
                     pointer-events: none;
                 }
 
-                image {
+                .box-image {
                     width: 100%;
                     height: 100%;
                     border-radius: 28rpx;
@@ -1300,7 +1300,7 @@ onMounted(() => {
                 }
 
                 &:active {
-                    image {
+                    .box-image {
                         transform: scale(1.08);
                     }
                 }
@@ -1309,7 +1309,7 @@ onMounted(() => {
             @media (hover: hover) {
                 .box:hover {
                     box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.45);
-                    image {
+                    .box-image {
                         transform: scale(1.08);
                     }
                 }
