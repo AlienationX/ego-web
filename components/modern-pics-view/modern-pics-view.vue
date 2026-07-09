@@ -85,8 +85,8 @@
                             <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
                                 <view 
                                     class="modern-card grid-card" 
-                                    v-for="item in tabStates[index].images" 
-                                    :key="item.id"
+                                    v-for="(item, idx) in tabStates[index].images" 
+                                    :key="index + '-' + item.id + '-' + idx"
                                     @click="openPreview(item.id, index)"
                                 >
                                     <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
@@ -110,8 +110,8 @@
                                 <view class="waterfall-col">
                                     <view 
                                         class="modern-card wf-card" 
-                                        v-for="item in tabStates[index].leftCol" 
-                                        :key="item.id"
+                                        v-for="(item, idx) in tabStates[index].leftCol" 
+                                        :key="index + '-l-' + item.id + '-' + idx"
                                         @click="openPreview(item.id, index)"
                                     >
                                         <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
@@ -132,8 +132,8 @@
                                 <view class="waterfall-col">
                                     <view 
                                         class="modern-card wf-card" 
-                                        v-for="item in tabStates[index].rightCol" 
-                                        :key="item.id"
+                                        v-for="(item, idx) in tabStates[index].rightCol" 
+                                        :key="index + '-r-' + item.id + '-' + idx"
                                         @click="openPreview(item.id, index)"
                                     >
                                         <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
@@ -253,6 +253,7 @@ const createTabState = () => ({
     oldScrollTop: 0,
     showBackTop: false,
     lastQueryStr: '',
+    hasLoaded: false,
 });
 
 const tabStates = reactive(props.tabs.map(() => createTabState()));
@@ -273,23 +274,36 @@ watch(() => props.tabs, (newTabs) => {
         if (!state) return;
         const queryStr = JSON.stringify(tab.query || {});
 
-        if (state.lastQueryStr && state.lastQueryStr !== queryStr) {
+        // 同 query 未变化，跳过
+        if (state.lastQueryStr === queryStr) return;
+
+        // query 发生变化
+        if (state.hasLoaded) {
+            // 已加载过的 tab，query 变了 → 重新拉取
             if (props.apiType === 'search') {
                 Object.assign(state, createTabState(), { lastQueryStr: queryStr });
                 if (index === currentIndex.value) activeQueryChanged = true;
-                return;
+            } else {
+                fetchData(index, true);
             }
-
-            fetchData(index, true);
+        } else {
+            // 从未加载过的 tab → 仅更新 query，等切换过去时懒加载
+            state.lastQueryStr = queryStr;
         }
-
-        state.lastQueryStr = queryStr;
     });
 
     if (props.apiType === 'local') tabStates.forEach((_, i) => fetchData(i, true));
 
     if (props.apiType === 'search' && activeQueryChanged) {
         fetchData(currentIndex.value, true);
+    }
+
+    // 非 search/local：确保当前激活的 tab 已加载
+    if (props.apiType !== 'search' && props.apiType !== 'local') {
+        const activeState = tabStates[currentIndex.value];
+        if (activeState && !activeState.hasLoaded && !activeState.isLoading) {
+            fetchData(currentIndex.value, true);
+        }
     }
 }, { deep: true, immediate: true });
 
@@ -330,7 +344,7 @@ const fetchData = async (index, init = false) => {
     if (!state || state.isLoading || (state.noMoreData && !init)) return;
 
     if (init) {
-        Object.assign(state, { images: [], leftCol: [], rightCol: [], leftHeight: 0, rightHeight: 0, pageNum: 1, noMoreData: false });
+        Object.assign(state, { images: [], leftCol: [], rightCol: [], leftHeight: 0, rightHeight: 0, pageNum: 1, noMoreData: false, hasLoaded: true });
     }
 
     try {
@@ -383,6 +397,11 @@ const handleTabClick = (index) => {
         }
     } else {
         currentIndex.value = index;
+        // 懒加载：切换到未加载的 tab 时拉取数据
+        const state = tabStates[index];
+        if (state && state.images.length === 0 && !state.isLoading) {
+            fetchData(index, true);
+        }
     }
 };
 
@@ -392,8 +411,13 @@ const toggleViewMode = () => {
 
 const onSwiperChange = (e) => {
     currentIndex.value = e.detail.current;
+    // 懒加载：首次进入该 tab 且未加载数据时触发拉取
+    const state = tabStates[currentIndex.value];
+    if (state && state.images.length === 0 && !state.isLoading) {
+        fetchData(currentIndex.value, true);
+    }
     emit('change', currentIndex.value);
-    emit('update', { images: tabStates[currentIndex.value].images, index: currentIndex.value });
+    emit('update', { images: state.images, index: currentIndex.value });
 };
 
 const onScroll = (e, index) => {

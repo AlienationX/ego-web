@@ -69,12 +69,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import {
-    onLoad,
-    onUnload,
-    onShareAppMessage,
-    onShareTimeline,
-} from '@dcloudio/uni-app';
+import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { gotoHome, handlePicUrl } from '@/utils/common.js';
@@ -166,7 +161,7 @@ const heroImage = computed(() => {
         return classList.value[0].mediumPicurl || classList.value[0].picurl;
     }
     // 优先级 3: 默认图
-    return '/static/images/guide/guide1.png';
+    return '';
 });
 
 const heroBadge = computed(() => `${t('common.recommend')} CATEGORY`);
