@@ -109,7 +109,7 @@ import { onLoad, onShow, onUnload, onShareAppMessage, onShareTimeline } from '@d
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { updateTabBarText } from '@/utils/i18n.js';
-import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/layout.js';
 import TimelinePage from '@/pages/app/timeline.vue';
 import TopNPage from '@/pages/app/topN.vue';
 const settingsStore = useSettingsStore();

@@ -60,7 +60,7 @@
 import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { PICS_BASE_URL } from '@/common/config.js';
 
 const { t } = useI18n();

@@ -174,7 +174,7 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostLogin, apiPostLoginByWechat } from '@/api/wallpaper.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { encrypt, decrypt } from '@/utils/encryption.js';
 import { useSettingsStore } from '@/stores/settings.js';
 

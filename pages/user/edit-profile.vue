@@ -80,7 +80,7 @@ import { reactive, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';

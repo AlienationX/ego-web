@@ -28,7 +28,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { getTabBarHeight } from '@/utils/system.js';
+import { getTabBarHeight } from '@/utils/layout.js';
 
 const props = defineProps({
     currentPath: {

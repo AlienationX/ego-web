@@ -204,7 +204,7 @@
 import { ref, reactive, computed } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiPostProfile, apiPostEarnEnergy } from '@/api/wallpaper.js';
-import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';

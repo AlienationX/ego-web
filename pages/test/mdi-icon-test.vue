@@ -84,7 +84,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const size = ref(80);

@@ -120,7 +120,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
 import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } from '@/utils/common.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 

@@ -139,7 +139,7 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { apiPostSendEmailCode, apiPostVerifyCode, apiPostResetPassword } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 

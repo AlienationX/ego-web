@@ -135,7 +135,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { onLoad, onUnload } from '@dcloudio/uni-app';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useAdRewardedVideo } from '@/hooks/useAd.js';
 import { apiPostRewards } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';

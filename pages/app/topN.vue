@@ -174,7 +174,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';

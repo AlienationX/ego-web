@@ -21,7 +21,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useSettingsStore } from '@/stores/settings.js';
-import { getNavBarHeight } from '@/utils/system.js';
+import { getNavBarHeight } from '@/utils/layout.js';
 import GlassTabBar from '@/components/glass-tab-bar/glass-tab-bar.vue';
 
 const settingsStore = useSettingsStore();

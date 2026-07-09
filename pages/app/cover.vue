@@ -157,7 +157,7 @@ import { apiGetClassList, apiGetClassify, apiPostClassifyPicUrl } from '@/api/wa
 import { handlePicUrl } from '@/utils/common.js';
 import { PICS_BASE_URL } from '@/common/config.js';
 import { useSettingsStore } from '@/stores/settings.js';
-import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 
 const settingsStore = useSettingsStore();
 const isDark = computed(() => settingsStore.isDark);

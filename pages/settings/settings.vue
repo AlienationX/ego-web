@@ -425,7 +425,7 @@ import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
-import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { RIGHT_ICP } from '@/common/config.js';
 import {
     LANGUAGE_PREF_AUTO,

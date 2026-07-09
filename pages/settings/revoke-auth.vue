@@ -37,7 +37,7 @@
 import { computed, ref } from 'vue';
 import { onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { useSettingsStore } from '@/stores/settings.js';
 

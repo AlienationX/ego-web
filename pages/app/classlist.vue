@@ -81,7 +81,7 @@ import { gotoHome, handlePicUrl } from '@/utils/common.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
-import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();

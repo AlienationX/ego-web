@@ -136,7 +136,7 @@ import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiGetActions, apiPostDiscoverStream } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useUserStore } from '@/stores/user.js';
-import { getStatusBarHeight, getTabBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { updateTabBarText } from '@/utils/i18n.js';

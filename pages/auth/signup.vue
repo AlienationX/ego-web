@@ -91,7 +91,7 @@
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiPostRegister } from '@/api/wallpaper.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();

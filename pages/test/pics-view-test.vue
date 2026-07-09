@@ -86,7 +86,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
-import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();

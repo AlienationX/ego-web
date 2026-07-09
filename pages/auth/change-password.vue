@@ -148,7 +148,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { apiPostChangePassword } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 

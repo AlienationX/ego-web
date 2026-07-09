@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth, getRightIconWidth } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight, getLeftIconWidth, getRightIconWidth } from '@/utils/layout.js';
 
 defineProps({
     title: {

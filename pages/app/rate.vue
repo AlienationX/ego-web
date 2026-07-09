@@ -73,7 +73,7 @@ import { apiGetActions, apiPostActions } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useAppStore } from '@/stores/app.js';
 
 const { t } = useI18n();

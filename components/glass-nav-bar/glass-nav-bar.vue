@@ -29,7 +29,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 
 const props = defineProps({
     title: {

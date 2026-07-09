@@ -37,7 +37,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { getStatusBarHeight, getNavBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getNavBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const settingsStore = useSettingsStore();

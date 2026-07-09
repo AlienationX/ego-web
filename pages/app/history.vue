@@ -87,7 +87,7 @@ import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
-import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { formatDateKey, formatHistoryDayLabel } from '@/utils/common.js';
 import { useAppStore } from '@/stores/app.js';
 

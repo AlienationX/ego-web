@@ -33,7 +33,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { getStatusBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const settingsStore = useSettingsStore();

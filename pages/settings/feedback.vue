@@ -110,7 +110,7 @@ import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
-import { getStatusBarHeight, getTitleBarHeight } from '@/utils/system.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
