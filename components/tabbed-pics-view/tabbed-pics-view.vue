@@ -423,7 +423,7 @@ const onSwiperChange = (e) => {
 
 const processImages = async (index, list) => {
     const state = tabStates[index];
-    const { screenWidth } = uni.getSystemInfoSync();
+    const { screenWidth } = uni.getWindowInfo();
     const colCount = settingsStore.options.column;
     const gap = colCount === 3 ? 12 : 12;
     const colWidth = (screenWidth - (colCount + 1) * gap) / colCount;

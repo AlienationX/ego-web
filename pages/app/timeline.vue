@@ -295,7 +295,7 @@ const goBack = () => {
 
 const handleScroll = (e) => {
     const top = Number(e?.detail?.scrollTop || 0);
-    const windowHeight = uni.getSystemInfoSync().windowHeight || 0;
+    const windowHeight = uni.getWindowInfo().windowHeight || 0;
     const nextVisible = top > windowHeight / 2;
     if (showScrollTop.value !== nextVisible) {
         showScrollTop.value = nextVisible;

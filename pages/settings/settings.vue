@@ -503,7 +503,7 @@ const themeValueLabel = computed(() => {
 });
 
 const themeOptions = computed(() => {
-    const isApp = uni.getSystemInfoSync().uniPlatform === 'app';
+    const isApp = uni.getAppBaseInfo().uniPlatform === 'app';
 
     return [
         {
@@ -560,7 +560,7 @@ const toggles = reactive({
     locationServices: false,
     autoSave: true,
     syncWifiOnly: true,
-    theme: uni.getSystemInfoSync().theme === 'dark',
+    theme: uni.getAppBaseInfo().theme === 'dark',
     // 瀑布流开关：true = 瀑布流，false = 网格
     waterfallView: settingsStore.options.view === 'waterfall',
 });

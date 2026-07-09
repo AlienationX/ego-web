@@ -520,8 +520,8 @@ classList.value = wallList.map((item) => {
 const disableSwipe = ref(false);
 const showScrollHint = ref(!uni.getStorageSync(HAS_SEEN_HINT_KEY));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-// 优先使用 getWindowInfo（新 API），不可用时回退到 getSystemInfoSync，确保 windowHeight 可靠
-const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || uni.getSystemInfoSync().windowHeight || 667;
+// 使用新版 getWindowInfo API，搭配可选链兜底
+const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || 667;
 const previewViewportHeightPx = previewHeroHeightPx;
 const statusBarFillOpacity = ref(0);
 

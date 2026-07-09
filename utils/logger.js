@@ -1,14 +1,15 @@
 export const isDev = () => {
     if (import.meta.env.DEV) return true;
-    
-    const SYSTEM_INFO = uni.getSystemInfoSync();
+
+    const app = uni.getAppBaseInfo();
+    const device = uni.getDeviceInfo();
     // 不统计web，主要是用来测试
-    if (SYSTEM_INFO.uniPlatform === 'web') return true;
+    if (app.uniPlatform === 'web') return true;
     // 微信小程序调试工具不统计
-    if (SYSTEM_INFO.uniPlatform === 'mp-weixin' && SYSTEM_INFO.deviceBrand === 'devtools') return true;
+    if (app.uniPlatform === 'mp-weixin' && device.deviceBrand === 'devtools') return true;
     // Android Studio 不统计, sdk_gphone64_arm64
-    if (SYSTEM_INFO.deviceModel.startsWith('sdk')) return true;
-    
+    if (device.deviceModel?.startsWith('sdk')) return true;
+
     return false;
 };
 

@@ -104,8 +104,7 @@ const titlebarPaddingRight = computed(() => {
     // #ifdef MP-WEIXIN
     const menuButtonInfo = uni.getMenuButtonBoundingClientRect ? uni.getMenuButtonBoundingClientRect() : null;
     if (menuButtonInfo) {
-        const sysInfo = uni.getSystemInfoSync();
-        return sysInfo.windowWidth - menuButtonInfo.left + 10 + 'px';
+        return uni.getWindowInfo().windowWidth - menuButtonInfo.left + 10 + 'px';
     }
     // #endif
     return '16px';

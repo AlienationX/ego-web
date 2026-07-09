@@ -1,18 +1,21 @@
 import { apiPostAccess } from '@/api/wallpaper.js';
 
-const SYSTEM_INFO = uni.getSystemInfoSync();
-const APP_INFO = uni.getAppBaseInfo();
+// ── 替换废弃的 getSystemInfoSync，改用新版细粒度 API ──
+const getWindow = () => uni.getWindowInfo();
+const getAppBase = () => uni.getAppBaseInfo();
+const getDevice = () => uni.getDeviceInfo();
 
 export const isDevelopment = () => {
     if (import.meta.env.DEV) return true;
 
-    const SYSTEM_INFO = uni.getSystemInfoSync();
+    const app = getAppBase();
+    const device = getDevice();
     // 不统计web，主要是用来测试
-    if (SYSTEM_INFO.uniPlatform === 'web') return true;
+    if (app.uniPlatform === 'web') return true;
     // 微信小程序调试工具不统计
-    if (SYSTEM_INFO.uniPlatform === 'mp-weixin' && SYSTEM_INFO.deviceBrand === 'devtools') return true;
+    if (app.uniPlatform === 'mp-weixin' && device.deviceBrand === 'devtools') return true;
     // Android Studio 不统计, sdk_gphone64_arm64
-    if (SYSTEM_INFO.deviceModel.startsWith('sdk')) return true;
+    if (device.deviceModel?.startsWith('sdk')) return true;
 
     return false;
 };
@@ -33,7 +36,7 @@ export const getStatusBarHeight = () => {
 
     // #ifndef WEB
     // MP = 54px, APP = 22px
-    return SYSTEM_INFO.statusBarHeight;
+    return getWindow().statusBarHeight;
     // #endif
 };
 
@@ -55,7 +58,7 @@ export const getTabBarHeight = () => {
     // #endif
 
     // #ifndef WEB
-    return SYSTEM_INFO.windowBottom;
+    return getWindow().windowBottom;
     // #endif
 };
 
@@ -88,8 +91,12 @@ export const getRightIconWidth = () => {
 };
 
 export const writeAccessLog = async () => {
-    console.log(SYSTEM_INFO, 'system_info');
-    console.log(APP_INFO, 'app_info');
+    const windowInfo = getWindow();
+    const appInfo = getAppBase();
+    const deviceInfo = getDevice();
+
+    console.log({ windowInfo, deviceInfo }, 'system_info');
+    console.log(appInfo, 'app_info');
 
     // 开发环境下不统计访问日志
     if (isDevelopment()) return;
@@ -113,14 +120,14 @@ export const writeAccessLog = async () => {
 
     let data = {
         // 如果是app，用来区分 android 和 ios
-        platform: SYSTEM_INFO.uniPlatform === 'app' ? SYSTEM_INFO.platform : SYSTEM_INFO.uniPlatform,
+        platform: appInfo.uniPlatform === 'app' ? appInfo.platform : appInfo.uniPlatform,
         channel: channel,
-        app_version: APP_INFO.appVersion,
-        device_id: SYSTEM_INFO.deviceId,
-        device_brand: SYSTEM_INFO.deviceBrand,
-        device_model: SYSTEM_INFO.deviceModel,
-        language: SYSTEM_INFO.language,
-        remark: JSON.stringify(SYSTEM_INFO),
+        app_version: appInfo.appVersion,
+        device_id: deviceInfo.deviceId,
+        device_brand: deviceInfo.deviceBrand,
+        device_model: deviceInfo.deviceModel,
+        language: appInfo.language,
+        remark: JSON.stringify({ window: windowInfo, device: deviceInfo, app: appInfo }),
     };
 
     // console.log(data);
