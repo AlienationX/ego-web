@@ -1,4 +1,5 @@
 import { request, uploadRequest, streamRequest } from '@/api/request.js';
+import { CHANNEL } from '@/common/config.js';
 
 // 访问接口
 export const apiPostAccess = (data = {}) => {
@@ -174,11 +175,11 @@ export const apiUploadFeedback = (data = {}) => {
     });
 };
 
-// 用户操作接口
+// 用户操作接口（自动附加渠道标识）
 export const apiPostActions = (data = {}) => {
     return request({
         url: '/actions/',
-        data,
+        data: { ...data, channel: CHANNEL },
         method: 'POST',
         isAuth: true,
     });

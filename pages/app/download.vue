@@ -15,7 +15,7 @@
         </view>
 
         <view class="content-wrapper">
-            <modern-pics-view :show-header="false" :tabs="tabs" api-type="actions"></modern-pics-view>
+            <modern-pics-view ref="picsRef" :show-header="false" :tabs="tabs" api-type="actions" :show-delete="true" @remove="handleRemove"></modern-pics-view>
         </view>
     </view>
 </template>
@@ -24,11 +24,13 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { apiPostActions } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const statusBarHeight = ref(getStatusBarHeight() || 0);
+const picsRef = ref(null);
 
 const tabs = computed(() => [
     {
@@ -38,6 +40,25 @@ const tabs = computed(() => [
         },
     },
 ]);
+
+const handleRemove = ({ item, tabIndex }) => {
+    uni.showModal({
+        title: '清除记录',
+        content: `确定清除该下载记录吗？`,
+        confirmText: '确定',
+        cancelText: '取消',
+        success: async (res) => {
+            if (!res.confirm) return;
+            try {
+                await apiPostActions({ wall_id: item.id, action_key: 'download', action_value: 0 });
+                picsRef.value?.removeItem(tabIndex, item.id);
+                uni.showToast({ title: '已清除记录', icon: 'none' });
+            } catch (e) {
+                uni.showToast({ title: '操作失败，请重试', icon: 'none' });
+            }
+        },
+    });
+};
 
 const goBack = () => {
     uni.navigateBack({

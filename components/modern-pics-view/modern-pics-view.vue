@@ -88,6 +88,7 @@
                                     v-for="(item, idx) in tabStates[index].images" 
                                     :key="index + '-' + item.id + '-' + idx"
                                     @click="openPreview(item.id, index)"
+                                    @longpress="handleLongPress(item, index)"
                                 >
                                     <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
@@ -113,6 +114,7 @@
                                         v-for="(item, idx) in tabStates[index].leftCol" 
                                         :key="index + '-l-' + item.id + '-' + idx"
                                         @click="openPreview(item.id, index)"
+                                        @longpress="handleLongPress(item, index)"
                                     >
                                         <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
@@ -135,6 +137,7 @@
                                         v-for="(item, idx) in tabStates[index].rightCol" 
                                         :key="index + '-r-' + item.id + '-' + idx"
                                         @click="openPreview(item.id, index)"
+                                        @longpress="handleLongPress(item, index)"
                                     >
                                         <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
@@ -200,10 +203,32 @@ const props = defineProps({
     stickyTop: { type: Number, default: 0 },
     layoutMode: { type: String, default: '' }, // '' 跟随全局, 'waterfall', 'grid'
     showCardMeta: { type: Boolean, default: false },
+    showDelete: { type: Boolean, default: false }, // 显示删除按钮
     bottomSafeSpace: { type: Number, default: 60 },
 });
 
-const emit = defineEmits(['update', 'change', 'scroll']);
+const emit = defineEmits(['update', 'change', 'scroll', 'remove']);
+
+// 长按删除
+const handleLongPress = (item, index) => {
+    if (!props.showDelete) return;
+    emit('remove', { item, tabIndex: index });
+};
+
+// 外部调用：从本地状态移除指定项
+const removeItem = (tabIndex, wallId) => {
+    const state = tabStates[tabIndex];
+    if (!state) return;
+    const removeFrom = (arr) => {
+        const idx = arr.findIndex(i => i.id === wallId);
+        if (idx !== -1) arr.splice(idx, 1);
+    };
+    removeFrom(state.images);
+    removeFrom(state.leftCol);
+    removeFrom(state.rightCol);
+};
+
+defineExpose({ removeItem });
 
 // --- Store & State ---
 const { locale } = useI18n();

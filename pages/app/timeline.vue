@@ -109,7 +109,7 @@
 
         <custom-ad-banner v-if="!embedded" @height-change="onAdHeightChange"></custom-ad-banner>
 
-        <view v-if="!embedded && showScrollTop" class="floating-top" @click="scrollToTop">
+        <view v-if="showScrollTop" class="floating-top" :class="{ 'is-embedded': embedded }" @click="scrollToTop">
             <mdi-icon path="/static/icons/arrow-up.svg" size="18px" color="#0d1b2f"></mdi-icon>
         </view>
     </view>
@@ -709,5 +709,9 @@ onMounted(() => {
     background: #619aef;
     box-shadow: 0 20rpx 44rpx rgba(97, 154, 239, 0.32);
     z-index: 20;
+
+    &.is-embedded {
+        bottom: calc(env(safe-area-inset-bottom) + 92rpx); // 高于 tabbar
+    }
 }
 </style>

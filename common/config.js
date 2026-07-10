@@ -21,5 +21,18 @@ export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper/media';
 // 备案信息
 export const RIGHT_ICP = '粤ICP备15077732号-2';
 
+// 渠道标识（避免在 system.js / wallpaper.js 间循环引用，统一放这里）
+let _channel = '';
+// #ifdef APP
+_channel = plus.runtime.channel || '';
+// #endif
+// #ifdef APP-HARMONY
+_channel = 'huawei';
+// #endif
+// #ifdef MP-WEIXIN
+_channel = 'wechat';
+// #endif
+export const CHANNEL = _channel;
+
 // 看一次视频广告奖励的能量点数
 export const VIDEO_REWARD_ENERGY = 3;
