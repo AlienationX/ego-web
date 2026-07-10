@@ -1,5 +1,5 @@
 <template>
-    <view class="signin-container" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="signin-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
             <uni-icons type="back" :color="backIconColor" size="20"></uni-icons>
         </view>
@@ -142,7 +142,7 @@
                             <text class="social-text">{{ t('login.google') }}</text>
                         </view>
                         <view class="social-btn" @click="handleAppleLogin" v-if="showDevFeatures">
-                            <image src="/static/icons/brands/apple.svg" mode="aspectFit" class="social-icon" :class="{ 'invert-icon': isDark }"></image>
+                            <image src="/static/icons/brands/apple.svg" mode="aspectFit" class="social-icon" :class="{ 'invert-icon': settingsStore.isDark }"></image>
                             <text class="social-text">{{ t('login.apple') }}</text>
                         </view>
                         <view class="social-btn" @click="handleFacebookLogin" v-if="showDevFeatures">
@@ -181,9 +181,8 @@ import { useSettingsStore } from '@/stores/settings.js';
 const { t } = useI18n();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
-const backIconColor = computed(() => (isDark.value ? '#94a3b8' : '#4a5670'));
-const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#94a3b8'));
+const backIconColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#4a5670'));
+const iconMutedColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#94a3b8'));
 const backTop = ref((getStatusBarHeight() || 0) + 10);
 const REMEMBER_STORAGE_KEY = 'signinRemember';
 

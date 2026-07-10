@@ -1,5 +1,5 @@
 <template>
-    <view class="top10-page" :class="[isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
+    <view class="top10-page" :class="[settingsStore.isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
         <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <scroll-view scroll-y class="top10-scroll" :style="{ height: scrollHeight }" @scroll="handleScroll">
@@ -9,7 +9,7 @@
                 <view v-if="!embedded" class="top10-header">
                     <view class="top10-header__left">
                         <view class="top10-header__back" @click="goBack">
-                            <uni-icons type="back" size="20" :color="isDark ? '#f8fafc' : '#374151'"></uni-icons>
+                            <uni-icons type="back" size="20" :color="settingsStore.isDark ? '#f8fafc' : '#374151'"></uni-icons>
                         </view>
                         <view class="top10-header__title">{{ $t('top10.title') }}</view>
                     </view>
@@ -181,7 +181,6 @@ import { useAppStore } from '@/stores/app.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const isEn = computed(() => locale.value === 'en');
 
 const getLocalizedItem = (item) => {

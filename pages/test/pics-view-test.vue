@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'" @tap="onDebugTap">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" @tap="onDebugTap">
         <!-- 顶部状态栏 + 导航栏 (模拟 classlist 的 top-shell) -->
         <view class="top-shell" :style="{ opacity: topbarOpacity, pointerEvents: topbarOpacity > 0.2 ? 'auto' : 'none' }">
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
@@ -9,7 +9,7 @@
                         <mdi-icon
                             path="/static/icons/arrow-left.svg"
                             size="20px"
-                            :color="isDark ? '#f8fbff' : '#1e293b'"
+                            :color="settingsStore.isDark ? '#f8fbff' : '#1e293b'"
                         ></mdi-icon>
                     </view>
                     <view class="topbar__title">TabbedPicsView Test</view>
@@ -90,7 +90,6 @@ import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 
 const headerScrollTop = ref(0);
 const classList = ref([]);

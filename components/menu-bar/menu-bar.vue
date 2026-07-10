@@ -11,7 +11,7 @@
             <view class="navbar">
                 <view class="left">
                     <view class="back" @click="goBack">
-                        <uni-icons type="back" :color="isDark ? '#f7f7fb' : '#333'" size="20"></uni-icons>
+                        <uni-icons type="back" :color="settingsStore.isDark ? '#f7f7fb' : '#333'" size="20"></uni-icons>
                     </view>
                     <view class="title">
                         <slot name="title"></slot>
@@ -23,7 +23,7 @@
                         <uni-icons
                             type="more-filled"
                             size="20"
-                            :color="isDark ? 'rgba(247, 247, 251, 0.72)' : '#666'"
+                            :color="settingsStore.isDark ? 'rgba(247, 247, 251, 0.72)' : '#666'"
                         ></uni-icons>
                     </view>
                 </view>
@@ -41,7 +41,6 @@ import { getStatusBarHeight, getNavBarHeight, getTitleBarHeight } from '@/utils/
 import { useSettingsStore } from '@/stores/settings.js';
 
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 
 // 定义props
 const props = defineProps({

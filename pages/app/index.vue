@@ -1,7 +1,7 @@
 <template>
     <view
         class="homeLayout"
-        :class="['homeLayout--' + activeHomeTab, isDark ? 'theme-dark' : 'theme-light']"
+        :class="['homeLayout--' + activeHomeTab, settingsStore.isDark ? 'theme-dark' : 'theme-light']"
         :style="{
             '--mask-color': pageBackgroundVar,
             backgroundColor: pageBackgroundVar,
@@ -24,7 +24,7 @@
             }"
         >
             <view class="home-titlebar__inner" :style="{ height: titleBarHeight + 'px' }">
-                <view class="home-tabs-wrapper" :class="{ 'is-dark': isDark }">
+                <view class="home-tabs-wrapper" :class="{ 'is-dark': settingsStore.isDark }">
                     <view class="home-tabs-scroll-area">
                         <scroll-view scroll-x class="home-tabs" show-scrollbar="false">
                             <view class="home-tabs__inner">
@@ -74,6 +74,7 @@
                 :show-header="false"
                 :tabs="[{ label: t('index.tabs.recommend') }]"
                 api-type="recommend"
+                layoutMode="waterfall"
                 :show-card-meta="true"
                 :header-height="navBarHeight"
                 @scroll="handleEmbeddedScroll"
@@ -99,7 +100,7 @@
         </view>
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
     </view>
 </template>
 
@@ -109,13 +110,13 @@ import { onLoad, onShow, onUnload, onShareAppMessage, onShareTimeline } from '@d
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { updateTabBarText } from '@/utils/i18n.js';
+import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/layout.js';
 import TimelinePage from '@/pages/app/timeline.vue';
 import TopNPage from '@/pages/app/topN.vue';
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
 
-const isDark = computed(() => settingsStore.isDark);
 
 const homeTabList = computed(() => [
     {
@@ -136,7 +137,7 @@ const homeTabList = computed(() => [
     },
 ]);
 
-const searchIconColor = computed(() => (isDark.value ? 'rgba(255, 255, 255, 0.7)' : '#64748b'));
+const searchIconColor = computed(() => (settingsStore.isDark ? 'rgba(255, 255, 255, 0.7)' : '#64748b'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const navBarHeight = ref(getNavBarHeight() || 0);

@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }">
             <view class="status-decorative-bg">
@@ -155,7 +155,6 @@ const favLoadingMore = ref(false);
 const selectedId = ref(null);
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const sourceMode = ref('favorite');
 const localImage = ref('');
 const pickerOpen = ref(true);

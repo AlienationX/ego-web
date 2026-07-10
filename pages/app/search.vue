@@ -1,10 +1,10 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <view class="search-shell" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
             <view class="search-shell__back" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="isDark ? '#eef5ff' : '#15171c'"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="settingsStore.isDark ? '#eef5ff' : '#15171c'"></mdi-icon>
             </view>
             <view class="search-box search-box--shell">
                 <view class="search-box__icon">
@@ -14,7 +14,7 @@
                     v-model="queryParams.keyword"
                     class="search-box__input"
                     :placeholder="t('common.search')"
-                    :placeholder-style="isDark ? 'color: #7f94b8' : 'color: rgba(21, 23, 28, 0.4)'"
+                    :placeholder-style="settingsStore.isDark ? 'color: #7f94b8' : 'color: rgba(21, 23, 28, 0.4)'"
                     confirm-type="search"
                     @confirm="onSearch"
                 />
@@ -92,7 +92,6 @@ import { getStatusBarHeight } from '@/utils/layout.js';
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
-const isDark = computed(() => settingsStore.isDark);
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(56);

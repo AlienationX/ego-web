@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <menu-bar>
             <template #title>{{ t('helpCentre.title') }}</template>
         </menu-bar>
@@ -45,9 +45,8 @@ import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
-const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#7b8794'));
-const iconForwardColor = computed(() => (isDark.value ? '#64748b' : '#b2bac7'));
+const iconMutedColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#7b8794'));
+const iconForwardColor = computed(() => (settingsStore.isDark ? '#64748b' : '#b2bac7'));
 const openId = ref(1);
 const faqList = [
     { id: 1, q: 'helpCentre.faq.q1', a: 'helpCentre.faq.a1' },

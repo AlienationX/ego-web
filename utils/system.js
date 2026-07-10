@@ -20,13 +20,7 @@ export const isDevelopment = () => {
     return false;
 };
 
-export const isInternational = () => {
-    // #ifdef APP
-    return plus.runtime.channel === 'google';
-    // #endif
-
-    return false;
-};
+export const IS_INTERNATIONAL = typeof plus !== 'undefined' ? plus.runtime.channel === 'google' : false;
 
 // ── 以下为系统级功能（布局测量请用 @/utils/layout.js）──
 

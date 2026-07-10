@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <menu-bar class="menubar" :show-border="false" :show-toggle-menu="false">
             <!-- <template #title>{{ props.name }}</template> -->
             <template #title>{{ $t('index.notice') }}</template>
@@ -52,7 +52,6 @@ import { useSettingsStore } from '@/stores/settings.js';
 
 const { locale } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const isEn = computed(() => locale.value === 'en');
 
 // UniApp 会将 URL 中的参数自动注入到 props

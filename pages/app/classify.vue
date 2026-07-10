@@ -1,5 +1,5 @@
 <template>
-    <view class="classLayout" :class="isDark ? 'theme-dark' : 'theme-light'" :style="pageStyle">
+    <view class="classLayout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="pageStyle">
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
@@ -44,7 +44,7 @@
         </scroll-view>
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
     </view>
 </template>
 
@@ -55,6 +55,7 @@ import { useI18n } from 'vue-i18n';
 import { updateTabBarText } from '@/utils/i18n.js';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -71,7 +72,6 @@ const classifyList = computed({
 });
 const isLoading = ref(true);
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 
 const classifyComputed = computed(() => {
     return classifyList.value.map((item) => ({

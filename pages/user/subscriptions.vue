@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <page-header
             :title="t('subscriptionPage.title')"
             :subtitle="t('subscriptionPage.subtitle')"
@@ -78,7 +78,6 @@ const { t } = useI18n();
 const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const classifyList = ref([]);
 
 const hasAnySubscription = computed(

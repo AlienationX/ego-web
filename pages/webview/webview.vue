@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
 
         <!-- ── 小程序端：mp-html 渲染完整 HTML（支持 <style>）── -->
         <!-- #ifdef MP -->
@@ -39,7 +39,6 @@ import { PICS_BASE_URL } from '@/common/config.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 
 const docType = ref('');
 const webviewUrl = ref('');

@@ -1,5 +1,5 @@
 <template>
-    <view class="recommend-panel" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="recommend-panel" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
 
         <view class="recommend-panel__head">
             <view>
@@ -68,7 +68,6 @@ const appStore = useAppStore();
 const list = ref([]);
 const loading = ref(false);
 const isAdmin = computed(() => !!userStore.isAdmin);
-const isDark = computed(() => settingsStore.isDark);
 
 // 语言切换支持
 const isEn = computed(() => locale.value === 'en');
@@ -81,7 +80,7 @@ const getLocalizedItem = (item) => {
         classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
     };
 };
-const arrowIconColor = computed(() => (isDark.value ? '#94a3b8' : '#7c8aa5'));
+const arrowIconColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#7c8aa5'));
 
 const normalizeTags = (wall = {}) => {
     if (Array.isArray(wall.tabs_list)) return wall.tabs_list.filter(Boolean);

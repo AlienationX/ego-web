@@ -97,7 +97,7 @@
                 </swiper>
             </view>
             <view class="right">
-                <uni-icons type="right" size="16" :color="isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
+                <uni-icons type="right" size="16" :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
             </view>
         </view>
 
@@ -111,7 +111,7 @@
                         <uni-icons
                             type="calendar"
                             size="20"
-                            :color="isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"
+                            :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"
                         ></uni-icons>
                         <view class="text"> {{ todayDateStr }}{{ $t('common.day') }} </view>
                         <button class="button is-spotlight" size="mini" @click="refreshRandom">
@@ -316,7 +316,6 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 
-const isDark = computed(() => settingsStore.isDark);
 const isAdmin = computed(() => !!userStore.isAdmin);
 
 const props = defineProps({

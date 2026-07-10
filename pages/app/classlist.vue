@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view
             class="top-shell"
             :style="{
@@ -14,17 +14,17 @@
                         <mdi-icon
                             path="/static/icons/arrow-left.svg"
                             size="20px"
-                            :color="isDark ? '#f8fbff' : '#1e293b'"
+                            :color="settingsStore.isDark ? '#f8fbff' : '#1e293b'"
                         ></mdi-icon>
                     </view>
                     <view class="topbar__title">{{ heroTitle }}</view>
                 </view>
                 <view class="topbar__actions">
                     <view class="topbar__icon" @click="goSearch">
-                        <uni-icons type="search" size="18" :color="isDark ? '#94a3b8' : '#64748b'"></uni-icons>
+                        <uni-icons type="search" size="18" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                     </view>
                     <view class="topbar__icon" v-if="isAdmin">
-                        <uni-icons type="more-filled" size="18" :color="isDark ? '#94a3b8' : '#64748b'"></uni-icons>
+                        <uni-icons type="more-filled" size="18" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                     </view>
                 </view>
             </view>
@@ -83,7 +83,6 @@ const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 const userStore = useUserStore();
 const isAdmin = computed(() => !!userStore.isAdmin);
-const isDark = computed(() => settingsStore.isDark);
 const isEn = computed(() => locale.value === 'en');
 
 const props = defineProps({

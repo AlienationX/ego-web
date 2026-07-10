@@ -1,5 +1,5 @@
 <template>
-    <view class="page-header" :class="isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: `${statusBarHeight}px` }">
+    <view class="page-header" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: `${statusBarHeight}px` }">
         <!-- #ifndef WEB -->
         <view class="page-header__status-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
@@ -9,7 +9,7 @@
                     <mdi-icon
                         path="/static/icons/arrow-left.svg"
                         size="26px"
-                        :color="isDark ? '#f7f7fb' : '#101828'"
+                        :color="settingsStore.isDark ? '#f7f7fb' : '#101828'"
                     ></mdi-icon>
                 </view>
             </view>
@@ -22,7 +22,7 @@
 
             <view class="page-header__side page-header__side--right">
                 <navigator v-if="searchable" url="/pages/app/search" class="page-header__action">
-                    <uni-icons type="search" size="18" :color="isDark ? '#f7f7fb' : '#101828'"></uni-icons>
+                    <uni-icons type="search" size="18" :color="settingsStore.isDark ? '#f7f7fb' : '#101828'"></uni-icons>
                 </navigator>
                 <view v-else-if="rightText" class="page-header__pill" @click="$emit('right-click')">{{ rightText }}</view>
                 <view v-else class="page-header__placeholder"></view>
@@ -37,7 +37,6 @@ import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 
 const props = defineProps({
     title: {

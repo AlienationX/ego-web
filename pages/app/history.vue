@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="nav-container">
             <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
             <view class="header" :style="{ height: `${titleBarHeight}px`, paddingRight: titlebarPaddingRight }">
@@ -7,7 +7,7 @@
                     <mdi-icon
                         path="/static/icons/arrow-left.svg"
                         size="18px"
-                        :color="isDark ? '#e5e7eb' : '#374151'"
+                        :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"
                     ></mdi-icon>
                 </view>
                 <text class="header-title">{{ t('historyPage.title') }}</text>
@@ -29,7 +29,7 @@
                         <mdi-icon
                             path="/static/icons/information-outline.svg"
                             size="16px"
-                            :color="isDark ? '#6b7280' : '#9ca3af'"
+                            :color="settingsStore.isDark ? '#6b7280' : '#9ca3af'"
                         ></mdi-icon>
                         <text class="retention-hint__text">{{ t('historyPage.retentionHint') }}</text>
                     </view>
@@ -42,7 +42,7 @@
                             <mdi-icon
                                 path="/static/icons/delete-empty.svg"
                                 size="18px"
-                                :color="isDark ? '#6b7280' : '#9ca3af'"
+                                :color="settingsStore.isDark ? '#6b7280' : '#9ca3af'"
                             ></mdi-icon>
                             <text class="clear-text">{{ t('historyPage.clear') }}</text>
                         </view>
@@ -95,7 +95,6 @@ const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const isZh = computed(() => String(locale.value || '').startsWith('zh'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);

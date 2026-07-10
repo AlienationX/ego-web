@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="[isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
+    <view class="layout" :class="[settingsStore.isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
         <view v-if="!embedded" class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <scroll-view
@@ -19,7 +19,7 @@
                         <mdi-icon
                             path="/static/icons/arrow-left.svg"
                             size="20px"
-                            :color="isDark ? '#f4f8ff' : '#374151'"
+                            :color="settingsStore.isDark ? '#f4f8ff' : '#374151'"
                         ></mdi-icon>
                     </view>
                     <view class="topbar__brand">{{ t('timeline.brand') }}</view>
@@ -126,7 +126,6 @@ import { useAppStore } from '@/stores/app.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const isEn = computed(() => locale.value === 'en');
 
 const getLocalizedItem = (item) => {

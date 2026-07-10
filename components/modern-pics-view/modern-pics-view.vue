@@ -1,5 +1,5 @@
 <template>
-    <view class="modern-pics-container" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="modern-pics-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- 头部导航 (Tabs + 工具栏) -->
         <view
             v-if="shouldShowHeader"
@@ -26,7 +26,7 @@
                         >
                             {{ tab.label }}
                             <view class="sort-icon" v-if="tab.isDate && currentIndex === index">
-                                <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="12" :color="isDark ? '#fff' : '#fff'"></uni-icons>
+                                <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="12" :color="settingsStore.isDark ? '#fff' : '#fff'"></uni-icons>
                             </view>
                         </view>
                     </view>
@@ -210,7 +210,6 @@ const { locale } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 
-const isDark = computed(() => settingsStore.isDark);
 const isEn = computed(() => locale.value === 'en');
 const currentIndex = ref(props.initialIndex);
 const headerScrollTop = ref(0);

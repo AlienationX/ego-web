@@ -2,7 +2,7 @@
     <view
         v-if="showAd && !isError"
         class="custom-ad-container"
-        :class="[isFixed ? 'is-fixed' : '', isDark ? 'theme-dark' : 'theme-light']"
+        :class="[isFixed ? 'is-fixed' : '', settingsStore.isDark ? 'theme-dark' : 'theme-light']"
         :style="{ bottom: isFixed ? `${bottomOffset}rpx` : 'auto' }"
     >
         <!-- #ifdef APP -->
@@ -38,7 +38,6 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 
 const showAd = computed(() => !userStore.isVip && userStore.showAd);
-const isDark = computed(() => settingsStore.isDark);
 
 const isLoaded = ref(false);
 const isError = ref(false);

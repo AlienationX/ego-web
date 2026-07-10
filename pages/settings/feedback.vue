@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: titleBarHeight + 'px' }">
             <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
                 <view class="back-btn" @click="goBack">
@@ -120,8 +120,7 @@ const { t } = useI18n();
 const { tp } = useTranslateParams();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
-const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
+const backIconColor = computed(() => (settingsStore.isDark ? '#e5e7eb' : '#374151'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);

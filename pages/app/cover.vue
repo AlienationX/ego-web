@@ -10,7 +10,7 @@
                     <mdi-icon
                         path="/static/icons/arrow-left.svg"
                         size="18px"
-                        :color="isDark ? '#e5e7eb' : '#374151'"
+                        :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"
                     ></mdi-icon>
                 </view>
                 <text class="header-title">Cover Editor</text>
@@ -160,7 +160,6 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
 

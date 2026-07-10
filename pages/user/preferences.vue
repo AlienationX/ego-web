@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <page-header :title="t('preferencePage.title')" :subtitle="t('preferencePage.subtitle')"></page-header>
 
         <view class="content">
@@ -77,7 +77,6 @@ const { t, locale } = useI18n();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
-const isDark = computed(() => settingsStore.isDark);
 
 const pinTag = (tag) => {
     libraryStore.bumpPreferredTag(tag);

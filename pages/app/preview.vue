@@ -155,7 +155,7 @@
         </scroll-view>
 
         <!-- ad广告无法在<swiper>、<scroll-view> 中使用，因此保持在滚动容器外固定展示 -->
-        <custom-ad-banner v-if="shouldShowBottomAd" @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner v-if="IS_INTERNATIONAL && shouldShowBottomAd" @height-change="onAdHeightChange"></custom-ad-banner>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -346,6 +346,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useAdIntersititial } from '@/hooks/useAd.js';
 import { downloadPic } from '@/common/core.js';

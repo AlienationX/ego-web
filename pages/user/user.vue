@@ -185,7 +185,7 @@
         </view> -->
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
 
         <!-- 通用导航对话框 -->
         <popup-navigation-dialog
@@ -204,6 +204,7 @@
 import { ref, reactive, computed } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiPostProfile, apiPostEarnEnergy } from '@/api/wallpaper.js';
+import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';

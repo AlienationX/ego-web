@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="header">
             <view class="back-btn" @click="goBack">
@@ -89,8 +89,7 @@ import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 const userStore = useUserStore();
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
-const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
+const backIconColor = computed(() => (settingsStore.isDark ? '#e5e7eb' : '#374151'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const saved = ref(false);
 

@@ -1,5 +1,5 @@
 <template>
-    <view class="page" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="page" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- 占位，防止内容被 tabbar 遮住 -->
         <view class="page__spacer" :style="{ height: navBarHeight + 'px' }"></view>
 
@@ -10,7 +10,7 @@
 
         <glass-tab-bar
             :current-path="currentTabPath"
-            :theme="isDark ? 'dark' : 'light'"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
             :bottom-offset="0"
             :disable-navigation="true"
             @change="(item) => currentTabPath = item.pagePath"
@@ -25,7 +25,6 @@ import { getNavBarHeight } from '@/utils/layout.js';
 import GlassTabBar from '@/components/glass-tab-bar/glass-tab-bar.vue';
 
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
 const navBarHeight = ref(getNavBarHeight() || 0);
 
 // 当前高亮的 tab 路径，默认指向首页

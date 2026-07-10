@@ -1,5 +1,5 @@
 <template>
-    <view class="signup-container" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="signup-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
             <uni-icons type="back" :color="backIconColor" size="20"></uni-icons>
         </view>
@@ -96,9 +96,8 @@ import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
-const backIconColor = computed(() => (isDark.value ? '#94a3b8' : '#4a5670'));
-const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#94a3b8'));
+const backIconColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#4a5670'));
+const iconMutedColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#94a3b8'));
 
 // 表单数据
 const form = reactive({

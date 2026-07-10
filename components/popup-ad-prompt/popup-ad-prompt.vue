@@ -1,8 +1,8 @@
 <template>
     <uni-popup ref="popup" type="center" :mask-click="true" :safe-area="true">
-        <view class="ad-prompt" :class="isDark ? 'theme-dark' : 'theme-light'">
+        <view class="ad-prompt" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
             <view class="ad-prompt__close" @click="close">
-                <mdi-icon path="/static/icons/close.svg" size="18px" :color="isDark ? '#e5e7eb' : '#2f3949'"></mdi-icon>
+                <mdi-icon path="/static/icons/close.svg" size="18px" :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"></mdi-icon>
             </view>
 
             <image class="ad-prompt__image" src="/static/images/pictures.svg" mode="aspectFit"></image>
@@ -33,7 +33,6 @@ const props = defineProps({
 
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
-const isDark = computed(() => settingsStore.isDark);
 
 // views字段值+1
 const incrementDownloads = async (id) => {

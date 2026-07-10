@@ -1,5 +1,5 @@
 <template>
-    <view :class="['layout', isDark ? 'theme-dark' : 'theme-light']">
+    <view :class="['layout', settingsStore.isDark ? 'theme-dark' : 'theme-light']">
         <!-- 1. 沉浸式导航栏 -->
         <menu-bar class="nav-bar">
             <template #title>{{ t('membership.title') }}</template>
@@ -127,7 +127,7 @@
                 <view class="benefits-grid">
                     <view class="benefit-card" v-for="(benefit, index) in benefits" :key="index">
                         <view class="benefit-icon">
-                            <mdi-icon :path="benefit.iconPath" size="32px" :color="isDark ? '#f8fbff' : '#619aef'"></mdi-icon>
+                            <mdi-icon :path="benefit.iconPath" size="32px" :color="settingsStore.isDark ? '#f8fbff' : '#619aef'"></mdi-icon>
                         </view>
                         <view class="benefit-content">
                             <view class="b-title">{{ benefit.title }}</view>
@@ -189,7 +189,6 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 
-const isDark = computed(() => settingsStore.options.theme === 'dark');
 const selectedCard = ref(1); // 默认选中推荐项(季卡)
 
 const currentCardPrice = computed(() => {

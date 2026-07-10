@@ -1,5 +1,5 @@
 <template>
-    <view class="layout" :class="isDark ? 'theme-dark' : 'theme-light'">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
         <template v-if="!saved">
@@ -154,9 +154,8 @@ import { useSettingsStore } from '@/stores/settings.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
-const isDark = computed(() => settingsStore.isDark);
-const backIconColor = computed(() => (isDark.value ? '#e5e7eb' : '#374151'));
-const iconMutedColor = computed(() => (isDark.value ? '#94a3b8' : '#9ca3af'));
+const backIconColor = computed(() => (settingsStore.isDark ? '#e5e7eb' : '#374151'));
+const iconMutedColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#9ca3af'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
 const current = ref('');
