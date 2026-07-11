@@ -16,15 +16,15 @@ export const IS_INTERNATIONAL = typeof plus !== 'undefined' ? plus.runtime.chann
 // ── 以下为系统级功能（布局测量请用 @/utils/layout.js）──
 
 export const writeAccessLog = async () => {
-    // 开发环境下不统计访问日志
-    if (IS_DEVELOPMENT) return;
-
     console.log(app, 'app_info');
     console.log(device, 'device_info');
     console.log(uni.getWindowInfo(), 'window_info');
 
+    // 开发环境下不统计访问日志
+    if (IS_DEVELOPMENT) return;
+
     let data = {
-        platform: app.uniPlatform === 'app' ? app.platform : app.uniPlatform,
+        platform: device.platform,
         channel: CHANNEL,
         app_version: app.appVersion,
         device_id: device.deviceId,

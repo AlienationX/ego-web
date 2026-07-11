@@ -38,6 +38,12 @@
         "downloading": "下载中...",
         "downloadSuccess": "下载成功",
         "downloadFailed": "下载失败",
+        "saveSuccessful": "保存成功，请到相册查看",
+        "saveFailed": "保存失败，请重新点击下载",
+        "authTip": "授权提示",
+        "authContent": "需要授权保存相册",
+        "authSuccess": "获取授权成功",
+        "authFailed": "获取权限失败",
         "admin": "管理员"
     },
     "index": {

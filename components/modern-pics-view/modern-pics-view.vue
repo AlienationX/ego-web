@@ -282,55 +282,6 @@ const createTabState = () => ({
 
 const tabStates = reactive(props.tabs.map(() => createTabState()));
 
-watch(() => props.tabs, (newTabs) => {
-    if (newTabs.length > tabStates.length) {
-        for (let i = tabStates.length; i < newTabs.length; i++) {
-            tabStates.push(createTabState());
-        }
-    } else if (newTabs.length < tabStates.length) {
-        tabStates.splice(newTabs.length);
-    }
-    
-    let activeQueryChanged = false;
-
-    newTabs.forEach((tab, index) => {
-        const state = tabStates[index];
-        if (!state) return;
-        const queryStr = JSON.stringify(tab.query || {});
-
-        // 同 query 未变化，跳过
-        if (state.lastQueryStr === queryStr) return;
-
-        // query 发生变化
-        if (state.hasLoaded) {
-            // 已加载过的 tab，query 变了 → 重新拉取
-            if (props.apiType === 'search') {
-                Object.assign(state, createTabState(), { lastQueryStr: queryStr });
-                if (index === currentIndex.value) activeQueryChanged = true;
-            } else {
-                fetchData(index, true);
-            }
-        } else {
-            // 从未加载过的 tab → 仅更新 query，等切换过去时懒加载
-            state.lastQueryStr = queryStr;
-        }
-    });
-
-    if (props.apiType === 'local') tabStates.forEach((_, i) => fetchData(i, true));
-
-    if (props.apiType === 'search' && activeQueryChanged) {
-        fetchData(currentIndex.value, true);
-    }
-
-    // 非 search/local：确保当前激活的 tab 已加载
-    if (props.apiType !== 'search' && props.apiType !== 'local') {
-        const activeState = tabStates[currentIndex.value];
-        if (activeState && !activeState.hasLoaded && !activeState.isLoading) {
-            fetchData(currentIndex.value, true);
-        }
-    }
-}, { deep: true, immediate: true });
-
 // --- Data Fetching & Layout Engine ---
 const distributeItems = async (index, newItems) => {
     const state = tabStates[index];
@@ -411,6 +362,51 @@ const fetchData = async (index, init = false) => {
         state.isLoading = false;
     }
 };
+
+// tabs 变化监听（放在 fetchData 定义之后，避免 immediate watch 时引用未初始化的 const）
+watch(() => props.tabs, (newTabs) => {
+    if (newTabs.length > tabStates.length) {
+        for (let i = tabStates.length; i < newTabs.length; i++) {
+            tabStates.push(createTabState());
+        }
+    } else if (newTabs.length < tabStates.length) {
+        tabStates.splice(newTabs.length);
+    }
+
+    let activeQueryChanged = false;
+
+    newTabs.forEach((tab, index) => {
+        const state = tabStates[index];
+        if (!state) return;
+        const queryStr = JSON.stringify(tab.query || {});
+
+        if (state.lastQueryStr === queryStr) return;
+
+        if (state.hasLoaded) {
+            if (props.apiType === 'search') {
+                Object.assign(state, createTabState(), { lastQueryStr: queryStr });
+                if (index === currentIndex.value) activeQueryChanged = true;
+            } else {
+                fetchData(index, true);
+            }
+        } else {
+            state.lastQueryStr = queryStr;
+        }
+    });
+
+    if (props.apiType === 'local') tabStates.forEach((_, i) => fetchData(i, true));
+
+    if (props.apiType === 'search' && activeQueryChanged) {
+        fetchData(currentIndex.value, true);
+    }
+
+    if (props.apiType !== 'search' && props.apiType !== 'local') {
+        const activeState = tabStates[currentIndex.value];
+        if (activeState && !activeState.hasLoaded && !activeState.isLoading) {
+            fetchData(currentIndex.value, true);
+        }
+    }
+}, { deep: true, immediate: true });
 
 // --- Interactions ---
 const handleTabClick = (index) => {

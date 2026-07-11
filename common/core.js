@@ -1,8 +1,12 @@
+import { useI18n } from 'vue-i18n';
+
 export const downloadPic = (picurl) => {
-    // 多语言的t不能在js中直接使用，只能在vue文件的setup方法中使用。这里只能当作参数传递进来使用
+    // 在函数内调用 useI18n()，确保运行在 Vue 上下文
+    const { t } = useI18n();
+
     uni.showLoading({
-        title: '下载中...',
-        mask: true
+        title: t('common.downloading'),
+        mask: true,
     });
 
     uni.getImageInfo({
@@ -10,49 +14,48 @@ export const downloadPic = (picurl) => {
         success: (res) => {
             uni.saveImageToPhotosAlbum({
                 filePath: res.path,
-                success: (res) => {
+                success: () => {
                     uni.showToast({
-                        title: '保存成功，请到相册查看',
-                        icon: 'none'
+                        title: t('common.saveSuccessful'),
+                        icon: 'none',
                     });
                 },
                 fail: (err) => {
-                    if (err.errMsg == 'saveImageToPhotosAlbum:fail cancel') {
+                    if (err.errMsg === 'saveImageToPhotosAlbum:fail cancel') {
                         uni.showToast({
-                            title: '保存失败，请重新点击下载',
-                            icon: 'none'
+                            title: t('common.saveFailed'),
+                            icon: 'none',
                         });
                         return;
                     }
                     uni.showModal({
-                        title: '授权提示',
-                        content: '需要授权保存相册',
-                        success: (res) => {
-                            if (res.confirm) {
+                        title: t('common.authTip'),
+                        content: t('common.authContent'),
+                        success: (modalRes) => {
+                            if (modalRes.confirm) {
                                 uni.openSetting({
                                     success: (setting) => {
-                                        console.log(setting);
                                         if (setting.authSetting['scope.writePhotosAlbum']) {
                                             uni.showToast({
-                                                title: '获取授权成功',
-                                                icon: 'none'
+                                                title: t('common.authSuccess'),
+                                                icon: 'none',
                                             });
                                         } else {
                                             uni.showToast({
-                                                title: '获取权限失败',
-                                                icon: 'none'
+                                                title: t('common.authFailed'),
+                                                icon: 'none',
                                             });
                                         }
-                                    }
+                                    },
                                 });
                             }
-                        }
+                        },
                     });
-                }
+                },
             });
         },
         complete: () => {
             uni.hideLoading();
-        }
+        },
     });
 };

@@ -1,5 +1,6 @@
 {
-    "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+    "pages": [
+        //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
         {
             "path": "pages/app/index",
             "style": {
@@ -182,7 +183,7 @@
             "style": {
                 "navigationBarTitleText": "我的收藏",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": true
+                "enablePullDownRefresh": false
             }
         },
         {
@@ -190,7 +191,7 @@
             "style": {
                 "navigationBarTitleText": "我的下载",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": true
+                "enablePullDownRefresh": false
             }
         },
         {
@@ -198,7 +199,7 @@
             "style": {
                 "navigationBarTitleText": "我的评分",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": true
+                "enablePullDownRefresh": false
             }
         },
         {
