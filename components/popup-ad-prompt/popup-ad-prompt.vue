@@ -2,7 +2,11 @@
     <uni-popup ref="popup" type="center" :mask-click="true" :safe-area="true">
         <view class="ad-prompt" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
             <view class="ad-prompt__close" @click="close">
-                <mdi-icon path="/static/icons/close.svg" size="18px" :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"></mdi-icon>
+                <mdi-icon
+                    path="/static/icons/close.svg"
+                    size="18px"
+                    :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"
+                ></mdi-icon>
             </view>
 
             <image class="ad-prompt__image" src="/static/images/pictures.svg" mode="aspectFit"></image>
@@ -18,6 +22,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { useAdRewardedVideo } from '@/hooks/useAd.js';
 import { apiPostIncrementDownloads, apiPostActions, apiPostEarnEnergy } from '@/api/wallpaper.js';
@@ -31,6 +36,7 @@ const props = defineProps({
     picurl: String,
 });
 
+const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 
@@ -60,26 +66,34 @@ const onWatch = () => {
 
     showRewardedVideoAd(props.picurl, {
         onSuccess: async (picurl) => {
-            // 观看完整视频后发放能量
-            const res = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
-            if (res.data?.energy !== undefined) {
-                userStore.updateEnergy(res.data.energy);
-                // 发放成功后自动扣除1点并下载
-                const consumeRes = await userStore.consumeEnergy(props.id);
-                if (consumeRes.data?.energy !== undefined) {
-                    downloadPic(picurl);
-                    incrementDownloads(props.id);
-                } else {
-                    uni.showToast({ title: 'Consume energy failed', icon: 'none' });
+            // 看完广告即下载（核心权益）
+            downloadPic(picurl, t);
+            incrementDownloads(props.id);
+
+            // 已登录用户额外获取能量奖励
+            if (userStore.isLoggedIn) {
+                try {
+                    const res = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
+                    if (res.data?.energy !== undefined) {
+                        userStore.updateEnergy(res.data.energy);
+                        await userStore.consumeEnergy(props.id);
+                    }
+                } catch (e) {
+                    // 能量奖励失败不影响下载
+                    if (userStore.isAdmin) {
+                        uni.showToast({
+                            title: 'Earn energy failed: ' + (e?.code || e?.message || 'unknown'),
+                            icon: 'none',
+                            duration: 3000,
+                        });
+                    }
                 }
-            } else {
-                uni.showToast({ title: 'Earn energy failed', icon: 'none' });
             }
         },
         onFallback: (picurl) => {
-            downloadPic(picurl);
+            downloadPic(picurl, t);
             incrementDownloads(props.id);
-        }
+        },
     });
 };
 

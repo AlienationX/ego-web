@@ -38,6 +38,8 @@
         "downloading": "下载中...",
         "downloadSuccess": "下载成功",
         "downloadFailed": "下载失败",
+        "earnEnergyFailed": "获取能量失败",
+        "consumeEnergyFailed": "消耗能量失败",
         "saveSuccessful": "保存成功，请到相册查看",
         "saveFailed": "保存失败，请重新点击下载",
         "authTip": "授权提示",

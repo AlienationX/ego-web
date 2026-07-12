@@ -40,6 +40,8 @@
         "downloading": "Downloading...",
         "downloadSuccess": "Downloaded successfully",
         "downloadFailed": "Download failed",
+        "earnEnergyFailed": "Failed to earn energy",
+        "consumeEnergyFailed": "Failed to consume energy",
         "saveSuccessful": "Saved! Check your album",
         "saveFailed": "Save failed, tap to retry",
         "authTip": "Permission Needed",

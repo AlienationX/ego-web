@@ -35,7 +35,7 @@ export const useSettingsStore = defineStore(
         });
 
         // WEB和MP获取宿主主题 hostTheme，APP获取操作系统主题 osTheme
-        const osTheme = ref(uni.getAppBaseInfo().hostTheme || uni.getAppBaseInfo().osTheme || 'light');
+        const osTheme = ref(uni.getDeviceInfo().osTheme || uni.getAppBaseInfo().hostTheme || 'light');
 
         // 窗口视图和瀑布流视图的切换
         const switchViewIcon = computed(() => (options.view === 'window' ? 'map-filled' : 'list'));

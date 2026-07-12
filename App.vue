@@ -59,7 +59,7 @@ onShow(() => {
 
     // 从后台切回时 onThemeChange 可能未触发，重新同步系统主题
     if (settingsStore.options.theme === 'auto') {
-        const currentOsTheme = uni.getAppBaseInfo().osTheme || uni.getAppBaseInfo().hostTheme || 'light';
+        const currentOsTheme = uni.getDeviceInfo().osTheme || uni.getAppBaseInfo().hostTheme || 'light';
         if (settingsStore.osTheme !== currentOsTheme) {
             console.log('onShow sync osTheme:', settingsStore.osTheme, '->', currentOsTheme);
             // #ifdef APP
