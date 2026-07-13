@@ -5,8 +5,27 @@ import { t } from '@/utils/i18n.js';
 
 let refreshPromise = null;
 
-// 获取或生成设备ID
+// ── Token 内存缓存，避免每次请求都解密 ──
+let _cachedToken = '';
+let _cachedRaw = '';
+
+const getRawToken = () => {
+    const userStore = useUserStore();
+    const encrypted = userStore.accessToken || '';
+    if (encrypted !== _cachedToken) {
+        _cachedToken = encrypted;
+        const raw = encrypted ? decrypt(encrypted) : '';
+        _cachedRaw = typeof raw === 'string' ? raw : String(raw || '');
+    }
+    return _cachedRaw;
+};
+
+// 获取或生成设备ID（首次写入后用内存缓存，避免每次请求读磁盘）
+let _deviceId = null;
+
 const getDeviceId = () => {
+    if (_deviceId) return _deviceId;
+
     let deviceId = uni.getStorageSync('deviceId');
     if (!deviceId) {
         try {
@@ -19,7 +38,8 @@ const getDeviceId = () => {
             deviceId = 'dev_unknown';
         }
     }
-    return deviceId;
+    _deviceId = deviceId;
+    return _deviceId;
 };
 
 // 发送 request 请求函数，如果token过期，刷新后再次发送 request 请求
@@ -51,9 +71,8 @@ export const request = (config = {}) => {
 };
 
 const setHeader = (isAuth) => {
-    const userStore = useUserStore();
-    const rawToken = userStore.accessToken ? decrypt(userStore.accessToken) : '';
-    const hasValidToken = rawToken && rawToken.trim().length > 0;
+    const rawToken = getRawToken();
+    const hasValidToken = rawToken && String(rawToken).trim().length > 0;
 
     const header = {
         'Access-Key': API_SECRET_KEY,
@@ -61,7 +80,7 @@ const setHeader = (isAuth) => {
     };
     // 仅当存在有效 token 时添加 Authorization，避免服务端报 "two space-delimited values"
     if (isAuth && hasValidToken) {
-        header.Authorization = `Bearer ${rawToken.trim()}`;
+        header.Authorization = `Bearer ${String(rawToken).trim()}`;
     }
     return header;
 };

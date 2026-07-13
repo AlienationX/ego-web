@@ -1,5 +1,6 @@
 // ifdef APP || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
 import { downloadPic } from '@/common/core.js';
+import { t } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user.js';
 
 export const useAdIntersititial = () => {
@@ -76,8 +77,6 @@ export const useAdIntersititial = () => {
             // 广告加载成功，不需要额外处理
         });
         ad.onClose(() => {
-            // 防止 onClose 重复触发（部分 SDK 在 onError 后也会回调 onClose）
-            if (!isShowing) return;
             // 用户关闭广告后执行业务回调（下载等）
             if (pendingOnSuccess) {
                 pendingOnSuccess(pendingPicurl);
@@ -89,11 +88,6 @@ export const useAdIntersititial = () => {
             tryDestroyIfNeeded();
         });
         ad.onError(() => {
-            // onClose 已处理过时 clearPending 会清空 isShowing，此处直接跳过，避免重复回退
-            if (!isShowing) {
-                tryDestroyIfNeeded();
-                return;
-            }
             // 广告异常时回退，不阻塞主流程
             if (pendingOnFallback) {
                 pendingOnFallback(pendingPicurl);
@@ -262,8 +256,6 @@ export const useAdRewardedVideo = () => {
             // 广告加载成功，不需要额外处理
         });
         ad.onClose((e) => {
-            // 防止 onClose 重复触发
-            if (!isShowing) return;
             // 用户点击了【关闭广告】按钮
             if (e?.isEnded) {
                 // 正常播放结束，优先执行业务回调
@@ -274,22 +266,16 @@ export const useAdRewardedVideo = () => {
                 }
             } else {
                 // 播放中途退出
-                adminToast({
-                    title: 'Cannot download without watching the Ad completely.',
+                uni.showToast({
+                    title: t('ad.incompleteWarning'),
                     icon: 'none',
                     duration: 3000,
                 });
             }
             clearPending();
-            preloadRewarded();
             tryDestroyIfNeeded();
         });
         ad.onError(() => {
-            // onClose 已处理过时 clearPending 会清空 isShowing，此处直接跳过，避免重复回退
-            if (!isShowing) {
-                tryDestroyIfNeeded();
-                return;
-            }
             // 广告异常时回退，不阻塞主流程
             adminToast({
                 title: 'Ad loading failed. Download directly.',

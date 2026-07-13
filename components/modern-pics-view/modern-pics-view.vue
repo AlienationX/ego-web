@@ -287,18 +287,19 @@ const distributeItems = async (index, newItems) => {
     const state = tabStates[index];
     
     // 确保有尺寸信息用于计算瀑布流
-    await Promise.all(newItems.map(async (item) => {
-        if (!item.width || !item.height) {
-            try {
-                const info = await new Promise((res, rej) => uni.getImageInfo({ src: item.smallPicurl, success: res, fail: rej }));
-                item.width = info.width || 300;
-                item.height = info.height || 600;
-            } catch (e) {
-                item.width = 300;
-                item.height = 600;
-            }
-        }
-    }));
+    // 后端必定返回宽高，这个兜底操作暂时关闭
+    // await Promise.all(newItems.map(async (item) => {
+    //     if (!item.width || !item.height) {
+    //         try {
+    //             const info = await new Promise((res, rej) => uni.getImageInfo({ src: item.smallPicurl, success: res, fail: rej }));
+    //             item.width = info.width || 300;
+    //             item.height = info.height || 600;
+    //         } catch (e) {
+    //             item.width = 300;
+    //             item.height = 600;
+    //         }
+    //     }
+    // }));
 
     // Flex 双列动态分发算法
     newItems.forEach(item => {

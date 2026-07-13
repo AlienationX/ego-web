@@ -2,8 +2,8 @@
     "name" : "Ego Wallpapers",
     "appid" : "__UNI__098B24F",
     "description" : "Explore wallpapers, and explore yourself.",
-    "versionName" : "1.4.3",
-    "versionCode" : 143,
+    "versionName" : "1.4.4",
+    "versionCode" : 144,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -80,14 +80,7 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "gg" : {},
-                    "pg" : {},
-                    "unity" : {},
-                    "liftoff" : {},
-                    "inmobi" : {},
-                    "ironsource" : {},
-                    "mintegral" : {},
-                    "applovin" : {}
+                    "ks" : {}
                 },
                 "oauth" : {
                     "weixin" : {
