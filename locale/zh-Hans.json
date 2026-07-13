@@ -46,7 +46,23 @@
         "authContent": "需要授权保存相册",
         "authSuccess": "获取授权成功",
         "authFailed": "获取权限失败",
-        "admin": "管理员"
+        "admin": "管理员",
+        "request": {
+            "errorTitle": "请求失败",
+            "networkErrorTitle": "网络异常",
+            "networkErrorMsg": "当前网络不稳定，请稍后重试",
+            "authErrorTitle": "登录状态失效",
+            "authErrorMsg": "请重新登录后继续操作",
+            "serverErrorTitle": "服务异常",
+            "serverErrorMsg": "服务器开小差了，请稍后再试",
+            "failTitle": "操作失败",
+            "retryMsg": "请稍后重试",
+            "serverCodeError": "服务器错误 - {code}",
+            "unknownError": "未知错误",
+            "serverUnavailable": "服务器暂时不可用，请稍后重试",
+            "tokenExpired": "登录过期，请重新登录",
+            "refreshFailed": "刷新登录状态失败，请重新登录"
+        }
     },
     "index": {
         "title": "推荐",

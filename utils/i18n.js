@@ -1,4 +1,5 @@
 import { useI18n } from 'vue-i18n';
+import { i18n } from '@/main.js';
 
 export const LANGUAGE_PREF_AUTO = 'auto';
 export const LANGUAGE_PREF_EN = 'en';
@@ -151,7 +152,6 @@ export const formatDate = (date, options = {}) => {
  * @returns {string} 格式化后的相对时间字符串
  */
 export const formatRelativeTime = (date, options = {}) => {
-    const locale = getCurrentLocale();
     const now = new Date();
     const targetDate = new Date(date);
     const diff = now - targetDate;
@@ -159,17 +159,17 @@ export const formatRelativeTime = (date, options = {}) => {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-    
-    const i18n = useI18n();
-    
+
+    const gt = i18n.global.t;
+
     if (days > 0) {
-        return `${days}${i18n.t('rating.daysAgo')}`;
+        return `${days}${gt('rating.daysAgo')}`;
     } else if (hours > 0) {
-        return `${hours}${i18n.t('rating.hoursAgo')}`;
+        return `${hours}${gt('rating.hoursAgo')}`;
     } else if (minutes > 0) {
-        return `${minutes}${i18n.t('rating.minutesAgo')}`;
+        return `${minutes}${gt('rating.minutesAgo')}`;
     } else {
-        return i18n.t('rating.justNow');
+        return gt('rating.justNow');
     }
 };
 
@@ -179,10 +179,7 @@ export const formatRelativeTime = (date, options = {}) => {
  * @param {Object} params 翻译参数
  * @returns {string} 翻译后的文本
  */
-export const t = (key, params = {}) => {
-    const i18n = useI18n();
-    return i18n.t(key, params);
-};
+export const t = (key, params) => i18n.global.t(key, params);
 
 /**
  * 跨平台兼容的参数插值翻译（推荐用于含变量的消息）

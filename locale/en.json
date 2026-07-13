@@ -48,7 +48,23 @@
         "authContent": "Please grant album access to save images",
         "authSuccess": "Permission granted",
         "authFailed": "Permission denied",
-        "admin": "Administrator"
+        "admin": "Administrator",
+        "request": {
+            "errorTitle": "Request Failed",
+            "networkErrorTitle": "Network Error",
+            "networkErrorMsg": "Network is unstable, please try again later",
+            "authErrorTitle": "Session Expired",
+            "authErrorMsg": "Please log in again to continue",
+            "serverErrorTitle": "Server Error",
+            "serverErrorMsg": "Server is unavailable, please try again later",
+            "failTitle": "Operation Failed",
+            "retryMsg": "Please try again later",
+            "serverCodeError": "Server Error - {code}",
+            "unknownError": "Unknown Error",
+            "serverUnavailable": "Server is temporarily unavailable, please try again later",
+            "tokenExpired": "Session expired, please log in again",
+            "refreshFailed": "Failed to refresh session, please log in again"
+        }
     },
     "index": {
         "title": "Recommend",

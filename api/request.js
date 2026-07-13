@@ -1,6 +1,7 @@
 import { API_DOMAIN, API_BASE_URL, API_SECRET_KEY } from '@/common/config';
 import { useUserStore } from '@/stores/user.js';
 import { decrypt } from '@/utils/encryption.js';
+import { t } from '@/utils/i18n.js';
 
 let refreshPromise = null;
 
@@ -67,24 +68,24 @@ const setHeader = (isAuth) => {
 
 const getErrorPayload = (error = {}) => {
     if (typeof error === 'string') {
-        return { title: '请求失败', message: error };
+        return { title: t('common.request.errorTitle'), message: error };
     }
 
     if (error.errMsg) {
-        return { title: '网络异常', message: '当前网络不稳定，请稍后重试' };
+        return { title: t('common.request.networkErrorTitle'), message: t('common.request.networkErrorMsg') };
     }
 
     if (error.code === 401 || error.code === 'token_not_valid') {
-        return { title: '登录状态失效', message: '请重新登录后继续操作' };
+        return { title: t('common.request.authErrorTitle'), message: t('common.request.authErrorMsg') };
     }
 
     if (error.code >= 500) {
-        return { title: '服务异常', message: error.message || '服务器开小差了，请稍后再试' };
+        return { title: t('common.request.serverErrorTitle'), message: error.message || t('common.request.serverErrorMsg') };
     }
 
     return {
-        title: error.title || '操作失败',
-        message: error.message || error.detail || '请稍后重试',
+        title: error.title || t('common.request.failTitle'),
+        message: error.message || error.detail || t('common.request.retryMsg'),
     };
 };
 
@@ -133,8 +134,8 @@ const sendRequest = (config = {}) => {
                 } else {
                     reject({
                         ...res.data,
-                        title: res.data.code ? `服务器错误 - ${res.data.code}` : '未知错误',
-                        message: res.data.message || '服务器暂时不可用，请稍后重试',
+                        title: res.data.code ? t('common.request.serverCodeError', { code: res.data.code }) : t('common.request.unknownError'),
+                        message: res.data.message || t('common.request.serverUnavailable'),
                     });
                 }
             },
@@ -180,11 +181,11 @@ const refreshToken = async () => {
                 return true;
             }
             if (userStore.refreshToken) {
-                handleRefreshToken('登录过期，请重新登录');
+                handleRefreshToken(t('common.request.tokenExpired'));
             }
-            throw { code: 401, message: '登录过期，请重新登录' };
+            throw { code: 401, message: t('common.request.tokenExpired') };
         } catch (error) {
-            handleRefreshToken('刷新登录状态失败，请重新登录');
+            handleRefreshToken(t('common.request.refreshFailed'));
             throw error;
         } finally {
             refreshPromise = null;

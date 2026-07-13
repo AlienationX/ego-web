@@ -24,7 +24,7 @@ import { createI18n } from 'vue-i18n';
 import * as Pinia from 'pinia';
 import { createPersistedState } from 'pinia-plugin-persistedstate';
 
-const i18n = createI18n(i18nConfig);
+export const i18n = createI18n(i18nConfig);
 export function createApp() {
     const app = createSSRApp(App);
 

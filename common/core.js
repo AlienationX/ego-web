@@ -1,8 +1,6 @@
-import { useI18n } from 'vue-i18n';
+import { t } from '@/utils/i18n.js';
 
 export const downloadPic = (picurl) => {
-    // 在函数内调用 useI18n()，确保运行在 Vue 上下文
-    const { t } = useI18n();
 
     uni.showLoading({
         title: t('common.downloading'),
