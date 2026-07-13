@@ -31,8 +31,42 @@
                     <view class="hero__desc">{{ t('timeline.desc') }}</view>
                 </view>
 
-                <view v-if="isLoading" class="loading-state">
-                    <rotate-loading></rotate-loading>
+                <view v-if="isLoading" class="skeleton-wrap">
+                    <!-- 月份标题骨架 -->
+                    <view class="skeleton-month-head">
+                        <view class="skeleton-month-ghost"></view>
+                        <view class="skeleton-month-meta">
+                            <view class="skeleton-month-year"></view>
+                            <view class="skeleton-month-line"></view>
+                            <view class="skeleton-month-tag"></view>
+                        </view>
+                    </view>
+                    <!-- 日期标记骨架 -->
+                    <view class="skeleton-day-marker">
+                        <view class="skeleton-day-number"></view>
+                        <view class="skeleton-day-divider"></view>
+                        <view class="skeleton-day-label"></view>
+                    </view>
+                    <!-- 编辑网格骨架：一大 + 两小 -->
+                    <view class="skeleton-grid">
+                        <view class="skeleton-card skeleton-card--wide"></view>
+                        <view class="skeleton-grid-row">
+                            <view class="skeleton-card skeleton-card--small"></view>
+                            <view class="skeleton-card skeleton-card--small"></view>
+                        </view>
+                    </view>
+                    <!-- 第二组日期 + 两小卡 -->
+                    <view class="skeleton-day-marker" style="margin-top: 48rpx;">
+                        <view class="skeleton-day-number"></view>
+                        <view class="skeleton-day-divider"></view>
+                        <view class="skeleton-day-label"></view>
+                    </view>
+                    <view class="skeleton-grid">
+                        <view class="skeleton-grid-row">
+                            <view class="skeleton-card skeleton-card--small"></view>
+                            <view class="skeleton-card skeleton-card--small"></view>
+                        </view>
+                    </view>
                 </view>
 
                 <view v-else-if="!monthGroups.length" class="empty">
@@ -712,6 +746,137 @@ onMounted(() => {
 
     &.is-embedded {
         bottom: calc(env(safe-area-inset-bottom) + 92rpx); // 高于 tabbar
+    }
+}
+
+// ── 骨架屏 ──
+@mixin shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.06) 25%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: timeline-shimmer 1.6s infinite linear;
+
+    .theme-light & {
+        background: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.06) 25%,
+            rgba(0, 0, 0, 0.1) 50%,
+            rgba(0, 0, 0, 0.06) 75%
+        );
+        background-size: 200% 100%;
+        animation: timeline-shimmer 1.6s infinite linear;
+    }
+}
+
+.skeleton-wrap {
+    padding: 0;
+}
+
+// 月份标题
+.skeleton-month-head {
+    margin-bottom: 28rpx;
+}
+
+.skeleton-month-ghost {
+    width: 40%;
+    height: 86rpx;
+    border-radius: 12rpx;
+    @include shimmer;
+}
+
+.skeleton-month-meta {
+    margin-top: -22rpx;
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+}
+
+.skeleton-month-year {
+    width: 100rpx;
+    height: 38rpx;
+    border-radius: 10rpx;
+    @include shimmer;
+}
+
+.skeleton-month-line {
+    flex: 1;
+    height: 1rpx;
+    background: rgba(115, 130, 154, 0.2);
+}
+
+.skeleton-month-tag {
+    width: 120rpx;
+    height: 20rpx;
+    border-radius: 6rpx;
+    @include shimmer;
+}
+
+// 日期标记
+.skeleton-day-marker {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    margin-bottom: 20rpx;
+}
+
+.skeleton-day-number {
+    width: 72rpx;
+    height: 54rpx;
+    border-radius: 12rpx;
+    @include shimmer;
+}
+
+.skeleton-day-divider {
+    width: 4rpx;
+    height: 52rpx;
+    border-radius: 999rpx;
+    background: rgba(121, 168, 255, 0.15);
+}
+
+.skeleton-day-label {
+    width: 100rpx;
+    height: 20rpx;
+    border-radius: 6rpx;
+    @include shimmer;
+}
+
+// 编辑网格
+.skeleton-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20rpx;
+}
+
+.skeleton-grid-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20rpx;
+}
+
+.skeleton-card {
+    border-radius: 28rpx;
+    @include shimmer;
+
+    &--wide {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+    }
+
+    &--small {
+        height: 620rpx;
+    }
+}
+
+@keyframes timeline-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
     }
 }
 </style>
