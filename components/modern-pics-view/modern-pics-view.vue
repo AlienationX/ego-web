@@ -26,7 +26,7 @@
                         >
                             {{ tab.label }}
                             <view class="sort-icon" v-if="tab.isDate && currentIndex === index">
-                                <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="12" :color="settingsStore.isDark ? '#fff' : '#fff'"></uni-icons>
+                                <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="12" :color="settingsStore.isDark ? '#181818' : '#eef1f5'"></uni-icons>
                             </view>
                         </view>
                     </view>
@@ -176,7 +176,12 @@
         </swiper>
 
         <!-- 返回顶部悬浮按钮 -->
-        <view class="fab-back-top" :class="{ show: tabStates[currentIndex]?.showBackTop }" @click="handleBackTop">
+        <view
+            class="fab-back-top"
+            :class="{ show: tabStates[currentIndex]?.showBackTop }"
+            :style="props.adHeight > 0 ? { bottom: `calc(${props.adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
+            @click="handleBackTop"
+        >
             <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
         </view>
     </view>
@@ -205,6 +210,7 @@ const props = defineProps({
     showCardMeta: { type: Boolean, default: false },
     showDelete: { type: Boolean, default: false }, // 显示删除按钮
     bottomSafeSpace: { type: Number, default: 60 },
+    adHeight: { type: Number, default: 0 }, // 广告条高度，用于悬浮按钮位置调整
 });
 
 const emit = defineEmits(['update', 'change', 'scroll', 'remove']);
@@ -287,7 +293,7 @@ const distributeItems = async (index, newItems) => {
     const state = tabStates[index];
     
     // 确保有尺寸信息用于计算瀑布流
-    // 后端必定返回宽高，这个兜底操作暂时关闭
+    // 因为后端必定返回宽高，所以这个兜底操作暂时关闭
     // await Promise.all(newItems.map(async (item) => {
     //     if (!item.width || !item.height) {
     //         try {
@@ -494,40 +500,14 @@ watch(() => currentIndex.value, (newIdx) => {
 </script>
 
 <style lang="scss" scoped>
-/* 全局色彩与主题变量管理 */
-.theme-light {
-    --bg-page: #f8fafc;
-    --bg-card: #ffffff;
-    --bg-header: #f8fafc;
-    --border-color: rgba(15, 23, 42, 0.05);
-    --text-main: #1e293b;
-    --text-sub: #64748b;
-    --tab-active-bg: #2b8cee;
-    --tab-active-text: #ffffff;
-    --tab-bg: #e2e8f0;
-    --card-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-.theme-dark {
-    --bg-page: #0f1115;
-    --bg-card: #181b21;
-    --bg-header: #0f1115;
-    --border-color: rgba(255, 255, 255, 0.05);
-    --text-main: #f8fafc;
-    --text-sub: #94a3b8;
-    --tab-active-bg: #3b82f6;
-    --tab-active-text: #ffffff;
-    --tab-bg: #1e232b;
-    --card-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.2);
-}
-
 .modern-pics-container {
     position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--bg-page);
-    color: var(--text-main);
+    background: var(--page-background);
+    color: var(--text-primary);
 }
 
 /* 头部 Header */
@@ -537,8 +517,8 @@ watch(() => currentIndex.value, (newIdx) => {
     height: 88rpx;
     display: flex;
     align-items: center;
-    background: var(--bg-header);
-    border-bottom: 1rpx solid var(--border-color);
+    background: var(--page-background);
+    border-bottom: 1rpx solid var(--panel-border);
     will-change: transform;
 }
 
@@ -568,14 +548,14 @@ watch(() => currentIndex.value, (newIdx) => {
             border-radius: 999rpx;
             font-size: 26rpx;
             font-weight: 600;
-            color: var(--text-sub);
-            background: var(--tab-bg);
+            color: var(--text-tertiary);
+            background: var(--panel-background-strong);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             
             &.active {
-                color: var(--tab-active-text);
-                background: var(--tab-active-bg);
-                box-shadow: 0 8rpx 20rpx rgba(43, 140, 238, 0.3);
+                color: var(--page-background);
+                background: var(--text-primary);
+                box-shadow: 0 8rpx 20rpx var(--shadow-color);
             }
             .sort-icon { margin-left: 6rpx; }
         }
@@ -584,7 +564,7 @@ watch(() => currentIndex.value, (newIdx) => {
 
 .tool-actions {
     padding: 0 24rpx;
-    border-left: 1rpx solid var(--border-color);
+    border-left: 1rpx solid var(--panel-border);
     &.is-single { border-left: none; width: 100%; justify-content: flex-end; display: flex;}
     
     .action-btn {
@@ -594,8 +574,8 @@ watch(() => currentIndex.value, (newIdx) => {
         align-items: center;
         justify-content: center;
         border-radius: 16rpx;
-        background: var(--bg-card);
-        border: 1rpx solid var(--border-color);
+        background: var(--panel-background);
+        border: 1rpx solid var(--panel-border);
         transition: transform 0.2s;
         
         &:active { transform: scale(0.9); }
@@ -636,16 +616,19 @@ watch(() => currentIndex.value, (newIdx) => {
 .modern-card {
     position: relative;
     width: 100%;
-    background: var(--bg-card);
+    background: var(--panel-background);
     border-radius: 36rpx;
     overflow: hidden;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4rpx 16rpx var(--shadow-color);
     transform: translateZ(0); /* 开启 GPU 加速 */
-    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease;
     
     &.grid-card { height: 580rpx; }
     
-    &:active { transform: scale(0.97); }
+    &:active { .card-img { transform: scale(1.08); } }
+    @media (hover: hover) {
+        &:hover { .card-img { transform: scale(1.08); } }
+    }
     
     .card-img {
         width: 100%;
@@ -653,7 +636,7 @@ watch(() => currentIndex.value, (newIdx) => {
         display: block;
         opacity: 0;
         filter: blur(10px);
-        transition: opacity 0.5s ease, filter 0.6s ease;
+        transition: opacity 0.5s ease, filter 0.6s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         
         &.is-loaded {
             opacity: 1;
@@ -732,7 +715,7 @@ watch(() => currentIndex.value, (newIdx) => {
 .sk-waterfall { display: flex; gap: 24rpx; .sk-col { flex: 1; display: flex; flex-direction: column; gap: 24rpx; } }
 .sk-card {
     border-radius: 36rpx;
-    background: linear-gradient(90deg, var(--bg-card) 25%, var(--tab-bg) 50%, var(--bg-card) 75%);
+    background: linear-gradient(90deg, var(--panel-background) 25%, var(--panel-background-strong) 50%, var(--panel-background) 75%);
     background-size: 200% 100%;
     animation: sk-shimmer 1.5s infinite linear;
     &.sk-grid .sk-card { height: 500rpx; }
@@ -753,18 +736,18 @@ watch(() => currentIndex.value, (newIdx) => {
     opacity: 0.6;
     
     .empty-img { width: 240rpx; height: 240rpx; }
-    .empty-text { margin-top: 24rpx; font-size: 28rpx; color: var(--text-sub); }
+    .empty-text { margin-top: 24rpx; font-size: 28rpx; color: var(--text-tertiary); }
 }
 
 .status-footer { padding: 24rpx 0; }
 
 .fab-back-top {
     position: fixed;
-    right: 40rpx;
-    bottom: calc(60rpx + env(safe-area-inset-bottom));
-    width: 96rpx;
-    height: 96rpx;
-    background: var(--tab-active-bg);
+    right: 32rpx;
+    bottom: calc(32rpx + env(safe-area-inset-bottom));
+    width: 88rpx;
+    height: 88rpx;
+    background: #2b8cee;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -772,7 +755,10 @@ watch(() => currentIndex.value, (newIdx) => {
     box-shadow: 0 12rpx 32rpx rgba(43, 140, 238, 0.4);
     opacity: 0;
     transform: translateY(100rpx) scale(0.5);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition:
+        opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        bottom 0.3s ease;
     z-index: 1000;
     
     &.show { opacity: 1; transform: translateY(0) scale(1); }

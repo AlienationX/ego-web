@@ -1178,7 +1178,7 @@ onMounted(() => {
 
             .box {
                 width: 280rpx;
-                height: calc(100% - 66rpx);
+                height: calc(100% - 50rpx);
                 display: inline-flex;
                 justify-content: center;
                 align-items: flex-start;
@@ -1244,7 +1244,7 @@ onMounted(() => {
                 // Hero mode
                 &.is-hero {
                     width: 440rpx;
-                    height: calc(100% - 66rpx);
+                    height: calc(100% - 50rpx);
                     padding-bottom: 0;
 
                     &::before {

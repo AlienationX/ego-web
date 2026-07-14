@@ -564,10 +564,6 @@ onShow(() => {
         pointer-events: none;
         z-index: 9999;
 
-        &.status-bar-bg--muted {
-            background: var(--page-background);
-        }
-
         .status-user-decorative {
             position: absolute;
             top: 0;
@@ -914,11 +910,11 @@ onShow(() => {
         .app-desc {
             font-size: 28rpx;
             color: var(--text-tertiary);
-            margin-bottom: 40rpx;
+            margin-bottom: 30rpx;
         }
 
         .login-btn {
-            margin-top: 20rpx;
+            margin-bottom: 30rpx;
             width: 360rpx;
             height: 84rpx;
             background: var(--text-primary);

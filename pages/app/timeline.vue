@@ -143,8 +143,14 @@
 
         <custom-ad-banner v-if="!embedded" @height-change="onAdHeightChange"></custom-ad-banner>
 
-        <view v-if="showScrollTop" class="floating-top" :class="{ 'is-embedded': embedded }" @click="scrollToTop">
-            <mdi-icon path="/static/icons/arrow-up.svg" size="18px" color="#0d1b2f"></mdi-icon>
+        <view
+            v-if="showScrollTop"
+            class="floating-top"
+            :class="{ 'is-embedded': embedded }"
+            :style="adHeight > 0 ? { bottom: `calc(${adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
+            @click="scrollToTop"
+        >
+            <mdi-icon path="/static/icons/arrow-up.svg" size="18px" color="#fff"></mdi-icon>
         </view>
     </view>
 </template>
@@ -732,17 +738,18 @@ onMounted(() => {
 
 .floating-top {
     position: fixed;
-    right: 28rpx;
+    right: 32rpx;
     bottom: calc(env(safe-area-inset-bottom) + 32rpx);
-    width: 86rpx;
-    height: 86rpx;
+    width: 88rpx;
+    height: 88rpx;
     border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #619aef;
-    box-shadow: 0 20rpx 44rpx rgba(97, 154, 239, 0.32);
+    background: #2b8cee;
+    box-shadow: 0 12rpx 32rpx rgba(43, 140, 238, 0.4);
     z-index: 20;
+    transition: bottom 0.3s ease;
 
     &.is-embedded {
         bottom: calc(env(safe-area-inset-bottom) + 92rpx); // 高于 tabbar

@@ -263,16 +263,19 @@ const handleSignup = async () => {
 .back-btn {
     position: fixed;
     left: 36rpx;
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 50%;
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: 16rpx;
     background: var(--page-background-secondary);
-    border: 1rpx solid var(--panel-border);
-    box-shadow: 0 8rpx 20rpx var(--shadow-color);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 12;
+    transition: all 0.3s;
+    &:active {
+        background: var(--panel-background-strong);
+        transform: scale(0.92);
+    }
 }
 
 .status-bar-placeholder {
@@ -349,12 +352,14 @@ const handleSignup = async () => {
 
     .form-item {
         height: 120rpx;
-        background: var(--page-background-secondary);
+        background: var(--panel-background);
+        border: 2rpx solid var(--panel-border);
         border-radius: 28rpx;
         display: flex;
         align-items: center;
         padding: 0 48rpx;
         position: relative;
+        box-sizing: border-box;
 
         &.password-item {
             padding-right: 48rpx;

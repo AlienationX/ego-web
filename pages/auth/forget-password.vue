@@ -464,16 +464,19 @@ onUnmounted(() => {
 .back-btn {
     position: fixed;
     left: 36rpx;
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
     z-index: 12;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
+    border-radius: 16rpx;
     background: var(--page-background-secondary);
-    border: 1rpx solid var(--panel-border);
-    box-shadow: 0 8rpx 20rpx var(--shadow-color);
+    transition: all 0.3s;
+    &:active {
+        background: var(--panel-background-strong);
+        transform: scale(0.92);
+    }
 }
 
 .step-host {
@@ -567,7 +570,8 @@ onUnmounted(() => {
         width: 100%;
         max-width: 100%;
         height: 120rpx;
-        background: var(--page-background-secondary);
+        background: var(--panel-background);
+        border: 2rpx solid var(--panel-border);
         border-radius: 28rpx;
         display: flex;
         align-items: center;
@@ -650,17 +654,18 @@ onUnmounted(() => {
         min-width: 0;
         max-width: 96rpx;
         height: 120rpx;
-        background: var(--page-background-secondary);
+        background: var(--panel-background);
+        border: 2rpx solid var(--panel-border);
         border-radius: 24rpx;
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
+        box-sizing: border-box;
 
         &.filled {
             background: #3461fd;
-            outline: 2rpx solid #3461fd;
-            outline-offset: -2rpx;
+            border-color: #3461fd;
 
             .otp-input {
                 color: #ffffff;
@@ -693,14 +698,14 @@ onUnmounted(() => {
     overflow-wrap: anywhere;
 
     .resend-text {
-        color: #3b4054;
+        color: var(--text-secondary);
     }
 
     .resend-link {
         color: #3461fd;
 
         &.disabled {
-            color: #999;
+            color: var(--text-tertiary);
         }
     }
 }

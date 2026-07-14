@@ -17,6 +17,13 @@
         <view class="content-wrapper">
             <modern-pics-view ref="picsRef" :show-header="false" :tabs="tabs" api-type="actions" :show-delete="true" @remove="handleRemove"></modern-pics-view>
         </view>
+        
+        <popup-navigation-dialog
+            ref="dialogRef"
+            :title="dialogTitle"
+            :description="dialogDesc"
+            @confirm="onConfirmRemove"
+        />
     </view>
 </template>
 
@@ -31,6 +38,11 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const picsRef = ref(null);
+const dialogRef = ref(null);
+const dialogTitle = ref('');
+const dialogDesc = ref('');
+const itemToRemove = ref(null);
+const tabIndexToRemove = ref(null);
 
 const tabs = computed(() => [
     {
@@ -42,22 +54,22 @@ const tabs = computed(() => [
 ]);
 
 const handleRemove = ({ item, tabIndex }) => {
-    uni.showModal({
-        title: '清除记录',
-        content: `确定清除该下载记录吗？`,
-        confirmText: '确定',
-        cancelText: '取消',
-        success: async (res) => {
-            if (!res.confirm) return;
-            try {
-                await apiPostActions({ wall_id: item.id, action_key: 'download', action_value: 0 });
-                picsRef.value?.removeItem(tabIndex, item.id);
-                uni.showToast({ title: '已清除记录', icon: 'none' });
-            } catch (e) {
-                uni.showToast({ title: '操作失败，请重试', icon: 'none' });
-            }
-        },
-    });
+    itemToRemove.value = item;
+    tabIndexToRemove.value = tabIndex;
+    dialogTitle.value = t('user.profile.clearDownloadTitle');
+    dialogDesc.value = t('user.profile.clearDownloadDesc');
+    dialogRef.value?.open();
+};
+
+const onConfirmRemove = async () => {
+    if (!itemToRemove.value) return;
+    try {
+        await apiPostActions({ wall_id: itemToRemove.value.id, action_key: 'download', action_value: 0 });
+        picsRef.value?.removeItem(tabIndexToRemove.value, itemToRemove.value.id);
+        uni.showToast({ title: t('user.profile.clearDownloadSuccess'), icon: 'none' });
+    } catch (e) {
+        uni.showToast({ title: t('user.profile.operationFailed'), icon: 'none' });
+    }
 };
 
 const goBack = () => {
@@ -99,7 +111,6 @@ const goBack = () => {
             height: 64rpx;
             border-radius: 16rpx;
             background: var(--page-background-secondary);
-            border: 2rpx solid var(--panel-border);
             display: flex;
             align-items: center;
             justify-content: center;
