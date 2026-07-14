@@ -113,6 +113,7 @@
                                         class="modern-card wf-card" 
                                         v-for="(item, idx) in tabStates[index].leftCol" 
                                         :key="index + '-l-' + item.id + '-' + idx"
+                                        :class="{ 'is-deleting': item.is_deleting }"
                                         @click="openPreview(item.id, index)"
                                         @longpress="handleLongPress(item, index)"
                                     >
@@ -136,6 +137,7 @@
                                         class="modern-card wf-card" 
                                         v-for="(item, idx) in tabStates[index].rightCol" 
                                         :key="index + '-r-' + item.id + '-' + idx"
+                                        :class="{ 'is-deleting': item.is_deleting }"
                                         @click="openPreview(item.id, index)"
                                         @longpress="handleLongPress(item, index)"
                                     >
@@ -178,8 +180,8 @@
         <!-- 返回顶部悬浮按钮 -->
         <view
             class="fab-back-top"
-            :class="{ show: tabStates[currentIndex]?.showBackTop }"
-            :style="props.adHeight > 0 ? { bottom: `calc(${props.adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
+            :class="{ show: tabStates[currentIndex]?.showBackTop, 'is-embedded': props.embedded }"
+            :style="props.adHeight > 0 ? { bottom: props.embedded ? `calc(${props.adHeight}px + 32rpx)` : `calc(${props.adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
             @click="handleBackTop"
         >
             <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
@@ -211,6 +213,7 @@ const props = defineProps({
     showDelete: { type: Boolean, default: false }, // 显示删除按钮
     bottomSafeSpace: { type: Number, default: 60 },
     adHeight: { type: Number, default: 0 }, // 广告条高度，用于悬浮按钮位置调整
+    embedded: { type: Boolean, default: false }, // 是否在 tabbar 页面内嵌入
 });
 
 const emit = defineEmits(['update', 'change', 'scroll', 'remove']);
@@ -225,13 +228,25 @@ const handleLongPress = (item, index) => {
 const removeItem = (tabIndex, wallId) => {
     const state = tabStates[tabIndex];
     if (!state) return;
-    const removeFrom = (arr) => {
-        const idx = arr.findIndex(i => i.id === wallId);
-        if (idx !== -1) arr.splice(idx, 1);
+
+    // 先标记为删除，触发 CSS 过渡动画
+    const markDeleted = (arr) => {
+        const item = arr.find(i => i.id === wallId);
+        if (item) item.is_deleting = true;
     };
-    removeFrom(state.images);
-    removeFrom(state.leftCol);
-    removeFrom(state.rightCol);
+    markDeleted(state.leftCol);
+    markDeleted(state.rightCol);
+
+    // 延时等待动画完成后真正移除数据
+    setTimeout(() => {
+        const removeFrom = (arr) => {
+            const idx = arr.findIndex(i => i.id === wallId);
+            if (idx !== -1) arr.splice(idx, 1);
+        };
+        removeFrom(state.images);
+        removeFrom(state.leftCol);
+        removeFrom(state.rightCol);
+    }, 350);
 };
 
 defineExpose({ removeItem });
@@ -612,6 +627,22 @@ watch(() => currentIndex.value, (newIdx) => {
     }
 }
 
+/* 瀑布流动画 */
+.waterfall-anim-move,
+.waterfall-anim-enter-active,
+.waterfall-anim-leave-active {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.waterfall-anim-enter-from,
+.waterfall-anim-leave-to {
+    opacity: 0;
+    transform: scale(0.9) translateY(40rpx);
+}
+.waterfall-anim-leave-active {
+    position: absolute !important;
+    width: 100%;
+}
+
 /* 卡片 UI (Glassmorphism + 交互) */
 .modern-card {
     position: relative;
@@ -621,9 +652,23 @@ watch(() => currentIndex.value, (newIdx) => {
     overflow: hidden;
     box-shadow: 0 4rpx 16rpx var(--shadow-color);
     transform: translateZ(0); /* 开启 GPU 加速 */
-    transition: box-shadow 0.3s ease;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-height: 2000rpx;
+    opacity: 1;
+    transform-origin: center center;
     
     &.grid-card { height: 580rpx; }
+    
+    &.is-deleting {
+        opacity: 0;
+        max-height: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        border: 0 !important;
+        transform: scale(0.8);
+    }
     
     &:active { .card-img { transform: scale(1.08); } }
     @media (hover: hover) {
@@ -763,5 +808,9 @@ watch(() => currentIndex.value, (newIdx) => {
     
     &.show { opacity: 1; transform: translateY(0) scale(1); }
     &:active { transform: scale(0.9); }
+
+    &.is-embedded {
+        bottom: 32rpx;
+    }
 }
 </style>

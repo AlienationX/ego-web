@@ -147,10 +147,10 @@
             v-if="showScrollTop"
             class="floating-top"
             :class="{ 'is-embedded': embedded }"
-            :style="adHeight > 0 ? { bottom: `calc(${adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
+            :style="adHeight > 0 ? { bottom: embedded ? `calc(${adHeight}px + 32rpx)` : `calc(${adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
             @click="scrollToTop"
         >
-            <mdi-icon path="/static/icons/arrow-up.svg" size="18px" color="#fff"></mdi-icon>
+            <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
         </view>
     </view>
 </template>
@@ -574,7 +574,7 @@ onMounted(() => {
 }
 
 .day-section {
-    margin-bottom: 60rpx;
+    margin-bottom: 40rpx;
 }
 
 .day-section__marker {
@@ -752,7 +752,7 @@ onMounted(() => {
     transition: bottom 0.3s ease;
 
     &.is-embedded {
-        bottom: calc(env(safe-area-inset-bottom) + 92rpx); // 高于 tabbar
+        bottom: 32rpx; // 底部有 tabbar，tabbar 已占据空间，直接基于 viewport 底部往上 32rpx 即可
     }
 }
 

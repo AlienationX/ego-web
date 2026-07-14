@@ -77,6 +77,7 @@
                 layoutMode="waterfall"
                 :show-card-meta="true"
                 :header-height="navBarHeight"
+                embedded
                 @scroll="handleEmbeddedScroll"
             ></modern-pics-view>
         </view>
