@@ -47,6 +47,8 @@
         "authSuccess": "获取授权成功",
         "authFailed": "获取权限失败",
         "admin": "管理员",
+        "privacy": "隐私政策",
+        "agreement": "用户协议",
         "request": {
             "errorTitle": "请求失败",
             "networkErrorTitle": "网络异常",
@@ -285,6 +287,7 @@
     "ad": {
         "incompleteWarning": "需要看完广告才能下载"
     },
+    "message": {
         "copyrightStatement": "声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱{email}，管理员将删除侵权壁纸，维护您的权益。",
         "saveSuccessful": "保存成功，请到相册查看",
         "saveFailed": "保存失败，请重新点击下载",
