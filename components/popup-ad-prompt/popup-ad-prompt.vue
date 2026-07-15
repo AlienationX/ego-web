@@ -12,6 +12,7 @@
             <image class="ad-prompt__image" src="/static/images/pictures.svg" mode="aspectFit"></image>
 
             <text class="ad-prompt__title">{{ $t('message.adText') }}</text>
+            <text class="ad-prompt__desc">{{ $t('message.adEnergyHint') }}</text>
 
             <button class="ad-prompt__button" @click="onWatch">
                 {{ $t('message.adPrompt') }}
@@ -156,7 +157,15 @@ defineExpose({
         font-weight: 700;
         color: var(--text-primary);
         text-align: center;
-        margin-bottom: 0rpx;
+        margin-bottom: 24rpx;
+    }
+
+    &__desc {
+        font-size: 24rpx;
+        color: var(--text-secondary, #64748b);
+        text-align: center;
+        line-height: 1.6;
+        padding: 0 16rpx;
     }
 
     &__button {

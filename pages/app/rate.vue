@@ -1,14 +1,14 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- Custom Beautiful Header -->
-        <view class="custom-header" :style="{ paddingTop: statusBarHeight + 'px' }">
+        <!-- The Review Journal Header -->
+        <view class="journal-header" :style="{ paddingTop: statusBarHeight + 'px' }">
             <view class="header-content">
                 <view class="back-btn" @click="goBack">
                     <mdi-icon path="/static/icons/arrow-left.svg" size="24px" :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
                 </view>
                 <view class="header-title-box">
-                    <text class="header-title">{{ t('user.profile.myScore') }}</text>
-                    <text class="header-subtitle">My Rating</text>
+                    <text class="header-title">{{ $t('rating.superTitle') }}</text>
+                    <text class="header-subtitle">{{ $t('rating.desc') }}</text>
                 </view>
                 <view class="header-placeholder"></view> <!-- For flex centering -->
             </view>
@@ -23,31 +23,37 @@
                 @action="goBrowse"
             ></empty-state>
 
-            <view v-else class="rating-list">
-                <view v-for="(item, index) in ratingList" :key="item.id" class="rating-swipe-item">
+            <view v-else class="journal-list">
+                <view v-for="(item, index) in ratingList" :key="item.id" class="journal-card-wrapper">
                     <uni-swipe-action>
                         <uni-swipe-action-item :right-options="swipeOptions" @click="handleSwipeClick(item, index, $event)">
-                            <view class="rating-item" @click="goPreview(item)">
-                                <view class="rating-image">
-                                    <image :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                            <view class="journal-card" @click="goPreview(item)">
+                                <!-- Cinematic Image Header -->
+                                <view class="card-hero">
+                                    <image class="hero-image" :src="item.mediumPicurl || item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                    <view class="hero-overlay"></view>
+                                    
+                                    <!-- Massive Score -->
+                                    <view class="massive-score">
+                                        <text class="score-num">{{ item.my_score }}</text>
+                                        <text class="score-max">/5</text>
+                                    </view>
                                 </view>
-                                <view class="rating-info">
-                                    <view class="wallpaper-name">{{ item.description || t('rating.untitled') }}</view>
-                                    <view class="rating-meta">
-                                        <view class="score-section">
-                                            <uni-rate readonly :value="item.my_score" size="14" margin="8"></uni-rate>
-                                            <text class="score-text">{{ item.my_score }}</text>
-                                        </view>
+                                
+                                <!-- Journal Content -->
+                                <view class="card-content">
+                                    <view class="content-header">
+                                        <view class="wallpaper-name">{{ getTitle(item) }}</view>
                                         <view class="rating-time" v-if="item.action_updated_at">
                                             {{ formatTime(item.action_updated_at) }}
                                         </view>
                                     </view>
-                                    <view class="rating-comment" v-if="item.tabs">
-                                        {{ item.tabs }}
+                                    
+                                    <view class="journal-comment" v-if="item.tabs">
+                                        <text class="quote-mark">“</text>
+                                        <text class="comment-text">{{ item.tabs }}</text>
+                                        <text class="quote-mark">”</text>
                                     </view>
-                                </view>
-                                <view class="rating-arrow">
-                                    <uni-icons type="right" size="16" :color="settingsStore.isDark ? '#4b5563' : '#cbd5e1'"></uni-icons>
                                 </view>
                             </view>
                         </uni-swipe-action-item>
@@ -60,14 +66,13 @@
             </view>
 
             <back-to-top ref="backToTopRef"></back-to-top>
-
             <view class="safe-area-inset-bottom"></view>
         </view>
     </view>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { onLoad, onUnload, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
 import { apiGetActions, apiPostActions } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -76,8 +81,11 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useAppStore } from '@/stores/app.js';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
+
+const isEn = computed(() => locale.value === 'en');
+const getTitle = (item) => isEn.value && item.description_en ? item.description_en : item.description || item.classify_name || t('rating.untitled');
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
@@ -98,7 +106,7 @@ const swipeOptions = ref([
     {
         text: t('rating.delete'),
         style: {
-            backgroundColor: '#e74c3c',
+            backgroundColor: '#ef4444',
         },
     },
 ]);
@@ -237,16 +245,20 @@ onPullDownRefresh(() => {
 
 <style lang="scss" scoped>
 .layout {
-    background: var(--page-background);
+    background: var(--page-background-secondary); // 让卡片浮现出来
     min-height: 100vh;
     transition: background-color 0.3s ease;
     display: flex;
     flex-direction: column;
 
-    .custom-header {
-        position: relative;
+    .journal-header {
+        position: sticky;
+        top: 0;
         z-index: 100;
+        background: rgba(var(--page-background-rgb), 0.8);
+        backdrop-filter: blur(16px);
         padding-bottom: 20rpx;
+        border-bottom: 1rpx solid var(--panel-border);
 
         .header-content {
             height: 88rpx;
@@ -263,144 +275,160 @@ onPullDownRefresh(() => {
         }
 
         .back-btn {
-            width: 64rpx;
-            height: 64rpx;
-            border-radius: 16rpx;
-            background: var(--page-background-secondary);
-            border: 2rpx solid var(--panel-border);
+            width: 72rpx;
+            height: 72rpx;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
             
             &:active {
-                transform: scale(0.92);
-                background: var(--panel-background-strong, #f1f5f9);
+                opacity: 0.5;
             }
         }
 
         .header-title {
-            font-size: 36rpx;
+            font-size: 34rpx;
             font-weight: 800;
-            color: var(--text-primary, #1e293b);
-            letter-spacing: 1rpx;
+            color: var(--text-primary);
+            letter-spacing: 2rpx;
+            text-transform: uppercase;
         }
         
         .header-subtitle {
             font-size: 22rpx;
-            color: var(--text-tertiary, #94a3b8);
-            margin-top: 6rpx;
-            letter-spacing: 2rpx;
-            text-transform: uppercase;
+            color: var(--text-tertiary);
+            margin-top: 4rpx;
             font-weight: 600;
         }
         
         .header-placeholder {
-            width: 84rpx;
+            width: 72rpx;
         }
     }
 
     .content-wrapper {
+        flex: 1;
         padding: 30rpx 24rpx;
     }
 
-    .rating-list {
-        .rating-swipe-item {
-            margin-bottom: 24rpx;
-            box-shadow: 0 8rpx 24rpx var(--shadow-color, rgba(19, 25, 39, 0.03));
-            border-radius: 24rpx;
+    .journal-list {
+        .journal-card-wrapper {
+            margin-bottom: 32rpx;
+            border-radius: 32rpx;
             overflow: hidden;
-            border: 1rpx solid var(--panel-border, rgba(17, 17, 17, 0.05));
-        }
-
-        .rating-swipe-item:last-child {
-            margin-bottom: 0;
+            box-shadow: 0 12rpx 32rpx var(--shadow-color, rgba(0,0,0,0.06));
+            transform: translateZ(0); // For safari rounded corners rendering
         }
 
         :deep(.uni-swipe_action) {
-            border-radius: 24rpx;
+            border-radius: 32rpx;
             overflow: hidden;
+            background: transparent;
         }
 
-        .rating-item {
+        .journal-card {
+            background: var(--page-background);
             display: flex;
-            align-items: center;
-            background: var(--panel-background-strong, #fff);
-            border-radius: 24rpx;
-            padding: 24rpx;
-            transition: all 0.25s ease-in-out;
+            flex-direction: column;
+            transition: all 0.25s ease;
 
             &:active {
-                transform: scale(0.985);
-                opacity: 0.92;
-                background: var(--panel-background, #f8fafc);
+                transform: scale(0.98);
             }
 
-            .rating-image {
-                width: 150rpx;
-                height: 150rpx;
-                border-radius: 16rpx;
+            .card-hero {
+                position: relative;
+                width: 100%;
+                height: 340rpx;
                 overflow: hidden;
-                flex-shrink: 0;
-                border: 1rpx solid var(--panel-border, rgba(17, 17, 17, 0.05));
 
-                image {
+                .hero-image {
                     width: 100%;
                     height: 100%;
                 }
-            }
 
-            .rating-info {
-                flex: 1;
-                padding: 0 24rpx;
-                overflow: hidden;
-
-                .wallpaper-name {
-                    font-size: 30rpx;
-                    color: var(--text-primary, #1e293b);
-                    font-weight: 700;
-                    margin-bottom: 12rpx;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                .hero-overlay {
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.3) 100%);
                 }
 
-                .rating-meta {
+                .massive-score {
+                    position: absolute;
+                    bottom: 24rpx;
+                    right: 32rpx;
                     display: flex;
-                    align-items: center;
+                    align-items: baseline;
+                    color: #fff;
+                    text-shadow: 0 4rpx 16rpx rgba(0,0,0,0.5);
+
+                    .score-num {
+                        font-size: 96rpx;
+                        font-weight: 900;
+                        line-height: 1;
+                        color: #fbbf24;
+                        letter-spacing: -4rpx;
+                    }
+
+                    .score-max {
+                        font-size: 32rpx;
+                        font-weight: 700;
+                        opacity: 0.8;
+                        margin-left: 4rpx;
+                    }
+                }
+            }
+
+            .card-content {
+                padding: 32rpx;
+                display: flex;
+                flex-direction: column;
+                gap: 20rpx;
+
+                .content-header {
+                    display: flex;
                     justify-content: space-between;
-                    margin-bottom: 10rpx;
+                    align-items: flex-start;
 
-                    .score-section {
-                        display: flex;
-                        align-items: center;
-                        gap: 8rpx;
-
-                        .score-text {
-                            font-size: 28rpx;
-                            color: #ffb300;
-                            font-weight: 700;
-                        }
+                    .wallpaper-name {
+                        font-size: 32rpx;
+                        font-weight: 700;
+                        color: var(--text-primary);
+                        flex: 1;
+                        padding-right: 20rpx;
+                        line-height: 1.4;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
 
                     .rating-time {
-                        font-size: 22rpx;
-                        color: var(--text-tertiary, #94a3b8);
+                        font-size: 24rpx;
+                        color: var(--text-tertiary);
+                        font-weight: 500;
+                        white-space: nowrap;
+                        margin-top: 6rpx;
                     }
                 }
 
-                .rating-comment {
-                    font-size: 25rpx;
-                    color: var(--text-secondary, #64748b);
-                    line-height: 1.5;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                .journal-comment {
+                    font-size: 28rpx;
+                    color: var(--text-secondary);
+                    line-height: 1.6;
+                    font-style: italic;
+                    position: relative;
+                    padding-left: 20rpx;
+                    border-left: 6rpx solid var(--panel-border);
+                    
+                    .quote-mark {
+                        color: var(--text-tertiary);
+                        opacity: 0.5;
+                        font-size: 32rpx;
+                        font-family: serif;
+                    }
                 }
-            }
-
-            .rating-arrow {
-                flex-shrink: 0;
             }
         }
     }

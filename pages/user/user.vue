@@ -12,72 +12,59 @@
         <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
             <view class="page-scroll__content">
                 <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
-                    <view v-if="userStore.userinfo.id" class="user-content">
-                        <view class="avatar">
-                            <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
-                            <view class="avatar-ring"></view>
-                        </view>
+                    <template v-if="userStore.userinfo.id">
+                        <view class="user-content">
+                            <view class="avatar">
+                                <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
+                                <view class="avatar-ring"></view>
+                            </view>
 
-                        <view class="user-details">
-                            <view class="details-top">
-                                <view class="name-row">
-                                    <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
-                                    <!-- <view v-if="userStore.userinfo.profile.is_vip" class="vip-badge">
-                                        <uni-icons type="vip-filled" size="14" color="#fff"></uni-icons>
-                                        <text>{{ t('user.profile.member') }}</text>
+                            <view class="user-details">
+                                <view class="details-top">
+                                    <view class="name-row">
+                                        <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
                                     </view>
-                                    <view v-else class="non-vip-badge" @click="toMembership">
-                                        <text>成为会员</text>
-                                        <uni-icons type="arrow-right" size="12" color="#28B389"></uni-icons>
-                                    </view> -->
                                 </view>
-                                <!-- <view class="edit-btn" @click="toEditProfile">
-                                    {{ t('user.profile.editProfile') }}
-                                </view> -->
-                            </view>
 
-                            <view class="user-description">
-                                {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
-                            </view>
-
-                            <view class="user-info-row">
-                                <view v-if="userStore.userinfo.email" class="info-item">
-                                    <uni-icons
-                                        type="mail-filled"
-                                        size="16"
-                                        :color="settingsStore.isDark ? '#767d8a' : '#999'"
-                                    ></uni-icons>
-                                    <text>{{ userStore.userinfo.email }}</text>
+                                <view class="user-description">
+                                    {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
                                 </view>
-                                <!-- <view v-if="userStore.userinfo.profile.region" class="info-item">
-                                    <uni-icons type="location" size="16" color="#999"></uni-icons>
-                                    <text>{{ userStore.userinfo.profile.region }}</text>
-                                </view> -->
+
+                                <view class="user-info-row">
+                                    <view v-if="userStore.userinfo.email" class="info-item">
+                                        <uni-icons
+                                            type="mail-filled"
+                                            size="16"
+                                            :color="settingsStore.isDark ? '#767d8a' : '#999'"
+                                        ></uni-icons>
+                                        <text>{{ userStore.userinfo.email }}</text>
+                                    </view>
+                                </view>
                             </view>
                         </view>
-                    </view>
 
-                    <!-- 签到和能量 -->
-                    <view v-if="userStore.userinfo.id" class="checkin-section">
-                        <view class="energy-info">
-                            <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right">
-                                <view class="energy-hint">
-                                    <uni-icons
-                                        type="help"
-                                        size="20"
-                                        :color="settingsStore.isDark ? '#767d8a' : '#999'"
-                                    ></uni-icons>
-                                </view>
-                            </bubble-tooltip>
-                            <text class="energy-text">
-                                {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
-                            </text>
+                        <!-- 签到和能量 -->
+                        <view class="checkin-section">
+                            <view class="energy-info">
+                                <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right-start">
+                                    <view class="energy-hint">
+                                        <uni-icons
+                                            type="help"
+                                            size="20"
+                                            :color="settingsStore.isDark ? '#767d8a' : '#999'"
+                                        ></uni-icons>
+                                    </view>
+                                </bubble-tooltip>
+                                <text class="energy-text">
+                                    {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
+                                </text>
+                            </view>
+                            <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
+                                <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
+                                <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
+                            </view>
                         </view>
-                        <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
-                            <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
-                            <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
-                        </view>
-                    </view>
+                    </template>
 
                     <view v-else class="not-logged-in-content">
                         <view class="avatar">

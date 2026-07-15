@@ -38,6 +38,7 @@
         "downloading": "Downloading...",
         "downloadSuccess": "Downloaded successfully",
         "downloadFailed": "Download failed",
+        "swipeUpToView": "Swipe up for more",
         "earnEnergyFailed": "Failed to earn energy",
         "consumeEnergyFailed": "Failed to consume energy",
         "saveSuccessful": "Saved! Check your album",
@@ -269,7 +270,7 @@
             "avatarHint": "Tap to change your avatar",
             "currentEnergy": "Current Energy",
             "energyHintTitle": "Energy Guide",
-            "energyHintContent": "How to get energy:\n1. Check in daily: +1 energy\n2. Upload wallpapers: +2 energy per upload\n3. Refer friends: +5 energy per referral\n\nHow to use energy:\n1. Unlock premium wallpapers: 10 energy\n2. Download high-resolution images: 5 energy\n3. Participate in lucky draws: 3 energy per entry"
+            "energyHintContent": "How to earn energy:\n1. Daily check-in: +1 energy (once per day)\n2. Watch rewarded video ad: +3 energy\n3. Share image to friends: +1 energy (up to 3/day)\n4. Share to Moments: +3 energy (up to 3/day)\n5. Rate the app: +5 energy (one-time only)\n\nHow to use energy:\n• Download wallpaper: costs 1 energy, skip ad and download directly"
         },
         "settings": {
             "preferences": "Preferences",
@@ -301,7 +302,8 @@
         "downloading": "Downloading...",
         "loading": "Loading...",
         "adText": "Unlock This Wallpaper",
-        "adPrompt": "Watch An Ads"
+        "adPrompt": "Watch An Ads",
+        "adEnergyHint": "Sign in to earn energy by watching ads, daily check-ins, sharing, or rating. Use energy to download wallpapers directly without ads!"
     },
     "feedback": {
         "title": "Feedback",
@@ -527,14 +529,20 @@
         "purchaseSuccess": "Purchase successful"
     },
     "favorite": {
+        "superTitle": "Inspiration",
+        "desc": "A collection of your favorite visual moments.",
         "empty": "No favorite wallpapers yet",
         "goBrowse": "Browse Now"
     },
     "download": {
+        "superTitle": "Local Library",
+        "desc": "All your downloaded and saved files in one place.",
         "empty": "No downloaded wallpapers yet",
         "goBrowse": "Browse Now"
     },
     "rating": {
+        "superTitle": "My Journal",
+        "desc": "Your Ratings & Reviews",
         "empty": "No rated wallpapers yet",
         "goBrowse": "Browse Now",
         "untitled": "Untitled",

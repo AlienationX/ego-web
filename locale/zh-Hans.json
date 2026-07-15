@@ -38,6 +38,7 @@
         "downloading": "下载中...",
         "downloadSuccess": "下载成功",
         "downloadFailed": "下载失败",
+        "swipeUpToView": "上滑浏览更多",
         "earnEnergyFailed": "获取能量失败",
         "consumeEnergyFailed": "消耗能量失败",
         "saveSuccessful": "保存成功，请到相册查看",
@@ -269,7 +270,7 @@
             "avatarHint": "点击更换头像",
             "currentEnergy": "当前能量",
             "energyHintTitle": "能量指南",
-            "energyHintContent": "如何获取能量：\n1. 每日签到：+1能量\n2. 上传壁纸：每上传+2能量\n3. 邀请好友：每邀请+5能量\n\n如何使用能量：\n1. 解锁 premium 壁纸：10能量\n2. 下载高清图片：5能量\n3. 参与幸运抽奖：每次3能量"
+            "energyHintContent": "如何获取能量：\n1. 每日签到：+1能量（每天1次）\n2. 观看激励视频广告：+3能量\n3. 分享图片给好友：+1能量（每天3次）\n4. 分享到朋友圈：+3能量（每天3次）\n5. 给App评分：+5能量（仅限1次）\n\n如何使用能量：\n• 下载壁纸：每次消耗1点能量，可跳过广告直接下载"
         },
         "settings": {
             "preferences": "偏好设置",
@@ -301,7 +302,8 @@
         "downloading": "下载中...",
         "loading": "加载中...",
         "adText": "解锁该壁纸",
-        "adPrompt": "观看视频广告"
+        "adPrompt": "观看视频广告",
+        "adEnergyHint": "登录后观看广告、每日签到、分享或评分等，即可获取能量。拥有能量即可直接免广告下载壁纸哦！"
     },
     "feedback": {
         "title": "反馈意见",
@@ -527,14 +529,20 @@
         "purchaseSuccess": "购买成功"
     },
     "favorite": {
+        "superTitle": "灵感画廊",
+        "desc": "收藏那些触动你内心的视觉瞬间。",
         "empty": "还没有收藏任何壁纸",
         "goBrowse": "去浏览"
     },
     "download": {
+        "superTitle": "本地图库",
+        "desc": "你下载并保存的所有作品都在这里。",
         "empty": "还没有下载任何壁纸",
         "goBrowse": "去浏览"
     },
     "rating": {
+        "superTitle": "我的手账",
+        "desc": "你记录下来的每一条评价与足迹。",
         "empty": "还没有评分任何壁纸",
         "goBrowse": "去浏览",
         "untitled": "未命名",

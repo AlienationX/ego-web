@@ -1,21 +1,35 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- Custom Beautiful Header -->
-        <view class="custom-header" :style="{ paddingTop: statusBarHeight + 'px' }">
-            <view class="header-content">
-                <view class="back-btn" @click="goBack">
-                    <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
+        <!-- 极简工作室风格头部 (The Studio Library Header) -->
+        <view class="studio-header" :style="{ paddingTop: statusBarHeight + 'px' }">
+            <view class="nav-bar">
+                <view class="left-section">
+                    <view class="back-btn" @click="goBack">
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
+                    </view>
+                    <view class="header-titles">
+                        <text class="main-title">{{ $t('user.profile.myDownload') }}</text>
+                        <text class="sub-title">{{ $t('download.superTitle') }}</text>
+                    </view>
                 </view>
-                <view class="header-title-box">
-                    <text class="header-title">{{ $t('user.profile.myDownload') }}</text>
-                    <text class="header-subtitle">Downloads</text>
-                </view>
-                <view class="header-placeholder"></view> <!-- For flex centering -->
+                <!-- 这里可以预留批量选择按钮 -->
+                <!-- <view class="action-btn">
+                    <text>Select</text>
+                </view> -->
             </view>
         </view>
 
         <view class="content-wrapper">
-            <modern-pics-view ref="picsRef" :show-header="false" :tabs="tabs" api-type="actions" :show-delete="true" @remove="handleRemove"></modern-pics-view>
+            <modern-pics-view 
+                ref="picsRef" 
+                :show-header="false" 
+                :tabs="tabs" 
+                api-type="actions" 
+                :show-delete="true"
+                layoutMode="grid"
+                :showCardMeta="false"
+                @remove="handleRemove"
+            ></modern-pics-view>
         </view>
         
         <popup-navigation-dialog
@@ -84,68 +98,102 @@ const goBack = () => {
 <style lang="scss" scoped>
 .layout {
     background: var(--page-background);
-    min-height: 100vh;
+    height: 100vh;
     transition: background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
 
-    .custom-header {
+    .studio-header {
         position: relative;
         z-index: 100;
-        padding-bottom: 20rpx;
+        background: var(--page-background);
+        border-bottom: 1rpx solid var(--panel-border);
 
-        .header-content {
-            height: 88rpx;
+        .nav-bar {
+            height: 100rpx;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 30rpx;
-        }
-        
-        .header-title-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
 
-        .back-btn {
-            width: 64rpx;
-            height: 64rpx;
-            border-radius: 16rpx;
-            background: var(--page-background-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            
-            &:active {
-                transform: scale(0.92);
-                background: var(--panel-background-strong, #f1f5f9);
+            .left-section {
+                display: flex;
+                align-items: center;
+                gap: 20rpx;
             }
-        }
 
-        .header-title {
-            font-size: 36rpx;
-            font-weight: 800;
-            color: var(--text-primary, #1e293b);
-            letter-spacing: 1rpx;
-        }
-        
-        .header-subtitle {
-            font-size: 22rpx;
-            color: var(--text-tertiary, #94a3b8);
-            margin-top: 6rpx;
-            letter-spacing: 2rpx;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-        
-        .header-placeholder {
-            width: 84rpx;
+            .back-btn {
+                width: 60rpx;
+                height: 60rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                
+                &:active {
+                    opacity: 0.7;
+                }
+            }
+
+            .header-titles {
+                display: flex;
+                flex-direction: column;
+                
+                .main-title {
+                    font-size: 32rpx;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    letter-spacing: 0.5rpx;
+                }
+                
+                .sub-title {
+                    font-size: 20rpx;
+                    color: var(--text-tertiary);
+                    text-transform: uppercase;
+                    letter-spacing: 1rpx;
+                    margin-top: 4rpx;
+                }
+            }
+
+            .action-btn {
+                font-size: 26rpx;
+                font-weight: 600;
+                color: $wp-theme-color;
+                padding: 10rpx 20rpx;
+                background: rgba($wp-theme-color, 0.1);
+                border-radius: 40rpx;
+                
+                &:active {
+                    opacity: 0.7;
+                }
+            }
         }
     }
 
     .content-wrapper {
-        height: calc(100vh - 130rpx - env(safe-area-inset-top));
+        flex: 1;
+        height: 0;
         padding: 0;
+        
+        /* 强制覆盖 modern-pics-view 为 1:1 正方形相册风格 */
+        :deep(.gallery-wrapper) {
+            padding: 16rpx;
+        }
+
+        :deep(.grid-layout) {
+            gap: 16rpx !important;
+            grid-template-columns: repeat(3, 1fr) !important; /* 强制3列相册 */
+        }
+
+        :deep(.modern-card.grid-card) {
+            height: auto !important;
+            aspect-ratio: 1 / 1 !important;
+            border-radius: 8rpx !important; /* 减小圆角更像照片 */
+            box-shadow: none !important;
+            border: 1rpx solid rgba(0,0,0,0.05);
+            .theme-dark & {
+                border-color: rgba(255,255,255,0.05);
+            }
+        }
     }
 }
 </style>

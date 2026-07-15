@@ -1,7 +1,7 @@
 {
-    "name" : "Ego Wallpapers",
+    "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
-    "description" : "Explore wallpapers, and explore yourself.",
+    "description" : "探索壁纸，亦探索自我。",
     "versionName" : "1.4.4",
     "versionCode" : 144,
     "transformPx" : false,
@@ -80,7 +80,8 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "ks" : {}
+                    "ks" : {},
+                    "sigmob" : {}
                 },
                 "oauth" : {
                     "weixin" : {

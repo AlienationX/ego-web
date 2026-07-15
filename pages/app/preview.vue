@@ -86,8 +86,9 @@
                         <view class="date">{{ dateText }}</view>
 
                         <view v-if="showScrollHint" class="scrollHint">
-                            <uni-icons type="up" size="18" color="#ffffff"></uni-icons>
-                            <uni-icons type="up" size="18" color="#ffffff"></uni-icons>
+                            <uni-icons type="up" size="22" color="#ffffff" class="hint-icon"></uni-icons>
+                            <uni-icons type="up" size="22" color="#ffffff" class="hint-icon second"></uni-icons>
+                            <view class="hint-text">{{ t('common.swipeUpToView') }}</view>
                         </view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
@@ -1328,17 +1329,41 @@ onShareTimeline(() => {
         }
 
         .scrollHint {
-            bottom: calc(env(safe-area-inset-bottom) + 24rpx);
+            z-index: 100;
+            bottom: calc(env(safe-area-inset-bottom) + 20rpx);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 0;
-            animation: preview-bounce 1.2s ease-in-out infinite;
-            opacity: 0.9;
+            gap: 4rpx;
+            animation: preview-bounce 1.5s ease-in-out infinite;
+            opacity: 0.85;
+
+            .hint-text {
+                font-size: 22rpx;
+                color: #ffffff;
+                font-weight: 500;
+                letter-spacing: 2rpx;
+                text-shadow: 
+                    0 2rpx 8rpx rgba(0, 0, 0, 0.8),
+                    0 0 4rpx rgba(0, 0, 0, 0.8);
+                margin-top: 4rpx;
+            }
 
             :deep(.uni-icons) {
-                color: #fff !important;
+                color: #ffffff !important;
+                filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.8));
+                height: 24rpx;
+                line-height: 24rpx;
+            }
+
+            .hint-icon {
+                opacity: 0.9;
+                
+                // &.second {
+                //     opacity: 0.5;
+                //     margin-top: -8rpx;
+                // }
             }
         }
 

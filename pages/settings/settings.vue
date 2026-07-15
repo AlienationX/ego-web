@@ -1001,14 +1001,17 @@ function setPreviewType(type) {
 
 async function clearCache() {
     uni.showLoading({
-        title: t('settings.toast.clearing'),
+        title: t('user.settings.clearing'),
         mask: true,
     });
     try {
+        // 增加 1 秒延时展示转圈动画，避免瞬间完成太突兀
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         uni.clearStorageSync();
         uni.hideLoading();
         uni.showToast({
-            title: t('settings.toast.clearSuccess'),
+            title: t('user.settings.clearSuccess'),
             icon: 'none',
         });
     } catch (error) {
