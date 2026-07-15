@@ -35,12 +35,14 @@
         "submitting": "提交中...",
         "submitSuccess": "提交成功",
         "submitFailed": "提交失败",
+        "loading": "加载中...",
+        "needLogin": "请先登录",
         "downloading": "下载中...",
         "downloadSuccess": "下载成功",
         "downloadFailed": "下载失败",
-        "swipeUpToView": "上滑浏览更多",
         "earnEnergyFailed": "获取能量失败",
         "consumeEnergyFailed": "消耗能量失败",
+        "networkError": "网络异常，请稍后重试",
         "saveSuccessful": "保存成功，请到相册查看",
         "saveFailed": "保存失败，请重新点击下载",
         "authTip": "授权提示",
@@ -502,7 +504,30 @@
             "reasonCategory": "同分类",
             "reasonScore": "评分接近",
             "reasonStyle": "风格相近"
-        }
+        },
+        "clockStyle": "时钟样式",
+        "unlockStyleConfirm": "使用该高级样式将消耗 1 点能量，确定继续吗？",
+        "unlockStyleSuccess": "解锁成功",
+        "styleNames": {
+            "default": "默认样式",
+            "ios-classic": "iOS 经典",
+            "android-stock": "安卓原生",
+            "hyperos-magazine": "澎湃杂志",
+            "harmonyos": "鸿蒙圆润",
+            "modern-left": "现代侧边",
+            "elegant-serif": "优雅衬线",
+            "tech-digital": "科技数字"
+        },
+        "unlockBtnVip": "使用 1 能量临时解锁",
+        "vipStyleHint": "提示：能量解锁仅对当前预览页面有效，退出后失效。",
+        "applyStyle": "应用样式",
+        "currentStyle": "当前样式",
+        "applyStyleHint": "点击应用以切换到此样式",
+        "energyNotEnoughTitle": "能量不足",
+        "energyNotEnoughHint": "您的能量不足，是否观看一段广告获取更多能量？",
+        "watchAd": "看广告获取",
+        "earnEnergySuccess": "获取能量成功",
+        "swipeUpToView": "上滑浏览更多"
     },
     "membership": {
         "title": "会员购买",
@@ -832,6 +857,13 @@
         "phone": "电话",
         "region": "地区",
         "description": "描述",
+        "gender": "性别",
+        "birthday": "生日",
+        "genders": {
+            "secret": "保密",
+            "male": "男",
+            "female": "女"
+        },
         "saveChanges": "保存修改",
         "profileSaved": "资料已保存",
         "enterName": "请输入姓名",
@@ -841,8 +873,10 @@
             "email": "请输入邮箱",
             "phone": "请输入电话",
             "region": "请输入地区",
-            "description": "请输入描述"
-        }
+            "description": "请输入描述",
+            "birthday": "请选择生日"
+        },
+        "imageSelectFailed": "选择图片失败"
     },
     "helpCentre": {
         "title": "帮助中心",

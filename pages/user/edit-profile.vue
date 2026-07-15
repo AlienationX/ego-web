@@ -35,13 +35,29 @@
                         disabled
                     />
                 </view>
-                <view class="field field-last">
+                <view class="field">
                     <text class="field-label">{{ t('editProfile.phone') }}</text>
                     <input
                         v-model="form.phone_number"
                         class="field-input"
                         :placeholder="t('editProfile.placeholders.phone')"
                     />
+                </view>
+                <view class="field">
+                    <text class="field-label">{{ t('editProfile.gender') }}</text>
+                    <picker :range="genderRange" :value="form.gender" @change="onGenderChange" class="field-picker-wrapper">
+                        <view class="picker-value">
+                            {{ genderRange[form.gender] || t('editProfile.genders.secret') }}
+                        </view>
+                    </picker>
+                </view>
+                <view class="field field-last">
+                    <text class="field-label">{{ t('editProfile.birthday') }}</text>
+                    <picker mode="date" :value="form.birthday" @change="onBirthdayChange" class="field-picker-wrapper">
+                        <view class="picker-value" :class="{ 'placeholder': !form.birthday }">
+                            {{ form.birthday || t('editProfile.placeholders.birthday') }}
+                        </view>
+                    </picker>
                 </view>
             </view>
 
@@ -100,7 +116,23 @@ const form = reactive({
     phone_number: userStore.userinfo?.profile?.phone_number || '',
     region: userStore.userinfo?.profile?.region || '',
     description: userStore.userinfo?.profile?.description || '',
+    gender: userStore.userinfo?.profile?.gender ?? 0,
+    birthday: userStore.userinfo?.profile?.birthday || '',
 });
+
+const genderRange = computed(() => [
+    t('editProfile.genders.secret'),
+    t('editProfile.genders.male'),
+    t('editProfile.genders.female')
+]);
+
+const onGenderChange = (e) => {
+    form.gender = parseInt(e.detail.value, 10);
+};
+
+const onBirthdayChange = (e) => {
+    form.birthday = e.detail.value;
+};
 
 const showPermissionModal = () => {
     uni.showModal({
@@ -192,6 +224,8 @@ const handleSave = async () => {
             phone_number: form.phone_number.trim(),
             region: form.region.trim(),
             description: form.description.trim(),
+            gender: form.gender,
+            birthday: form.birthday || null,
         };
 
         let res;
@@ -379,6 +413,20 @@ const goBack = () => {
     font-weight: 500;
     color: var(--text-primary);
     background: transparent;
+}
+
+.field-picker-wrapper {
+    width: 100%;
+}
+
+.picker-value {
+    font-size: 30rpx;
+    font-weight: 500;
+    color: var(--text-primary);
+    
+    &.placeholder {
+        color: var(--text-tertiary);
+    }
 }
 
 .save-btn {

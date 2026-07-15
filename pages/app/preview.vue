@@ -71,6 +71,9 @@
                                     color="#fff"
                                 ></mdi-icon>
                             </view>
+                            <view class="icon-btn" @click="openClockStyle">
+                                <mdi-icon path="/static/icons/clock.svg" size="20px" color="#fff"></mdi-icon>
+                            </view>
                             <!-- #ifdef MP-WEIXIN -->
                             <button class="icon-btn" open-type="share" @click="handleShare">
                                 <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
@@ -82,13 +85,12 @@
                         </view>
 
                         <view v-if="!disableSwipe" class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
-                        <view class="time">{{ timeText }}</view>
-                        <view class="date">{{ dateText }}</view>
+                        <lock-screen-overlay :clockStyle="tempClockStyle || activeSessionClockStyle" />
 
                         <view v-if="showScrollHint" class="scrollHint">
                             <uni-icons type="up" size="22" color="#ffffff" class="hint-icon"></uni-icons>
                             <uni-icons type="up" size="22" color="#ffffff" class="hint-icon second"></uni-icons>
-                            <view class="hint-text">{{ t('common.swipeUpToView') }}</view>
+                            <view class="hint-text">{{ t('previewPage.swipeUpToView') }}</view>
                         </view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
@@ -111,6 +113,10 @@
 
                         <template v-else>
                             <view class="right-actions">
+                                <view class="action-item" @click="openClockStyle">
+                                    <mdi-icon path="/static/icons/clock.svg" size="36px" color="#ffffff"></mdi-icon>
+                                    <view class="action-text">{{ t('previewPage.clockStyle') }}</view>
+                                </view>
                                 <view class="action-item" @click="openInfo">
                                     <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
                                     <view class="action-text">{{ t('common.information') }}</view>
@@ -339,17 +345,103 @@
             @confirm="dialogState.onConfirm"
             @cancel="dialogState.onCancel"
         ></popup-navigation-dialog>
+
+        <!-- Clock Style Popup -->
+        <uni-popup ref="clockStylePopup" type="bottom" :safe-area="false" @change="onClockStylePopupChange">
+            <view class="clockStylePopup-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+                <view class="header">
+                    <text class="title">{{ t('previewPage.clockStyle') }}</text>
+                    <uni-icons type="closeempty" size="24" :color="settingsStore.isDark ? '#ffffff' : '#333333'" @click="closeClockStyle"></uni-icons>
+                </view>
+                <scroll-view scroll-x class="style-list" :show-scrollbar="false">
+                    <view class="style-scroll-content">
+                        <view 
+                            class="style-item" 
+                            v-for="item in clockStyles" 
+                            :key="item.value"
+                            :class="{ active: tempClockStyle === item.value }"
+                            @click="selectClockStyle(item)"
+                        >
+                            <view class="style-preview" :class="item.value">
+                                <view v-if="item.isVip" class="vip-tag">VIP</view>
+                                <!-- Mini clock visuals -->
+                                <view class="mini-clock-layout">
+                                    <template v-if="item.value === 'default'">
+                                        <view class="mc-time default-time">09:41</view>
+                                        <view class="mc-date default-date">10/24</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'ios-classic'">
+                                        <view class="mc-date">10/24</view>
+                                        <view class="mc-time ios-time">09:41</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'android-stock'">
+                                        <view class="mc-time android-time">09:41</view>
+                                        <view class="mc-date android-date">Tue, Oct 24</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'hyperos-magazine'">
+                                        <view class="mc-date hyper-date">OCT 24</view>
+                                        <view class="mc-time hyper-time">
+                                            <text>09</text>
+                                            <text style="color: rgba(255,255,255,0.6); margin-left: 20rpx;">41</text>
+                                        </view>
+                                    </template>
+                                    <template v-else-if="item.value === 'harmonyos'">
+                                        <view class="mc-date harmony-date">10/24</view>
+                                        <view class="mc-time harmony-time">09:41</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'modern-left'">
+                                        <view class="mc-time modern-time">
+                                            <text>09</text>
+                                            <text>41</text>
+                                        </view>
+                                        <view class="mc-date modern-date">10/24</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'elegant-serif'">
+                                        <view class="mc-time elegant-time">09:41</view>
+                                        <view class="mc-date elegant-date">10/24</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'tech-digital'">
+                                        <view class="mc-time tech-time">09:41</view>
+                                        <view class="mc-date tech-date">OCT 24</view>
+                                    </template>
+                                </view>
+                                <text class="style-name">{{ t('previewPage.styleNames.' + item.value) }}</text>
+                            </view>
+                        </view>
+                    </view>
+                </scroll-view>
+                
+                <view class="action-bar">
+                    <!-- 选中的是当前已激活的样式 -->
+                    <template v-if="!tempClockStyle || tempClockStyle === activeSessionClockStyle">
+                        <view class="free-hint">{{ t('previewPage.currentStyle') }}</view>
+                        <button class="apply-btn apply-btn--disabled" disabled>{{ t('previewPage.applyStyle') }}</button>
+                    </template>
+                    <!-- 选中了新样式，且是 VIP 样式 -->
+                    <template v-else-if="selectedClockStyleItem?.isVip && !userStore.isVip">
+                        <view class="vip-hint">{{ t('previewPage.vipStyleHint') }}</view>
+                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.unlockBtnVip') }}</button>
+                    </template>
+                    <!-- 选中了新样式，免费或已是 VIP -->
+                    <template v-else>
+                        <view class="free-hint">{{ t('previewPage.applyStyleHint') }}</view>
+                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.applyStyle') }}</button>
+                    </template>
+                </view>
+            </view>
+        </uni-popup>
     </view>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, reactive, onMounted, getCurrentInstance } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
-import { useAdIntersititial } from '@/hooks/useAd.js';
+
+import { VIDEO_REWARD_ENERGY } from '@/common/config.js';
 import { downloadPic } from '@/common/core.js';
 import {
     apiPostIncrementViews,
@@ -361,17 +453,24 @@ import {
 } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
-
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
+import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
+import lockScreenOverlay from '@/components/lock-screen-overlay/lock-screen-overlay.vue';
 import { formatPreviewDate } from '@/utils/common.js';
-const userStore = useUserStore();
+
+const { proxy } = getCurrentInstance();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
+const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
+const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
 
+// UI state
+const hideUI = ref(false);
 // 通用导航对话框控制
 const navDialog = ref(null);
-const dialogState = ref({
+const dialogState = reactive({
     title: '',
     description: '',
     confirmText: '',
@@ -386,21 +485,136 @@ const dialogState = ref({
  * @param {Object} config 配置项 { title, content, confirmText, cancelText, onConfirm, onCancel }
  */
 const showNavDialog = (config) => {
-    dialogState.value = {
-        title: config.title || t('common.tip'),
-        description: config.content || '',
-        confirmText: config.confirmText || t('common.confirm'),
-        cancelText: config.cancelText || t('common.cancel'),
-        showCancel: config.showCancel !== false,
-        onConfirm: () => {
-            if (config.onConfirm) config.onConfirm();
-        },
-        onCancel: () => {
-            if (config.onCancel) config.onCancel();
-        },
+    dialogState.title = config.title || t('common.tip');
+    dialogState.description = config.content || '';
+    dialogState.confirmText = config.confirmText || t('common.confirm');
+    dialogState.cancelText = config.cancelText || t('common.cancel');
+    dialogState.showCancel = config.showCancel !== false;
+    dialogState.onConfirm = () => {
+        if (config.onConfirm) config.onConfirm();
+        navDialog.value?.close();
+    };
+    dialogState.onCancel = () => {
+        if (config.onCancel) config.onCancel();
+        navDialog.value?.close();
     };
     navDialog.value?.open();
 };
+
+const clockStylePopup = ref(null);
+const activeSessionClockStyle = ref('ios-classic');
+
+onMounted(() => {
+    let savedStyle = settingsStore.options.clockStyle || 'ios-classic';
+    const savedItem = clockStyles.value.find(s => s.value === savedStyle);
+    // 如果保存的是 VIP 样式，但当前用户不是 VIP，则回退为普通样式
+    if (savedItem?.isVip && !userStore.isVip) {
+        savedStyle = 'ios-classic';
+        settingsStore.options.clockStyle = savedStyle; // 自动修复本地错误状态
+    }
+    activeSessionClockStyle.value = savedStyle;
+});
+
+const currentClockStyle = computed(() => activeSessionClockStyle.value);
+const tempClockStyle = ref('');
+const selectedClockStyleItem = computed(() => clockStyles.value.find(s => s.value === tempClockStyle.value));
+
+const clockStyles = computed(() => [
+    { value: 'default', name: 'Default', isVip: false },
+    { value: 'ios-classic', name: 'iOS', isVip: false },
+    { value: 'android-stock', name: 'Android', isVip: false },
+    { value: 'hyperos-magazine', name: 'HyperOS', isVip: true },
+    { value: 'harmonyos', name: 'HarmonyOS', isVip: true },
+    { value: 'modern-left', name: 'Modern Left', isVip: true },
+    { value: 'elegant-serif', name: 'Elegant Serif', isVip: true },
+    { value: 'tech-digital', name: 'Tech Digital', isVip: true }
+]);
+const openClockStyle = () => {
+    tempClockStyle.value = currentClockStyle.value;
+    clockStylePopup.value?.open();
+};
+const closeClockStyle = () => {
+    clockStylePopup.value?.close();
+};
+
+const onClockStylePopupChange = (e) => {
+    // When popup closes, reset preview to saved style if user didn't apply
+    if (!e.show) {
+        tempClockStyle.value = '';
+    }
+};
+
+const selectClockStyle = (item) => {
+    tempClockStyle.value = item.value;
+};
+
+const applyTempClockStyle = async () => {
+    const item = selectedClockStyleItem.value;
+    if (!item) return;
+
+    if (!userStore.isLoggedIn) {
+        uni.showToast({ title: t('common.needLogin'), icon: 'none' });
+        setTimeout(() => {
+            uni.navigateTo({ url: '/pages/user/login' });
+        }, 1000);
+        return;
+    }
+
+    if (userStore.isVip || !item.isVip) {
+        settingsStore.options.clockStyle = item.value;
+        activeSessionClockStyle.value = item.value;
+        uni.showToast({ title: 'Applied', icon: 'none' });
+        closeClockStyle();
+        return;
+    }
+
+    // Need energy, check if enough
+    if (userStore.energy < 1) {
+        uni.showModal({
+            title: t('previewPage.energyNotEnoughTitle'),
+            content: t('previewPage.energyNotEnoughHint'),
+            confirmText: t('previewPage.watchAd'),
+            cancelText: t('common.cancel'),
+            success: (res) => {
+                if (res.confirm) {
+                    showRewardedVideoAd(null, {
+                        onSuccess: async () => {
+                            try {
+                                const adRes = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
+                                if (adRes.data?.energy !== undefined) {
+                                    userStore.updateEnergy(adRes.data.energy);
+                                    uni.showToast({ title: t('common.success'), icon: 'none' });
+                                }
+                            } catch (e) {
+                                uni.showToast({ title: t('common.networkError'), icon: 'none' });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        return;
+    }
+
+    // Need energy, do it directly (Temporary session unlock)
+    uni.showLoading({ title: t('common.loading') });
+    try {
+        const res = await userStore.consumeEnergy(0, 'consume_preview_style');
+        if (res.data?.error) {
+            uni.showToast({ title: res.data.error, icon: 'none' });
+        } else {
+            // 仅在当前会话生效，不保存到 settingsStore
+            activeSessionClockStyle.value = item.value;
+            uni.showToast({ title: t('previewPage.unlockStyleSuccess'), icon: 'none' });
+            closeClockStyle();
+        }
+    } catch (e) {
+        uni.showToast({ title: t('common.networkError'), icon: 'none' });
+    } finally {
+        uni.hideLoading();
+    }
+};
+
 const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 const HAS_SEEN_HINT_KEY = 'hasSeenHint';
 
@@ -948,8 +1162,6 @@ const submitScore = async () => {
 // 点击下载弹窗观看广告
 const adPopup = ref(null);
 
-const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
-
 const clickDownload = async () => {
     // #ifdef WEB
     showNavDialog({
@@ -992,7 +1204,6 @@ const clickDownload = async () => {
         // adPopup.value.open();
     } else {
         // 展示插屏广告，关闭后再下载图片（不再出现广告挡住下载提示的问题）
-        createInterstitialAd();
         showInterstitialAd(currentInfo.value.picurl, {
             onSuccess: (picurl) => {
                 // 广告关闭后执行下载
@@ -1005,7 +1216,6 @@ const clickDownload = async () => {
                 incrementDownloads(currentInfo.value.id);
             },
         });
-        destroyInterstitialAd();
     }
     // #endif
 };
@@ -1916,6 +2126,227 @@ onShareTimeline(() => {
     }
     50% {
         transform: translateY(12rpx);
+    }
+}
+.clockStylePopup-container {
+    background: #ffffff;
+    border-radius: 32rpx 32rpx 0 0;
+    padding: 40rpx;
+    
+    &.theme-dark {
+        background: #1a1a1a;
+        .header .title { color: #ffffff; }
+        // uni-icons closeempty 按钮需要 filter 让其变白
+        .header .uni-icons { color: #ffffff !important; filter: brightness(10); }
+        .style-item .style-preview { background: #2a2a2a; border-color: #333; }
+        .style-item.active .style-preview { border-color: #007aff; }
+        .style-item .style-name { color: #cccccc; }
+        .style-item.active .style-name { color: #ffffff; }
+        // minimalist-art 在 dark 下保持更深背景以区分
+        .style-item .style-preview.minimalist-art {
+            background: #0e0e12;
+            .mini-clock-layout { color: rgba(255,255,255,0.85); }
+            .style-name { color: rgba(255,255,255,0.6); }
+        }
+    }
+    
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40rpx;
+        
+        .title {
+            font-size: 36rpx;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+    }
+    
+    .style-list {
+        width: 100%;
+        white-space: nowrap;
+        padding-bottom: 20rpx;
+        padding-top: 10rpx;
+        
+        .style-scroll-content {
+            display: inline-flex;
+            gap: 24rpx;
+            padding: 10rpx;
+        }
+        
+        .style-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 180rpx;
+            
+            .style-preview {
+                width: 100%;
+                height: 260rpx;
+                background: #f0f2f5;
+                border: 4rpx solid transparent;
+                border-radius: 24rpx;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-end;
+                position: relative;
+                transition: all 0.3s ease;
+                overflow: hidden;
+
+                .vip-tag {
+                    position: absolute;
+                    top: 12rpx;
+                    right: 12rpx;
+                    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+                    color: #e91e63;
+                    font-size: 18rpx;
+                    font-weight: 800;
+                    padding: 2rpx 10rpx;
+                    border-radius: 12rpx;
+                    z-index: 2;
+                }
+
+                .mini-clock-layout {
+                    position: absolute;
+                    top: 40rpx;
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    color: #333;
+                    text-shadow: none;
+
+                    .mc-date { font-size: 18rpx; }
+                    .mc-time { font-size: 48rpx; font-weight: bold; line-height: 1; }
+
+                    .default-time { font-weight: 400; font-size: 56rpx; line-height: 1em; letter-spacing: 2rpx; margin-top: 6rpx; }
+                    .default-date { font-weight: 500; font-size: 16rpx; letter-spacing: 1rpx; margin-top: 10rpx; opacity: 0.9; }
+
+                    .ios-time { font-weight: 800; font-size: 52rpx; margin-top: 4rpx; }
+                    .android-time { font-weight: 300; font-size: 46rpx; }
+                    .android-date { opacity: 0.9; margin-top: 4rpx; font-size: 16rpx;}
+                    
+                    .hyper-date { font-weight: 800; letter-spacing: 2rpx; font-size: 16rpx; margin-bottom: -4rpx; }
+                    .hyper-time { display: flex; flex-direction: column; font-weight: 900; line-height: 0.85; font-size: 54rpx; margin-left: 20rpx;}
+                    
+                    .harmony-date { background: rgba(0,0,0,0.05); padding: 2rpx 12rpx; border-radius: 20rpx; margin-top: 8rpx; }
+                    .harmony-time { font-weight: 500; font-size: 50rpx; }
+
+                    .modern-time { display: flex; flex-direction: column; font-weight: 600; font-size: 48rpx; line-height: 0.85; align-items: flex-start; left: 24rpx; position: absolute; margin-top: 10rpx;}
+                    .modern-date { writing-mode: vertical-rl; position: absolute; left: 78rpx; top: 12rpx; font-size: 14rpx; font-weight: 600; letter-spacing: 2rpx; }
+                    
+                    .elegant-time { font-family: serif; font-weight: 500; font-size: 52rpx; margin-top: 10rpx; }
+                    .elegant-date { font-family: serif; font-style: italic; font-size: 16rpx; margin-top: 4rpx; }
+                    
+                    .tech-time { font-family: monospace; font-weight: 300; font-size: 46rpx; letter-spacing: -2rpx; margin-top: 10rpx;}
+                    .tech-date { font-family: monospace; font-size: 14rpx; letter-spacing: 2rpx; margin-top: 6rpx; background: rgba(128,128,128,0.1); padding: 2rpx 6rpx; border: 1px solid rgba(128,128,128,0.2); }
+                }
+                
+                .style-name {
+                    font-size: 22rpx;
+                    color: #666;
+                    font-weight: 500;
+                    white-space: normal;
+                    text-align: center;
+                    padding: 12rpx 10rpx;
+                    width: 100%;
+                    background: transparent;
+                }
+            }
+            
+            &.active .style-preview {
+                border-color: #007aff;
+                background: rgba(0, 122, 255, 0.05);
+                transform: scale(1.02);
+                box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.15);
+                
+                &.minimalist-art {
+                    background: #1e2535;
+                    .mini-clock-layout { color: rgba(255,255,255,0.88); }
+                    .style-name { color: rgba(255,255,255,0.7); }
+                }
+            }
+        }
+    }
+
+    .action-bar {
+        margin-top: 30rpx;
+        padding-top: 20rpx;
+        border-top: 1rpx solid #eee;
+
+        .vip-hint {
+            font-size: 20rpx;
+            color: #999;
+            text-align: center;
+            margin-bottom: 16rpx;
+        }
+
+        .apply-btn {
+            background: #007aff;
+            color: #fff;
+            border-radius: 40rpx;
+            font-size: 30rpx;
+            font-weight: 600;
+            border: none;
+            height: 80rpx;
+            line-height: 80rpx;
+            
+            &:active {
+                opacity: 0.8;
+            }
+        }
+    }
+    
+    .is-hidden {
+        visibility: hidden;
+    }
+    
+    .free-hint {
+        font-size: 20rpx;
+        color: #999;
+        text-align: center;
+        margin-bottom: 16rpx;
+    }
+    
+    .apply-btn--disabled {
+        background: #e0e0e0 !important;
+        color: #aaa !important;
+        cursor: not-allowed;
+    }
+}
+.theme-dark .clockStylePopup-container {
+    .style-item {
+        .style-preview {
+            background: #2a2b2e;
+            .mini-clock-layout {
+                color: #fff;
+                .harmony-date { background: rgba(255,255,255,0.1); }
+            }
+            .style-name {
+                color: #aaa;
+            }
+        }
+        .style-preview.minimalist-art {
+            background: #0e0e12 !important;
+            .mini-clock-layout { color: rgba(255,255,255,0.85) !important; }
+            .style-name { color: rgba(255,255,255,0.6) !important; }
+        }
+        &.active .style-preview {
+            background: rgba(0, 122, 255, 0.15);
+        }
+        &.active .style-preview.minimalist-art {
+            background: #1a2040 !important;
+        }
+    }
+    .action-bar {
+        border-color: #333;
+        .free-hint, .vip-hint { color: #888; }
+        .apply-btn--disabled {
+            background: #333 !important;
+            color: #666 !important;
+        }
     }
 }
 </style>

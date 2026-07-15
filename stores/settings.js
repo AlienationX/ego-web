@@ -14,6 +14,7 @@ export const useSettingsStore = defineStore(
             theme: 'auto',
             language: 'auto',
             previewType: 'classic', // classic / floating
+            clockStyle: 'ios-classic', // ios-classic / android-stock / hyperos-magazine / harmonyos / minimalist-art
 
             // vuetify项目的配置，后续修改
             navBarFlat: false, // 导航栏扁平效果

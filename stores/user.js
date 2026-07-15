@@ -97,8 +97,8 @@ export const useUserStore = defineStore(
         };
 
         // 扣除能量（调用后端接口）
-        const consumeEnergy = async (wallId) => {
-            const res = await apiPostConsumeEnergy({ wall_id: wallId });
+        const consumeEnergy = async (wallId, actionType = 'consume_download') => {
+            const res = await apiPostConsumeEnergy({ wall_id: wallId, action_type: actionType });
             if (res.data?.energy !== undefined) {
                 updateEnergy(res.data.energy);
             }
