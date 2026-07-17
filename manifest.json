@@ -2,8 +2,8 @@
     "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
     "description" : "探索壁纸，亦探索自我。",
-    "versionName" : "1.4.4",
-    "versionCode" : 144,
+    "versionName" : "1.4.5",
+    "versionCode" : 145,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -29,7 +29,9 @@
         /* 模块配置 */
         "modules" : {
             "OAuth" : {},
-            "Camera" : {}
+            "Camera" : {},
+            "Share" : {},
+            "Payment" : {}
         },
         /* 应用发布信息 */
         "distribute" : {
@@ -80,8 +82,7 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "ks" : {},
-                    "sigmob" : {}
+                    "ks" : {}
                 },
                 "oauth" : {
                     "weixin" : {
@@ -89,7 +90,23 @@
                         "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
                     }
                 },
-                "push" : {}
+                "push" : {},
+                "share" : {
+                    "weixin" : {
+                        "appid" : "wx74c392f8525b9268",
+                        "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
+                    }
+                },
+                "payment" : {
+                    "alipay" : {
+                        "__platform__" : [ "android" ]
+                    },
+                    "weixin" : {
+                        "__platform__" : [ "android" ],
+                        "appid" : "wx74c392f8525b9268",
+                        "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
+                    }
+                }
             },
             "icons" : {
                 "android" : {

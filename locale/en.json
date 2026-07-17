@@ -551,7 +551,12 @@
         "confirmPurchase": "Confirm Purchase",
         "confirmContent": "Confirm purchase {title} for ¥{price}?",
         "processing": "Processing...",
-        "purchaseSuccess": "Purchase successful"
+        "purchaseSuccess": "Purchase successful",
+        "paymentMethod": "Payment Method",
+        "alipay": "Alipay",
+        "wechat": "WeChat Pay",
+        "paypal": "PayPal",
+        "confirmPaymentInfo": "Activating {title} for ¥{price} via {method}"
     },
     "favorite": {
         "superTitle": "Inspiration",

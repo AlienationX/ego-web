@@ -88,7 +88,7 @@
             class="home-channel home-channel--latest"
             :style="channelBottomStyle"
         >
-            <timeline-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></timeline-page>
+            <timeline-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></timeline-tab>
         </view>
 
         <view
@@ -97,7 +97,7 @@
             class="home-channel home-channel--hot"
             :style="channelBottomStyle"
         >
-            <top-n-page embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-n-page>
+            <top-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-tab>
         </view>
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
@@ -113,11 +113,9 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { updateTabBarText } from '@/utils/i18n.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/layout.js';
-import TimelinePage from '@/pages/app/timeline.vue';
-import TopNPage from '@/pages/app/topN.vue';
+
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
-
 
 const homeTabList = computed(() => [
     {

@@ -551,7 +551,12 @@
         "confirmPurchase": "确认购买",
         "confirmContent": "确认购买 {title}，价格 ¥{price}？",
         "processing": "处理中...",
-        "purchaseSuccess": "购买成功"
+        "purchaseSuccess": "购买成功",
+        "paymentMethod": "支付方式",
+        "alipay": "支付宝",
+        "wechat": "微信支付",
+        "paypal": "PayPal",
+        "confirmPaymentInfo": "正在为您开通 {title}，需通过 {method} 支付 ¥{price}"
     },
     "favorite": {
         "superTitle": "灵感画廊",

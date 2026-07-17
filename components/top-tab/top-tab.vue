@@ -1,0 +1,968 @@
+<template>
+    <view class="top10-page" :class="[settingsStore.isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
+        <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
+
+        <scroll-view scroll-y class="top10-scroll" :style="{ height: scrollHeight }" @scroll="handleScroll">
+            <!-- Spacer for embedded titlebar -->
+            <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
+            <view class="top10-wrap">
+                <view v-if="!embedded" class="top10-header">
+                    <view class="top10-header__left">
+                        <view class="top10-header__back" @click="goBack">
+                            <uni-icons type="back" size="20" :color="settingsStore.isDark ? '#f8fafc' : '#374151'"></uni-icons>
+                        </view>
+                        <view class="top10-header__title">{{ $t('top10.title') }}</view>
+                    </view>
+                </view>
+
+                <view class="metric-switch">
+                    <view
+                        class="metric-switch__item"
+                        :class="{ 'is-active': activeMetric === 'views' }"
+                        @click="switchMetric('views')"
+                    >
+                        {{ $t('top10.tabs.views') }}
+                    </view>
+                    <view
+                        class="metric-switch__item"
+                        :class="{ 'is-active': activeMetric === 'downloads' }"
+                        @click="switchMetric('downloads')"
+                    >
+                        {{ $t('top10.tabs.downloads') }}
+                    </view>
+                </view>
+
+                <view class="top10-intro">
+                    <view class="top10-intro__badge">{{ metricBadge }}</view>
+                    <view class="top10-intro__desc">{{ metricDescription }}</view>
+                </view>
+
+                <!-- 骨架屏 -->
+                <view v-if="loading" class="skeleton-wrap">
+                    <!-- 大卡骨架 -->
+                    <view class="skeleton-hero-first"></view>
+                    <!-- 两小卡骨架 -->
+                    <view class="skeleton-hero-grid">
+                        <view class="skeleton-hero-secondary"></view>
+                        <view class="skeleton-hero-secondary"></view>
+                    </view>
+                    <!-- 列表项骨架 -->
+                    <view class="skeleton-rank-list">
+                        <view v-for="i in 4" :key="i" class="skeleton-rank-item">
+                            <view class="skeleton-rank-thumb"></view>
+                            <view class="skeleton-rank-body">
+                                <view class="skeleton-rank-title"></view>
+                                <view class="skeleton-rank-title skeleton-rank-title--short"></view>
+                                <view class="skeleton-rank-meta"></view>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+
+                <template v-else-if="rankedList.length">
+                    <view class="hero-section">
+                        <view class="hero-card hero-card--first" @click="goPreview(rankedList[0].id)">
+                            <image
+                                class="hero-card__image"
+                                :src="rankedList[0].mediumPicurl || rankedList[0].picurl"
+                                mode="aspectFill"
+                            ></image>
+                            <view class="hero-card__overlay"></view>
+                            <view class="hero-card__rank hero-card__rank--first">1</view>
+                            <view class="hero-card__content">
+                                <view class="hero-card__tag">{{ $t('top10.heroTag') }}</view>
+                                <view class="hero-card__title">{{
+                                    getLocalizedItem(rankedList[0]).description ||
+                                    getLocalizedItem(rankedList[0]).classify_name ||
+                                    rankedList[0].id
+                                }}</view>
+                                <view class="hero-card__meta">
+                                    <view class="hero-card__meta-item">
+                                        <mdi-icon path="/static/icons/fire.svg" size="14" color="#cbd5e1"></mdi-icon>
+                                        <text>{{ formatCount(rankedList[0].views) }}</text>
+                                    </view>
+                                    <view class="hero-card__meta-item">
+                                        <mdi-icon path="/static/icons/download.svg" size="14" color="#cbd5e1"></mdi-icon>
+                                        <text>{{ formatCount(rankedList[0].downloads) }}</text>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+
+                        <view class="hero-grid" v-if="rankedList.length > 1">
+                            <view
+                                v-for="(item, idx) in rankedList.slice(1, 3)"
+                                :key="item.id"
+                                class="hero-card hero-card--secondary"
+                                @click="goPreview(item.id)"
+                            >
+                                <image
+                                    class="hero-card__image"
+                                    :src="item.mediumPicurl || item.smallPicurl || item.picurl"
+                                    mode="aspectFill"
+                                ></image>
+                                <view class="hero-card__overlay hero-card__overlay--soft"></view>
+                                <view class="hero-card__rank" :class="{ 'hero-card__rank--second': idx === 0 }">{{
+                                    idx + 2
+                                }}</view>
+                                <view class="hero-card__content hero-card__content--compact">
+                                    <view class="hero-card__title hero-card__title--compact">
+                                        {{
+                                            getLocalizedItem(item).description ||
+                                            getLocalizedItem(item).classify_name ||
+                                            item.id
+                                        }}
+                                    </view>
+                                    <view class="hero-card__sub">{{ formatMetric(item) }}</view>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+
+                    <view class="rank-section" v-if="rankedList.length > 3">
+                        <view class="rank-section__title">
+                            {{ $t('top10.listTitle') }}
+                            <view class="rank-section__line"></view>
+                        </view>
+
+                        <view class="rank-list">
+                            <view
+                                v-for="(item, idx) in rankedList.slice(3)"
+                                :key="item.id"
+                                class="rank-item"
+                                @click="goPreview(item.id)"
+                            >
+                                <view class="rank-item__media">
+                                    <image
+                                        class="rank-item__thumb"
+                                        :src="item.smallPicurl || item.picurl"
+                                        mode="aspectFill"
+                                    ></image>
+                                    <view class="rank-item__index">{{ idx + 4 }}</view>
+                                </view>
+                                <view class="rank-item__body">
+                                    <view class="rank-item__title">{{
+                                        getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id
+                                    }}</view>
+                                    <view class="rank-item__meta">
+                                        <text class="rank-item__category">{{
+                                            getLocalizedItem(item).classify_name || $t('top10.wallpaper')
+                                        }}</text>
+                                        <text class="rank-item__metric">{{ formatMetric(item) }}</text>
+                                    </view>
+                                </view>
+                                <view class="rank-item__action">
+                                    <uni-icons type="right" size="16" color="#9fb4d1"></uni-icons>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                </template>
+
+                <view v-else class="top10-empty">
+                    <view class="top10-empty__title">{{ $t('top10.empty') }}</view>
+                    <view class="top10-empty__desc">{{ $t('top10.emptyDesc') }}</view>
+                </view>
+            </view>
+        </scroll-view>
+
+        <custom-ad-banner v-if="!embedded" @height-change="onAdHeightChange"></custom-ad-banner>
+    </view>
+</template>
+
+<script setup>
+import { computed, onMounted, ref } from 'vue';
+import { apiGetTopWall } from '@/api/wallpaper.js';
+import { handlePicUrl } from '@/utils/common.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
+import { useI18n } from 'vue-i18n';
+import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
+
+const { t, locale } = useI18n();
+const settingsStore = useSettingsStore();
+const isEn = computed(() => locale.value === 'en');
+
+const getLocalizedItem = (item) => {
+    if (!item) return item;
+    return {
+        ...item,
+        description: isEn.value && item.description_en ? item.description_en : item.description,
+        classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
+    };
+};
+
+const props = defineProps({
+    embedded: {
+        type: Boolean,
+        default: false,
+    },
+    navBarHeight: {
+        type: Number,
+        default: 0,
+    },
+});
+
+const emit = defineEmits(['scroll']);
+
+const handleScroll = (e) => {
+    emit('scroll', { scrollTop: e.detail.scrollTop });
+};
+
+const activeMetric = ref('views');
+const loading = ref(false);
+const rankedList = ref([]);
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+const scrollHeight = computed(() =>
+    props.embedded ? '100vh' : `calc(100vh - ${statusBarHeight.value}px - ${adHeight.value}px)`,
+);
+
+const cache = {
+    views: null,
+    downloads: null,
+};
+
+const metricBadge = computed(() => (activeMetric.value === 'views' ? t('top10.badgeViews') : t('top10.badgeDownloads')));
+const metricDescription = computed(() => (activeMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads')));
+
+const getTopList = async () => {
+    const metric = activeMetric.value;
+
+    if (cache[metric]) {
+        rankedList.value = cache[metric];
+        return;
+    }
+
+    loading.value = true;
+    try {
+        const res = await apiGetTopWall({
+            type: metric === 'views' ? 'views' : 'downloads',
+            n: 20,
+        });
+        const list = (res.data || [])
+            .map((item) => handlePicUrl(item))
+            .sort((a, b) => {
+                const aValue = Number(metric === 'views' ? a.views : a.downloads) || 0;
+                const bValue = Number(metric === 'views' ? b.views : b.downloads) || 0;
+                return bValue - aValue;
+            })
+            .slice(0, 20);
+
+        cache[metric] = list;
+        rankedList.value = list;
+    } catch (error) {
+        rankedList.value = [];
+    } finally {
+        loading.value = false;
+    }
+};
+
+const switchMetric = async (metric) => {
+    if (activeMetric.value === metric) return;
+    activeMetric.value = metric;
+    await getTopList();
+};
+
+const formatCount = (value) => {
+    const num = Number(value) || 0;
+
+    if (typeof Intl !== 'undefined' && Intl?.NumberFormat) {
+        return new Intl.NumberFormat(locale.value === 'zh-Hans' ? 'zh-CN' : 'en-US', {
+            notation: 'compact',
+            maximumFractionDigits: 1,
+        }).format(num);
+    }
+
+    const isZh = locale.value === 'zh-Hans';
+    if (isZh) {
+        if (num >= 100000000) return `${(num / 100000000).toFixed(num >= 1000000000 ? 0 : 1).replace(/\.0$/, '')}亿`;
+        if (num >= 10000) return `${(num / 10000).toFixed(num >= 100000 ? 0 : 1).replace(/\.0$/, '')}万`;
+        return `${num}`;
+    }
+
+    if (num >= 1000000000) return `${(num / 1000000000).toFixed(1).replace(/\.0$/, '')}B`;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1).replace(/\.0$/, '')}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+    return `${num}`;
+};
+
+const formatMetric = (item) => {
+    const count = activeMetric.value === 'views' ? item.views : item.downloads;
+    return `${formatCount(count)} ${activeMetric.value === 'views' ? t('top10.metricViews') : t('top10.metricDownloads')}`;
+};
+
+const goPreview = (id) => {
+    const appStore = useAppStore();
+    appStore.wallList = rankedList.value;
+    uni.navigateTo({
+        url: `/pages/app/preview?id=${id}`,
+    });
+};
+
+const goBack = () => {
+    uni.navigateBack({
+        fail: () => {
+            uni.switchTab({ url: '/pages/app/index' });
+        },
+    });
+};
+
+onMounted(() => {
+    if (!rankedList.value.length) {
+        getTopList();
+    }
+});
+</script>
+
+<style lang="scss" scoped>
+.top10-page {
+    min-height: 100vh;
+    background: var(--page-background);
+}
+
+.top10-page.is-embedded {
+    min-height: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.top10-status {
+    width: 100%;
+}
+
+.top10-scroll {
+    width: 100%;
+}
+
+.top10-wrap {
+    max-width: 860rpx;
+    margin: 0 auto;
+    padding: 20rpx;
+}
+
+.top10-header {
+    margin-bottom: 26rpx;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 18rpx;
+}
+
+.top10-header__left {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    min-width: 0;
+}
+
+.top10-header__back {
+    width: 68rpx;
+    height: 68rpx;
+    border-radius: 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1rpx solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20rpx);
+    box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+
+    &:active {
+        transform: scale(0.9);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .theme-light & {
+        background: #ffffff;
+        border: 1rpx solid rgba(17, 24, 39, 0.08);
+        box-shadow: 0 4rpx 14rpx rgba(15, 23, 42, 0.06);
+        backdrop-filter: none;
+
+        &:active {
+            background: #f1f5f9;
+        }
+    }
+}
+
+.top10-header__title {
+    font-size: 40rpx;
+    font-weight: 800;
+    color: #60a5fa;
+    line-height: 1.2;
+
+    .theme-light & {
+        color: #2563eb;
+    }
+}
+
+.metric-switch {
+    margin: 0 auto 24rpx;
+    padding: 8rpx;
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 10rpx;
+    border-radius: 999rpx;
+    background: rgba(17, 25, 34, 0.9);
+    border: 1rpx solid rgba(148, 163, 184, 0.14);
+    box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.04);
+
+    .theme-light & {
+        background: #e8ecf2;
+        border: 1rpx solid rgba(17, 24, 39, 0.06);
+        box-shadow: none;
+    }
+}
+
+.metric-switch__item {
+    min-width: 220rpx;
+    height: 74rpx;
+    padding: 0 26rpx;
+    border-radius: 999rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 24rpx;
+    font-weight: 700;
+
+    .theme-light & {
+        color: #64748b;
+    }
+}
+
+.metric-switch__item.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, #2b8cee, #1f6fd1);
+    box-shadow: 0 10rpx 24rpx rgba(43, 140, 238, 0.24);
+}
+
+.top10-intro {
+    margin-bottom: 28rpx;
+}
+
+.top10-intro__badge {
+    display: inline-flex;
+    height: 40rpx;
+    padding: 0 14rpx;
+    align-items: center;
+    border-radius: 999rpx;
+    background: rgba(43, 140, 238, 0.16);
+    color: #7dd3fc;
+    font-size: 18rpx;
+    font-weight: 800;
+    letter-spacing: 2rpx;
+    margin-bottom: 16rpx;
+
+    .theme-light & {
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+    }
+}
+
+.top10-intro__desc {
+    font-size: 24rpx;
+    line-height: 1.8;
+    color: #94a3b8;
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
+}
+
+.hero-section {
+    margin-bottom: 40rpx;
+}
+
+.hero-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 32rpx;
+    background: #182431;
+    box-shadow: 0 24rpx 56rpx rgba(0, 0, 0, 0.28);
+    transition:
+        transform 0.28s ease,
+        box-shadow 0.28s ease;
+
+    .theme-light & {
+        background: #f8fafc;
+        box-shadow: 0 8rpx 24rpx rgba(15, 23, 42, 0.05);
+    }
+}
+
+.hero-card--first {
+    aspect-ratio: 16 / 10;
+    margin-bottom: 30rpx;
+}
+
+.hero-grid {
+    margin-top: 18rpx;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30rpx;
+}
+
+.hero-card--secondary {
+    aspect-ratio: 3 / 4;
+}
+
+.hero-card__image {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.32s ease;
+}
+
+.hero-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 48%, rgba(6, 12, 18, 0.9) 100%);
+
+    .theme-light & {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.6) 100%);
+    }
+}
+
+.hero-card__overlay--soft {
+    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 50%, rgba(6, 12, 18, 0.74) 100%);
+
+    .theme-light & {
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
+    }
+}
+
+.hero-card__rank {
+    position: absolute;
+    top: 22rpx;
+    left: 22rpx;
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 999rpx;
+    background: rgba(30, 41, 59, 0.92);
+    color: #fff;
+    font-size: 30rpx;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.24);
+}
+
+.hero-card__rank--first {
+    background: linear-gradient(135deg, #2b8cee, #60a5fa);
+}
+
+.hero-card__rank--second {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+}
+
+.hero-card__content {
+    position: absolute;
+    left: 28rpx;
+    right: 28rpx;
+    bottom: 28rpx;
+    z-index: 1;
+}
+
+.hero-card__content--compact {
+    left: 20rpx;
+    right: 20rpx;
+    bottom: 20rpx;
+}
+
+.hero-card__tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36rpx;
+    padding: 0 14rpx;
+    border-radius: 999rpx;
+    background: rgba(43, 140, 238, 0.188);
+    border: 1rpx solid rgba(125, 211, 252, 0.22);
+    color: #7dd3fc;
+    font-size: 18rpx;
+    font-weight: 800;
+    margin-bottom: 14rpx;
+}
+
+.hero-card__title {
+    font-size: 42rpx;
+    line-height: 1.2;
+    font-weight: 800;
+    color: #e2e8f0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hero-card__title--compact {
+    font-size: 28rpx;
+    line-height: 1.38;
+}
+
+.hero-card__meta {
+    margin-top: 16rpx;
+    display: flex;
+    align-items: center;
+    gap: 24rpx;
+}
+
+.hero-card__meta-item,
+.hero-card__sub {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+    color: #cbd5e1;
+    font-size: 22rpx;
+}
+
+.hero-card:active {
+    transform: scale(1.03);
+    box-shadow:
+        0 18rpx 36rpx rgba(0, 0, 0, 0.26),
+        0 32rpx 64rpx rgba(0, 0, 0, 0.22);
+}
+
+.hero-card:active .hero-card__image {
+    transform: scale(1.08);
+}
+
+.rank-section__title {
+    margin-bottom: 18rpx;
+    display: flex;
+    align-items: center;
+    gap: 14rpx;
+    color: #94a3b8;
+    font-size: 18rpx;
+    font-weight: 800;
+    letter-spacing: 4rpx;
+    text-transform: uppercase;
+
+    .theme-light & {
+        color: var(--text-tertiary);
+    }
+}
+
+.rank-section__line {
+    flex: 1;
+    height: 1rpx;
+    background: rgba(51, 65, 85, 0.8);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.08);
+    }
+}
+
+.rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30rpx;
+}
+
+.rank-item {
+    height: 280rpx;
+    border-radius: 28rpx;
+    background: rgba(24, 36, 49, 0.92);
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow: hidden;
+    box-shadow:
+        0 10rpx 24rpx rgba(0, 0, 0, 0.2),
+        0 24rpx 48rpx rgba(0, 0, 0, 0.16);
+    transition:
+        transform 0.28s ease,
+        box-shadow 0.28s ease,
+        border-color 0.28s ease;
+
+    .theme-light & {
+        background: #f8fafc;
+        box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
+    }
+}
+
+.rank-item__media {
+    position: relative;
+    width: 214rpx;
+    height: 280rpx;
+    flex-shrink: 0;
+}
+
+.rank-item__thumb {
+    width: 214rpx;
+    height: 280rpx;
+    display: block;
+}
+
+.rank-item__index {
+    position: absolute;
+    top: 14rpx;
+    left: 14rpx;
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 999rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 19, 30, 0.9);
+    border: 1rpx solid rgba(191, 219, 254, 0.18);
+    color: #f8fafc;
+    font-size: 24rpx;
+    font-weight: 800;
+    box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.24);
+}
+
+.rank-item__body {
+    flex: 1;
+    min-width: 0;
+    padding: 22rpx 18rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.rank-item__title {
+    color: #dce4ee;
+    font-size: 28rpx;
+    font-weight: 600;
+    line-height: 1.38;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
+}
+
+.rank-item__meta {
+    margin-top: 8rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16rpx;
+    color: #94a3b8;
+    font-size: 22rpx;
+
+    .theme-light & {
+        color: var(--text-tertiary);
+    }
+}
+
+.rank-item__category {
+    color: #9fb4d1;
+    min-width: 0;
+    flex: 1;
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
+}
+
+.rank-item__metric {
+    flex-shrink: 0;
+}
+
+.rank-item__action {
+    width: 48rpx;
+    height: 48rpx;
+    border-radius: 999rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(159, 180, 209, 0.08);
+    align-self: center;
+    margin-right: 10rpx;
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.04);
+    }
+}
+
+.rank-item:active {
+    transform: scale(1.03);
+    box-shadow:
+        0 18rpx 36rpx rgba(0, 0, 0, 0.26),
+        0 32rpx 64rpx rgba(0, 0, 0, 0.22);
+    border-color: rgba(125, 211, 252, 0.28);
+}
+
+.rank-item:active .rank-item__thumb {
+    transform: scale(1.08);
+}
+
+.rank-item__thumb {
+    transition: transform 0.32s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .hero-card:hover {
+        transform: scale(1.03);
+        box-shadow:
+            0 18rpx 36rpx rgba(0, 0, 0, 0.26),
+            0 32rpx 64rpx rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-card:hover .hero-card__image {
+        transform: scale(1.08);
+    }
+
+    .rank-item:hover {
+        transform: scale(1.03);
+        box-shadow:
+            0 18rpx 36rpx rgba(0, 0, 0, 0.26),
+            0 32rpx 64rpx rgba(0, 0, 0, 0.22);
+        border-color: rgba(125, 211, 252, 0.28);
+    }
+
+    .rank-item:hover .rank-item__thumb {
+        transform: scale(1.08);
+    }
+}
+
+.top10-empty {
+    padding: 140rpx 30rpx;
+    text-align: center;
+}
+
+.top10-empty__title {
+    font-size: 34rpx;
+    color: #f8fafc;
+    font-weight: 700;
+
+    .theme-light & {
+        color: var(--text-primary);
+    }
+}
+
+.top10-empty__desc {
+    margin-top: 14rpx;
+    font-size: 24rpx;
+    line-height: 1.8;
+    color: #94a3b8;
+
+    .theme-light & {
+        color: var(--text-secondary);
+    }
+}
+
+// ── 骨架屏 ──
+@mixin shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.06) 25%,
+        rgba(255, 255, 255, 0.12) 50%,
+        rgba(255, 255, 255, 0.06) 75%
+    );
+    background-size: 200% 100%;
+    animation: top10-shimmer 1.6s infinite linear;
+
+    .theme-light & {
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.06) 75%);
+        background-size: 200% 100%;
+        animation: top10-shimmer 1.6s infinite linear;
+    }
+}
+
+.skeleton-wrap {
+    padding: 0;
+}
+
+.skeleton-hero-first {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 32rpx;
+    margin-bottom: 30rpx;
+    @include shimmer;
+}
+
+.skeleton-hero-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30rpx;
+    margin-bottom: 40rpx;
+}
+
+.skeleton-hero-secondary {
+    aspect-ratio: 3 / 4;
+    border-radius: 32rpx;
+    @include shimmer;
+}
+
+.skeleton-rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30rpx;
+}
+
+.skeleton-rank-item {
+    height: 280rpx;
+    border-radius: 28rpx;
+    overflow: hidden;
+    display: flex;
+    gap: 0;
+    @include shimmer;
+}
+
+.skeleton-rank-thumb {
+    width: 214rpx;
+    height: 100%;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.04);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.04);
+    }
+}
+
+.skeleton-rank-body {
+    flex: 1;
+    padding: 28rpx 22rpx;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16rpx;
+}
+
+.skeleton-rank-title {
+    height: 28rpx;
+    border-radius: 8rpx;
+    width: 85%;
+    background: rgba(255, 255, 255, 0.08);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.07);
+    }
+
+    &--short {
+        width: 55%;
+    }
+}
+
+.skeleton-rank-meta {
+    height: 22rpx;
+    width: 40%;
+    border-radius: 6rpx;
+    background: rgba(255, 255, 255, 0.05);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.05);
+    }
+}
+
+@keyframes top10-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+</style>
