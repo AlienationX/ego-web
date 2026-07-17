@@ -29,27 +29,44 @@
         <view class="page-wrap" :style="pageWrapStyle">
             <view v-if="showWordBoard" class="explore-board">
                 <view class="section-head">
-                    <view class="section-head__title">{{ t('common.hotSearch') }}</view>
-                    <uni-icons type="fire-filled" size="16" color="#619aef"></uni-icons>
+                    <view class="section-head__left">
+                        <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
+                        <view class="section-head__title">{{ t('common.hotSearch') }}</view>
+                    </view>
                 </view>
                 <view class="keyword-cloud">
                     <view class="keyword-chip" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">
-                        {{ tab }}
+                        #{{ tab }}
                     </view>
                 </view>
 
                 <view v-if="searchHistory.length" class="history-block">
                     <view class="section-head">
-                        <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}</view>
-                        <view class="section-head__action" @click="removeHistory">{{ t('search.clearAll') }}</view>
-                    </view>
-                    <view class="history-list">
-                        <view class="history-item" v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">
-                            <view class="history-item__left">
-                                <uni-icons type="refreshempty" size="16" color="#7788a6"></uni-icons>
-                                <text>{{ tab }}</text>
+                        <view class="section-head__left">
+                            <uni-icons type="refreshempty" size="16" color="var(--text-secondary)"></uni-icons>
+                            <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}</view>
+                        </view>
+                        <view class="section-head__actions">
+                            <view class="section-head__action" @click="toggleEditHistory">
+                                {{ isEditingHistory ? t('common.done') : t('common.edit') }}
                             </view>
-                            <uni-icons type="top" size="13" color="#607089"></uni-icons>
+                            <view class="section-head__action" @click="removeHistory">
+                                {{ t('search.clearAll') }}
+                            </view>
+                        </view>
+                    </view>
+                    <view class="history-tags">
+                        <view 
+                            class="history-chip" 
+                            :class="{ 'is-editing': isEditingHistory }" 
+                            v-for="tab in searchHistory" 
+                            :key="tab" 
+                            @click="clickTab(tab)"
+                        >
+                            <text class="history-chip__text">{{ tab }}</text>
+                            <view v-if="isEditingHistory" class="history-chip__delete" @click.stop="deleteHistoryItem(tab)">
+                                <uni-icons type="closeempty" size="10" color="var(--text-tertiary)"></uni-icons>
+                            </view>
                         </view>
                     </view>
                 </view>
@@ -105,6 +122,11 @@ const queryParams = ref({
 const searchHistory = ref(uni.getStorageSync('searchHistory') || []);
 const showWordBoard = ref(true);
 const lastSearchedKeyword = ref('');
+const isEditingHistory = ref(false);
+
+const toggleEditHistory = () => {
+    isEditingHistory.value = !isEditingHistory.value;
+};
 
 // ── 广告高度，控制底部留白 ──
 const adHeight = ref(0);
@@ -192,6 +214,11 @@ const clearKeyword = () => {
 const clickTab = (value) => {
     queryParams.value.keyword = value;
     onSearch();
+};
+
+const deleteHistoryItem = (keyword) => {
+    searchHistory.value = searchHistory.value.filter((item) => item !== keyword);
+    uni.setStorageSync('searchHistory', searchHistory.value);
 };
 
 const removeHistory = () => {
@@ -352,28 +379,47 @@ onUnload(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14rpx;
-    margin-bottom: 18rpx;
+    margin-bottom: 20rpx;
+}
+
+.section-head__left {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
 }
 
 .section-head__title {
-    font-size: 20rpx;
-    font-weight: 800;
-    letter-spacing: 4rpx;
-    color: var(--search-accent);
-    text-transform: uppercase;
+    font-size: 26rpx;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5rpx;
 }
 
 .section-head__title--muted {
-    color: var(--search-text-secondary);
+    color: var(--text-secondary);
 }
 
 .section-head__action {
-    font-size: 18rpx;
+    font-size: 22rpx;
     font-weight: 700;
     color: var(--search-text-muted);
-    text-transform: uppercase;
-    letter-spacing: 2rpx;
+    letter-spacing: 1rpx;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:active {
+        opacity: 0.7;
+    }
+
+    &--danger {
+        color: #ff4d4f;
+    }
+}
+
+.section-head__actions {
+    display: flex;
+    align-items: center;
+    gap: 20rpx;
 }
 
 .keyword-cloud {
@@ -383,44 +429,82 @@ onUnload(() => {
 }
 
 .keyword-chip {
-    min-height: 72rpx;
-    padding: 0 26rpx;
-    border-radius: 999rpx;
+    padding: 12rpx 28rpx;
+    border-radius: 100rpx;
     display: inline-flex;
     align-items: center;
     font-size: 24rpx;
     font-weight: 600;
-    color: var(--search-text-main);
-    background: var(--search-chip-bg);
-    border: 1rpx solid var(--search-border);
+    color: var(--text-primary);
+    background: var(--panel-background);
+    border: 1rpx solid var(--panel-border);
+    box-shadow: 0 4rpx 10rpx var(--shadow-color);
+    transition: transform 0.2s, opacity 0.2s;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:active {
+        transform: scale(0.95);
+        opacity: 0.85;
+    }
 }
 
 .history-block {
     margin-top: 46rpx;
 }
 
-.history-list {
+.history-tags {
     display: flex;
-    flex-direction: column;
-    gap: 4rpx;
-}
-
-.history-item {
-    min-height: 82rpx;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12rpx;
-    border-radius: 20rpx;
-    background: var(--search-history-bg);
-}
-
-.history-item__left {
-    display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 16rpx;
-    font-size: 26rpx;
-    color: var(--search-text-main);
+}
+
+.history-chip {
+    padding: 12rpx 28rpx;
+    border-radius: 100rpx;
+    display: inline-flex;
+    align-items: center;
+    gap: 8rpx;
+    font-size: 24rpx;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--panel-background);
+    border: 1rpx solid var(--panel-border);
+    box-shadow: 0 4rpx 10rpx var(--shadow-color);
+    transition: transform 0.2s, opacity 0.2s, padding 0.2s;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &.is-editing {
+        padding: 12rpx 20rpx 12rpx 28rpx;
+    }
+    &:active {
+        transform: scale(0.95);
+        opacity: 0.85;
+    }
+
+    &__delete {
+        width: 28rpx;
+        height: 28rpx;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.03);
+        transition: background 0.2s;
+
+        .theme-dark & {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        &:active {
+            background: rgba(0, 0, 0, 0.1);
+
+            .theme-dark & {
+                background: rgba(255, 255, 255, 0.2);
+            }
+        }
+    }
 }
 
 .noResult {

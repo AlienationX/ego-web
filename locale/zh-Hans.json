@@ -28,6 +28,8 @@
         "recentSearch": "最近搜索",
         "noResult": "抱歉，没有找到您想要的搜索结果",
         "clearHistory": "是否清空历史搜索？",
+        "edit": "编辑",
+        "done": "完成",
         "hotKeywords": "美女,帅哥,宠物,卡通",
         "tip": "提示",
         "confirm": "确定",
@@ -219,7 +221,9 @@
         "title": "分类",
         "desc": "探索更多精美壁纸分类",
         "empty": "暂无分类",
-        "emptyDesc": "分类数据暂时无法加载，请稍后再试"
+        "emptyDesc": "分类数据暂时无法加载，请稍后再试",
+        "popularTags": "热门标签推荐",
+        "tagList": "赛博朋克,极简,动漫,自然风景,暗黑,OLED黑色,奇幻,璀璨星空"
     },
     "user": {
         "profile": {

@@ -18,6 +18,26 @@
                     <view class="search-container">
                         <search-bar></search-bar>
                     </view>
+
+                    <!-- Popular Tags Cloud -->
+                    <view class="tags-section">
+                        <view class="tags-header">
+                            <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
+                            <text class="tags-title">{{ t('category.popularTags') }}</text>
+                        </view>
+                        <scroll-view scroll-x class="tags-scroll" show-scrollbar="false">
+                            <view class="tags-list">
+                                <view 
+                                    class="tag-chip" 
+                                    v-for="(tag, index) in popularTags" 
+                                    :key="index"
+                                    @click="searchTag(tag)"
+                                >
+                                    <text class="tag-label">#{{ tag }}</text>
+                                </view>
+                            </view>
+                        </scroll-view>
+                    </view>
                 </view>
 
                 <!-- 加载骨架屏 -->
@@ -79,6 +99,18 @@ const classifyComputed = computed(() => {
         name: isEn.value ? item.name_en || item.name : item.name,
     }));
 });
+
+const popularTags = computed(() => {
+    const rawTags = t('category.tagList') || '';
+    if (!rawTags) return [];
+    return rawTags.split(',').map((tag) => tag.trim()).filter(Boolean);
+});
+
+const searchTag = (tag) => {
+    uni.navigateTo({
+        url: '/pages/app/search?keyword=' + encodeURIComponent(tag)
+    });
+};
 
 // ── 广告高度，控制底部留白 ──
 const adHeight = ref(0);
@@ -169,6 +201,60 @@ onLoad(() => {
 
     .search-container {
         margin: 10rpx -30rpx 0;
+    }
+
+    .tags-section {
+        margin-top: 30rpx;
+        padding: 0 4rpx;
+
+        .tags-header {
+            display: flex;
+            align-items: center;
+            gap: 8rpx;
+            margin-bottom: 20rpx;
+
+            .tags-title {
+                font-size: 26rpx;
+                font-weight: 700;
+                color: var(--text-secondary);
+                letter-spacing: 0.5rpx;
+            }
+        }
+
+        .tags-scroll {
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        .tags-list {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            gap: 16rpx;
+            padding-bottom: 8rpx;
+        }
+
+        .tag-chip {
+            padding: 12rpx 28rpx;
+            border-radius: 100rpx;
+            background: var(--panel-background);
+            border: 1rpx solid var(--panel-border);
+            box-shadow: 0 4rpx 10rpx var(--shadow-color);
+            transition: transform 0.2s, opacity 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+
+            &:active {
+                transform: scale(0.95);
+                opacity: 0.85;
+            }
+
+            .tag-label {
+                font-size: 24rpx;
+                font-weight: 600;
+                color: var(--text-primary);
+            }
+        }
     }
 
     .hero-ad {

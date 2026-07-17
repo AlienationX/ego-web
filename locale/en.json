@@ -28,6 +28,8 @@
         "recentSearch": "Recnet search",
         "noResult": "Sorry, it's empty here.",
         "clearHistory": "Clear search history?",
+        "edit": "Edit",
+        "done": "Done",
         "hotKeywords": "beauty,handsome man,pet,cartoon",
         "tip": "Tip",
         "confirm": "Confirm",
@@ -219,7 +221,9 @@
         "title": "Category",
         "desc": "Explore more beautiful wallpaper categories",
         "empty": "No categories",
-        "emptyDesc": "Category data is temporarily unavailable, please try again later"
+        "emptyDesc": "Category data is temporarily unavailable, please try again later",
+        "popularTags": "Popular Tags",
+        "tagList": "Cyberpunk,Minimalist,Anime,Nature,Dark,OLED Black,Fantasy,Space"
     },
     "user": {
         "profile": {

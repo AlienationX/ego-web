@@ -273,21 +273,8 @@ const fetchProducts = async () => {
     }
 };
 
-const updateStatusBarStyle = () => {
-    // #ifdef APP-PLUS || MP
-    uni.setStatusBarStyle({
-        style: settingsStore.isDark ? "light" : "dark"
-    });
-    // #endif
-};
-
 onMounted(() => {
     fetchProducts();
-    updateStatusBarStyle();
-});
-
-watch(() => settingsStore.isDark, () => {
-    updateStatusBarStyle();
 });
 
 // 5. 支付结果轮询
