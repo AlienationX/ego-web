@@ -106,7 +106,7 @@ const dateStr = computed(() => {
     flex-direction: column;
     align-items: center;
     color: rgba(255, 255, 255, 0.95);
-    z-index: 100;
+    z-index: 5;
     pointer-events: none;
     
     // Shared shadows for legibility

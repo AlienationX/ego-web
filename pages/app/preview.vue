@@ -570,29 +570,46 @@ const applyTempClockStyle = async () => {
 
     // Need energy, check if enough
     if (userStore.energy < 1) {
-        uni.showModal({
-            title: t('previewPage.energyNotEnoughTitle'),
-            content: t('previewPage.energyNotEnoughHint'),
-            confirmText: t('previewPage.watchAd'),
-            cancelText: t('common.cancel'),
-            success: (res) => {
-                if (res.confirm) {
-                    showRewardedVideoAd(null, {
-                        onSuccess: async () => {
-                            try {
-                                const adRes = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
-                                if (adRes.data?.energy !== undefined) {
-                                    userStore.updateEnergy(adRes.data.energy);
-                                    uni.showToast({ title: t('common.success'), icon: 'none' });
-                                }
-                            } catch (e) {
-                                uni.showToast({ title: t('common.networkError'), icon: 'none' });
-                            }
+        const watchAdAndUnlock = () => {
+            showRewardedVideoAd(null, {
+                onSuccess: async () => {
+                    try {
+                        const adRes = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
+                        if (adRes.data?.energy !== undefined) {
+                            userStore.updateEnergy(adRes.data.energy);
+                            uni.showToast({ title: t('common.success'), icon: 'none' });
                         }
-                    });
+                    } catch (e) {
+                        uni.showToast({ title: t('common.networkError'), icon: 'none' });
+                    }
                 }
-            }
-        });
+            });
+        };
+
+        if (userStore.isAdmin) {
+            uni.showActionSheet({
+                itemList: [t('previewPage.watchAd'), t('membership.title')],
+                success: (res) => {
+                    if (res.tapIndex === 0) {
+                        watchAdAndUnlock();
+                    } else if (res.tapIndex === 1) {
+                        uni.navigateTo({ url: '/pages/member/payment' });
+                    }
+                }
+            });
+        } else {
+            uni.showModal({
+                title: t('previewPage.energyNotEnoughTitle'),
+                content: t('previewPage.energyNotEnoughHint'),
+                confirmText: t('previewPage.watchAd'),
+                cancelText: t('common.cancel'),
+                success: (res) => {
+                    if (res.confirm) {
+                        watchAdAndUnlock();
+                    }
+                }
+            });
+        }
         return;
     }
 

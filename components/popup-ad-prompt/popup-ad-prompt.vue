@@ -17,6 +17,12 @@
             <button class="ad-prompt__button" @click="onWatch">
                 {{ $t('message.adPrompt') }}
             </button>
+
+            <!-- VIP Option for Admin -->
+            <view v-if="userStore.isAdmin" class="ad-prompt__vip-option" @click="toMembership">
+                <mdi-icon path="/static/icons/crown-circle.svg" size="18px" color="#FBBF24"></mdi-icon>
+                <text class="vip-link-text">{{ t('membership.title') }}</text>
+            </view>
         </view>
     </uni-popup>
 </template>
@@ -96,6 +102,11 @@ const onWatch = () => {
             incrementDownloads(props.id);
         },
     });
+};
+
+const toMembership = () => {
+    close();
+    uni.navigateTo({ url: '/pages/member/payment' });
 };
 
 onLoad(() => {
@@ -189,6 +200,21 @@ defineExpose({
         &:active {
             transform: scale(0.98);
             opacity: 0.9;
+        }
+    }
+
+    &__vip-option {
+        margin-top: 28rpx;
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        cursor: pointer;
+        
+        .vip-link-text {
+            font-size: 26rpx;
+            color: #a855f7;
+            font-weight: 700;
+            text-decoration: underline;
         }
     }
 }

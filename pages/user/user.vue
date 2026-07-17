@@ -23,6 +23,8 @@
                                 <view class="details-top">
                                     <view class="name-row">
                                         <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
+                                        <view v-if="userStore.isVip" class="vip-badge">VIP</view>
+                                        <view v-else-if="userStore.isAdmin" class="non-vip-badge" @click="toMembership">Get VIP</view>
                                     </view>
                                 </view>
 
@@ -63,6 +65,20 @@
                                 <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
                                 <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
                             </view>
+                        </view>
+
+                        <!-- VIP Banner for Admins -->
+                        <view v-if="userStore.isAdmin" class="vip-banner-card" @click="toMembership">
+                            <view class="vip-banner-content">
+                                <view class="vip-banner-title-row">
+                                    <mdi-icon path="/static/icons/crown-circle.svg" size="20px" color="#FBBF24"></mdi-icon>
+                                    <text class="vip-banner-title">{{ t('membership.title') }}</text>
+                                </view>
+                                <text class="vip-banner-desc">
+                                    {{ userStore.isVip ? (locale === 'en' ? 'VIP active! Click to extend.' : '您的会员已开通！点击续费。') : t('membership.subtitle') }}
+                                </text>
+                            </view>
+                            <uni-icons type="right" size="16" color="#ffffff"></uni-icons>
                         </view>
                     </template>
 
@@ -797,6 +813,50 @@ onShow(() => {
             position: relative;
             z-index: 5;
             overflow: visible;
+        }
+
+        .vip-banner-card {
+            margin-top: 24rpx;
+            padding: 24rpx 32rpx;
+            border-radius: 24rpx;
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8rpx 20rpx rgba(147, 51, 234, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            position: relative;
+            z-index: 5;
+
+            &:active {
+                transform: scale(0.98);
+                opacity: 0.9;
+            }
+
+            .vip-banner-content {
+                display: flex;
+                flex-direction: column;
+                gap: 6rpx;
+                flex: 1;
+            }
+
+            .vip-banner-title-row {
+                display: flex;
+                align-items: center;
+                gap: 12rpx;
+            }
+
+            .vip-banner-title {
+                font-size: 28rpx;
+                font-weight: 800;
+                color: #ffffff;
+            }
+
+            .vip-banner-desc {
+                font-size: 22rpx;
+                color: rgba(255, 255, 255, 0.85);
+            }
         }
 
         .energy-info {
