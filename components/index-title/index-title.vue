@@ -16,7 +16,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 30rpx;
+    padding: 0 20rpx;
 
     .name {
         font-size: 34rpx;

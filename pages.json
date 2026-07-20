@@ -66,6 +66,22 @@
             }
         },
         {
+            "path": "pages/app/subjects",
+            "style": {
+                "navigationBarTitleText": "专题策划",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": true
+            }
+        },
+        {
+            "path": "pages/app/subject-detail",
+            "style": {
+                "navigationBarTitleText": "专题详情",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/app/preview",
             "style": {
                 "navigationBarTitleText": "预览",

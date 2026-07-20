@@ -20,20 +20,31 @@ export function compareTimestamp(timestamp) {
 }
 
 export function handlePicUrl(item, prefix = PICS_BASE_URL) {
-    // 1. 给 url 字段添加前缀。wall数据增加额外字段，前端处理，减少后端流量消耗
-    const prefixedUrl = `${prefix}/${item.picurl}`;
+    if (!item) return item;
+    const newItem = { ...item };
 
-    // 2. 生成 smallPicurl 存储小图片（基于添加前缀后的完整 URL）
-    const smallPicurl = prefixedUrl.replace('.jpg', '_small.webp');
-    const mediumPicurl = prefixedUrl.replace('.jpg', '_medium.webp');
+    // 1. 处理主图片
+    if (newItem.picurl) {
+        const prefixedUrl = `${prefix}/${newItem.picurl}`;
+        newItem.picurl = prefixedUrl;
+        newItem.smallPicurl = prefixedUrl.replace('.jpg', '_small.webp');
+        newItem.mediumPicurl = prefixedUrl.replace('.jpg', '_medium.webp');
+    }
 
-    // 返回新对象（保留原字段(覆盖原字段) + 新增字段）
-    return {
-        ...item,
-        picurl: prefixedUrl, // 覆盖原始的picurl数据
-        smallPicurl,
-        mediumPicurl,
-    };
+    // 2. 处理专题封面图
+    if (newItem.cover_url) {
+        const prefixedCover = `${prefix}/${newItem.cover_url}`;
+        newItem.cover_url = prefixedCover;
+        newItem.cover_small = prefixedCover.replace('.jpg', '_small.webp');
+        newItem.cover_medium = prefixedCover.replace('.jpg', '_medium.webp');
+    }
+
+    // 3. 处理专题预览壁纸数组
+    if (newItem.preview_walls && Array.isArray(newItem.preview_walls)) {
+        newItem.preview_walls = newItem.preview_walls.map((url) => `${prefix}/${url}`);
+    }
+
+    return newItem;
 }
 
 export function gotoHome() {

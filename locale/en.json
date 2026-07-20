@@ -94,6 +94,7 @@
         "dailyRecommend": "Daily Recommend",
         "latestRelease": "Latest Releases",
         "categoryRecommend": "Category Recommend",
+        "subjectRecommend": "Featured Collections",
         "banner": {
             "defaultTitle": "Featured Wallpaper",
             "discoverMore": "Discover More",

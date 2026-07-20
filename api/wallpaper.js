@@ -56,6 +56,22 @@ export const apiGetClassify = (data = {}) => {
     });
 };
 
+// 获取专题列表接口
+export const apiGetSubjects = (data = {}) => {
+    return request({
+        url: '/subject/',
+        data,
+    });
+};
+
+// 获取专题详情接口
+export const apiGetSubjectDetail = (id, data = {}) => {
+    return request({
+        url: `/subject/${id}/`,
+        data,
+    });
+};
+
 // 获取分类列表，也就是分类下的所有图片接口
 export const apiGetClassList = (data = {}) => {
     return request({

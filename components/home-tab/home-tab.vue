@@ -158,6 +158,55 @@
             </view>
         </view>
 
+        <!-- Featured Subjects Section -->
+        <view class="select">
+            <view class="select-watermark">Subject</view>
+            <index-title>
+                <template #name>{{ $t('index.subjectRecommend') }}</template>
+                <template #custom>
+                    <button size="mini" class="btn is-default" @click="goSubjects">{{ $t('common.more') }}</button>
+                </template>
+            </index-title>
+
+            <view class="content content--subjects">
+                <!-- Subject 骨架屏 -->
+                <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
+                    <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
+                </view>
+                <scroll-view v-else scroll-x class="home-scroll">
+                    <view
+                        class="subject-box-new"
+                        v-for="item in subjectsRecommendList"
+                        :key="item.id"
+                        @click="goSubjectDetail(item)"
+                    >
+                        <view class="subject-box-new__left">
+                            <view class="subject-box-new__badge-row">
+                                <view class="subject-box-new__badge" v-if="item.is_locked">
+                                    <uni-icons type="vip-filled" size="8" color="#fbbf24"></uni-icons>
+                                    <text class="badge-text">VIP</text>
+                                </view>
+                                <view class="subject-box-new__count" v-if="item.wall_count">
+                                    {{ item.wall_count }}P
+                                </view>
+                            </view>
+                            <text class="subject-box-new__title">
+                                {{ isEn ? (item.name_en || item.name) : item.name }}
+                            </text>
+                            <text class="subject-box-new__desc">
+                                {{ isEn ? (item.content_en || item.content) : item.content }}
+                            </text>
+                        </view>
+                        
+                        <view class="subject-box-new__right">
+                            <image class="subject-box-new__cover" :src="item.cover_url || '/static/images/placeholder.jpg'" mode="aspectFill" lazy-load></image>
+                            <view class="subject-box-new__cover-shadow"></view>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
+
         <!-- Latest Release -->
         <view class="select">
             <view class="select-watermark">Latest</view>
@@ -183,50 +232,55 @@
         </view>
 
         <!-- Subscription Signals -->
-        <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout">
-            <view class="signal-callout__main">
-                <view class="signal-callout__content">
-                    <view class="signal-callout__eyebrow">{{ t('index.followingEyebrow') }}</view>
-                    <view class="signal-callout__title">{{ t('index.followingTitle') }}</view>
-                    <view class="signal-callout__desc">{{ followingSummary }}</view>
+        <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout-new" :class="{ 'is-expanded': followingExpanded }">
+            <view class="signal-callout-new__header" @click="toggleFollowingExpanded">
+                <view class="signal-callout-new__left">
+                    <view class="signal-pulse-dot"></view>
+                    <text class="signal-callout-new__eyebrow">{{ t('index.followingEyebrow') }}</text>
                 </view>
-                <view class="signal-callout__action" @click="toggleFollowingExpanded">
-                    {{ followingExpanded ? t('index.followingCollapse') : t('index.followingExpand') }}
+                <view class="signal-callout-new__right">
+                    <uni-icons :type="followingExpanded ? 'arrow-up' : 'arrow-down'" size="11" color="var(--text-secondary)"></uni-icons>
                 </view>
             </view>
+            
+            <view class="signal-callout-new__body" @click="toggleFollowingExpanded">
+                <view class="signal-callout-new__title">{{ t('index.followingTitle') }}</view>
+                <view class="signal-callout-new__desc">{{ followingSummary }}</view>
+            </view>
 
-            <view v-if="followingExpanded" class="signal-callout__panel">
-                <view v-if="subscribedClassifyItems.length" class="signal-group">
-                    <view class="signal-group__title">{{ t('subscriptionPage.classifyTitle') }}</view>
-                    <view class="signal-group__chips">
+            <view v-if="followingExpanded" class="signal-callout-new__panel">
+                <view v-if="subscribedClassifyItems.length" class="signal-group-new">
+                    <view class="signal-group-new__title">{{ t('subscriptionPage.classifyTitle') }}</view>
+                    <view class="signal-group-new__chips">
                         <view
                             v-for="item in subscribedClassifyItems"
                             :key="item.id"
-                            class="signal-chip"
+                            class="signal-chip-new"
                             @click="goClassify(item)"
                         >
-                            {{ item.name }}
+                            <uni-icons type="images" size="10" color="var(--text-secondary)"></uni-icons>
+                            <text class="chip-text">{{ item.name }}</text>
                         </view>
                     </view>
                 </view>
 
-                <view v-if="libraryStore.subscriptions.tags.length" class="signal-group">
-                    <view class="signal-group__title">{{ t('subscriptionPage.tagTitle') }}</view>
-                    <view class="signal-group__chips">
+                <view v-if="libraryStore.subscriptions.tags.length" class="signal-group-new">
+                    <view class="signal-group-new__title">{{ t('subscriptionPage.tagTitle') }}</view>
+                    <view class="signal-group-new__chips">
                         <view
                             v-for="tag in libraryStore.subscriptions.tags"
                             :key="tag"
-                            class="signal-chip signal-chip--tag"
+                            class="signal-chip-new signal-chip-new--tag"
                             @click="goSearchByTag(tag)"
                         >
-                            #{{ tag }}
+                            <text class="chip-text"># {{ tag }}</text>
                         </view>
                     </view>
                 </view>
 
-                <navigator url="/pages/user/subscriptions" class="signal-manage">
-                    {{ t('index.followingManage') }}
-                    <uni-icons type="right" size="14" color="#dbeafe"></uni-icons>
+                <navigator url="/pages/user/subscriptions" class="signal-manage-new">
+                    <text>{{ t('index.followingManage') }}</text>
+                    <uni-icons type="right" size="10" color="var(--text-primary)"></uni-icons>
                 </navigator>
             </view>
         </view>
@@ -301,6 +355,7 @@ import {
     apiGetNotice,
     apiGetClassify,
     apiGetClassList,
+    apiGetSubjects,
 } from '@/api/wallpaper.js';
 import { PICS_BASE_URL } from '@/common/config.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -317,6 +372,7 @@ const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 
 const isAdmin = computed(() => !!userStore.isAdmin);
+const isEn = computed(() => locale.value === 'en');
 
 const props = defineProps({
     navBarHeight: {
@@ -355,11 +411,11 @@ const heroImageLoaded = ref(false);
 const randomRecommendList = ref([]);
 const latestList = ref([]);
 const noticeList = ref([]);
+const subjectsRecommendList = ref([]);
 const noticeComputed = computed(() => {
-    const isEn = locale.value === 'en';
     return noticeList.value.map((item) => ({
         ...item,
-        title: isEn && item.title_en ? item.title_en : item.title,
+        title: isEn.value && item.title_en ? item.title_en : item.title,
     }));
 });
 const classifyList = ref([]);
@@ -394,18 +450,16 @@ const followingSummary = computed(() => {
 
 // ── 优化3：使用响应式 locale ref，语言切换时 computed 会正确重算 ──
 const randomRecommendComputed = computed(() => {
-    const isEn = locale.value === 'en';
     return randomRecommendList.value.map((item) => ({
         ...item,
-        name: isEn && item.name_en ? item.name_en : item.name,
+        name: isEn.value && item.name_en ? item.name_en : item.name,
     }));
 });
 
 const classifyComputed = computed(() => {
-    const isEn = locale.value === 'en';
     return classifyList.value.map((item) => ({
         ...item,
-        name: isEn && item.name_en ? item.name_en : item.name,
+        name: isEn.value && item.name_en ? item.name_en : item.name,
     }));
 });
 
@@ -549,14 +603,12 @@ const getBannerTextMeta = (item) => {
 
     const config = configMap[type];
 
-    const isEn = locale.value === 'en';
-
     return {
         title:
-            (isEn && rawTitleEn ? rawTitleEn : rawTitle) ||
+            (isEn.value && rawTitleEn ? rawTitleEn : rawTitle) ||
             (type === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle')),
         desc:
-            (isEn && item.description_en ? item.description_en : item.description) ||
+            (isEn.value && item.description_en ? item.description_en : item.description) ||
             (item && item.title && item.title.includes('必应') ? t('index.banner.bingDesc') : config.desc),
         badge: config.badge,
         targetLabel: targetMap[item.target] || targetMap.external,
@@ -665,6 +717,28 @@ const refreshRandom = () => {
     heroImageLoaded.value = false;
     getRandom();
     getRandomRecommend();
+    getSubjects();
+};
+
+const getSubjects = async () => {
+    try {
+        const res = await apiGetSubjects({ select: true });
+        if (res.code === 200 && res.data) {
+            subjectsRecommendList.value = res.data.map((item) => handlePicUrl(item));
+        }
+    } catch (err) {
+        console.error('Failed to load recommended subjects:', err);
+    }
+};
+
+const goSubjects = () => {
+    uni.navigateTo({ url: '/pages/app/subjects' });
+};
+
+const goSubjectDetail = (item) => {
+    uni.navigateTo({
+        url: `/pages/app/subject-detail?id=${item.id}&name=${encodeURIComponent(item.name)}`
+    });
 };
 
 onMounted(() => {
@@ -678,6 +752,7 @@ onMounted(() => {
     setTimeout(() => {
         getRandomRecommend();
         getNotice();
+        getSubjects();
     }, 300);
 
     // P3 延时 800ms：需要滚动才能看到，完全错峰
@@ -882,132 +957,186 @@ onMounted(() => {
     }
 }
 
-.signal-callout {
-    margin: 0 30rpx 28rpx;
-    padding: 26rpx 24rpx;
-    border-radius: 28rpx;
-    background:
-        radial-gradient(circle at top right, rgba(40, 179, 137, 0.18), transparent 28%),
-        linear-gradient(135deg, #18202a 0%, #243244 100%);
+.signal-callout-new {
+    margin: 16rpx 20rpx 32rpx;
+    padding: 28rpx 28rpx;
+    border-radius: 36rpx;
+    background: linear-gradient(135deg, rgba(40, 179, 137, 0.04) 0%, rgba(97, 154, 239, 0.04) 100%);
+    border: 1rpx solid rgba(40, 179, 137, 0.12);
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 22rpx;
-    box-shadow: 0 18rpx 38rpx rgba(15, 23, 42, 0.16);
-}
+    gap: 16rpx;
+    box-sizing: border-box;
+    box-shadow: 0 10rpx 30rpx var(--shadow-color);
+    transition: all 0.28s cubic-bezier(0.25, 1, 0.5, 1);
 
-.signal-callout__main {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18rpx;
-
-    .signal-callout__content {
-        min-width: 0;
-        flex: 1;
+    .theme-dark & {
+        background: linear-gradient(135deg, rgba(40, 179, 137, 0.12) 0%, rgba(30, 41, 59, 0.45) 100%);
+        border: 1rpx solid rgba(40, 179, 137, 0.22);
     }
 
-    .signal-callout__eyebrow {
+    &.is-expanded {
+        background: var(--panel-background);
+        border-color: var(--panel-border);
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+    }
+
+    .signal-pulse-dot {
+        width: 12rpx;
+        height: 12rpx;
+        background: #28b389;
+        border-radius: 50%;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #28b389;
+            animation: pulse-ring 1.8s infinite ease-in-out;
+        }
+    }
+
+    &__eyebrow {
+        font-size: 20rpx;
+        font-weight: 900;
+        letter-spacing: 2rpx;
+        color: #28b389;
+        text-transform: uppercase;
+        line-height: 1;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+    }
+
+    &__body {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 6rpx;
+    }
+
+    &__title {
+        font-size: 32rpx;
+        font-weight: 850;
+        color: var(--text-primary);
+        line-height: 1.2;
+    }
+
+    &__desc {
+        font-size: 24rpx;
+        line-height: 1.5;
+        color: var(--text-secondary);
+    }
+
+    &__panel {
+        padding-top: 24rpx;
+        border-top: 1rpx solid var(--panel-border);
+        display: flex;
+        flex-direction: column;
+        gap: 20rpx;
+    }
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+}
+
+.signal-group-new {
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+
+    &__title {
         font-size: 18rpx;
-        font-weight: 800;
-        letter-spacing: 4rpx;
-        color: rgba(125, 211, 252, 0.88);
+        font-weight: 900;
+        letter-spacing: 1rpx;
+        color: var(--text-tertiary);
         text-transform: uppercase;
     }
 
-    .signal-callout__title {
-        margin-top: 10rpx;
-        font-size: 32rpx;
-        font-weight: 800;
-        color: #f8fbff;
-    }
-
-    .signal-callout__desc {
-        margin-top: 8rpx;
-        font-size: 23rpx;
-        line-height: 1.7;
-        color: rgba(226, 232, 240, 0.74);
-    }
-
-    .signal-callout__action {
-        flex-shrink: 0;
-        min-height: 64rpx;
-        padding: 0 24rpx;
-        border-radius: 999rpx;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.12);
-        border: 1rpx solid rgba(255, 255, 255, 0.12);
-        color: #f8fbff;
-        font-size: 22rpx;
-        font-weight: 700;
+    &__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12rpx;
     }
 }
 
-.signal-callout__panel {
-    padding-top: 20rpx;
-    border-top: 1rpx solid rgba(255, 255, 255, 0.08);
-}
-
-.signal-group {
-    margin-bottom: 18rpx;
-}
-
-.signal-group__title {
-    font-size: 20rpx;
-    font-weight: 800;
-    letter-spacing: 2rpx;
-    color: rgba(226, 232, 240, 0.68);
-    text-transform: uppercase;
-    margin-bottom: 12rpx;
-}
-
-.signal-group__chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12rpx;
-}
-
-.signal-chip {
-    min-height: 58rpx;
-    padding: 0 20rpx;
-    border-radius: 999rpx;
+.signal-chip-new {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1rpx solid rgba(255, 255, 255, 0.1);
-    color: #f8fbff;
+    gap: 8rpx;
+    padding: 8rpx 20rpx;
+    background: var(--page-background-secondary);
+    border: 1rpx solid var(--panel-border);
+    border-radius: 100rpx;
+    color: var(--text-primary);
     font-size: 22rpx;
     font-weight: 700;
+    transition: transform 0.2s;
 
     &:active {
         transform: scale(0.96);
-        opacity: 0.86;
+    }
+
+    .chip-text {
+        line-height: 1;
+    }
+
+    &--tag {
+        color: #28b389;
+        background: rgba(40, 179, 137, 0.06);
+        border-color: rgba(40, 179, 137, 0.16);
+
+        .theme-dark & {
+            background: rgba(40, 179, 137, 0.12);
+            border-color: rgba(40, 179, 137, 0.25);
+        }
     }
 }
 
-.signal-chip--tag {
-    color: #bbf7d0;
-    background: rgba(40, 179, 137, 0.14);
-    border-color: rgba(40, 179, 137, 0.18);
-}
-
-.signal-manage {
-    margin-top: 6rpx;
-    min-height: 62rpx;
-    padding: 0 20rpx;
-    border-radius: 18rpx;
+.signal-manage-new {
+    min-height: 72rpx;
+    border-radius: 20rpx;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8rpx;
-    background: rgba(97, 154, 239, 0.14);
-    border: 1rpx solid rgba(147, 197, 253, 0.18);
-    color: #dbeafe;
-    font-size: 22rpx;
+    background: var(--panel-background-strong);
+    border: 1rpx solid var(--panel-border);
+    color: var(--text-primary);
+    font-size: 24rpx;
     font-weight: 800;
+    transition: background 0.2s;
+
+    &:active {
+        background: var(--page-background-secondary);
+    }
 }
 
 .notice {
@@ -1046,7 +1175,7 @@ onMounted(() => {
             align-items: center;
             justify-content: left;
             height: 100%;
-            font-size: 30rpx;
+            font-size: 28rpx;
             color: var(--text-secondary);
             overflow: hidden;
             white-space: nowrap;
@@ -1175,6 +1304,7 @@ onMounted(() => {
             white-space: nowrap;
             height: 100%;
             box-sizing: border-box;
+            padding: 0 20rpx;
 
             .box {
                 width: 280rpx;
@@ -1314,12 +1444,6 @@ onMounted(() => {
                 }
             }
 
-            .box:first-child {
-                margin-left: 20rpx;
-            }
-            .box:last-child {
-                margin-right: 20rpx;
-            }
         }
     }
 }
@@ -1535,6 +1659,12 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     white-space: nowrap;
     width: 100%;
     box-sizing: border-box;
+
+    &--subjects {
+        height: 100%;
+        padding: 10rpx 20rpx;
+        gap: 20rpx;
+    }
 }
 
 .sk-card {
@@ -1546,6 +1676,127 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
     &--hero {
         width: 440rpx;
+    }
+
+    &--subject-skeleton {
+        width: 480rpx !important;
+        height: 220rpx !important;
+        border-radius: 32rpx;
+        flex-shrink: 0;
+    }
+}
+
+.content--subjects {
+    height: 260rpx !important;
+}
+
+.subject-box-new {
+    width: 480rpx;
+    height: 220rpx;
+    display: inline-flex;
+    flex-shrink: 0;
+    background: var(--panel-background);
+    border: 1rpx solid var(--panel-border);
+    margin: 12rpx 20rpx 12rpx 0;
+    position: relative;
+    border-radius: 32rpx;
+    box-sizing: border-box;
+    box-shadow: 0 10rpx 28rpx var(--shadow-color);
+    transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 24rpx;
+    gap: 16rpx;
+    align-items: center;
+
+    &:active {
+        transform: scale(0.97);
+        box-shadow: 0 4rpx 12rpx var(--shadow-color);
+    }
+
+    &__left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        min-width: 0;
+    }
+
+    &__badge-row {
+        display: flex;
+        align-items: center;
+        gap: 10rpx;
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4rpx;
+        padding: 4rpx 12rpx;
+        background: rgba(251, 191, 36, 0.08);
+        border: 1rpx solid rgba(251, 191, 36, 0.16);
+        border-radius: 100rpx;
+        color: #fbbf24;
+        font-size: 16rpx;
+        font-weight: 900;
+
+        .badge-text {
+            line-height: 1;
+        }
+    }
+
+    &__count {
+        font-size: 16rpx;
+        font-weight: 800;
+        color: var(--text-tertiary);
+        letter-spacing: 0.5rpx;
+    }
+
+    &__title {
+        font-size: 26rpx;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1.25;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+    &__desc {
+        font-size: 18rpx;
+        color: var(--text-secondary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+        margin-top: 4rpx;
+    }
+
+    &__right {
+        position: relative;
+        width: 120rpx;
+        height: 172rpx;
+        flex-shrink: 0;
+        border-radius: 20rpx;
+        overflow: hidden;
+        box-shadow: 0 6rpx 16rpx var(--shadow-color);
+        background: var(--page-background-secondary);
+    }
+
+    &__cover {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    &__cover-shadow {
+        position: absolute;
+        inset: 0;
+        box-shadow: inset 0 0 10rpx rgba(0, 0, 0, 0.1);
+        pointer-events: none;
     }
 }
 </style>
