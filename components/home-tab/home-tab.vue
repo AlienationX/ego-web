@@ -156,56 +156,7 @@
                     </view>
                 </scroll-view>
             </view>
-        </view>
-
-        <!-- Featured Subjects Section -->
-        <view class="select">
-            <view class="select-watermark">Subject</view>
-            <index-title>
-                <template #name>{{ $t('index.subjectRecommend') }}</template>
-                <template #custom>
-                    <button size="mini" class="btn is-default" @click="goSubjects">{{ $t('common.more') }}</button>
-                </template>
-            </index-title>
-
-            <view class="content content--subjects">
-                <!-- Subject 骨架屏 -->
-                <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
-                    <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
-                </view>
-                <scroll-view v-else scroll-x class="home-scroll">
-                    <view
-                        class="subject-box-new"
-                        v-for="item in subjectsRecommendList"
-                        :key="item.id"
-                        @click="goSubjectDetail(item)"
-                    >
-                        <view class="subject-box-new__left">
-                            <view class="subject-box-new__badge-row">
-                                <view class="subject-box-new__badge" v-if="item.is_locked">
-                                    <uni-icons type="vip-filled" size="8" color="#fbbf24"></uni-icons>
-                                    <text class="badge-text">VIP</text>
-                                </view>
-                                <view class="subject-box-new__count" v-if="item.wall_count">
-                                    {{ item.wall_count }}P
-                                </view>
-                            </view>
-                            <text class="subject-box-new__title">
-                                {{ isEn ? (item.name_en || item.name) : item.name }}
-                            </text>
-                            <text class="subject-box-new__desc">
-                                {{ isEn ? (item.content_en || item.content) : item.content }}
-                            </text>
-                        </view>
-                        
-                        <view class="subject-box-new__right">
-                            <image class="subject-box-new__cover" :src="item.cover_url || '/static/images/placeholder.jpg'" mode="aspectFill" lazy-load></image>
-                            <view class="subject-box-new__cover-shadow"></view>
-                        </view>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>
+        </view>  
 
         <!-- Latest Release -->
         <view class="select">
@@ -285,18 +236,77 @@
             </view>
         </view>
 
-        <!-- Top Entry -->
-        <navigator class="top-entry" url="/pages/app/topN">
-            <view class="top-entry__content">
-                <view class="top-entry__title">{{ $t('top10.title') }}</view>
-                <view class="top-entry__desc">{{ $t('top10.descViews') }}</view>
-                <view class="top-entry__action">
-                    <text class="top-entry__action-text">{{ $t('common.seeAll') }}</text>
-                    <uni-icons type="right" size="18" color="#ffffff"></uni-icons>
-                </view>
+        <!-- Popular Tags Cloud -->
+        <view class="tags-section">
+            <view class="tags-header">
+                <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
+                <text class="tags-title">{{ t('category.popularTags') }}</text>
             </view>
-            <image class="top-entry__visual" :src="topCardImageURL" mode="heightFix"></image>
-        </navigator>
+            <scroll-view scroll-x class="tags-scroll" show-scrollbar="false">
+                <view class="tags-list">
+                    <view 
+                        class="tag-chip" 
+                        v-for="(tag, index) in popularTags" 
+                        :key="index"
+                        @click="searchTag(tag)"
+                    >
+                        <text class="tag-label">#{{ tag }}</text>
+                    </view>
+                </view>
+            </scroll-view>
+        </view>
+
+        <!-- Featured Subjects Section -->
+        <view class="select">
+            <view class="select-watermark">Subject</view>
+            <index-title>
+                <template #name>{{ $t('index.subjectRecommend') }}</template>
+                <template #custom>
+                    <button size="mini" class="btn is-default" @click="goSubjects">{{ $t('common.more') }}</button>
+                </template>
+            </index-title>
+
+            <view class="content content--subjects">
+                <!-- Subject 骨架屏 -->
+                <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
+                    <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
+                </view>
+                <scroll-view v-else scroll-x class="home-scroll">
+                    <view
+                        class="subject-box-new"
+                        v-for="item in subjectsRecommendList"
+                        :key="item.id"
+                        @click="goSubjectDetail(item)"
+                    >
+                        <!-- Top Image Area -->
+                        <view class="subject-box-new__cover-wrapper">
+                            <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load></image>
+                            
+                            <!-- Floating Badges inside Image (Top-Right) -->
+                            <view class="subject-box-new__floating-badges">
+                                <view class="subject-box-new__badge" v-if="item.is_locked">
+                                    <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
+                                    <text class="badge-text">VIP</text>
+                                </view>
+                                <view class="subject-box-new__floating-count">
+                                    {{ item.wall_count || 0 }}P
+                                </view>
+                            </view>
+                        </view>
+                        
+                        <!-- Bottom Info Area -->
+                        <view class="subject-box-new__info">
+                            <text class="subject-box-new__title">
+                                {{ isEn ? (item.name_en || item.name) : item.name }}
+                            </text>
+                            <text class="subject-box-new__desc">
+                                {{ isEn ? (item.content_en || item.content) : item.content }}
+                            </text>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
 
         <!-- Classify Sections -->
         <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
@@ -738,6 +748,17 @@ const goSubjects = () => {
 const goSubjectDetail = (item) => {
     uni.navigateTo({
         url: `/pages/app/subject-detail?id=${item.id}&name=${encodeURIComponent(item.name)}`
+    });
+};
+
+const popularTags = computed(() => {
+    const rawTags = t('category.tagList') || '';
+    return rawTags.split(',').map((tag) => tag.trim()).filter(Boolean);
+});
+
+const searchTag = (tag) => {
+    uni.navigateTo({
+        url: '/pages/app/search?keyword=' + encodeURIComponent(tag)
     });
 };
 
@@ -1304,7 +1325,6 @@ onMounted(() => {
             white-space: nowrap;
             height: 100%;
             box-sizing: border-box;
-            padding: 0 20rpx;
 
             .box {
                 width: 280rpx;
@@ -1312,7 +1332,7 @@ onMounted(() => {
                 display: inline-flex;
                 justify-content: center;
                 align-items: flex-start;
-                margin: 20rpx 20rpx 50rpx 0;
+                margin: 20rpx 20rpx 50rpx 0rpx;
                 transition: box-shadow 0.3s ease;
                 position: relative;
                 overflow: hidden;
@@ -1320,6 +1340,10 @@ onMounted(() => {
                 box-sizing: border-box;
                 // box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
                 box-shadow: none;
+
+                &:first-child {
+                    margin-left: 20rpx;
+                }
 
                 &::before {
                     content: '';
@@ -1448,80 +1472,70 @@ onMounted(() => {
     }
 }
 
-.top-entry {
-    position: relative;
-    margin: 0 20rpx 30rpx;
-    padding: 24rpx 24rpx 24rpx 28rpx;
-    display: block;
-    min-height: 210rpx;
-    overflow: visible;
-    border-radius: 28rpx;
-    background: linear-gradient(180deg, #40454f 0%, #393f48 100%);
-    border: 1rpx solid rgba(255, 255, 255, 0.04);
-    box-shadow: 0 10rpx 24rpx rgba(15, 23, 42, 0.1);
-    text-align: left;
-}
+.tags-section {
+    margin: 0 0 20rpx;
+    padding: 0;
 
-.top-entry__content {
-    width: 340rpx;
-    min-width: 340rpx;
-    padding: 4rpx 0;
-    margin-left: 0;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    justify-content: flex-start;
-}
+    .tags-header {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        margin: 0 20rpx 10rpx;
 
-.top-entry__title {
-    display: block;
-    width: 100%;
-    margin-top: 10rpx;
-    font-size: 34rpx;
-    line-height: 1.2;
-    font-weight: 800;
-    color: #ffffff;
-}
+        .tags-title {
+            font-size: 26rpx;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.5rpx;
+        }
+    }
 
-.top-entry__desc {
-    display: block;
-    width: 100%;
-    margin-top: 10rpx;
-    font-size: 24rpx;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.56);
-    max-width: 320rpx;
-}
+    .tags-scroll {
+        width: 100%;
+        white-space: nowrap;
+    }
 
-.top-entry__action {
-    margin-top: 20rpx;
-    margin-left: 0;
-    align-self: flex-start;
-    width: 56rpx;
-    height: 56rpx;
-    border-radius: 16rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(20, 28, 39, 0.32);
-    border: 1rpx solid rgba(255, 255, 255, 0.12);
-}
+    .tags-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 16rpx;
+        padding: 10rpx 0 10rpx 0;
 
-.top-entry__action-text {
-    display: none;
-}
+        &::before {
+            content: '';
+            width: 4rpx;
+            flex-shrink: 0;
+        }
 
-.top-entry__visual {
-    position: absolute;
-    right: 10rpx;
-    bottom: -18rpx;
-    height: 384rpx;
-    width: auto;
-    z-index: 2;
-    pointer-events: none;
+        &::after {
+            content: '';
+            width: 4rpx;
+            flex-shrink: 0;
+        }
+    }
+
+    .tag-chip {
+        padding: 12rpx 28rpx;
+        border-radius: 100rpx;
+        background: var(--panel-background);
+        border: 1rpx solid var(--panel-border);
+        box-shadow: 0 4rpx 10rpx var(--shadow-color);
+        transition: transform 0.2s, opacity 0.2s;
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        &:active {
+            transform: scale(0.95);
+            opacity: 0.85;
+        }
+
+        .tag-label {
+            font-size: 24rpx;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+    }
 }
 
 .classify {
@@ -1679,124 +1693,135 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     }
 
     &--subject-skeleton {
-        width: 480rpx !important;
-        height: 220rpx !important;
+        width: 580rpx !important;
+        height: 400rpx !important;
         border-radius: 32rpx;
         flex-shrink: 0;
     }
 }
 
 .content--subjects {
-    height: 260rpx !important;
+    height: 520rpx !important;
 }
 
 .subject-box-new {
-    width: 480rpx;
-    height: 220rpx;
+    width: 580rpx;
+    height: 480rpx;
     display: inline-flex;
+    flex-direction: column;
     flex-shrink: 0;
     background: var(--panel-background);
-    border: 1rpx solid var(--panel-border);
-    margin: 12rpx 20rpx 12rpx 0;
+    margin: 20rpx 20rpx 48rpx 0rpx;
     position: relative;
     border-radius: 32rpx;
     box-sizing: border-box;
-    box-shadow: 0 10rpx 28rpx var(--shadow-color);
-    transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s;
+    // box-shadow: 0 4rpx 16rpx var(--shadow-color);
+    box-shadow: none;
+    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s;
     cursor: pointer;
     overflow: hidden;
-    padding: 24rpx;
-    gap: 16rpx;
-    align-items: center;
+
+    &:first-child {
+        margin-left: 20rpx;
+    }
 
     &:active {
-        transform: scale(0.97);
-        box-shadow: 0 4rpx 12rpx var(--shadow-color);
-    }
+        transform: translateY(-2rpx) scale(0.98);
+        box-shadow: 0 8rpx 24rpx var(--shadow-color);
 
-    &__left {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 100%;
-        min-width: 0;
-    }
-
-    &__badge-row {
-        display: flex;
-        align-items: center;
-        gap: 10rpx;
-    }
-
-    &__badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4rpx;
-        padding: 4rpx 12rpx;
-        background: rgba(251, 191, 36, 0.08);
-        border: 1rpx solid rgba(251, 191, 36, 0.16);
-        border-radius: 100rpx;
-        color: #fbbf24;
-        font-size: 16rpx;
-        font-weight: 900;
-
-        .badge-text {
-            line-height: 1;
+        .subject-box-new__cover {
+            transform: scale(1.06);
+        }
+        
+        .subject-box-new__floating-badges {
+            transform: translateY(-4rpx);
         }
     }
 
-    &__count {
-        font-size: 16rpx;
-        font-weight: 800;
-        color: var(--text-tertiary);
-        letter-spacing: 0.5rpx;
-    }
-
-    &__title {
-        font-size: 26rpx;
-        font-weight: 800;
-        color: var(--text-primary);
-        line-height: 1.25;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-    }
-
-    &__desc {
-        font-size: 18rpx;
-        color: var(--text-secondary);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+    &__cover-wrapper {
         width: 100%;
-        margin-top: 4rpx;
-    }
-
-    &__right {
+        height: 100%;
         position: relative;
-        width: 120rpx;
-        height: 172rpx;
-        flex-shrink: 0;
-        border-radius: 20rpx;
         overflow: hidden;
-        box-shadow: 0 6rpx 16rpx var(--shadow-color);
-        background: var(--page-background-secondary);
     }
 
     &__cover {
         width: 100%;
         height: 100%;
         display: block;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
-    &__cover-shadow {
+    &__floating-badges {
         position: absolute;
-        inset: 0;
-        box-shadow: inset 0 0 10rpx rgba(0, 0, 0, 0.1);
-        pointer-events: none;
+        top: 16rpx;
+        right: 16rpx;
+        display: flex;
+        align-items: center;
+        gap: 10rpx;
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        z-index: 5;
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4rpx;
+        padding: 6rpx 14rpx;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1rpx solid rgba(255, 255, 255, 0.15);
+        border-radius: 100rpx;
+        color: #fbbf24;
+        font-size: 22rpx;
+        font-weight: 900;
+        backdrop-filter: blur(8px);
+
+        .badge-text {
+            line-height: 1;
+        }
+    }
+
+    &__floating-count {
+        padding: 6rpx 14rpx;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1rpx solid rgba(255, 255, 255, 0.15);
+        border-radius: 100rpx;
+        color: #ffffff;
+        font-size: 22rpx;
+        font-weight: 800;
+        backdrop-filter: blur(8px);
+    }
+
+    &__info {
+        flex: 1;
+        width: 100%;
+        padding: 16rpx 24rpx;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--panel-background);
+    }
+
+    &__title {
+        font-size: 28rpx;
+        font-weight: 850;
+        color: var(--text-primary);
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__desc {
+        font-size: 22rpx;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+        margin-top: 6rpx;
     }
 }
 </style>

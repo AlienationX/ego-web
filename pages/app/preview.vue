@@ -113,10 +113,10 @@
 
                         <template v-else>
                             <view class="right-actions">
-                                <view class="action-item" @click="openClockStyle">
+                                <!-- <view class="action-item" @click="openClockStyle">
                                     <mdi-icon path="/static/icons/clock.svg" size="36px" color="#ffffff"></mdi-icon>
                                     <view class="action-text">{{ t('previewPage.clockStyle') }}</view>
-                                </view>
+                                </view> -->
                                 <view class="action-item" @click="openInfo">
                                     <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
                                     <view class="action-text">{{ t('common.information') }}</view>
@@ -456,10 +456,8 @@ import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
-import lockScreenOverlay from '@/components/lock-screen-overlay/lock-screen-overlay.vue';
 import { formatPreviewDate } from '@/utils/common.js';
 
-const { proxy } = getCurrentInstance();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
@@ -502,14 +500,14 @@ const showNavDialog = (config) => {
 };
 
 const clockStylePopup = ref(null);
-const activeSessionClockStyle = ref('ios-classic');
+const activeSessionClockStyle = ref('default');
 
 onMounted(() => {
-    let savedStyle = settingsStore.options.clockStyle || 'ios-classic';
+    let savedStyle = settingsStore.options.clockStyle || 'default';
     const savedItem = clockStyles.value.find(s => s.value === savedStyle);
     // 如果保存的是 VIP 样式，但当前用户不是 VIP，则回退为普通样式
     if (savedItem?.isVip && !userStore.isVip) {
-        savedStyle = 'ios-classic';
+        savedStyle = 'default';
         settingsStore.options.clockStyle = savedStyle; // 自动修复本地错误状态
     }
     activeSessionClockStyle.value = savedStyle;
@@ -2171,7 +2169,7 @@ onShareTimeline(() => {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40rpx;
+        margin-bottom: 10rpx;
         
         .title {
             font-size: 36rpx;
@@ -2183,8 +2181,6 @@ onShareTimeline(() => {
     .style-list {
         width: 100%;
         white-space: nowrap;
-        padding-bottom: 20rpx;
-        padding-top: 10rpx;
         
         .style-scroll-content {
             display: inline-flex;
@@ -2200,7 +2196,7 @@ onShareTimeline(() => {
             
             .style-preview {
                 width: 100%;
-                height: 260rpx;
+                height: 320rpx;
                 background: #f0f2f5;
                 border: 4rpx solid transparent;
                 border-radius: 24rpx;
