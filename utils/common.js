@@ -1,19 +1,23 @@
 import { PICS_BASE_URL } from '@/common/config.js';
 
-export function compareTimestamp(timestamp) {
+export function compareTimestamp(timestamp, isEn = false) {
     const currentTime = new Date().getTime();
     const timeDiff = currentTime - timestamp;
 
     if (timeDiff < 60000) {
-        return '1分钟内';
+        return isEn ? 'Just now' : '1分钟内';
     } else if (timeDiff < 3600000) {
-        return Math.floor(timeDiff / 60000) + '分钟';
+        const mins = Math.floor(timeDiff / 60000);
+        return isEn ? `${mins} min` : `${mins}分钟`;
     } else if (timeDiff < 86400000) {
-        return Math.floor(timeDiff / 3600000) + '小时';
+        const hours = Math.floor(timeDiff / 3600000);
+        return isEn ? `${hours} hr` : `${hours}小时`;
     } else if (timeDiff < 2592000000) {
-        return Math.floor(timeDiff / 86400000) + '天';
+        const days = Math.floor(timeDiff / 86400000);
+        return isEn ? `${days} day${days > 1 ? 's' : ''}` : `${days}天`;
     } else if (timeDiff < 7776000000) {
-        return Math.floor(timeDiff / 2592000000) + '月';
+        const months = Math.floor(timeDiff / 2592000000);
+        return isEn ? `${months} mo` : `${months}月`;
     } else {
         return null;
     }

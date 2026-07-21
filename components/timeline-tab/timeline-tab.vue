@@ -91,44 +91,51 @@
                         </view>
 
                         <view class="editorial-grid">
-                            <view
-                                v-for="(item, idx) in day.items"
-                                :key="item.id"
-                                class="timeline-card"
-                                :class="{ 'timeline-card--wide': idx === 0 }"
-                                @click="goPreview(item.id)"
-                            >
-                                <image
-                                    class="timeline-card__image"
-                                    :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
-                                    mode="aspectFill"
-                                    lazy-load
-                                ></image>
-                                <view class="timeline-card__overlay"></view>
-                                <view class="timeline-card__content">
-                                    <view class="timeline-card__classify">
-                                        {{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}
-                                    </view>
-                                    <view class="timeline-card__title">
-                                        {{
-                                            getLocalizedItem(item).description ||
-                                            getLocalizedItem(item).classify_name ||
-                                            `#${item.id}`
-                                        }}
-                                    </view>
-                                    <view class="timeline-card__footer">
-                                        <view class="timeline-card__footer-left">
-                                            <view class="timeline-card__time">
-                                                <text>{{ formatTime(item) }}</text>
-                                            </view>
+                            <template v-for="(item, idx) in day.items" :key="item.id">
+                                <view
+                                    class="timeline-card"
+                                    :class="{ 'timeline-card--wide': idx === 0 }"
+                                    @click="goPreview(item.id)"
+                                >
+                                    <image
+                                        class="timeline-card__image"
+                                        :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
+                                        mode="aspectFill"
+                                        lazy-load
+                                    ></image>
+                                    <view class="timeline-card__overlay"></view>
+                                    <view class="timeline-card__content">
+                                        <view class="timeline-card__classify">
+                                            {{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}
                                         </view>
-                                        <view class="timeline-card__score">
-                                            <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
-                                            <text>{{ item.score ?? '--' }}</text>
+                                        <view class="timeline-card__title">
+                                            {{
+                                                getLocalizedItem(item).description ||
+                                                getLocalizedItem(item).classify_name ||
+                                                `#${item.id}`
+                                            }}
+                                        </view>
+                                        <view class="timeline-card__footer">
+                                            <view class="timeline-card__footer-left">
+                                                <view class="timeline-card__time">
+                                                    <text>{{ formatTime(item) }}</text>
+                                                </view>
+                                            </view>
+                                            <view class="timeline-card__score">
+                                                <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                <text>{{ item.score ?? '--' }}</text>
+                                            </view>
                                         </view>
                                     </view>
                                 </view>
-                            </view>
+
+                                <!-- 上次浏览标记 -->
+                                <view v-if="item.isLastViewedBoundary" class="last-viewed-divider">
+                                    <view class="last-viewed-divider__line"></view>
+                                    <view class="last-viewed-divider__text">{{ t('timeline.aboveNewWallpapers') }}</view>
+                                    <view class="last-viewed-divider__line"></view>
+                                </view>
+                            </template>
                         </view>
                     </view>
                 </view>
@@ -181,6 +188,10 @@ const props = defineProps({
         default: false,
     },
     navBarHeight: {
+        type: Number,
+        default: 0,
+    },
+    unreadCount: {
         type: Number,
         default: 0,
     },
@@ -245,7 +256,7 @@ const monthGroups = computed(() => {
     const list = [];
     const monthMap = new Map();
 
-    latestList.value.forEach((item) => {
+    latestList.value.forEach((item, index) => {
         const date = toDate(item);
         const monthKey = getMonthKey(date);
         const dayKey = getDayKey(date);
@@ -277,7 +288,13 @@ const monthGroups = computed(() => {
             monthItem.days.push(dayItem);
         }
 
-        monthItem.dayMap.get(dayKey).items.push(item);
+        // 判断是否为新旧壁纸边界
+        const markedItem = { ...item };
+        if (props.unreadCount > 0 && index === props.unreadCount - 1) {
+            markedItem.isLastViewedBoundary = true;
+        }
+
+        monthItem.dayMap.get(dayKey).items.push(markedItem);
     });
 
     return list;
@@ -658,6 +675,36 @@ onMounted(() => {
 
     .theme-light & {
         background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%);
+    }
+}
+
+.last-viewed-divider {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20rpx;
+    margin: 40rpx 0;
+    
+    &__line {
+        flex: 1;
+        height: 1px;
+        background: rgba(115, 130, 154, 0.34);
+        
+        .theme-light & {
+            background: rgba(0, 0, 0, 0.08);
+        }
+    }
+    
+    &__text {
+        font-size: 24rpx;
+        color: rgba(226, 232, 240, 0.88);
+        font-weight: 500;
+        letter-spacing: 2rpx;
+        
+        .theme-light & {
+            color: var(--text-tertiary);
+        }
     }
 }
 

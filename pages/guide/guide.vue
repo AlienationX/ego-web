@@ -60,8 +60,10 @@
 import { ref, computed } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { getStatusBarHeight } from '@/utils/layout.js';
 import { PICS_BASE_URL } from '@/common/config.js';
+import { useStatusStore } from '@/stores/status.js';
+
+const statusStore = useStatusStore();
 
 const { t } = useI18n();
 
@@ -113,7 +115,7 @@ const skipGuide = () => {
 };
 
 const enterApp = () => {
-    uni.setStorageSync('hasSeenGuide', true);
+    statusStore.appStatus.hasSeenGuide = true;
     uni.switchTab({
         url: '/pages/app/index',
     });

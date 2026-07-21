@@ -212,6 +212,7 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useStatusStore } from '@/stores/status.js';
 import { useI18n } from 'vue-i18n';
 import { updateTabBarText } from '@/utils/i18n.js';
 
@@ -220,6 +221,7 @@ const { t } = useI18n();
 const userStore = useUserStore();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
+const statusStore = useStatusStore();
 // const userinfo = reactive(userStore.userinfo);  // 只是userinfo的副本的响应式，和userStore.userinfo不是同一个对象
 // const userinfo = computed(() => userStore.userinfo); // 计算属性需要写userinfo.value，也麻烦
 
@@ -389,7 +391,7 @@ const checkin = async () => {
 
         // 保存签到日期到本地存储
         const today = new Date().toISOString().split('T')[0];
-        uni.setStorageSync('lastCheckinDate', today);
+        statusStore.appStatus.lastCheckinDate = today;
 
         uni.showToast({
             title: t('user.profile.checkinSuccess'),
@@ -536,7 +538,7 @@ onShow(() => {
     }
 
     // 检查今日是否已签到
-    const lastCheckinDate = uni.getStorageSync('lastCheckinDate');
+    const lastCheckinDate = statusStore.appStatus.lastCheckinDate;
     const today = new Date().toISOString().split('T')[0];
     hasCheckedInToday.value = lastCheckinDate === today;
 });

@@ -455,12 +455,14 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
+import { useStatusStore } from '@/stores/status.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
 import { formatPreviewDate } from '@/utils/common.js';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+const statusStore = useStatusStore();
 const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
 const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
 
@@ -631,7 +633,6 @@ const applyTempClockStyle = async () => {
 };
 
 const avatarSeedSalt = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-const HAS_SEEN_HINT_KEY = 'hasSeenHint';
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -749,7 +750,7 @@ classList.value = wallList.map((item) => {
     };
 });
 const disableSwipe = ref(false);
-const showScrollHint = ref(!uni.getStorageSync(HAS_SEEN_HINT_KEY));
+const showScrollHint = ref(!statusStore.appStatus.hasSeenPreviewHint);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 // 使用新版 getWindowInfo API，搭配可选链兜底
 const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || 667;
@@ -789,7 +790,7 @@ const handlePreviewScroll = (e) => {
     if (!showScrollHint.value) return;
     if (scrollTop > 60) {
         showScrollHint.value = false;
-        uni.setStorageSync(HAS_SEEN_HINT_KEY, true);
+        statusStore.appStatus.hasSeenPreviewHint = true;
     }
 };
 

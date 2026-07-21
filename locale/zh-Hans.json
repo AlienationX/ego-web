@@ -87,6 +87,8 @@
         "forYouRecentPreference": "最近偏好",
         "followingEyebrow": "FOLLOWING",
         "followingTitle": "订阅提醒",
+        "newWallpapersNoticeTitle": "发现新灵感",
+        "newWallpapersNoticeDesc": "新增了 {count} 张壁纸，前往时间轴浏览最新发布的高清作品。",
         "followingDesc": "你当前订阅了 {classifyCount} 个分类、{tagCount} 个标签，首页推荐会优先参考这些兴趣方向。",
         "followingExpand": "展开",
         "followingCollapse": "收起",
@@ -196,6 +198,7 @@
         "title": "时间轴",
         "subtitle": "视觉\n时间轴",
         "desc": "把最近发布的壁纸按时间切成更有节奏的浏览方式，像翻一份深夜编辑刊物一样往下看。",
+        "aboveNewWallpapers": "以上为新增壁纸",
         "empty": "暂无时间轴内容",
         "recentTag": "最新 {count} 张"
     },

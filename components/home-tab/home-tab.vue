@@ -1,7 +1,21 @@
 <template>
-    <scroll-view scroll-y class="home-tab-layout" @scroll="handleScroll">
-        <!-- 静态 spacer，与其他嵌入式 tab 保持一致，不随 titlebar 显隐变化 -->
-        <view :style="{ height: navBarHeight + 'px' }"></view>
+    <view class="home-tab-wrapper">
+        <view class="update-banner" :class="{ 'update-banner--show': statusStore.newWallpapersCount > 0 }" :style="{ top: (navBarHeight + 10) + 'px' }" @click="goTimeline">
+            <view class="update-banner__inner">
+                <image src="/static/logo.svg" mode="aspectFill" class="update-banner__logo"></image>
+                <view class="update-banner__content">
+                    <view class="update-banner__header">
+                        <text class="update-banner__title">{{ $t('index.newWallpapersNoticeTitle') }}</text>
+                        <text v-if="bannerTimeAgo" class="update-banner__time">{{ bannerTimeAgo }}</text>
+                    </view>
+                    <text class="update-banner__desc">{{ tp('index.newWallpapersNoticeDesc', { count: statusStore.newWallpapersCount }) }}</text>
+                </view>
+            </view>
+        </view>
+
+        <scroll-view scroll-y class="home-tab-layout" @scroll="handleScroll">
+            <!-- 静态 spacer，与其他嵌入式 tab 保持一致，不随 titlebar 显隐变化 -->
+            <view :style="{ height: navBarHeight + 'px' }"></view>
 
         <!-- Banner -->
         <view class="banner">
@@ -352,6 +366,7 @@
             </view>
         </view>
     </scroll-view>
+    </view>
 </template>
 
 <script setup>
@@ -366,13 +381,15 @@ import {
     apiGetClassify,
     apiGetClassList,
     apiGetSubjects,
+    apiGetCheckUpdates,
 } from '@/api/wallpaper.js';
 import { PICS_BASE_URL } from '@/common/config.js';
-import { handlePicUrl } from '@/utils/common.js';
+import { handlePicUrl, compareTimestamp } from '@/utils/common.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+import { useStatusStore } from '@/stores/status.js';
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -380,6 +397,7 @@ const libraryStore = useLibraryStore();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
+const statusStore = useStatusStore();
 
 const isAdmin = computed(() => !!userStore.isAdmin);
 const isEn = computed(() => locale.value === 'en');
@@ -399,6 +417,16 @@ const handleScroll = (e) => {
 
 // navBarHeight 直接使用 props，不再重复获取
 const navBarHeight = computed(() => props.navBarHeight);
+
+const bannerTimeAgo = computed(() => {
+    const lastTime = statusStore.appStatus.lastViewedWallpaperTime;
+    if (!lastTime) return '';
+    const ts = new Date(lastTime).getTime();
+    const ago = compareTimestamp(ts, isEn.value);
+    if (!ago) return '';
+    if (isEn.value && ago === 'Just now') return ago;
+    return isEn.value ? `${ago} ago` : `${ago}前`;
+});
 
 const topCardImageURL = ref(PICS_BASE_URL + '/insets/1699281368061_2-removebg-preview.png');
 
@@ -669,12 +697,42 @@ const getLatest = async (isAppend = false) => {
         const nextList = (res.data || [])
             .map((item) => addTimeBadge(handlePicUrl(item)))
             .sort((a, b) => toTimelineDate(b).getTime() - toTimelineDate(a).getTime());
+            
+        // 提取最新时间记录到本地
+        if (nextList.length > 0 && nextList[0].created_at) {
+            statusStore.setLastViewedWallpaperTime(nextList[0].created_at);
+        }
+        
         latestList.value = isAppend ? [...latestList.value, ...nextList] : nextList;
         const totalPages = Number(res?.pagination?.total_pages || 1);
         latestNoMore.value = latestQuery.value.pageNum >= totalPages || nextList.length === 0;
     } finally {
         latestLoading.value = false;
     }
+};
+
+const checkUpdates = async () => {
+    const lastTime = statusStore.appStatus.lastViewedWallpaperTime;
+    if (!lastTime) return;
+    try {
+        const res = await apiGetCheckUpdates({ since: lastTime });
+        if (res.data?.new_count > 0) {
+            statusStore.newWallpapersCount = res.data.new_count;
+            // 自动定时关闭横幅 (例如8秒后)
+            setTimeout(() => {
+                statusStore.newWallpapersCount = 0;
+            }, 8000);
+        }
+    } catch (e) {
+        console.error('Check updates failed', e);
+    }
+};
+
+const goTimeline = () => {
+    const unread = statusStore.newWallpapersCount;
+    // 隐藏横幅
+    statusStore.newWallpapersCount = 0;
+    uni.navigateTo({ url: `/pages/app/timeline?unreadCount=${unread}` });
 };
 
 // --- Navigation ---
@@ -715,9 +773,6 @@ const onAdError = (key) => {
     adVisibleMap[key] = false;
 };
 
-const goTimeline = () => {
-    uni.navigateTo({ url: '/pages/app/timeline' });
-};
 
 const goClasslist = (id, name) => {
     uni.navigateTo({ url: `/pages/app/classlist?id=${id}&name=${name}` });
@@ -768,6 +823,7 @@ onMounted(() => {
     getBanner();
     getRandom();
     getLatest();
+    checkUpdates(); // 静默检查更新
 
     // P2 延时 300ms：首屏次要数据，让 P1 的渲染先跑起来
     setTimeout(() => {
@@ -784,6 +840,98 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.home-tab-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+.update-banner {
+    position: absolute;
+    left: 32rpx;
+    right: 32rpx;
+    background: #ffffff;
+    border-radius: 40rpx;
+    padding: 32rpx;
+    display: flex;
+    align-items: center;
+    z-index: 100;
+    transform: translateY(-150%);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
+
+    .theme-light & {
+        background: #ffffff;
+        box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
+    }
+    /* Dark mode override */
+    .theme-dark & {
+        background: #1e293b;
+        box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.3);
+    }
+
+    &--show {
+        transform: translateY(20rpx);
+        opacity: 1;
+    }
+
+    &__inner {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 24rpx;
+    }
+
+    &__logo {
+        width: 96rpx;
+        height: 96rpx;
+        border-radius: 24rpx;
+        background: #4F46E5;
+        flex-shrink: 0;
+    }
+
+    &__content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6rpx;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 2rpx;
+    }
+
+    &__title {
+        font-size: 28rpx;
+        font-weight: 700;
+        color: #0f172a;
+        
+        .theme-dark & {
+            color: #f8fafc;
+        }
+    }
+
+    &__time {
+        font-size: 22rpx;
+        color: #94a3b8;
+    }
+
+    &__desc {
+        font-size: 26rpx;
+        color: #475569;
+        line-height: 1.4;
+
+        .theme-dark & {
+            color: #cbd5e1;
+        }
+    }
+}
+
 .home-tab-layout {
     width: 100%;
     max-width: 100%;
@@ -1397,7 +1545,7 @@ onMounted(() => {
 
                 // Hero mode
                 &.is-hero {
-                    width: 440rpx;
+                    width: 460rpx;
                     height: calc(100% - 50rpx);
                     padding-bottom: 0;
 
