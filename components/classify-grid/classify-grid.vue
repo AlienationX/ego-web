@@ -125,7 +125,7 @@ const onImageLoad = (id) => {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        box-shadow: 0 10rpx 10rpx rgba(0, 0, 0, 0.34);
+        box-shadow: 0 8rpx 20rpx var(--shadow-color);
         transition:
             opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1),
             transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);

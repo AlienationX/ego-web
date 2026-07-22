@@ -1411,10 +1411,6 @@ onShareTimeline(() => {
     position: relative;
     min-height: 100vh;
     background: var(--page-background);
-
-    .theme-dark & {
-        background: #0b0f14;
-    }
 }
 
 .previewScroll {
@@ -1435,10 +1431,6 @@ onShareTimeline(() => {
             height: 100%;
             position: relative;
             background: var(--page-background);
-
-            .theme-dark & {
-                background: #0b0f14;
-            }
         }
 
         .preview-slide__image {
