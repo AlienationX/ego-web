@@ -45,7 +45,7 @@ const webMiniStyle = computed(() => ({
     fontSize: sizeValue.value,
     width: sizeValue.value,
     height: sizeValue.value,
-    lineHeight: sizeValue.value,
+    lineHeight: 1,
 }));
 
 // ===== APP 原生：drop-shadow 方案 =====

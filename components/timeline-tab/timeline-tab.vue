@@ -103,6 +103,9 @@
                                         mode="aspectFill"
                                         lazy-load
                                     ></image>
+                                    <view class="timeline-card__lock" v-if="item.is_locked">
+                                        <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                    </view>
                                     <view class="timeline-card__overlay"></view>
                                     <view class="timeline-card__content">
                                         <view class="timeline-card__classify">
@@ -676,6 +679,20 @@ onMounted(() => {
     .theme-light & {
         background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%);
     }
+}
+
+.timeline-card__lock {
+    position: absolute;
+    top: 20rpx;
+    right: 20rpx;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    padding: 8rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
 }
 
 .last-viewed-divider {

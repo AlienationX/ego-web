@@ -1,6 +1,9 @@
 <template>
     <view class="home-tab-wrapper">
         <view class="update-banner" :class="{ 'update-banner--show': statusStore.newWallpapersCount > 0 }" :style="{ top: (navBarHeight + 10) + 'px' }" @click="goTimeline">
+            <view class="update-banner__close" @click.stop="closeBanner">
+                <mdi-icon path="/static/icons/close.svg" size="12px" color="#ffffff"></mdi-icon>
+            </view>
             <view class="update-banner__inner">
                 <image src="/static/logo.svg" mode="aspectFill" class="update-banner__logo"></image>
                 <view class="update-banner__content">
@@ -728,6 +731,10 @@ const checkUpdates = async () => {
     }
 };
 
+const closeBanner = () => {
+    statusStore.newWallpapersCount = 0;
+};
+
 const goTimeline = () => {
     const unread = statusStore.newWallpapersCount;
     // 隐藏横幅
@@ -874,6 +881,39 @@ onMounted(() => {
     &--show {
         transform: translateY(20rpx);
         opacity: 1;
+    }
+
+    &__close {
+        position: absolute;
+        top: -12rpx;
+        right: -12rpx;
+        width: 40rpx;
+        height: 40rpx;
+        border-radius: 50%;
+        background: #94a3b8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border: 4rpx solid #ffffff;
+        box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.15);
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        :deep(mdi-icon) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-dark & {
+            background: #475569;
+            border-color: #1e293b;
+        }
+
+        &:active {
+            transform: scale(0.85);
+            background: #64748b;
+        }
     }
 
     &__inner {
