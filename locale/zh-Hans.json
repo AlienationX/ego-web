@@ -470,6 +470,7 @@
         "views": "浏览量:",
         "downloads": "下载量:",
         "resolution": "分辨率:",
+        "fileSize": "文件大小:",
         "aspectRatio": "比例:",
         "description": "描述:",
         "tags": "标签:",

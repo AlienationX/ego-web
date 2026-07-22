@@ -157,6 +157,41 @@
                         </template>
                     </view>
                 </view>
+                <!-- 作品参数指标与免责声明面板（3行2列扁平化布局） -->
+                <view class="preview-extra-panel" v-if="currentInfo">
+                    <!-- 第一行：免责声明 -->
+                    <view class="extra-disclaimer">
+                        <text class="disclaimer-text" user-select>{{ tp('message.copyrightStatement', { email: '735003439@qq.com' }) }}</text>
+                    </view>
+
+                    <!-- 第二行与第三行：2列网格指标数据 -->
+                    <view class="extra-grid">
+                        <!-- 第二行：浏览量 & 下载量 -->
+                        <view class="grid-cell">
+                            <mdi-icon path="/static/icons/fire.svg" size="16px" color="#94a3b8"></mdi-icon>
+                            <text class="cell-label">{{ t('common.views') }}</text>
+                            <text class="cell-value">{{ currentInfo.views ?? 0 }}</text>
+                        </view>
+                        <view class="grid-cell">
+                            <mdi-icon path="/static/icons/download.svg" size="16px" color="#94a3b8"></mdi-icon>
+                            <text class="cell-label">{{ t('common.downloads') }}</text>
+                            <text class="cell-value">{{ currentInfo.downloads ?? 0 }}</text>
+                        </view>
+
+                        <!-- 第三行：尺寸(分辨率) & 大小(文件体积) -->
+                        <view class="grid-cell">
+                            <mdi-icon path="/static/icons/information-outline.svg" size="16px" color="#94a3b8"></mdi-icon>
+                            <text class="cell-label">{{ t('previewPage.resolution').replace(':', '') }}</text>
+                            <text class="cell-value">{{ currentInfo.width && currentInfo.height ? `${currentInfo.width}×${currentInfo.height}` : '--' }}</text>
+                        </view>
+                        <view class="grid-cell">
+                            <mdi-icon path="/static/icons/image.svg" size="16px" color="#94a3b8"></mdi-icon>
+                            <text class="cell-label">{{ t('previewPage.fileSize').replace(':', '') }}</text>
+                            <text class="cell-value">{{ formatFileSize(currentInfo.file_size) }}</text>
+                        </view>
+                    </view>
+                </view>
+
                 <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
             </view>
         </scroll-view>
@@ -228,7 +263,7 @@
                                 </view>
                             </view>
                         </view>
-                        <view class="copyright">{{ tp('message.copyrightStatement', { email: '735003439@qq.com' }) }}</view>
+                        <text class="copyright" user-select>{{ tp('message.copyrightStatement', { email: '735003439@qq.com' }) }}</text>
                     </view>
                 </scroll-view>
             </view>
@@ -457,7 +492,7 @@ import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useStatusStore } from '@/stores/status.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
-import { formatPreviewDate } from '@/utils/common.js';
+import { formatPreviewDate, formatFileSize } from '@/utils/common.js';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -2360,6 +2395,72 @@ onShareTimeline(() => {
         .apply-btn--disabled {
             background: #333 !important;
             color: #666 !important;
+        }
+    }
+}
+
+.preview-extra-panel {
+    padding: 24rpx 36rpx 30rpx 36rpx;
+    background: transparent;
+
+    .extra-disclaimer {
+        display: flex;
+        align-items: flex-start;
+        gap: 12rpx;
+        padding-bottom: 24rpx;
+        margin-bottom: 24rpx;
+        border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+
+        .theme-light & {
+            border-bottom-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .disclaimer-icon {
+            flex-shrink: 0;
+            margin-top: 2rpx;
+        }
+
+        .disclaimer-text {
+            font-size: 22rpx;
+            color: #94a3b8;
+            line-height: 1.5;
+
+            .theme-light & {
+                color: #64748b;
+            }
+        }
+    }
+
+    .extra-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20rpx 32rpx;
+
+        .grid-cell {
+            display: flex;
+            align-items: center;
+            gap: 12rpx;
+
+            .cell-label {
+                font-size: 24rpx;
+                color: #94a3b8;
+                flex-shrink: 0;
+
+                .theme-light & {
+                    color: #64748b;
+                }
+            }
+
+            .cell-value {
+                font-size: 24rpx;
+                font-weight: 600;
+                color: #f1f5f9;
+                margin-left: auto;
+
+                .theme-light & {
+                    color: #0f172a;
+                }
+            }
         }
     }
 }

@@ -23,6 +23,22 @@ export function compareTimestamp(timestamp, isEn = false) {
     }
 }
 
+export function formatFileSize(bytes) {
+    if (bytes === null || bytes === undefined || bytes === '' || isNaN(bytes) || Number(bytes) <= 0) {
+        return '--';
+    }
+    const numBytes = Number(bytes);
+    if (numBytes < 1024) {
+        return `${numBytes} B`;
+    } else if (numBytes < 1024 * 1024) {
+        return `${(numBytes / 1024).toFixed(1)} KB`;
+    } else if (numBytes < 1024 * 1024 * 1024) {
+        return `${(numBytes / (1024 * 1024)).toFixed(1)} MB`;
+    } else {
+        return `${(numBytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+    }
+}
+
 export function handlePicUrl(item, prefix = PICS_BASE_URL) {
     if (!item) return item;
     const newItem = { ...item };

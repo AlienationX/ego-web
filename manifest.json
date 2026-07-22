@@ -57,7 +57,7 @@
                 ],
                 "abiFilters" : [ "arm64-v8a", "x86" ],
                 "minSdkVersion" : 24,
-                "targetSdkVersion" : 35,
+                "targetSdkVersion" : 36,
                 "excludePermissions" : [
                     "<uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\"/>",
                     "<uses-permission android:name=\"android.permission.READ_MEDIA_VIDEO\"/>"
