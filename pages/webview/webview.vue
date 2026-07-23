@@ -17,7 +17,7 @@
             v-else
             :content="htmlContent"
             :tag-style="parsedTagStyle"
-            :container-style="'font-family:PingFang SC,Microsoft YaHei,Arial,sans-serif;line-height:1.8;color:#f8f9fa;padding:20px;'"
+            :container-style="'font-family:PingFang SC,Microsoft YaHei,Arial,sans-serif;line-height:1.8;color:var(--text-primary);padding:20px;'"
             scroll-table
         ></mp-html>
         <!-- #endif -->
@@ -51,13 +51,15 @@ const parsedTagStyle = ref({});  // 从 HTML <style> 动态解析
 
 /**
  * 把 CSS 字符串解析成 mp-html tag-style 对象
- * 只处理纯标签选择器（h1/h2/p/ul/li 等），忽略类/ID/伪类选择器
+ * 先剥离 @media 块（防止 dark 媒体查询样式渗入 light 模式），再解析纯标签选择器
  */
 const parseCssToTagStyle = (css) => {
     const result = {};
+    // 移除所有 @media 块，避免 prefers-color-scheme: dark 样式覆盖浅色模式
+    const cleanCss = css.replace(/@[^{]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, '');
     const ruleReg = /([a-zA-Z][a-zA-Z0-9,\s]*?)\s*\{([^}]*)\}/g;
     let match;
-    while ((match = ruleReg.exec(css)) !== null) {
+    while ((match = ruleReg.exec(cleanCss)) !== null) {
         const declarations = match[2].trim();
         for (const selector of match[1].split(',').map(s => s.trim())) {
             if (/^[a-zA-Z][a-zA-Z0-9]*$/.test(selector)) {

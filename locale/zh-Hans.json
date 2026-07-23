@@ -306,7 +306,7 @@
         "incompleteWarning": "需要看完广告才能下载"
     },
     "message": {
-        "copyrightStatement": "声明：本图片来源于网络，如有侵权可以拷贝壁纸ID及相关证明反馈到邮箱{email}，管理员将删除侵权壁纸，维护您的权益。",
+        "copyrightStatement": "声明：本站壁纸均来源于网络收集。如无意侵犯了您的版权，请将壁纸 ID 及相关权属证明发送至 {email}，我们将核实后尽快处理以维护您的权益。",
         "saveSuccessful": "保存成功，请到相册查看",
         "saveFailed": "保存失败，请重新点击下载",
         "downloading": "下载中...",

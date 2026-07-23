@@ -22,6 +22,7 @@
         font-size: 34rpx;
         font-weight: 500;
         color: var(--text-primary);
+        padding-left: 10rpx;
     }
 }
 </style>

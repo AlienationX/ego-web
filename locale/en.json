@@ -306,7 +306,7 @@
         "incompleteWarning": "Watch the full ad to unlock download"
     },
     "message": {
-        "copyrightStatement": "Declaration: This image is from the internet. If there is any infringement, please copy the wallpaper ID and relevant proof and send them to the email {email}. The administrator will delete the infringing wallpaper to protect your rights.",
+        "copyrightStatement": "Statement: Wallpapers on this app are collected from the internet. If your copyright is unintentionally infringed, please send the wallpaper ID and relevant proof of ownership to {email}. We will verify and process it as soon as possible to protect your rights.",
         "saveSuccessful": "Save successful. Please go to the album to view.",
         "saveFailed": "Save failed. Please try again.",
         "downloading": "Downloading...",

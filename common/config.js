@@ -21,6 +21,9 @@ export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper/media';
 // 备案信息
 export const RIGHT_ICP = '粤ICP备15077732号-2';
 
+// 客服邮箱
+export const SERVICE_EMAIL = "le7yi_ss@163.com";
+
 // 渠道标识（避免在 system.js / wallpaper.js 间循环引用，统一放这里）
 let _channel = '';
 // #ifdef APP

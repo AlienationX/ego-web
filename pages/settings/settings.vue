@@ -217,7 +217,7 @@
                                     <mdi-icon path="/static/icons/email.svg" size="20px" color="#28B389"></mdi-icon>
                                     <text class="about-row-text">{{ t('about.email') }}</text>
                                 </view>
-                                <text class="about-row-value">735003439@qq.com</text>
+                                <text class="about-row-value">{{ SERVICE_EMAIL }}</text>
                             </view>
                         </view>
                     </view>
@@ -426,7 +426,7 @@ import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
-import { RIGHT_ICP } from '@/common/config.js';
+import { RIGHT_ICP, SERVICE_EMAIL } from '@/common/config.js';
 import {
     LANGUAGE_PREF_AUTO,
     LANGUAGE_PREF_EN,
@@ -1055,7 +1055,7 @@ function contactSupport() {
 
 function copyEmail() {
     uni.setClipboardData({
-        data: '735003439@qq.com',
+        data: SERVICE_EMAIL,
         success: () => {
             uni.showToast({
                 title: t('about.copied'),

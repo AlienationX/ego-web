@@ -899,12 +899,6 @@ onMounted(() => {
         box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.15);
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-        :deep(mdi-icon) {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
         .theme-dark & {
             background: #475569;
             border-color: #1e293b;
@@ -1427,26 +1421,6 @@ onMounted(() => {
         position: relative;
         z-index: 1;
         margin-bottom: 24rpx;
-
-        :deep(.name) {
-            font-size: 38rpx;
-            font-weight: 850;
-            color: var(--text-primary);
-            letter-spacing: 0.5rpx;
-            position: relative;
-            padding-bottom: 8rpx;
-
-            &::after {
-                content: '';
-                position: absolute;
-                left: 0;
-                bottom: 0;
-                width: 36rpx;
-                height: 6rpx;
-                border-radius: 99rpx;
-                background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            }
-        }
     }
 
     .date {

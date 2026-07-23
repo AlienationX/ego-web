@@ -161,7 +161,7 @@
                 <view class="preview-extra-panel" v-if="currentInfo">
                     <!-- 第一行：免责声明 -->
                     <view class="extra-disclaimer">
-                        <text class="disclaimer-text" user-select>{{ tp('message.copyrightStatement', { email: '735003439@qq.com' }) }}</text>
+                        <text class="disclaimer-text" user-select>{{ tp('message.copyrightStatement', { email: SERVICE_EMAIL }) }}</text>
                     </view>
 
                     <!-- 第二行与第三行：2列网格指标数据 -->
@@ -263,7 +263,7 @@
                                 </view>
                             </view>
                         </view>
-                        <text class="copyright" user-select>{{ tp('message.copyrightStatement', { email: '735003439@qq.com' }) }}</text>
+                        <text class="copyright" user-select>{{ tp('message.copyrightStatement', { email: SERVICE_EMAIL }) }}</text>
                     </view>
                 </scroll-view>
             </view>
@@ -476,7 +476,7 @@ import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 
-import { VIDEO_REWARD_ENERGY } from '@/common/config.js';
+import { VIDEO_REWARD_ENERGY, SERVICE_EMAIL } from '@/common/config.js';
 import { downloadPic } from '@/common/core.js';
 import {
     apiPostIncrementViews,

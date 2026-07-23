@@ -79,7 +79,7 @@
                             <text class="item-text">{{ t('about.email') }}</text>
                         </view>
                         <view class="item-right">
-                            <text class="email-text">735003439@qq.com</text>
+                            <text class="email-text">{{ SERVICE_EMAIL }}</text>
                             <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                         </view>
                     </view>
@@ -118,6 +118,7 @@ import { ref } from 'vue';
 import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
+import { SERVICE_EMAIL } from '@/common/config.js';
 
 const { t } = useI18n();
 const { tp } = useTranslateParams();
@@ -139,7 +140,7 @@ const contactSupport = () => {
 
 const copyEmail = () => {
     uni.setClipboardData({
-        data: '735003439@qq.com',
+        data: SERVICE_EMAIL,
         success: () => {
             uni.showToast({
                 title: t('about.copied'),
