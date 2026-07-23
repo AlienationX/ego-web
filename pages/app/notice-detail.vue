@@ -133,13 +133,13 @@ onLoad(() => {
     min-height: 100vh;
 
     .container {
-        padding: 32rpx 36rpx 60rpx;
+        padding: 30rpx;
 
         .header {
             display: flex;
             align-items: center;
             gap: 16rpx;
-            margin-bottom: 32rpx;
+            margin-bottom: 30rpx;
 
             .title-text {
                 font-size: 42rpx;
@@ -170,7 +170,6 @@ onLoad(() => {
         }
 
         .content {
-            padding-bottom: 24rpx;
             color: var(--text-primary);
         }
 
@@ -179,8 +178,8 @@ onLoad(() => {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-top: 24rpx;
-            margin-top: 12rpx;
+            padding-top: 20rpx;
+            padding-bottom: 30rpx;
             color: var(--text-tertiary);
             font-size: 26rpx;
 

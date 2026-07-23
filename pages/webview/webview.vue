@@ -12,12 +12,12 @@
             <text class="mp-error__text">内容加载失败，请检查网络后重试</text>
             <view class="mp-error__btn" @click="fetchHtmlContent">重新加载</view>
         </view>
-        <!-- mp-html：tag-style 注入协议页样式，自适应 Light/Dark 模式 -->
+        <!-- mp-html：tag-style 采用 CSS 变量自适应，实现与 notice 一致的 Light/Dark 主题秒切 -->
         <mp-html
             v-else
             :content="htmlContent"
             :tag-style="effectiveTagStyle"
-            container-style="font-family:PingFang SC,Microsoft YaHei,Arial,sans-serif;line-height:1.8;color:var(--text-primary);padding:20px;"
+            container-style="font-family:PingFang SC,Microsoft YaHei,Arial,sans-serif;line-height:1.8;color:var(--text-primary);padding:20px 24px;"
             scroll-table
         ></mp-html>
         <!-- #endif -->
@@ -51,7 +51,7 @@ const parsedTagStyle = ref({});  // 从 HTML <style> 动态解析
 
 /**
  * 把 CSS 字符串解析成 mp-html tag-style 对象
- * 先剥离 @media 块（防止 dark 媒体查询样式渗入 light 模式），再解析纯标签选择器
+ * 剥离 @media 块，防止外部写死样式干扰 CSS 变量系统
  */
 const parseCssToTagStyle = (css) => {
     const result = {};
@@ -75,43 +75,30 @@ const pageTitle = computed(() => {
     return t('common.title');
 });
 
-// 动态深色/浅色样式覆盖，解决小程序端解析外部 HTML 在深色模式下文字不可见的问题
+// 使用 CSS 变量 (var(--text-primary)) 统领全局调色，完美跟随页面切换 Light/Dark 模式
 const effectiveTagStyle = computed(() => {
-    const isDark = settingsStore.isDark;
     const base = { ...parsedTagStyle.value };
 
-    if (isDark) {
-        return {
-            ...base,
-            body: 'color: #f7f7fb; background-color: transparent;',
-            h1: 'color: #f7f7fb; border-bottom-color: rgba(255,255,255,0.12);',
-            h2: 'color: #e2e8f0;',
-            h3: 'color: #cbd5e1;',
-            p: 'color: rgba(247, 247, 251, 0.85);',
-            li: 'color: rgba(247, 247, 251, 0.85);',
-            '.note': 'color: #94a3b8; background-color: rgba(231, 76, 60, 0.12); border-left-color: #e74c3c;',
-            '.date': 'color: #64748b; text-align: right;'
-        };
-    } else {
-        return {
-            ...base,
-            body: 'color: #15171c; background-color: transparent;',
-            h1: 'color: #2c3e50;',
-            h2: 'color: #34495e;',
-            h3: 'color: #476582;',
-            p: 'color: rgba(21, 23, 28, 0.85);',
-            li: 'color: rgba(21, 23, 28, 0.85);',
-            '.note': 'color: #7f8c8d; background-color: #fdf6f6; border-left-color: #e74c3c;',
-            '.date': 'color: #95a5a6; text-align: right;'
-        };
-    }
+    return {
+        ...base,
+        body: 'color: var(--text-primary); background-color: transparent;',
+        h1: 'color: var(--text-primary); text-align: center; border-bottom: 1rpx solid var(--panel-border); font-size: 24px; font-weight: 700; margin: 20px 0 16px; padding-bottom: 16px;',
+        h2: 'color: var(--text-primary); font-size: 20px; font-weight: 700; margin: 28px 0 16px; line-height: 1.4;',
+        h3: 'color: var(--text-primary); font-size: 17px; font-weight: 600; margin: 22px 0 12px; line-height: 1.4;',
+        p: 'color: var(--text-primary); font-size: 15px; line-height: 1.8; margin-bottom: 16px; opacity: 0.92;',
+        li: 'color: var(--text-primary); font-size: 15px; line-height: 1.8; margin-bottom: 8px; opacity: 0.92;',
+        ul: 'padding-left: 20px; margin-left: 0; margin-bottom: 16px;',
+        ol: 'padding-left: 20px; margin-left: 0; margin-bottom: 16px;',
+        '.note': 'color: var(--text-secondary); background-color: var(--panel-background); border-left: 4px solid #e74c3c; padding: 12px 16px; margin: 20px 0; border-radius: 0 8px 8px 0;',
+        '.date': 'color: var(--text-tertiary); text-align: right; margin-bottom: 24px; font-size: 14px;'
+    };
 });
 
 const handleMessage = (e) => {
     console.log('Webview message:', e.detail);
 };
 
-// 小程序端拉取完整 HTML，直接传给 mp-html
+// 小程序端拉取完整 HTML，传给 mp-html 动态渲染
 const fetchHtmlContent = () => {
     // #ifndef MP
     return;
@@ -136,9 +123,9 @@ const fetchHtmlContent = () => {
                 }
                 // 去掉 <style> 块（mp-html 会忽略，提前移除更干净）
                 html = html.replace(/<style[\s\S]*?<\/style>/gi, '');
-                // 去掉固定背景色，避免深色模式出现白块
+                // 彻底去掉 HTML 写死的背景色，保证继承外层主题背景
                 html = html.replace(
-                    /background-color\s*:\s*#(?:f8f9fa|fff|ffffff)\b/gi,
+                    /background-color\s*:\s*#(?:f8f9fa|fff|ffffff|181818)\b/gi,
                     'background-color: transparent'
                 );
                 htmlContent.value = html;
