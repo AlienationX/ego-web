@@ -102,6 +102,12 @@
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
         <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
+
+        <!-- 自定义 TabBar 组件 (支持多语言实时切换与 Light/Dark 模式) -->
+        <glass-tab-bar
+            current-path="/pages/app/index"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-tab-bar>
     </view>
 </template>
 
@@ -110,7 +116,6 @@ import { ref, computed, watch } from 'vue';
 import { onLoad, onShow, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
-import { updateTabBarText } from '@/utils/i18n.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/layout.js';
 
@@ -203,13 +208,6 @@ const onAdHeightChange = (height) => {
     adHeight.value = Math.max(0, Number(height) || 0);
 };
 const channelBottomStyle = computed(() => (adHeight.value > 0 ? { paddingBottom: `${adHeight.value}px` } : {}));
-
-// ── 优化：在 onLoad 中注册事件，避免模块顶层重复注册；传入函数引用精确移除 ──
-onShow(() => {
-    // #ifdef MP || APP-HARMONY
-    updateTabBarText(t);
-    // #endif
-});
 
 onLoad(() => {
     uni.$on('app-scroll', updateTitleBarVisibleByScroll);

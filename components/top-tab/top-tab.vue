@@ -5,7 +5,7 @@
         <scroll-view scroll-y class="top10-scroll" :style="{ height: scrollHeight }" @scroll="handleScroll">
             <!-- Spacer for embedded titlebar -->
             <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
-            <view class="top10-wrap">
+            <view class="top10-wrap" :style="{ paddingBottom: top10WrapPaddingBottom }">
                 <view v-if="!embedded" class="top10-header">
                     <view class="top10-header__left">
                         <view class="top10-header__back" @click="goBack">
@@ -174,7 +174,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { getStatusBarHeight } from '@/utils/layout.js';
+import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -182,6 +182,11 @@ import { useAppStore } from '@/stores/app.js';
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const isEn = computed(() => locale.value === 'en');
+
+const top10WrapPaddingBottom = computed(() => {
+    const tabH = props.embedded ? getTabBarHeight() : 0;
+    return `${tabH + 16}px`;
+});
 
 const getLocalizedItem = (item) => {
     if (!item) return item;

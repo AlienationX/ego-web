@@ -10,7 +10,7 @@
             @scroll="handleScroll"
             @scrolltolower="onReachLower"
         >
-            <view class="timeline-wrap">
+            <view class="timeline-wrap" :style="{ paddingBottom: timelineWrapPaddingBottom }">
                 <!-- Spacer for embedded titlebar -->
                 <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
                 <view id="timeline-top-anchor" class="timeline-top-anchor"></view>
@@ -155,7 +155,7 @@
             v-if="showScrollTop"
             class="floating-top"
             :class="{ 'is-embedded': embedded }"
-            :style="adHeight > 0 ? { bottom: embedded ? `calc(${adHeight}px + 32rpx)` : `calc(${adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
+            :style="floatingTopStyle"
             @click="scrollToTop"
         >
             <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
@@ -168,9 +168,22 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
 import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } from '@/utils/common.js';
-import { getStatusBarHeight } from '@/utils/layout.js';
+import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+
+const floatingTopStyle = computed(() => {
+    const tabH = props.embedded ? getTabBarHeight() : 0;
+    const adH = adHeight.value > 0 ? adHeight.value : 0;
+    return {
+        bottom: `${tabH + adH + 16}px`,
+    };
+});
+
+const timelineWrapPaddingBottom = computed(() => {
+    const tabH = props.embedded ? getTabBarHeight() : 0;
+    return `${tabH + 16}px`;
+});
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();

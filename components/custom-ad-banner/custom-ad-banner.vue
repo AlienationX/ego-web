@@ -3,7 +3,7 @@
         v-if="showAd && !isError"
         class="custom-ad-container"
         :class="[isFixed ? 'is-fixed' : '', settingsStore.isDark ? 'theme-dark' : 'theme-light']"
-        :style="{ bottom: isFixed ? `${bottomOffset}rpx` : 'auto' }"
+        :style="{ bottom: calculatedBottom }"
     >
         <!-- #ifdef APP -->
         <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }">
@@ -17,6 +17,7 @@
 import { ref, computed, watch } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { getTabBarHeight } from '@/utils/layout.js';
 
 const props = defineProps({
     adpid: {
@@ -32,7 +33,12 @@ const props = defineProps({
         default: 0,
     },
 });
-const emit = defineEmits(['load', 'close', 'error', 'height-change']);
+
+const calculatedBottom = computed(() => {
+    if (!props.isFixed) return 'auto';
+    if (props.bottomOffset > 0) return `${props.bottomOffset}px`;
+    return `${getTabBarHeight()}px`;
+});
 
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();

@@ -181,7 +181,7 @@
         <view
             class="fab-back-top"
             :class="{ show: tabStates[currentIndex]?.showBackTop, 'is-embedded': props.embedded }"
-            :style="props.adHeight > 0 ? { bottom: props.embedded ? `calc(${props.adHeight}px + 32rpx)` : `calc(${props.adHeight}px + env(safe-area-inset-bottom) + 32rpx)` } : {}"
+            :style="fabBackTopStyle"
             @click="handleBackTop"
         >
             <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
@@ -193,6 +193,15 @@
 import { ref, reactive, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList, apiGetSearchData, apiGetActions, apiPostRecommend } from '@/api/wallpaper.js';
+import { getTabBarHeight } from '@/utils/layout.js';
+
+const fabBackTopStyle = computed(() => {
+    const tabH = props.embedded ? getTabBarHeight() : 0;
+    const adH = props.adHeight > 0 ? props.adHeight : 0;
+    return {
+        bottom: `${tabH + adH + 16}px`,
+    };
+});
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { useAppStore } from '@/stores/app.js';

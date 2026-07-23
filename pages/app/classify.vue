@@ -5,7 +5,7 @@
         <!-- #endif -->
 
         <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
-            <view class="page-scroll__content">
+            <view class="page-scroll__content" :style="{ paddingBottom: pagePaddingBottom }">
                 <!-- 沉浸式头部区域 -->
                 <view class="hero-section" :style="{ paddingTop: `${heroTopPadding}px` }">
                     <view class="hero-header">
@@ -18,8 +18,6 @@
                     <view class="search-container">
                         <search-bar></search-bar>
                     </view>
-
-
                 </view>
 
                 <!-- 加载骨架屏 -->
@@ -47,20 +45,27 @@
 
         <!-- 吸底全局广告 (在 tabBar 之上) -->
         <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
+
+        <!-- 自定义 TabBar 组件 -->
+        <glass-tab-bar
+            current-path="/pages/app/classify"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-tab-bar>
     </view>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad, onShow } from '@dcloudio/uni-app';
+import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { updateTabBarText } from '@/utils/i18n.js';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
-import { getStatusBarHeight } from '@/utils/layout.js';
+import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+
+const pagePaddingBottom = computed(() => `${getTabBarHeight()}px`);
 
 const { t, locale } = useI18n();
 const isEn = computed(() => locale.value === 'en');
@@ -104,12 +109,6 @@ const getClassify = async () => {
         isLoading.value = false;
     }
 };
-
-onShow(() => {
-    // #ifdef MP || APP-HARMONY
-    updateTabBarText(t);
-    // #endif
-});
 
 onLoad(() => {
     getClassify();
@@ -233,7 +232,7 @@ onLoad(() => {
 }
 
 .classify-grid-padding {
-    padding: 20rpx;
+    padding: 20rpx 20rpx 10rpx 20rpx;
 }
 
 // ── 骨架屏 ──

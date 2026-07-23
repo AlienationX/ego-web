@@ -3,7 +3,7 @@
         <view v-if="placeholder" class="glass-tab__placeholder" :style="{ height: `${tabBarSpace}px` }"></view>
 
         <view class="glass-tab" :style="{ bottom: `${bottom}px` }">
-            <view class="glass-tab__shell">
+            <view class="glass-tab__shell" :style="{ paddingBottom: `${shellPaddingBottom}px` }">
                 <view
                     v-for="item in items"
                     :key="item.pagePath"
@@ -28,7 +28,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { getTabBarHeight } from '@/utils/layout.js';
+import { getTabBarHeight, getSafeAreaBottom } from '@/utils/layout.js';
 
 const props = defineProps({
     currentPath: {
@@ -47,7 +47,7 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    // 覆盖底部偏移量（px），默认跟随系统 tabBar 高度，非 tabBar 页传 0
+    // 覆盖底部偏移量（px），默认吸底 0
     bottomOffset: {
         type: Number,
         default: -1,
@@ -55,39 +55,46 @@ const props = defineProps({
 });
 const emit = defineEmits(['change']);
 
-const { t } = useI18n();
+const { locale, t } = useI18n();
 
-const items = computed(() => [
-    {
-        text: t('tabbar.index'),
-        pagePath: '/pages/app/index',
-        iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_Home.png' : '/static/tabbar/Light_Home.png',
-        selectedIconPath: '/static/tabbar/Fill_Home_Green.png',
-    },
-    {
-        text: t('tabbar.category'),
-        pagePath: '/pages/app/classify',
-        iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_Category.png' : '/static/tabbar/Light_Category.png',
-        selectedIconPath: '/static/tabbar/Fill_Category_Green.png',
-    },
-    {
-        text: t('tabbar.discover'),
-        pagePath: '/pages/discover/discover',
-        iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_Discover.png' : '/static/tabbar/Light_Discover.png',
-        selectedIconPath: '/static/tabbar/Fill_Discover_Green.png',
-    },
-    {
-        text: t('tabbar.user'),
-        pagePath: '/pages/user/user',
-        iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_User.png' : '/static/tabbar/Light_User.png',
-        selectedIconPath: '/static/tabbar/Fill_User_Green.png',
-    },
-]);
+const items = computed(() => {
+    // 引用 locale.value 确保语言改变时实时触发响应式重算
+    const _locale = locale.value;
+    return [
+        {
+            text: t('tabbar.index'),
+            pagePath: '/pages/app/index',
+            iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_Home.png' : '/static/tabbar/Light_Home.png',
+            selectedIconPath: '/static/tabbar/Fill_Home_Green.png',
+        },
+        {
+            text: t('tabbar.category'),
+            pagePath: '/pages/app/classify',
+            iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_Category.png' : '/static/tabbar/Light_Category.png',
+            selectedIconPath: '/static/tabbar/Fill_Category_Green.png',
+        },
+        {
+            text: t('tabbar.discover'),
+            pagePath: '/pages/discover/discover',
+            iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_Discover.png' : '/static/tabbar/Light_Discover.png',
+            selectedIconPath: '/static/tabbar/Fill_Discover_Green.png',
+        },
+        {
+            text: t('tabbar.user'),
+            pagePath: '/pages/user/user',
+            iconPath: props.theme === 'dark' ? '/static/tabbar/Dark_User.png' : '/static/tabbar/Light_User.png',
+            selectedIconPath: '/static/tabbar/Fill_User_Green.png',
+        },
+    ];
+});
 
-const safeBottom = computed(() => Math.max(getTabBarHeight(), 0));
-const tabBarSpace = computed(() => safeBottom.value + 122);
-// bottomOffset=-1 表示使用默认值，否则使用传入值
-const bottom = computed(() => props.bottomOffset >= 0 ? props.bottomOffset : safeBottom.value);
+const safeAreaBottom = computed(() => getSafeAreaBottom());
+// 当有安全区 (如 34px) 时，直接使用安全区作为底部内边距；无安全区时回退 7px (14rpx)
+const shellPaddingBottom = computed(() => (safeAreaBottom.value > 0 ? safeAreaBottom.value : 7));
+// 占位块高度：精确匹配 getTabBarHeight()（包含 TabBar 主体 50px + 上 padding 7px + 下 padding）
+const tabBarSpace = computed(() => getTabBarHeight());
+// bottomOffset=-1 表示默认吸底 0px
+const bottom = computed(() => (props.bottomOffset >= 0 ? props.bottomOffset : 0));
 
 const handleSwitch = (item) => {
     if (props.currentPath === item.pagePath) return;
@@ -133,7 +140,7 @@ const handleSwitch = (item) => {
     position: fixed;
     left: 0rpx;
     right: 0rpx;
-    z-index: 45;
+    z-index: 120;
 }
 
 .glass-tab__shell {
@@ -153,8 +160,8 @@ const handleSwitch = (item) => {
 .glass-tab__item {
     flex: 1;
     min-width: 0;
-    height: 94rpx;
-    border-radius: 26rpx;
+    height: 100rpx;
+    border-radius: 24rpx;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -172,24 +179,28 @@ const handleSwitch = (item) => {
     box-shadow: var(--glass-tab-inner-highlight);
     transform: translateY(-2rpx);
     color: var(--glass-tab-active-text);
+
+    .glass-tab__text {
+        font-weight: 500;
+    }
 }
 
 .glass-tab__icon-wrap {
-    width: 40rpx;
-    height: 40rpx;
+    width: 52rpx;
+    height: 52rpx;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .glass-tab__icon {
-    width: 38rpx;
-    height: 38rpx;
+    width: 50rpx;
+    height: 50rpx;
 }
 
 .glass-tab__text {
     font-size: 20rpx;
-    font-weight: 600;
-    line-height: 1;
+    font-weight: 400;
+    line-height: 1.2;
 }
 </style>

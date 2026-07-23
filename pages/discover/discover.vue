@@ -74,7 +74,7 @@
             </view>
         </scroll-view>
 
-        <view class="bottom-panel" :style="{ bottom: `${tabBarHeight}px` }">
+        <view class="bottom-panel" :style="{ bottom: bottomPanelBottom }">
                 <view class="picker-wrap" v-if="pickerOpen">
                     <template v-if="sourceMode === 'favorite'">
                         <view class="picker-title">{{ $t('discover.pickFavorite') }}</view>
@@ -127,11 +127,17 @@
                     </view> -->
                 </view>
         </view>
+
+        <!-- 自定义 TabBar 组件 -->
+        <glass-tab-bar
+            current-path="/pages/discover/discover"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-tab-bar>
     </view>
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiGetActions, apiPostDiscoverStream } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -139,7 +145,6 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
-import { updateTabBarText } from '@/utils/i18n.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
@@ -167,7 +172,6 @@ const thinkingTime = ref(0);
 let thinkingTimer = null;
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const containerTopPadding = computed(() => statusBarHeight.value + 10);
-const tabBarHeight = ref(getTabBarHeight());
 
 let typingTimer = null;
 const chatMessages = ref([]);
@@ -198,11 +202,15 @@ const canAnalyze = computed(() => {
     if (sourceMode.value === 'local') return !!localImage.value;
     return !!selectedItem.value;
 });
+const tabBarHeight = computed(() => getTabBarHeight() || 60);
+const bottomPanelBottom = computed(() => `${tabBarHeight.value}px`);
+
+// 纯公式计算：TabBar高度 + 面板主体高度(折叠 65px / 展开 200px) + 10rpx (5px) 预留间距
 const containerBottomSpace = computed(() => {
-    // 为 fixed 的 bottom-panel 预留空间，防止聊天内容被遮挡
-    // return tabBarHeight.value + 0;
-    return 80;
+    const panelHeight = pickerOpen.value ? 200 : 65;
+    return tabBarHeight.value + panelHeight + 5;
 });
+
 const pageScrollStyle = computed(() => ({
     height: '100vh',
 }));
@@ -816,9 +824,6 @@ onLoad(() => {
 });
 
 onShow(() => {
-    // #ifdef MP || APP-HARMONY
-    updateTabBarText(t);
-    // #endif
     if (userStore.isLoggedIn) {
         getFavoriteList();
     }
@@ -1335,13 +1340,12 @@ onUnload(() => {
     background: var(--discover-bottom-panel);
     border-top-left-radius: 34rpx;
     border-top-right-radius: 34rpx;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
     border-top: 1rpx solid var(--panel-border);
-    box-shadow: 0 -20rpx 44rpx var(--shadow-color);
+    box-shadow: 0 -12rpx 36rpx var(--shadow-color);
     backdrop-filter: blur(24rpx);
-    padding-top: 18rpx;
-    padding-left: 24rpx;
-    padding-right: 24rpx;
-    padding-bottom: 22rpx;
+    padding: 24rpx 24rpx 36rpx 24rpx;
     z-index: 99;
 }
 
