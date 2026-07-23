@@ -12,12 +12,12 @@
             <text class="mp-error__text">内容加载失败，请检查网络后重试</text>
             <view class="mp-error__btn" @click="fetchHtmlContent">重新加载</view>
         </view>
-        <!-- mp-html：tag-style 注入协议页样式，弥补 <style> 标签被忽略的问题 -->
+        <!-- mp-html：tag-style 注入协议页样式，自适应 Light/Dark 模式 -->
         <mp-html
             v-else
             :content="htmlContent"
-            :tag-style="parsedTagStyle"
-            :container-style="'font-family:PingFang SC,Microsoft YaHei,Arial,sans-serif;line-height:1.8;color:var(--text-primary);padding:20px;'"
+            :tag-style="effectiveTagStyle"
+            container-style="font-family:PingFang SC,Microsoft YaHei,Arial,sans-serif;line-height:1.8;color:var(--text-primary);padding:20px;"
             scroll-table
         ></mp-html>
         <!-- #endif -->
@@ -55,7 +55,6 @@ const parsedTagStyle = ref({});  // 从 HTML <style> 动态解析
  */
 const parseCssToTagStyle = (css) => {
     const result = {};
-    // 移除所有 @media 块，避免 prefers-color-scheme: dark 样式覆盖浅色模式
     const cleanCss = css.replace(/@[^{]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, '');
     const ruleReg = /([a-zA-Z][a-zA-Z0-9,\s]*?)\s*\{([^}]*)\}/g;
     let match;
@@ -74,6 +73,38 @@ const pageTitle = computed(() => {
     if (docType.value === 'privacy') return t('about.privacy');
     if (docType.value === 'agreement') return t('about.agreement');
     return t('common.title');
+});
+
+// 动态深色/浅色样式覆盖，解决小程序端解析外部 HTML 在深色模式下文字不可见的问题
+const effectiveTagStyle = computed(() => {
+    const isDark = settingsStore.isDark;
+    const base = { ...parsedTagStyle.value };
+
+    if (isDark) {
+        return {
+            ...base,
+            body: 'color: #f7f7fb; background-color: transparent;',
+            h1: 'color: #f7f7fb; border-bottom-color: rgba(255,255,255,0.12);',
+            h2: 'color: #e2e8f0;',
+            h3: 'color: #cbd5e1;',
+            p: 'color: rgba(247, 247, 251, 0.85);',
+            li: 'color: rgba(247, 247, 251, 0.85);',
+            '.note': 'color: #94a3b8; background-color: rgba(231, 76, 60, 0.12); border-left-color: #e74c3c;',
+            '.date': 'color: #64748b; text-align: right;'
+        };
+    } else {
+        return {
+            ...base,
+            body: 'color: #15171c; background-color: transparent;',
+            h1: 'color: #2c3e50;',
+            h2: 'color: #34495e;',
+            h3: 'color: #476582;',
+            p: 'color: rgba(21, 23, 28, 0.85);',
+            li: 'color: rgba(21, 23, 28, 0.85);',
+            '.note': 'color: #7f8c8d; background-color: #fdf6f6; border-left-color: #e74c3c;',
+            '.date': 'color: #95a5a6; text-align: right;'
+        };
+    }
 });
 
 const handleMessage = (e) => {
