@@ -16,7 +16,7 @@
             </view>
         </view>
 
-        <scroll-view scroll-y class="home-tab-layout" @scroll="handleScroll">
+        <scroll-view scroll-y class="home-tab-layout" show-scrollbar="false" @scroll="handleScroll">
             <!-- 静态 spacer，与其他嵌入式 tab 保持一致，不随 titlebar 显隐变化 -->
             <view :style="{ height: navBarHeight + 'px' }"></view>
 
@@ -144,7 +144,7 @@
                     <view class="sk-card sk-card--hero"></view>
                     <view v-for="i in 4" :key="i" class="sk-card"></view>
                 </view>
-                <scroll-view v-else scroll-x class="home-scroll">
+                <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
                     <view
                         class="box"
                         v-for="(item, idx) in randomDailyList"
@@ -190,7 +190,7 @@
                 <view v-if="!latestList.length" class="sk-scroll-row">
                     <view v-for="i in 5" :key="i" class="sk-card"></view>
                 </view>
-                <scroll-view v-else scroll-x class="home-scroll">
+                <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
                     <view class="box" v-for="(item, idx) in latestList" :key="item.id" @click="goPreview(item.id, latestList)">
                         <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
                         <view v-if="item._timeBadge" class="box-badge">{{ item._timeBadge }}</view>
@@ -288,7 +288,7 @@
                 <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
                     <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
                 </view>
-                <scroll-view v-else scroll-x class="home-scroll">
+                <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
                     <view
                         class="subject-box-new"
                         v-for="item in subjectsRecommendList"
@@ -344,7 +344,7 @@
 
             <view class="content">
                 <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x class="home-scroll">
+                <scroll-view scroll-x class="home-scroll" show-scrollbar="false">
                     <view class="box" v-for="item in classify.data" :key="item.id" @click="goPreview(item.id, classify.data)">
                         <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
                         <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}</view>

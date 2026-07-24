@@ -13,126 +13,115 @@
         </view>
 
         <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
-        <view
-            class="container"
-            @touchstart="onChatTouchStart"
-            @touchend="onChatTouchEnd"
-            :style="{
+            <view class="container" @touchstart="onChatTouchStart" @touchend="onChatTouchEnd" :style="{
                 paddingTop: `${containerTopPadding}px`,
                 paddingBottom: `${containerBottomSpace}px`,
-            }"
-        >
-            <view class="hero-section">
-                <view class="hero-title hero-enter-1">{{ $t('discover.title') }}</view>
-                <view class="hero-subtitle hero-enter-2">{{ $t('discover.subtitle') }}</view>
-                <view class="hero-desc hero-enter-3">{{ $t('discover.desc') }}</view>
-            </view>
+            }">
+                <view class="hero-section">
+                    <view class="hero-title hero-enter-1">{{ $t('discover.title') }}</view>
+                    <view class="hero-subtitle hero-enter-2">{{ $t('discover.subtitle') }}</view>
+                    <view class="hero-desc hero-enter-3">{{ $t('discover.desc') }}</view>
+                </view>
 
-            <view class="chat-panel" v-if="chatMessages.length">
-                <view v-for="msg in chatMessages" :id="`msg-${msg.id}`" :key="msg.id" class="msg-item" :class="msg.role">
-                    <template v-if="msg.role === 'assistant'">
+                <view class="chat-panel" v-if="chatMessages.length">
+                    <view v-for="msg in chatMessages" :id="`msg-${msg.id}`" :key="msg.id" class="msg-item"
+                        :class="msg.role">
+                        <template v-if="msg.role === 'assistant'">
+                            <view class="msg-header">
+                                <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
+                                <view class="msg-label">{{ msg.name }}</view>
+                            </view>
+                            <view class="msg-content full-width">
+                                <view class="msg-text markdown">
+                                    <mp-html :content="msg.html" :tag-style="markdownTagStyle"></mp-html>
+                                </view>
+                            </view>
+                        </template>
+                        <template v-else>
+                            <view class="msg-row user">
+                                <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
+                                <view class="msg-content">
+                                    <view class="msg-label">{{ msg.name }}</view>
+                                    <template v-if="msg.image">
+                                        <image class="msg-image" :src="msg.image" mode="aspectFill"></image>
+                                    </template>
+                                    <template v-if="msg.text">
+                                        <view class="msg-text">{{ msg.text }}</view>
+                                    </template>
+                                </view>
+                            </view>
+                        </template>
+                    </view>
+
+                    <view v-if="isThinking" class="msg-item assistant">
                         <view class="msg-header">
-                            <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
-                            <view class="msg-label">{{ msg.name }}</view>
+                            <image class="msg-avatar" :src="aiProfile.avatar" mode="aspectFill"></image>
+                            <view class="msg-label">{{ aiProfile.name }}</view>
                         </view>
                         <view class="msg-content full-width">
-                            <view class="msg-text markdown">
-                                <mp-html :content="msg.html" :tag-style="markdownTagStyle"></mp-html>
+                            <view class="thinking-text">
+                                <rotate-loading :size="30" :speed="1.2"></rotate-loading>
+                                <text>{{ $t('discover.analyzingMessage') }} {{ thinkingTime }}s</text>
                             </view>
-                        </view>
-                    </template>
-                    <template v-else>
-                        <view class="msg-row user">
-                            <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
-                            <view class="msg-content">
-                                <view class="msg-label">{{ msg.name }}</view>
-                                <template v-if="msg.image">
-                                    <image class="msg-image" :src="msg.image" mode="aspectFill"></image>
-                                </template>
-                                <template v-if="msg.text">
-                                    <view class="msg-text">{{ msg.text }}</view>
-                                </template>
-                            </view>
-                        </view>
-                    </template>
-                </view>
-
-                <view v-if="isThinking" class="msg-item assistant">
-                    <view class="msg-header">
-                        <image class="msg-avatar" :src="aiProfile.avatar" mode="aspectFill"></image>
-                        <view class="msg-label">{{ aiProfile.name }}</view>
-                    </view>
-                    <view class="msg-content full-width">
-                        <view class="thinking-text">
-                            <rotate-loading :size="30" :speed="1.2"></rotate-loading>
-                            <text>{{ $t('discover.analyzingMessage') }} {{ thinkingTime }}s</text>
                         </view>
                     </view>
                 </view>
-            </view>
 
             </view>
         </scroll-view>
 
         <view class="bottom-panel" :style="{ bottom: bottomPanelBottom }">
-                <view class="picker-wrap" v-if="pickerOpen">
-                    <template v-if="sourceMode === 'favorite'">
-                        <view class="picker-title">{{ $t('discover.pickFavorite') }}</view>
-                        <scroll-view
-                            v-if="favoriteList.length"
-                            class="favorite-scroll"
-                            scroll-x
-                            :lower-threshold="60"
-                            @scrolltolower="loadMoreFavorites"
-                        >
-                            <view class="favorite-row">
-                                <view
-                                    v-for="item in favoriteList"
-                                    :key="item.id"
-                                    class="fav-card"
-                                    :class="{ active: selectedId === item.id }"
-                                    @click="onSelect(item.id)"
-                                >
-                                    <image class="fav-image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
-                                </view>
-                                <view v-if="favLoadingMore" class="fav-card fav-card--loading">
-                                    <rotate-loading :size="48"></rotate-loading>
-                                </view>
+            <view class="picker-wrap" v-if="pickerOpen">
+                <template v-if="sourceMode === 'favorite'">
+                    <view class="picker-title">{{ $t('discover.pickFavorite') }}</view>
+                    <scroll-view v-if="favoriteList.length" class="favorite-scroll" scroll-x show-scrollbar="false"
+                        :lower-threshold="60" @scrolltolower="loadMoreFavorites">
+                        <view class="favorite-row">
+                            <view v-for="item in favoriteList" :key="item.id" class="fav-card"
+                                :class="{ active: selectedId === item.id }" @click="onSelect(item.id)">
+                                <image class="fav-image" :src="item.smallPicurl || item.picurl" mode="aspectFill">
+                                </image>
                             </view>
-                        </scroll-view>
-                        <view v-else-if="!isLoading" class="mini-empty">
-                            <text>{{ $t('discover.empty') }}</text>
-                            <text class="mini-link" @click="goFavorite">{{ $t('discover.goFavorite') }}</text>
-                        </view>
-                    </template>
-
-                    <template v-else>
-                        <view class="picker-title">{{ $t('discover.pickLocal') }}</view>
-                        <view class="local-line">
-                            <view class="local-preview" v-if="localImage">
-                                <image class="local-image" :src="localImage" mode="aspectFill"></image>
+                            <view v-if="favLoadingMore" class="fav-card fav-card--loading">
+                                <rotate-loading :size="48"></rotate-loading>
                             </view>
-                            <button class="pick-local-btn" @click="pickLocalImage">{{ $t('discover.pickLocalBtn') }}</button>
                         </view>
-                    </template>
-                </view>
-
-                <view class="source-switch">
-                    <view class="source-item" :class="{ active: sourceMode === 'favorite' }" @click="setSourceMode('favorite')">
-                        {{ $t('discover.sourceFavorite') }}
+                    </scroll-view>
+                    <view v-else-if="!isLoading" class="mini-empty">
+                        <text>{{ $t('discover.empty') }}</text>
+                        <text class="mini-link" @click="goFavorite">{{ $t('discover.goFavorite') }}</text>
                     </view>
-                    <!-- <view class="source-item" :class="{ active: sourceMode === 'local' }" @click="setSourceMode('local')">
+                </template>
+
+                <template v-else>
+                    <view class="picker-title">{{ $t('discover.pickLocal') }}</view>
+                    <view class="local-line">
+                        <view class="local-preview" v-if="localImage">
+                            <image class="local-image" :src="localImage" mode="aspectFill"></image>
+                        </view>
+                        <button class="pick-local-btn" @click="pickLocalImage">{{ $t('discover.pickLocalBtn')
+                            }}</button>
+                    </view>
+                </template>
+            </view>
+
+            <view class="source-switch">
+                <view class="source-item" :class="{ active: sourceMode === 'favorite' }"
+                    @click="setSourceMode('favorite')">
+                    {{ $t('discover.sourceFavorite') }}
+                </view>
+                <!-- <view class="source-item" :class="{ active: sourceMode === 'local' }" @click="setSourceMode('local')">
                         {{ $t('discover.sourceLocal') }}
                         <uni-icons class="lock-icon" type="vip-filled" size="14" color="#b7791f"></uni-icons>
                     </view> -->
-                </view>
+            </view>
         </view>
 
         <!-- 自定义 TabBar 组件 -->
-        <glass-tab-bar
+        <!-- <glass-tab-bar
             current-path="/pages/discover/discover"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar>
+        ></glass-tab-bar> -->
     </view>
 </template>
 
@@ -248,13 +237,13 @@ const markdownToHtml = (md = '', isStreaming = false) => {
     html = html.replace(/^###\s*(.*)$/gm, '\n\n<h3>$1</h3>\n\n');
     html = html.replace(/^##\s*(.*)$/gm, '\n\n<h2>$1</h2>\n\n');
     html = html.replace(/^#\s*(.*)$/gm, '\n\n<h1>$1</h1>\n\n');
-    
+
     // 内联元素恢复使用标准标签，mp-html 在包裹于 p 内时会合并为单个 rich-text 避免换行
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-    
+
     // 无序列表
     html = html.replace(/(?:^|\n)((?:[-*•]\s+.+(?:\n|$))+)/g, (m, p1) => {
         const items = p1
@@ -289,7 +278,7 @@ const markdownToHtml = (md = '', isStreaming = false) => {
             return `<p>${block.replace(/\n/g, '<br/>')}</p>`;
         })
         .join('\n');
-    
+
     if (isStreaming) {
         // 使用省略号代替带 class 的 span，防止 mp-html 停止合并 rich-text 节点
         const cursor = '......';
@@ -313,7 +302,7 @@ const updateAssistantHtml = (id, force = false) => {
     const now = Date.now();
     const lastMarkdownAt = target.lastMarkdownAt || 0;
     if (!force && now - lastMarkdownAt < 120) return;
-    
+
     chatMessages.value[idx] = {
         ...target,
         html: markdownToHtml(String(target.text || ''), target.isStreaming),
@@ -423,7 +412,7 @@ let scrollTimer = null;
 const scrollToBottom = (duration = 0) => {
     if (isAutoScrollPaused.value) return;
     if (scrollTimer) return;
-    
+
     scrollTimer = setTimeout(() => {
         uni.pageScrollTo({
             scrollTop: 999999,
@@ -700,7 +689,7 @@ const onAnalyze = async () => {
             // 简单拼接，大模型一般能识别 data:image/... 的 base64
             finalPicUrl = 'data:image/jpeg;base64,' + base64Data;
             // #endif
-            
+
             // #ifdef WEB
             const resBlob = await fetch(finalPicUrl);
             const blob = await resBlob.blob();
@@ -1174,12 +1163,35 @@ onUnload(() => {
     color: var(--text-primary);
 }
 
-.markdown :deep(h1) { font-size: 44rpx; margin: 56rpx 0 28rpx; }
-.markdown :deep(h2) { font-size: 40rpx; margin: 48rpx 0 24rpx; }
-.markdown :deep(h3) { font-size: 36rpx; margin: 40rpx 0 20rpx; }
-.markdown :deep(h4) { font-size: 34rpx; margin: 32rpx 0 16rpx; }
-.markdown :deep(h5) { font-size: 32rpx; margin: 24rpx 0 12rpx; }
-.markdown :deep(h6) { font-size: 30rpx; margin: 16rpx 0 8rpx; }
+.markdown :deep(h1) {
+    font-size: 44rpx;
+    margin: 56rpx 0 28rpx;
+}
+
+.markdown :deep(h2) {
+    font-size: 40rpx;
+    margin: 48rpx 0 24rpx;
+}
+
+.markdown :deep(h3) {
+    font-size: 36rpx;
+    margin: 40rpx 0 20rpx;
+}
+
+.markdown :deep(h4) {
+    font-size: 34rpx;
+    margin: 32rpx 0 16rpx;
+}
+
+.markdown :deep(h5) {
+    font-size: 32rpx;
+    margin: 24rpx 0 12rpx;
+}
+
+.markdown :deep(h6) {
+    font-size: 30rpx;
+    margin: 16rpx 0 8rpx;
+}
 
 
 
@@ -1308,6 +1320,7 @@ onUnload(() => {
 .local-preview {
     margin-bottom: 16rpx;
 }
+
 .local-image {
     width: 180rpx;
     height: 240rpx;
@@ -1417,6 +1430,7 @@ onUnload(() => {
         opacity: 0;
         transform: translateY(40rpx);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

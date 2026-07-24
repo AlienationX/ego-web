@@ -5,6 +5,7 @@
         <scroll-view
             scroll-y
             class="timeline-scroll"
+            show-scrollbar="false"
             :style="{ height: contentHeight }"
             :scroll-into-view="scrollIntoViewTarget"
             @scroll="handleScroll"

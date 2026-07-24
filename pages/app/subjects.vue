@@ -20,6 +20,7 @@
 
         <!-- List Scroll Area -->
         <scroll-view
+            show-scrollbar="false"
             scroll-y
             class="scroll-area"
             :style="{ paddingTop: `${titleBarHeight}px` }"

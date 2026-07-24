@@ -26,9 +26,17 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getTabBarHeight, getSafeAreaBottom } from '@/utils/layout.js';
+
+// 在 App 端和 Web 端，pages.json 的 custom: true 并不会自动隐藏原生 TabBar，必须显式调用 uni.hideTabBar()
+onMounted(() => {
+    uni.hideTabBar({
+        animation: false,
+        fail: () => {},
+    });
+});
 
 const props = defineProps({
     currentPath: {

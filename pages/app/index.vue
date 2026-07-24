@@ -1,40 +1,30 @@
 <template>
-    <view
-        class="homeLayout"
-        :class="['homeLayout--' + activeHomeTab, settingsStore.isDark ? 'theme-dark' : 'theme-light']"
-        :style="{
+    <view class="homeLayout"
+        :class="['homeLayout--' + activeHomeTab, settingsStore.isDark ? 'theme-dark' : 'theme-light']" :style="{
             '--mask-color': pageBackgroundVar,
             backgroundColor: pageBackgroundVar,
             height: activeHomeTab !== 'home' ? '100vh' : 'auto',
             overflow: activeHomeTab !== 'home' ? 'hidden' : 'visible',
-        }"
-    >
+        }">
         <!-- #ifndef WEB -->
-        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: pageBackgroundVar }"> </view>
+        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: pageBackgroundVar }">
+        </view>
         <!-- #endif -->
 
-        <view
-            class="home-titlebar"
-            :class="{ 'is-hidden': !isTitleBarVisible }"
-            :style="{
-                paddingTop: statusBarHeight + 'px',
-                height: navBarHeight + 'px',
-                paddingRight: titlebarPaddingRight,
-                backgroundColor: pageBackgroundVar,
-            }"
-        >
+        <view class="home-titlebar" :class="{ 'is-hidden': !isTitleBarVisible }" :style="{
+            paddingTop: statusBarHeight + 'px',
+            height: navBarHeight + 'px',
+            paddingRight: titlebarPaddingRight,
+            backgroundColor: pageBackgroundVar,
+        }">
             <view class="home-titlebar__inner" :style="{ height: titleBarHeight + 'px' }">
                 <view class="home-tabs-wrapper" :class="{ 'is-dark': settingsStore.isDark }">
                     <view class="home-tabs-scroll-area">
                         <scroll-view scroll-x class="home-tabs" show-scrollbar="false">
                             <view class="home-tabs__inner">
-                                <view
-                                    v-for="tab in homeTabList"
-                                    :key="tab.key"
-                                    class="home-tab"
+                                <view v-for="tab in homeTabList" :key="tab.key" class="home-tab"
                                     :class="{ 'is-active': activeHomeTab === tab.key }"
-                                    @click="activeHomeTab = tab.key"
-                                >
+                                    @click="activeHomeTab = tab.key">
                                     {{ tab.label }}
                                 </view>
                             </view>
@@ -64,39 +54,20 @@
         </view>
 
         <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
-        <view
-            v-if="recommendLoaded"
-            v-show="activeHomeTab === 'recommend'"
-            class="home-channel home-channel--recommend"
-            :style="channelBottomStyle"
-        >
-            <modern-pics-view
-                :show-header="false"
-                :tabs="[{ label: t('index.tabs.recommend') }]"
-                api-type="recommend"
-                layoutMode="waterfall"
-                :show-card-meta="true"
-                :header-height="navBarHeight"
-                embedded
-                @scroll="handleEmbeddedScroll"
-            ></modern-pics-view>
+        <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend"
+            :style="channelBottomStyle">
+            <modern-pics-view :show-header="false" :tabs="[{ label: t('index.tabs.recommend') }]" api-type="recommend"
+                layoutMode="waterfall" :show-card-meta="true" :header-height="navBarHeight" embedded
+                @scroll="handleEmbeddedScroll"></modern-pics-view>
         </view>
 
-        <view
-            v-if="latestLoaded"
-            v-show="activeHomeTab === 'latest'"
-            class="home-channel home-channel--latest"
-            :style="channelBottomStyle"
-        >
+        <view v-if="latestLoaded" v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest"
+            :style="channelBottomStyle">
             <timeline-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></timeline-tab>
         </view>
 
-        <view
-            v-if="hotLoaded"
-            v-show="activeHomeTab === 'hot'"
-            class="home-channel home-channel--hot"
-            :style="channelBottomStyle"
-        >
+        <view v-if="hotLoaded" v-show="activeHomeTab === 'hot'" class="home-channel home-channel--hot"
+            :style="channelBottomStyle">
             <top-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-tab>
         </view>
 
@@ -104,10 +75,10 @@
         <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
 
         <!-- 自定义 TabBar 组件 (支持多语言实时切换与 Light/Dark 模式) -->
-        <glass-tab-bar
+        <!-- <glass-tab-bar
             current-path="/pages/app/index"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar>
+        ></glass-tab-bar> -->
     </view>
 </template>
 

@@ -2,7 +2,7 @@
     <view class="top10-page" :class="[settingsStore.isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
         <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
 
-        <scroll-view scroll-y class="top10-scroll" :style="{ height: scrollHeight }" @scroll="handleScroll">
+        <scroll-view scroll-y class="top10-scroll" :style="{ height: scrollHeight }" @scroll="handleScroll" show-scrollbar="false">
             <!-- Spacer for embedded titlebar -->
             <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
             <view class="top10-wrap" :style="{ paddingBottom: top10WrapPaddingBottom }">

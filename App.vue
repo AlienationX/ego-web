@@ -52,10 +52,15 @@ onLaunch(() => {
     // console.log(process.env, 'process.env'); // 小程序不支持
     // console.log(process.env.VUE_APP_DEBUG_MODE, 'debug');
     // #endif
+
+    // 全局隐藏原生 TabBar（适用于 App 和 H5 端）
+    // uni.hideTabBar({ animation: false, fail: () => { } });
 });
 
 onShow(() => {
     console.log('App Show');
+
+    // uni.hideTabBar({ animation: false, fail: () => { } });
 
     // 从后台切回时 onThemeChange 可能未触发，重新同步系统主题
     if (settingsStore.options.theme === 'auto') {

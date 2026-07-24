@@ -14,6 +14,7 @@
                 v-if="tabs.length > 1"
                 scroll-x
                 class="tabs-scroll"
+                show-scrollbar="false"
                 :scroll-into-view="'tab-' + (currentIndex > 1 ? currentIndex - 1 : 0)"
                 scroll-with-animation
             >
@@ -52,6 +53,7 @@
                 <scroll-view
                     scroll-y
                     class="tab-scroll-view"
+                    show-scrollbar="false"
                     :scroll-top="tabStates[index].scrollTop"
                     scroll-with-animation
                     @scroll="onScroll($event, index)"

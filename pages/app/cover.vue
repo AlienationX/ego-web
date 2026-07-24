@@ -27,7 +27,7 @@
 
             <view class="editor-panel">
                 <view class="panel-title">1. 选择分类</view>
-                <scroll-view scroll-x class="chip-scroll">
+                <scroll-view scroll-x class="chip-scroll" show-scrollbar="false">
                     <view class="chip-row">
                         <view
                             v-for="item in classifyComputed"
@@ -57,7 +57,7 @@
 
                 <view v-else-if="!classifyImages.length" class="editor-empty"> 当前分类下暂无可选图片 </view>
 
-                <scroll-view v-else scroll-x class="image-scroll" :lower-threshold="80" @scrolltolower="loadMoreImages">
+                <scroll-view v-else scroll-x class="image-scroll" :lower-threshold="80" @scrolltolower="loadMoreImages" show-scrollbar="false">
                     <view class="image-row">
                         <view
                             v-for="item in classifyImages"

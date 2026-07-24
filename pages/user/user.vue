@@ -1,173 +1,158 @@
 <template>
-    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="layoutStyle">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
+        :style="[layoutStyle, { paddingBottom: userPaddingBottom }]">
         <!-- #ifndef WEB -->
-        <view
-            class="status-bar-bg"
-            :class="{ 'status-bar-bg--muted': !userStore.userinfo.id }"
-            :style="{ height: `${statusBarHeight}px` }"
-        >
+        <view class="status-bar-bg" :class="{ 'status-bar-bg--muted': !userStore.userinfo.id }"
+            :style="{ height: `${statusBarHeight}px` }">
         </view>
         <!-- #endif -->
 
-        <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
-            <view class="page-scroll__content" :style="{ paddingBottom: userPaddingBottom }">
-                <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
-                    <template v-if="userStore.userinfo.id">
-                        <view class="user-content">
-                            <view class="avatar">
-                                <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
-                                <view class="avatar-ring"></view>
-                            </view>
+        <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
+            <template v-if="userStore.userinfo.id">
+                <view class="user-content">
+                    <view class="avatar">
+                        <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
+                        <view class="avatar-ring"></view>
+                    </view>
 
-                            <view class="user-details">
-                                <view class="details-top">
-                                    <view class="name-row">
-                                        <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
-                                        <view v-if="userStore.isVip" class="vip-badge">VIP</view>
-                                        <view v-else-if="userStore.isAdmin" class="non-vip-badge" @click="toMembership">Get VIP</view>
-                                    </view>
-                                </view>
-
-                                <view class="user-description">
-                                    {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
-                                </view>
-
-                                <view class="user-info-row">
-                                    <view v-if="userStore.userinfo.email" class="info-item">
-                                        <uni-icons
-                                            type="mail-filled"
-                                            size="16"
-                                            :color="settingsStore.isDark ? '#767d8a' : '#999'"
-                                        ></uni-icons>
-                                        <text>{{ userStore.userinfo.email }}</text>
-                                    </view>
+                    <view class="user-details">
+                        <view class="details-top">
+                            <view class="name-row">
+                                <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
+                                <view v-if="userStore.isVip" class="vip-badge">VIP</view>
+                                <view v-else-if="userStore.isAdmin" class="non-vip-badge" @click="toMembership">Get VIP
                                 </view>
                             </view>
                         </view>
 
-                        <!-- 签到和能量 -->
-                        <view class="checkin-section">
-                            <view class="energy-info">
-                                <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right-start">
-                                    <view class="energy-hint">
-                                        <uni-icons
-                                            type="help"
-                                            size="20"
-                                            :color="settingsStore.isDark ? '#767d8a' : '#999'"
-                                        ></uni-icons>
-                                    </view>
-                                </bubble-tooltip>
-                                <text class="energy-text">
-                                    {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
-                                </text>
-                            </view>
-                            <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
-                                <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
-                                <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
-                            </view>
+                        <view class="user-description">
+                            {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
                         </view>
 
-                        <!-- VIP Banner for Admins -->
-                        <view v-if="userStore.isAdmin" class="vip-banner-card" @click="toMembership">
-                            <view class="vip-banner-content">
-                                <view class="vip-banner-title-row">
-                                    <mdi-icon path="/static/icons/crown-circle.svg" size="20px" color="#FBBF24"></mdi-icon>
-                                    <text class="vip-banner-title">{{ t('membership.title') }}</text>
-                                </view>
-                                <text class="vip-banner-desc">
-                                    {{ userStore.isVip ? (locale === 'en' ? 'VIP active! Click to extend.' : '您的会员已开通！点击续费。') : t('membership.subtitle') }}
-                                </text>
+                        <view class="user-info-row">
+                            <view v-if="userStore.userinfo.email" class="info-item">
+                                <uni-icons type="mail-filled" size="16"
+                                    :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
+                                <text>{{ userStore.userinfo.email }}</text>
                             </view>
-                            <uni-icons type="right" size="16" color="#ffffff"></uni-icons>
                         </view>
-                    </template>
-
-                    <view v-else class="not-logged-in-content">
-                        <view class="avatar">
-                            <image src="/static/logo.svg" mode="aspectFill"></image>
-                            <view class="avatar-ring"></view>
-                        </view>
-                        <view class="app-name">{{ $t('common.appName') }}</view>
-                        <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
-                        <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
                     </view>
                 </view>
 
-                <!-- 统计卡片 -->
-                <view class="stats-section">
-                    <view class="stats-card heart-card" @click="toMyFavorite">
-                        <view class="card-bg"></view>
-                        <view class="stats-row">
-                            <view class="stats-icon heart">
-                                <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
+                <!-- 签到和能量 -->
+                <view class="checkin-section">
+                    <view class="energy-info">
+                        <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right-start">
+                            <view class="energy-hint">
+                                <uni-icons type="help" size="20"
+                                    :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
                             </view>
-                            <view class="stats-number">{{
-                                userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
-                            }}</view>
-                        </view>
-                        <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
-                        <view class="card-decoration decoration-1"></view>
+                        </bubble-tooltip>
+                        <text class="energy-text">
+                            {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
+                        </text>
                     </view>
-                    <view class="stats-card download-card" @click="toMyDownload">
-                        <view class="card-bg"></view>
-                        <view class="stats-row">
-                            <view class="stats-icon download">
-                                <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
-                            </view>
-                            <view class="stats-number">{{
-                                userStore.userinfo.count ? userStore.userinfo.count.download_count : 0
-                            }}</view>
-                        </view>
-                        <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
-                        <view class="card-decoration decoration-2"></view>
-                    </view>
-                    <view class="stats-card star-card" @click="toMyScore">
-                        <view class="card-bg"></view>
-                        <view class="stats-row">
-                            <view class="stats-icon star">
-                                <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
-                            </view>
-                            <view class="stats-number">{{
-                                userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0
-                            }}</view>
-                        </view>
-                        <view class="stats-label">{{ t('user.profile.myScore') }}</view>
-                        <view class="card-decoration decoration-3"></view>
+                    <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
+                        <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
+                        <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
                     </view>
                 </view>
 
-                <view class="section">
-                    <view class="list">
-                        <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
-                            <view class="left">
-                                <view class="icon-wrap">
-                                    <mdi-icon
-                                        :path="item.left_icon"
-                                        size="24px"
-                                        :color="resolveMenuIconColor(item.left_color)"
-                                    ></mdi-icon>
-                                </view>
-                                <view class="text">
-                                    {{ item.left_text }}
-                                </view>
-                            </view>
-                            <view class="right">
-                                <view class="text">
-                                    {{ item.right_text }}
-                                </view>
-                                <mdi-icon
-                                    path="/static/icons/chevron-right.svg"
-                                    size="20px"
-                                    :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"
-                                ></mdi-icon>
-                            </view>
+                <!-- VIP Banner for Admins -->
+                <view v-if="userStore.isAdmin" class="vip-banner-card" @click="toMembership">
+                    <view class="vip-banner-content">
+                        <view class="vip-banner-title-row">
+                            <mdi-icon path="/static/icons/crown-circle.svg" size="20px" color="#FBBF24"></mdi-icon>
+                            <text class="vip-banner-title">{{ t('membership.title') }}</text>
                         </view>
+                        <text class="vip-banner-desc">
+                            {{ userStore.isVip ? (locale === 'en' ? 'VIP active! Click to extend.' : '您的会员已开通！点击续费。') :
+                                t('membership.subtitle') }}
+                        </text>
+                    </view>
+                    <uni-icons type="right" size="16" color="#ffffff"></uni-icons>
+                </view>
+            </template>
+
+            <view v-else class="not-logged-in-content">
+                <view class="avatar">
+                    <image src="/static/logo.svg" mode="aspectFill"></image>
+                    <view class="avatar-ring"></view>
+                </view>
+                <view class="app-name">{{ $t('common.appName') }}</view>
+                <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
+                <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
+            </view>
+        </view>
+
+        <!-- 统计卡片 -->
+        <view class="stats-section">
+            <view class="stats-card heart-card" @click="toMyFavorite">
+                <view class="card-bg"></view>
+                <view class="stats-row">
+                    <view class="stats-icon heart">
+                        <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
+                    </view>
+                    <view class="stats-number">{{
+                        userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
+                        }}</view>
+                </view>
+                <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
+                <view class="card-decoration decoration-1"></view>
+            </view>
+            <view class="stats-card download-card" @click="toMyDownload">
+                <view class="card-bg"></view>
+                <view class="stats-row">
+                    <view class="stats-icon download">
+                        <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
+                    </view>
+                    <view class="stats-number">{{
+                        userStore.userinfo.count ? userStore.userinfo.count.download_count : 0
+                        }}</view>
+                </view>
+                <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
+                <view class="card-decoration decoration-2"></view>
+            </view>
+            <view class="stats-card star-card" @click="toMyScore">
+                <view class="card-bg"></view>
+                <view class="stats-row">
+                    <view class="stats-icon star">
+                        <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
+                    </view>
+                    <view class="stats-number">{{
+                        userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0
+                        }}</view>
+                </view>
+                <view class="stats-label">{{ t('user.profile.myScore') }}</view>
+                <view class="card-decoration decoration-3"></view>
+            </view>
+        </view>
+
+        <view class="section">
+            <view class="list">
+                <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
+                    <view class="left">
+                        <view class="icon-wrap">
+                            <mdi-icon :path="item.left_icon" size="24px"
+                                :color="resolveMenuIconColor(item.left_color)"></mdi-icon>
+                        </view>
+                        <view class="text">
+                            {{ item.left_text }}
+                        </view>
+                    </view>
+                    <view class="right">
+                        <view class="text">
+                            {{ item.right_text }}
+                        </view>
+                        <mdi-icon path="/static/icons/chevron-right.svg" size="20px"
+                            :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"></mdi-icon>
                     </view>
                 </view>
             </view>
-        </scroll-view>
+        </view>
+    </view>
 
-        <!-- <view class="section exit-section" v-if="userStore.userinfo.id">
+    <!-- <view class="section exit-section" v-if="userStore.userinfo.id">
             <view class="list">
                 <view class="row exit-row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
                     <view class="left">
@@ -187,26 +172,16 @@
             </view>
         </view> -->
 
-        <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
+    <!-- 吸底全局广告 (在 tabBar 之上) -->
+    <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
 
-        <!-- 通用导航对话框 -->
-        <popup-navigation-dialog
-            ref="navDialog"
-            :title="dialogState.title"
-            :description="dialogState.description"
-            :confirmText="dialogState.confirmText"
-            :cancelText="dialogState.cancelText"
-            @confirm="dialogState.onConfirm"
-            @cancel="dialogState.onCancel"
-        ></popup-navigation-dialog>
+    <!-- 通用导航对话框 -->
+    <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
+        :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText" @confirm="dialogState.onConfirm"
+        @cancel="dialogState.onCancel"></popup-navigation-dialog>
 
-        <!-- 自定义 TabBar 组件 -->
-        <glass-tab-bar
-            current-path="/pages/user/user"
-            :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar>
-    </view>
+    <!-- 自定义 TabBar 组件 -->
+    <!-- <glass-tab-bar current-path="/pages/user/user" :theme="settingsStore.isDark ? 'dark' : 'light'"></glass-tab-bar> -->
 </template>
 
 <script setup>
@@ -245,9 +220,6 @@ const onAdHeightChange = (height) => {
 const layoutStyle = computed(() => ({
     '--tab-bar-height': `${tabBarHeight.value}px`,
 }));
-const pageScrollStyle = computed(() => ({
-    height: `calc(100vh - ${adHeight.value}px)`,
-}));
 
 // 通用导航对话框控制
 const navDialog = ref(null);
@@ -256,8 +228,8 @@ const dialogState = ref({
     description: '',
     confirmText: '',
     cancelText: '',
-    onConfirm: () => {},
-    onCancel: () => {},
+    onConfirm: () => { },
+    onCancel: () => { },
 });
 
 /**
@@ -450,31 +422,31 @@ const appMenus = computed(() => [
 const sysMenus = computed(() => [
     ...(userStore.isAdmin
         ? [
-              {
-                  left_icon: '/static/icons/bell.svg',
-                  left_color: '#6B7280',
-                  left_text: t('user.profile.subscription'),
-                  right_text: `${libraryStore.subscriptions.classifyIds.length + libraryStore.subscriptions.tags.length}`,
-                  right_icon: 'right',
-                  click: toSubscriptions,
-              },
-              {
-                  left_icon: '/static/icons/tag.svg',
-                  left_color: '#6B7280',
-                  left_text: t('user.settings.preferences'),
-                  right_text: `${libraryStore.preferredTags.length}`,
-                  right_icon: 'right',
-                  click: toPreferences,
-              },
-              {
-                  left_icon: '/static/icons/bookmark.svg',
-                  left_color: '#6B7280',
-                  left_text: t('historyPage.watchLaterTitle'),
-                  right_text: `${libraryStore.watchLater.length}`,
-                  right_icon: 'right',
-                  click: toWatchLater,
-              },
-          ]
+            {
+                left_icon: '/static/icons/bell.svg',
+                left_color: '#6B7280',
+                left_text: t('user.profile.subscription'),
+                right_text: `${libraryStore.subscriptions.classifyIds.length + libraryStore.subscriptions.tags.length}`,
+                right_icon: 'right',
+                click: toSubscriptions,
+            },
+            {
+                left_icon: '/static/icons/tag.svg',
+                left_color: '#6B7280',
+                left_text: t('user.settings.preferences'),
+                right_text: `${libraryStore.preferredTags.length}`,
+                right_icon: 'right',
+                click: toPreferences,
+            },
+            {
+                left_icon: '/static/icons/bookmark.svg',
+                left_color: '#6B7280',
+                left_text: t('historyPage.watchLaterTitle'),
+                right_text: `${libraryStore.watchLater.length}`,
+                right_icon: 'right',
+                click: toWatchLater,
+            },
+        ]
         : []),
     {
         left_icon: '/static/icons/clock.svg',
@@ -510,15 +482,15 @@ const sysMenus = computed(() => [
     },
     ...(userStore.isAdmin
         ? [
-              {
-                  left_icon: '/static/icons/ab-testing.svg',
-                  left_color: '#6B7280',
-                  left_text: t('user.profile.testLab'),
-                  right_text: '',
-                  right_icon: 'right',
-                  click: toTest,
-              },
-          ]
+            {
+                left_icon: '/static/icons/ab-testing.svg',
+                left_color: '#6B7280',
+                left_text: t('user.profile.testLab'),
+                right_text: '',
+                right_icon: 'right',
+                click: toTest,
+            },
+        ]
         : []),
 ]);
 
@@ -550,17 +522,7 @@ onShow(() => {
 <style lang="scss" scoped>
 .layout {
     background-color: var(--page-background);
-    height: 100vh;
-    overflow: hidden;
-
-    .page-scroll {
-        width: 100%;
-    }
-
-    .page-scroll__content {
-        min-height: 100%;
-        padding-bottom: 140rpx;
-    }
+    min-height: 100vh;
 
     .status-bar-bg {
         position: fixed;
@@ -877,6 +839,7 @@ onShow(() => {
         }
 
         .energy-tooltip {
+
             // 自定义弹出框样式
             :deep(.uni-tooltip-popup) {
                 position: absolute;
@@ -1046,6 +1009,7 @@ onShow(() => {
                 .card-bg {
                     background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(255, 107, 157, 0.05) 100%);
                 }
+
                 .decoration-1 {
                     background: #ff6b9d;
                     top: -30rpx;
@@ -1057,6 +1021,7 @@ onShow(() => {
                 .card-bg {
                     background: linear-gradient(135deg, rgba($wp-theme-color, 0.1) 0%, rgba($wp-theme-color, 0.05) 100%);
                 }
+
                 .decoration-2 {
                     background: $wp-theme-color;
                     bottom: -30rpx;
@@ -1068,6 +1033,7 @@ onShow(() => {
                 .card-bg {
                     background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
                 }
+
                 .decoration-3 {
                     background: #ffc107;
                     top: -20rpx;
@@ -1146,6 +1112,7 @@ onShow(() => {
         from {
             transform: rotate(0deg);
         }
+
         to {
             transform: rotate(360deg);
         }
@@ -1234,6 +1201,7 @@ onShow(() => {
 // 每个 row 是独立卡片，用背景色差 + 顶部高光代替边框
 // ─────────────────────────────────────────────
 .theme-dark {
+
     // 页面底色更深，让卡片浮起来
     &.layout {
         background-color: #111114;

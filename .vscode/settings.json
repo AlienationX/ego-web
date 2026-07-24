@@ -9,7 +9,7 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[vue]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "Vue.volar"
     },
     // 保存时自动格式化
     "editor.formatOnSave": true,

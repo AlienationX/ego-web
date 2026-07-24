@@ -47,10 +47,10 @@
         <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
 
         <!-- 自定义 TabBar 组件 -->
-        <glass-tab-bar
+        <!-- <glass-tab-bar
             current-path="/pages/app/classify"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar>
+        ></glass-tab-bar> -->
     </view>
 </template>
 
@@ -252,12 +252,10 @@ onLoad(() => {
     width: 100%;
     aspect-ratio: 1 / 1;
     border-radius: 24rpx;
-    background: linear-gradient(
-        90deg,
-        var(--panel-background) 25%,
-        rgba(200, 200, 200, 0.12) 50%,
-        var(--panel-background) 75%
-    );
+    background: linear-gradient(90deg,
+            var(--panel-background) 25%,
+            rgba(200, 200, 200, 0.12) 50%,
+            var(--panel-background) 75%);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s infinite linear;
 }
@@ -266,18 +264,21 @@ onLoad(() => {
     width: 60%;
     height: 28rpx;
     border-radius: 8rpx;
-    background: linear-gradient(
-        90deg,
-        var(--panel-background) 25%,
-        rgba(200, 200, 200, 0.12) 50%,
-        var(--panel-background) 75%
-    );
+    background: linear-gradient(90deg,
+            var(--panel-background) 25%,
+            rgba(200, 200, 200, 0.12) 50%,
+            var(--panel-background) 75%);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s infinite linear;
 }
 
 @keyframes skeleton-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 </style>

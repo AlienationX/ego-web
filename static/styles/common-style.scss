@@ -1,8 +1,39 @@
 @import '@/static/styles/theme-variables.scss';
 
+/* ================================================================
+ * 全局隐藏 H5 端滚动条（三件套覆盖所有现代浏览器）
+ * 注意：仅对 DOM 滚动生效，小程序/App原生的 scroll-view 需配合
+ *       show-scrollbar="false" 属性使用。
+ * ================================================================ */
+
+/* 1. WebKit 内核（Chrome / Safari / Edge / iOS & Android WebView） */
+::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+/* 2. Firefox */
+* {
+    scrollbar-width: none;
+}
+
+/* 3. IE / 旧版 Edge */
+* {
+    -ms-overflow-style: none;
+}
+
 /* 全局字体 */
 page {
-    font-family: Roboto, -apple-system, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family:
+        Roboto,
+        -apple-system,
+        'Helvetica Neue',
+        'PingFang SC',
+        'Microsoft YaHei',
+        sans-serif;
 }
 
 view swiper swiper-item {
