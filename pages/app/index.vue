@@ -56,7 +56,7 @@
         <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
         <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend"
             :style="channelBottomStyle">
-            <modern-pics-view :show-header="false" :tabs="[{ label: t('index.tabs.recommend') }]" api-type="recommend"
+            <modern-pics-view :show-header="false" :tabs="recommendTabList" api-type="recommend"
                 layoutMode="waterfall" :show-card-meta="true" :header-height="navBarHeight" embedded
                 @scroll="handleEmbeddedScroll"></modern-pics-view>
         </view>
@@ -89,9 +89,14 @@ import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/layout.js';
+import { updateNativeTabBar } from '@/utils/tabbar.js';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
+
+onShow(() => {
+    updateNativeTabBar(t);
+});
 
 const homeTabList = computed(() => [
     {
@@ -111,6 +116,8 @@ const homeTabList = computed(() => [
         label: t('index.tabs.hot'),
     },
 ]);
+
+const recommendTabList = computed(() => [{ label: t('index.tabs.recommend') }]);
 
 const searchIconColor = computed(() => (settingsStore.isDark ? 'rgba(255, 255, 255, 0.7)' : '#64748b'));
 

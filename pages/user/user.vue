@@ -1,187 +1,174 @@
 <template>
-    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
-        :style="[layoutStyle, { paddingBottom: userPaddingBottom }]">
+    <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="layoutStyle">
         <!-- #ifndef WEB -->
         <view class="status-bar-bg" :class="{ 'status-bar-bg--muted': !userStore.userinfo.id }"
             :style="{ height: `${statusBarHeight}px` }">
         </view>
         <!-- #endif -->
 
-        <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
-            <template v-if="userStore.userinfo.id">
-                <view class="user-content">
-                    <view class="avatar">
-                        <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
-                        <view class="avatar-ring"></view>
-                    </view>
+        <scroll-view scroll-y class="page-scroll" :show-scrollbar="false" enhanced :bounces="true">
+            <view class="page-scroll__content" :style="{ paddingBottom: userPaddingBottom }">
+                <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
+                    <template v-if="userStore.userinfo.id">
+                        <view class="user-content">
+                            <view class="avatar">
+                                <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
+                                <view class="avatar-ring"></view>
+                            </view>
 
-                    <view class="user-details">
-                        <view class="details-top">
-                            <view class="name-row">
-                                <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
-                                <view v-if="userStore.isVip" class="vip-badge">VIP</view>
-                                <view v-else-if="userStore.isAdmin" class="non-vip-badge" @click="toMembership">Get VIP
+                            <view class="user-details">
+                                <view class="details-top">
+                                    <view class="name-row">
+                                        <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
+                                        <view v-if="userStore.isVip" class="vip-badge">VIP</view>
+                                        <view v-else-if="userStore.isAdmin" class="non-vip-badge" @click="toMembership">
+                                            Get VIP
+                                        </view>
+                                    </view>
+                                </view>
+
+                                <view class="user-description">
+                                    {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
+                                </view>
+
+                                <view class="user-info-row">
+                                    <view v-if="userStore.userinfo.email" class="info-item">
+                                        <uni-icons type="mail-filled" size="16"
+                                            :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
+                                        <text>{{ userStore.userinfo.email }}</text>
+                                    </view>
                                 </view>
                             </view>
                         </view>
 
-                        <view class="user-description">
-                            {{ userStore.userinfo.profile.description || t('user.profile.noDescription') }}
+                        <!-- 签到和能量 -->
+                        <view class="checkin-section">
+                            <view class="energy-info">
+                                <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right-start">
+                                    <view class="energy-hint">
+                                        <uni-icons type="help" size="20"
+                                            :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
+                                    </view>
+                                </bubble-tooltip>
+                                <text class="energy-text">
+                                    {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
+                                </text>
+                            </view>
+                            <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
+                                <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
+                                <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin')
+                                    }}</text>
+                            </view>
                         </view>
 
-                        <view class="user-info-row">
-                            <view v-if="userStore.userinfo.email" class="info-item">
-                                <uni-icons type="mail-filled" size="16"
-                                    :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
-                                <text>{{ userStore.userinfo.email }}</text>
+                        <!-- VIP Banner for Admins -->
+                        <view v-if="userStore.isAdmin" class="vip-banner-card" @click="toMembership">
+                            <view class="vip-banner-content">
+                                <view class="vip-banner-title-row">
+                                    <mdi-icon path="/static/icons/crown-circle.svg" size="20px"
+                                        color="#FBBF24"></mdi-icon>
+                                    <text class="vip-banner-title">{{ t('membership.title') }}</text>
+                                </view>
+                                <text class="vip-banner-desc">
+                                    {{ userStore.isVip ? (locale === 'en' ? 'VIP active! Click to extend.' :
+                                        '您的会员已开通！点击续费。') :
+                                    t('membership.subtitle') }}
+                                </text>
+                            </view>
+                            <uni-icons type="right" size="16" color="#ffffff"></uni-icons>
+                        </view>
+                    </template>
+
+                    <view v-else class="not-logged-in-content">
+                        <view class="avatar">
+                            <image src="/static/logo.svg" mode="aspectFill"></image>
+                            <view class="avatar-ring"></view>
+                        </view>
+                        <view class="app-name">{{ $t('common.appName') }}</view>
+                        <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
+                        <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
+                    </view>
+                </view>
+
+                <!-- 统计卡片 -->
+                <view class="stats-section">
+                    <view class="stats-card heart-card" @click="toMyFavorite">
+                        <view class="card-bg"></view>
+                        <view class="stats-row">
+                            <view class="stats-icon heart">
+                                <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
+                            </view>
+                            <view class="stats-number">{{
+                                userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
+                                }}</view>
+                        </view>
+                        <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
+                        <view class="card-decoration decoration-1"></view>
+                    </view>
+                    <view class="stats-card download-card" @click="toMyDownload">
+                        <view class="card-bg"></view>
+                        <view class="stats-row">
+                            <view class="stats-icon download">
+                                <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
+                            </view>
+                            <view class="stats-number">{{
+                                userStore.userinfo.count ? userStore.userinfo.count.download_count : 0
+                                }}</view>
+                        </view>
+                        <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
+                        <view class="card-decoration decoration-2"></view>
+                    </view>
+                    <view class="stats-card star-card" @click="toMyScore">
+                        <view class="card-bg"></view>
+                        <view class="stats-row">
+                            <view class="stats-icon star">
+                                <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
+                            </view>
+                            <view class="stats-number">{{
+                                userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0
+                                }}</view>
+                        </view>
+                        <view class="stats-label">{{ t('user.profile.myScore') }}</view>
+                        <view class="card-decoration decoration-3"></view>
+                    </view>
+                </view>
+
+                <view class="section">
+                    <view class="list">
+                        <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
+                            <view class="left">
+                                <view class="icon-wrap">
+                                    <mdi-icon :path="item.left_icon" size="24px"
+                                        :color="resolveMenuIconColor(item.left_color)"></mdi-icon>
+                                </view>
+                                <view class="text">
+                                    {{ item.left_text }}
+                                </view>
+                            </view>
+                            <view class="right">
+                                <view class="text">
+                                    {{ item.right_text }}
+                                </view>
+                                <mdi-icon path="/static/icons/chevron-right.svg" size="20px"
+                                    :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"></mdi-icon>
                             </view>
                         </view>
                     </view>
                 </view>
-
-                <!-- 签到和能量 -->
-                <view class="checkin-section">
-                    <view class="energy-info">
-                        <bubble-tooltip :content="t('user.profile.energyHintContent')" placement="right-start">
-                            <view class="energy-hint">
-                                <uni-icons type="help" size="20"
-                                    :color="settingsStore.isDark ? '#767d8a' : '#999'"></uni-icons>
-                            </view>
-                        </bubble-tooltip>
-                        <text class="energy-text">
-                            {{ t('user.profile.currentEnergy') }}: {{ userStore.userinfo.profile.energy || 0 }}
-                        </text>
-                    </view>
-                    <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
-                        <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
-                        <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin') }}</text>
-                    </view>
-                </view>
-
-                <!-- VIP Banner for Admins -->
-                <view v-if="userStore.isAdmin" class="vip-banner-card" @click="toMembership">
-                    <view class="vip-banner-content">
-                        <view class="vip-banner-title-row">
-                            <mdi-icon path="/static/icons/crown-circle.svg" size="20px" color="#FBBF24"></mdi-icon>
-                            <text class="vip-banner-title">{{ t('membership.title') }}</text>
-                        </view>
-                        <text class="vip-banner-desc">
-                            {{ userStore.isVip ? (locale === 'en' ? 'VIP active! Click to extend.' : '您的会员已开通！点击续费。') :
-                                t('membership.subtitle') }}
-                        </text>
-                    </view>
-                    <uni-icons type="right" size="16" color="#ffffff"></uni-icons>
-                </view>
-            </template>
-
-            <view v-else class="not-logged-in-content">
-                <view class="avatar">
-                    <image src="/static/logo.svg" mode="aspectFill"></image>
-                    <view class="avatar-ring"></view>
-                </view>
-                <view class="app-name">{{ $t('common.appName') }}</view>
-                <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
-                <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
             </view>
-        </view>
+        </scroll-view>
 
-        <!-- 统计卡片 -->
-        <view class="stats-section">
-            <view class="stats-card heart-card" @click="toMyFavorite">
-                <view class="card-bg"></view>
-                <view class="stats-row">
-                    <view class="stats-icon heart">
-                        <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
-                    </view>
-                    <view class="stats-number">{{
-                        userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
-                        }}</view>
-                </view>
-                <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
-                <view class="card-decoration decoration-1"></view>
-            </view>
-            <view class="stats-card download-card" @click="toMyDownload">
-                <view class="card-bg"></view>
-                <view class="stats-row">
-                    <view class="stats-icon download">
-                        <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
-                    </view>
-                    <view class="stats-number">{{
-                        userStore.userinfo.count ? userStore.userinfo.count.download_count : 0
-                        }}</view>
-                </view>
-                <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
-                <view class="card-decoration decoration-2"></view>
-            </view>
-            <view class="stats-card star-card" @click="toMyScore">
-                <view class="card-bg"></view>
-                <view class="stats-row">
-                    <view class="stats-icon star">
-                        <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
-                    </view>
-                    <view class="stats-number">{{
-                        userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0
-                        }}</view>
-                </view>
-                <view class="stats-label">{{ t('user.profile.myScore') }}</view>
-                <view class="card-decoration decoration-3"></view>
-            </view>
-        </view>
+        <!-- 吸底全局广告 (在 tabBar 之上) -->
+        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
 
-        <view class="section">
-            <view class="list">
-                <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
-                    <view class="left">
-                        <view class="icon-wrap">
-                            <mdi-icon :path="item.left_icon" size="24px"
-                                :color="resolveMenuIconColor(item.left_color)"></mdi-icon>
-                        </view>
-                        <view class="text">
-                            {{ item.left_text }}
-                        </view>
-                    </view>
-                    <view class="right">
-                        <view class="text">
-                            {{ item.right_text }}
-                        </view>
-                        <mdi-icon path="/static/icons/chevron-right.svg" size="20px"
-                            :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"></mdi-icon>
-                    </view>
-                </view>
-            </view>
-        </view>
+        <!-- 通用导航对话框 -->
+        <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
+            :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText" @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"></popup-navigation-dialog>
+
+        <!-- 自定义 TabBar 组件 -->
+        <!-- <glass-tab-bar current-path="/pages/user/user" :theme="settingsStore.isDark ? 'dark' : 'light'"></glass-tab-bar> -->
     </view>
-
-    <!-- <view class="section exit-section" v-if="userStore.userinfo.id">
-            <view class="list">
-                <view class="row exit-row" v-for="item in exitMenus" :key="item.left_text" @click="item.click">
-                    <view class="left">
-                        <view class="icon-wrap exit-icon">
-                            <mdi-icon :path="item.left_icon" size="24px" :color="item.left_color || '#ff6b6b'"></mdi-icon>
-                        </view>
-                        <view class="text">
-                            {{ item.left_text }}
-                        </view>
-                    </view>
-                    <view class="right">
-                        <view class="text">
-                            {{ item.right_text }}
-                        </view>
-                    </view>
-                </view>
-            </view>
-        </view> -->
-
-    <!-- 吸底全局广告 (在 tabBar 之上) -->
-    <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
-
-    <!-- 通用导航对话框 -->
-    <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
-        :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText" @confirm="dialogState.onConfirm"
-        @cancel="dialogState.onCancel"></popup-navigation-dialog>
-
-    <!-- 自定义 TabBar 组件 -->
-    <!-- <glass-tab-bar current-path="/pages/user/user" :theme="settingsStore.isDark ? 'dark' : 'light'"></glass-tab-bar> -->
 </template>
 
 <script setup>
@@ -191,7 +178,12 @@ import { apiPostProfile, apiPostEarnEnergy } from '@/api/wallpaper.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 
-const userPaddingBottom = computed(() => `${getTabBarHeight() + 10}px`);
+import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+
+const userPaddingBottom = computed(() => {
+    const baseTabSpace = USE_CUSTOM_TABBAR ? getTabBarHeight() : 0;
+    return `${baseTabSpace + adHeight.value + 10}px`;
+});
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -505,7 +497,10 @@ const exitMenus = computed(() => [
     },
 ]);
 
+import { updateNativeTabBar } from '@/utils/tabbar.js';
+
 onShow(() => {
+    updateNativeTabBar(t);
     // 检查是否已登录，已登录则获取最新用户信息
     // isFetchedRecently 防止刚登录时 signin 已拉过一次，onShow 再重复拉
     if (userStore.userinfo.id && !userStore.isFetchedRecently(3000)) {
@@ -522,7 +517,17 @@ onShow(() => {
 <style lang="scss" scoped>
 .layout {
     background-color: var(--page-background);
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+
+    .page-scroll {
+        width: 100%;
+        height: 100%;
+    }
+
+    .page-scroll__content {
+        min-height: 100%;
+    }
 
     .status-bar-bg {
         position: fixed;

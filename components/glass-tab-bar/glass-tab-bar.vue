@@ -1,5 +1,5 @@
 <template>
-    <view class="glass-tab-layout" :class="[`theme-${theme}`]">
+    <view v-if="USE_CUSTOM_TABBAR" class="glass-tab-layout" :class="[`theme-${theme}`]">
         <view v-if="placeholder" class="glass-tab__placeholder" :style="{ height: `${tabBarSpace}px` }"></view>
 
         <view class="glass-tab" :style="{ bottom: `${bottom}px` }">
@@ -29,13 +29,15 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getTabBarHeight, getSafeAreaBottom } from '@/utils/layout.js';
+import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
 
-// 在 App 端和 Web 端，pages.json 的 custom: true 并不会自动隐藏原生 TabBar，必须显式调用 uni.hideTabBar()
 onMounted(() => {
-    uni.hideTabBar({
-        animation: false,
-        fail: () => {},
-    });
+    if (USE_CUSTOM_TABBAR) {
+        uni.hideTabBar({
+            animation: false,
+            fail: () => {},
+        });
+    }
 });
 
 const props = defineProps({

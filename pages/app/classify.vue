@@ -56,7 +56,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -65,7 +65,12 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 
-const pagePaddingBottom = computed(() => `${getTabBarHeight()}px`);
+import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+
+const pagePaddingBottom = computed(() => {
+    const baseTabSpace = USE_CUSTOM_TABBAR ? getTabBarHeight() : 0;
+    return `${baseTabSpace + adHeight.value + 10}px`;
+});
 
 const { t, locale } = useI18n();
 const isEn = computed(() => locale.value === 'en');
@@ -110,8 +115,14 @@ const getClassify = async () => {
     }
 };
 
+import { updateNativeTabBar } from '@/utils/tabbar.js';
+
 onLoad(() => {
     getClassify();
+});
+
+onShow(() => {
+    updateNativeTabBar(t);
 });
 </script>
 

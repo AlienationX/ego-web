@@ -100,7 +100,7 @@
                             <image class="local-image" :src="localImage" mode="aspectFill"></image>
                         </view>
                         <button class="pick-local-btn" @click="pickLocalImage">{{ $t('discover.pickLocalBtn')
-                            }}</button>
+                        }}</button>
                     </view>
                 </template>
             </view>
@@ -191,7 +191,9 @@ const canAnalyze = computed(() => {
     if (sourceMode.value === 'local') return !!localImage.value;
     return !!selectedItem.value;
 });
-const tabBarHeight = computed(() => getTabBarHeight() || 60);
+import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+
+const tabBarHeight = computed(() => (USE_CUSTOM_TABBAR ? (getTabBarHeight() || 60) : 0));
 const bottomPanelBottom = computed(() => `${tabBarHeight.value}px`);
 
 // 纯公式计算：TabBar高度 + 面板主体高度(折叠 65px / 展开 200px) + 10rpx (5px) 预留间距
@@ -812,7 +814,10 @@ onLoad(() => {
     createAiProfile();
 });
 
+import { updateNativeTabBar } from '@/utils/tabbar.js';
+
 onShow(() => {
+    updateNativeTabBar(t);
     if (userStore.isLoggedIn) {
         getFavoriteList();
     }
@@ -1358,7 +1363,7 @@ onUnload(() => {
     border-top: 1rpx solid var(--panel-border);
     box-shadow: 0 -12rpx 36rpx var(--shadow-color);
     backdrop-filter: blur(24rpx);
-    padding: 24rpx 24rpx 36rpx 24rpx;
+    padding: 20rpx;
     z-index: 99;
 }
 

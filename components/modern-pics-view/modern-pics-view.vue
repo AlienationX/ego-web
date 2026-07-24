@@ -54,13 +54,12 @@
                     scroll-y
                     class="tab-scroll-view"
                     show-scrollbar="false"
-                    :scroll-top="tabStates[index].scrollTop"
-                    scroll-with-animation
+                    :scroll-into-view="tabStates[index].scrollIntoViewId"
                     @scroll="onScroll($event, index)"
                     @scrolltolower="onReachLower(index)"
                 >
                     <view class="scroll-content" :style="{ minHeight: `calc(100% + ${headerHeight}px)` }">
-                        <view class="top-spacer" :style="{ height: topSpacerHeight + 'px' }"></view>
+                        <view :id="`tab-top-anchor-${index}`" class="top-spacer" :style="{ height: topSpacerHeight + 'px' }"></view>
 
                         <!-- 骨架屏加载态 -->
                         <view v-if="tabStates[index].isLoading && tabStates[index].images.length === 0" class="skeleton-wrapper">
@@ -180,14 +179,12 @@
         </swiper>
 
         <!-- 返回顶部悬浮按钮 -->
-        <view
-            class="fab-back-top"
-            :class="{ show: tabStates[currentIndex]?.showBackTop, 'is-embedded': props.embedded }"
-            :style="fabBackTopStyle"
+        <fab-back-top
+            :show="tabStates[currentIndex]?.showBackTop"
+            :embedded="props.embedded"
+            :ad-height="props.adHeight"
             @click="handleBackTop"
-        >
-            <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
-        </view>
+        />
     </view>
 </template>
 
@@ -197,13 +194,9 @@ import { useI18n } from 'vue-i18n';
 import { apiGetClassList, apiGetSearchData, apiGetActions, apiPostRecommend } from '@/api/wallpaper.js';
 import { getTabBarHeight } from '@/utils/layout.js';
 
-const fabBackTopStyle = computed(() => {
-    const tabH = props.embedded ? getTabBarHeight() : 0;
-    const adH = props.adHeight > 0 ? props.adHeight : 0;
-    return {
-        bottom: `${tabH + adH + 16}px`,
-    };
-});
+import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+
+
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { useAppStore } from '@/stores/app.js';
@@ -225,6 +218,7 @@ const props = defineProps({
     bottomSafeSpace: { type: Number, default: 60 },
     adHeight: { type: Number, default: 0 }, // 广告条高度，用于悬浮按钮位置调整
     embedded: { type: Boolean, default: false }, // 是否在 tabbar 页面内嵌入
+    active: { type: Boolean, default: true }, // 是否当前可见（用于 v-show 切换时恢复滚动位置）
 });
 
 const emit = defineEmits(['update', 'change', 'scroll', 'remove']);
@@ -305,7 +299,7 @@ const createTabState = () => ({
     pageNum: 1,
     isLoading: false,
     noMoreData: false,
-    scrollTop: null,
+    scrollIntoViewId: '', // 用于 scroll-into-view 跳转（如返回顶部），不绑定响应式位置
     oldScrollTop: 0,
     showBackTop: false,
     lastQueryStr: '',
@@ -415,12 +409,12 @@ watch(() => props.tabs, (newTabs) => {
 
         if (state.lastQueryStr === queryStr) return;
 
-        if (state.hasLoaded) {
+        if (state.hasLoaded && state.images.length > 0) {
             if (props.apiType === 'search') {
                 Object.assign(state, createTabState(), { lastQueryStr: queryStr });
                 if (index === currentIndex.value) activeQueryChanged = true;
             } else {
-                fetchData(index, true);
+                state.lastQueryStr = queryStr;
             }
         } else {
             state.lastQueryStr = queryStr;
@@ -492,9 +486,14 @@ const onReachLower = (index) => {
 };
 
 const handleBackTop = () => {
-    const state = tabStates[currentIndex.value];
-    state.scrollTop = state.oldScrollTop;
-    nextTick(() => { state.scrollTop = 0; });
+    const idx = currentIndex.value;
+    const state = tabStates[idx];
+    // 用 scroll-into-view 跳到顶部锚点，无需操控响应式 scrollTop
+    state.scrollIntoViewId = `tab-top-anchor-${idx}`;
+    state.oldScrollTop = 0;
+    state.showBackTop = false;
+    // 跳转生效后清空，避免再次触发
+    setTimeout(() => { state.scrollIntoViewId = ''; }, 100);
 };
 
 const openPreview = (id, index) => {
@@ -506,22 +505,20 @@ const openPreview = (id, index) => {
 // --- Lifecycle ---
 watch(() => currentIndex.value, (newIdx) => {
     const currentScroll = tabStates[newIdx]?.oldScrollTop || 0;
-    
-    // Smooth header sync on tab switch
-    if (headerScrollTop.value >= props.headerHeight && currentScroll < props.headerHeight) {
-        tabStates[newIdx].scrollTop = currentScroll;
-        setTimeout(() => {
-            tabStates[newIdx].scrollTop = props.headerHeight;
-            tabStates[newIdx].oldScrollTop = props.headerHeight;
-        }, 50);
-        headerScrollTop.value = props.headerHeight;
-    } else {
-        headerScrollTop.value = Math.min(currentScroll, props.headerHeight);
-    }
+    headerScrollTop.value = Math.min(currentScroll, props.headerHeight);
     emit('scroll', { scrollTop: currentScroll, index: newIdx });
 
     if (tabStates[newIdx].images.length === 0) fetchData(newIdx, true);
 }, { immediate: true });
+
+import { onShow } from '@dcloudio/uni-app';
+
+onShow(() => {
+    const state = tabStates[currentIndex.value];
+    if (state && (state.oldScrollTop || 0) > 400) {
+        state.showBackTop = true;
+    }
+});
 
 </script>
 
@@ -797,31 +794,5 @@ watch(() => currentIndex.value, (newIdx) => {
 
 .status-footer { padding: 24rpx 0; }
 
-.fab-back-top {
-    position: fixed;
-    right: 32rpx;
-    bottom: calc(32rpx + env(safe-area-inset-bottom));
-    width: 88rpx;
-    height: 88rpx;
-    background: #2b8cee;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 12rpx 32rpx rgba(43, 140, 238, 0.4);
-    opacity: 0;
-    transform: translateY(100rpx) scale(0.5);
-    transition:
-        opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-        bottom 0.3s ease;
-    z-index: 1000;
-    
-    &.show { opacity: 1; transform: translateY(0) scale(1); }
-    &:active { transform: scale(0.9); }
 
-    &.is-embedded {
-        bottom: 32rpx;
-    }
-}
 </style>

@@ -2,26 +2,16 @@
     <view class="layout" :class="[settingsStore.isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
         <view v-if="!embedded" class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
 
-        <scroll-view
-            scroll-y
-            class="timeline-scroll"
-            show-scrollbar="false"
-            :style="{ height: contentHeight }"
-            :scroll-into-view="scrollIntoViewTarget"
-            @scroll="handleScroll"
-            @scrolltolower="onReachLower"
-        >
+        <scroll-view scroll-y class="timeline-scroll" show-scrollbar="false" :style="{ height: contentHeight }"
+            :scroll-into-view="scrollIntoViewTarget" @scroll="handleScroll" @scrolltolower="onReachLower">
             <view class="timeline-wrap" :style="{ paddingBottom: timelineWrapPaddingBottom }">
                 <!-- Spacer for embedded titlebar -->
                 <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
                 <view id="timeline-top-anchor" class="timeline-top-anchor"></view>
                 <view v-if="!embedded" class="topbar">
                     <view class="topbar__back" @click="goBack">
-                        <mdi-icon
-                            path="/static/icons/arrow-left.svg"
-                            size="20px"
-                            :color="settingsStore.isDark ? '#f4f8ff' : '#374151'"
-                        ></mdi-icon>
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                            :color="settingsStore.isDark ? '#f4f8ff' : '#374151'"></mdi-icon>
                     </view>
                     <view class="topbar__brand">{{ t('timeline.brand') }}</view>
                     <view class="topbar__placeholder"></view>
@@ -93,17 +83,11 @@
 
                         <view class="editorial-grid">
                             <template v-for="(item, idx) in day.items" :key="item.id">
-                                <view
-                                    class="timeline-card"
-                                    :class="{ 'timeline-card--wide': idx === 0 }"
-                                    @click="goPreview(item.id)"
-                                >
-                                    <image
-                                        class="timeline-card__image"
+                                <view class="timeline-card" :class="{ 'timeline-card--wide': idx === 0 }"
+                                    @click="goPreview(item.id)">
+                                    <image class="timeline-card__image"
                                         :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
-                                        mode="aspectFill"
-                                        lazy-load
-                                    ></image>
+                                        mode="aspectFill" lazy-load></image>
                                     <view class="timeline-card__lock" v-if="item.is_locked">
                                         <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                     </view>
@@ -126,7 +110,8 @@
                                                 </view>
                                             </view>
                                             <view class="timeline-card__score">
-                                                <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                <mdi-icon path="/static/icons/star.svg" size="14px"
+                                                    color="#ffbf66"></mdi-icon>
                                                 <text>{{ item.score ?? '--' }}</text>
                                             </view>
                                         </view>
@@ -136,7 +121,8 @@
                                 <!-- 上次浏览标记 -->
                                 <view v-if="item.isLastViewedBoundary" class="last-viewed-divider">
                                     <view class="last-viewed-divider__line"></view>
-                                    <view class="last-viewed-divider__text">{{ t('timeline.aboveNewWallpapers') }}</view>
+                                    <view class="last-viewed-divider__text">{{ t('timeline.aboveNewWallpapers') }}
+                                    </view>
                                     <view class="last-viewed-divider__line"></view>
                                 </view>
                             </template>
@@ -152,20 +138,13 @@
 
         <custom-ad-banner v-if="!embedded" @height-change="onAdHeightChange"></custom-ad-banner>
 
-        <view
-            v-if="showScrollTop"
-            class="floating-top"
-            :class="{ 'is-embedded': embedded }"
-            :style="floatingTopStyle"
-            @click="scrollToTop"
-        >
-            <uni-icons type="arrow-up" size="24" color="#fff"></uni-icons>
-        </view>
+        <fab-back-top :show="showScrollTop" :embedded="embedded" :ad-height="adHeight" @click="scrollToTop" />
     </view>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
 import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } from '@/utils/common.js';
@@ -173,16 +152,12 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 
-const floatingTopStyle = computed(() => {
-    const tabH = props.embedded ? getTabBarHeight() : 0;
-    const adH = adHeight.value > 0 ? adHeight.value : 0;
-    return {
-        bottom: `${tabH + adH + 16}px`,
-    };
-});
+import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+
+
 
 const timelineWrapPaddingBottom = computed(() => {
-    const tabH = props.embedded ? getTabBarHeight() : 0;
+    const tabH = (props.embedded && USE_CUSTOM_TABBAR) ? getTabBarHeight() : 0;
     return `${tabH + 16}px`;
 });
 
@@ -363,8 +338,11 @@ const goBack = () => {
     });
 };
 
+const currentScrollTop = ref(0);
+
 const handleScroll = (e) => {
     const top = Number(e?.detail?.scrollTop || 0);
+    currentScrollTop.value = top;
     const windowHeight = uni.getWindowInfo().windowHeight || 0;
     const nextVisible = top > windowHeight / 2;
     if (showScrollTop.value !== nextVisible) {
@@ -376,6 +354,7 @@ const handleScroll = (e) => {
 const scrollToTop = () => {
     scrollIntoViewTarget.value = 'timeline-top-anchor';
     showScrollTop.value = false;
+    currentScrollTop.value = 0;
     setTimeout(() => {
         scrollIntoViewTarget.value = '';
     }, 80);
@@ -384,6 +363,13 @@ const scrollToTop = () => {
 onMounted(() => {
     if (!latestList.value.length) {
         getLatest();
+    }
+});
+
+onShow(() => {
+    const windowHeight = uni.getWindowInfo().windowHeight || 0;
+    if (currentScrollTop.value > windowHeight / 2) {
+        showScrollTop.value = true;
     }
 });
 </script>
@@ -716,23 +702,23 @@ onMounted(() => {
     justify-content: center;
     gap: 20rpx;
     margin: 40rpx 0;
-    
+
     &__line {
         flex: 1;
         height: 1px;
         background: rgba(115, 130, 154, 0.34);
-        
+
         .theme-light & {
             background: rgba(0, 0, 0, 0.08);
         }
     }
-    
+
     &__text {
         font-size: 24rpx;
         color: rgba(226, 232, 240, 0.88);
         font-weight: 500;
         letter-spacing: 2rpx;
-        
+
         .theme-light & {
             color: var(--text-tertiary);
         }
@@ -811,44 +797,22 @@ onMounted(() => {
     }
 }
 
-.floating-top {
-    position: fixed;
-    right: 32rpx;
-    bottom: calc(env(safe-area-inset-bottom) + 32rpx);
-    width: 88rpx;
-    height: 88rpx;
-    border-radius: 999rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #2b8cee;
-    box-shadow: 0 12rpx 32rpx rgba(43, 140, 238, 0.4);
-    z-index: 20;
-    transition: bottom 0.3s ease;
 
-    &.is-embedded {
-        bottom: 32rpx;
-    }
-}
 
 // ── 骨架屏 ──
 @mixin shimmer {
-    background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0.06) 25%,
-        rgba(255, 255, 255, 0.12) 50%,
-        rgba(255, 255, 255, 0.06) 75%
-    );
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.06) 25%,
+            rgba(255, 255, 255, 0.12) 50%,
+            rgba(255, 255, 255, 0.06) 75%);
     background-size: 200% 100%;
     animation: timeline-shimmer 1.6s infinite linear;
 
     .theme-light & {
-        background: linear-gradient(
-            90deg,
-            rgba(0, 0, 0, 0.06) 25%,
-            rgba(0, 0, 0, 0.1) 50%,
-            rgba(0, 0, 0, 0.06) 75%
-        );
+        background: linear-gradient(90deg,
+                rgba(0, 0, 0, 0.06) 25%,
+                rgba(0, 0, 0, 0.1) 50%,
+                rgba(0, 0, 0, 0.06) 75%);
         background-size: 200% 100%;
         animation: timeline-shimmer 1.6s infinite linear;
     }
@@ -954,6 +918,7 @@ onMounted(() => {
     0% {
         background-position: 200% 0;
     }
+
     100% {
         background-position: -200% 0;
     }

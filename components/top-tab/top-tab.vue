@@ -183,8 +183,10 @@ const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const isEn = computed(() => locale.value === 'en');
 
+import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+
 const top10WrapPaddingBottom = computed(() => {
-    const tabH = props.embedded ? getTabBarHeight() : 0;
+    const tabH = (props.embedded && USE_CUSTOM_TABBAR) ? getTabBarHeight() : 0;
     return `${tabH + 16}px`;
 });
 

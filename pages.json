@@ -354,7 +354,7 @@
         "backgroundColor": "@backgroundColor"
     },
     "tabBar": {
-        // "custom": true,
+        "custom": false,
         "color": "@tabBarColor",
         "selectedColor": "@tabBarSelectedColor",
         "borderStyle": "@tabBarBorderStyle",
