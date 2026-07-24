@@ -1,4 +1,4 @@
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 /**
  * 动态更新原生 TabBar 的文字 (i18n)

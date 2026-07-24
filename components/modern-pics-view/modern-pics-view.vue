@@ -194,7 +194,7 @@ import { useI18n } from 'vue-i18n';
 import { apiGetClassList, apiGetSearchData, apiGetActions, apiPostRecommend } from '@/api/wallpaper.js';
 import { getTabBarHeight } from '@/utils/layout.js';
 
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 
 import { useSettingsStore } from '@/stores/settings.js';

@@ -12,7 +12,7 @@
 <script setup>
 import { computed } from 'vue';
 import { getTabBarHeight } from '@/utils/layout.js';
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 const props = defineProps({
     show: {

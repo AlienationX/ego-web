@@ -191,7 +191,7 @@ const canAnalyze = computed(() => {
     if (sourceMode.value === 'local') return !!localImage.value;
     return !!selectedItem.value;
 });
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 const tabBarHeight = computed(() => (USE_CUSTOM_TABBAR ? (getTabBarHeight() || 60) : 0));
 const bottomPanelBottom = computed(() => `${tabBarHeight.value}px`);

@@ -29,7 +29,7 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { getTabBarHeight, getSafeAreaBottom } from '@/utils/layout.js';
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 onMounted(() => {
     if (USE_CUSTOM_TABBAR) {

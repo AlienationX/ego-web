@@ -178,7 +178,7 @@ import { apiPostProfile, apiPostEarnEnergy } from '@/api/wallpaper.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 const userPaddingBottom = computed(() => {
     const baseTabSpace = USE_CUSTOM_TABBAR ? getTabBarHeight() : 0;

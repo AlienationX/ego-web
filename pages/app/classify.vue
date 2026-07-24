@@ -65,7 +65,7 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 const pagePaddingBottom = computed(() => {
     const baseTabSpace = USE_CUSTOM_TABBAR ? getTabBarHeight() : 0;

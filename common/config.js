@@ -24,6 +24,10 @@ export const RIGHT_ICP = '粤ICP备15077732号-2';
 // 客服邮箱
 export const SERVICE_EMAIL = "le7yi_ss@163.com";
 
+// 看一次视频广告奖励的能量点数
+export const VIDEO_REWARD_ENERGY = 3;
+
+// ─────────────────────────────────────────────────────────────
 // 渠道标识（避免在 system.js / wallpaper.js 间循环引用，统一放这里）
 let _channel = '';
 // #ifdef APP
@@ -36,6 +40,11 @@ _channel = 'huawei';
 _channel = 'wechat';
 // #endif
 export const CHANNEL = _channel;
+// ─────────────────────────────────────────────────────────────
 
-// 看一次视频广告奖励的能量点数
-export const VIDEO_REWARD_ENERGY = 3;
+// ─────────────────────────────────────────────────────────────
+// TabBar 全局模式开关
+// false: 使用 uni-app 官方原生 TabBar（原生渲染、支持动态主题/多语言 API）
+// true : 使用自定义毛玻璃 glass-tab-bar 组件
+// ─────────────────────────────────────────────────────────────
+export const USE_CUSTOM_TABBAR = false;

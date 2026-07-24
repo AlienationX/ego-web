@@ -34,7 +34,7 @@ const props = defineProps({
     },
 });
 
-import { USE_CUSTOM_TABBAR } from '@/config/tabbar.js';
+import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
 const calculatedBottom = computed(() => {
     if (!props.isFixed) return 'auto';
