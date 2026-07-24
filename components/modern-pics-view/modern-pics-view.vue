@@ -1,33 +1,21 @@
 <template>
     <view class="modern-pics-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- 头部导航 (Tabs + 工具栏) -->
-        <view
-            v-if="shouldShowHeader"
-            class="header-bar"
-            :style="{
-                transform: `translateY(${Math.max(stickyTop, headerHeight - headerScrollTop)}px)`,
-                top: 0,
-                zIndex: 100,
-            }"
-        >
-            <scroll-view
-                v-if="tabs.length > 1"
-                scroll-x
-                class="tabs-scroll"
-                show-scrollbar="false"
-                :scroll-into-view="'tab-' + (currentIndex > 1 ? currentIndex - 1 : 0)"
-                scroll-with-animation
-            >
+        <view v-if="shouldShowHeader" class="header-bar" :style="{
+            transform: `translateY(${Math.max(stickyTop, headerHeight - headerScrollTop)}px)`,
+            top: 0,
+            zIndex: 100,
+        }">
+            <scroll-view v-if="tabs.length > 1" scroll-x class="tabs-scroll" show-scrollbar="false"
+                :scroll-into-view="'tab-' + (currentIndex > 1 ? currentIndex - 1 : 0)" scroll-with-animation>
                 <view class="tabs-list">
                     <view v-for="(tab, index) in tabs" :key="index" :id="'tab-' + index" class="tab-item">
-                        <view 
-                            class="tab-btn" 
-                            :class="{ active: currentIndex === index }" 
-                            @click="handleTabClick(index)"
-                        >
+                        <view class="tab-btn" :class="{ active: currentIndex === index }"
+                            @click="handleTabClick(index)">
                             {{ tab.label }}
                             <view class="sort-icon" v-if="tab.isDate && currentIndex === index">
-                                <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="12" :color="settingsStore.isDark ? '#181818' : '#eef1f5'"></uni-icons>
+                                <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="12"
+                                    :color="settingsStore.isDark ? '#181818' : '#eef1f5'"></uni-icons>
                             </view>
                         </view>
                     </view>
@@ -36,12 +24,8 @@
 
             <view class="tool-actions" :class="{ 'is-single': tabs.length <= 1 }">
                 <view class="action-btn" @click="toggleViewMode">
-                    <image
-                        class="icon-svg"
-                        v-if="!isWaterfall"
-                        src="/static/icons/view-grid.svg"
-                        mode="aspectFit"
-                    ></image>
+                    <image class="icon-svg" v-if="!isWaterfall" src="/static/icons/view-grid.svg" mode="aspectFit">
+                    </image>
                     <image class="icon-svg" v-else src="/static/icons/view-dashboard.svg" mode="aspectFit"></image>
                 </view>
             </view>
@@ -50,19 +34,16 @@
         <!-- 内容区域 -->
         <swiper class="content-swiper" :current="currentIndex" @change="onSwiperChange" duration="300">
             <swiper-item v-for="(tab, index) in tabs" :key="index">
-                <scroll-view
-                    scroll-y
-                    class="tab-scroll-view"
-                    show-scrollbar="false"
-                    :scroll-into-view="tabStates[index].scrollIntoViewId"
-                    @scroll="onScroll($event, index)"
-                    @scrolltolower="onReachLower(index)"
-                >
+                <scroll-view scroll-y class="tab-scroll-view" show-scrollbar="false"
+                    :scroll-into-view="tabStates[index].scrollIntoViewId" @scroll="onScroll($event, index)"
+                    @scrolltolower="onReachLower(index)">
                     <view class="scroll-content" :style="{ minHeight: `calc(100% + ${headerHeight}px)` }">
-                        <view :id="`tab-top-anchor-${index}`" class="top-spacer" :style="{ height: topSpacerHeight + 'px' }"></view>
+                        <view :id="`tab-top-anchor-${index}`" class="top-spacer"
+                            :style="{ height: topSpacerHeight + 'px' }"></view>
 
                         <!-- 骨架屏加载态 -->
-                        <view v-if="tabStates[index].isLoading && tabStates[index].images.length === 0" class="skeleton-wrapper">
+                        <view v-if="tabStates[index].isLoading && tabStates[index].images.length === 0"
+                            class="skeleton-wrapper">
                             <view class="sk-grid" v-if="!isWaterfall">
                                 <view v-for="i in 8" :key="i" class="sk-card"></view>
                             </view>
@@ -84,25 +65,23 @@
                         <view class="gallery-wrapper" v-else-if="tabStates[index].images.length > 0">
                             <!-- 模式 1: 网格视图 (CSS Grid) -->
                             <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
-                                <view 
-                                    class="modern-card grid-card" 
-                                    v-for="(item, idx) in tabStates[index].images" 
-                                    :key="index + '-' + item.id + '-' + idx"
-                                    @click="openPreview(item.id, index)"
-                                    @longpress="handleLongPress(item, index)"
-                                >
-                                    <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
-                                        <view class="card-overlay" v-if="showCardMeta"></view>
-                                        <view class="card-meta" v-if="showCardMeta">
-                                            <view class="meta-title">{{ getTitle(item) }}</view>
-                                            <view class="meta-footer">
-                                                <view class="meta-tag">{{ getTag(item) }}</view>
-                                                <view class="meta-score"><mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
-                                            </view>
+                                <view class="modern-card grid-card" v-for="(item, idx) in tabStates[index].images"
+                                    :key="index + '-' + item.id + '-' + idx" @click="openPreview(item.id, index)"
+                                    @longpress="handleLongPress(item, index)">
+                                    <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
+                                        @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
+                                    <view class="card-overlay" v-if="showCardMeta"></view>
+                                    <view class="card-meta" v-if="showCardMeta">
+                                        <view class="meta-title">{{ getTitle(item) }}</view>
+                                        <view class="meta-footer">
+                                            <view class="meta-tag">{{ getTag(item) }}</view>
+                                            <view class="meta-score"><mdi-icon path="/static/icons/star.svg" size="14px"
+                                                    color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
                                         </view>
-                                        <view class="card-lock" v-if="item.is_locked && item.loaded">
-                                            <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
-                                        </view>
+                                    </view>
+                                    <view class="card-lock" v-if="item.is_locked && item.loaded">
+                                        <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                    </view>
                                 </view>
                             </view>
 
@@ -110,21 +89,20 @@
                             <view class="waterfall-layout" v-else>
                                 <!-- 左列 -->
                                 <view class="waterfall-col">
-                                    <view 
-                                        class="modern-card wf-card" 
-                                        v-for="(item, idx) in tabStates[index].leftCol" 
+                                    <view class="modern-card wf-card" v-for="(item, idx) in tabStates[index].leftCol"
                                         :key="index + '-l-' + item.id + '-' + idx"
                                         :class="{ 'is-deleting': item.is_deleting }"
-                                        @click="openPreview(item.id, index)"
-                                        @longpress="handleLongPress(item, index)"
-                                    >
-                                        <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
+                                        @click="openPreview(item.id, index)" @longpress="handleLongPress(item, index)">
+                                        <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
+                                            @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
                                         <view class="card-meta" v-if="showCardMeta">
                                             <view class="meta-title">{{ getTitle(item) }}</view>
                                             <view class="meta-footer">
                                                 <view class="meta-tag">{{ getTag(item) }}</view>
-                                                <view class="meta-score"><mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
+                                                <view class="meta-score"><mdi-icon path="/static/icons/star.svg"
+                                                        size="14px" color="#ffbf66"></mdi-icon>{{ item.score || '--' }}
+                                                </view>
                                             </view>
                                         </view>
                                         <view class="card-lock" v-if="item.is_locked && item.loaded">
@@ -134,21 +112,20 @@
                                 </view>
                                 <!-- 右列 -->
                                 <view class="waterfall-col">
-                                    <view 
-                                        class="modern-card wf-card" 
-                                        v-for="(item, idx) in tabStates[index].rightCol" 
+                                    <view class="modern-card wf-card" v-for="(item, idx) in tabStates[index].rightCol"
                                         :key="index + '-r-' + item.id + '-' + idx"
                                         :class="{ 'is-deleting': item.is_deleting }"
-                                        @click="openPreview(item.id, index)"
-                                        @longpress="handleLongPress(item, index)"
-                                    >
-                                        <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load @load="item.loaded = true" :class="{'is-loaded': item.loaded}"></image>
+                                        @click="openPreview(item.id, index)" @longpress="handleLongPress(item, index)">
+                                        <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
+                                            @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
                                         <view class="card-meta" v-if="showCardMeta">
                                             <view class="meta-title">{{ getTitle(item) }}</view>
                                             <view class="meta-footer">
                                                 <view class="meta-tag">{{ getTag(item) }}</view>
-                                                <view class="meta-score"><mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
+                                                <view class="meta-score"><mdi-icon path="/static/icons/star.svg"
+                                                        size="14px" color="#ffbf66"></mdi-icon>{{ item.score || '--' }}
+                                                </view>
                                             </view>
                                         </view>
                                         <view class="card-lock" v-if="item.is_locked && item.loaded">
@@ -160,7 +137,8 @@
                         </view>
 
                         <!-- 空状态 -->
-                        <view class="empty-state" v-if="!tabStates[index].isLoading && tabStates[index].images.length === 0">
+                        <view class="empty-state"
+                            v-if="!tabStates[index].isLoading && tabStates[index].images.length === 0">
                             <slot name="empty" :index="index">
                                 <image src="/static/images/photos_empty.svg" mode="aspectFit" class="empty-img"></image>
                                 <text class="empty-text">暂无相关壁纸</text>
@@ -169,7 +147,8 @@
 
                         <!-- 底部加载状态 -->
                         <view class="status-footer" v-if="tabStates[index].images.length > 0">
-                            <uni-load-more :status="tabStates[index].noMoreData ? 'noMore' : tabStates[index].isLoading ? 'loading' : 'more'"></uni-load-more>
+                            <uni-load-more
+                                :status="tabStates[index].noMoreData ? 'noMore' : tabStates[index].isLoading ? 'loading' : 'more'"></uni-load-more>
                         </view>
 
                         <view class="safe-area-bottom" :style="{ height: `${bottomSafeSpace}rpx` }"></view>
@@ -179,12 +158,8 @@
         </swiper>
 
         <!-- 返回顶部悬浮按钮 -->
-        <fab-back-top
-            :show="tabStates[currentIndex]?.showBackTop"
-            :embedded="props.embedded"
-            :ad-height="props.adHeight"
-            @click="handleBackTop"
-        />
+        <fab-back-top :show="tabStates[currentIndex]?.showBackTop" :embedded="props.embedded"
+            :ad-height="props.adHeight" @click="handleBackTop" />
     </view>
 </template>
 
@@ -266,7 +241,7 @@ const currentIndex = ref(props.initialIndex);
 const headerScrollTop = ref(0);
 const dateSortAsc = ref(true);
 
-const isWaterfall = computed(() => 
+const isWaterfall = computed(() =>
     props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'
 );
 
@@ -311,7 +286,7 @@ const tabStates = reactive(props.tabs.map(() => createTabState()));
 // --- Data Fetching & Layout Engine ---
 const distributeItems = async (index, newItems) => {
     const state = tabStates[index];
-    
+
     // 确保有尺寸信息用于计算瀑布流
     // 因为后端必定返回宽高，所以这个兜底操作暂时关闭
     // await Promise.all(newItems.map(async (item) => {
@@ -382,7 +357,7 @@ const fetchData = async (index, init = false) => {
 
         if (index === currentIndex.value) emit('update', { images: state.images, index });
         if (state.pageNum >= (res.pagination?.total_pages || 1)) state.noMoreData = true;
-        
+
     } catch (e) {
         console.error('Fetch error:', e);
     } finally {
@@ -471,7 +446,7 @@ const onScroll = (e, index) => {
     const st = e.detail.scrollTop;
     tabStates[index].oldScrollTop = st;
     tabStates[index].showBackTop = st > 400;
-    
+
     if (index === currentIndex.value) {
         headerScrollTop.value = Math.min(st, props.headerHeight);
         emit('scroll', { scrollTop: st, index });
@@ -550,18 +525,18 @@ onShow(() => {
     width: 0;
     height: 100%;
     white-space: nowrap;
-    
+
     .tabs-list {
         display: flex;
         height: 100%;
         align-items: center;
         padding: 0 20rpx;
-        
+
         .tab-item {
             padding: 0 10rpx;
             display: inline-block;
         }
-        
+
         .tab-btn {
             display: flex;
             align-items: center;
@@ -574,13 +549,16 @@ onShow(() => {
             color: var(--text-tertiary);
             background: var(--panel-background-strong);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            
+
             &.active {
                 color: var(--page-background);
                 background: var(--text-primary);
                 box-shadow: 0 8rpx 20rpx var(--shadow-color);
             }
-            .sort-icon { margin-left: 6rpx; }
+
+            .sort-icon {
+                margin-left: 6rpx;
+            }
         }
     }
 }
@@ -588,8 +566,14 @@ onShow(() => {
 .tool-actions {
     padding: 0 24rpx;
     border-left: 1rpx solid var(--panel-border);
-    &.is-single { border-left: none; width: 100%; justify-content: flex-end; display: flex;}
-    
+
+    &.is-single {
+        border-left: none;
+        width: 100%;
+        justify-content: flex-end;
+        display: flex;
+    }
+
     .action-btn {
         width: 56rpx;
         height: 56rpx;
@@ -600,18 +584,44 @@ onShow(() => {
         background: var(--panel-background);
         border: 1rpx solid var(--panel-border);
         transition: transform 0.2s;
-        
-        &:active { transform: scale(0.9); }
-        .icon-svg { width: 34rpx; height: 34rpx; filter: grayscale(1); opacity: 0.8; }
-        .theme-dark & .icon-svg { filter: invert(1) grayscale(1); }
+
+        &:active {
+            transform: scale(0.9);
+        }
+
+        .icon-svg {
+            width: 34rpx;
+            height: 34rpx;
+            filter: grayscale(1);
+            opacity: 0.8;
+        }
+
+        .theme-dark & .icon-svg {
+            filter: invert(1) grayscale(1);
+        }
     }
 }
 
 /* 核心内容区 */
-.content-swiper { flex: 1; width: 100%; height: 100%; }
-.tab-scroll-view { height: 100%; width: 100%; }
-.scroll-content { display: flex; flex-direction: column; }
-.gallery-wrapper { padding: 24rpx; }
+.content-swiper {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.tab-scroll-view {
+    height: 100%;
+    width: 100%;
+}
+
+.scroll-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery-wrapper {
+    padding: 24rpx;
+}
 
 /* 网格布局 */
 .grid-layout {
@@ -625,7 +635,7 @@ onShow(() => {
     justify-content: space-between;
     gap: 24rpx;
     align-items: flex-start;
-    
+
     .waterfall-col {
         flex: 1;
         width: calc(50% - 12rpx);
@@ -641,11 +651,13 @@ onShow(() => {
 .waterfall-anim-leave-active {
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
 .waterfall-anim-enter-from,
 .waterfall-anim-leave-to {
     opacity: 0;
     transform: scale(0.9) translateY(40rpx);
 }
+
 .waterfall-anim-leave-active {
     position: absolute !important;
     width: 100%;
@@ -659,14 +671,17 @@ onShow(() => {
     border-radius: 36rpx;
     overflow: hidden;
     box-shadow: 0 4rpx 16rpx var(--shadow-color);
-    transform: translateZ(0); /* 开启 GPU 加速 */
+    transform: translateZ(0);
+    /* 开启 GPU 加速 */
     transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     max-height: 2000rpx;
     opacity: 1;
     transform-origin: center center;
-    
-    &.grid-card { height: 580rpx; }
-    
+
+    &.grid-card {
+        height: 580rpx;
+    }
+
     &.is-deleting {
         opacity: 0;
         max-height: 0 !important;
@@ -677,12 +692,21 @@ onShow(() => {
         border: 0 !important;
         transform: scale(0.8);
     }
-    
-    &:active { .card-img { transform: scale(1.08); } }
-    @media (hover: hover) {
-        &:hover { .card-img { transform: scale(1.08); } }
+
+    &:active {
+        .card-img {
+            transform: scale(1.08);
+        }
     }
-    
+
+    @media (hover: hover) {
+        &:hover {
+            .card-img {
+                transform: scale(1.08);
+            }
+        }
+    }
+
     .card-img {
         width: 100%;
         height: 100%;
@@ -690,21 +714,25 @@ onShow(() => {
         opacity: 0;
         filter: blur(10px);
         transition: opacity 0.5s ease, filter 0.6s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        
+
         &.is-loaded {
             opacity: 1;
             filter: blur(0);
         }
     }
-    
+
     .card-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%);
+        background: linear-gradient(to top,
+                rgba(0, 0, 0, 0.42) 0%,
+                rgba(0, 0, 0, 0.26) 12%,
+                rgba(0, 0, 0, 0.10) 24%,
+                rgba(0, 0, 0, 0.02) 33%,
+                rgba(0, 0, 0, 0) 40%);
         pointer-events: none;
-        opacity: 0.8;
     }
-    
+
     .card-meta {
         position: absolute;
         left: 20rpx;
@@ -713,7 +741,7 @@ onShow(() => {
         z-index: 2;
         pointer-events: none;
         color: #fff;
-        
+
         .meta-title {
             font-size: 26rpx;
             font-weight: bold;
@@ -722,15 +750,15 @@ onShow(() => {
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.5);
+            text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
         }
-        
+
         .meta-footer {
             margin-top: 12rpx;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            
+
             .meta-tag {
                 background: rgba(255, 255, 255, 0.2);
                 backdrop-filter: blur(8px);
@@ -739,7 +767,7 @@ onShow(() => {
                 font-size: 18rpx;
                 font-weight: 600;
             }
-            
+
             .meta-score {
                 display: flex;
                 align-items: center;
@@ -749,7 +777,7 @@ onShow(() => {
             }
         }
     }
-    
+
     .card-lock {
         position: absolute;
         top: 20rpx;
@@ -763,19 +791,47 @@ onShow(() => {
 }
 
 /* 骨架屏 */
-.skeleton-wrapper { padding: 24rpx; }
-.sk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24rpx; }
-.sk-waterfall { display: flex; gap: 24rpx; .sk-col { flex: 1; display: flex; flex-direction: column; gap: 24rpx; } }
+.skeleton-wrapper {
+    padding: 24rpx;
+}
+
+.sk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24rpx;
+}
+
+.sk-waterfall {
+    display: flex;
+    gap: 24rpx;
+
+    .sk-col {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 24rpx;
+    }
+}
+
 .sk-card {
     border-radius: 36rpx;
     background: linear-gradient(90deg, var(--panel-background) 25%, var(--panel-background-strong) 50%, var(--panel-background) 75%);
     background-size: 200% 100%;
     animation: sk-shimmer 1.5s infinite linear;
-    &.sk-grid .sk-card { height: 500rpx; }
+
+    &.sk-grid .sk-card {
+        height: 500rpx;
+    }
 }
+
 @keyframes sk-shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* 辅助与状态 */
@@ -787,12 +843,20 @@ onShow(() => {
     justify-content: center;
     padding-top: 160rpx;
     opacity: 0.6;
-    
-    .empty-img { width: 240rpx; height: 240rpx; }
-    .empty-text { margin-top: 24rpx; font-size: 28rpx; color: var(--text-tertiary); }
+
+    .empty-img {
+        width: 240rpx;
+        height: 240rpx;
+    }
+
+    .empty-text {
+        margin-top: 24rpx;
+        font-size: 28rpx;
+        color: var(--text-tertiary);
+    }
 }
 
-.status-footer { padding: 24rpx 0; }
-
-
+.status-footer {
+    padding: 24rpx 0;
+}
 </style>
