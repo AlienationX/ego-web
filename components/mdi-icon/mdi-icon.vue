@@ -13,6 +13,12 @@
 <script setup>
 import { computed } from 'vue';
 
+defineOptions({
+    options: {
+        virtualHost: true,
+    },
+});
+
 const props = defineProps({
     path: {
         type: String,
@@ -45,7 +51,7 @@ const webMiniStyle = computed(() => ({
     fontSize: sizeValue.value,
     width: sizeValue.value,
     height: sizeValue.value,
-    lineHeight: 1,
+    lineHeight: sizeValue.value,
 }));
 
 // ===== APP 原生：drop-shadow 方案 =====
@@ -75,6 +81,13 @@ const appImageStyle = computed(() => {
 
 <style>
 /* appicons.css 已移至 App.vue 全局样式，避免属性选择器 [class^="appicons-"] 触犯微信小程序组件 wxss 限制 */
+
+:host {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+}
 
 .mdi-icon {
     display: inline-flex;

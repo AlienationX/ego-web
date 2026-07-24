@@ -1,8 +1,9 @@
 <template>
     <view class="home-tab-wrapper">
-        <view class="update-banner" :class="{ 'update-banner--show': statusStore.newWallpapersCount > 0 }" :style="{ top: (navBarHeight + 10) + 'px' }" @click="goTimeline">
+        <view class="update-banner" :class="{ 'update-banner--show': statusStore.newWallpapersCount > 0 }"
+            :style="{ top: (navBarHeight + 10) + 'px' }" @click="goTimeline">
             <view class="update-banner__close" @click.stop="closeBanner">
-                <mdi-icon path="/static/icons/close.svg" size="12px" color="#ffffff"></mdi-icon>
+                <mdi-icon path="/static/icons/close.svg" size="14px" color="#ffffff"></mdi-icon>
             </view>
             <view class="update-banner__inner">
                 <image src="/static/logo.svg" mode="aspectFill" class="update-banner__logo"></image>
@@ -11,7 +12,9 @@
                         <text class="update-banner__title">{{ $t('index.newWallpapersNoticeTitle') }}</text>
                         <text v-if="bannerTimeAgo" class="update-banner__time">{{ bannerTimeAgo }}</text>
                     </view>
-                    <text class="update-banner__desc">{{ tp('index.newWallpapersNoticeDesc', { count: statusStore.newWallpapersCount }) }}</text>
+                    <text class="update-banner__desc">{{ tp('index.newWallpapersNoticeDesc', {
+                        count:
+                            statusStore.newWallpapersCount }) }}</text>
                 </view>
             </view>
         </view>
@@ -20,355 +23,322 @@
             <!-- 静态 spacer，与其他嵌入式 tab 保持一致，不随 titlebar 显隐变化 -->
             <view :style="{ height: navBarHeight + 'px' }"></view>
 
-        <!-- Banner -->
-        <view class="banner">
-            <!-- Banner 骨架屏 -->
-            <view v-if="!bannerList.length" class="banner-swiper">
-                <view class="sk-banner">
-                    <view class="sk-banner__img"></view>
-                    <view class="sk-banner__content">
-                        <view class="sk-banner__tag-row">
-                            <view class="sk-bar sk-bar--tag"></view>
-                            <view class="sk-bar sk-bar--tag sk-bar--short"></view>
-                        </view>
-                        <view class="sk-bar sk-bar--title"></view>
-                        <view class="sk-bar sk-bar--title sk-bar--medium"></view>
-                        <view class="sk-bar sk-bar--desc"></view>
-                    </view>
-                </view>
-            </view>
-            <swiper
-                v-else
-                class="banner-swiper"
-                indicator-dots
-                indicator-color="rgba(255,255,255,0.5)"
-                indicator-active-color="#fff"
-                autoplay
-                circular
-            >
-                <swiper-item class="banner-swiper-item" v-for="item in bannerList" :key="item.id">
-                    <navigator
-                        v-if="item.target == 'miniProgram'"
-                        :url="item.url"
-                        target="miniProgram"
-                        :app-id="item.appid"
-                        :class="['banner-card', item.accentClass]"
-                    >
-                        <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
-                        <view class="banner-card__overlay"></view>
-                        <view class="banner-card__content">
-                            <view class="banner-card__tag-row">
-                                <view class="banner-card__tag">{{ item.badge }}</view>
-                                <view class="banner-card__target">{{ item.targetLabel }}</view>
+            <!-- Banner -->
+            <view class="banner">
+                <!-- Banner 骨架屏 -->
+                <view v-if="!bannerList.length" class="banner-swiper">
+                    <view class="sk-banner">
+                        <view class="sk-banner__img"></view>
+                        <view class="sk-banner__content">
+                            <view class="sk-banner__tag-row">
+                                <view class="sk-bar sk-bar--tag"></view>
+                                <view class="sk-bar sk-bar--tag sk-bar--short"></view>
                             </view>
-                            <view class="banner-card__title">{{ item.title }}</view>
-                            <view class="banner-card__desc">{{ item.desc }}</view>
-                            <view class="banner-card__meta">
-                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
-                                <view class="banner-card__meta-arrow">
-                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
-                                </view>
-                            </view>
-                        </view>
-                    </navigator>
-
-                    <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
-                        <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
-                        <view class="banner-card__overlay"></view>
-                        <view class="banner-card__content">
-                            <view class="banner-card__tag-row">
-                                <view class="banner-card__tag">{{ item.badge }}</view>
-                                <view class="banner-card__target">{{ item.targetLabel }}</view>
-                            </view>
-                            <view class="banner-card__title">{{ item.title }}</view>
-                            <view class="banner-card__desc">{{ item.desc }}</view>
-                            <view class="banner-card__meta">
-                                <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
-                                <view class="banner-card__meta-arrow">
-                                    <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
-                                </view>
-                            </view>
+                            <view class="sk-bar sk-bar--title"></view>
+                            <view class="sk-bar sk-bar--title sk-bar--medium"></view>
+                            <view class="sk-bar sk-bar--desc"></view>
                         </view>
                     </view>
-                </swiper-item>
-            </swiper>
-        </view>
-
-        <!-- Notice -->
-        <view class="notice">
-            <view class="left">
-                <uni-icons type="sound-filled" size="20" color="#28B389"></uni-icons>
-                <text class="text">{{ $t('index.notice') }}</text>
-            </view>
-            <view class="center">
-                <!-- Notice 骨架屏 -->
-                <view v-if="!noticeList.length" class="sk-notice-bar">
-                    <view class="sk-bar sk-bar--notice"></view>
                 </view>
-                <swiper v-else class="notice-swiper" vertical interval="1500" duration="300" autoplay circular>
-                    <swiper-item class="notice-swiper-item" v-for="item in noticeComputed" :key="item.id">
-                        <navigator class="notice-nav" :url="`/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(item.title)}`">
-                            {{ item.title }}
+                <swiper v-else class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.5)"
+                    indicator-active-color="#fff" autoplay circular>
+                    <swiper-item class="banner-swiper-item" v-for="item in bannerList" :key="item.id">
+                        <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram"
+                            :app-id="item.appid" :class="['banner-card', item.accentClass]">
+                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
+                            <view class="banner-card__overlay"></view>
+                            <view class="banner-card__content">
+                                <view class="banner-card__tag-row">
+                                    <view class="banner-card__tag">{{ item.badge }}</view>
+                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                </view>
+                                <view class="banner-card__title">{{ item.title }}</view>
+                                <view class="banner-card__desc">{{ item.desc }}</view>
+                                <view class="banner-card__meta">
+                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                    <view class="banner-card__meta-arrow">
+                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                    </view>
+                                </view>
+                            </view>
                         </navigator>
+
+                        <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
+                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
+                            <view class="banner-card__overlay"></view>
+                            <view class="banner-card__content">
+                                <view class="banner-card__tag-row">
+                                    <view class="banner-card__tag">{{ item.badge }}</view>
+                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                </view>
+                                <view class="banner-card__title">{{ item.title }}</view>
+                                <view class="banner-card__desc">{{ item.desc }}</view>
+                                <view class="banner-card__meta">
+                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                    <view class="banner-card__meta-arrow">
+                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
                     </swiper-item>
                 </swiper>
             </view>
-            <view class="right">
-                <uni-icons type="right" size="16" :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
-            </view>
-        </view>
 
-        <!-- Daily Recommend -->
-        <view class="select">
-            <view class="select-watermark">Daily</view>
-            <index-title>
-                <template #name>{{ $t('index.dailyRecommend') }}</template>
-                <template #custom>
-                    <view class="date">
-                        <uni-icons
-                            type="calendar"
-                            size="20"
-                            :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"
-                        ></uni-icons>
-                        <view class="text"> {{ todayDateStr }}{{ $t('common.day') }} </view>
-                        <button class="button is-spotlight" size="mini" @click="refreshRandom">
-                            {{ $t('common.refresh') }}
+            <!-- Notice -->
+            <view class="notice">
+                <view class="left">
+                    <uni-icons type="sound-filled" size="20" color="#28B389"></uni-icons>
+                    <text class="text">{{ $t('index.notice') }}</text>
+                </view>
+                <view class="center">
+                    <!-- Notice 骨架屏 -->
+                    <view v-if="!noticeList.length" class="sk-notice-bar">
+                        <view class="sk-bar sk-bar--notice"></view>
+                    </view>
+                    <swiper v-else class="notice-swiper" vertical interval="1500" duration="300" autoplay circular>
+                        <swiper-item class="notice-swiper-item" v-for="item in noticeComputed" :key="item.id">
+                            <navigator class="notice-nav"
+                                :url="`/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(item.title)}`">
+                                {{ item.title }}
+                            </navigator>
+                        </swiper-item>
+                    </swiper>
+                </view>
+                <view class="right">
+                    <uni-icons type="right" size="16"
+                        :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
+                </view>
+            </view>
+
+            <!-- Daily Recommend -->
+            <view class="select">
+                <view class="select-watermark">Daily</view>
+                <index-title>
+                    <template #name>{{ $t('index.dailyRecommend') }}</template>
+                    <template #custom>
+                        <view class="date">
+                            <uni-icons type="calendar" size="20"
+                                :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
+                            <view class="text"> {{ todayDateStr }}{{ $t('common.day') }} </view>
+                            <button class="button is-spotlight" size="mini" @click="refreshRandom">
+                                {{ $t('common.refresh') }}
+                            </button>
+                        </view>
+                    </template>
+                </index-title>
+
+                <view class="content">
+                    <!-- Daily 骨架屏：1个大卡 + 4个小卡 -->
+                    <view v-if="!randomDailyList.length" class="sk-scroll-row">
+                        <view class="sk-card sk-card--hero"></view>
+                        <view v-for="i in 4" :key="i" class="sk-card"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="(item, idx) in randomDailyList" :key="item.id"
+                            :class="{ 'is-hero': idx === 0 }" @click="goPreview(item.id, randomDailyList)">
+                            <image class="box-image"
+                                :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl" mode="aspectFill"
+                                lazy-load fade-in @load="idx === 0 ? (heroImageLoaded = true) : null"></image>
+                            <block v-if="idx === 0">
+                                <view class="box-hero-overlay" :class="{ 'is-visible': heroImageLoaded }"></view>
+                                <view class="box-hero-content" :class="{ 'is-visible': heroImageLoaded }">
+                                    <view class="day-tag">{{ todayDate }}</view>
+                                    <view class="pick-text">PICK OF THE DAY</view>
+                                </view>
+                            </block>
+                            <block v-else>
+                                <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}
+                                </view>
+                            </block>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- Latest Release -->
+            <view class="select">
+                <view class="select-watermark">Latest</view>
+                <index-title>
+                    <template #name>{{ $t('index.latestRelease') }}</template>
+                    <template #custom>
+                        <button size="mini" class="btn is-default" @click="goTimeline">{{ $t('common.seeAll')
+                            }}</button>
+                    </template>
+                </index-title>
+
+                <view class="content">
+                    <!-- Latest 骨架屏：5个小卡 -->
+                    <view v-if="!latestList.length" class="sk-scroll-row">
+                        <view v-for="i in 5" :key="i" class="sk-card"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="(item, idx) in latestList" :key="item.id"
+                            @click="goPreview(item.id, latestList)">
+                            <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                            <view v-if="item._timeBadge" class="box-badge">{{ item._timeBadge }}</view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- Subscription Signals -->
+            <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout-new"
+                :class="{ 'is-expanded': followingExpanded }">
+                <view class="signal-callout-new__header" @click="toggleFollowingExpanded">
+                    <view class="signal-callout-new__left">
+                        <view class="signal-pulse-dot"></view>
+                        <text class="signal-callout-new__eyebrow">{{ t('index.followingEyebrow') }}</text>
+                    </view>
+                    <view class="signal-callout-new__right">
+                        <uni-icons :type="followingExpanded ? 'arrow-up' : 'arrow-down'" size="11"
+                            color="var(--text-secondary)"></uni-icons>
+                    </view>
+                </view>
+
+                <view class="signal-callout-new__body" @click="toggleFollowingExpanded">
+                    <view class="signal-callout-new__title">{{ t('index.followingTitle') }}</view>
+                    <view class="signal-callout-new__desc">{{ followingSummary }}</view>
+                </view>
+
+                <view v-if="followingExpanded" class="signal-callout-new__panel">
+                    <view v-if="subscribedClassifyItems.length" class="signal-group-new">
+                        <view class="signal-group-new__title">{{ t('subscriptionPage.classifyTitle') }}</view>
+                        <view class="signal-group-new__chips">
+                            <view v-for="item in subscribedClassifyItems" :key="item.id" class="signal-chip-new"
+                                @click="goClassify(item)">
+                                <uni-icons type="images" size="10" color="var(--text-secondary)"></uni-icons>
+                                <text class="chip-text">{{ item.name }}</text>
+                            </view>
+                        </view>
+                    </view>
+
+                    <view v-if="libraryStore.subscriptions.tags.length" class="signal-group-new">
+                        <view class="signal-group-new__title">{{ t('subscriptionPage.tagTitle') }}</view>
+                        <view class="signal-group-new__chips">
+                            <view v-for="tag in libraryStore.subscriptions.tags" :key="tag"
+                                class="signal-chip-new signal-chip-new--tag" @click="goSearchByTag(tag)">
+                                <text class="chip-text"># {{ tag }}</text>
+                            </view>
+                        </view>
+                    </view>
+
+                    <navigator url="/pages/user/subscriptions" class="signal-manage-new">
+                        <text>{{ t('index.followingManage') }}</text>
+                        <uni-icons type="right" size="10" color="var(--text-primary)"></uni-icons>
+                    </navigator>
+                </view>
+            </view>
+
+            <!-- Popular Tags Cloud -->
+            <view class="tags-section">
+                <view class="tags-header">
+                    <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
+                    <text class="tags-title">{{ t('category.popularTags') }}</text>
+                </view>
+                <scroll-view scroll-x class="tags-scroll" show-scrollbar="false">
+                    <view class="tags-list">
+                        <view class="tag-chip" v-for="(tag, index) in popularTags" :key="index" @click="searchTag(tag)">
+                            <text class="tag-label">#{{ tag }}</text>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+
+            <!-- Featured Subjects Section -->
+            <view class="select">
+                <view class="select-watermark">Subject</view>
+                <index-title>
+                    <template #name>{{ $t('index.subjectRecommend') }}</template>
+                    <template #custom>
+                        <button size="mini" class="btn is-default" @click="goSubjects">{{ $t('common.more') }}</button>
+                    </template>
+                </index-title>
+
+                <view class="content content--subjects">
+                    <!-- Subject 骨架屏 -->
+                    <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
+                        <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="subject-box-new" v-for="item in subjectsRecommendList" :key="item.id"
+                            @click="goSubjectDetail(item)">
+                            <!-- Top Image Area -->
+                            <view class="subject-box-new__cover-wrapper">
+                                <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load>
+                                </image>
+
+                                <!-- Floating Badges inside Image (Top-Right) -->
+                                <view class="subject-box-new__floating-badges">
+                                    <view class="subject-box-new__badge" v-if="item.is_locked">
+                                        <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
+                                        <text class="badge-text">VIP</text>
+                                    </view>
+                                    <view class="subject-box-new__floating-count">
+                                        {{ item.wall_count || 0 }}P
+                                    </view>
+                                </view>
+                            </view>
+
+                            <!-- Bottom Info Area -->
+                            <view class="subject-box-new__info">
+                                <text class="subject-box-new__title">
+                                    {{ isEn ? (item.name_en || item.name) : item.name }}
+                                </text>
+                                <text class="subject-box-new__desc">
+                                    {{ isEn ? (item.content_en || item.content) : item.content }}
+                                </text>
+                            </view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- Classify Sections -->
+            <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
+                <view class="select-watermark">{{ classify.name }}</view>
+                <index-title>
+                    <template #name>{{ classify.name }}</template>
+                    <template #custom>
+                        <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]"
+                            @click="goClasslist(classify.id, classify.name)">
+                            {{ $t('common.seeAll') }}
                         </button>
-                    </view>
-                </template>
-            </index-title>
+                    </template>
+                </index-title>
 
-            <view class="content">
-                <!-- Daily 骨架屏：1个大卡 + 4个小卡 -->
-                <view v-if="!randomDailyList.length" class="sk-scroll-row">
-                    <view class="sk-card sk-card--hero"></view>
-                    <view v-for="i in 4" :key="i" class="sk-card"></view>
-                </view>
-                <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
-                    <view
-                        class="box"
-                        v-for="(item, idx) in randomDailyList"
-                        :key="item.id"
-                        :class="{ 'is-hero': idx === 0 }"
-                        @click="goPreview(item.id, randomDailyList)"
-                    >
-                        <image
-                            class="box-image"
-                            :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
-                            mode="aspectFill"
-                            lazy-load
-                            fade-in
-                            @load="idx === 0 ? (heroImageLoaded = true) : null"
-                        ></image>
-                        <block v-if="idx === 0">
-                            <view class="box-hero-overlay" :class="{ 'is-visible': heroImageLoaded }"></view>
-                            <view class="box-hero-content" :class="{ 'is-visible': heroImageLoaded }">
-                                <view class="day-tag">{{ todayDate }}</view>
-                                <view class="pick-text">PICK OF THE DAY</view>
-                            </view>
-                        </block>
-                        <block v-else>
-                            <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}</view>
-                        </block>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>  
-
-        <!-- Latest Release -->
-        <view class="select">
-            <view class="select-watermark">Latest</view>
-            <index-title>
-                <template #name>{{ $t('index.latestRelease') }}</template>
-                <template #custom>
-                    <button size="mini" class="btn is-default" @click="goTimeline">{{ $t('common.seeAll') }}</button>
-                </template>
-            </index-title>
-
-            <view class="content">
-                <!-- Latest 骨架屏：5个小卡 -->
-                <view v-if="!latestList.length" class="sk-scroll-row">
-                    <view v-for="i in 5" :key="i" class="sk-card"></view>
-                </view>
-                <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
-                    <view class="box" v-for="(item, idx) in latestList" :key="item.id" @click="goPreview(item.id, latestList)">
-                        <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
-                        <view v-if="item._timeBadge" class="box-badge">{{ item._timeBadge }}</view>
-                    </view>
-                </scroll-view>
-            </view>
-        </view>
-
-        <!-- Subscription Signals -->
-        <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout-new" :class="{ 'is-expanded': followingExpanded }">
-            <view class="signal-callout-new__header" @click="toggleFollowingExpanded">
-                <view class="signal-callout-new__left">
-                    <view class="signal-pulse-dot"></view>
-                    <text class="signal-callout-new__eyebrow">{{ t('index.followingEyebrow') }}</text>
-                </view>
-                <view class="signal-callout-new__right">
-                    <uni-icons :type="followingExpanded ? 'arrow-up' : 'arrow-down'" size="11" color="var(--text-secondary)"></uni-icons>
-                </view>
-            </view>
-            
-            <view class="signal-callout-new__body" @click="toggleFollowingExpanded">
-                <view class="signal-callout-new__title">{{ t('index.followingTitle') }}</view>
-                <view class="signal-callout-new__desc">{{ followingSummary }}</view>
-            </view>
-
-            <view v-if="followingExpanded" class="signal-callout-new__panel">
-                <view v-if="subscribedClassifyItems.length" class="signal-group-new">
-                    <view class="signal-group-new__title">{{ t('subscriptionPage.classifyTitle') }}</view>
-                    <view class="signal-group-new__chips">
-                        <view
-                            v-for="item in subscribedClassifyItems"
-                            :key="item.id"
-                            class="signal-chip-new"
-                            @click="goClassify(item)"
-                        >
-                            <uni-icons type="images" size="10" color="var(--text-secondary)"></uni-icons>
-                            <text class="chip-text">{{ item.name }}</text>
-                        </view>
-                    </view>
-                </view>
-
-                <view v-if="libraryStore.subscriptions.tags.length" class="signal-group-new">
-                    <view class="signal-group-new__title">{{ t('subscriptionPage.tagTitle') }}</view>
-                    <view class="signal-group-new__chips">
-                        <view
-                            v-for="tag in libraryStore.subscriptions.tags"
-                            :key="tag"
-                            class="signal-chip-new signal-chip-new--tag"
-                            @click="goSearchByTag(tag)"
-                        >
-                            <text class="chip-text"># {{ tag }}</text>
-                        </view>
-                    </view>
-                </view>
-
-                <navigator url="/pages/user/subscriptions" class="signal-manage-new">
-                    <text>{{ t('index.followingManage') }}</text>
-                    <uni-icons type="right" size="10" color="var(--text-primary)"></uni-icons>
-                </navigator>
-            </view>
-        </view>
-
-        <!-- Popular Tags Cloud -->
-        <view class="tags-section">
-            <view class="tags-header">
-                <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
-                <text class="tags-title">{{ t('category.popularTags') }}</text>
-            </view>
-            <scroll-view scroll-x class="tags-scroll" show-scrollbar="false">
-                <view class="tags-list">
-                    <view 
-                        class="tag-chip" 
-                        v-for="(tag, index) in popularTags" 
-                        :key="index"
-                        @click="searchTag(tag)"
-                    >
-                        <text class="tag-label">#{{ tag }}</text>
-                    </view>
-                </view>
-            </scroll-view>
-        </view>
-
-        <!-- Featured Subjects Section -->
-        <view class="select">
-            <view class="select-watermark">Subject</view>
-            <index-title>
-                <template #name>{{ $t('index.subjectRecommend') }}</template>
-                <template #custom>
-                    <button size="mini" class="btn is-default" @click="goSubjects">{{ $t('common.more') }}</button>
-                </template>
-            </index-title>
-
-            <view class="content content--subjects">
-                <!-- Subject 骨架屏 -->
-                <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
-                    <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
-                </view>
-                <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
-                    <view
-                        class="subject-box-new"
-                        v-for="item in subjectsRecommendList"
-                        :key="item.id"
-                        @click="goSubjectDetail(item)"
-                    >
-                        <!-- Top Image Area -->
-                        <view class="subject-box-new__cover-wrapper">
-                            <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load></image>
-                            
-                            <!-- Floating Badges inside Image (Top-Right) -->
-                            <view class="subject-box-new__floating-badges">
-                                <view class="subject-box-new__badge" v-if="item.is_locked">
-                                    <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
-                                    <text class="badge-text">VIP</text>
-                                </view>
-                                <view class="subject-box-new__floating-count">
-                                    {{ item.wall_count || 0 }}P
-                                </view>
+                <view class="content">
+                    <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
+                    <scroll-view scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="item in classify.data" :key="item.id"
+                            @click="goPreview(item.id, classify.data)">
+                            <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                            <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}
                             </view>
                         </view>
-                        
-                        <!-- Bottom Info Area -->
-                        <view class="subject-box-new__info">
-                            <text class="subject-box-new__title">
-                                {{ isEn ? (item.name_en || item.name) : item.name }}
-                            </text>
-                            <text class="subject-box-new__desc">
-                                {{ isEn ? (item.content_en || item.content) : item.content }}
-                            </text>
-                        </view>
-                    </view>
-                </scroll-view>
+                    </scroll-view>
+                </view>
             </view>
-        </view>
 
-        <!-- Classify Sections -->
-        <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
-            <view class="select-watermark">{{ classify.name }}</view>
-            <index-title>
-                <template #name>{{ classify.name }}</template>
-                <template #custom>
-                    <button
-                        size="mini"
-                        class="btn"
-                        :class="themeClasses[idx % themeClasses.length]"
-                        @click="goClasslist(classify.id, classify.name)"
-                    >
-                        {{ $t('common.seeAll') }}
-                    </button>
-                </template>
-            </index-title>
+            <!-- Classify Grid -->
+            <view class="classify">
+                <index-title>
+                    <template #name>{{ $t('index.categoryRecommend') }}</template>
+                    <template #custom>
+                        <navigator url="/pages/app/classify" open-type="reLaunch" class="more">{{ $t('common.more') }}+
+                        </navigator>
+                    </template>
+                </index-title>
 
-            <view class="content">
-                <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
-                <scroll-view scroll-x class="home-scroll" show-scrollbar="false">
-                    <view class="box" v-for="item in classify.data" :key="item.id" @click="goPreview(item.id, classify.data)">
-                        <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in></image>
-                        <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}</view>
-                    </view>
-                </scroll-view>
+                <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
+
+                <view class="classify-grid-padding">
+                    <classify-grid v-if="classifyList.length" :items="classifyPreviewList" />
+                </view>
             </view>
-        </view>
-
-        <!-- Classify Grid -->
-        <view class="classify">
-            <index-title>
-                <template #name>{{ $t('index.categoryRecommend') }}</template>
-                <template #custom>
-                    <navigator url="/pages/app/classify" open-type="reLaunch" class="more">{{ $t('common.more') }}+</navigator>
-                </template>
-            </index-title>
-
-            <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
-
-            <view class="classify-grid-padding">
-                <classify-grid v-if="classifyList.length" :items="classifyPreviewList" />
-            </view>
-        </view>
-    </scroll-view>
+        </scroll-view>
     </view>
 </template>
 
@@ -569,10 +539,10 @@ const getTimeBadge = (item) =>
     isUpdatedToday(item)
         ? badgeCopy.justIn
         : isUpdatedYesterday(item)
-          ? badgeCopy.new
-          : isUpdatedWithinDays(item, 5)
-            ? badgeCopy.latest
-            : '';
+            ? badgeCopy.new
+            : isUpdatedWithinDays(item, 5)
+                ? badgeCopy.latest
+                : '';
 
 const addTimeBadge = (item) => {
     item._timeBadge = getTimeBadge(item);
@@ -700,12 +670,12 @@ const getLatest = async (isAppend = false) => {
         const nextList = (res.data || [])
             .map((item) => addTimeBadge(handlePicUrl(item)))
             .sort((a, b) => toTimelineDate(b).getTime() - toTimelineDate(a).getTime());
-            
+
         // 提取最新时间记录到本地
         if (nextList.length > 0 && nextList[0].created_at) {
             statusStore.setLastViewedWallpaperTime(nextList[0].created_at);
         }
-        
+
         latestList.value = isAppend ? [...latestList.value, ...nextList] : nextList;
         const totalPages = Number(res?.pagination?.total_pages || 1);
         latestNoMore.value = latestQuery.value.pageNum >= totalPages || nextList.length === 0;
@@ -872,6 +842,7 @@ onMounted(() => {
         background: #ffffff;
         box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
     }
+
     /* Dark mode override */
     .theme-dark & {
         background: #1e293b;
@@ -887,26 +858,32 @@ onMounted(() => {
         position: absolute;
         top: -12rpx;
         right: -12rpx;
-        width: 40rpx;
-        height: 40rpx;
+        width: 44rpx;
+        height: 44rpx;
+        box-sizing: border-box;
+        padding: 0;
         border-radius: 50%;
-        background: #94a3b8;
+        background: #64748b;
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 10;
-        border: 4rpx solid #ffffff;
-        box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.15);
+        border: none;
+        box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.18);
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 
         .theme-dark & {
             background: #475569;
-            border-color: #1e293b;
+            box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.35);
         }
 
         &:active {
-            transform: scale(0.85);
-            background: #64748b;
+            transform: scale(0.86);
+            background: #475569;
+
+            .theme-dark & {
+                background: #334155;
+            }
         }
     }
 
@@ -944,7 +921,7 @@ onMounted(() => {
         font-size: 28rpx;
         font-weight: 700;
         color: #0f172a;
-        
+
         .theme-dark & {
             color: #f8fafc;
         }
@@ -977,6 +954,7 @@ onMounted(() => {
 .banner {
     width: 750rpx;
     padding: 0 0 8rpx;
+
     // ── 优化8：使用 class 选择器替代 swiper 标签名，小程序端更可靠 ──
     .banner-swiper {
         width: 750rpx;
@@ -1010,12 +988,10 @@ onMounted(() => {
         .banner-card__overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(
-                180deg,
-                rgba(6, 12, 18, 0.06) 0%,
-                rgba(6, 12, 18, 0.18) 34%,
-                rgba(6, 12, 18, 0.78) 100%
-            );
+            background: linear-gradient(180deg,
+                    rgba(6, 12, 18, 0.06) 0%,
+                    rgba(6, 12, 18, 0.18) 34%,
+                    rgba(6, 12, 18, 0.78) 100%);
         }
 
         .banner-card__content {
@@ -1127,6 +1103,7 @@ onMounted(() => {
                 background: rgba(126, 34, 206, 0.32);
                 border-color: rgba(216, 180, 254, 0.34);
             }
+
             .banner-card__meta-chip {
                 color: #f3e8ff;
                 background: rgba(15, 23, 42, 0.38);
@@ -1140,6 +1117,7 @@ onMounted(() => {
                 background: rgba(101, 163, 13, 0.28);
                 border-color: rgba(190, 242, 100, 0.3);
             }
+
             .banner-card__meta-chip {
                 color: #ecfccb;
                 background: rgba(15, 23, 42, 0.34);
@@ -1153,6 +1131,7 @@ onMounted(() => {
                 background: rgba(245, 158, 11, 0.18);
                 border-color: rgba(253, 230, 138, 0.3);
             }
+
             .banner-card__meta-chip {
                 color: #fef3c7;
             }
@@ -1264,6 +1243,7 @@ onMounted(() => {
         transform: scale(1);
         opacity: 0.8;
     }
+
     100% {
         transform: scale(2.8);
         opacity: 0;
@@ -1515,12 +1495,10 @@ onMounted(() => {
                     right: 0;
                     bottom: 0;
                     border-radius: 28rpx;
-                    background: linear-gradient(
-                        90deg,
-                        rgba(200, 200, 200, 0.08) 25%,
-                        rgba(200, 200, 200, 0.18) 50%,
-                        rgba(200, 200, 200, 0.08) 75%
-                    );
+                    background: linear-gradient(90deg,
+                            rgba(200, 200, 200, 0.08) 25%,
+                            rgba(200, 200, 200, 0.18) 50%,
+                            rgba(200, 200, 200, 0.08) 75%);
                     background-size: 200% 100%;
                     animation: skeleton-shimmer 1.6s infinite linear;
                     z-index: 0;
@@ -1624,6 +1602,7 @@ onMounted(() => {
             @media (hover: hover) {
                 .box:hover {
                     box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.45);
+
                     .box-image {
                         transform: scale(1.08);
                     }
@@ -1731,6 +1710,7 @@ onMounted(() => {
     0% {
         background-position: 200% 0;
     }
+
     100% {
         background-position: -200% 0;
     }
@@ -1867,7 +1847,7 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 }
 
 .subject-box-new {
-    width: 580rpx;
+    width: 660rpx;
     height: 480rpx;
     display: inline-flex;
     flex-direction: column;
@@ -1894,7 +1874,7 @@ $sk-shine: rgba(148, 163, 184, 0.22);
         .subject-box-new__cover {
             transform: scale(1.06);
         }
-        
+
         .subject-box-new__floating-badges {
             transform: translateY(-4rpx);
         }
