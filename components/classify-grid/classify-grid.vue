@@ -2,33 +2,20 @@
     <view class="classify-grid">
         <view v-for="item in items" :key="item.id" class="classify-item">
             <navigator class="box" :url="'/pages/app/classlist?id=' + item.id + '&name=' + item.name">
-                <image
-                    class="pic"
-                    :class="{ 'pic--loaded': loadedMap[item.id] }"
-                    :src="item.mediumPicurl"
-                    mode="aspectFill"
-                    lazy-load
-                    @load="onImageLoad(item.id)"
-                ></image>
+                <image class="pic" :class="{ 'pic--loaded': loadedMap[item.id] }" :src="item.mediumPicurl"
+                    mode="aspectFill" lazy-load @load="onImageLoad(item.id)"></image>
                 <view class="mask" :class="{ 'is-visible': loadedMap[item.id] }">
                     <view class="mask-info">
                         <text class="mask-text">{{ isEn ? (item.name_en || item.name) : item.name }}</text>
-                        <text class="mask-count" v-if="item.wallpapers_count"
-                            >{{ item.wallpapers_count }}{{ t('common.items') || '张' }}</text
-                        >
+                        <text class="mask-count" v-if="item.wallpapers_count">{{ item.wallpapers_count }}{{
+                            t('common.items') || '张' }}</text>
                     </view>
                 </view>
-                <view class="tab" :class="{ 'is-visible': loadedMap[item.id] }" v-if="compareTimestamp(item.updateTime)"
-                    >{{ compareTimestamp(item.updateTime) }}{{ t('common.ago') || '前' }}更新</view
-                >
-                <uni-icons
-                    class="vip"
-                    :class="{ 'is-visible': loadedMap[item.id] }"
-                    v-if="item.is_locked"
-                    type="vip-filled"
-                    size="18"
-                    color="#F9E9B5"
-                ></uni-icons>
+                <view class="tab" :class="{ 'is-visible': loadedMap[item.id] }"
+                    v-if="compareTimestamp(item.updateTime)">{{ compareTimestamp(item.updateTime) }}{{ t('common.ago')
+                    || '前' }}更新</view>
+                <uni-icons class="vip" :class="{ 'is-visible': loadedMap[item.id] }" v-if="item.is_locked"
+                    type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
             </navigator>
         </view>
     </view>
@@ -109,12 +96,10 @@ const onImageLoad = (id) => {
     position: relative;
     display: block;
     transition: transform 0.3s ease;
-    background: linear-gradient(
-        90deg,
-        rgba(200, 200, 200, 0.08) 25%,
-        rgba(200, 200, 200, 0.18) 50%,
-        rgba(200, 200, 200, 0.08) 75%
-    );
+    background: linear-gradient(90deg,
+            rgba(200, 200, 200, 0.08) 25%,
+            rgba(200, 200, 200, 0.18) 50%,
+            rgba(200, 200, 200, 0.08) 75%);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s infinite linear;
 
@@ -217,6 +202,7 @@ const onImageLoad = (id) => {
     0% {
         background-position: 200% 0;
     }
+
     100% {
         background-position: -200% 0;
     }

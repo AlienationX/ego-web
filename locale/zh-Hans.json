@@ -617,6 +617,7 @@
         "deleteConfirm": "确定删除这条评分记录吗？",
         "deleteSuccess": "评分已删除",
         "deleteFailed": "删除评分失败",
+        "swipeTip": "左滑卡片可删除评分记录",
         "justNow": "刚刚",
         "minutesAgo": "分钟前",
         "hoursAgo": "小时前",

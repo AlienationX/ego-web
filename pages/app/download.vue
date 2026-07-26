@@ -5,7 +5,8 @@
             <view class="nav-bar">
                 <view class="left-section">
                     <view class="back-btn" @click="goBack">
-                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                            :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'" />
                     </view>
                     <view class="header-titles">
                         <text class="main-title">{{ $t('user.profile.myDownload') }}</text>
@@ -20,24 +21,13 @@
         </view>
 
         <view class="content-wrapper">
-            <modern-pics-view 
-                ref="picsRef" 
-                :show-header="false" 
-                :tabs="tabs" 
-                api-type="actions" 
-                :show-delete="true"
-                layoutMode="grid"
-                :showCardMeta="false"
-                @remove="handleRemove"
-            ></modern-pics-view>
+            <modern-pics-view ref="picsRef" :show-header="false" :tabs="tabs" api-type="actions" :show-delete="true"
+                delete-icon="trash-filled" delete-icon-color="#ffffff" layoutMode="grid" :showCardMeta="false"
+                @remove="handleRemove"></modern-pics-view>
         </view>
-        
-        <popup-navigation-dialog
-            ref="dialogRef"
-            :title="dialogTitle"
-            :description="dialogDesc"
-            @confirm="onConfirmRemove"
-        />
+
+        <popup-navigation-dialog ref="dialogRef" :title="dialogTitle" :description="dialogDesc"
+            @confirm="onConfirmRemove" />
     </view>
 </template>
 
@@ -128,7 +118,7 @@ const goBack = () => {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                
+
                 &:active {
                     opacity: 0.7;
                 }
@@ -137,14 +127,14 @@ const goBack = () => {
             .header-titles {
                 display: flex;
                 flex-direction: column;
-                
+
                 .main-title {
                     font-size: 32rpx;
                     font-weight: 700;
                     color: var(--text-primary);
                     letter-spacing: 0.5rpx;
                 }
-                
+
                 .sub-title {
                     font-size: 20rpx;
                     color: var(--text-tertiary);
@@ -161,7 +151,7 @@ const goBack = () => {
                 padding: 10rpx 20rpx;
                 background: rgba($wp-theme-color, 0.1);
                 border-radius: 40rpx;
-                
+
                 &:active {
                     opacity: 0.7;
                 }
@@ -173,7 +163,7 @@ const goBack = () => {
         flex: 1;
         height: 0;
         padding: 0;
-        
+
         /* 强制覆盖 modern-pics-view 为 1:1 正方形相册风格 */
         :deep(.gallery-wrapper) {
             padding: 16rpx;
@@ -181,17 +171,20 @@ const goBack = () => {
 
         :deep(.grid-layout) {
             gap: 16rpx !important;
-            grid-template-columns: repeat(3, 1fr) !important; /* 强制3列相册 */
+            grid-template-columns: repeat(3, 1fr) !important;
+            /* 强制3列相册 */
         }
 
         :deep(.modern-card.grid-card) {
             height: auto !important;
             aspect-ratio: 1 / 1 !important;
-            border-radius: 8rpx !important; /* 减小圆角更像照片 */
+            border-radius: 8rpx !important;
+            /* 减小圆角更像照片 */
             box-shadow: none !important;
-            border: 1rpx solid rgba(0,0,0,0.05);
+            border: 1rpx solid rgba(0, 0, 0, 0.05);
+
             .theme-dark & {
-                border-color: rgba(255,255,255,0.05);
+                border-color: rgba(255, 255, 255, 0.05);
             }
         }
     }

@@ -79,7 +79,10 @@
                                                     color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
                                         </view>
                                     </view>
-                                    <view class="card-lock" v-if="item.is_locked && item.loaded">
+                                    <view class="card-action" v-if="showDelete && item.loaded" @click.stop="handleDelete(item, index)">
+                                        <uni-icons :type="deleteIcon" size="18" :color="deleteIconColor"></uni-icons>
+                                    </view>
+                                    <view class="card-lock" v-else-if="item.is_locked && item.loaded">
                                         <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                     </view>
                                 </view>
@@ -105,7 +108,10 @@
                                                 </view>
                                             </view>
                                         </view>
-                                        <view class="card-lock" v-if="item.is_locked && item.loaded">
+                                        <view class="card-action" v-if="showDelete && item.loaded" @click.stop="handleDelete(item, index)">
+                                            <uni-icons :type="deleteIcon" size="18" :color="deleteIconColor"></uni-icons>
+                                        </view>
+                                        <view class="card-lock" v-else-if="item.is_locked && item.loaded">
                                             <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                         </view>
                                     </view>
@@ -128,7 +134,10 @@
                                                 </view>
                                             </view>
                                         </view>
-                                        <view class="card-lock" v-if="item.is_locked && item.loaded">
+                                        <view class="card-action" v-if="showDelete && item.loaded" @click.stop="handleDelete(item, index)">
+                                            <uni-icons :type="deleteIcon" size="18" :color="deleteIconColor"></uni-icons>
+                                        </view>
+                                        <view class="card-lock" v-else-if="item.is_locked && item.loaded">
                                             <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                         </view>
                                     </view>
@@ -190,6 +199,8 @@ const props = defineProps({
     layoutMode: { type: String, default: '' }, // '' 跟随全局, 'waterfall', 'grid'
     showCardMeta: { type: Boolean, default: false },
     showDelete: { type: Boolean, default: false }, // 显示删除按钮
+    deleteIcon: { type: String, default: 'heart-filled' }, // 删除/动作图标
+    deleteIconColor: { type: String, default: '#ffffff' }, // 图标颜色
     bottomSafeSpace: { type: Number, default: 60 },
     adHeight: { type: Number, default: 0 }, // 广告条高度，用于悬浮按钮位置调整
     embedded: { type: Boolean, default: false }, // 是否在 tabbar 页面内嵌入
@@ -197,6 +208,12 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update', 'change', 'scroll', 'remove']);
+
+// 点击右上角动作按钮删除
+const handleDelete = (item, index) => {
+    if (!props.showDelete) return;
+    emit('remove', { item, tabIndex: index });
+};
 
 // 长按删除
 const handleLongPress = (item, index) => {
@@ -775,6 +792,27 @@ onShow(() => {
                 font-size: 20rpx;
                 font-weight: bold;
             }
+        }
+    }
+
+    .card-action {
+        position: absolute;
+        top: 20rpx;
+        right: 20rpx;
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(8px);
+        border-radius: 50%;
+        width: 56rpx;
+        height: 56rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+
+        &:active {
+            transform: scale(0.85);
+            background: rgba(0, 0, 0, 0.55);
         }
     }
 

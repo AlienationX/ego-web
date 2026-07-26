@@ -21,6 +21,8 @@
                 :tabs="tabs" 
                 api-type="actions" 
                 :show-delete="true" 
+                delete-icon="heart-filled"
+                delete-icon-color="#ff4d4f"
                 layoutMode="waterfall"
                 :showCardMeta="false"
                 @remove="handleRemove"

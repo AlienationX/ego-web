@@ -617,6 +617,7 @@
         "deleteConfirm": "Are you sure you want to remove this rating?",
         "deleteSuccess": "Rating removed",
         "deleteFailed": "Failed to remove rating",
+        "swipeTip": "Swipe left on a card to delete rating",
         "justNow": "Just now",
         "minutesAgo": " min ago",
         "hoursAgo": " hours ago",
