@@ -106,21 +106,24 @@ const onScroll = (e) => {
     headerScrollTop.value = Math.min(scrollTop, heroHeightPx);
 };
 
-const tabs = computed(() => [
-    {
-        label: t('common.random'),
-        query: { classify_id: parseInt(currentId.value), sortord: 'random' },
-    },
-    {
-        label: t('common.score'),
-        query: { classify_id: parseInt(currentId.value), sortord: 'score' },
-    },
-    {
-        label: t('common.publishDate'),
-        query: { classify_id: parseInt(currentId.value), sortord: 'date_desc' },
-        isDate: true,
-    },
-]);
+const tabs = computed(() => {
+    if (!currentId.value) return [];
+    return [
+        {
+            label: t('common.random'),
+            query: { classify_id: parseInt(currentId.value), sortord: 'random' },
+        },
+        {
+            label: t('common.score'),
+            query: { classify_id: parseInt(currentId.value), sortord: 'score' },
+        },
+        {
+            label: t('common.publishDate'),
+            query: { classify_id: parseInt(currentId.value), sortord: 'date_desc' },
+            isDate: true,
+        },
+    ];
+});
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);

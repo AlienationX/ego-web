@@ -23,7 +23,7 @@
             show-scrollbar="false"
             scroll-y
             class="scroll-area"
-            :style="{ paddingTop: `${titleBarHeight}px` }"
+            :style="{ paddingTop: `${statusBarHeight + titleBarHeight}px` }"
             refresher-enabled
             :refresher-triggered="isRefreshing"
             @refresherrefresh="onRefresh"
@@ -47,9 +47,12 @@
                 <!-- Subject Cards List -->
                 <view v-else class="subjects-list">
                     <view
-                        v-for="item in subjectsList"
+                        v-for="(item, index) in subjectsList"
                         :key="item.id"
                         class="subject-card"
+                        hover-class="subject-card--active"
+                        :hover-stay-time="150"
+                        :style="{ animationDelay: `${(index % 6) * 0.08}s` }"
                         @click="goDetail(item)"
                     >
                         <view class="subject-card__header">
@@ -82,7 +85,7 @@
                         <!-- Wallpaper Previews Row -->
                         <view class="subject-card__previews" v-if="item.preview_walls && item.preview_walls.length">
                             <view class="preview-item" v-for="(img, imgIdx) in item.preview_walls" :key="imgIdx">
-                                <image class="preview-img" :src="img.replace('.jpg', '_small.webp')" mode="aspectFill" lazy-load></image>
+                                <image class="preview-img" :src="img.includes('.jpg') ? img.replace('.jpg', '_small.webp') : img" mode="aspectFill" lazy-load></image>
                             </view>
                         </view>
                         <!-- Fallback mesh overlay if empty -->
@@ -249,6 +252,17 @@ onLoad(() => {
     padding-bottom: 60rpx;
 }
 
+@keyframes subjectCardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(32rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .subjects-list {
     display: flex;
     flex-direction: column;
@@ -262,15 +276,16 @@ onLoad(() => {
     padding: 32rpx;
     box-shadow: 0 12rpx 36rpx var(--shadow-color);
     box-sizing: border-box;
-    transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s;
+    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s ease;
+    animation: subjectCardEntrance 0.5s cubic-bezier(0.25, 1, 0.5, 1) both;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: 24rpx;
 
-    &:active {
-        transform: scale(0.98);
-        box-shadow: 0 6rpx 16rpx var(--shadow-color);
+    &--active, &:active {
+        transform: scale(0.97) !important;
+        box-shadow: 0 6rpx 18rpx var(--shadow-color) !important;
     }
 
     &__header {
@@ -355,10 +370,15 @@ onLoad(() => {
         overflow: hidden;
         background: var(--page-background-secondary);
         box-shadow: 0 6rpx 16rpx var(--shadow-color);
-        transition: transform 0.28s;
+        transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
 
         &:hover {
-            transform: translateY(-4rpx);
+            transform: translateY(-10rpx) scale(1.03);
+            box-shadow: 0 12rpx 28rpx var(--shadow-color);
+
+            .preview-img {
+                transform: scale(1.08);
+            }
         }
     }
 
@@ -366,6 +386,7 @@ onLoad(() => {
         width: 100%;
         height: 100%;
         display: block;
+        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     &__previews-placeholder {

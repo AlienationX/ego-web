@@ -26,7 +26,7 @@
             <view v-else class="journal-list">
                 <!-- 删除操作提示 -->
                 <view class="swipe-tip-bar" v-if="ratingList.length > 0">
-                    <mdi-icon path="/static/icons/information-outline.svg" size="14px" color="var(--text-secondary)" />
+                    <mdi-icon path="/static/icons/information-outline.svg" size="14px" color="var(--text-tertiary)" />
                     <text class="swipe-tip-text">{{ $t('rating.swipeTip') }}</text>
                 </view>
 
@@ -323,18 +323,17 @@ onPullDownRefresh(() => {
             align-items: center;
             justify-content: center;
             gap: 10rpx;
-            padding: 14rpx 24rpx;
-            margin-bottom: 24rpx;
-            background: var(--panel-background);
-            border: 1rpx solid var(--panel-border);
-            border-radius: 20rpx;
-            backdrop-filter: blur(10px);
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+            padding: 10rpx 16rpx;
+            margin-bottom: 20rpx;
+            background: transparent;
+            border: none;
+            box-shadow: none;
 
             .swipe-tip-text {
-                font-size: 24rpx;
-                color: var(--text-secondary);
+                font-size: 22rpx;
+                color: var(--text-tertiary);
                 font-weight: 500;
+                letter-spacing: 0.5rpx;
             }
         }
 

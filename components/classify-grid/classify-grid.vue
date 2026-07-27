@@ -1,7 +1,7 @@
 <template>
     <view class="classify-grid">
         <view v-for="item in items" :key="item.id" class="classify-item">
-            <navigator class="box" :url="'/pages/app/classlist?id=' + item.id + '&name=' + item.name">
+            <navigator class="box" hover-class="box--active" :hover-stay-time="150" :url="'/pages/app/classlist?id=' + item.id + '&name=' + item.name">
                 <image class="pic" :class="{ 'pic--loaded': loadedMap[item.id] }" :src="item.mediumPicurl"
                     mode="aspectFill" lazy-load @load="onImageLoad(item.id)"></image>
                 <view class="mask" :class="{ 'is-visible': loadedMap[item.id] }">
@@ -80,12 +80,6 @@ const onImageLoad = (id) => {
     position: relative;
     border-radius: 24rpx;
     overflow: hidden;
-
-    &:active {
-        .pic {
-            transform: scale(1.08);
-        }
-    }
 }
 
 .box {
@@ -95,13 +89,22 @@ const onImageLoad = (id) => {
     overflow: hidden;
     position: relative;
     display: block;
-    transition: transform 0.3s ease;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease;
     background: linear-gradient(90deg,
             rgba(200, 200, 200, 0.08) 25%,
             rgba(200, 200, 200, 0.18) 50%,
             rgba(200, 200, 200, 0.08) 75%);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s infinite linear;
+
+    &--active, &:active {
+        transform: scale(0.96) !important;
+        box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0,0,0,0.12)) !important;
+
+        .pic {
+            transform: scale(1.08) !important;
+        }
+    }
 
     .pic {
         position: absolute;

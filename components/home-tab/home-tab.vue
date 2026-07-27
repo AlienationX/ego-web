@@ -14,7 +14,8 @@
                     </view>
                     <text class="update-banner__desc">{{ tp('index.newWallpapersNoticeDesc', {
                         count:
-                            statusStore.newWallpapersCount }) }}</text>
+                            statusStore.newWallpapersCount
+                    }) }}</text>
                 </view>
             </view>
         </view>
@@ -136,7 +137,8 @@
                     </view>
                     <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
                         <view class="box" v-for="(item, idx) in randomDailyList" :key="item.id"
-                            :class="{ 'is-hero': idx === 0 }" @click="goPreview(item.id, randomDailyList)">
+                            :class="{ 'is-hero': idx === 0 }" hover-class="box--active" :hover-stay-time="150"
+                            @click="goPreview(item.id, randomDailyList)">
                             <image class="box-image"
                                 :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl" mode="aspectFill"
                                 lazy-load fade-in @load="idx === 0 ? (heroImageLoaded = true) : null"></image>
@@ -173,8 +175,8 @@
                         <view v-for="i in 5" :key="i" class="sk-card"></view>
                     </view>
                     <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
-                        <view class="box" v-for="(item, idx) in latestList" :key="item.id"
-                            @click="goPreview(item.id, latestList)">
+                        <view class="box" v-for="(item, idx) in latestList" :key="item.id" hover-class="box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, latestList)">
                             <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
                             </image>
                             <view v-if="item._timeBadge" class="box-badge">{{ item._timeBadge }}</view>
@@ -263,25 +265,23 @@
                     </view>
                     <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
                         <view class="subject-box-new" v-for="item in subjectsRecommendList" :key="item.id"
-                            @click="goSubjectDetail(item)">
-                            <!-- Top Image Area -->
-                            <view class="subject-box-new__cover-wrapper">
-                                <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load>
-                                </image>
+                            hover-class="subject-box-new--active" :hover-stay-time="150" @click="goSubjectDetail(item)">
+                            <!-- Full-cover image (absolutely positioned, 1:1 with classify-grid.vue) -->
+                            <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load>
+                            </image>
 
-                                <!-- Floating Badges inside Image (Top-Right) -->
-                                <view class="subject-box-new__floating-badges">
-                                    <view class="subject-box-new__badge" v-if="item.is_locked">
-                                        <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
-                                        <text class="badge-text">VIP</text>
-                                    </view>
-                                    <view class="subject-box-new__floating-count">
-                                        {{ item.wall_count || 0 }}P
-                                    </view>
+                            <!-- Floating Badges (Top-Right, absolute) -->
+                            <view class="subject-box-new__floating-badges">
+                                <view class="subject-box-new__badge" v-if="item.is_locked">
+                                    <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
+                                    <text class="badge-text">VIP</text>
+                                </view>
+                                <view class="subject-box-new__floating-count">
+                                    {{ item.wall_count || 0 }}P
                                 </view>
                             </view>
 
-                            <!-- Bottom Info Area -->
+                            <!-- Bottom gradient overlay info (absolute, 1:1 with classify-grid .mask) -->
                             <view class="subject-box-new__info">
                                 <text class="subject-box-new__title">
                                     {{ isEn ? (item.name_en || item.name) : item.name }}
@@ -311,8 +311,8 @@
                 <view class="content">
                     <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
                     <scroll-view scroll-x class="home-scroll" show-scrollbar="false">
-                        <view class="box" v-for="item in classify.data" :key="item.id"
-                            @click="goPreview(item.id, classify.data)">
+                        <view class="box" v-for="item in classify.data" :key="item.id" hover-class="box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, classify.data)">
                             <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
                             </image>
                             <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}
@@ -1510,9 +1510,10 @@ onMounted(() => {
                     height: 100%;
                     border-radius: 28rpx;
                     display: block;
-                    position: relative;
-                    z-index: 1;
-                    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                    position: absolute;
+                    inset: 0;
+                    object-fit: cover;
+                    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
                 }
 
                 .box-badge {
@@ -1526,13 +1527,29 @@ onMounted(() => {
                     font-weight: 800;
                     border-radius: 8rpx;
                     box-shadow: 0 4rpx 12rpx rgba(40, 179, 137, 0.4);
-                    z-index: 1;
+                    z-index: 2;
                 }
 
                 .box-badge--subtle {
                     background: rgba(15, 23, 42, 0.72);
                     color: rgba(255, 255, 255, 0.92);
                     box-shadow: 0 4rpx 12rpx rgba(15, 23, 42, 0.24);
+                }
+
+                &:hover {
+                    .box-image {
+                        transform: scale(1.08);
+                    }
+                }
+
+                &--active,
+                &:active {
+                    transform: scale(0.96) !important;
+                    box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0, 0, 0, 0.12)) !important;
+
+                    .box-image {
+                        transform: scale(1.08) !important;
+                    }
                 }
 
                 // Hero mode
@@ -1549,11 +1566,31 @@ onMounted(() => {
                         position: absolute;
                         inset: 0;
                         border-radius: 28rpx;
-                        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.5) 100%);
+                        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.65) 100%);
                         pointer-events: none;
                         z-index: 2;
                         opacity: 0;
                         transition: opacity 0.4s ease-in-out;
+
+                        &.is-visible {
+                            opacity: 1;
+                        }
+                    }
+
+                    .box-hero-shimmer {
+                        position: absolute;
+                        top: -50%;
+                        left: -50%;
+                        width: 60%;
+                        height: 200%;
+                        background: linear-gradient(90deg,
+                                rgba(255, 255, 255, 0) 0%,
+                                rgba(255, 255, 255, 0.18) 50%,
+                                rgba(255, 255, 255, 0) 100%);
+                        pointer-events: none;
+                        z-index: 2;
+                        opacity: 0;
+                        animation: heroShimmerSweep 7s ease-in-out infinite;
 
                         &.is-visible {
                             opacity: 1;
@@ -1567,7 +1604,7 @@ onMounted(() => {
                         right: 24rpx;
                         z-index: 3;
                         opacity: 0;
-                        transition: opacity 0.4s ease-in-out;
+                        transition: opacity 0.4s ease-in-out, transform 0.3s ease;
 
                         &.is-visible {
                             opacity: 1;
@@ -1576,25 +1613,20 @@ onMounted(() => {
                         .day-tag {
                             font-size: 64rpx;
                             font-weight: 900;
-                            color: rgba(255, 255, 255, 0.95);
+                            color: rgba(255, 255, 255, 0.98);
                             line-height: 1;
                             margin-bottom: 8rpx;
-                            text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+                            text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
                         }
 
                         .pick-text {
                             font-size: 20rpx;
-                            font-weight: 800;
+                            font-weight: 850;
                             color: #fde68a;
                             text-transform: uppercase;
                             letter-spacing: 4rpx;
+                            text-shadow: 0 2rpx 10rpx rgba(253, 230, 138, 0.35);
                         }
-                    }
-                }
-
-                &:active {
-                    .box-image {
-                        transform: scale(1.08);
                     }
                 }
             }
@@ -1842,6 +1874,44 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     }
 }
 
+@keyframes heroPanCover {
+    0% {
+        transform: scale(1.08) translate(0%, 0%);
+    }
+
+    50% {
+        transform: scale(1.16) translate(-2.5%, -1.5%);
+    }
+
+    100% {
+        transform: scale(1.1) translate(2.5%, 1%);
+    }
+}
+
+@keyframes heroShimmerSweep {
+    0% {
+        transform: translateX(-150%) rotate(25deg);
+    }
+
+    100% {
+        transform: translateX(250%) rotate(25deg);
+    }
+}
+
+@keyframes subjectPanCover {
+    0% {
+        transform: scale(1.06) translate(0%, 0%);
+    }
+
+    50% {
+        transform: scale(1.14) translate(-2.5%, -1.5%);
+    }
+
+    100% {
+        transform: scale(1.08) translate(2.5%, 1%);
+    }
+}
+
 .content--subjects {
     height: 520rpx !important;
 }
@@ -1849,49 +1919,46 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 .subject-box-new {
     width: 660rpx;
     height: 480rpx;
-    display: inline-flex;
-    flex-direction: column;
+    display: inline-block;
     flex-shrink: 0;
-    background: var(--panel-background);
     margin: 20rpx 20rpx 48rpx 0rpx;
     position: relative;
     border-radius: 32rpx;
     box-sizing: border-box;
-    // box-shadow: 0 4rpx 16rpx var(--shadow-color);
     box-shadow: none;
-    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease;
     cursor: pointer;
     overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
 
     &:first-child {
         margin-left: 20rpx;
     }
 
+    &:hover {
+        .subject-box-new__cover {
+            transform: scale(1.08);
+        }
+    }
+
+    &--active,
     &:active {
-        transform: translateY(-2rpx) scale(0.98);
-        box-shadow: 0 8rpx 24rpx var(--shadow-color);
+        transform: scale(0.96) !important;
+        box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0, 0, 0, 0.12)) !important;
 
         .subject-box-new__cover {
-            transform: scale(1.06);
-        }
-
-        .subject-box-new__floating-badges {
-            transform: translateY(-4rpx);
+            transform: scale(1.08) !important;
         }
     }
 
-    &__cover-wrapper {
+    .subject-box-new__cover {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-
-    &__cover {
-        width: 100%;
-        height: 100%;
-        display: block;
-        transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        height: calc(100% - 108rpx);
+        object-fit: cover;
+        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     &__floating-badges {
@@ -1935,14 +2002,19 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     }
 
     &__info {
-        flex: 1;
-        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 108rpx;
         padding: 16rpx 24rpx;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        background: var(--panel-background);
+        background: var(--panel-background-solid);
+        z-index: 3;
+        border-radius: 0 0 32rpx 32rpx;
     }
 
     &__title {

@@ -2,53 +2,38 @@
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- Ambient Color Glow Background -->
         <view class="hero-blur-bg" v-if="heroImage" :style="{ backgroundImage: `url(${heroImage})` }"></view>
-        <view
-            class="top-shell"
-            :style="{
-                opacity: topbarOpacity,
-                pointerEvents: topbarOpacity > 0.2 ? 'auto' : 'none',
-            }"
-        >
+        <view class="top-shell" :style="{
+            opacity: topbarOpacity,
+            pointerEvents: topbarOpacity > 0.2 ? 'auto' : 'none',
+        }">
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
             <view class="topbar" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
                 <view class="topbar__left">
                     <view class="topbar__back topbar__back--bar" @click="goBack">
-                        <mdi-icon
-                            path="/static/icons/arrow-left.svg"
-                            size="20px"
-                            :color="settingsStore.isDark ? '#f8fbff' : '#1e293b'"
-                        ></mdi-icon>
+                        <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                            :color="settingsStore.isDark ? '#f8fbff' : '#1e293b'"></mdi-icon>
                     </view>
                     <view class="topbar__title">{{ heroTitle }}</view>
                 </view>
                 <view class="topbar__actions">
                     <view class="topbar__icon" @click="goSearch">
-                        <uni-icons type="search" size="18" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
+                        <uni-icons type="search" size="18"
+                            :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                     </view>
                 </view>
             </view>
         </view>
 
         <view class="content-wrapper" :style="contentWrapperStyle">
-            <modern-pics-view
-                v-if="tabs.length > 0"
-                :show-header="true"
-                :tabs="tabs"
-                api-type="classList"
-                :header-height="heroHeightPx"
-                :tabs-height="44"
-                :sticky-top="navBarHeight"
-                @scroll="onScroll"
-            ></modern-pics-view>
+            <modern-pics-view v-if="tabs.length > 0" :show-header="true" :tabs="tabs" api-type="classList"
+                :header-height="heroHeightPx" :tabs-height="44" :sticky-top="navBarHeight"
+                @scroll="onScroll"></modern-pics-view>
         </view>
 
-        <view
-            class="hero"
-            :style="{
-                transform: `translateY(${-headerScrollTop}px)`,
-                opacity: 1 - headerScrollTop / heroHeightPx,
-            }"
-        >
+        <view class="hero" :style="{
+            transform: `translateY(${-headerScrollTop}px)`,
+            opacity: 1 - headerScrollTop / heroHeightPx,
+        }">
             <image class="hero__image" :src="heroImage" mode="aspectFill"></image>
             <view class="hero__overlay"></view>
             <view class="hero__back" :style="{ top: `${statusBarHeight + 12}px` }" @click="goBack">
@@ -143,10 +128,13 @@ const topbarOpacity = computed(() => {
 });
 
 const heroImage = computed(() => {
-    if (currentSubject.value && currentSubject.value.picurl) {
-        return currentSubject.value.picurl;
-    }
-    return '';
+    if (!currentSubject.value) return '';
+    return (
+        currentSubject.value.cover_url ||
+        (currentSubject.value.preview_walls && currentSubject.value.preview_walls.length > 0
+            ? currentSubject.value.preview_walls[0]
+            : '')
+    );
 });
 
 const heroTitle = computed(() => {

@@ -10,11 +10,10 @@
         "darkmode" : true,
         "themeLocation" : "theme.json",
         "safearea" : {
-            // iOS平台的安全区域
-            "background" : "#9799a5",
-            "backgroundDark" : "#c9cbd1",
+            "background" : "#eef1f5",
+            "backgroundDark" : "#181818",
             "bottom" : {
-                "offset" : "none" // 在没有 tabBar 时，底部区域是否需要占位
+                "offset" : "auto"
             }
         },
         "usingComponents" : true,
@@ -58,6 +57,7 @@
                 "abiFilters" : [ "arm64-v8a", "x86" ],
                 "minSdkVersion" : 24,
                 "targetSdkVersion" : 36,
+                "resizableActivity" : true,
                 "excludePermissions" : [
                     "<uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\"/>",
                     "<uses-permission android:name=\"android.permission.READ_MEDIA_VIDEO\"/>"
