@@ -266,22 +266,24 @@
                     <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
                         <view class="subject-box-new" v-for="item in subjectsRecommendList" :key="item.id"
                             hover-class="subject-box-new--active" :hover-stay-time="150" @click="goSubjectDetail(item)">
-                            <!-- Full-cover image (absolutely positioned, 1:1 with classify-grid.vue) -->
-                            <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load>
-                            </image>
+                            <!-- Top Image Area -->
+                            <view class="subject-box-new__cover-wrapper">
+                                <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load>
+                                </image>
 
-                            <!-- Floating Badges (Top-Right, absolute) -->
-                            <view class="subject-box-new__floating-badges">
-                                <view class="subject-box-new__badge" v-if="item.is_locked">
-                                    <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
-                                    <text class="badge-text">VIP</text>
-                                </view>
-                                <view class="subject-box-new__floating-count">
-                                    {{ item.wall_count || 0 }}P
+                                <!-- Floating Badges inside Image (Top-Right) -->
+                                <view class="subject-box-new__floating-badges">
+                                    <view class="subject-box-new__badge" v-if="item.is_locked">
+                                        <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
+                                        <text class="badge-text">VIP</text>
+                                    </view>
+                                    <view class="subject-box-new__floating-count">
+                                        {{ item.wall_count || 0 }}P
+                                    </view>
                                 </view>
                             </view>
 
-                            <!-- Bottom gradient overlay info (absolute, 1:1 with classify-grid .mask) -->
+                            <!-- Bottom Info Area -->
                             <view class="subject-box-new__info">
                                 <text class="subject-box-new__title">
                                     {{ isEn ? (item.name_en || item.name) : item.name }}
@@ -1919,8 +1921,10 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 .subject-box-new {
     width: 660rpx;
     height: 480rpx;
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: column;
     flex-shrink: 0;
+    background: var(--panel-background);
     margin: 20rpx 20rpx 48rpx 0rpx;
     position: relative;
     border-radius: 32rpx;
@@ -1929,7 +1933,7 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease;
     cursor: pointer;
     overflow: hidden;
-    -webkit-tap-highlight-color: transparent;
+    transform: translateZ(0);
 
     &:first-child {
         margin-left: 20rpx;
@@ -1951,12 +1955,21 @@ $sk-shine: rgba(148, 163, 184, 0.22);
         }
     }
 
-    .subject-box-new__cover {
-        position: absolute;
-        top: 0;
-        left: 0;
+    &__cover-wrapper {
         width: 100%;
-        height: calc(100% - 108rpx);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: 32rpx 32rpx 0 0;
+        transform: translateZ(0);
+    }
+
+    &__cover {
+        width: 100%;
+        height: 100%;
+        display: block;
+        position: absolute;
+        inset: 0;
         object-fit: cover;
         transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
     }
@@ -2002,19 +2015,14 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     }
 
     &__info {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 108rpx;
+        flex: 1;
+        width: 100%;
         padding: 16rpx 24rpx;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        background: var(--panel-background-solid);
-        z-index: 3;
-        border-radius: 0 0 32rpx 32rpx;
+        background: var(--panel-background);
     }
 
     &__title {

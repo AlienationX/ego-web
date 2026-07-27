@@ -1,28 +1,69 @@
 <template>
-    <view class="classify-grid">
-        <view v-for="item in items" :key="item.id" class="classify-item">
-            <navigator class="box" hover-class="box--active" :hover-stay-time="150" :url="'/pages/app/classlist?id=' + item.id + '&name=' + item.name">
-                <image class="pic" :class="{ 'pic--loaded': loadedMap[item.id] }" :src="item.mediumPicurl"
-                    mode="aspectFill" lazy-load @load="onImageLoad(item.id)"></image>
-                <view class="mask" :class="{ 'is-visible': loadedMap[item.id] }">
-                    <view class="mask-info">
-                        <text class="mask-text">{{ isEn ? (item.name_en || item.name) : item.name }}</text>
-                        <text class="mask-count" v-if="item.wallpapers_count">{{ item.wallpapers_count }}{{
-                            t('common.items') || '张' }}</text>
+    <view class="classify-grid-wrapper">
+        <view class="classify-grid">
+            <view v-for="item in items" :key="item.id" class="classify-item">
+                <view class="box" hover-class="box--active" :hover-start-time="20" :hover-stay-time="100"
+                    @click="handleClick(item)" @longpress="handleLongPress(item)">
+                    <image class="pic" :class="{ 'pic--loaded': loadedMap[item.id] }" :src="item.mediumPicurl"
+                        mode="aspectFill" lazy-load @load="onImageLoad(item.id)"></image>
+                    <view class="mask" :class="{ 'is-visible': loadedMap[item.id] }">
+                        <view class="mask-info">
+                            <text class="mask-text">{{ isEn ? (item.name_en || item.name) : item.name }}</text>
+                            <text class="mask-count" v-if="item.wallpapers_count">{{ item.wallpapers_count }}{{
+                                t('common.items') || '张' }}</text>
+                        </view>
+                    </view>
+                    <view class="tab" :class="{ 'is-visible': loadedMap[item.id] }"
+                        v-if="compareTimestamp(item.updateTime)">{{ compareTimestamp(item.updateTime) }}{{
+                            t('common.ago')
+                        || '前' }}更新</view>
+                    <uni-icons class="vip" :class="{ 'is-visible': loadedMap[item.id] }" v-if="item.is_locked"
+                        type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+                </view>
+            </view>
+        </view>
+
+        <!-- Quick Look Pop-over Floating Card Modal (独立于 grid 容器外) -->
+        <view class="quick-look-mask" :class="{ 'is-active': activeQuickLookItem }" @click="closeQuickLook"
+            @touchmove.stop.prevent>
+            <view class="quick-look-card" :class="{ 'is-active': activeQuickLookItem }" @click.stop
+                v-if="activeQuickLookItem">
+                <image class="quick-look-pic" :src="activeQuickLookItem.mediumPicurl || activeQuickLookItem.picurl"
+                    mode="aspectFill"></image>
+                <view class="quick-look-overlay">
+                    <view class="quick-look-header">
+                        <view class="quick-look-badge" v-if="activeQuickLookItem.is_locked">
+                            <uni-icons type="vip-filled" size="14" color="#F9E9B5"></uni-icons>
+                            <text>VIP ONLY</text>
+                        </view>
+                        <view class="quick-look-badge" v-else-if="compareTimestamp(activeQuickLookItem.updateTime)">
+                            {{ compareTimestamp(activeQuickLookItem.updateTime) }}前更新
+                        </view>
+                    </view>
+
+                    <view class="quick-look-info">
+                        <text class="quick-look-title">{{ isEn ? (activeQuickLookItem.name_en ||
+                            activeQuickLookItem.name) : activeQuickLookItem.name }}</text>
+                        <text class="quick-look-count" v-if="activeQuickLookItem.wallpapers_count">{{
+                            activeQuickLookItem.wallpapers_count }}{{ t('common.items') || '张' }}壁纸</text>
+                    </view>
+
+                    <view class="quick-look-actions">
+                        <button class="quick-look-btn primary" @click="goClasslistFromQuickLook(activeQuickLookItem)">
+                            {{ t('common.seeAll') || '探索分类' }}
+                        </button>
+                        <button class="quick-look-btn secondary" @click="closeQuickLook">
+                            关闭
+                        </button>
                     </view>
                 </view>
-                <view class="tab" :class="{ 'is-visible': loadedMap[item.id] }"
-                    v-if="compareTimestamp(item.updateTime)">{{ compareTimestamp(item.updateTime) }}{{ t('common.ago')
-                    || '前' }}更新</view>
-                <uni-icons class="vip" :class="{ 'is-visible': loadedMap[item.id] }" v-if="item.is_locked"
-                    type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
-            </navigator>
+            </view>
         </view>
     </view>
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { compareTimestamp } from '@/utils/common.js';
 
@@ -37,9 +78,43 @@ const props = defineProps({
 });
 
 const loadedMap = reactive({});
+const activeQuickLookItem = ref(null);
+const isLongPressing = ref(false);
 
 const onImageLoad = (id) => {
     loadedMap[id] = true;
+};
+
+const handleLongPress = (item) => {
+    isLongPressing.value = true;
+    activeQuickLookItem.value = item;
+};
+
+const handleClick = (item) => {
+    if (isLongPressing.value) {
+        isLongPressing.value = false;
+        return;
+    }
+    uni.navigateTo({
+        url: `/pages/app/classlist?id=${item.id}&name=${item.name}`,
+    });
+};
+
+const closeQuickLook = () => {
+    activeQuickLookItem.value = null;
+    setTimeout(() => {
+        isLongPressing.value = false;
+    }, 150);
+};
+
+const goClasslistFromQuickLook = (item) => {
+    const targetItem = item || activeQuickLookItem.value;
+    closeQuickLook();
+    if (targetItem) {
+        uni.navigateTo({
+            url: `/pages/app/classlist?id=${targetItem.id}&name=${targetItem.name}`,
+        });
+    }
 };
 </script>
 
@@ -97,9 +172,10 @@ const onImageLoad = (id) => {
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s infinite linear;
 
-    &--active, &:active {
+    &--active,
+    &:active {
         transform: scale(0.96) !important;
-        box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0,0,0,0.12)) !important;
+        box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0, 0, 0, 0.12)) !important;
 
         .pic {
             transform: scale(1.08) !important;
@@ -193,7 +269,7 @@ const onImageLoad = (id) => {
     }
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
     .classify-item:hover {
         .pic {
             transform: scale(1.08);
@@ -208,6 +284,128 @@ const onImageLoad = (id) => {
 
     100% {
         background-position: -200% 0;
+    }
+}
+
+// ── Quick Look 悬浮放大预览 ──
+.quick-look-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(24px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40rpx;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+
+    &.is-active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+.quick-look-card {
+    width: 620rpx;
+    height: 840rpx;
+    border-radius: 40rpx;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 30rpx 80rpx rgba(0, 0, 0, 0.45);
+    transform: scale(0.85);
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &.is-active {
+        transform: scale(1);
+    }
+}
+
+.quick-look-pic {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.quick-look-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.9) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 36rpx 32rpx;
+    box-sizing: border-box;
+}
+
+.quick-look-header {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.quick-look-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6rpx;
+    padding: 8rpx 20rpx;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1rpx solid rgba(255, 255, 255, 0.18);
+    border-radius: 100rpx;
+    color: #ffffff;
+    font-size: 22rpx;
+    font-weight: 700;
+    backdrop-filter: blur(8px);
+}
+
+.quick-look-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8rpx;
+    margin-bottom: 24rpx;
+}
+
+.quick-look-title {
+    font-size: 46rpx;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -1rpx;
+    text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.5);
+}
+
+.quick-look-count {
+    font-size: 26rpx;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.quick-look-actions {
+    display: flex;
+    gap: 20rpx;
+
+    .quick-look-btn {
+        flex: 1;
+        height: 88rpx;
+        line-height: 88rpx;
+        border-radius: 100rpx;
+        font-size: 28rpx;
+        font-weight: 700;
+        border: none;
+        outline: none;
+
+        &.primary {
+            background: #ffffff;
+            color: #111111;
+        }
+
+        &.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            backdrop-filter: blur(10px);
+        }
     }
 }
 </style>
