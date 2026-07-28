@@ -987,7 +987,8 @@
         "cancel": "取消",
         "doneTitle": "你已退出登录",
         "doneDesc": "下次再见！你的数据和设置已安全保存。",
-        "backSettings": "返回设置"
+        "backSettings": "返回设置",
+        "backUser": "返回个人中心"
     },
     "changePasswordPage": {
         "title": "修改密码",

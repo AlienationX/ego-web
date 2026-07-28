@@ -987,7 +987,8 @@
         "cancel": "Cancel",
         "doneTitle": "You've been logged out",
         "doneDesc": "See you next time! Your data and settings are safely stored.",
-        "backSettings": "Back to Settings"
+        "backSettings": "Back to Settings",
+        "backUser": "Back to Profile"
     },
     "changePasswordPage": {
         "title": "Change Password",

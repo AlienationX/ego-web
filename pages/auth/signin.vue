@@ -320,6 +320,25 @@ const handleForgotPassword = () => {
     });
 };
 
+const finishAuthSuccess = () => {
+    const pages = getCurrentPages();
+    let delta = 0;
+    for (let i = pages.length - 1; i >= 0; i--) {
+        const route = pages[i]?.route || '';
+        if (route.includes('pages/auth/signin') || route.includes('pages/auth/signup')) {
+            delta++;
+        } else {
+            break;
+        }
+    }
+
+    if (delta > 0 && delta < pages.length) {
+        uni.navigateBack({ delta });
+    } else {
+        uni.reLaunch({ url: '/pages/app/index' });
+    }
+};
+
 // 微信登录
 const handleWechatLogin = () => {
     // #ifndef MP-WEIXIN
@@ -362,8 +381,8 @@ const handleWechatLogin = () => {
                     title: t('login.loginSuccess'),
                     icon: 'success',
                 });
-                // 跳转到用户页
-                uni.reLaunch({ url: '/pages/user/user' });
+                // 智能退出所有 Auth 页面，返回起点业务页
+                finishAuthSuccess();
             } catch (error) {
                 uni.showToast({
                     title: error.message || t('login.loginFailed'),
@@ -467,7 +486,7 @@ const handleLogin = async () => {
             icon: 'success',
         });
         
-        goBack();
+        finishAuthSuccess();
     } catch (error) {
         uni.showToast({
             title: error.message || t('login.loginFailed'),

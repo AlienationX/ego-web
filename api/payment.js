@@ -45,5 +45,6 @@ export const apiMockPay = (orderNo) => {
     return request({
         url: `/payment/mock_pay/${orderNo}/`,
         method: "POST",
+        isAuth: true,
     });
 };

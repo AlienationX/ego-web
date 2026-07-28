@@ -201,12 +201,12 @@
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
-            <view class="infoPopup">
+            <view class="infoPopup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="popHeader">
                     <view></view>
                     <view class="title">{{ t('previewPage.wallpaperInfo') }}</view>
                     <view class="close">
-                        <uni-icons class="close" type="clear" size="32" @click="closeInfo"></uni-icons>
+                        <uni-icons class="close" type="clear" size="32" :color="settingsStore.isDark ? '#a1a1aa' : '#888888'" @click="closeInfo"></uni-icons>
                     </view>
                 </view>
                 <scroll-view class="info-scroll-view" scroll-y>
@@ -485,6 +485,7 @@ import {
     apiPostUpdateWall,
     apiGetClassify,
     apiPostEarnEnergy,
+    apiGetWallDetail,
 } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -1304,36 +1305,59 @@ const isCurrentSlideLoading = computed(
     () => readImgs.value.includes(currentIndex.value) && !loadedImageMap.value[currentIndex.value],
 );
 const currentInfo = ref(null);
-onLoad((e) => {
+const fetchSingleWallDetail = async (id) => {
+    if (!id) return;
+    try {
+        const res = await apiGetWallDetail(id);
+        if (res.code === 200 && res.data) {
+            const detail = res.data;
+            const formatted = {
+                ...detail,
+                is_favorited: !!detail.is_favorited,
+                tags_list: typeof detail.tags === 'string' ? detail.tags.split(',') : detail.tags_list || [],
+                tags_en_list: typeof detail.tags_en === 'string' ? detail.tags_en.split(',') : detail.tags_en_list || [],
+            };
+
+            const matchIndex = classList.value.findIndex((item) => item.id === parseInt(id));
+            if (matchIndex >= 0) {
+                classList.value[matchIndex] = { ...classList.value[matchIndex], ...formatted };
+            } else {
+                classList.value = [formatted];
+                currentIndex.value = 0;
+            }
+            currentInfo.value = classList.value[currentIndex.value];
+        }
+    } catch (err) {
+        console.error('Fetch single wall detail failed:', err);
+    }
+};
+
+onLoad(async (e) => {
     currentId.value = e.id;
     disableSwipe.value = e.mode === 'recommend' || e.disableSwipe === '1';
-    if (e.type === 'share') {
-        // TODO
-        console.log('分享页接收到的用户需要发送api请求，自己获取数据');
-        // let res = apiDetailWall({id: currentId.value});
-        // classList.value = res.data;
+
+    const matchIndex = classList.value.findIndex((item) => item.id === parseInt(currentId.value));
+    if (matchIndex >= 0) {
+        currentIndex.value = matchIndex;
+        currentInfo.value = classList.value[currentIndex.value];
     }
-    currentIndex.value = classList.value.findIndex((item) => item.id === parseInt(currentId.value));
-    if (currentIndex.value < 0) {
-        currentIndex.value = 0;
+
+    // 若本地未找到全量项，或该壁纸缺少技术指标（width / file_size / views），自动从服务端补全详情
+    if (!currentInfo.value || !currentInfo.value.width || !currentInfo.value.file_size || e.mode === 'recommend' || e.type === 'share') {
+        await fetchSingleWallDetail(currentId.value);
     }
-    currentInfo.value = classList.value[currentIndex.value];
+
     if (currentInfo.value) {
         resetBottomAdBanner();
         readImgsFun();
         recordCurrentHistory();
         incrementViews(currentInfo.value.id);
     }
-
-    // createInterstitialAd(); // 创建插屏广告
-    // createRewardedVideoAd(); // 创建激励视频广告
 });
 
 onUnload(() => {
     clearTimeout(viewDebounceTimer);
     viewDebounceTimer = null;
-    // destroyInterstitialAd(); // 销毁插屏广告
-    // destroyRewardedVideoAd(); // 销毁激励视频广告
 });
 
 // 滑动事件，变化当前数字
@@ -1341,6 +1365,11 @@ const swiperChange = (e) => {
     if (disableSwipe.value) return;
     currentIndex.value = e.detail.current;
     currentInfo.value = classList.value[currentIndex.value];
+
+    if (currentInfo.value?.id && (!currentInfo.value.width || !currentInfo.value.file_size)) {
+        fetchSingleWallDetail(currentInfo.value.id);
+    }
+
     resetBottomAdBanner();
     readImgsFun();
     recordCurrentHistory();
@@ -1772,13 +1801,62 @@ onShareTimeline(() => {
 }
 
 .infoPopup {
-    background: #fff;
+    background: #ffffff;
     padding: 30rpx;
     border-radius: 30rpx 30rpx 0 0;
     overflow: hidden;
     z-index: 100;
+    transition: background 0.3s, color 0.3s;
 
-    // padding-bottom: 30rpx !important; // safe-area关闭后，手动增加相应高度
+    &.theme-dark {
+        background: #1c222b;
+
+        .popHeader .title {
+            color: #f4f5f6;
+        }
+
+        .content .row .label {
+            color: #94a3b8;
+        }
+
+        .content .row .value {
+            color: #f1f5f9;
+        }
+
+        .content .row .rateBox .score {
+            color: #94a3b8;
+        }
+
+        .content .copyright {
+            background: rgba(255, 255, 255, 0.06);
+            color: #94a3b8;
+        }
+    }
+
+    &.theme-light {
+        background: #ffffff;
+
+        .popHeader .title {
+            color: #18181b;
+        }
+
+        .content .row .label {
+            color: #94a3b8;
+        }
+
+        .content .row .value {
+            color: #18181b;
+        }
+
+        .content .row .rateBox .score {
+            color: #64748b;
+        }
+
+        .content .copyright {
+            background: #f6f6f6;
+            color: #666666;
+        }
+    }
 
     .popHeader {
         display: flex;
@@ -1786,7 +1864,6 @@ onShareTimeline(() => {
         align-items: center;
 
         .title {
-            color: $wp-font-color-2;
             font-size: 32rpx;
             font-weight: 600;
             padding: 16rpx 0;
@@ -1810,14 +1887,12 @@ onShareTimeline(() => {
                 padding: 10rpx 0;
                 font-size: 32rpx;
                 line-height: 1.7em;
-                // border-bottom: 1rpx solid #f0f0f0;
 
                 &:last-child {
                     border-bottom: none;
                 }
 
                 .label {
-                    color: #999;
                     text-align: left;
                     font-size: 28rpx;
                     margin-right: 20rpx;
@@ -1831,7 +1906,6 @@ onShareTimeline(() => {
                     flex: 1;
                     text-align: left;
                     font-size: 28rpx;
-                    color: #333;
                     line-height: 1.8em;
                 }
 
@@ -1847,7 +1921,6 @@ onShareTimeline(() => {
 
                     .score {
                         font-size: 28rpx;
-                        color: #666;
                         font-weight: 500;
                     }
                 }
@@ -1877,10 +1950,9 @@ onShareTimeline(() => {
             }
 
             .copyright {
+                display: block;
                 font-size: 24rpx;
                 padding: 20rpx;
-                background: #f6f6f6;
-                color: #666;
                 border-radius: 10rpx;
                 margin: 20rpx 0;
                 line-height: 1.6em;

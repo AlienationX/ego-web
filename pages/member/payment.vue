@@ -313,6 +313,10 @@ onUnmounted(() => clearInterval(pollTimer));
 
 // 6. 支付入口 (打开自定义 Checkout 弹窗)
 const handlePurchase = async () => {
+    if (!userStore.isLoggedIn) {
+        uni.navigateTo({ url: '/pages/auth/signin' });
+        return;
+    }
     if (selectedCard.value === null || !membershipCards.value.length) return;
     openCheckout();
 };

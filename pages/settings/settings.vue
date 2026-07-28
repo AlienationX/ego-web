@@ -453,6 +453,45 @@ const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
 const copyrightText = computed(() => tp('about.copyright', { year: new Date().getFullYear() }));
 
+// ── 缓存大小计算 ──
+const cacheSizeText = ref('0 KB');
+
+const formatBytes = (bytes) => {
+    if (!bytes || bytes <= 0) return '0 KB';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    if (i === 0) return bytes + ' B';
+    return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+};
+
+const calcCacheSize = () => {
+    // #ifdef APP-PLUS
+    if (typeof plus !== 'undefined' && plus.cache) {
+        plus.cache.calculate((size) => {
+            cacheSizeText.value = formatBytes(size);
+        });
+        return;
+    }
+    // #endif
+
+    try {
+        const res = uni.getStorageInfoSync();
+        const currentKB = res.currentSize || 0;
+        if (currentKB >= 1024) {
+            cacheSizeText.value = (currentKB / 1024).toFixed(2) + ' MB';
+        } else {
+            cacheSizeText.value = currentKB + ' KB';
+        }
+    } catch (e) {
+        cacheSizeText.value = '0 KB';
+    }
+};
+
+onLoad(() => {
+    calcCacheSize();
+});
+
 const navDialog = ref(null);
 const dialogState = ref({
     title: '',
@@ -738,7 +777,7 @@ const sections = computed(() => {
                     key: 'clear_cache',
                     icon: '/static/icons/delete-empty.svg',
                     label: t('settings.items.clearCache.label'),
-                    sublabel: t('settings.items.clearCache.sublabel'),
+                    sublabel: `${t('settings.items.clearCache.sublabel')} (${String(locale.value || '').startsWith('en') ? 'Cache size' : '缓存大小'}: ${cacheSizeText.value})`,
                     action: clearCache,
                 },
             ],
@@ -1006,9 +1045,17 @@ async function clearCache() {
     });
     try {
         // 增加 1 秒延时展示转圈动画，避免瞬间完成太突兀
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // #ifdef APP-PLUS
+        if (typeof plus !== 'undefined' && plus.cache) {
+            plus.cache.clear(() => {});
+        }
+        // #endif
+
         uni.clearStorageSync();
+        calcCacheSize();
+
         uni.hideLoading();
         uni.showToast({
             title: t('user.settings.clearSuccess'),

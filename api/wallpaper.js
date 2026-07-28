@@ -80,6 +80,13 @@ export const apiGetClassList = (data = {}) => {
     });
 };
 
+// 获取单张壁纸详情接口
+export const apiGetWallDetail = (id = '') => {
+    return request({
+        url: `/wall/${id}/`,
+    });
+};
+
 // 获取新增壁纸数量
 export const apiGetCheckUpdates = (data = {}) => {
     return request({

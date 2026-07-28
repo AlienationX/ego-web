@@ -90,12 +90,14 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { apiPostRegister } from '@/api/wallpaper.js';
+import { apiPostRegister, apiPostLogin } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useUserStore } from '@/stores/user.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const backIconColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#4a5670'));
 const iconMutedColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#94a3b8'));
 
@@ -135,8 +137,27 @@ const goToLogin = () => {
 
 const goBack = () => {
     uni.navigateBack({
-        fail: () => uni.reLaunch({ url: '/pages/app/index' }),
+        fail: () => uni.reLaunch({ url: '/pages/user/user' }),
     });
+};
+
+const finishAuthSuccess = () => {
+    const pages = getCurrentPages();
+    let delta = 0;
+    for (let i = pages.length - 1; i >= 0; i--) {
+        const route = pages[i]?.route || '';
+        if (route.includes('pages/auth/signin') || route.includes('pages/auth/signup')) {
+            delta++;
+        } else {
+            break;
+        }
+    }
+
+    if (delta > 0 && delta < pages.length) {
+        uni.navigateBack({ delta });
+    } else {
+        uni.reLaunch({ url: '/pages/app/index' });
+    }
 };
 
 // 打开服务条款
@@ -152,8 +173,6 @@ const openPrivacy = () => {
         url: '/pages/webview/webview?url=privacy_agreement',
     });
 };
-
-
 
 // 表单验证
 const validateForm = () => {
@@ -224,23 +243,36 @@ const handleSignup = async () => {
 
     isSubmitting.value = true;
     try {
+        const email = form.email.trim();
+        const password = form.password;
+
+        // 1. 调用注册接口
         await apiPostRegister({
-            username: form.email.trim(),
-            email: form.email.trim(),
-            nickname: form.email.trim().split('@')[0] || form.email.trim(),
-            password: form.password,
+            username: email,
+            email: email,
+            nickname: email.split('@')[0] || email,
+            password: password,
         });
+
+        // 2. 注册成功后直接自动调用登录接口
+        const loginRes = await apiPostLogin({
+            email: email,
+            password: password,
+        });
+
+        const { access, refresh } = loginRes.data;
+        userStore.setToken(access, refresh);
+        await userStore.setUserInfo();
 
         uni.showToast({
-            title: t('login.registerSuccess'),
-            icon: 'none',
+            title: t('login.loginSuccess') || '注册并登录成功',
+            icon: 'success',
         });
 
+        // 3. 智能退栈：跳过 signin / signup，直达源业务页
         setTimeout(() => {
-            uni.redirectTo({
-                url: '/pages/auth/signin',
-            });
-        }, 1500);
+            finishAuthSuccess();
+        }, 1000);
     } catch (error) {
         uni.showToast({
             title: error.message || t('login.registerFailed'),

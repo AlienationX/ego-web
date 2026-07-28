@@ -45,7 +45,7 @@
                 <image class="success-emoji" src="/static/images/successful.svg" mode="aspectFit"></image>
                 <text class="success-title">{{ t('logoutPage.doneTitle') }}</text>
                 <text class="success-desc">{{ tp('logoutPage.doneDesc', { name: profileShortName }) }}</text>
-                <button class="back-settings-btn" @click="backToSettings">{{ t('logoutPage.backSettings') }}</button>
+                <button class="back-user-btn" @click="backToUser">{{ t('logoutPage.backUser') }}</button>
             </view>
         </template>
     </view>
@@ -85,8 +85,8 @@ const goBack = () => {
     });
 };
 
-const backToSettings = () => {
-    uni.redirectTo({ url: '/pages/settings/settings' });
+const backToUser = () => {
+    uni.reLaunch({ url: '/pages/user/user' });
 };
 </script>
 
@@ -285,7 +285,7 @@ const backToSettings = () => {
     margin-bottom: 72rpx;
 }
 
-.back-settings-btn {
+.back-user-btn {
     width: 100%;
     height: 100rpx;
     border-radius: 24rpx;
