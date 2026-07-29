@@ -82,14 +82,14 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "gg" : {},
-                    "pg" : {},
-                    "unity" : {},
-                    "liftoff" : {},
-                    "inmobi" : {},
-                    "ironsource" : {},
-                    "mintegral" : {},
-                    "applovin" : {}
+                    "ks" : {},
+                    "sigmob" : {},
+                    "zy" : {},
+                    "bz" : {},
+                    "fl" : {},
+                    "yt" : {},
+                    "jt" : {},
+                    "wa" : {}
                 },
                 "oauth" : {
                     "weixin" : {

@@ -1,87 +1,84 @@
 <template>
     <view :class="['layout', settingsStore.isDark ? 'theme-dark' : 'theme-light']">
-        <!-- Decorative Fixed Status Bar Background -->
-        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-
-        <!-- Custom Navigation Header -->
-        <view class="nav-header" :style="{ paddingTop: `${statusBarHeight}px` }">
-            <view class="back-btn" @click="goBack">
-                <uni-icons type="back" size="22" :color="settingsStore.isDark ? '#f4f5f6' : '#18181b'"></uni-icons>
+        <!-- 仅上半部分：紫蓝渐变 Header 卡片区 -->
+        <view class="hero-gradient-header">
+            <!-- 顶栏导航行（仅独立放返回按钮，防止挤压） -->
+            <view class="header-nav-bar" :style="navBarBoxStyle">
+                <view class="back-circle-btn" @click="goBack">
+                    <uni-icons type="back" size="18" color="#ffffff"></uni-icons>
+                </view>
             </view>
-            <view class="nav-right-box">
-                <view class="premium-badge">
-                    <mdi-icon path="/static/icons/crown-circle.svg" size="16px" color="#fbbf24"></mdi-icon>
-                    <text class="premium-badge-text">VIP CLUB</text>
+
+            <!-- 核心标题（右侧紧跟 VIP CLUB 胶囊） -->
+            <view class="header-title-box">
+                <view class="title-with-badge">
+                    <mdi-icon path="/static/icons/crown-circle.svg" size="32px" color="#fbbf24"></mdi-icon>
+                    <text class="main-title">{{ t('membership.title') }}</text>
+                    <!-- <view class="header-badge">
+                        <text class="badge-text">VIP CLUB</text>
+                    </view> -->
+                </view>
+                <text class="sub-title">{{ t('membership.subtitle') }}</text>
+            </view>
+
+            <!-- 勾选特权列表 (上一版图标样式) -->
+            <view class="header-benefits-list">
+                <view class="benefit-item" v-for="(benefit, index) in benefits" :key="index">
+                    <view class="benefit-icon-box">
+                        <uni-icons type="checkmarkempty" size="18" color="#ffffff"></uni-icons>
+                    </view>
+                    <text class="benefit-text">{{ benefit.title }}</text>
                 </view>
             </view>
         </view>
 
-        <view class="main-scroll">
-            <view class="container">
-                
-                <!-- Minimal Hero Header -->
-                <view class="hero-header">
-                    <text class="hero-title">{{ t('membership.title') }}</text>
-                    <text class="hero-subtitle">{{ t('membership.subtitle') }}</text>
-                </view>
-
-                <!-- Vertical Benefits List -->
-                <view class="benefits-list">
-                    <view class="benefit-row" v-for="(benefit, index) in benefits" :key="index">
-                        <view class="benefit-icon-box">
-                            <uni-icons type="checkmarkempty" size="18" color="#a855f7"></uni-icons>
-                        </view>
-                        <text class="benefit-text">{{ benefit.title }}</text>
+        <!-- 主内容区域（页面普通背景） -->
+        <view class="main-content-body">
+            <!-- 套餐卡片堆叠列表 -->
+            <view class="plans-container">
+                <view class="plan-card" v-for="(card, index) in membershipCards" :key="index"
+                    :class="{ 'is-selected': selectedCard === index, 'is-recommended': card.recommended }"
+                    @click="selectCard(index)">
+                    <!-- 仅在推荐商品上显示“推荐”胶囊标签 -->
+                    <view class="recommend-pill" v-if="card.recommended">
+                        <text>{{ t('membership.recommended') }}</text>
                     </view>
-                </view>
 
-                <!-- Stacked Product Cards -->
-                <view class="plans-container">
-                    <view
-                        class="plan-card"
-                        v-for="(card, index) in membershipCards"
-                        :key="index"
-                        :class="{ 'is-selected': selectedCard === index, 'is-recommended': card.recommended }"
-                        @click="selectCard(index)"
-                    >
-                        <view class="plan-info">
-                            <text class="plan-title">{{ card.title }}</text>
-                            <text class="plan-desc" v-if="card.savings">{{ card.savings }}</text>
-                        </view>
-                        <view class="plan-price-info">
+                    <view class="plan-info">
+                        <text class="plan-title">{{ card.title }}</text>
+                        <text class="plan-desc" v-if="card.savings">{{ card.savings }}</text>
+                    </view>
+                    <view class="plan-price-info">
+                        <view class="price-val-box">
+                            <text class="original-price-strike"
+                                v-if="card.originalPrice && Number(card.originalPrice) > Number(card.price)">
+                                {{ card.currency === 'USD' ? '$' : '¥' }}{{ card.originalPrice }}
+                            </text>
                             <text class="plan-price">{{ card.currency === 'USD' ? '$' : '¥' }}{{ card.price }}</text>
-                            <text class="plan-avg">{{ card.avgText }}</text>
                         </view>
-                        <view class="recommend-pill" v-if="card.recommended">
-                            <text>{{ t('membership.bestValue') }}</text>
-                        </view>
+                        <text class="plan-avg">{{ card.avgText }}</text>
                     </view>
                 </view>
+            </view>
 
-                <!-- Payment Methods (Clean Native-like List) -->
-                <view class="payment-methods-list">
-                    <view class="pm-title">{{ t('membership.payWith') }}</view>
-                    <view 
-                        class="pm-row" 
-                        v-for="method in paymentMethods" 
-                        :key="method.id"
-                        @click="selectedPayment = method.id"
-                    >
-                        <view class="pm-icon-wrapper">
-                            <image class="pm-icon" :src="method.iconSrc" mode="aspectFit"></image>
-                        </view>
-                        <text class="pm-name">{{ method.name }}</text>
-                        <view class="pm-radio" :class="{ 'is-active': selectedPayment === method.id }">
-                            <view class="radio-dot"></view>
-                        </view>
+            <!-- 保留现有的支付方式选择区域 -->
+            <view class="payment-methods-section">
+                <view class="pm-title">{{ t('membership.payWith') }}</view>
+                <view class="pm-row" v-for="method in paymentMethods" :key="method.id"
+                    @click="selectedPayment = method.id">
+                    <view class="pm-icon-wrapper">
+                        <image class="pm-icon" :src="method.iconSrc" mode="aspectFit"></image>
+                    </view>
+                    <text class="pm-name">{{ method.name }}</text>
+                    <view class="pm-radio-check" :class="{ 'is-active': selectedPayment === method.id }">
+                        <uni-icons v-if="selectedPayment === method.id" type="checkmarkempty" size="14"
+                            color="#ffffff"></uni-icons>
                     </view>
                 </view>
-                
-                <view class="bottom-spacer"></view>
             </view>
         </view>
 
-        <!-- Sticky Bottom CTA -->
+        <!-- 底部固定悬浮按钮 (已移除随时取消文案) -->
         <view class="sticky-footer">
             <button class="cta-btn" :disabled="selectedCard === null" @click="handlePurchase">
                 <text>{{ t('membership.continue') }}</text>
@@ -91,12 +88,13 @@
         </view>
 
         <!-- Custom Checkout Bottom Sheet (replaces uni.showModal confirmPaymentInfo) -->
-        <uni-popup ref="checkoutPopup" type="bottom" :safe-area="true">
+        <uni-popup ref="checkoutPopup" type="bottom" :safe-area="false">
             <view class="checkout-sheet" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="checkout-sheet__header">
                     <text class="checkout-sheet__title">{{ t('membership.checkoutTitle') }}</text>
                     <view class="checkout-sheet__close" @click="closeCheckout">
-                        <uni-icons type="closeempty" size="20" :color="settingsStore.isDark ? '#a1a1aa' : '#71717a'"></uni-icons>
+                        <uni-icons type="closeempty" size="20"
+                            :color="settingsStore.isDark ? '#a1a1aa' : '#71717a'"></uni-icons>
                     </view>
                 </view>
 
@@ -111,7 +109,8 @@
                         </view>
                     </view>
                     <view class="cpc-right">
-                        <text class="cpc-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price }}</text>
+                        <text class="cpc-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price
+                            }}</text>
                     </view>
                 </view>
 
@@ -123,12 +122,13 @@
                             <text class="cd-value">{{ activePaymentMethod?.name }}</text>
                         </view>
                     </view>
-                    
+
                     <view class="checkout-detail-divider"></view>
-                    
+
                     <view class="checkout-detail-row is-total">
                         <text class="cd-label">{{ t('membership.total') }}</text>
-                        <text class="cd-total-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price }}</text>
+                        <text class="cd-total-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{
+                            activeCard?.price }}</text>
                     </view>
                 </view>
 
@@ -140,6 +140,7 @@
                 <button class="checkout-pay-btn" @click="confirmAndExecutePayment">
                     <text>{{ t('membership.confirmPay') }}</text>
                 </button>
+                <view class="safe-area-bottom"></view>
             </view>
         </uni-popup>
 
@@ -183,6 +184,25 @@ const userStore = useUserStore();
 const selectedCard = ref(0);
 const rawProducts = ref([]);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
+
+// 动态计算适配微信小程序原生胶囊及各端状态栏对齐
+const navBarBoxStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    if (uni.getMenuButtonBoundingClientRect) {
+        const rect = uni.getMenuButtonBoundingClientRect();
+        if (rect && rect.top) {
+            return {
+                paddingTop: `${rect.top}px`,
+                height: `${rect.height}px`
+            };
+        }
+    }
+    // #endif
+    return {
+        paddingTop: `${statusBarHeight.value + 8}px`,
+        height: '32px'
+    };
+});
 
 // Popups and mock states
 const checkoutPopup = ref(null);
@@ -283,7 +303,7 @@ let pollTimer = null;
 const onPaymentSuccess = () => {
     uni.hideLoading();
     uni.showToast({ title: t("membership.welcomeVip"), icon: "success" });
-    userStore.getUserProfile && userStore.getUserProfile();
+    userStore.getUserProfile();
     setTimeout(() => uni.navigateBack(), 2000);
 };
 
@@ -321,11 +341,15 @@ const handlePurchase = async () => {
     openCheckout();
 };
 
+const isSubmitting = ref(false);
+
 const confirmAndExecutePayment = async () => {
+    if (isSubmitting.value) return;
     const card = activeCard.value;
     if (!card) return;
     closeCheckout();
-    
+
+    isSubmitting.value = true;
     uni.showLoading({ title: t("membership.creatingOrder") });
 
     try {
@@ -339,6 +363,8 @@ const confirmAndExecutePayment = async () => {
         uni.hideLoading();
         console.error("Purchase error:", err);
         uni.showToast({ title: err.message || t("common.networkError"), icon: "none" });
+    } finally {
+        isSubmitting.value = false;
     }
 };
 
@@ -353,7 +379,7 @@ const handleAlipay = async (card, platform) => {
     const { order_no, order_string } = createRes.data;
 
     // ── App 真实支付 ──────────────────
-    // #ifdef APP-PLUS
+    // #ifdef APP
     uni.hideLoading();
     uni.requestPayment({
         provider: "alipay",
@@ -433,348 +459,339 @@ const goBack = () => {
     --footer-bg: rgba(238, 241, 245, 0.88);
 }
 
-/* ================= 基础布局 ================= */
+/* ================= 基础布局 (轻柔莫兰迪薰衣草紫，清透空气感) ================= */
 .layout {
     min-height: 100vh;
-    background: var(--bg-main);
-    color: var(--text-color);
-    transition: background 0.3s, color 0.3s;
     display: flex;
     flex-direction: column;
+    padding-bottom: 200rpx;
+    transition: all 0.3s ease;
+
+    &.theme-light {
+        background: linear-gradient(180deg, #7573f6 0%, #908df9 20%, #b8b6fc 38%, #deddfe 56%, #f3f3fe 75%, #ffffff 100%);
+        color: #0f172a;
+    }
+
+    &.theme-dark {
+        background: linear-gradient(180deg, #5b53d6 0%, #463ebb 22%, #2a2578 45%, #161833 72%, #0f172a 100%);
+        color: #f8fafc;
+    }
 }
 
-.status-bar-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: var(--bg-main);
-    z-index: 100;
-    pointer-events: none;
+/* ================= 顶级 Header 区域 (透明无缝融入) ================= */
+.hero-gradient-header {
+    background: transparent;
+    padding: 0 40rpx 32rpx 40rpx;
+    color: #ffffff;
 }
 
-.nav-header {
-    height: 100rpx;
+.header-nav-bar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0 40rpx;
     box-sizing: content-box;
-    position: relative;
-    z-index: 10;
-    
-    .back-btn {
-        width: 72rpx;
-        height: 72rpx;
+
+    .back-circle-btn {
+        width: 64rpx;
+        height: 64rpx;
         border-radius: 50%;
-        background: var(--card-bg);
-        border: 1rpx solid var(--card-border);
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(12px);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4rpx 10rpx var(--shadow-color);
-        position: relative;
-        z-index: 2;
-        
+        flex-shrink: 0;
+
         &:active {
-            transform: scale(0.95);
-            opacity: 0.9;
+            opacity: 0.7;
         }
     }
+}
 
-    .nav-title-box {
-        position: absolute;
-        left: 0;
-        right: 0;
-        text-align: center;
-        pointer-events: none;
-        
-        .nav-title {
-            font-size: 34rpx;
+.header-title-box {
+    margin: 32rpx 0 28rpx;
+
+    .title-with-badge {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+        margin-bottom: 12rpx;
+
+        .main-title {
+            font-size: 52rpx;
             font-weight: 800;
-            color: var(--text-color);
+            line-height: 1.15;
+            letter-spacing: -0.5rpx;
         }
-    }
 
-    .nav-right-box {
-        position: relative;
-        z-index: 2;
-        
-        .premium-badge {
-            display: flex;
+        .header-badge {
+            display: inline-flex;
             align-items: center;
-            gap: 8rpx;
-            padding: 8rpx 18rpx;
+            gap: 6rpx;
+            padding: 6rpx 18rpx;
             border-radius: 100rpx;
-            background: var(--card-bg);
-            border: 1rpx solid var(--card-border);
-            box-shadow: 0 4rpx 10rpx var(--shadow-color);
-            
-            .premium-badge-text {
-                font-size: 20rpx;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(12px);
+
+            .badge-text {
+                font-size: 40rpx;
                 font-weight: 800;
                 color: #fbbf24;
-                letter-spacing: 0.5rpx;
+                letter-spacing: 1rpx;
             }
         }
     }
-}
 
-.main-scroll {
-    flex: 1;
-}
-
-.container {
-    padding: 0rpx 40rpx 40rpx;
-}
-
-/* ================= 极简头部 ================= */
-.hero-header {
-    margin: 30rpx 0 50rpx;
-    
-    .hero-title {
-        font-size: 64rpx;
-        font-weight: 800;
-        line-height: 1.1;
-        letter-spacing: -1rpx;
-        color: var(--text-color);
-        display: block;
-        margin-bottom: 16rpx;
-    }
-    
-    .hero-subtitle {
-        font-size: 30rpx;
-        color: var(--text-sub);
-        line-height: 1.4;
+    .sub-title {
+        font-size: 26rpx;
+        color: rgba(255, 255, 255, 0.85);
         font-weight: 500;
         display: block;
     }
 }
 
-/* ================= 纵向特权列表 ================= */
-.benefits-list {
-    margin-bottom: 60rpx;
-    
-    .benefit-row {
+.header-benefits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20rpx;
+
+    .benefit-item {
         display: flex;
         align-items: center;
-        gap: 24rpx;
-        margin-bottom: 32rpx;
-        
+        gap: 20rpx;
+
         .benefit-icon-box {
             width: 44rpx;
             height: 44rpx;
             border-radius: 50%;
-            background: rgba(168, 85, 247, 0.1);
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(8px);
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
-        
+
         .benefit-text {
-            font-size: 32rpx;
+            font-size: 30rpx;
             font-weight: 600;
-            color: var(--text-color);
+            color: rgba(255, 255, 255, 0.95);
         }
     }
 }
 
-/* ================= 堆叠式卡片 ================= */
+/* ================= 主内容体（常规页面背景） ================= */
+.main-content-body {
+    padding: 40rpx 40rpx 0 40rpx;
+}
+
+/* 套餐卡片堆叠列表 */
 .plans-container {
     display: flex;
     flex-direction: column;
-    gap: 24rpx;
-    margin-bottom: 60rpx;
+    gap: 28rpx;
+    margin-bottom: 48rpx;
 }
 
 .plan-card {
     position: relative;
     padding: 36rpx 40rpx;
     border-radius: 32rpx;
-    background: var(--card-bg);
-    border: 4rpx solid var(--card-border);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border: 4rpx solid rgba(255, 255, 255, 0.8);
     display: flex;
     justify-content: space-between;
     align-items: center;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 6rpx 16rpx var(--shadow-color);
-    
-    &.is-selected {
-        border-color: var(--radio-active);
-        background: rgba(168, 85, 247, 0.04);
-        transform: scale(1.01);
+    box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.05);
+
+    .theme-dark & {
+        background: rgba(30, 30, 36, 0.85);
+        border-color: rgba(255, 255, 255, 0.08);
     }
-    
+
+    &.is-selected {
+        border-color: #6366f1;
+        background: #ffffff;
+        box-shadow: 0 14rpx 36rpx rgba(99, 102, 241, 0.25);
+        transform: scale(1.01);
+
+        .theme-dark & {
+            background: #1e1b4b;
+            border-color: #818cf8;
+        }
+    }
+
     .plan-info {
         display: flex;
         flex-direction: column;
         gap: 8rpx;
-        
+
         .plan-title {
             font-size: 36rpx;
             font-weight: 700;
             color: var(--text-color);
         }
-        
+
         .plan-desc {
             font-size: 24rpx;
-            color: #10b981;
-            font-weight: 600;
+            color: #64748b;
+            font-weight: 500;
+
+            .theme-dark & {
+                color: #94a3b8;
+            }
         }
     }
-    
+
     .plan-price-info {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         gap: 4rpx;
-        
-        .plan-price {
-            font-size: 40rpx;
-            font-weight: 800;
-            color: var(--text-color);
+
+        .price-val-box {
+            display: flex;
+            align-items: baseline;
+            gap: 10rpx;
+
+            .original-price-strike {
+                font-size: 26rpx;
+                color: #94a3b8;
+                text-decoration: line-through;
+                font-weight: 500;
+            }
+
+            .plan-price {
+                font-size: 40rpx;
+                font-weight: 800;
+                color: var(--text-color);
+            }
         }
-        
+
         .plan-avg {
             font-size: 24rpx;
             color: var(--text-sub);
             font-weight: 500;
         }
     }
-    
+
     .recommend-pill {
         position: absolute;
         top: -18rpx;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 32rpx;
         background: linear-gradient(135deg, #fbbf24, #f59e0b);
         color: #78350f;
-        padding: 6rpx 20rpx;
-        border-radius: 999rpx;
         font-size: 20rpx;
         font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1rpx;
-        box-shadow: 0 4rpx 10rpx rgba(245, 158, 11, 0.2);
+        padding: 4rpx 20rpx;
+        border-radius: 100rpx;
+        box-shadow: 0 4rpx 10rpx rgba(245, 158, 11, 0.3);
     }
 }
 
-/* ================= 支付方式 ================= */
-.payment-methods-list {
+/* 支付方式选择列 */
+.payment-methods-section {
     margin-bottom: 40rpx;
-    
+
     .pm-title {
-        font-size: 28rpx;
+        font-size: 24rpx;
         font-weight: 700;
         color: var(--text-sub);
-        margin-bottom: 24rpx;
         text-transform: uppercase;
-        letter-spacing: 1rpx;
+        letter-spacing: 1.5rpx;
+        margin-bottom: 24rpx;
     }
-    
+
     .pm-row {
         display: flex;
         align-items: center;
-        padding: 32rpx 0;
+        padding: 24rpx 0;
         border-bottom: 1rpx solid var(--card-border);
-        
+
         &:last-child {
             border-bottom: none;
         }
-        
+
         .pm-icon-wrapper {
-            width: 64rpx;
-            height: 64rpx;
-            border-radius: 16rpx;
-            background: var(--card-bg);
-            border: 1rpx solid var(--card-border);
+            width: 60rpx;
+            height: 60rpx;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-right: 24rpx;
-            
+
             .pm-icon {
                 width: 44rpx;
                 height: 44rpx;
             }
         }
-        
+
         .pm-name {
             flex: 1;
-            font-size: 32rpx;
+            font-size: 30rpx;
             font-weight: 600;
             color: var(--text-color);
         }
-        
-        .pm-radio {
+
+        .pm-radio-check {
             width: 44rpx;
             height: 44rpx;
             border-radius: 50%;
-            border: 4rpx solid var(--radio-border);
+            border: 3rpx solid var(--card-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            
+
             &.is-active {
-                border-color: var(--radio-active);
-                
-                .radio-dot {
-                    width: 20rpx;
-                    height: 20rpx;
-                    background: var(--radio-active);
-                    border-radius: 50%;
-                }
+                background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+                border-color: #6366f1;
             }
         }
     }
 }
 
-.bottom-spacer {
-    height: 200rpx;
-}
-
-/* ================= 底部动作栏 ================= */
+/* 底部固定悬浮按钮 (已彻底删除随时取消文案) */
 .sticky-footer {
     position: fixed;
     bottom: 0;
     left: 0;
-    right: 0;
-    background: var(--footer-bg);
-    backdrop-filter: blur(24rpx);
-    padding: 32rpx 40rpx;
-    border-top: 1px solid var(--card-border);
+    width: 100%;
+    background: var(--bg-main);
+    border-top: 1rpx solid var(--card-border);
+    padding: 24rpx 40rpx 32rpx;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20rpx;
+    gap: 12rpx;
     z-index: 90;
-    
+
     .cta-btn {
         width: 100%;
-        height: 112rpx;
-        border-radius: 999rpx;
-        background: var(--btn-bg);
-        color: var(--btn-text);
+        height: 108rpx;
+        border-radius: 100rpx;
+        background: linear-gradient(135deg, #7573f6 0%, #635df0 100%);
+        color: #ffffff;
+        font-size: 34rpx;
+        font-weight: 800;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 36rpx;
-        font-weight: 800;
         border: none;
         margin: 0;
-        box-shadow: 0 8rpx 20rpx rgba(147, 51, 234, 0.15);
-        
+        box-shadow: 0 10rpx 28rpx rgba(117, 115, 246, 0.35);
+
         &:active {
             opacity: 0.9;
             transform: scale(0.98);
         }
-        
+
         &[disabled] {
             opacity: 0.5;
         }
     }
-    
+
     .footer-terms {
         font-size: 22rpx;
         color: var(--text-sub);
@@ -783,14 +800,17 @@ const goBack = () => {
     }
 }
 
-/* ================= 自定义收银台底部弹窗 ================= */
+/* ================= 自定义收银台底部弹窗 (全封闭覆盖底部安全区) ================= */
 .checkout-sheet {
     background: var(--card-bg);
     border-top-left-radius: 48rpx;
     border-top-right-radius: 48rpx;
-    padding: 48rpx 40rpx 64rpx;
+    padding: 48rpx 40rpx calc(48rpx + env(safe-area-inset-bottom));
+    padding-bottom: calc(48rpx + constant(safe-area-inset-bottom));
     border-top: 1rpx solid var(--card-border);
-    box-shadow: 0 -12rpx 48rpx rgba(0, 0, 0, 0.08);
+    box-shadow: 0 -12rpx 48rpx rgba(0, 0, 0, 0.12);
+    position: relative;
+    z-index: 100;
 
     &__header {
         display: flex;
@@ -883,7 +903,7 @@ const goBack = () => {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        
+
         .cd-label {
             font-size: 26rpx;
             color: var(--text-sub);
@@ -1012,7 +1032,7 @@ const goBack = () => {
             font-size: 28rpx;
             font-weight: 700;
             border: none;
-            
+
             &.is-cancel {
                 background: var(--bg-main);
                 color: var(--text-sub);

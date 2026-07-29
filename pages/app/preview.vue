@@ -1,33 +1,17 @@
 <template>
-    <view
-        v-if="currentInfo && currentInfo.id"
-        class="preview-page"
-        :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
-    >
-        <view
-            class="preview-statusbar"
-            :style="{
-                height: `${statusBarHeight}px`,
-                opacity: statusBarFillOpacity,
-            }"
-        ></view>
-        <scroll-view
-            scroll-y
-            class="previewScroll"
-            show-scrollbar="false"
-            :style="previewScrollStyle"
-            @scroll="handlePreviewScroll"
-        >
+    <view v-if="currentInfo && currentInfo.id" class="preview-page"
+        :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <view class="preview-statusbar" :style="{
+            height: `${statusBarHeight}px`,
+            opacity: statusBarFillOpacity,
+        }"></view>
+        <scroll-view scroll-y class="previewScroll" show-scrollbar="false" :style="previewScrollStyle"
+            @scroll="handlePreviewScroll">
             <view class="previewLayout" :style="previewLayoutStyle">
                 <view class="previewHero">
                     <!-- swiper and mask content unchanged -->
-                    <swiper
-                        class="preview-swiper"
-                        :circular="!disableSwipe && classList.length > 1"
-                        :disable-touch="disableSwipe"
-                        :current="currentIndex"
-                        @change="swiperChange"
-                    >
+                    <swiper class="preview-swiper" :circular="!disableSwipe && classList.length > 1"
+                        :disable-touch="disableSwipe" :current="currentIndex" @change="swiperChange">
                         <swiper-item v-for="(item, index) in classList" :key="item.id">
                             <view class="preview-slide">
                                 <view v-if="readImgs.includes(index) && !isImageLoaded(index)" class="preview-loading">
@@ -35,16 +19,10 @@
                                     <rotate-loading :size="88"></rotate-loading>
                                     <view class="preview-loading__text">{{ t('message.loading') }}</view>
                                 </view>
-                                <image
-                                    v-if="readImgs.includes(index)"
-                                    class="preview-slide__image"
-                                    :class="{ 'is-loaded': isImageLoaded(index) }"
-                                    @click="maskChange"
-                                    @load="handleImageLoad(index, $event)"
-                                    @error="handleImageLoad(index)"
-                                    :src="item.picurl"
-                                    mode="aspectFill"
-                                ></image>
+                                <image v-if="readImgs.includes(index)" class="preview-slide__image"
+                                    :class="{ 'is-loaded': isImageLoaded(index) }" @click="maskChange"
+                                    @load="handleImageLoad(index, $event)" @error="handleImageLoad(index)"
+                                    :src="item.picurl" mode="aspectFill"></image>
                             </view>
                         </swiper-item>
                     </swiper>
@@ -53,34 +31,17 @@
                         <view class="goBack" :style="{ top: backButtonTop + 'px' }" @click="goBack">
                             <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
                         </view>
-                        <view class="top-actions" :style="{ top: backButtonTop + 'px', right: capsuleRightOffset + 'px' }">
-                            <view v-if="isAdmin" class="icon-btn" @click="toggleWatchLater">
-                                <mdi-icon
-                                    :path="isCurrentInWatchLater ? '/static/icons/check.svg' : '/static/icons/bookmark.svg'"
-                                    size="20px"
-                                    color="#fff"
-                                ></mdi-icon>
-                            </view>
-                            <view v-if="isAdmin" class="icon-btn" @click="openEdit">
-                                <mdi-icon path="/static/icons/pencil.svg" size="20px" color="#fff"></mdi-icon>
-                            </view>
-                            <view v-if="isAdmin" class="icon-btn" @click="toggleLock">
-                                <mdi-icon
-                                    :path="currentInfo.is_locked ? '/static/icons/lock.svg' : '/static/icons/lock-open.svg'"
-                                    size="20px"
-                                    color="#fff"
-                                ></mdi-icon>
+                        <view class="top-actions"
+                            :style="{ top: backButtonTop + 'px', right: capsuleRightOffset + 'px' }">
+                            <view v-if="isAdmin" class="icon-btn" @click="openAdminMenu">
+                                <uni-icons type="more-filled" size="24" color="#ffffff"></uni-icons>
                             </view>
                             <view class="icon-btn" @click="openClockStyle">
                                 <mdi-icon path="/static/icons/clock.svg" size="20px" color="#fff"></mdi-icon>
                             </view>
-                            <!-- #ifdef MP-WEIXIN -->
-                            <button class="icon-btn" open-type="share" @click="handleShare">
-                                <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
-                            </button>
-                            <!-- #endif -->
                             <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
-                                <mdi-icon path="/static/icons/information-symbol.svg" size="32px" color="#fff"></mdi-icon>
+                                <mdi-icon path="/static/icons/information-symbol.svg" size="32px"
+                                    color="#fff"></mdi-icon>
                             </view>
                         </view>
 
@@ -128,16 +89,13 @@
                                 <view class="action-item" @click="toggleCollect">
                                     <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
                                     <view class="action-text">{{
-                                        currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
+                                        currentInfo.is_favorited ? t('previewPage.favorited') :
+                                            t('previewPage.favorite')
                                     }}</view>
                                 </view>
                                 <view class="action-item" @click="clickDownload">
-                                    <uni-icons
-                                        v-if="currentInfo.is_locked"
-                                        type="locked-filled"
-                                        size="36"
-                                        color="#ffffff"
-                                    ></uni-icons>
+                                    <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="36"
+                                        color="#ffffff"></uni-icons>
                                     <uni-icons v-else type="download-filled" size="36" color="#ffffff"></uni-icons>
                                     <view class="action-text">{{ t('common.download') }}</view>
                                 </view>
@@ -161,7 +119,11 @@
                 <view class="preview-extra-panel" v-if="currentInfo">
                     <!-- 第一行：免责声明 -->
                     <view class="extra-disclaimer">
-                        <text class="disclaimer-text" user-select>{{ tp('message.copyrightStatement', { email: SERVICE_EMAIL }) }}</text>
+                        <text class="disclaimer-text" user-select>{{ tp('message.copyrightStatement', {
+                            email:
+                                SERVICE_EMAIL
+                        })
+                        }}</text>
                     </view>
 
                     <!-- 第二行与第三行：2列网格指标数据 -->
@@ -180,9 +142,11 @@
 
                         <!-- 第三行：尺寸(分辨率) & 大小(文件体积) -->
                         <view class="grid-cell">
-                            <mdi-icon path="/static/icons/information-outline.svg" size="16px" color="#94a3b8"></mdi-icon>
+                            <mdi-icon path="/static/icons/information-outline.svg" size="16px"
+                                color="#94a3b8"></mdi-icon>
                             <text class="cell-label">{{ t('previewPage.resolution').replace(':', '') }}</text>
-                            <text class="cell-value">{{ currentInfo.width && currentInfo.height ? `${currentInfo.width}×${currentInfo.height}` : '--' }}</text>
+                            <text class="cell-value">{{ currentInfo.width && currentInfo.height ?
+                                `${currentInfo.width}×${currentInfo.height}` : '--' }}</text>
                         </view>
                         <view class="grid-cell">
                             <mdi-icon path="/static/icons/image.svg" size="16px" color="#94a3b8"></mdi-icon>
@@ -197,7 +161,8 @@
         </scroll-view>
 
         <!-- ad广告无法在<swiper>、<scroll-view> 中使用，因此保持在滚动容器外固定展示 -->
-        <custom-ad-banner v-if="IS_INTERNATIONAL && shouldShowBottomAd" @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner v-if="IS_INTERNATIONAL && shouldShowBottomAd"
+            @height-change="onAdHeightChange"></custom-ad-banner>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -206,7 +171,8 @@
                     <view></view>
                     <view class="title">{{ t('previewPage.wallpaperInfo') }}</view>
                     <view class="close">
-                        <uni-icons class="close" type="clear" size="32" :color="settingsStore.isDark ? '#a1a1aa' : '#888888'" @click="closeInfo"></uni-icons>
+                        <uni-icons class="close" type="clear" size="32"
+                            :color="settingsStore.isDark ? '#a1a1aa' : '#888888'" @click="closeInfo"></uni-icons>
                     </view>
                 </view>
                 <scroll-view class="info-scroll-view" scroll-y>
@@ -263,7 +229,10 @@
                                 </view>
                             </view>
                         </view>
-                        <text class="copyright" user-select>{{ tp('message.copyrightStatement', { email: SERVICE_EMAIL }) }}</text>
+                        <text class="copyright" user-select>{{ tp('message.copyrightStatement', {
+                            email: SERVICE_EMAIL
+                        })
+                        }}</text>
                     </view>
                 </scroll-view>
             </view>
@@ -273,13 +242,8 @@
             <view class="scorePopup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="popHeader">
                     <view class="title">{{ t('previewPage.wallpaperRating') }}</view>
-                    <uni-icons
-                        class="close"
-                        type="clear"
-                        size="32"
-                        color="var(--text-tertiary)"
-                        @click="closeScore"
-                    ></uni-icons>
+                    <uni-icons class="close" type="clear" size="32" color="var(--text-tertiary)"
+                        @click="closeScore"></uni-icons>
                 </view>
 
                 <view class="content">
@@ -308,7 +272,8 @@
                     <view class="content">
                         <view class="row">
                             <view class="label">{{ t('previewPage.description') }}</view>
-                            <textarea v-model="editForm.description" class="input-textarea" :auto-height="true"></textarea>
+                            <textarea v-model="editForm.description" class="input-textarea"
+                                :auto-height="true"></textarea>
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.tags') }}</view>
@@ -316,12 +281,8 @@
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.category') }}</view>
-                            <picker
-                                :range="classifyList"
-                                range-key="classify_name"
-                                @change="onClassifyChange"
-                                :value="getClassifyIndex()"
-                            >
+                            <picker :range="classifyList" range-key="classify_name" @change="onClassifyChange"
+                                :value="getClassifyIndex()">
                                 <view class="input picker-input">
                                     {{ getClassifyName() || t('previewPage.selectCategory') }}
                                 </view>
@@ -370,33 +331,23 @@
         <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
 
         <!-- 通用导航对话框 -->
-        <popup-navigation-dialog
-            ref="navDialog"
-            :title="dialogState.title"
-            :description="dialogState.description"
-            :confirmText="dialogState.confirmText"
-            :cancelText="dialogState.cancelText"
-            :showCancel="dialogState.showCancel"
-            @confirm="dialogState.onConfirm"
-            @cancel="dialogState.onCancel"
-        ></popup-navigation-dialog>
+        <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
+            :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            :showCancel="dialogState.showCancel" @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"></popup-navigation-dialog>
 
         <!-- Clock Style Popup -->
         <uni-popup ref="clockStylePopup" type="bottom" :safe-area="false" @change="onClockStylePopupChange">
             <view class="clockStylePopup-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="header">
                     <text class="title">{{ t('previewPage.clockStyle') }}</text>
-                    <uni-icons type="closeempty" size="24" :color="settingsStore.isDark ? '#ffffff' : '#333333'" @click="closeClockStyle"></uni-icons>
+                    <uni-icons type="closeempty" size="24" :color="settingsStore.isDark ? '#ffffff' : '#333333'"
+                        @click="closeClockStyle"></uni-icons>
                 </view>
                 <scroll-view scroll-x class="style-list" :show-scrollbar="false">
                     <view class="style-scroll-content">
-                        <view 
-                            class="style-item" 
-                            v-for="item in clockStyles" 
-                            :key="item.value"
-                            :class="{ active: tempClockStyle === item.value }"
-                            @click="selectClockStyle(item)"
-                        >
+                        <view class="style-item" v-for="item in clockStyles" :key="item.value"
+                            :class="{ active: tempClockStyle === item.value }" @click="selectClockStyle(item)">
                             <view class="style-preview" :class="item.value">
                                 <view v-if="item.isVip" class="vip-tag">VIP</view>
                                 <!-- Mini clock visuals -->
@@ -445,23 +396,96 @@
                         </view>
                     </view>
                 </scroll-view>
-                
+
                 <view class="action-bar">
                     <!-- 选中的是当前已激活的样式 -->
                     <template v-if="!tempClockStyle || tempClockStyle === activeSessionClockStyle">
                         <view class="free-hint">{{ t('previewPage.currentStyle') }}</view>
-                        <button class="apply-btn apply-btn--disabled" disabled>{{ t('previewPage.applyStyle') }}</button>
+                        <button class="apply-btn apply-btn--disabled" disabled>{{ t('previewPage.applyStyle')
+                        }}</button>
                     </template>
                     <!-- 选中了新样式，且是 VIP 样式 -->
                     <template v-else-if="selectedClockStyleItem?.isVip && !userStore.isVip">
                         <view class="vip-hint">{{ t('previewPage.vipStyleHint') }}</view>
-                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.unlockBtnVip') }}</button>
+                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.unlockBtnVip')
+                        }}</button>
                     </template>
                     <!-- 选中了新样式，免费或已是 VIP -->
                     <template v-else>
                         <view class="free-hint">{{ t('previewPage.applyStyleHint') }}</view>
-                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.applyStyle') }}</button>
+                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.applyStyle')
+                        }}</button>
                     </template>
+                </view>
+            </view>
+        </uni-popup>
+
+        <!-- 底部分享弹窗组件 -->
+        <share-sheet ref="shareSheetRef" :title="t('common.share')"
+            :share-title="getLocalizedItem(currentInfo).description || t('common.appName')"
+            :share-summary="t('about.introText')" :share-image="currentInfo?.smallPicurl || currentInfo?.picurl"
+            :share-url="shareUrl"></share-sheet>
+
+        <!-- 管理员快捷控制面板弹窗 (极简风格) -->
+        <uni-popup ref="adminMenuPopup" type="bottom" :safe-area="false">
+            <view class="admin-menu-sheet" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+                <view class="sheet-header">
+                    <text class="title">{{ t('previewPage.adminMenuTitle') || '管理员设置' }}</text>
+                    <view class="close-btn" @click="closeAdminMenu">
+                        <uni-icons type="closeempty" size="18"
+                            :color="settingsStore.isDark ? '#9ca3af' : '#6b7280'"></uni-icons>
+                    </view>
+                </view>
+
+                <view class="admin-grid">
+                    <!-- 1. 看后待看 -->
+                    <view class="admin-item" @click="handleAdminAction(toggleWatchLater)">
+                        <view class="icon-circle" :class="{ 'is-active': isCurrentInWatchLater }">
+                            <mdi-icon
+                                :path="isCurrentInWatchLater ? '/static/icons/check.svg' : '/static/icons/bookmark.svg'"
+                                size="22px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
+                        </view>
+                        <text class="item-label">{{ isCurrentInWatchLater ? (t('previewPage.watchLaterAdded') || '已入待看') :
+                            (t('previewPage.watchLaterAdd') || '看后待看') }}</text>
+                    </view>
+
+                    <!-- 2. 编辑壁纸 -->
+                    <view class="admin-item" @click="handleAdminAction(openEdit)">
+                        <view class="icon-circle">
+                            <mdi-icon path="/static/icons/pencil.svg" size="22px"
+                                :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
+                        </view>
+                        <text class="item-label">{{ t('previewPage.editWallpaper') || '编辑信息' }}</text>
+                    </view>
+
+                    <!-- 3. 锁状态 -->
+                    <view class="admin-item" @click="handleAdminAction(toggleLock)">
+                        <view class="icon-circle" :class="{ 'is-locked': currentInfo.is_locked }">
+                            <mdi-icon
+                                :path="currentInfo.is_locked ? '/static/icons/lock.svg' : '/static/icons/lock-open.svg'"
+                                size="22px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
+                        </view>
+                        <text class="item-label">{{ currentInfo.is_locked ? (t('previewPage.unlockWallpaper') || '解锁免费')
+                            : (t('previewPage.lockWallpaper') || '设为VIP') }}</text>
+                    </view>
+
+                    <!-- 4. 应用内置分享 -->
+                    <view class="admin-item" @click="handleAdminAction(openShareSheet)">
+                        <view class="icon-circle">
+                            <mdi-icon path="/static/icons/share-variant.svg" size="22px"
+                                :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
+                        </view>
+                        <text class="item-label">{{ t('previewPage.internalShare') || '应用分享' }}</text>
+                    </view>
+
+                    <!-- 5. 系统原生分享 -->
+                    <view class="admin-item" @click="handleAdminAction(handleSystemShare)">
+                        <view class="icon-circle">
+                            <mdi-icon path="/static/icons/export.svg" size="22px"
+                                :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
+                        </view>
+                        <text class="item-label">{{ t('previewPage.systemShare') || '系统分享' }}</text>
+                    </view>
                 </view>
             </view>
         </uni-popup>
@@ -490,10 +514,11 @@ import {
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
+import ShareSheet from '@/components/share-sheet/share-sheet.vue';
 import { useLibraryStore } from '@/stores/library.js';
 import { useStatusStore } from '@/stores/status.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
-import { formatPreviewDate, formatFileSize } from '@/utils/common.js';
+import { formatPreviewDate, formatFileSize, handlePicUrl } from '@/utils/common.js';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -512,8 +537,8 @@ const dialogState = reactive({
     confirmText: '',
     cancelText: '',
     showCancel: true,
-    onConfirm: () => {},
-    onCancel: () => {},
+    onConfirm: () => { },
+    onCancel: () => { },
 });
 
 /**
@@ -896,7 +921,7 @@ const capsuleRightOffset = computed(() => {
 
 const goBack = () => {
     uni.navigateBack({
-        success: () => {},
+        success: () => { },
         fail: (err) => {
             // 返回失败，直接跳转回首页
             uni.reLaunch({
@@ -1039,9 +1064,9 @@ const saveEdit = async () => {
             ...payload,
             tags_list: editForm.value.tags
                 ? editForm.value.tags
-                      .split(',')
-                      .map((t) => t.trim())
-                      .filter(Boolean)
+                    .split(',')
+                    .map((t) => t.trim())
+                    .filter(Boolean)
                 : [],
         });
         uni.showToast({ title: t('previewPage.adminSaveSuccess'), icon: 'none' });
@@ -1089,30 +1114,53 @@ const toggleLock = async () => {
     }
 };
 
+const shareSheetRef = ref(null);
+const shareUrl = computed(() => {
+    if (!currentInfo.value?.id) return '';
+    return `https://egowallpaper.space/preview?id=${currentInfo.value.id}`;
+});
+
+const openShareSheet = () => {
+    shareSheetRef.value?.open();
+};
+
 const handleShare = () => {
-    // #ifdef APP
-    // TODO https://uniapp.dcloud.net.cn/api/plugins/share.html#share
-    uni.share({
-        provider: 'weixin',
-        // WXSceneSession	分享到聊天界面
-        // WXSceneTimeline	分享到朋友圈
-        // WXSceneFavorite	分享到微信收藏
-        scene: 'WXSceneSession',
-        type: 0,
-        summary: t('common.appName'),
+    openShareSheet();
+};
+
+const handleSystemShare = () => {
+    const url = shareUrl.value || `https://egowallpaper.space/preview?id=${currentInfo.value?.id}`;
+    uni.shareWithSystem({
+        type: 'text',
+        summary: getLocalizedItem(currentInfo.value).description || t('common.appName'),
+        href: url,
         success: () => {
-            uni.showToast({ title: t('previewPage.shareSuccess'), icon: 'success' });
+            uni.showToast({
+                title: t('shareSheet.shareSuccess') || '分享成功',
+                icon: 'none',
+            });
         },
-        fail: (e) => {
-            console.log(e);
-            uni.showToast({ title: t('previewPage.shareFailed'), icon: 'none' });
+        fail: (err) => {
+            console.error('uni.shareWithSystem fail:', err);
         },
     });
-    // #endif
+};
 
-    // #ifdef WEB
-    uni.showToast({ title: t('previewPage.shareHint'), icon: 'none' });
-    // #endif
+const adminMenuPopup = ref(null);
+
+const openAdminMenu = () => {
+    adminMenuPopup.value?.open();
+};
+
+const closeAdminMenu = () => {
+    adminMenuPopup.value?.close();
+};
+
+const handleAdminAction = (actionFn) => {
+    closeAdminMenu();
+    if (typeof actionFn === 'function') {
+        actionFn();
+    }
 };
 
 const toggleCollect = async () => {
@@ -1310,7 +1358,7 @@ const fetchSingleWallDetail = async (id) => {
     try {
         const res = await apiGetWallDetail(id);
         if (res.code === 200 && res.data) {
-            const detail = res.data;
+            const detail = handlePicUrl(res.data);
             const formatted = {
                 ...detail,
                 is_favorited: !!detail.is_favorited,
@@ -1527,7 +1575,7 @@ onShareTimeline(() => {
         height: 100%;
         pointer-events: none;
 
-        & > view {
+        &>view {
             // goBack\count\time\date\footer都需要绝对定位，统一在这里设
             position: absolute;
             width: fit-content;
@@ -1626,7 +1674,7 @@ onShareTimeline(() => {
                 color: #ffffff;
                 font-weight: 500;
                 letter-spacing: 2rpx;
-                text-shadow: 
+                text-shadow:
                     0 2rpx 8rpx rgba(0, 0, 0, 0.8),
                     0 0 4rpx rgba(0, 0, 0, 0.8);
                 margin-top: 4rpx;
@@ -1641,7 +1689,7 @@ onShareTimeline(() => {
 
             .hint-icon {
                 opacity: 0.9;
-                
+
                 // &.second {
                 //     opacity: 0.5;
                 //     margin-top: -8rpx;
@@ -1729,8 +1777,7 @@ onShareTimeline(() => {
             :deep(.uni-icons) {
                 color: #fff !important;
                 // 给图标也加同款阴影，浅色背景下轮廓清晰
-                filter: drop-shadow(0 0 2rpx rgba(0, 0, 0, 0.55)) drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45))
-                    drop-shadow(0 6rpx 18rpx rgba(0, 0, 0, 0.3));
+                filter: drop-shadow(0 0 2rpx rgba(0, 0, 0, 0.55)) drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45)) drop-shadow(0 6rpx 18rpx rgba(0, 0, 0, 0.3));
             }
         }
 
@@ -2235,65 +2282,95 @@ onShareTimeline(() => {
 }
 
 @keyframes preview-bounce {
+
     0%,
     100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(12rpx);
     }
 }
+
 .clockStylePopup-container {
     background: #ffffff;
     border-radius: 32rpx 32rpx 0 0;
     padding: 40rpx;
-    
+
     &.theme-dark {
         background: #1a1a1a;
-        .header .title { color: #ffffff; }
+
+        .header .title {
+            color: #ffffff;
+        }
+
         // uni-icons closeempty 按钮需要 filter 让其变白
-        .header .uni-icons { color: #ffffff !important; filter: brightness(10); }
-        .style-item .style-preview { background: #2a2a2a; border-color: #333; }
-        .style-item.active .style-preview { border-color: #007aff; }
-        .style-item .style-name { color: #cccccc; }
-        .style-item.active .style-name { color: #ffffff; }
+        .header .uni-icons {
+            color: #ffffff !important;
+            filter: brightness(10);
+        }
+
+        .style-item .style-preview {
+            background: #2a2a2a;
+            border-color: #333;
+        }
+
+        .style-item.active .style-preview {
+            border-color: #007aff;
+        }
+
+        .style-item .style-name {
+            color: #cccccc;
+        }
+
+        .style-item.active .style-name {
+            color: #ffffff;
+        }
+
         // minimalist-art 在 dark 下保持更深背景以区分
         .style-item .style-preview.minimalist-art {
             background: #0e0e12;
-            .mini-clock-layout { color: rgba(255,255,255,0.85); }
-            .style-name { color: rgba(255,255,255,0.6); }
+
+            .mini-clock-layout {
+                color: rgba(255, 255, 255, 0.85);
+            }
+
+            .style-name {
+                color: rgba(255, 255, 255, 0.6);
+            }
         }
     }
-    
+
     .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 10rpx;
-        
+
         .title {
             font-size: 36rpx;
             font-weight: 600;
             color: #1a1a1a;
         }
     }
-    
+
     .style-list {
         width: 100%;
         white-space: nowrap;
-        
+
         .style-scroll-content {
             display: inline-flex;
             gap: 24rpx;
             padding: 10rpx;
         }
-        
+
         .style-item {
             display: flex;
             flex-direction: column;
             align-items: center;
             width: 180rpx;
-            
+
             .style-preview {
                 width: 100%;
                 height: 320rpx;
@@ -2331,32 +2408,132 @@ onShareTimeline(() => {
                     color: #333;
                     text-shadow: none;
 
-                    .mc-date { font-size: 18rpx; }
-                    .mc-time { font-size: 48rpx; font-weight: bold; line-height: 1; }
+                    .mc-date {
+                        font-size: 18rpx;
+                    }
 
-                    .default-time { font-weight: 400; font-size: 56rpx; line-height: 1em; letter-spacing: 2rpx; margin-top: 6rpx; }
-                    .default-date { font-weight: 500; font-size: 16rpx; letter-spacing: 1rpx; margin-top: 10rpx; opacity: 0.9; }
+                    .mc-time {
+                        font-size: 48rpx;
+                        font-weight: bold;
+                        line-height: 1;
+                    }
 
-                    .ios-time { font-weight: 800; font-size: 52rpx; margin-top: 4rpx; }
-                    .android-time { font-weight: 300; font-size: 46rpx; }
-                    .android-date { opacity: 0.9; margin-top: 4rpx; font-size: 16rpx;}
-                    
-                    .hyper-date { font-weight: 800; letter-spacing: 2rpx; font-size: 16rpx; margin-bottom: -4rpx; }
-                    .hyper-time { display: flex; flex-direction: column; font-weight: 900; line-height: 0.85; font-size: 54rpx; margin-left: 20rpx;}
-                    
-                    .harmony-date { background: rgba(0,0,0,0.05); padding: 2rpx 12rpx; border-radius: 20rpx; margin-top: 8rpx; }
-                    .harmony-time { font-weight: 500; font-size: 50rpx; }
+                    .default-time {
+                        font-weight: 400;
+                        font-size: 56rpx;
+                        line-height: 1em;
+                        letter-spacing: 2rpx;
+                        margin-top: 6rpx;
+                    }
 
-                    .modern-time { display: flex; flex-direction: column; font-weight: 600; font-size: 48rpx; line-height: 0.85; align-items: flex-start; left: 24rpx; position: absolute; margin-top: 10rpx;}
-                    .modern-date { writing-mode: vertical-rl; position: absolute; left: 78rpx; top: 12rpx; font-size: 14rpx; font-weight: 600; letter-spacing: 2rpx; }
-                    
-                    .elegant-time { font-family: serif; font-weight: 500; font-size: 52rpx; margin-top: 10rpx; }
-                    .elegant-date { font-family: serif; font-style: italic; font-size: 16rpx; margin-top: 4rpx; }
-                    
-                    .tech-time { font-family: monospace; font-weight: 300; font-size: 46rpx; letter-spacing: -2rpx; margin-top: 10rpx;}
-                    .tech-date { font-family: monospace; font-size: 14rpx; letter-spacing: 2rpx; margin-top: 6rpx; background: rgba(128,128,128,0.1); padding: 2rpx 6rpx; border: 1px solid rgba(128,128,128,0.2); }
+                    .default-date {
+                        font-weight: 500;
+                        font-size: 16rpx;
+                        letter-spacing: 1rpx;
+                        margin-top: 10rpx;
+                        opacity: 0.9;
+                    }
+
+                    .ios-time {
+                        font-weight: 800;
+                        font-size: 52rpx;
+                        margin-top: 4rpx;
+                    }
+
+                    .android-time {
+                        font-weight: 300;
+                        font-size: 46rpx;
+                    }
+
+                    .android-date {
+                        opacity: 0.9;
+                        margin-top: 4rpx;
+                        font-size: 16rpx;
+                    }
+
+                    .hyper-date {
+                        font-weight: 800;
+                        letter-spacing: 2rpx;
+                        font-size: 16rpx;
+                        margin-bottom: -4rpx;
+                    }
+
+                    .hyper-time {
+                        display: flex;
+                        flex-direction: column;
+                        font-weight: 900;
+                        line-height: 0.85;
+                        font-size: 54rpx;
+                        margin-left: 20rpx;
+                    }
+
+                    .harmony-date {
+                        background: rgba(0, 0, 0, 0.05);
+                        padding: 2rpx 12rpx;
+                        border-radius: 20rpx;
+                        margin-top: 8rpx;
+                    }
+
+                    .harmony-time {
+                        font-weight: 500;
+                        font-size: 50rpx;
+                    }
+
+                    .modern-time {
+                        display: flex;
+                        flex-direction: column;
+                        font-weight: 600;
+                        font-size: 48rpx;
+                        line-height: 0.85;
+                        align-items: flex-start;
+                        left: 24rpx;
+                        position: absolute;
+                        margin-top: 10rpx;
+                    }
+
+                    .modern-date {
+                        writing-mode: vertical-rl;
+                        position: absolute;
+                        left: 78rpx;
+                        top: 12rpx;
+                        font-size: 14rpx;
+                        font-weight: 600;
+                        letter-spacing: 2rpx;
+                    }
+
+                    .elegant-time {
+                        font-family: serif;
+                        font-weight: 500;
+                        font-size: 52rpx;
+                        margin-top: 10rpx;
+                    }
+
+                    .elegant-date {
+                        font-family: serif;
+                        font-style: italic;
+                        font-size: 16rpx;
+                        margin-top: 4rpx;
+                    }
+
+                    .tech-time {
+                        font-family: monospace;
+                        font-weight: 300;
+                        font-size: 46rpx;
+                        letter-spacing: -2rpx;
+                        margin-top: 10rpx;
+                    }
+
+                    .tech-date {
+                        font-family: monospace;
+                        font-size: 14rpx;
+                        letter-spacing: 2rpx;
+                        margin-top: 6rpx;
+                        background: rgba(128, 128, 128, 0.1);
+                        padding: 2rpx 6rpx;
+                        border: 1px solid rgba(128, 128, 128, 0.2);
+                    }
                 }
-                
+
                 .style-name {
                     font-size: 22rpx;
                     color: #666;
@@ -2368,17 +2545,23 @@ onShareTimeline(() => {
                     background: transparent;
                 }
             }
-            
+
             &.active .style-preview {
                 border-color: #007aff;
                 background: rgba(0, 122, 255, 0.05);
                 transform: scale(1.02);
                 box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.15);
-                
+
                 &.minimalist-art {
                     background: #1e2535;
-                    .mini-clock-layout { color: rgba(255,255,255,0.88); }
-                    .style-name { color: rgba(255,255,255,0.7); }
+
+                    .mini-clock-layout {
+                        color: rgba(255, 255, 255, 0.88);
+                    }
+
+                    .style-name {
+                        color: rgba(255, 255, 255, 0.7);
+                    }
                 }
             }
         }
@@ -2405,57 +2588,78 @@ onShareTimeline(() => {
             border: none;
             height: 80rpx;
             line-height: 80rpx;
-            
+
             &:active {
                 opacity: 0.8;
             }
         }
     }
-    
+
     .is-hidden {
         visibility: hidden;
     }
-    
+
     .free-hint {
         font-size: 20rpx;
         color: #999;
         text-align: center;
         margin-bottom: 16rpx;
     }
-    
+
     .apply-btn--disabled {
         background: #e0e0e0 !important;
         color: #aaa !important;
         cursor: not-allowed;
     }
 }
+
 .theme-dark .clockStylePopup-container {
     .style-item {
         .style-preview {
             background: #2a2b2e;
+
             .mini-clock-layout {
                 color: #fff;
-                .harmony-date { background: rgba(255,255,255,0.1); }
+
+                .harmony-date {
+                    background: rgba(255, 255, 255, 0.1);
+                }
             }
+
             .style-name {
                 color: #aaa;
             }
         }
+
         .style-preview.minimalist-art {
             background: #0e0e12 !important;
-            .mini-clock-layout { color: rgba(255,255,255,0.85) !important; }
-            .style-name { color: rgba(255,255,255,0.6) !important; }
+
+            .mini-clock-layout {
+                color: rgba(255, 255, 255, 0.85) !important;
+            }
+
+            .style-name {
+                color: rgba(255, 255, 255, 0.6) !important;
+            }
         }
+
         &.active .style-preview {
             background: rgba(0, 122, 255, 0.15);
         }
+
         &.active .style-preview.minimalist-art {
             background: #1a2040 !important;
         }
     }
+
     .action-bar {
         border-color: #333;
-        .free-hint, .vip-hint { color: #888; }
+
+        .free-hint,
+        .vip-hint {
+            color: #888;
+        }
+
         .apply-btn--disabled {
             background: #333 !important;
             color: #666 !important;
@@ -2525,6 +2729,115 @@ onShareTimeline(() => {
                     color: #0f172a;
                 }
             }
+        }
+    }
+}
+
+.admin-menu-sheet {
+    background: #ffffff;
+    border-radius: 36rpx 36rpx 0 0;
+    padding: 32rpx 32rpx 56rpx 32rpx;
+    box-sizing: border-box;
+
+    &.theme-dark {
+        background: #18181b;
+
+        .sheet-header .title {
+            color: #f4f5f6;
+        }
+
+        .admin-item .icon-circle {
+            background: #27272a;
+        }
+
+        .admin-item .item-label {
+            color: #a1a1aa;
+        }
+    }
+
+    &.theme-light {
+        background: #ffffff;
+
+        .sheet-header .title {
+            color: #18181b;
+        }
+
+        .admin-item .icon-circle {
+            background: #f4f4f5;
+        }
+
+        .admin-item .item-label {
+            color: #52525b;
+        }
+    }
+
+    .sheet-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 36rpx;
+
+        .title {
+            font-size: 30rpx;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            width: 56rpx;
+            height: 56rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+
+            &:active {
+                opacity: 0.6;
+            }
+        }
+    }
+
+    .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32rpx 16rpx;
+    }
+
+    .admin-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:active {
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+
+        .icon-circle {
+            width: 104rpx;
+            height: 104rpx;
+            border-radius: 30rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14rpx;
+            transition: all 0.2s ease;
+
+            &.is-active {
+                background: rgba(59, 130, 246, 0.15) !important;
+            }
+
+            &.is-locked {
+                background: rgba(245, 158, 11, 0.15) !important;
+            }
+        }
+
+        .item-label {
+            font-size: 24rpx;
+            font-weight: 500;
+            text-align: center;
+            white-space: nowrap;
         }
     }
 }
