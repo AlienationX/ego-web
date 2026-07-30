@@ -1405,36 +1405,36 @@ const clickDownload = async () => {
         return;
     }
 
-    // 3. VIP 专属壁纸 (access_level = 2)：看广告也无法绕过，强制引导调起 VIP 收银台
-    if (unlockType === 'vip_only' || effectiveLevel === 2) {
-        showNavDialog({
-            title: t('membership.vipExclusiveTitle') || 'VIP 专属壁纸',
-            content: t('membership.vipExclusiveHint') || '该壁纸为独家 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。',
-            confirmText: t('membership.openVipNow') || '立即开通 VIP',
-            cancelText: t('common.cancel'),
-            onConfirm: () => {
-                uni.navigateTo({ url: '/pages/member/payment' });
-            },
-        });
+    const adEnabled = appStore.versionConfig?.ad_enabled !== false;
+    const payEnabled = appStore.versionConfig?.pay_enabled !== false;
+
+    // 模式 1: 无广告且无支付（审核期/免费福利渠道）-> 所有广告与 VIP 壁纸均直接放行下载
+    if (!adEnabled && !payEnabled) {
+        downloadPic(currentInfo.value.picurl);
+        incrementDownloads(currentInfo.value.id);
         return;
     }
 
-    // 4. 看广告/VIP下载 (access_level = 1 或 每日看广告体验壁纸)
-    // 动态检查远程广告开关与设备兼容性
-    let adEnabled = true;
-    try {
-        const sysInfo = uni.getSystemInfoSync();
-        const platform = sysInfo.uniPlatform || sysInfo.platform || 'app';
-        const configRes = await apiGetVersionConfig({ platform });
-        if (configRes && configRes.ad_enabled === false) {
-            adEnabled = false;
+    // 3. VIP 专属壁纸 (access_level = 2)
+    if (unlockType === 'vip_only' || effectiveLevel === 2) {
+        if (payEnabled) {
+            showNavDialog({
+                title: t('membership.vipExclusiveTitle') || 'VIP 专属壁纸',
+                content: t('membership.vipExclusiveHint') || '该壁纸为独家 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。',
+                confirmText: t('membership.openVipNow') || '立即开通 VIP',
+                cancelText: t('common.cancel'),
+                onConfirm: () => {
+                    uni.navigateTo({ url: '/pages/member/payment' });
+                },
+            });
+            return;
         }
-    } catch (e) {
-        console.warn('Get version config failed, default adEnabled=true', e);
+        // 若开启了广告但未开通支付，降级为看激励视频广告解锁 VIP 专属壁纸
     }
 
-    // 若远程配置关闭了广告（如审核期、无广告环境），优雅降级调起 VIP 弹窗
-    if (!adEnabled) {
+    // 4. 看广告/VIP下载 (access_level = 1 或 降级广告处理)
+    // 纯 VIP 模式（开启支付但无广告）：无法播放广告，引导开通 VIP
+    if (!adEnabled && payEnabled) {
         showNavDialog({
             title: t('membership.title') || '开通会员',
             content: t('previewPage.adUnavailablePrompt') || '当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。',
@@ -1447,36 +1447,45 @@ const clickDownload = async () => {
         return;
     }
 
-    // 广告开启状态：调起激励视频广告
+    // 调起激励视频广告
     showRewardedVideoAd(currentInfo.value.picurl, {
         onSuccess: (picurl) => {
             downloadPic(picurl);
             incrementDownloads(currentInfo.value.id);
         },
         onError: (err) => {
-            // 广告加载失败（如无填充、广告未准备好、网络超时），优雅捕获提示用户
             console.error('Reward video ad error:', err);
-            showNavDialog({
-                title: t('previewPage.adFailedTitle') || '广告加载失败',
-                content: t('previewPage.adFailedHint') || '激励视频广告暂时无法展示。建议升级 VIP 专享免广告高速下载。',
-                confirmText: t('membership.title') || '升级 VIP',
-                cancelText: t('common.cancel'),
-                onConfirm: () => {
-                    uni.navigateTo({ url: '/pages/member/payment' });
-                },
-            });
+            if (payEnabled) {
+                showNavDialog({
+                    title: t('previewPage.adFailedTitle') || '广告加载失败',
+                    content: t('previewPage.adFailedHint') || '激励视频广告暂时无法展示。建议升级 VIP 专享免广告高速下载。',
+                    confirmText: t('membership.title') || '升级 VIP',
+                    cancelText: t('common.cancel'),
+                    onConfirm: () => {
+                        uni.navigateTo({ url: '/pages/member/payment' });
+                    },
+                });
+            } else {
+                // 纯广告模式无支付接口时，广告加载失败直接放行下载
+                downloadPic(currentInfo.value.picurl);
+                incrementDownloads(currentInfo.value.id);
+            }
         },
         onFallback: () => {
-            // 广告组件不存在时 fallback
-            showNavDialog({
-                title: t('membership.title') || '开通会员',
-                content: t('previewPage.adUnavailablePrompt') || '当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。',
-                confirmText: t('membership.openVipNow') || '开通 VIP',
-                cancelText: t('common.cancel'),
-                onConfirm: () => {
-                    uni.navigateTo({ url: '/pages/member/payment' });
-                },
-            });
+            if (payEnabled) {
+                showNavDialog({
+                    title: t('membership.title') || '开通会员',
+                    content: t('previewPage.adUnavailablePrompt') || '当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。',
+                    confirmText: t('membership.openVipNow') || '开通 VIP',
+                    cancelText: t('common.cancel'),
+                    onConfirm: () => {
+                        uni.navigateTo({ url: '/pages/member/payment' });
+                    },
+                });
+            } else {
+                downloadPic(currentInfo.value.picurl);
+                incrementDownloads(currentInfo.value.id);
+            }
         }
     });
     // #endif

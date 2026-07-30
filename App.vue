@@ -4,11 +4,14 @@ import { writeAccessLog } from '@/utils/system.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 
 onLaunch(() => {
     console.log('App Launch');
+    appStore.fetchVersionConfig();
 
     // 检查是否已看过引导页。
     // TODO 目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
