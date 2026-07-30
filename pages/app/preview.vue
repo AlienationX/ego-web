@@ -232,7 +232,7 @@
                         <text class="copyright" user-select>{{ tp('message.copyrightStatement', {
                             email: SERVICE_EMAIL
                         })
-                        }}</text>
+                            }}</text>
                     </view>
                 </scroll-view>
             </view>
@@ -255,6 +255,69 @@
                     <button class="confirm-btn" :disabled="!userScore" @click="submitScore">
                         {{ t('previewPage.confirmRating') }}
                     </button>
+                </view>
+            </view>
+        </uni-popup>
+
+        <!-- 权限级别设置弹窗 -->
+        <uni-popup ref="accessLevelPopup" type="bottom" :is-mask-click="true" :safe-area="false">
+            <view class="access-level-pop" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+                <view class="pop-header">
+                    <view class="pop-title">权限层级设置</view>
+                    <view class="pop-close" @click="closeAccessLevelPopup">
+                        <uni-icons type="closeempty" size="20"
+                            :color="settingsStore.isDark ? '#9ca3af' : '#6b7280'"></uni-icons>
+                    </view>
+                </view>
+                <view class="pop-sub">请选择该壁纸在全站的下载与变现规则：</view>
+
+                <view class="level-options">
+                    <view class="level-card" :class="{ 'is-selected': selectedAccessLevel === 0 }"
+                        @click="selectedAccessLevel = 0">
+                        <view class="level-icon">
+                            <mdi-icon path="/static/icons/lock-open.svg" size="24px"
+                                :color="settingsStore.isDark ? '#cbd5e1' : '#475569'"></mdi-icon>
+                        </view>
+                        <view class="level-info">
+                            <view class="level-name">0. 免费壁纸</view>
+                            <view class="level-desc">所有人均可直接免费下载</view>
+                        </view>
+                        <view v-if="selectedAccessLevel === 0" class="level-check">
+                            <uni-icons type="checkmark-empty" size="20" color="#3b82f6"></uni-icons>
+                        </view>
+                    </view>
+
+                    <view class="level-card" :class="{ 'is-selected': selectedAccessLevel === 1 }"
+                        @click="selectedAccessLevel = 1">
+                        <view class="level-icon">
+                            <mdi-icon path="/static/icons/advertisements.svg" size="24px" color="#4285f4"></mdi-icon>
+                        </view>
+                        <view class="level-info">
+                            <view class="level-name">1. 看广告</view>
+                            <view class="level-desc">非VIP看视频解锁，VIP免广告</view>
+                        </view>
+                        <view v-if="selectedAccessLevel === 1" class="level-check">
+                            <uni-icons type="checkmark-empty" size="20" color="#3b82f6"></uni-icons>
+                        </view>
+                    </view>
+
+                    <view class="level-card" :class="{ 'is-selected': selectedAccessLevel === 2 }"
+                        @click="selectedAccessLevel = 2">
+                        <view class="level-icon">
+                            <mdi-icon path="/static/icons/crown-circle.svg" size="24px" color="#f59e0b"></mdi-icon>
+                        </view>
+                        <view class="level-info">
+                            <view class="level-name">2. VIP 专属壁纸</view>
+                            <view class="level-desc">看广告不可绕过，强制开通VIP</view>
+                        </view>
+                        <view v-if="selectedAccessLevel === 2" class="level-check">
+                            <uni-icons type="checkmark-empty" size="20" color="#3b82f6"></uni-icons>
+                        </view>
+                    </view>
+                </view>
+
+                <view class="pop-footer">
+                    <button class="save-level-btn" @click="saveAccessLevel">保存修改</button>
                 </view>
             </view>
         </uni-popup>
@@ -312,19 +375,24 @@
                         <view class="row row-inline">
                             <view class="inline-item">
                                 <view class="label">{{ t('previewPage.active') }}</view>
-                                <switch color="#E5322D" :checked="editForm.is_active" @change="onEditActiveChange" />
+                                <switch color="#3b82f6" :checked="Boolean(editForm.is_active)"
+                                    @change="onEditActiveChange" style="transform: scale(0.85);" />
                             </view>
                             <view class="inline-item">
-                                <view class="label">{{ t('previewPage.lock') }}</view>
-                                <switch color="#E5322D" :checked="editForm.is_locked" @change="onEditLockChange" />
+                                <view class="label">权限</view>
+                                <picker :range="accessLevelOptions" range-key="label" @change="onAccessLevelChange"
+                                    :value="getAccessLevelIndex()">
+                                    <view class="picker-short-text">
+                                        {{ getAccessLevelShortLabel(editForm.access_level) }}
+                                    </view>
+                                </picker>
                             </view>
-                        </view>
-                        <view class="edit-actions">
-                            <button class="btn-primary" @click="saveEdit">{{ t('previewPage.adminSave') }}</button>
-                            <button class="btn-danger" @click="deleteWall">{{ t('previewPage.adminDelete') }}</button>
                         </view>
                     </view>
                 </scroll-view>
+                <view class="pop-footer">
+                    <button class="save-level-btn" @click="saveEdit">{{ t('previewPage.adminSave') }}</button>
+                </view>
             </view>
         </uni-popup>
 
@@ -445,7 +513,8 @@
                                 :path="isCurrentInWatchLater ? '/static/icons/check.svg' : '/static/icons/bookmark.svg'"
                                 size="22px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
                         </view>
-                        <text class="item-label">{{ isCurrentInWatchLater ? (t('previewPage.watchLaterAdded') || '已入待看') :
+                        <text class="item-label">{{ isCurrentInWatchLater ? (t('previewPage.watchLaterAdded') || '已入待看')
+                            :
                             (t('previewPage.watchLaterAdd') || '看后待看') }}</text>
                     </view>
 
@@ -458,15 +527,19 @@
                         <text class="item-label">{{ t('previewPage.editWallpaper') || '编辑信息' }}</text>
                     </view>
 
-                    <!-- 3. 锁状态 -->
-                    <view class="admin-item" @click="handleAdminAction(toggleLock)">
+                    <!-- 3. 权限等级设置 -->
+                    <view class="admin-item" @click="handleAdminAction(openAccessLevelPicker)">
                         <view class="icon-circle" :class="{ 'is-locked': currentInfo.is_locked }">
                             <mdi-icon
-                                :path="currentInfo.is_locked ? '/static/icons/lock.svg' : '/static/icons/lock-open.svg'"
+                                :path="currentInfo.access_level === 2 ? '/static/icons/lock.svg' : (currentInfo.is_locked ? '/static/icons/lock-open.svg' : '/static/icons/lock-open.svg')"
                                 size="22px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
                         </view>
-                        <text class="item-label">{{ currentInfo.is_locked ? (t('previewPage.unlockWallpaper') || '解锁免费')
-                            : (t('previewPage.lockWallpaper') || '设为VIP') }}</text>
+                        <text class="item-label">
+                            {{ currentInfo.access_level === 2 ? (t('previewPage.accessLevelVipOnly') || '权限: VIP专属') :
+                                ((currentInfo.access_level === 1 || currentInfo.is_locked) ?
+                                    (t('previewPage.accessLevelAdOrVip') ||
+                                        '权限: 看广告/VIP') : (t('previewPage.accessLevelFree') || '权限: 免费壁纸')) }}
+                        </text>
                     </view>
 
                     <!-- 4. 应用内置分享 -->
@@ -510,6 +583,7 @@ import {
     apiGetClassify,
     apiPostEarnEnergy,
     apiGetWallDetail,
+    apiGetVersionConfig,
 } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -981,6 +1055,12 @@ const closeScore = () => {
 
 const editPopup = ref(null);
 const classifyList = ref([]);
+const accessLevelOptions = [
+    { value: 0, label: '0. 免费壁纸' },
+    { value: 1, label: '1. 看广告 / VIP' },
+    { value: 2, label: '2. VIP专属' },
+];
+
 const editForm = ref({
     description: '',
     tags: '',
@@ -990,7 +1070,7 @@ const editForm = ref({
     views: 0,
     downloads: 0,
     is_active: true,
-    is_locked: false,
+    access_level: 0,
 });
 
 const openEdit = async () => {
@@ -1008,8 +1088,8 @@ const openEdit = async () => {
         score: currentInfo.value.score || 0,
         views: currentInfo.value.views || 0,
         downloads: currentInfo.value.downloads || 0,
-        is_active: !!currentInfo.value.is_active,
-        is_locked: !!currentInfo.value.is_locked,
+        is_active: currentInfo.value.is_active === true || currentInfo.value.is_active === 1,
+        access_level: currentInfo.value.access_level ?? (currentInfo.value.is_locked ? 1 : 0),
     };
     editPopup.value.open();
 };
@@ -1018,8 +1098,26 @@ const closeEdit = () => {
     editPopup.value.close();
 };
 
-const onEditLockChange = (e) => {
-    editForm.value.is_locked = !!e.detail.value;
+const getAccessLevelLabel = (val) => {
+    const item = accessLevelOptions.find((opt) => opt.value === val);
+    return item ? item.label : '0. 免费壁纸';
+};
+
+const getAccessLevelShortLabel = (val) => {
+    const map = { 0: '免费壁纸', 1: '看广告/VIP', 2: 'VIP专属' };
+    return map[val] || '免费壁纸';
+};
+
+const getAccessLevelIndex = () => {
+    const index = accessLevelOptions.findIndex((opt) => opt.value === editForm.value.access_level);
+    return index >= 0 ? index : 0;
+};
+
+const onAccessLevelChange = (e) => {
+    const index = Number(e.detail.value);
+    if (index >= 0 && index < accessLevelOptions.length) {
+        editForm.value.access_level = accessLevelOptions[index].value;
+    }
 };
 
 const onEditActiveChange = (e) => {
@@ -1054,14 +1152,23 @@ const saveEdit = async () => {
     try {
         const payload = {
             id: currentInfo.value.id,
-            ...editForm.value,
+            description: editForm.value.description,
+            tags: editForm.value.tags,
+            classify_id: editForm.value.classify_id,
+            publisher: editForm.value.publisher,
             score: Number(editForm.value.score) || 0,
             views: Number(editForm.value.views) || 0,
             downloads: Number(editForm.value.downloads) || 0,
+            is_active: editForm.value.is_active,
+            access_level: editForm.value.access_level,
         };
         await apiPostUpdateWall(payload);
+        const unlockTypeMap = { 0: 'free', 1: 'ad_or_vip', 2: 'vip_only' };
         applyLocalUpdate({
             ...payload,
+            effective_access_level: editForm.value.access_level,
+            unlock_type: unlockTypeMap[editForm.value.access_level],
+            is_locked: editForm.value.access_level > 0,
             tags_list: editForm.value.tags
                 ? editForm.value.tags
                     .split(',')
@@ -1076,41 +1183,43 @@ const saveEdit = async () => {
     }
 };
 
-const deleteWall = () => {
-    showNavDialog({
-        title: t('common.tip'),
-        content: t('previewPage.adminDeleteConfirm'),
-        confirmText: t('previewPage.adminDelete'),
-        cancelText: t('previewPage.cancel'),
-        onConfirm: async () => {
-            try {
-                await apiPostUpdateWall({ id: currentInfo.value.id, is_active: false });
-                classList.value = classList.value.filter((item) => item.id !== currentInfo.value.id);
-                if (!classList.value.length) {
-                    goBack();
-                    return;
-                }
-                if (currentIndex.value >= classList.value.length) {
-                    currentIndex.value = classList.value.length - 1;
-                }
-                currentInfo.value = classList.value[currentIndex.value];
-                uni.showToast({ title: t('previewPage.adminDeleteSuccess'), icon: 'none' });
-                closeEdit();
-            } catch (error) {
-                uni.showToast({ title: t('previewPage.adminDeleteFailed'), icon: 'none' });
-            }
-        },
-    });
+
+
+const accessLevelPopup = ref(null);
+const selectedAccessLevel = ref(0);
+
+const openAccessLevelPicker = () => {
+    selectedAccessLevel.value = currentInfo.value?.access_level ?? (currentInfo.value?.is_locked ? 1 : 0);
+    accessLevelPopup.value?.open();
 };
 
-const toggleLock = async () => {
-    const next = !currentInfo.value.is_locked;
+const closeAccessLevelPopup = () => {
+    accessLevelPopup.value?.close();
+};
+
+const saveAccessLevel = async () => {
+    const nextLevel = selectedAccessLevel.value;
     try {
-        await apiPostUpdateWall({ id: currentInfo.value.id, is_locked: next });
-        applyLocalUpdate({ is_locked: next });
-        uni.showToast({ title: t('previewPage.lockToggled'), icon: 'none' });
+        // 仅向后端 API 提交更新核心字段 access_level
+        await apiPostUpdateWall({ id: currentInfo.value.id, access_level: nextLevel });
+
+        const unlockTypeMap = { 0: 'free', 1: 'ad_or_vip', 2: 'vip_only' };
+        applyLocalUpdate({
+            access_level: nextLevel,
+            effective_access_level: nextLevel,
+            unlock_type: unlockTypeMap[nextLevel],
+            is_locked: nextLevel > 0,
+        });
+
+        const levelToastMap = {
+            0: t('previewPage.accessLevelFreeToast') || '已设为免费壁纸',
+            1: t('previewPage.accessLevelAdOrVipToast') || '已设为看广告/VIP',
+            2: t('previewPage.accessLevelVipOnlyToast') || '已设为VIP专属',
+        };
+        uni.showToast({ title: levelToastMap[nextLevel], icon: 'none' });
+        closeAccessLevelPopup();
     } catch (error) {
-        uni.showToast({ title: t('previewPage.lockToggleFailed'), icon: 'none' });
+        uni.showToast({ title: t('previewPage.lockToggleFailed') || '保存失败', icon: 'none' });
     }
 };
 
@@ -1271,52 +1380,105 @@ const clickDownload = async () => {
     // #endif
 
     // #ifndef WEB
-    // 弹出广告，除以5余1的直接下载，除以5的整数倍弹出 激励视频广告，其他弹出 插屏广告-半屏
-    // 重启应用，重新计算
-    // userStore.downloadCntAdd();
-    // if (userStore.downloadCnt % 5 === 1) {
-    //     console.log('直接下载');
-    //     // showRewardedVideoAd();
-    // } else if (userStore.downloadCnt % 5 === 0) {
-    //     console.log('弹出 激励视频广告');
-    //     showRewardedVideoAd();
-    // } else {
-    //     console.log('弹出 插屏广告-半屏');
-    //     showInterstitialAd();
-    // }
+    const unlockType = currentInfo.value?.unlock_type || (currentInfo.value?.is_locked ? 'ad_or_vip' : 'free');
+    const effectiveLevel = currentInfo.value?.effective_access_level ?? (currentInfo.value?.is_locked ? 1 : 0);
 
-    if (currentInfo.value.is_locked) {
-        if (userStore.energy > 0) {
-            uni.showLoading({ title: 'Processing...', mask: true });
-            const res = await userStore.consumeEnergy(currentInfo.value.id);
-            uni.hideLoading();
-
-            if (res.data?.energy !== undefined) {
-                downloadPic(currentInfo.value.picurl);
-                incrementDownloads(currentInfo.value.id);
-            } else {
-                uni.showToast({ title: res.data?.error || 'Consume energy failed', icon: 'none' });
-            }
-        } else {
-            // 弹出观看视频提示框
-            adPopup.value.open();
-        }
-        // adPopup.value.open();
-    } else {
-        // 展示插屏广告，关闭后再下载图片（不再出现广告挡住下载提示的问题）
+    // 1. 免费 或 每日免费福利壁纸
+    if (unlockType === 'free' || effectiveLevel === 0) {
         showInterstitialAd(currentInfo.value.picurl, {
             onSuccess: (picurl) => {
-                // 广告关闭后执行下载
                 downloadPic(picurl);
                 incrementDownloads(currentInfo.value.id);
             },
             onFallback: (picurl) => {
-                // 广告异常直接下载
                 downloadPic(picurl);
                 incrementDownloads(currentInfo.value.id);
             },
         });
+        return;
     }
+
+    // 2. 如果用户已经是 VIP 订阅者，所有壁纸直接免广告/免卡顿下载
+    if (userStore.isVip) {
+        downloadPic(currentInfo.value.picurl);
+        incrementDownloads(currentInfo.value.id);
+        return;
+    }
+
+    // 3. VIP 专属壁纸 (access_level = 2)：看广告也无法绕过，强制引导调起 VIP 收银台
+    if (unlockType === 'vip_only' || effectiveLevel === 2) {
+        showNavDialog({
+            title: t('membership.vipExclusiveTitle') || 'VIP 专属壁纸',
+            content: t('membership.vipExclusiveHint') || '该壁纸为独家 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。',
+            confirmText: t('membership.openVipNow') || '立即开通 VIP',
+            cancelText: t('common.cancel'),
+            onConfirm: () => {
+                uni.navigateTo({ url: '/pages/member/payment' });
+            },
+        });
+        return;
+    }
+
+    // 4. 看广告/VIP下载 (access_level = 1 或 每日看广告体验壁纸)
+    // 动态检查远程广告开关与设备兼容性
+    let adEnabled = true;
+    try {
+        const sysInfo = uni.getSystemInfoSync();
+        const platform = sysInfo.uniPlatform || sysInfo.platform || 'app';
+        const configRes = await apiGetVersionConfig({ platform });
+        if (configRes && configRes.ad_enabled === false) {
+            adEnabled = false;
+        }
+    } catch (e) {
+        console.warn('Get version config failed, default adEnabled=true', e);
+    }
+
+    // 若远程配置关闭了广告（如审核期、无广告环境），优雅降级调起 VIP 弹窗
+    if (!adEnabled) {
+        showNavDialog({
+            title: t('membership.title') || '开通会员',
+            content: t('previewPage.adUnavailablePrompt') || '当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。',
+            confirmText: t('membership.openVipNow') || '开通 VIP',
+            cancelText: t('common.cancel'),
+            onConfirm: () => {
+                uni.navigateTo({ url: '/pages/member/payment' });
+            },
+        });
+        return;
+    }
+
+    // 广告开启状态：调起激励视频广告
+    showRewardedVideoAd(currentInfo.value.picurl, {
+        onSuccess: (picurl) => {
+            downloadPic(picurl);
+            incrementDownloads(currentInfo.value.id);
+        },
+        onError: (err) => {
+            // 广告加载失败（如无填充、广告未准备好、网络超时），优雅捕获提示用户
+            console.error('Reward video ad error:', err);
+            showNavDialog({
+                title: t('previewPage.adFailedTitle') || '广告加载失败',
+                content: t('previewPage.adFailedHint') || '激励视频广告暂时无法展示。建议升级 VIP 专享免广告高速下载。',
+                confirmText: t('membership.title') || '升级 VIP',
+                cancelText: t('common.cancel'),
+                onConfirm: () => {
+                    uni.navigateTo({ url: '/pages/member/payment' });
+                },
+            });
+        },
+        onFallback: () => {
+            // 广告组件不存在时 fallback
+            showNavDialog({
+                title: t('membership.title') || '开通会员',
+                content: t('previewPage.adUnavailablePrompt') || '当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。',
+                confirmText: t('membership.openVipNow') || '开通 VIP',
+                cancelText: t('common.cancel'),
+                onConfirm: () => {
+                    uni.navigateTo({ url: '/pages/member/payment' });
+                },
+            });
+        }
+    });
     // #endif
 };
 
@@ -2094,11 +2256,13 @@ onShareTimeline(() => {
 }
 
 .editPopup {
-    background: #fff;
-    padding: 30rpx;
-    border-radius: 30rpx 30rpx 0 0;
+    background: #ffffff;
+    width: 100vw;
+    padding: 36rpx 40rpx calc(36rpx + env(safe-area-inset-bottom));
+    border-radius: 40rpx 40rpx 0 0;
     overflow: hidden;
     z-index: 100;
+    box-sizing: border-box;
 
     .popHeader {
         display: flex;
@@ -2133,6 +2297,13 @@ onShareTimeline(() => {
             line-height: 1.6em;
         }
 
+        .row-switch {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18rpx 0;
+        }
+
         .row-inline {
             flex-direction: row;
             justify-content: space-between;
@@ -2157,6 +2328,22 @@ onShareTimeline(() => {
             border-radius: 16rpx;
             padding: 16rpx 20rpx;
             box-sizing: border-box;
+            min-height: 88rpx;
+
+            .picker-short-text {
+                font-size: 26rpx;
+                color: #3b82f6;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 6rpx;
+
+                &::after {
+                    content: '▼';
+                    font-size: 18rpx;
+                    color: #93c5fd;
+                }
+            }
         }
 
         .inline-item--metric {
@@ -2228,55 +2415,6 @@ onShareTimeline(() => {
         .rate-input__text {
             font-size: 28rpx;
             color: $wp-font-color-2;
-        }
-
-        .edit-actions {
-            margin-top: 20rpx;
-            display: flex;
-            flex-direction: column;
-            gap: 16rpx;
-        }
-
-        .btn-primary {
-            width: 100%;
-            height: 84rpx;
-            border-radius: 16rpx;
-            background: $wp-theme-color;
-            color: #fff;
-            font-size: 30rpx;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-            line-height: 1;
-            border: none;
-
-            &::after {
-                border: none;
-            }
-        }
-
-        .btn-danger {
-            width: 100%;
-            height: 84rpx;
-            border-radius: 16rpx;
-            background: #fef2f2;
-            color: #e5322d;
-            font-size: 30rpx;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 0;
-            line-height: 1;
-            border: 1rpx solid #fecaca;
-
-            &::after {
-                border: none;
-            }
         }
     }
 }
@@ -2838,6 +2976,169 @@ onShareTimeline(() => {
             font-weight: 500;
             text-align: center;
             white-space: nowrap;
+        }
+    }
+}
+
+// ── 弹窗局部与统一主题色变量 ──
+$access-theme-primary: #3b82f6;
+
+.access-level-pop {
+    width: 100vw;
+    padding: 44rpx 40rpx calc(36rpx + env(safe-area-inset-bottom));
+    border-radius: 44rpx 44rpx 0 0;
+    box-sizing: border-box;
+
+    &.theme-light {
+        background: #ffffff;
+        color: #1f2937;
+        box-shadow: 0 -12rpx 48rpx rgba(0, 0, 0, 0.1);
+    }
+
+    &.theme-dark {
+        background: #1e293b;
+        color: #f3f4f6;
+        box-shadow: 0 -12rpx 48rpx rgba(0, 0, 0, 0.45);
+    }
+
+    .pop-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .pop-title {
+            font-size: 34rpx;
+            font-weight: 700;
+            letter-spacing: -0.5rpx;
+        }
+
+        .pop-close {
+            padding: 8rpx;
+            cursor: pointer;
+            transition: opacity 0.2s;
+
+            &:active {
+                opacity: 0.6;
+            }
+        }
+    }
+
+    .pop-sub {
+        font-size: 24rpx;
+        opacity: 0.6;
+        margin-top: 10rpx;
+        margin-bottom: 32rpx;
+    }
+
+    .level-options {
+        display: flex;
+        flex-direction: column;
+        gap: 22rpx;
+    }
+
+    .level-card {
+        display: flex;
+        align-items: center;
+        padding: 26rpx 28rpx;
+        border-radius: 28rpx;
+        border: 3rpx solid transparent;
+        transition: all 0.22s ease;
+        cursor: pointer;
+        overflow: hidden;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+
+        .theme-light & {
+            background: #f8fafc;
+            border-color: #f1f5f9;
+        }
+
+        .theme-dark & {
+            background: #0f172a;
+            border-color: #1e293b;
+        }
+
+        &.is-selected {
+            border-radius: 28rpx;
+
+            .theme-light & {
+                border-color: $access-theme-primary;
+                background: #eff6ff;
+            }
+
+            .theme-dark & {
+                border-color: $access-theme-primary;
+                background: rgba(59, 130, 246, 0.16);
+            }
+
+            .level-name {
+                color: $access-theme-primary;
+            }
+        }
+
+        .level-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 24rpx;
+            flex-shrink: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .level-info {
+            flex: 1;
+
+            .level-name {
+                font-size: 28rpx;
+                font-weight: 600;
+                transition: color 0.2s;
+            }
+
+            .level-desc {
+                font-size: 22rpx;
+                opacity: 0.65;
+                margin-top: 6rpx;
+            }
+        }
+
+        .level-check {
+            margin-left: 16rpx;
+        }
+    }
+}
+
+.pop-footer {
+    margin-top: 36rpx;
+
+    .save-level-btn {
+        width: 100%;
+        height: 92rpx;
+        line-height: 92rpx;
+        border-radius: 28rpx;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #ffffff;
+        font-size: 30rpx;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0 !important;
+        outline: none;
+        overflow: hidden;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        box-shadow: 0 8rpx 20rpx rgba(37, 99, 235, 0.25);
+        transition: all 0.2s;
+
+        &:active {
+            opacity: 0.9;
+            transform: scale(0.98);
+        }
+
+        &::after {
+            display: none;
+            border: none;
         }
     }
 }

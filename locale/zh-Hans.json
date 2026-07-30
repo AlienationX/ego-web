@@ -516,6 +516,15 @@
         "shareSuccess": "分享成功",
         "shareFailed": "分享失败",
         "shareHint": "请使用系统分享功能",
+        "accessLevelFree": "权限: 免费壁纸",
+        "accessLevelAdOrVip": "权限: 看广告/VIP",
+        "accessLevelVipOnly": "权限: VIP专属",
+        "accessLevelFreeToast": "已设为免费壁纸",
+        "accessLevelAdOrVipToast": "已设为看广告/VIP",
+        "accessLevelVipOnlyToast": "已设为VIP专属",
+        "adUnavailablePrompt": "当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。",
+        "adFailedTitle": "广告加载失败",
+        "adFailedHint": "激励视频广告暂时无法展示。建议升级 VIP 专享免广告高速下载。",
         "recommend": {
             "title": "相似推荐",
             "desc": "继续浏览同类风格壁纸",
@@ -605,7 +614,10 @@
         "subtotal": "原价",
         "discount": "优惠金额",
         "total": "应付总额",
-        "method": "支付方式"
+        "method": "支付方式",
+        "vipExclusiveTitle": "VIP 专属壁纸",
+        "vipExclusiveHint": "该壁纸为独家 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。",
+        "openVipNow": "立即开通 VIP"
     },
     "favorite": {
         "superTitle": "灵感画廊",

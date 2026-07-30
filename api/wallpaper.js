@@ -190,6 +190,15 @@ export const apiPostFeedback = (data = {}) => {
     });
 };
 
+// 获取版本与广告配置接口
+export const apiGetVersionConfig = (data = {}) => {
+    return request({
+        url: '/versions/',
+        data,
+        method: 'GET',
+    });
+};
+
 // 上传反馈图片
 export const apiUploadFeedback = (data = {}) => {
     // uni.uploadFile 的 files 参数需要对象数组格式 [{name, uri}]

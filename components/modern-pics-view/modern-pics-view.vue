@@ -145,14 +145,7 @@
                             </view>
                         </view>
 
-                        <!-- 空状态 -->
-                        <view class="empty-state"
-                            v-if="!tabStates[index].isLoading && tabStates[index].images.length === 0">
-                            <slot name="empty" :index="index">
-                                <image src="/static/images/photos_empty.svg" mode="aspectFit" class="empty-img"></image>
-                                <text class="empty-text">暂无相关壁纸</text>
-                            </slot>
-                        </view>
+                        <!-- 空状态占位（保持 flex 高度，实际内容由外层 overlay 展示） -->
 
                         <!-- 底部加载状态 -->
                         <view class="status-footer" v-if="tabStates[index].images.length > 0">
@@ -165,6 +158,17 @@
                 </scroll-view>
             </swiper-item>
         </swiper>
+
+        <!-- 空状态 overlay（absolute 覆盖，不受 scroll-view 内布局影响） -->
+        <view class="empty-overlay"
+            v-if="!tabStates[currentIndex]?.isLoading && tabStates[currentIndex]?.images.length === 0 && tabStates[currentIndex]?.hasLoaded">
+            <slot name="empty" :index="currentIndex">
+                <view class="empty-state">
+                    <image src="/static/images/photos_empty.svg" mode="aspectFit" class="empty-img"></image>
+                    <text class="empty-text">暂无相关壁纸</text>
+                </view>
+            </slot>
+        </view>
 
         <!-- 返回顶部悬浮按钮 -->
         <fab-back-top :show="tabStates[currentIndex]?.showBackTop" :embedded="props.embedded"
@@ -401,13 +405,12 @@ watch(() => props.tabs, (newTabs) => {
 
         if (state.lastQueryStr === queryStr) return;
 
-        if (state.hasLoaded && state.images.length > 0) {
-            if (props.apiType === 'search') {
-                Object.assign(state, createTabState(), { lastQueryStr: queryStr });
-                if (index === currentIndex.value) activeQueryChanged = true;
-            } else {
-                state.lastQueryStr = queryStr;
-            }
+        if (props.apiType === 'search') {
+            // search 类型：只要 query 变化就重置状态，无论当前是否有数据
+            Object.assign(state, createTabState(), { lastQueryStr: queryStr });
+            if (index === currentIndex.value) activeQueryChanged = true;
+        } else if (state.hasLoaded && state.images.length > 0) {
+            state.lastQueryStr = queryStr;
         } else {
             state.lastQueryStr = queryStr;
         }
@@ -873,14 +876,28 @@ onShow(() => {
 }
 
 /* 辅助与状态 */
+.empty-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+}
+
 .empty-state {
     flex: 1;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding-top: 160rpx;
-    opacity: 0.6;
+    padding: 100rpx 0;
+    box-sizing: border-box;
 
     .empty-img {
         width: 240rpx;

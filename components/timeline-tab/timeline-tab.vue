@@ -208,13 +208,13 @@ const latestList = ref([]);
 const queryParams = ref({
     pageNum: 1,
     pageSize: 12,
-    ordering: '-updated_at',
+    ordering: '-created_at',
 });
 
 const isZh = computed(() => String(locale.value || '').startsWith('zh'));
 
 const toDate = (item) => {
-    const raw = item.updated_at || Date.now();
+    const raw = item.created_at || item.updated_at || Date.now();
     return new Date(raw);
 };
 

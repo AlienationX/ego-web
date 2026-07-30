@@ -17,6 +17,7 @@
                     :placeholder-style="settingsStore.isDark ? 'color: #7f94b8' : 'color: rgba(21, 23, 28, 0.4)'"
                     confirm-type="search"
                     @confirm="onSearch"
+                    @input="onInput"
                 />
                 <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
                     <uni-icons type="clear" size="16" color="#7f94b8"></uni-icons>
@@ -179,6 +180,22 @@ const searchData = async () => {
     showWordBoard.value = false;
 };
 
+let debounceTimer = null;
+
+const onInput = (e) => {
+    const val = (e.detail?.value || queryParams.value.keyword || '').trim();
+    if (!val) {
+        if (debounceTimer) clearTimeout(debounceTimer);
+        onClear();
+        return;
+    }
+
+    if (debounceTimer) clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        onSearch();
+    }, 400);
+};
+
 const onSearch = () => {
     const keyword = queryParams.value.keyword?.trim() || '';
 
@@ -319,10 +336,8 @@ onUnload(() => {
     min-height: 0;
 }
 
-.list-container :deep(.empty-state) {
-    justify-content: flex-start;
-    align-items: stretch;
-    padding-top: 120rpx;
+.list-container :deep(.empty-overlay) {
+    top: 44px; /* 让出顶部 titleBar 的高度，避免遮盖 tabs */
 }
 
 .search-box {
@@ -508,10 +523,9 @@ onUnload(() => {
 }
 
 .noResult {
+    pointer-events: auto;
     margin: 0 24rpx;
     padding: 24rpx 28rpx 40rpx;
-    // border: 2rpx dashed rgba(97, 154, 239, 0.4);
-    // background: rgba(97, 154, 239, 0.06);
     display: flex;
     flex-direction: column;
     align-items: center;

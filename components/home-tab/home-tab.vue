@@ -442,7 +442,7 @@ const latestNoMore = ref(false);
 const latestQuery = ref({
     pageNum: 1,
     pageSize: 12, // ── 优化6：与 latestPreviewList 截取数对齐，避免多拉无用数据 ──
-    ordering: '-updated_at',
+    ordering: '-created_at',
 });
 
 // --- Computed ---
@@ -489,7 +489,7 @@ const getBadgeCopy = () => {
 const badgeCopy = getBadgeCopy();
 
 const getWallDate = (item) => {
-    const raw = item?.updated_at || item?.created_at || null;
+    const raw = item?.created_at || item?.updated_at || null;
     if (!raw) return null;
     const date = new Date(raw);
     return Number.isNaN(date.getTime()) ? null : date;
@@ -552,7 +552,7 @@ const addTimeBadge = (item) => {
 };
 
 const toTimelineDate = (item) => {
-    const raw = item?.updated_at || item?.created_at || Date.now();
+    const raw = item?.created_at || item?.updated_at || Date.now();
     const date = new Date(raw);
     return Number.isNaN(date.getTime()) ? new Date() : date;
 };
@@ -1763,7 +1763,7 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 // ── Banner 骨架 ──
 .sk-banner {
     margin: 0 20rpx;
-    width: calc(100% - 60rpx);
+    width: calc(100% - 40rpx);
     height: 100%;
     border-radius: 28rpx;
     overflow: hidden;

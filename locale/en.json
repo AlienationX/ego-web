@@ -516,6 +516,15 @@
         "shareSuccess": "Shared successfully",
         "shareFailed": "Share failed",
         "shareHint": "Please use system share function",
+        "accessLevelFree": "Access: Free",
+        "accessLevelAdOrVip": "Access: Ad / VIP",
+        "accessLevelVipOnly": "Access: VIP Only",
+        "accessLevelFreeToast": "Set to Free",
+        "accessLevelAdOrVipToast": "Set to Ad / VIP",
+        "accessLevelVipOnlyToast": "Set to VIP Only",
+        "adUnavailablePrompt": "Ads are currently unavailable in this region. Upgrade to VIP to unlock unlimited wallpaper downloads.",
+        "adFailedTitle": "Ad Failed to Load",
+        "adFailedHint": "Reward video ad could not be displayed. Upgrade to VIP for ad-free instant downloads.",
         "recommend": {
             "title": "Similar Recommend",
             "desc": "Continue browsing similar wallpapers",
@@ -605,7 +614,10 @@
         "subtotal": "Original Price",
         "discount": "Discount",
         "total": "Total Price",
-        "method": "Payment Method"
+        "method": "Payment Method",
+        "vipExclusiveTitle": "VIP Exclusive",
+        "vipExclusiveHint": "This is an exclusive VIP high-definition wallpaper. Unlock VIP to download unlimited wallpapers.",
+        "openVipNow": "Unlock VIP Now"
     },
     "favorite": {
         "superTitle": "Inspiration",

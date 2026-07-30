@@ -110,7 +110,7 @@
                     </view>
                     <view class="cpc-right">
                         <text class="cpc-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price
-                            }}</text>
+                        }}</text>
                     </view>
                 </view>
 
@@ -302,7 +302,7 @@ let pollTimer = null;
 
 const onPaymentSuccess = () => {
     uni.hideLoading();
-    uni.showToast({ title: t("membership.welcomeVip"), icon: "success" });
+    uni.showToast({ title: t("membership.welcomeVip"), icon: "none" });
     userStore.getUserProfile();
     setTimeout(() => uni.navigateBack(), 2000);
 };
