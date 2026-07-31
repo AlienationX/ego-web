@@ -264,9 +264,9 @@
             <view class="access-level-pop" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="pop-header">
                     <view class="pop-title">权限层级设置</view>
-                    <view class="pop-close" @click="closeAccessLevelPopup">
-                        <uni-icons type="closeempty" size="20"
-                            :color="settingsStore.isDark ? '#9ca3af' : '#6b7280'"></uni-icons>
+                    <view class="close" @click="closeAccessLevelPopup">
+                        <uni-icons class="close" type="clear" size="32"
+                            :color="settingsStore.isDark ? '#a1a1aa' : '#888888'"></uni-icons>
                     </view>
                 </view>
                 <view class="pop-sub">请选择该壁纸在全站的下载与变现规则：</view>
@@ -275,7 +275,7 @@
                     <view class="level-card" :class="{ 'is-selected': selectedAccessLevel === 0 }"
                         @click="selectedAccessLevel = 0">
                         <view class="level-icon">
-                            <mdi-icon path="/static/icons/lock-open.svg" size="24px"
+                            <mdi-icon path="/static/icons/lock-open.svg" size="30px"
                                 :color="settingsStore.isDark ? '#cbd5e1' : '#475569'"></mdi-icon>
                         </view>
                         <view class="level-info">
@@ -283,35 +283,35 @@
                             <view class="level-desc">所有人均可直接免费下载</view>
                         </view>
                         <view v-if="selectedAccessLevel === 0" class="level-check">
-                            <uni-icons type="checkmark-empty" size="20" color="#3b82f6"></uni-icons>
+                            <uni-icons type="checkmark-empty" size="30" color="#3b82f6"></uni-icons>
                         </view>
                     </view>
 
                     <view class="level-card" :class="{ 'is-selected': selectedAccessLevel === 1 }"
                         @click="selectedAccessLevel = 1">
                         <view class="level-icon">
-                            <mdi-icon path="/static/icons/advertisements.svg" size="24px" color="#4285f4"></mdi-icon>
+                            <mdi-icon path="/static/icons/advertisements.svg" size="30px" color="#4285f4"></mdi-icon>
                         </view>
                         <view class="level-info">
                             <view class="level-name">1. 看广告</view>
                             <view class="level-desc">非VIP看视频解锁，VIP免广告</view>
                         </view>
                         <view v-if="selectedAccessLevel === 1" class="level-check">
-                            <uni-icons type="checkmark-empty" size="20" color="#3b82f6"></uni-icons>
+                            <uni-icons type="checkmark-empty" size="30" color="#3b82f6"></uni-icons>
                         </view>
                     </view>
 
                     <view class="level-card" :class="{ 'is-selected': selectedAccessLevel === 2 }"
                         @click="selectedAccessLevel = 2">
                         <view class="level-icon">
-                            <mdi-icon path="/static/icons/crown-circle.svg" size="24px" color="#f59e0b"></mdi-icon>
+                            <mdi-icon path="/static/icons/crown-circle.svg" size="30px" color="#f59e0b"></mdi-icon>
                         </view>
                         <view class="level-info">
                             <view class="level-name">2. VIP 专属壁纸</view>
                             <view class="level-desc">看广告不可绕过，强制开通VIP</view>
                         </view>
                         <view v-if="selectedAccessLevel === 2" class="level-check">
-                            <uni-icons type="checkmark-empty" size="20" color="#3b82f6"></uni-icons>
+                            <uni-icons type="checkmark-empty" size="30" color="#3b82f6"></uni-icons>
                         </view>
                     </view>
                 </view>
@@ -323,12 +323,13 @@
         </uni-popup>
 
         <uni-popup ref="editPopup" type="bottom" :safe-area="false">
-            <view class="editPopup">
+            <view class="editPopup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="popHeader">
                     <view></view>
                     <view class="title">{{ t('previewPage.adminEdit') }}</view>
                     <view class="close">
-                        <uni-icons class="close" type="clear" size="32" @click="closeEdit"></uni-icons>
+                        <uni-icons class="close" type="clear" size="32"
+                            :color="settingsStore.isDark ? '#a1a1aa' : '#888888'" @click="closeEdit"></uni-icons>
                     </view>
                 </view>
                 <scroll-view class="info-scroll-view" scroll-y>
@@ -409,8 +410,10 @@
             <view class="clockStylePopup-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="header">
                     <text class="title">{{ t('previewPage.clockStyle') }}</text>
-                    <uni-icons type="closeempty" size="24" :color="settingsStore.isDark ? '#ffffff' : '#333333'"
-                        @click="closeClockStyle"></uni-icons>
+                    <view class="close">
+                        <uni-icons class="close" type="clear" size="32"
+                            :color="settingsStore.isDark ? '#a1a1aa' : '#888888'" @click="closeClockStyle"></uni-icons>
+                    </view>
                 </view>
                 <scroll-view scroll-x class="style-list" :show-scrollbar="false">
                     <view class="style-scroll-content">
@@ -469,20 +472,23 @@
                     <!-- 选中的是当前已激活的样式 -->
                     <template v-if="!tempClockStyle || tempClockStyle === activeSessionClockStyle">
                         <view class="free-hint">{{ t('previewPage.currentStyle') }}</view>
-                        <button class="apply-btn apply-btn--disabled" disabled>{{ t('previewPage.applyStyle')
-                        }}</button>
+                        <button class="apply-btn apply-btn--disabled" disabled>
+                            {{ t('previewPage.applyStyle') }}
+                        </button>
                     </template>
                     <!-- 选中了新样式，且是 VIP 样式 -->
                     <template v-else-if="selectedClockStyleItem?.isVip && !userStore.isVip">
                         <view class="vip-hint">{{ t('previewPage.vipStyleHint') }}</view>
-                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.unlockBtnVip')
-                        }}</button>
+                        <button class="apply-btn" @click="applyTempClockStyle">
+                            {{ t('previewPage.unlockBtnVip') }}
+                        </button>
                     </template>
                     <!-- 选中了新样式，免费或已是 VIP -->
                     <template v-else>
                         <view class="free-hint">{{ t('previewPage.applyStyleHint') }}</view>
-                        <button class="apply-btn" @click="applyTempClockStyle">{{ t('previewPage.applyStyle')
-                        }}</button>
+                        <button class="apply-btn" @click="applyTempClockStyle">
+                            {{ t('previewPage.applyStyle') }}
+                        </button>
                     </template>
                 </view>
             </view>
@@ -499,9 +505,9 @@
             <view class="admin-menu-sheet" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="sheet-header">
                     <text class="title">{{ t('previewPage.adminMenuTitle') || '管理员设置' }}</text>
-                    <view class="close-btn" @click="closeAdminMenu">
-                        <uni-icons type="closeempty" size="18"
-                            :color="settingsStore.isDark ? '#9ca3af' : '#6b7280'"></uni-icons>
+                    <view class="close" @click="closeAdminMenu">
+                        <uni-icons class="close" type="clear" size="32"
+                            :color="settingsStore.isDark ? '#a1a1aa' : '#888888'"></uni-icons>
                     </view>
                 </view>
 
@@ -511,7 +517,7 @@
                         <view class="icon-circle" :class="{ 'is-active': isCurrentInWatchLater }">
                             <mdi-icon
                                 :path="isCurrentInWatchLater ? '/static/icons/check.svg' : '/static/icons/bookmark.svg'"
-                                size="22px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
+                                size="30px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
                         </view>
                         <text class="item-label">{{ isCurrentInWatchLater ? (t('previewPage.watchLaterAdded') || '已入待看')
                             :
@@ -521,7 +527,7 @@
                     <!-- 2. 编辑壁纸 -->
                     <view class="admin-item" @click="handleAdminAction(openEdit)">
                         <view class="icon-circle">
-                            <mdi-icon path="/static/icons/pencil.svg" size="22px"
+                            <mdi-icon path="/static/icons/pencil.svg" size="30px"
                                 :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
                         </view>
                         <text class="item-label">{{ t('previewPage.editWallpaper') || '编辑信息' }}</text>
@@ -532,7 +538,7 @@
                         <view class="icon-circle" :class="{ 'is-locked': currentInfo.is_locked }">
                             <mdi-icon
                                 :path="currentInfo.access_level === 2 ? '/static/icons/lock.svg' : (currentInfo.is_locked ? '/static/icons/lock-open.svg' : '/static/icons/lock-open.svg')"
-                                size="22px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
+                                size="30px" :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
                         </view>
                         <text class="item-label">
                             {{ currentInfo.access_level === 2 ? (t('previewPage.accessLevelVipOnly') || '权限: VIP专属') :
@@ -545,7 +551,7 @@
                     <!-- 4. 应用内置分享 -->
                     <view class="admin-item" @click="handleAdminAction(openShareSheet)">
                         <view class="icon-circle">
-                            <mdi-icon path="/static/icons/share-variant.svg" size="22px"
+                            <mdi-icon path="/static/icons/share-variant.svg" size="30px"
                                 :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
                         </view>
                         <text class="item-label">{{ t('previewPage.internalShare') || '应用分享' }}</text>
@@ -554,7 +560,7 @@
                     <!-- 5. 系统原生分享 -->
                     <view class="admin-item" @click="handleAdminAction(handleSystemShare)">
                         <view class="icon-circle">
-                            <mdi-icon path="/static/icons/export.svg" size="22px"
+                            <mdi-icon path="/static/icons/export.svg" size="30px"
                                 :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
                         </view>
                         <text class="item-label">{{ t('previewPage.systemShare') || '系统分享' }}</text>
@@ -1057,7 +1063,7 @@ const editPopup = ref(null);
 const classifyList = ref([]);
 const accessLevelOptions = [
     { value: 0, label: '0. 免费壁纸' },
-    { value: 1, label: '1. 看广告 / VIP' },
+    { value: 1, label: '1. 看广告' },
     { value: 2, label: '2. VIP专属' },
 ];
 
@@ -2267,7 +2273,7 @@ onShareTimeline(() => {
 .editPopup {
     background: #ffffff;
     width: 100vw;
-    padding: 36rpx 40rpx calc(36rpx + env(safe-area-inset-bottom));
+    padding: 30rpx;
     border-radius: 40rpx 40rpx 0 0;
     overflow: hidden;
     z-index: 100;
@@ -2450,12 +2456,6 @@ onShareTimeline(() => {
 
         .header .title {
             color: #ffffff;
-        }
-
-        // uni-icons closeempty 按钮需要 filter 让其变白
-        .header .uni-icons {
-            color: #ffffff !important;
-            filter: brightness(10);
         }
 
         .style-item .style-preview {
@@ -2715,7 +2715,7 @@ onShareTimeline(() => {
     }
 
     .action-bar {
-        margin-top: 30rpx;
+        margin: 20rpx;
         padding-top: 20rpx;
         border-top: 1rpx solid #eee;
 
@@ -2881,9 +2881,10 @@ onShareTimeline(() => {
 }
 
 .admin-menu-sheet {
+    position: relative;
     background: #ffffff;
     border-radius: 36rpx 36rpx 0 0;
-    padding: 32rpx 32rpx 56rpx 32rpx;
+    padding: 30rpx;
     box-sizing: border-box;
 
     &.theme-dark {
@@ -2929,17 +2930,10 @@ onShareTimeline(() => {
             font-weight: 600;
         }
 
-        .close-btn {
-            width: 56rpx;
-            height: 56rpx;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-
-            &:active {
-                opacity: 0.6;
-            }
+        .close {
+            position: absolute;
+            top: 18rpx;
+            right: 18rpx;
         }
     }
 
@@ -2993,8 +2987,9 @@ onShareTimeline(() => {
 $access-theme-primary: #3b82f6;
 
 .access-level-pop {
+    position: relative;
     width: 100vw;
-    padding: 44rpx 40rpx calc(36rpx + env(safe-area-inset-bottom));
+    padding: 30rpx;
     border-radius: 44rpx 44rpx 0 0;
     box-sizing: border-box;
 
@@ -3021,14 +3016,10 @@ $access-theme-primary: #3b82f6;
             letter-spacing: -0.5rpx;
         }
 
-        .pop-close {
-            padding: 8rpx;
-            cursor: pointer;
-            transition: opacity 0.2s;
-
-            &:active {
-                opacity: 0.6;
-            }
+        .close {
+            position: absolute;
+            top: 18rpx;
+            right: 18rpx;
         }
     }
 
@@ -3118,7 +3109,7 @@ $access-theme-primary: #3b82f6;
 }
 
 .pop-footer {
-    margin-top: 36rpx;
+    margin: 20rpx 0;
 
     .save-level-btn {
         width: 100%;

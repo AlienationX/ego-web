@@ -79,11 +79,15 @@
                                                     color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
                                         </view>
                                     </view>
-                                    <view class="card-action" v-if="showDelete && item.loaded" @click.stop="handleDelete(item, index)">
+                                    <view class="card-action" v-if="showDelete && item.loaded"
+                                        @click.stop="handleDelete(item, index)">
                                         <uni-icons :type="deleteIcon" size="18" :color="deleteIconColor"></uni-icons>
                                     </view>
                                     <view class="card-lock" v-else-if="item.is_locked && item.loaded">
-                                        <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                        <uni-icons
+                                            v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                            type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+                                        <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                     </view>
                                 </view>
                             </view>
@@ -108,11 +112,17 @@
                                                 </view>
                                             </view>
                                         </view>
-                                        <view class="card-action" v-if="showDelete && item.loaded" @click.stop="handleDelete(item, index)">
-                                            <uni-icons :type="deleteIcon" size="18" :color="deleteIconColor"></uni-icons>
+                                        <view class="card-action" v-if="showDelete && item.loaded"
+                                            @click.stop="handleDelete(item, index)">
+                                            <uni-icons :type="deleteIcon" size="18"
+                                                :color="deleteIconColor"></uni-icons>
                                         </view>
                                         <view class="card-lock" v-else-if="item.is_locked && item.loaded">
-                                            <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            <uni-icons
+                                                v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                                type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            <uni-icons v-else type="locked-filled" size="18"
+                                                color="#F9E9B5"></uni-icons>
                                         </view>
                                     </view>
                                 </view>
@@ -134,11 +144,17 @@
                                                 </view>
                                             </view>
                                         </view>
-                                        <view class="card-action" v-if="showDelete && item.loaded" @click.stop="handleDelete(item, index)">
-                                            <uni-icons :type="deleteIcon" size="18" :color="deleteIconColor"></uni-icons>
+                                        <view class="card-action" v-if="showDelete && item.loaded"
+                                            @click.stop="handleDelete(item, index)">
+                                            <uni-icons :type="deleteIcon" size="18"
+                                                :color="deleteIconColor"></uni-icons>
                                         </view>
                                         <view class="card-lock" v-else-if="item.is_locked && item.loaded">
-                                            <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            <uni-icons
+                                                v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                                type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            <uni-icons v-else type="locked-filled" size="18"
+                                                color="#F9E9B5"></uni-icons>
                                         </view>
                                     </view>
                                 </view>

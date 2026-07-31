@@ -112,11 +112,11 @@
                 </view>
             </view>
 
-            <!-- Daily Recommend -->
+            <!-- Inspiration / Random Pick -->
             <view class="select">
-                <view class="select-watermark">Daily</view>
+                <view class="select-watermark">Inspire</view>
                 <index-title>
-                    <template #name>{{ $t('index.dailyRecommend') }}</template>
+                    <template #name>{{ $t('index.randomRecommend') }}</template>
                     <template #custom>
                         <view class="date">
                             <uni-icons type="calendar" size="20"
@@ -150,7 +150,8 @@
                                 </view>
                             </block>
                             <block v-else>
-                                <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}
+                                <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
+                                    {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
                                 </view>
                             </block>
                         </view>
@@ -165,7 +166,7 @@
                     <template #name>{{ $t('index.latestRelease') }}</template>
                     <template #custom>
                         <button size="mini" class="btn is-default" @click="goTimeline">{{ $t('common.seeAll')
-                            }}</button>
+                        }}</button>
                     </template>
                 </index-title>
 
@@ -179,7 +180,43 @@
                             :hover-stay-time="150" @click="goPreview(item.id, latestList)">
                             <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
                             </image>
-                            <view v-if="item._timeBadge" class="box-badge">{{ item._timeBadge }}</view>
+                            <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--latest">
+                                {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
+                            </view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- Daily Benefits (每日福利专区) -->
+            <view class="select daily-benefits-section">
+                <view class="select-watermark">Benefit</view>
+                <index-title>
+                    <template #name>{{ $t('index.dailyBenefits') }}</template>
+                    <template #custom>
+                        <text class="benefit-text-tip">{{ $t('index.dailyBenefitsTip') }}</text>
+                    </template>
+                </index-title>
+
+                <view class="content">
+                    <!-- 每日福利 骨架屏：5个小卡 -->
+                    <view v-if="!dailyFeaturedList.length" class="sk-scroll-row">
+                        <view v-for="i in 5" :key="i" class="sk-card"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="item in dailyFeaturedList" :key="item.id" hover-class="box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, dailyFeaturedList)">
+                            <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                            <view v-if="item.is_daily_free" class="box-badge box-badge--free">
+                                {{ $t('index.todayFree') }}
+                            </view>
+                            <view v-else-if="item.is_daily_ad" class="box-badge box-badge--ad">
+                                {{ $t('index.watchUnlock') }}
+                            </view>
+                            <view v-else-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
+                                {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
+                            </view>
                         </view>
                     </scroll-view>
                 </view>
@@ -317,7 +354,8 @@
                             :hover-stay-time="150" @click="goPreview(item.id, classify.data)">
                             <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
                             </image>
-                            <view v-if="item._timeBadge" class="box-badge box-badge--subtle">{{ item._timeBadge }}
+                            <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
+                                {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
                             </view>
                         </view>
                     </scroll-view>
@@ -351,6 +389,7 @@ import { useTranslateParams } from '@/utils/i18n.js';
 import {
     apiGetBanner,
     apiGetRandomDay,
+    apiGetDailyFeatured,
     apiGetRandomRecommend,
     apiGetNotice,
     apiGetClassify,
@@ -420,6 +459,7 @@ const bannerList = computed(() => {
 });
 
 const randomDailyList = ref([]);
+const dailyFeaturedList = ref([]);
 const heroImageLoaded = ref(false);
 const randomRecommendList = ref([]);
 const latestList = ref([]);
@@ -536,18 +576,17 @@ const isUpdatedWithinDays = (item, days = 5) => {
     return diff >= 0 && diff <= days * DAY_MS;
 };
 
-// ── 优化2：使用缓存的 badgeCopy，不再每次构造新对象 ──
-const getTimeBadge = (item) =>
+const getTimeBadgeKey = (item) =>
     isUpdatedToday(item)
-        ? badgeCopy.justIn
+        ? 'justIn'
         : isUpdatedYesterday(item)
-            ? badgeCopy.new
+            ? 'new'
             : isUpdatedWithinDays(item, 5)
-                ? badgeCopy.latest
+                ? 'latest'
                 : '';
 
 const addTimeBadge = (item) => {
-    item._timeBadge = getTimeBadge(item);
+    item._timeBadgeKey = getTimeBadgeKey(item);
     return item;
 };
 
@@ -636,9 +675,20 @@ const getBanner = async () => {
     rawBannerList.value = res.data;
 };
 
-const getRandom = async () => {
+const getRandomDay = async () => {
     let res = await apiGetRandomDay();
     randomDailyList.value = res.data.map((item) => addTimeBadge(handlePicUrl(item)));
+};
+
+const getDailyFeatured = async () => {
+    try {
+        let res = await apiGetDailyFeatured();
+        if (res && res.data) {
+            dailyFeaturedList.value = res.data.map((item) => addTimeBadge(handlePicUrl(item)));
+        }
+    } catch (e) {
+        console.warn('apiGetDailyFeatured failed:', e);
+    }
 };
 
 const getRandomRecommend = async () => {
@@ -759,9 +809,8 @@ const goClasslist = (id, name) => {
 
 const refreshRandom = () => {
     heroImageLoaded.value = false;
-    getRandom();
+    getRandomDay();
     getRandomRecommend();
-    getSubjects();
 };
 
 const getSubjects = async () => {
@@ -800,12 +849,13 @@ onMounted(() => {
     // ── 优化：分优先级延时加载，错峰发请求，减少首屏并发竞争 ──
     // P1 立即：首屏可见的关键数据
     getBanner();
-    getRandom();
+    getRandomDay();
     getLatest();
     checkUpdates(); // 静默检查更新
 
     // P2 延时 300ms：首屏次要数据，让 P1 的渲染先跑起来
     setTimeout(() => {
+        getDailyFeatured();
         getRandomRecommend();
         getNotice();
         getSubjects();
@@ -1418,6 +1468,14 @@ onMounted(() => {
         }
     }
 
+    .benefit-text-tip {
+        font-size: 26rpx;
+        font-weight: 600;
+        color: var(--text-secondary, #94a3b8);
+        letter-spacing: 0.4rpx;
+        padding-right: 4rpx;
+    }
+
     .btn,
     .date .button {
         margin: 0;
@@ -1520,22 +1578,38 @@ onMounted(() => {
 
                 .box-badge {
                     position: absolute;
-                    top: 16rpx;
-                    right: 16rpx;
-                    padding: 4rpx 12rpx;
-                    background: rgba(40, 179, 137, 0.9);
-                    color: #fff;
+                    top: 14rpx;
+                    left: 14rpx;
+                    right: auto;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 6rpx 14rpx;
+                    background: rgba(0, 0, 0, 0.6);
+                    color: rgba(255, 255, 255, 0.9);
                     font-size: 18rpx;
-                    font-weight: 800;
-                    border-radius: 8rpx;
-                    box-shadow: 0 4rpx 12rpx rgba(40, 179, 137, 0.4);
+                    font-weight: 500;
+                    line-height: 1;
+                    border-radius: 9999rpx;
+                    backdrop-filter: blur(4px);
+                    -webkit-backdrop-filter: blur(4px);
+                    border: none;
+                    box-shadow: none;
                     z-index: 2;
                 }
 
-                .box-badge--subtle {
-                    background: rgba(15, 23, 42, 0.72);
-                    color: rgba(255, 255, 255, 0.92);
-                    box-shadow: 0 4rpx 12rpx rgba(15, 23, 42, 0.24);
+                .box-badge--subtle,
+                .box-badge--free,
+                .box-badge--ad,
+                .box-badge--latest,
+                .box-badge--vip {
+                    background: rgba(0, 0, 0, 0.6);
+                    color: rgba(255, 255, 255, 0.9);
+                    font-size: 18rpx;
+                    font-weight: 500;
+                    line-height: 1;
+                    border: none;
+                    box-shadow: none;
                 }
 
                 &:hover {

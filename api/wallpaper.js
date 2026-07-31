@@ -24,6 +24,13 @@ export const apiGetRandomDay = () => {
     });
 };
 
+// 获取每日精选/福利壁纸接口（2张免费 + 10张看广告）
+export const apiGetDailyFeatured = () => {
+    return request({
+        url: '/wall/daily_featured/',
+    });
+};
+
 // 获取随机推荐图片接口
 export const apiGetRandomRecommend = (data = {}) => {
     return request({
