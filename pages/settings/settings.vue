@@ -139,7 +139,7 @@
             > -->
         </view>
 
-        <uni-popup ref="previewTypePopup" type="bottom" :safe-area="true">
+        <uni-popup ref="previewTypePopup" type="bottom" :safe-area="false">
             <view class="preview-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="popup-head">
                     <text class="popup-title">{{ t('settings.preview.title') }}</text>
@@ -1429,7 +1429,8 @@ function shareApp() {
 .preview-popup {
     background: var(--popup-background);
     border-radius: 24rpx 24rpx 0 0;
-    padding: 20rpx 20rpx calc(26rpx + env(safe-area-inset-bottom));
+    padding: 24rpx 24rpx calc(30rpx + constant(safe-area-inset-bottom)) 24rpx;
+    padding: 24rpx 24rpx calc(30rpx + env(safe-area-inset-bottom)) 24rpx;
     box-shadow: 0 -24rpx 60rpx var(--popup-shadow);
 }
 

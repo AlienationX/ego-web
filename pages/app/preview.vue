@@ -1,6 +1,25 @@
 <template>
     <view v-if="currentInfo && currentInfo.id" class="preview-page"
         :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+
+        <!-- 全局 Viewport 固顶提示 (写在 scroll-view 外部，滚动页面时绝不跑偏) -->
+        <!-- 1. 轻触屏幕提示：仅在【预览模式】显示，使用过的用户不展示 -->
+        <view v-if="!maskState && showTapHint" class="mode-tip-toast">
+            <text>{{ t('previewPage.tapToToggleControls') }}</text>
+        </view>
+
+        <!-- 2. 左右滑动提示：仅在【操作模式】显示，保持与轻触提示相同的全套位置与动画，使用过的用户不展示 -->
+        <view v-if="maskState && showSwipeHint && !disableSwipe && classList.length > 1" class="mode-tip-toast">
+            <text>{{ t('previewPage.swipeToSwitch') }}</text>
+        </view>
+
+        <!-- 3. 向上滑动提示：无论什么模式，未滑动时均固顶展示 (滑动后隐去并持久化记录) -->
+        <view v-if="showScrollHint" class="scrollHint">
+            <uni-icons type="up" size="22" color="#ffffff" class="hint-icon"></uni-icons>
+            <uni-icons type="up" size="22" color="#ffffff" class="hint-icon second"></uni-icons>
+            <view class="hint-text">{{ t('previewPage.swipeUpToView') }}</view>
+        </view>
+
         <view class="preview-statusbar" :style="{
             height: `${statusBarHeight}px`,
             opacity: statusBarFillOpacity,
@@ -27,6 +46,10 @@
                         </swiper-item>
                     </swiper>
 
+                    <!-- 沉浸式锁屏预览模式或正在挑选时钟样式时的时钟 overlay -->
+                    <lock-screen-overlay v-if="!maskState || tempClockStyle"
+                        :clockStyle="tempClockStyle || activeSessionClockStyle" />
+
                     <view class="mask" :class="{ 'mask--loading': isCurrentSlideLoading }" v-if="maskState">
                         <view class="goBack" :style="{ top: backButtonTop + 'px' }" @click="goBack">
                             <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
@@ -45,14 +68,7 @@
                             </view>
                         </view>
 
-                        <view v-if="!disableSwipe" class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
-                        <lock-screen-overlay :clockStyle="tempClockStyle || activeSessionClockStyle" />
-
-                        <view v-if="showScrollHint" class="scrollHint">
-                            <uni-icons type="up" size="22" color="#ffffff" class="hint-icon"></uni-icons>
-                            <uni-icons type="up" size="22" color="#ffffff" class="hint-icon second"></uni-icons>
-                            <view class="hint-text">{{ t('previewPage.swipeUpToView') }}</view>
-                        </view>
+                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
                             <view class="box" @click="toggleCollect">
@@ -670,15 +686,20 @@ const clockStyles = computed(() => [
     { value: 'elegant-serif', name: 'Elegant Serif', isVip: true },
     { value: 'tech-digital', name: 'Tech Digital', isVip: true }
 ]);
+const isClockStylePopupOpen = ref(false);
+
 const openClockStyle = () => {
     tempClockStyle.value = currentClockStyle.value;
+    isClockStylePopupOpen.value = true;
     clockStylePopup.value?.open();
 };
 const closeClockStyle = () => {
+    isClockStylePopupOpen.value = false;
     clockStylePopup.value?.close();
 };
 
 const onClockStylePopupChange = (e) => {
+    isClockStylePopupOpen.value = e.show;
     // When popup closes, reset preview to saved style if user didn't apply
     if (!e.show) {
         tempClockStyle.value = '';
@@ -704,7 +725,7 @@ const applyTempClockStyle = async () => {
     if (userStore.isVip || !item.isVip) {
         settingsStore.options.clockStyle = item.value;
         activeSessionClockStyle.value = item.value;
-        uni.showToast({ title: 'Applied', icon: 'none' });
+        uni.showToast({ title: t('previewPage.styleApplied'), icon: 'none' });
         closeClockStyle();
         return;
     }
@@ -891,7 +912,6 @@ classList.value = wallList.map((item) => {
     };
 });
 const disableSwipe = ref(false);
-const showScrollHint = ref(!statusStore.appStatus.hasSeenPreviewHint);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 // 使用新版 getWindowInfo API，搭配可选链兜底
 const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || 667;
@@ -928,9 +948,7 @@ const handlePreviewScroll = (e) => {
     const recommendProgress = Math.min(1, recommendScrollTop / recommendScrollableDistance);
     shouldShowBottomAd.value = recommendProgress >= 0.7;
 
-    if (!showScrollHint.value) return;
-    if (scrollTop > 60) {
-        showScrollHint.value = false;
+    if (scrollTop > 40 && statusStore.appStatus && !statusStore.appStatus.hasSeenPreviewHint) {
         statusStore.appStatus.hasSeenPreviewHint = true;
     }
 };
@@ -1011,10 +1029,17 @@ const goBack = () => {
     });
 };
 
-// 遮罩状态
-const maskState = ref(true);
+// 遮罩状态与 3 个手势引导提示逻辑（默认 false 即【预览模式】）
+const maskState = ref(false);
+const showTapHint = computed(() => !statusStore.appStatus?.hasSeenTapHint);
+const showSwipeHint = computed(() => !statusStore.appStatus?.hasSeenSwipeHint);
+const showScrollHint = computed(() => !statusStore.appStatus?.hasSeenPreviewHint);
+
 const maskChange = () => {
     maskState.value = !maskState.value;
+    if (statusStore.appStatus && !statusStore.appStatus.hasSeenTapHint) {
+        statusStore.appStatus.hasSeenTapHint = true;
+    }
 };
 
 // 点击信息弹窗
@@ -1591,6 +1616,10 @@ const swiperChange = (e) => {
     currentIndex.value = e.detail.current;
     currentInfo.value = classList.value[currentIndex.value];
 
+    if (statusStore.appStatus && !statusStore.appStatus.hasSeenSwipeHint) {
+        statusStore.appStatus.hasSeenSwipeHint = true;
+    }
+
     if (currentInfo.value?.id && (!currentInfo.value.width || !currentInfo.value.file_size)) {
         fetchSingleWallDetail(currentInfo.value.id);
     }
@@ -1658,6 +1687,69 @@ onShareTimeline(() => {
     pointer-events: none;
     background: var(--page-background);
     transition: opacity 0.22s ease;
+}
+
+.mode-tip-toast {
+    position: fixed;
+    bottom: 20vh;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: #ffffff;
+    font-size: 24rpx;
+    font-weight: 500;
+    padding: 14rpx 36rpx;
+    border-radius: 100rpx;
+    border: 1rpx solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.4);
+    z-index: 999;
+    pointer-events: none;
+    animation: fadeInToast 0.4s ease-out;
+}
+
+.scrollHint {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    bottom: calc(env(safe-area-inset-bottom) + 30rpx);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4rpx;
+    pointer-events: none;
+    animation: preview-bounce 1.5s ease-in-out infinite;
+    opacity: 0.85;
+
+    .hint-text {
+        font-size: 22rpx;
+        color: #ffffff;
+        font-weight: 500;
+        letter-spacing: 2rpx;
+        text-shadow:
+            0 2rpx 8rpx rgba(0, 0, 0, 0.8),
+            0 0 4rpx rgba(0, 0, 0, 0.8);
+        margin-top: 4rpx;
+    }
+
+    :deep(.uni-icons) {
+        color: #ffffff !important;
+        filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.8));
+        height: 24rpx;
+        line-height: 24rpx;
+    }
+
+    .hint-icon {
+        opacity: 0.9;
+    }
+
+    .hint-icon.second {
+        margin-top: -16rpx;
+        opacity: 0.55;
+    }
 }
 
 .previewLayout {
@@ -1835,45 +1927,6 @@ onShareTimeline(() => {
                 0 4rpx 14rpx rgba(0, 0, 0, 0.4);
         }
 
-        .scrollHint {
-            z-index: 100;
-            bottom: calc(env(safe-area-inset-bottom) + 20rpx);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4rpx;
-            animation: preview-bounce 1.5s ease-in-out infinite;
-            opacity: 0.85;
-
-            .hint-text {
-                font-size: 22rpx;
-                color: #ffffff;
-                font-weight: 500;
-                letter-spacing: 2rpx;
-                text-shadow:
-                    0 2rpx 8rpx rgba(0, 0, 0, 0.8),
-                    0 0 4rpx rgba(0, 0, 0, 0.8);
-                margin-top: 4rpx;
-            }
-
-            :deep(.uni-icons) {
-                color: #ffffff !important;
-                filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.8));
-                height: 24rpx;
-                line-height: 24rpx;
-            }
-
-            .hint-icon {
-                opacity: 0.9;
-
-                // &.second {
-                //     opacity: 0.5;
-                //     margin-top: -8rpx;
-                // }
-            }
-        }
-
         .footer {
             background: rgba(255, 255, 255, 0.85);
             bottom: 10vh;
@@ -1969,7 +2022,7 @@ onShareTimeline(() => {
             color: #fff;
             text-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.55);
             z-index: 2;
-            padding: 20rpx 20rpx 100rpx;
+            padding: 20rpx 20rpx 140rpx;
             margin: 0;
 
             &::before {
@@ -1978,8 +2031,15 @@ onShareTimeline(() => {
                 left: -44rpx;
                 right: -170rpx;
                 bottom: 0;
-                top: -20rpx;
-                background: linear-gradient(to top, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.4) 54%, transparent 100%);
+                top: -240rpx;
+                background: linear-gradient(to top,
+                        rgba(0, 0, 0, 0.72) 0%,
+                        rgba(0, 0, 0, 0.64) 18%,
+                        rgba(0, 0, 0, 0.46) 38%,
+                        rgba(0, 0, 0, 0.26) 60%,
+                        rgba(0, 0, 0, 0.10) 80%,
+                        rgba(0, 0, 0, 0.02) 92%,
+                        transparent 100%);
                 pointer-events: none;
                 z-index: -1;
             }
@@ -2438,18 +2498,18 @@ onShareTimeline(() => {
 
     0%,
     100% {
-        transform: translateY(0);
+        transform: translate(-50%, 0);
     }
 
     50% {
-        transform: translateY(12rpx);
+        transform: translate(-50%, 12rpx);
     }
 }
 
 .clockStylePopup-container {
     background: #ffffff;
     border-radius: 32rpx 32rpx 0 0;
-    padding: 40rpx;
+    padding: 30rpx;
 
     &.theme-dark {
         background: #1a1a1a;
@@ -2924,6 +2984,7 @@ onShareTimeline(() => {
         align-items: center;
         justify-content: space-between;
         margin-bottom: 36rpx;
+        padding-left: 20rpx;
 
         .title {
             font-size: 30rpx;
@@ -2941,6 +3002,7 @@ onShareTimeline(() => {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 32rpx 16rpx;
+        margin-bottom: 20rpx;
     }
 
     .admin-item {

@@ -543,8 +543,11 @@
             "reasonStyle": "风格相近"
         },
         "clockStyle": "时钟样式",
+        "tapToToggleControls": "轻触屏幕切换操作面板",
+        "swipeToSwitch": "左右滑动切换壁纸",
         "unlockStyleConfirm": "使用该高级样式将消耗 1 点能量，确定继续吗？",
         "unlockStyleSuccess": "解锁成功",
+        "styleApplied": "已应用样式",
         "styleNames": {
             "default": "默认样式",
             "ios-classic": "iOS 经典",

@@ -543,8 +543,11 @@
             "reasonStyle": "Similar Style"
         },
         "clockStyle": "Clock Style",
+        "tapToToggleControls": "Tap anywhere to show controls",
+        "swipeToSwitch": "Swipe left or right to switch wallpapers",
         "unlockStyleConfirm": "Use this premium style for 1 energy point, continue?",
         "unlockStyleSuccess": "Unlocked successfully",
+        "styleApplied": "Applied",
         "styleNames": {
             "default": "Default",
             "ios-classic": "iOS Classic",

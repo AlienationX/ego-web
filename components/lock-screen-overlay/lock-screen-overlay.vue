@@ -118,7 +118,7 @@ const dateStr = computed(() => {
 
 /* 0. default */
 .lock-screen-wrapper.default {
-    top: calc(12vh + 80rpx);
+    top: 12vh;
 
     .time-container {
         font-size: 168rpx;
@@ -146,7 +146,7 @@ const dateStr = computed(() => {
 
 /* 1. ios-classic */
 .ios-classic {
-    top: calc(12vh + 80rpx);
+    top: 12vh;
 
     .date-container {
         font-size: 36rpx;
@@ -165,7 +165,7 @@ const dateStr = computed(() => {
 
 /* 2. android-stock */
 .android-stock {
-    top: calc(12vh + 60rpx);
+    top: 12vh;
 
     .time-container {
         font-size: 160rpx;
@@ -183,7 +183,7 @@ const dateStr = computed(() => {
 
 /* 3. hyperos-magazine */
 .hyperos-magazine {
-    top: calc(12vh + 60rpx);
+    top: 12vh;
     align-items: center;
     padding-left: 0;
 
@@ -218,7 +218,7 @@ const dateStr = computed(() => {
 
 /* 4. harmonyos */
 .harmonyos {
-    top: calc(12vh + 60rpx);
+    top: 12vh;
 
     .time-container {
         font-size: 170rpx;
@@ -241,7 +241,12 @@ const dateStr = computed(() => {
 
 /* 6. modern-left */
 .lock-screen-wrapper.modern-left {
-    top: calc(12vh + 60rpx);
+    top: 12vh;
+    margin: 0 !important;
+    left: 40rpx !important;
+    right: unset !important;
+    width: auto !important;
+    align-items: flex-start;
     margin: 0 !important;
     left: 40rpx !important;
     right: unset !important;

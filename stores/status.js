@@ -7,6 +7,8 @@ export const useStatusStore = defineStore(
         const appStatus = reactive({
             hasSeenGuide: false,
             hasSeenPreviewHint: false,
+            hasSeenTapHint: false,
+            hasSeenSwipeHint: false,
             lastCheckinDate: '',
             lastViewedWallpaperTime: '', // ISO format timestamp string
         });
