@@ -68,7 +68,8 @@
                             </view>
                         </view>
 
-                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">{{ currentIndex + 1 }} / {{ classList.length }}</view>
+                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">{{ currentIndex + 1 }} / {{
+                            classList.length }}</view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
                             <view class="box" @click="toggleCollect">
@@ -306,7 +307,7 @@
                     <view class="level-card" :class="{ 'is-selected': selectedAccessLevel === 1 }"
                         @click="selectedAccessLevel = 1">
                         <view class="level-icon">
-                            <mdi-icon path="/static/icons/advertisements.svg" size="30px" color="#4285f4"></mdi-icon>
+                            <mdi-icon path="/static/icons/advertisements.svg" size="30px" color="#10b981"></mdi-icon>
                         </view>
                         <view class="level-info">
                             <view class="level-name">1. 看广告</view>
@@ -1714,7 +1715,7 @@ onShareTimeline(() => {
     left: 50%;
     transform: translateX(-50%);
     z-index: 999;
-    bottom: calc(env(safe-area-inset-bottom) + 30rpx);
+    bottom: 50rpx;
     display: flex;
     flex-direction: column;
     align-items: center;

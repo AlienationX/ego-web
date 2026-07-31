@@ -13,16 +13,15 @@
                         <view class="user-content">
                             <view class="avatar">
                                 <image :src="userStore.userinfo.profile.avatar" mode="aspectFill"></image>
-                                <view class="avatar-ring"></view>
+                                <!-- <view class="avatar-ring"></view> -->
                             </view>
 
                             <view class="user-details">
                                 <view class="details-top">
                                     <view class="name-row">
                                         <text class="name">{{ userStore.userinfo.profile.nickname }}</text>
-                                        <view v-if="userStore.isVip" class="vip-badge">VIP</view>
-                                        <view v-else-if="userStore.isAdmin" class="non-vip-badge" @click="toMembership">
-                                            Get VIP
+                                        <view v-if="userStore.isVip" class="vip-badge">
+                                            <text class="vip-text">VIP</text>
                                         </view>
                                     </view>
                                 </view>
@@ -61,8 +60,8 @@
                             </view>
                         </view>
 
-                        <!-- VIP Banner for Admins -->
-                        <view v-if="userStore.isAdmin" class="vip-banner-card" @click="toMembership">
+                        <!-- VIP Banner (根据后端版本配置 pay_enabled 决定是否开启显示) -->
+                        <view v-if="appStore.versionConfig?.pay_enabled" class="vip-banner-card" @click="toMembership">
                             <view class="vip-banner-content">
                                 <view class="vip-banner-title-row">
                                     <mdi-icon path="/static/icons/crown-circle.svg" size="20px"
@@ -72,7 +71,7 @@
                                 <text class="vip-banner-desc">
                                     {{ userStore.isVip ? (locale === 'en' ? 'VIP active! Click to extend.' :
                                         '您的会员已开通！点击续费。') :
-                                    t('membership.subtitle') }}
+                                        t('membership.subtitle') }}
                                 </text>
                             </view>
                             <uni-icons type="right" size="16" color="#ffffff"></uni-icons>
@@ -83,6 +82,9 @@
                         <view class="avatar">
                             <image src="/static/logo.svg" mode="aspectFill"></image>
                             <view class="avatar-ring"></view>
+                            <view class="avatar-img-wrap">
+                                <image src="/static/logo.svg" mode="aspectFill"></image>
+                            </view>
                         </view>
                         <view class="app-name">{{ $t('common.appName') }}</view>
                         <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
@@ -188,6 +190,7 @@ import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useStatusStore } from '@/stores/status.js';
+import { useAppStore } from '@/stores/app.js';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -196,6 +199,7 @@ const userStore = useUserStore();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 const statusStore = useStatusStore();
+const appStore = useAppStore();
 // const userinfo = reactive(userStore.userinfo);  // 只是userinfo的副本的响应式，和userStore.userinfo不是同一个对象
 // const userinfo = computed(() => userStore.userinfo); // 计算属性需要写userinfo.value，也麻烦
 
@@ -700,33 +704,51 @@ onShow(() => {
         .vip-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4rpx;
-            padding: 4rpx 12rpx;
-            background: linear-gradient(135deg, $wp-theme-color 0%, darken($wp-theme-color, 8%) 100%);
-            color: #fff;
-            font-size: 18rpx;
-            font-weight: 600;
-            border-radius: 16rpx;
+            gap: 6rpx;
+            padding: 4rpx 18rpx;
+            background: linear-gradient(135deg, #2a251b 0%, #17140e 100%);
+            border: 1rpx solid rgba(251, 191, 36, 0.45);
+            border-radius: 20rpx;
+            box-shadow: 0 4rpx 14rpx rgba(251, 191, 36, 0.18);
             white-space: nowrap;
+            margin-left: 8rpx;
+
+            .vip-text {
+                font-size: 20rpx;
+                font-weight: 800;
+                letter-spacing: 1rpx;
+                background: linear-gradient(135deg, #ffe9b3 0%, #f59e0b 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                font-style: italic;
+            }
         }
 
         .non-vip-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4rpx;
-            padding: 4rpx 12rpx;
-            background: rgba($wp-theme-color, 0.08);
-            color: #28b389;
-            font-size: 18rpx;
-            font-weight: 600;
-            border-radius: 16rpx;
+            gap: 6rpx;
+            padding: 4rpx 18rpx;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.14) 0%, rgba(245, 158, 11, 0.08) 100%);
+            border: 1rpx solid rgba(251, 191, 36, 0.35);
+            color: #d97706;
+            font-size: 20rpx;
+            font-weight: 700;
+            border-radius: 20rpx;
             white-space: nowrap;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s ease;
+            margin-left: 8rpx;
+
+            .theme-dark & {
+                color: #fbbf24;
+                border-color: rgba(251, 191, 36, 0.45);
+                background: linear-gradient(135deg, rgba(251, 191, 36, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%);
+            }
 
             &:active {
-                background: rgba($wp-theme-color, 0.15);
                 transform: scale(0.95);
+                opacity: 0.88;
             }
         }
 
@@ -1120,6 +1142,18 @@ onShow(() => {
 
         to {
             transform: rotate(360deg);
+        }
+    }
+
+    @keyframes avatarBreath {
+        0% {
+            transform: scale(0.95);
+            opacity: 0.5;
+        }
+
+        100% {
+            transform: scale(1.08);
+            opacity: 0.88;
         }
     }
 
