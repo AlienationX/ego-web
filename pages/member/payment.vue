@@ -110,7 +110,7 @@
                     </view>
                     <view class="cpc-right">
                         <text class="cpc-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price
-                        }}</text>
+                            }}</text>
                     </view>
                 </view>
 
@@ -251,20 +251,28 @@ const benefits = computed(() => [
 
 // 2. 动态商品卡片数据
 const membershipCards = computed(() => {
-    return rawProducts.value.map((p) => {
-        const avg = p.period_days > 0 ? (p.price / p.period_days).toFixed(2) : p.price;
-        const curSym = p.currency === "USD" ? "$" : "¥";
-        return {
-            id: p.id,
-            title: getLocalizedField(p, "name"),
-            price: p.price,
-            originalPrice: p.original_price,
-            currency: p.currency,
-            avgText: tp("membership.avgDayText", { symbol: curSym, price: avg }),
-            savings: getLocalizedField(p, "description"),
-            recommended: p.recommended,
-        };
-    });
+    return rawProducts.value
+        .filter((p) => {
+            // 非开发者隐藏测试 / test 商品
+            if (!userStore.isDeveloper) {
+                if (p.name === '测试' || p.name_en === 'test') return false;
+            }
+            return true;
+        })
+        .map((p) => {
+            const avg = p.period_days > 0 ? (p.price / p.period_days).toFixed(2) : p.price;
+            const curSym = p.currency === "USD" ? "$" : "¥";
+            return {
+                id: p.id,
+                title: getLocalizedField(p, "name"),
+                price: p.price,
+                originalPrice: p.original_price,
+                currency: p.currency,
+                avgText: tp("membership.avgDayText", { symbol: curSym, price: avg }),
+                savings: getLocalizedField(p, "description"),
+                recommended: p.recommended,
+            };
+        });
 });
 
 const selectCard = (index) => {
@@ -275,8 +283,8 @@ const selectCard = (index) => {
 const selectedPayment = ref("alipay");
 const paymentMethods = computed(() => [
     { id: "alipay", name: t("membership.alipay") || "Alipay", iconSrc: "/static/icons/brands/alipay.svg" },
-    { id: "wechat", name: t("membership.wechat") || "WeChat Pay", iconSrc: "/static/icons/brands/wxpay.svg" },
-    { id: "paypal", name: t("membership.paypal") || "PayPal", iconSrc: "/static/icons/brands/paypal.svg" },
+    // { id: "wechat", name: t("membership.wechat") || "WeChat Pay", iconSrc: "/static/icons/brands/wxpay.svg" },
+    // { id: "paypal", name: t("membership.paypal") || "PayPal", iconSrc: "/static/icons/brands/paypal.svg" },
 ]);
 
 // 4. 加载商品
