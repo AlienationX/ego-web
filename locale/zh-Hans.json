@@ -512,7 +512,6 @@
         "unlockWallpaper": "解锁为免费壁纸",
         "lockWallpaper": "设为 VIP 独占",
         "internalShare": "应用内置分享",
-        "systemShare": "系统原生分享",
         "adminDeleteSuccess": "已删除壁纸",
         "adminDeleteFailed": "删除失败，请稍后重试",
         "lock": "锁定",
@@ -626,7 +625,7 @@
         "total": "应付总额",
         "method": "支付方式",
         "vipExclusiveTitle": "VIP 专属壁纸",
-        "vipExclusiveHint": "该壁纸为独家 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。",
+        "vipExclusiveHint": "该壁纸为独家 VIP 专属高精资源，开通会员后可无限制下载全站壁纸。",
         "openVipNow": "立即开通 VIP"
     },
     "favorite": {
@@ -1029,6 +1028,7 @@
         "weixinTimeline": "微信朋友圈",
         "weibo": "新浪微博",
         "qq": "QQ好友",
+        "systemShare": "系统分享",
         "shareSuccess": "分享成功",
         "shareFailed": "分享失败，请稍后重试",
         "weiboFailed": "未检测到微博客户端，已为您提示",

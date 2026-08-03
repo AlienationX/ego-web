@@ -5,56 +5,52 @@
             <view class="sheet-header">
                 <text class="title">{{ title || t('common.share') }}</text>
                 <view class="close-btn" @click="close">
-                    <uni-icons type="closeempty" size="20" :color="closeIconColor"></uni-icons>
+                    <uni-icons type="clear" size="32" :color="settingsStore.isDark ? '#a1a1aa' : '#888888'"></uni-icons>
                 </view>
             </view>
 
             <!-- 4列分享网格 -->
             <view class="share-grid">
-                <!-- 1. 微信好友 (weixin) -->
-                <!-- #ifdef MP-WEIXIN -->
-                <button class="share-item share-button-reset" open-type="share">
-                    <view class="icon-wrap icon-weixin">
-                        <uni-icons type="weixin" size="32" color="#ffffff"></uni-icons>
-                    </view>
-                    <text class="item-label">{{ t('shareSheet.weixinFriend') }}</text>
-                </button>
-                <!-- #endif -->
-
                 <!-- #ifndef MP-WEIXIN -->
+
+                <!-- 1. 微信好友 -->
                 <view class="share-item" @click="shareToWechat('WXSceneSession')">
                     <view class="icon-wrap icon-weixin">
                         <uni-icons type="weixin" size="32" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.weixinFriend') }}</text>
                 </view>
-                <!-- #endif -->
 
-                <!-- 2. 微信朋友圈 (pyq) -->
-                <view class="share-item" @click="shareToWechat('WXSenceTimeline')">
+                <!-- 2. 微信朋友圈 (小程序不支持分享朋友圈) -->
+                <view class="share-item" @click="shareToWechat('WXSceneTimeline')">
                     <view class="icon-wrap icon-pyq">
                         <uni-icons type="pyq" size="32" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.weixinTimeline') }}</text>
                 </view>
 
-                <!-- 3. 新浪微博 (weibo) -->
-                <!-- #ifndef MP-WEIXIN -->
+                <!-- 3. 新浪微博 -->
                 <view class="share-item" @click="shareToWeibo">
                     <view class="icon-wrap icon-weibo">
                         <uni-icons type="weibo" size="32" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.weibo') }}</text>
                 </view>
-                <!-- #endif -->
 
-                <!-- 4. QQ好友 (qq) -->
-                <!-- #ifndef MP-WEIXIN -->
+                <!-- 4. QQ好友 -->
                 <view class="share-item" @click="shareToQQ">
                     <view class="icon-wrap icon-qq">
                         <uni-icons type="qq" size="32" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.qq') }}</text>
+                </view>
+
+                <!-- 5. 系统原生分享 -->
+                <view class="share-item" @click="shareToSystem">
+                    <view class="icon-wrap icon-system">
+                        <mdi-icon path="/static/icons/export.svg" size="30px" color="#ffffff"></mdi-icon>
+                    </view>
+                    <text class="item-label">{{ t('shareSheet.systemShare') }}</text>
                 </view>
                 <!-- #endif -->
             </view>
@@ -96,8 +92,6 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const popup = ref(null);
 
-const closeIconColor = computed(() => (settingsStore.isDark ? '#9ca3af' : '#6b7280'));
-
 const open = () => {
     popup.value?.open();
     emit('open');
@@ -118,7 +112,7 @@ const onPopupChange = (e) => {
 const shareToWechat = (scene) => {
     uni.share({
         provider: 'weixin',
-        scene: scene, // WXSceneSession | WXSenceTimeline
+        scene: scene, // WXSceneSession | WXSceneTimeline
         type: 0, // 图文卡片
         href: props.shareUrl || 'https://egowallpaper.space',
         title: props.shareTitle || t('common.appName'),
@@ -205,6 +199,26 @@ const shareToQQ = () => {
     });
 };
 
+// 5. 系统原生分享
+const shareToSystem = () => {
+    uni.shareWithSystem({
+        type: 'text',
+        summary: props.shareSummary || t('about.introText'),
+        href: props.shareUrl || 'https://egowallpaper.space',
+        success: () => {
+            uni.showToast({
+                title: t('shareSheet.shareSuccess') || '分享成功',
+                icon: 'none',
+            });
+            emit('success', { type: 'system' });
+            close();
+        },
+        fail: (err) => {
+            console.error('system share fail:', err);
+        },
+    });
+};
+
 defineExpose({
     open,
     close,
@@ -276,19 +290,6 @@ defineExpose({
     margin-bottom: 20rpx;
 }
 
-.share-button-reset {
-    padding: 0;
-    margin: 0;
-    background: transparent;
-    line-height: normal;
-    border: none;
-    outline: none;
-
-    &::after {
-        border: none;
-    }
-}
-
 .share-item {
     display: flex;
     flex-direction: column;
@@ -325,6 +326,10 @@ defineExpose({
 
         &.icon-qq {
             background: #1296db;
+        }
+
+        &.icon-system {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         }
     }
 

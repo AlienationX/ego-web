@@ -2,17 +2,6 @@
     <view v-if="currentInfo && currentInfo.id" class="preview-page"
         :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
 
-        <!-- 全局 Viewport 固顶提示 (写在 scroll-view 外部，滚动页面时绝不跑偏) -->
-        <!-- 1. 轻触屏幕提示：仅在【预览模式】显示，使用过的用户不展示 -->
-        <view v-if="!maskState && showTapHint" class="mode-tip-toast">
-            <text>{{ t('previewPage.tapToToggleControls') }}</text>
-        </view>
-
-        <!-- 2. 左右滑动提示：仅在【操作模式】显示，保持与轻触提示相同的全套位置与动画，使用过的用户不展示 -->
-        <view v-if="maskState && showSwipeHint && !disableSwipe && classList.length > 1" class="mode-tip-toast">
-            <text>{{ t('previewPage.swipeToSwitch') }}</text>
-        </view>
-
         <!-- 3. 向上滑动提示：无论什么模式，未滑动时均固顶展示 (滑动后隐去并持久化记录) -->
         <view v-if="showScrollHint" class="scrollHint">
             <uni-icons type="up" size="22" color="#ffffff" class="hint-icon"></uni-icons>
@@ -28,6 +17,16 @@
             @scroll="handlePreviewScroll">
             <view class="previewLayout" :style="previewLayoutStyle">
                 <view class="previewHero">
+                    <!-- 1. 轻触屏幕提示：仅在【预览模式】显示，使用过的用户不展示 -->
+                    <view v-if="!maskState && showTapHint" class="mode-tip-toast">
+                        <text>{{ t('previewPage.tapToToggleControls') }}</text>
+                    </view>
+
+                    <!-- 2. 左右滑动提示：仅在【操作模式】显示，使用过的用户不展示 -->
+                    <view v-if="maskState && showSwipeHint && !disableSwipe && classList.length > 1" class="mode-tip-toast">
+                        <text>{{ t('previewPage.swipeToSwitch') }}</text>
+                    </view>
+
                     <!-- swiper and mask content unchanged -->
                     <swiper class="preview-swiper" :circular="!disableSwipe && classList.length > 1"
                         :disable-touch="disableSwipe" :current="currentIndex" @change="swiperChange">
@@ -62,6 +61,16 @@
                             <view class="icon-btn" @click="openClockStyle">
                                 <mdi-icon path="/static/icons/clock.svg" size="20px" color="#fff"></mdi-icon>
                             </view>
+                            <!-- #ifdef MP-WEIXIN -->
+                            <button class="icon-btn share-btn-reset" open-type="share">
+                                <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
+                            </button>
+                            <!-- #endif -->
+                            <!-- #ifndef MP-WEIXIN -->
+                            <view v-if="isAdmin" class="icon-btn" @click="handleAdminAction(openShareSheet)">
+                                <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
+                            </view>
+                            <!-- #endif -->
                             <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
                                 <mdi-icon path="/static/icons/information-symbol.svg" size="32px"
                                     color="#fff"></mdi-icon>
@@ -515,7 +524,8 @@
         <share-sheet ref="shareSheetRef" :title="t('common.share')"
             :share-title="getLocalizedItem(currentInfo).description || t('common.appName')"
             :share-summary="t('about.introText')" :share-image="currentInfo?.smallPicurl || currentInfo?.picurl"
-            :share-url="shareUrl"></share-sheet>
+            :share-url="shareUrl">
+        </share-sheet>
 
         <!-- 管理员快捷控制面板弹窗 (极简风格) -->
         <uni-popup ref="adminMenuPopup" type="bottom" :safe-area="false">
@@ -563,24 +573,6 @@
                                     (t('previewPage.accessLevelAdOrVip') ||
                                         '权限: 看广告/VIP') : (t('previewPage.accessLevelFree') || '权限: 免费壁纸')) }}
                         </text>
-                    </view>
-
-                    <!-- 4. 应用内置分享 -->
-                    <view class="admin-item" @click="handleAdminAction(openShareSheet)">
-                        <view class="icon-circle">
-                            <mdi-icon path="/static/icons/share-variant.svg" size="30px"
-                                :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
-                        </view>
-                        <text class="item-label">{{ t('previewPage.internalShare') || '应用分享' }}</text>
-                    </view>
-
-                    <!-- 5. 系统原生分享 -->
-                    <view class="admin-item" @click="handleAdminAction(handleSystemShare)">
-                        <view class="icon-circle">
-                            <mdi-icon path="/static/icons/export.svg" size="30px"
-                                :color="settingsStore.isDark ? '#f3f4f6' : '#1f2937'"></mdi-icon>
-                        </view>
-                        <text class="item-label">{{ t('previewPage.systemShare') || '系统分享' }}</text>
                     </view>
                 </view>
             </view>
@@ -1269,24 +1261,6 @@ const handleShare = () => {
     openShareSheet();
 };
 
-const handleSystemShare = () => {
-    const url = shareUrl.value || `https://egowallpaper.space/preview?id=${currentInfo.value?.id}`;
-    uni.shareWithSystem({
-        type: 'text',
-        summary: getLocalizedItem(currentInfo.value).description || t('common.appName'),
-        href: url,
-        success: () => {
-            uni.showToast({
-                title: t('shareSheet.shareSuccess') || '分享成功',
-                icon: 'none',
-            });
-        },
-        fail: (err) => {
-            console.error('uni.shareWithSystem fail:', err);
-        },
-    });
-};
-
 const adminMenuPopup = ref(null);
 
 const openAdminMenu = () => {
@@ -1691,7 +1665,7 @@ onShareTimeline(() => {
 }
 
 .mode-tip-toast {
-    position: fixed;
+    position: absolute;
     bottom: 20vh;
     left: 50%;
     transform: translateX(-50%);
@@ -1708,6 +1682,17 @@ onShareTimeline(() => {
     z-index: 999;
     pointer-events: none;
     animation: fadeInToast 0.4s ease-out;
+}
+
+@keyframes fadeInToast {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 .scrollHint {
@@ -1890,6 +1875,16 @@ onShareTimeline(() => {
             align-items: center;
             justify-content: center;
             padding: 0;
+        }
+
+        .share-btn-reset {
+            border: none;
+            line-height: normal;
+            margin: 0;
+
+            &::after {
+                border: none;
+            }
         }
 
         .count {

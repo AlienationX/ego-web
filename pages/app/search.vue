@@ -4,21 +4,16 @@
 
         <view class="search-shell" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
             <view class="search-shell__back" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="settingsStore.isDark ? '#eef5ff' : '#15171c'"></mdi-icon>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                    :color="settingsStore.isDark ? '#eef5ff' : '#15171c'"></mdi-icon>
             </view>
             <view class="search-box search-box--shell">
                 <view class="search-box__icon">
                     <uni-icons type="search" size="18" color="#7f94b8"></uni-icons>
                 </view>
-                <input
-                    v-model="queryParams.keyword"
-                    class="search-box__input"
-                    :placeholder="t('common.search')"
+                <input v-model="queryParams.keyword" class="search-box__input" :placeholder="t('common.search')"
                     :placeholder-style="settingsStore.isDark ? 'color: #7f94b8' : 'color: rgba(21, 23, 28, 0.4)'"
-                    confirm-type="search"
-                    @confirm="onSearch"
-                    @input="onInput"
-                />
+                    confirm-type="search" @confirm="onSearch" @input="onInput" />
                 <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
                     <uni-icons type="clear" size="16" color="#7f94b8"></uni-icons>
                 </view>
@@ -45,7 +40,8 @@
                     <view class="section-head">
                         <view class="section-head__left">
                             <uni-icons type="refreshempty" size="16" color="var(--text-secondary)"></uni-icons>
-                            <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}</view>
+                            <view class="section-head__title section-head__title--muted">{{ t('common.recentSearch') }}
+                            </view>
                         </view>
                         <view class="section-head__actions">
                             <view class="section-head__action" @click="toggleEditHistory">
@@ -57,15 +53,11 @@
                         </view>
                     </view>
                     <view class="history-tags">
-                        <view 
-                            class="history-chip" 
-                            :class="{ 'is-editing': isEditingHistory }" 
-                            v-for="tab in searchHistory" 
-                            :key="tab" 
-                            @click="clickTab(tab)"
-                        >
+                        <view class="history-chip" :class="{ 'is-editing': isEditingHistory }"
+                            v-for="tab in searchHistory" :key="tab" @click="clickTab(tab)">
                             <text class="history-chip__text">{{ tab }}</text>
-                            <view v-if="isEditingHistory" class="history-chip__delete" @click.stop="deleteHistoryItem(tab)">
+                            <view v-if="isEditingHistory" class="history-chip__delete"
+                                @click.stop="deleteHistoryItem(tab)">
                                 <uni-icons type="closeempty" size="10" color="var(--text-tertiary)"></uni-icons>
                             </view>
                         </view>
@@ -74,12 +66,7 @@
             </view>
 
             <view v-else class="list-container">
-                <modern-pics-view
-                    :show-header="true"
-                    :tabs="tabs"
-                    api-type="search"
-                    :hide-header-if-empty="true"
-                >
+                <modern-pics-view :show-header="true" :tabs="tabs" api-type="search" :hide-header-if-empty="true">
                     <template #empty>
                         <view class="noResult">
                             <view class="noResult__icon">
@@ -209,7 +196,7 @@ const onSearch = () => {
     queryParams.value.keyword = keyword;
     lastSearchedKeyword.value = keyword;
 
-    searchHistory.value = [...new Set([keyword, ...searchHistory.value])].slice(0, 10);
+    searchHistory.value = [...new Set([keyword, ...searchHistory.value])].slice(0, 20);
     uni.setStorageSync('searchHistory', searchHistory.value);
 
     init(keyword);
@@ -337,7 +324,8 @@ onUnload(() => {
 }
 
 .list-container :deep(.empty-overlay) {
-    top: 44px; /* 让出顶部 titleBar 的高度，避免遮盖 tabs */
+    top: 44px;
+    /* 让出顶部 titleBar 的高度，避免遮盖 tabs */
 }
 
 .search-box {
@@ -493,6 +481,7 @@ onUnload(() => {
     &.is-editing {
         padding: 12rpx 20rpx 12rpx 28rpx;
     }
+
     &:active {
         transform: scale(0.95);
         opacity: 0.85;
