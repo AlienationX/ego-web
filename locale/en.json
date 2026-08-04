@@ -1030,6 +1030,7 @@
         "qq": "QQ",
         "systemShare": "System Share",
         "shareSuccess": "Shared successfully",
+        "shareSuccessWithEnergy": "Shared! +{amount} energy",
         "shareFailed": "Share failed, please try again",
         "weiboFailed": "Weibo client is not installed",
         "qqFailed": "QQ client is not installed",

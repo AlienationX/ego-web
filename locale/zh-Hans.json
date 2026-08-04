@@ -1030,6 +1030,7 @@
         "qq": "QQ好友",
         "systemShare": "系统分享",
         "shareSuccess": "分享成功",
+        "shareSuccessWithEnergy": "分享成功，能量+{amount}",
         "shareFailed": "分享失败，请稍后重试",
         "weiboFailed": "未检测到微博客户端，已为您提示",
         "qqFailed": "未检测到QQ客户端，已为您提示",

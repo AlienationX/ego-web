@@ -62,6 +62,8 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useUserStore } from '@/stores/user.js';
+import { apiPostEarnEnergy } from '@/api/wallpaper.js';
 
 const props = defineProps({
     title: {
@@ -90,6 +92,7 @@ const emit = defineEmits(['open', 'close', 'success']);
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const popup = ref(null);
 
 const open = () => {
@@ -119,10 +122,35 @@ const shareToWechat = (scene) => {
         summary: props.shareSummary || t('about.introText'),
         imageUrl: props.shareImage || '/static/images/logo.png',
         success: (res) => {
-            uni.showToast({
-                title: t('shareSheet.shareSuccess') || '分享成功',
-                icon: 'none',
-            });
+            // 分享微信好友 +1 / 朋友圈 +3 能量（仅登录用户请求接口）
+            if (userStore.isLoggedIn) {
+                const actionType = scene === 'WXSceneTimeline' ? 'share_timeline' : 'share_image';
+                const amount = scene === 'WXSceneTimeline' ? 3 : 1;
+                apiPostEarnEnergy({ action_type: actionType, amount }).then((energyRes) => {
+                    if (energyRes.data?.energy !== undefined) {
+                        userStore.updateEnergy(energyRes.data.energy);
+                        uni.showToast({
+                            title: t('shareSheet.shareSuccessWithEnergy', { amount }),
+                            icon: 'none',
+                        });
+                    } else {
+                        uni.showToast({
+                            title: t('shareSheet.shareSuccess') || '分享成功',
+                            icon: 'none',
+                        });
+                    }
+                }).catch(() => {
+                    uni.showToast({
+                        title: t('shareSheet.shareSuccess') || '分享成功',
+                        icon: 'none',
+                    });
+                });
+            } else {
+                uni.showToast({
+                    title: t('shareSheet.shareSuccess') || '分享成功',
+                    icon: 'none',
+                });
+            }
             emit('success', { type: 'weixin', scene });
             close();
         },

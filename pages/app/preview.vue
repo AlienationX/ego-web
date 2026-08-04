@@ -23,7 +23,8 @@
                     </view>
 
                     <!-- 2. 左右滑动提示：仅在【操作模式】显示，使用过的用户不展示 -->
-                    <view v-if="maskState && showSwipeHint && !disableSwipe && classList.length > 1" class="mode-tip-toast">
+                    <view v-if="maskState && showSwipeHint && !disableSwipe && classList.length > 1"
+                        class="mode-tip-toast">
                         <text>{{ t('previewPage.swipeToSwitch') }}</text>
                     </view>
 
@@ -85,7 +86,7 @@
                                 <uni-icons type="heart-filled" size="28"></uni-icons>
                                 <view class="text">{{
                                     currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
-                                }}</view>
+                                    }}</view>
                             </view>
                             <view class="box" @click="openScore">
                                 <uni-icons type="star-filled" size="28"></uni-icons>
@@ -136,7 +137,7 @@
                                     getLocalizedItem(currentInfo).description ||
                                     getLocalizedItem(currentInfo).classify_name ||
                                     ''
-                                }}</view>
+                                    }}</view>
                             </view>
                         </template>
                     </view>
@@ -149,7 +150,7 @@
                             email:
                                 SERVICE_EMAIL
                         })
-                        }}</text>
+                            }}</text>
                     </view>
 
                     <!-- 第二行与第三行：2列网格指标数据 -->
@@ -598,7 +599,6 @@ import {
     apiGetClassify,
     apiPostEarnEnergy,
     apiGetWallDetail,
-    apiGetVersionConfig,
 } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -1607,17 +1607,14 @@ const swiperChange = (e) => {
 
 //分享给好友
 onShareAppMessage((e) => {
-    // 分享图片奖励1点能量
-    apiPostEarnEnergy({ action_type: 'share_image', amount: 1 }).then((res) => {
-        if (res.data?.energy !== undefined) {
-            userStore.updateEnergy(res.data.energy);
-            if (res.data.msg) {
-                uni.showToast({ title: res.data.msg, icon: 'none' });
-            } else {
-                uni.showToast({ title: '分享成功，能量+1', icon: 'none' });
+    // 分享图片奖励1点能量（仅登录用户请求接口，无法确认是否真正分享，故不弹 toast）
+    if (userStore.isLoggedIn) {
+        apiPostEarnEnergy({ action_type: 'share_image', amount: 1 }).then((res) => {
+            if (res.data?.energy !== undefined) {
+                userStore.updateEnergy(res.data.energy);
             }
-        }
-    });
+        });
+    }
 
     // 读取缓存数据的话需要增加type=share，分享到的用户就可以不读缓存，直接读取数据库数据
     return {
@@ -1628,17 +1625,14 @@ onShareAppMessage((e) => {
 
 //分享朋友圈
 onShareTimeline(() => {
-    // 分享朋友圈奖励3点能量
-    apiPostEarnEnergy({ action_type: 'share_timeline', amount: 3 }).then((res) => {
-        if (res.data?.energy !== undefined) {
-            userStore.updateEnergy(res.data.energy);
-            if (res.data.msg) {
-                uni.showToast({ title: res.data.msg, icon: 'none' });
-            } else {
-                uni.showToast({ title: '分享朋友圈成功，能量+3', icon: 'none' });
+    // 分享朋友圈奖励3点能量（仅登录用户请求接口，无法确认是否真正分享，故不弹 toast）
+    if (userStore.isLoggedIn) {
+        apiPostEarnEnergy({ action_type: 'share_timeline', amount: 3 }).then((res) => {
+            if (res.data?.energy !== undefined) {
+                userStore.updateEnergy(res.data.energy);
             }
-        }
-    });
+        });
+    }
 
     return {
         title: t('common.appName'),
@@ -1689,6 +1683,7 @@ onShareTimeline(() => {
         opacity: 0;
         transform: translateX(-50%) translateY(10rpx);
     }
+
     to {
         opacity: 1;
         transform: translateX(-50%) translateY(0);
