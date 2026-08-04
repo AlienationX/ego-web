@@ -975,6 +975,10 @@ function selectTheme(theme) {
     settingsStore.options.theme = theme;
     // 更新原生UI风格，支持跟随系统主题auto、dark、light主题
     plus.nativeUI.setUIStyle(theme);
+    // 切回 auto 时原生 UI 从锁定状态恢复跟随系统，此刻主题事件不一定触发，手动同步一次系统主题
+    if (theme === 'auto') {
+        settingsStore.osTheme = uni.getDeviceInfo().osTheme || 'light';
+    }
     // #endif
 
     // #ifndef APP

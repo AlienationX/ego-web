@@ -36,12 +36,13 @@ onLaunch(() => {
     // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
         console.log('onThemeChange', theme);
-        console.log('osTheme', settingsStore.osTheme);
         settingsStore.osTheme = theme;
 
         // #ifdef APP
-        // 在 App 上需要先调用 plus.nativeUI.setUIStyle('auto') 开启跟随系统主题切换的功能，才能监听到主题切换事件，值为light或dark
-        plus.nativeUI.setUIStyle(theme);
+        // auto 模式下保持原生 UI 跟随系统（必须传 'auto'，传具体主题会锁死原生 UI，导致后续主题事件停止派发）
+        if (settingsStore.options.theme === 'auto') {
+            plus.nativeUI.setUIStyle('auto');
+        }
         // #endif
     });
 
@@ -64,18 +65,6 @@ onShow(() => {
     console.log('App Show');
 
     // uni.hideTabBar({ animation: false, fail: () => { } });
-
-    // 从后台切回时 onThemeChange 可能未触发，重新同步系统主题
-    if (settingsStore.options.theme === 'auto') {
-        const currentOsTheme = uni.getDeviceInfo().osTheme || uni.getAppBaseInfo().hostTheme || 'light';
-        if (settingsStore.osTheme !== currentOsTheme) {
-            console.log('onShow sync osTheme:', settingsStore.osTheme, '->', currentOsTheme);
-            // #ifdef APP
-            plus.nativeUI.setUIStyle(currentOsTheme);
-            // #endif
-            settingsStore.osTheme = currentOsTheme;
-        }
-    }
 
     // permissionEnums枚举建议单独一个js文件，然后引入
     // const permissionEnums = {
