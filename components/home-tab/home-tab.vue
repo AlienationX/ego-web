@@ -692,7 +692,7 @@ const getDailyFeatured = async () => {
 };
 
 const getRandomRecommend = async () => {
-    let res = await apiGetRandomRecommend({ classify_ids: '30,62,2,3,10,12' });
+    let res = await apiGetRandomRecommend({ classify_ids: '30,62,2,12,10,11,6,9' });
     randomRecommendList.value = res.data.map((classify) => ({
         ...classify,
         data: classify.data.map((item) => addTimeBadge(handlePicUrl(item))),
@@ -1535,7 +1535,8 @@ onMounted(() => {
                 justify-content: center;
                 align-items: flex-start;
                 margin: 20rpx 20rpx 50rpx 0rpx;
-                transition: box-shadow 0.3s ease;
+                transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease, opacity 0.12s ease, box-shadow 0.3s ease;
+                will-change: transform, filter;
                 position: relative;
                 overflow: hidden;
                 border-radius: 28rpx;
@@ -1596,6 +1597,8 @@ onMounted(() => {
                     border: none;
                     box-shadow: none;
                     z-index: 2;
+                    animation: badgeFadeIn 0.3s ease-out;
+                    will-change: transform, opacity;
                 }
 
                 .box-badge--subtle,
@@ -1612,20 +1615,10 @@ onMounted(() => {
                     box-shadow: none;
                 }
 
-                &:hover {
-                    .box-image {
-                        transform: scale(1.08);
-                    }
-                }
-
                 &--active,
                 &:active {
-                    transform: scale(0.96) !important;
-                    box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0, 0, 0, 0.12)) !important;
-
-                    .box-image {
-                        transform: scale(1.08) !important;
-                    }
+                    transform: scale(0.97) !important;
+                    filter: brightness(0.9) !important;
                 }
 
                 // Hero mode
@@ -1811,6 +1804,18 @@ onMounted(() => {
     &.ready &__inner {
         display: block;
         margin: 0 30rpx 30rpx;
+    }
+}
+
+@keyframes badgeFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4rpx);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 

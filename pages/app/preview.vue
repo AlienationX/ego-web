@@ -1676,6 +1676,8 @@ onShareTimeline(() => {
     z-index: 999;
     pointer-events: none;
     animation: fadeInToast 0.4s ease-out;
+    white-space: nowrap;
+    text-align: center;
 }
 
 @keyframes fadeInToast {

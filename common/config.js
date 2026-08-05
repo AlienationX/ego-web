@@ -29,9 +29,9 @@ export const VIDEO_REWARD_ENERGY = 3;
 
 // ─────────────────────────────────────────────────────────────
 // 渠道标识（避免在 system.js / wallpaper.js 间循环引用，统一放这里）
-let _channel = '';
+let _channel = 'unknown';
 // #ifdef APP
-_channel = plus.runtime.channel || '';
+_channel = plus.runtime.channel || 'app';
 // #endif
 // #ifdef APP-HARMONY
 _channel = 'huawei';

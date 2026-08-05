@@ -164,7 +164,8 @@ const goClasslistFromQuickLook = (item) => {
     overflow: hidden;
     position: relative;
     display: block;
-    transition: opacity 0.15s ease, box-shadow 0.25s ease;
+    transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease, opacity 0.12s ease;
+    will-change: transform, filter;
     background: linear-gradient(90deg,
             rgba(200, 200, 200, 0.08) 25%,
             rgba(200, 200, 200, 0.18) 50%,
@@ -174,7 +175,8 @@ const goClasslistFromQuickLook = (item) => {
 
     &--active,
     &:active {
-        opacity: 0.8 !important;
+        transform: scale(0.97) !important;
+        filter: brightness(0.9) !important;
     }
 
     .pic {

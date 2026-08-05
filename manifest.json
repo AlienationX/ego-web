@@ -1,42 +1,42 @@
 {
-    "name": "本我壁纸",
-    "appid": "__UNI__098B24F",
-    "description": "探索壁纸，亦探索自我。",
-    "versionName": "1.4.6",
-    "versionCode": 146,
-    "transformPx": false,
+    "name" : "本我壁纸",
+    "appid" : "__UNI__098B24F",
+    "description" : "探索壁纸，亦探索自我。",
+    "versionName" : "1.4.6",
+    "versionCode" : 146,
+    "transformPx" : false,
     /* 5+App特有相关 */
-    "app-plus": {
-        "darkmode": true,
-        "themeLocation": "theme.json",
-        "safearea": {
-            "background": "#f5f5f8",
-            "backgroundDark": "#1c1c1c",
-            "bottom": {
-                "offset": "none" // 将 offset 设置为 "none" 后，页面内容会延伸到屏幕最底部
-            }
+    "app-plus" : {
+        "darkmode" : true,
+        "themeLocation" : "theme.json",
+        "safearea" : {
+            "background" : "#f5f5f8",
+            "backgroundDark" : "#1c1c1c"
+            // "bottom" : {
+            //     "offset" : "none" // 将 offset 设置为 "none" 后，页面内容会延伸到屏幕最底部
+            // }
         },
-        "usingComponents": true,
-        "nvueStyleCompiler": "uni-app",
-        "compilerVersion": 3,
-        "splashscreen": {
-            "alwaysShowBeforeRender": true,
-            "waiting": true,
-            "autoclose": true,
-            "delay": 0
+        "usingComponents" : true,
+        "nvueStyleCompiler" : "uni-app",
+        "compilerVersion" : 3,
+        "splashscreen" : {
+            "alwaysShowBeforeRender" : true,
+            "waiting" : true,
+            "autoclose" : true,
+            "delay" : 0
         },
         /* 模块配置 */
-        "modules": {
-            "OAuth": {},
-            "Camera": {},
-            "Share": {},
-            "Payment": {}
+        "modules" : {
+            "OAuth" : {},
+            "Camera" : {},
+            "Share" : {},
+            "Payment" : {}
         },
         /* 应用发布信息 */
-        "distribute": {
+        "distribute" : {
             /* android打包配置 */
-            "android": {
-                "permissions": [
+            "android" : {
+                "permissions" : [
                     "<uses-permission android:name=\"android.permission.CHANGE_NETWORK_STATE\"/>",
                     "<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
                     "<uses-permission android:name=\"android.permission.VIBRATE\"/>",
@@ -54,186 +54,175 @@
                     "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>",
                     "<uses-permission android:name=\"com.google.android.gms.permission.AD_ID\"/>"
                 ],
-                "abiFilters": [
-                    "arm64-v8a",
-                    "x86"
-                ],
-                "minSdkVersion": 24,
-                "targetSdkVersion": 36,
-                "resizableActivity": true,
-                "excludePermissions": [
+                "abiFilters" : [ "arm64-v8a", "x86" ],
+                "minSdkVersion" : 24,
+                "targetSdkVersion" : 36,
+                "resizableActivity" : true,
+                "excludePermissions" : [
                     "<uses-permission android:name=\"android.permission.READ_MEDIA_IMAGES\"/>",
                     "<uses-permission android:name=\"android.permission.READ_MEDIA_VIDEO\"/>"
                 ]
             },
             /* ios打包配置 */
-            "ios": {
-                "dSYMs": false,
-                "capabilities": {
-                    "entitlements": {
-                        "com.apple.developer.associated-domains": [
+            "ios" : {
+                "dSYMs" : false,
+                "capabilities" : {
+                    "entitlements" : {
+                        "com.apple.developer.associated-domains" : [
                             "applinks:static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com"
                         ]
                     }
                 },
-                "infoPlist": {
-                    "NSPhotoLibraryUsageDescription": "为了上传反馈图片，需要访问您的相册权限",
-                    "NSPhotoLibraryAddUsageDescription": "为了保存反馈图片，需要访问您的相册权限",
-                    "NSCameraUsageDescription": "为了拍摄反馈图片，需要访问您的相机权限"
+                "infoPlist" : {
+                    "NSPhotoLibraryUsageDescription" : "为了上传反馈图片，需要访问您的相册权限",
+                    "NSPhotoLibraryAddUsageDescription" : "为了保存反馈图片，需要访问您的相册权限",
+                    "NSCameraUsageDescription" : "为了拍摄反馈图片，需要访问您的相机权限"
                 }
             },
             /* SDK配置 */
-            "sdkConfigs": {
-                "ad": {
-                    "ks": {}
+            "sdkConfigs" : {
+                "ad" : {
+                    "ks" : {}
                 },
-                "oauth": {
-                    "weixin": {
-                        "appid": "wx74c392f8525b9268",
-                        "UniversalLinks": "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
+                "oauth" : {
+                    "weixin" : {
+                        "appid" : "wx74c392f8525b9268",
+                        "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
                     }
                 },
-                "push": {},
-                "share": {
-                    "weixin": {
-                        "appid": "wx74c392f8525b9268",
-                        "UniversalLinks": "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
+                "push" : {},
+                "share" : {
+                    "weixin" : {
+                        "appid" : "wx74c392f8525b9268",
+                        "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
                     }
                 },
-                "payment": {
-                    "alipay": {
-                        "__platform__": [
-                            "android"
-                        ]
+                "payment" : {
+                    "alipay" : {
+                        "__platform__" : [ "android" ]
                     },
-                    "weixin": {
-                        "__platform__": [
-                            "android"
-                        ],
-                        "appid": "wx74c392f8525b9268",
-                        "UniversalLinks": "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
+                    "weixin" : {
+                        "__platform__" : [ "android" ],
+                        "appid" : "wx74c392f8525b9268",
+                        "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
                     }
                 }
             },
-            "icons": {
-                "android": {
-                    "hdpi": "unpackage/res/icons/72x72.png",
-                    "xhdpi": "unpackage/res/icons/96x96.png",
-                    "xxhdpi": "unpackage/res/icons/144x144.png",
-                    "xxxhdpi": "unpackage/res/icons/192x192.png"
+            "icons" : {
+                "android" : {
+                    "hdpi" : "unpackage/res/icons/72x72.png",
+                    "xhdpi" : "unpackage/res/icons/96x96.png",
+                    "xxhdpi" : "unpackage/res/icons/144x144.png",
+                    "xxxhdpi" : "unpackage/res/icons/192x192.png"
                 },
-                "ios": {
-                    "appstore": "unpackage/res/icons/1024x1024.png",
-                    "ipad": {
-                        "app": "unpackage/res/icons/76x76.png",
-                        "app@2x": "unpackage/res/icons/152x152.png",
-                        "notification": "unpackage/res/icons/20x20.png",
-                        "notification@2x": "unpackage/res/icons/40x40.png",
-                        "proapp@2x": "unpackage/res/icons/167x167.png",
-                        "settings": "unpackage/res/icons/29x29.png",
-                        "settings@2x": "unpackage/res/icons/58x58.png",
-                        "spotlight": "unpackage/res/icons/40x40.png",
-                        "spotlight@2x": "unpackage/res/icons/80x80.png"
+                "ios" : {
+                    "appstore" : "unpackage/res/icons/1024x1024.png",
+                    "ipad" : {
+                        "app" : "unpackage/res/icons/76x76.png",
+                        "app@2x" : "unpackage/res/icons/152x152.png",
+                        "notification" : "unpackage/res/icons/20x20.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "proapp@2x" : "unpackage/res/icons/167x167.png",
+                        "settings" : "unpackage/res/icons/29x29.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "spotlight" : "unpackage/res/icons/40x40.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png"
                     },
-                    "iphone": {
-                        "app@2x": "unpackage/res/icons/120x120.png",
-                        "app@3x": "unpackage/res/icons/180x180.png",
-                        "notification@2x": "unpackage/res/icons/40x40.png",
-                        "notification@3x": "unpackage/res/icons/60x60.png",
-                        "settings@2x": "unpackage/res/icons/58x58.png",
-                        "settings@3x": "unpackage/res/icons/87x87.png",
-                        "spotlight@2x": "unpackage/res/icons/80x80.png",
-                        "spotlight@3x": "unpackage/res/icons/120x120.png"
+                    "iphone" : {
+                        "app@2x" : "unpackage/res/icons/120x120.png",
+                        "app@3x" : "unpackage/res/icons/180x180.png",
+                        "notification@2x" : "unpackage/res/icons/40x40.png",
+                        "notification@3x" : "unpackage/res/icons/60x60.png",
+                        "settings@2x" : "unpackage/res/icons/58x58.png",
+                        "settings@3x" : "unpackage/res/icons/87x87.png",
+                        "spotlight@2x" : "unpackage/res/icons/80x80.png",
+                        "spotlight@3x" : "unpackage/res/icons/120x120.png"
                     }
                 }
             },
-            "splashscreen": {
-                "useOriginalMsgbox": true,
-                "androidStyle": "common"
+            "splashscreen" : {
+                "useOriginalMsgbox" : true,
+                "androidStyle" : "common"
             }
         }
     },
     /* 快应用特有相关 */
-    "quickapp": {},
+    "quickapp" : {},
     /* 小程序特有相关 */
-    "mp-weixin": {
-        "darkmode": true,
-        "themeLocation": "theme.json",
-        "appid": "wx74c392f8525b9268",
-        "setting": {
-            "urlCheck": false,
-            "minified": true,
-            "es6": true
+    "mp-weixin" : {
+        "darkmode" : true,
+        "themeLocation" : "theme.json",
+        "appid" : "wx74c392f8525b9268",
+        "setting" : {
+            "urlCheck" : false,
+            "minified" : true,
+            "es6" : true
         },
-        "usingComponents": true
+        "usingComponents" : true
     },
-    "mp-alipay": {
-        "usingComponents": true
+    "mp-alipay" : {
+        "usingComponents" : true
     },
-    "mp-baidu": {
-        "usingComponents": true
+    "mp-baidu" : {
+        "usingComponents" : true
     },
-    "mp-toutiao": {
-        "usingComponents": true,
-        "setting": {
-            "minified": true
+    "mp-toutiao" : {
+        "usingComponents" : true,
+        "setting" : {
+            "minified" : true
         }
     },
-    "uniStatistics": {
-        "enable": false
+    "uniStatistics" : {
+        "enable" : false
     },
-    "vueVersion": "3",
-    "_spaceID": "mp-36059119-7390-44c6-8190-cc3527d1e745",
-    "h5": {
-        "title": "benwo",
-        "darkmode": true,
-        "themeLocation": "theme.json"
+    "vueVersion" : "3",
+    "_spaceID" : "mp-36059119-7390-44c6-8190-cc3527d1e745",
+    "h5" : {
+        "title" : "benwo",
+        "darkmode" : true,
+        "themeLocation" : "theme.json"
     },
-    "app-harmony": {
-        "darkmode": true,
-        "themeLocation": "theme.json",
-        "safearea": {
-            // HarmonyOS 平台的安全区域
-            "background": "#9799a5",
-            "backgroundDark": "#c9cbd1",
-            "bottom": {
-                "offset": "none" // 将 offset 设置为 "none" 后，页面内容会延伸到屏幕最底部
-            }
-        },
-        "distribute": {
-            "bundleName": "com.ego.app.hmos.wallpaper",
-            "deviceTypes": [
-                "phone",
-                "tablet"
-            ],
-            "splashScreens": {
-                "startWindowIcon": "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/launch.png"
+    "app-harmony" : {
+        "darkmode" : true,
+        "themeLocation" : "theme.json",
+        "safearea" : {},
+        // HarmonyOS 平台的安全区域。其实设置无效，鸿蒙的安全区域自带延伸和背景色透明
+        // "background" : "#f5f5f8",
+        // "backgroundDark" : "#1c1c1c"
+        // "bottom" : {
+        //     "offset" : "none" // 将 offset 设置为 "none" 后，页面内容会延伸到屏幕最底部
+        // }
+        "distribute" : {
+            "bundleName" : "com.ego.app.hmos.wallpaper",
+            "deviceTypes" : [ "phone", "tablet" ],
+            "splashScreens" : {
+                "startWindowIcon" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/launch.png"
             },
-            "icons": {
-                "foreground": "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/logo-foreground.png",
-                "background": "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/logo-background.png"
+            "icons" : {
+                "foreground" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/logo-foreground.png",
+                "background" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/logo-background.png"
             },
-            "signingConfigs": {
-                "default": {
-                    "certpath": "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.cer",
-                    "keyAlias": "debugKey",
-                    "keyPassword": "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4",
-                    "profile": "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1782699924419.p7b",
-                    "signAlg": "SHA256withECDSA",
-                    "storeFile": "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.p12",
-                    "storePassword": "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4"
+            "signingConfigs" : {
+                "default" : {
+                    "certpath" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.cer",
+                    "keyAlias" : "debugKey",
+                    "keyPassword" : "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4",
+                    "profile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1782699924419.p7b",
+                    "signAlg" : "SHA256withECDSA",
+                    "storeFile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.p12",
+                    "storePassword" : "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4"
                 },
-                "release": {
-                    "certpath": "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.cer",
-                    "keyAlias": "wp",
-                    "keyPassword": "00000023DC327F2B24C5A6B5AD0A78C80FCC7E701D3713362E25140F7AF0159D1E80808CC677EBEEE26720FBA81A9D3B7B4234",
-                    "profile": "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper-profileRelease.p7b",
-                    "signAlg": "SHA256withECDSA",
-                    "storeFile": "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.p12",
-                    "storePassword": "00000023E5A2CA26358069CADF876CDC9A0A4D2C36C79ABCBF370DDB5A5943C17A1C95190C7BFF3E9B5DA5335FB82B3DD382B9"
+                "release" : {
+                    "certpath" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.cer",
+                    "keyAlias" : "wp",
+                    "keyPassword" : "00000023DC327F2B24C5A6B5AD0A78C80FCC7E701D3713362E25140F7AF0159D1E80808CC677EBEEE26720FBA81A9D3B7B4234",
+                    "profile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper-profileRelease.p7b",
+                    "signAlg" : "SHA256withECDSA",
+                    "storeFile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.p12",
+                    "storePassword" : "00000023E5A2CA26358069CADF876CDC9A0A4D2C36C79ABCBF370DDB5A5943C17A1C95190C7BFF3E9B5DA5335FB82B3DD382B9"
                 }
             }
         }
     },
-    "locale": "auto"
+    "locale" : "auto"
 }

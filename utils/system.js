@@ -31,6 +31,8 @@ export const writeAccessLog = async () => {
         device_brand: device.deviceBrand,
         device_model: device.deviceModel,
         language: app.language,
+        os_theme: device.osTheme || app.hostTheme || 'unknown',
+        app_theme: app.theme,
         remark: JSON.stringify({ device: device, app: app }),
     };
 

@@ -34,8 +34,22 @@
 
         <!-- 主内容区域（页面普通背景） -->
         <view class="main-content-body">
+            <!-- 套餐卡片堆叠列表 (骨架屏加载状态) -->
+            <view v-if="isLoading" class="plans-container">
+                <view v-for="i in 4" :key="i" class="plan-card-skeleton">
+                    <view class="skeleton-info">
+                        <view class="skeleton-title"></view>
+                        <view class="skeleton-desc"></view>
+                    </view>
+                    <view class="skeleton-price-box">
+                        <view class="skeleton-price"></view>
+                        <view class="skeleton-avg"></view>
+                    </view>
+                </view>
+            </view>
+
             <!-- 套餐卡片堆叠列表 -->
-            <view class="plans-container">
+            <view v-else-if="membershipCards.length" class="plans-container">
                 <view class="plan-card" v-for="(card, index) in membershipCards" :key="index"
                     :class="{ 'is-selected': selectedCard === index, 'is-recommended': card.recommended }"
                     @click="selectCard(index)">
@@ -288,16 +302,20 @@ const paymentMethods = computed(() => [
 ]);
 
 // 4. 加载商品
+const isLoading = ref(true);
 const fetchProducts = async () => {
     try {
+        isLoading.value = true;
         const res = await apiGetPaymentProducts();
         if (res.code === 200 && res.data) {
             rawProducts.value = res.data;
-            const recIndex = rawProducts.value.findIndex((p) => p.recommended);
-            selectedCard.value = recIndex !== -1 ? recIndex : 0;
+            const recIndex = membershipCards.value.findIndex((p) => p.recommended);
+            selectedCard.value = recIndex !== -1 ? recIndex : (membershipCards.value.length ? 0 : null);
         }
     } catch (err) {
         console.error("Failed to load products:", err);
+    } finally {
+        isLoading.value = false;
     }
 };
 
@@ -598,6 +616,100 @@ const goBack = () => {
     flex-direction: column;
     gap: 28rpx;
     margin-bottom: 48rpx;
+}
+
+/* 骨架屏卡片样式 */
+.plan-card-skeleton {
+    position: relative;
+    padding: 36rpx 40rpx;
+    min-height: 140rpx;
+    box-sizing: border-box;
+    border-radius: 32rpx;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border: 4rpx solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.03);
+
+    .theme-dark & {
+        background: rgba(30, 30, 36, 0.6);
+        border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .skeleton-info {
+        display: flex;
+        flex-direction: column;
+        gap: 16rpx;
+        width: 45%;
+
+        .skeleton-title {
+            width: 100%;
+            height: 36rpx;
+            border-radius: 8rpx;
+            background: linear-gradient(90deg,
+                    rgba(200, 200, 200, 0.15) 25%,
+                    rgba(200, 200, 200, 0.35) 50%,
+                    rgba(200, 200, 200, 0.15) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.6s infinite linear;
+        }
+
+        .skeleton-desc {
+            width: 70%;
+            height: 24rpx;
+            border-radius: 6rpx;
+            background: linear-gradient(90deg,
+                    rgba(200, 200, 200, 0.15) 25%,
+                    rgba(200, 200, 200, 0.35) 50%,
+                    rgba(200, 200, 200, 0.15) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.6s infinite linear;
+        }
+    }
+
+    .skeleton-price-box {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12rpx;
+        width: 35%;
+
+        .skeleton-price {
+            width: 80%;
+            height: 40rpx;
+            border-radius: 8rpx;
+            background: linear-gradient(90deg,
+                    rgba(200, 200, 200, 0.15) 25%,
+                    rgba(200, 200, 200, 0.35) 50%,
+                    rgba(200, 200, 200, 0.15) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.6s infinite linear;
+        }
+
+        .skeleton-avg {
+            width: 60%;
+            height: 22rpx;
+            border-radius: 6rpx;
+            background: linear-gradient(90deg,
+                    rgba(200, 200, 200, 0.15) 25%,
+                    rgba(200, 200, 200, 0.35) 50%,
+                    rgba(200, 200, 200, 0.15) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.6s infinite linear;
+        }
+    }
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 .plan-card {
