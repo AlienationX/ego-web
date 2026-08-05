@@ -2,13 +2,14 @@
 	"light": {
 		"navigationBarTextStyle": "black",
 		"navigationBarBackgroundColor": "#f5f5f8",
-		"backgroundColor": "#eef1f5",
+		"backgroundColor": "#f5f5f8",
+        
 		"tabBarColor": "#9799a5",
 		"tabBarSelectedColor": "#28b389",
 		"tabBarBorderStyle": "white",
 		"tabBarBackgroundColor": "#f5f5f8",
+        
 		"pageBackground": "#eef1f5",
-		"tabbarBackground": "#f5f5f8",
 		"pageBackgroundSecondary": "#ffffff",
 		"panelBackground": "rgba(255,255,255,0.92)",
 		"panelBackgroundStrong": "rgba(255,255,255,0.98)",
@@ -32,13 +33,14 @@
 	"dark": {
 		"navigationBarTextStyle": "white",
 		"navigationBarBackgroundColor": "#1c1c1c",
-		"backgroundColor": "#181818",
+		"backgroundColor": "#1c1c1c",
+        
 		"tabBarColor": "#c9cbd1",
 		"tabBarSelectedColor": "#28b389",
 		"tabBarBorderStyle": "black",
 		"tabBarBackgroundColor": "#1c1c1c",
+        
 		"pageBackground": "#181818",
-		"tabbarBackground": "#1c1c1c",
 		"pageBackgroundSecondary": "#16161a",
 		"panelBackground": "rgba(255,255,255,0.06)",
 		"panelBackgroundStrong": "rgba(255,255,255,0.1)",

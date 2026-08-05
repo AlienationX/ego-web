@@ -86,18 +86,20 @@
                 </swiper>
             </view>
 
-            <!-- Notice -->
+            <!-- Notice 公告栏 -->
             <view class="notice">
                 <view class="left">
-                    <uni-icons type="sound-filled" size="20" color="#28B389"></uni-icons>
-                    <text class="text">{{ $t('index.notice') }}</text>
+                    <view class="left-tag">
+                        <uni-icons type="sound-filled" size="16" color="#28B389"></uni-icons>
+                        <text class="text">{{ $t('index.notice') }}</text>
+                    </view>
                 </view>
                 <view class="center">
                     <!-- Notice 骨架屏 -->
                     <view v-if="!noticeList.length" class="sk-notice-bar">
                         <view class="sk-bar sk-bar--notice"></view>
                     </view>
-                    <swiper v-else class="notice-swiper" vertical interval="1500" duration="300" autoplay circular>
+                    <swiper v-else class="notice-swiper" vertical interval="2800" duration="400" autoplay circular>
                         <swiper-item class="notice-swiper-item" v-for="item in noticeComputed" :key="item.id">
                             <navigator class="notice-nav"
                                 :url="`/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(item.title)}`">
@@ -107,8 +109,8 @@
                     </swiper>
                 </view>
                 <view class="right">
-                    <uni-icons type="right" size="16"
-                        :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
+                    <uni-icons type="right" size="14"
+                        :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.4)'"></uni-icons>
                 </view>
             </view>
 
@@ -122,8 +124,9 @@
                             <uni-icons type="calendar" size="20"
                                 :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
                             <view class="text"> {{ todayDateStr }}{{ $t('common.day') }} </view>
-                            <button class="button is-spotlight" size="mini" @click="refreshRandom">
-                                {{ $t('common.refresh') }}
+                            <button class="button refresh-btn" size="mini" :class="{ 'is-loading': isRefreshing }" @click="refreshRandom">
+                                <uni-icons type="refreshempty" size="13" class="refresh-icon" :class="{ 'is-spinning': isRefreshing }" :color="settingsStore.isDark ? '#181818' : '#ffffff'"></uni-icons>
+                                <text class="refresh-text">{{ $t('common.refresh') }}</text>
                             </button>
                         </view>
                     </template>
@@ -807,10 +810,21 @@ const goClasslist = (id, name) => {
     uni.navigateTo({ url: `/pages/app/classlist?id=${id}&name=${name}` });
 };
 
-const refreshRandom = () => {
+const isRefreshing = ref(false);
+
+const refreshRandom = async () => {
+    if (isRefreshing.value) return;
+    isRefreshing.value = true;
     heroImageLoaded.value = false;
-    getRandomDay();
-    getRandomRecommend();
+    try {
+        await Promise.all([getRandomDay(), getRandomRecommend()]);
+    } catch (e) {
+        console.error('Refresh random error:', e);
+    } finally {
+        setTimeout(() => {
+            isRefreshing.value = false;
+        }, 600);
+    }
 };
 
 const getSubjects = async () => {
@@ -1376,31 +1390,53 @@ onMounted(() => {
 
 .notice {
     width: 710rpx;
-    height: 72rpx;
-    line-height: 80rpx;
-    background: var(--page-background-secondary);
-    margin: 0 auto 24rpx;
+    height: 76rpx;
+    background: var(--panel-background);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1rpx solid var(--panel-border);
+    margin: 0 auto 28rpx;
     border-radius: 80rpx;
     display: flex;
-    box-shadow: 0 0px 6rpx rgba(0, 0, 0, 0.05);
+    align-items: center;
+    box-shadow: 0 8rpx 24rpx var(--shadow-color);
+    box-sizing: border-box;
+    padding: 0 16rpx 0 16rpx;
+    transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
+
+    &:active {
+        transform: scale(0.98);
+        filter: brightness(0.95);
+    }
 
     .left {
-        width: 140rpx;
         display: flex;
         align-items: center;
-        justify-content: center;
+        margin-right: 16rpx;
+        flex-shrink: 0;
 
-        .text {
-            color: $wp-theme-color;
-            font-weight: 600;
-            font-size: 28rpx;
+        .left-tag {
+            display: flex;
+            align-items: center;
+            gap: 8rpx;
+            padding: 8rpx 18rpx;
+            background: rgba(40, 179, 137, 0.12);
+            border-radius: 100rpx;
+
+            .text {
+                color: $wp-theme-color;
+                font-weight: 700;
+                font-size: 24rpx;
+                line-height: 1;
+            }
         }
     }
 
     .center {
         flex: 1;
+        height: 100%;
+        overflow: hidden;
 
-        // ── 优化8：使用 class 选择器替代标签名 ──
         .notice-swiper {
             height: 100%;
         }
@@ -1408,10 +1444,10 @@ onMounted(() => {
         .notice-swiper-item {
             display: flex;
             align-items: center;
-            justify-content: left;
             height: 100%;
-            font-size: 28rpx;
-            color: var(--text-secondary);
+            font-size: 26rpx;
+            font-weight: 500;
+            color: var(--text-primary);
             overflow: hidden;
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -1419,15 +1455,19 @@ onMounted(() => {
 
         .notice-nav {
             width: 100%;
-            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
     }
 
     .right {
-        width: 70rpx;
+        width: 48rpx;
+        height: 48rpx;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
 }
 
@@ -1437,16 +1477,25 @@ onMounted(() => {
 
     .select-watermark {
         position: absolute;
-        top: -30rpx;
-        right: -20rpx;
-        font-size: 140rpx;
+        top: -32rpx;
+        right: -10rpx;
+        font-size: 144rpx;
         font-weight: 900;
-        color: rgba(17, 24, 39, 0.07);
+        color: var(--text-primary);
+        opacity: 0.05;
         text-transform: uppercase;
-        letter-spacing: -4rpx;
+        letter-spacing: -2rpx;
         pointer-events: none;
         z-index: 0;
         white-space: nowrap;
+        user-select: none;
+        -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 100%);
+        mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 100%);
+        transition: opacity 0.3s ease;
+
+        .theme-dark & {
+            opacity: 0.04;
+        }
     }
 
     .index-title {
@@ -1477,11 +1526,12 @@ onMounted(() => {
     }
 
     .btn,
-    .date .button {
+    .date .button,
+    .refresh-btn {
         margin: 0;
-        padding: 0 24rpx;
+        padding: 0 20rpx;
         height: 52rpx;
-        line-height: 50rpx;
+        line-height: 52rpx;
         font-size: 22rpx;
         font-weight: 600;
         border-radius: 999rpx;
@@ -1491,20 +1541,29 @@ onMounted(() => {
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 8rpx;
         letter-spacing: 0.4rpx;
         box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
-        transition:
-            transform 0.28s ease,
-            background-color 0.28s ease,
-            color 0.28s ease;
+        transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
 
         &::after {
             border: none;
         }
 
         &:active {
-            transform: scale(0.96);
-            opacity: 0.92;
+            transform: scale(0.94);
+            filter: brightness(0.92);
+        }
+
+        .refresh-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+            &.is-spinning {
+                animation: refreshSpin 0.7s linear infinite;
+            }
         }
 
         &.is-default,
@@ -1804,6 +1863,16 @@ onMounted(() => {
     &.ready &__inner {
         display: block;
         margin: 0 30rpx 30rpx;
+    }
+}
+
+@keyframes refreshSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
     }
 }
 
