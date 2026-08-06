@@ -9,6 +9,8 @@ import { useAppStore } from '@/stores/app.js';
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 
+import { applyLanguagePreference, getLanguagePreference, LANGUAGE_PREF_AUTO } from '@/utils/i18n.js';
+
 onLaunch(() => {
     console.log('App Launch');
     appStore.fetchVersionConfig();
@@ -23,6 +25,7 @@ onLaunch(() => {
     //     });
     // }
 
+    // 初始化应用主题
     // #ifdef APP
     const savedTheme = uni.getStorageSync('theme') || 'auto';
     settingsStore.options.theme = savedTheme;
@@ -46,6 +49,19 @@ onLaunch(() => {
         // #endif
     });
 
+    // 初始化应用语言（Android 修改系统语言会重启 App，这里负责正确初始化）
+    applyLanguagePreference(getLanguagePreference());
+
+    // 不再需要，因为 onLaunch、onShow、settings 中有调用 applyLanguagePreference 进行设置
+    // 监听应用内语言切换（uni.setLocale 触发，非系统语言）
+    // uni.onLocaleChange(() => {
+    //     console.log('onLocaleChange', uni.getLocale());
+    //     if (getLanguagePreference() === LANGUAGE_PREF_AUTO) {
+    //         applyLanguagePreference(LANGUAGE_PREF_AUTO);
+    //     }
+    // });
+
+    // 写入启动日志
     writeAccessLog();
 
     // console.log(import.meta.env, 'env');
@@ -63,6 +79,14 @@ onLaunch(() => {
 
 onShow(() => {
     console.log('App Show');
+
+    // iOS/鸿蒙修改系统语言不重启 App，切回前台时通过 onShow 重新检测系统语言
+    // 注：uni.onLocaleChange 只监听 uni.setLocale() 调用，无法感知系统设置变化
+    const latestOsLang = uni.getDeviceInfo().osLanguage || uni.getAppBaseInfo().hostLanguage || 'en';
+    settingsStore.osLanguage = latestOsLang;
+    if (getLanguagePreference() === LANGUAGE_PREF_AUTO) {
+        applyLanguagePreference(LANGUAGE_PREF_AUTO);
+    }
 
     // uni.hideTabBar({ animation: false, fail: () => { } });
 

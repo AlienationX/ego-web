@@ -19,7 +19,7 @@ const normalizeLanguagePreference = (pref) => {
 export const resolveAppLocale = (pref) => {
     const normalized = normalizeLanguagePreference(pref);
     if (normalized === LANGUAGE_PREF_AUTO) {
-        const sys = uni.getAppBaseInfo().language || uni.getLocale() || 'en';
+        const sys = uni.getDeviceInfo().osLanguage || uni.getAppBaseInfo().hostLanguage || uni.getLocale() || 'en';
         return String(sys).toLowerCase().startsWith('zh') ? LANGUAGE_PREF_ZH : LANGUAGE_PREF_EN;
     }
     return normalized;
@@ -49,6 +49,14 @@ export const applyLanguagePreference = (pref, localeRef) => {
 
     if (localeRef) {
         localeRef.value = effective;
+    }
+
+    if (i18n && i18n.global) {
+        if (typeof i18n.global.locale === 'object') {
+            i18n.global.locale.value = effective;
+        } else {
+            i18n.global.locale = effective;
+        }
     }
 
     uni.$emit('localeChanged', { preference: normalized, locale: effective });

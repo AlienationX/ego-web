@@ -1,19 +1,13 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- #ifndef WEB -->
-        <view
-            class="status-bar-bg"
-            :style="{ height: `${statusBarHeight}px` }"
-        ></view>
+        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <!-- #endif -->
         <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: titleBarHeight + 'px' }">
             <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
                 <view class="back-btn" @click="goBack">
-                    <mdi-icon
-                        path="/static/icons/arrow-left.svg"
-                        size="18px"
-                        :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"
-                    ></mdi-icon>
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px"
+                        :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"></mdi-icon>
                 </view>
                 <text class="header-title">{{ t('settings.title') }}</text>
                 <view class="header-placeholder"></view>
@@ -36,20 +30,12 @@
                         </view>
                     </view>
 
-                    <view
-                        v-for="(item, index) in profileItems"
-                        :key="item.key"
-                        class="row"
-                        :class="{ 'row-last': index === profileItems.length - 1 }"
-                        @click="handleClick(item)"
-                    >
+                    <view v-for="(item, index) in profileItems" :key="item.key" class="row"
+                        :class="{ 'row-last': index === profileItems.length - 1 }" @click="handleClick(item)">
                         <view class="row-left">
                             <view class="icon-box">
-                                <mdi-icon
-                                    :path="item.icon"
-                                    size="28px"
-                                    :color="settingsStore.isDark ? '#9ca3af' : '#6B7280'"
-                                ></mdi-icon>
+                                <mdi-icon :path="item.icon" size="28px"
+                                    :color="settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
                             </view>
                             <view class="label-block">
                                 <text class="label">{{ item.label }}</text>
@@ -57,11 +43,8 @@
                             </view>
                         </view>
                         <view class="row-right">
-                            <mdi-icon
-                                path="/static/icons/chevron-right.svg"
-                                size="17px"
-                                :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"
-                            ></mdi-icon>
+                            <mdi-icon path="/static/icons/chevron-right.svg" size="17px"
+                                :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"></mdi-icon>
                         </view>
                     </view>
                 </view>
@@ -70,20 +53,13 @@
             <view v-for="section in sections" v-show="section.items.length > 0" :key="section.key" class="section">
                 <view class="section-title">{{ section.title }}</view>
                 <view class="card">
-                    <view
-                        v-for="(item, index) in section.items"
-                        :key="item.key"
-                        class="row"
+                    <view v-for="(item, index) in section.items" :key="item.key" class="row"
                         :class="{ 'row-last': index === section.items.length - 1, destructive: item.destructive }"
-                        @click="handleClick(item)"
-                    >
+                        @click="handleClick(item)">
                         <view class="row-left">
                             <view class="icon-box" :class="{ destructive: item.destructive }">
-                                <mdi-icon
-                                    :path="item.icon"
-                                    size="28px"
-                                    :color="item.destructive ? '#E5322D' : settingsStore.isDark ? '#9ca3af' : '#6B7280'"
-                                ></mdi-icon>
+                                <mdi-icon :path="item.icon" size="28px"
+                                    :color="item.destructive ? '#E5322D' : settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
                             </view>
                             <view class="label-block">
                                 <text class="label">{{ item.label }}</text>
@@ -92,21 +68,15 @@
                         </view>
                         <view class="row-right">
                             <template v-if="item.type === 'toggle'">
-                                <view
-                                    class="switch"
-                                    :class="{ on: !!toggles[item.toggleKey] }"
-                                    @click.stop="toggleSwitch(item.toggleKey)"
-                                >
+                                <view class="switch" :class="{ on: !!toggles[item.toggleKey] }"
+                                    @click.stop="toggleSwitch(item.toggleKey)">
                                     <view class="switch-dot"></view>
                                 </view>
                             </template>
                             <template v-else>
                                 <text v-if="item.value" class="value">{{ item.value }}</text>
-                                <mdi-icon
-                                    path="/static/icons/chevron-right.svg"
-                                    size="17px"
-                                    :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"
-                                ></mdi-icon>
+                                <mdi-icon path="/static/icons/chevron-right.svg" size="17px"
+                                    :color="settingsStore.isDark ? '#4b5563' : '#C4C9D4'"></mdi-icon>
                             </template>
                         </view>
                         <!-- 微信特有的功能 -->
@@ -148,11 +118,8 @@
                     </view>
                 </view>
                 <view class="preview-list">
-                    <view
-                        class="preview-item"
-                        :class="{ active: settingsStore.options.previewType === 'classic' }"
-                        @click="setPreviewType('classic')"
-                    >
+                    <view class="preview-item" :class="{ active: settingsStore.options.previewType === 'classic' }"
+                        @click="setPreviewType('classic')">
                         <view class="phone-mock">
                             <view class="mock-time"></view>
                             <view class="mock-clock">08:00</view>
@@ -160,11 +127,8 @@
                         </view>
                         <text class="preview-name">{{ t('settings.preview.classic') }}</text>
                     </view>
-                    <view
-                        class="preview-item"
-                        :class="{ active: settingsStore.options.previewType === 'floating' }"
-                        @click="setPreviewType('floating')"
-                    >
+                    <view class="preview-item" :class="{ active: settingsStore.options.previewType === 'floating' }"
+                        @click="setPreviewType('floating')">
                         <view class="phone-mock">
                             <view class="mock-time"></view>
                             <view class="mock-clock">08:00</view>
@@ -243,46 +207,23 @@
         <uni-popup ref="ratePopup" type="center" :mask-click="true" :safe-area="true">
             <view class="rate-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="rate-popup__close" @click="closeRatePopup">
-                    <mdi-icon
-                        path="/static/icons/close.svg"
-                        size="18px"
-                        :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"
-                    ></mdi-icon>
+                    <mdi-icon path="/static/icons/close.svg" size="18px"
+                        :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"></mdi-icon>
                 </view>
 
                 <text class="rate-popup__title">{{ t('settings.ratePopup.title') }}</text>
 
                 <view class="rate-popup__stars">
-                    <uni-icons
-                        class="rate-star-icon rate-star-icon--xs"
-                        type="star-filled"
-                        size="28"
-                        color="#ffbf0b"
-                    ></uni-icons>
-                    <uni-icons
-                        class="rate-star-icon rate-star-icon--sm"
-                        type="star-filled"
-                        size="54"
-                        color="#ffbf0b"
-                    ></uni-icons>
-                    <uni-icons
-                        class="rate-star-icon rate-star-icon--lg"
-                        type="star-filled"
-                        size="92"
-                        color="#ffbf0b"
-                    ></uni-icons>
-                    <uni-icons
-                        class="rate-star-icon rate-star-icon--sm"
-                        type="star-filled"
-                        size="54"
-                        color="#ffbf0b"
-                    ></uni-icons>
-                    <uni-icons
-                        class="rate-star-icon rate-star-icon--xs"
-                        type="star-filled"
-                        size="28"
-                        color="#ffbf0b"
-                    ></uni-icons>
+                    <uni-icons class="rate-star-icon rate-star-icon--xs" type="star-filled" size="28"
+                        color="#ffbf0b"></uni-icons>
+                    <uni-icons class="rate-star-icon rate-star-icon--sm" type="star-filled" size="54"
+                        color="#ffbf0b"></uni-icons>
+                    <uni-icons class="rate-star-icon rate-star-icon--lg" type="star-filled" size="92"
+                        color="#ffbf0b"></uni-icons>
+                    <uni-icons class="rate-star-icon rate-star-icon--sm" type="star-filled" size="54"
+                        color="#ffbf0b"></uni-icons>
+                    <uni-icons class="rate-star-icon rate-star-icon--xs" type="star-filled" size="28"
+                        color="#ffbf0b"></uni-icons>
                 </view>
 
                 <text class="rate-popup__desc">{{ t('settings.ratePopup.desc') }}</text>
@@ -298,47 +239,31 @@
                 <view class="choice-popup__head">
                     <text class="choice-popup__title">{{ t('settings.items.theme.label') }}</text>
                     <view class="choice-popup__close" @click="closeThemePopup">
-                        <mdi-icon
-                            path="/static/icons/close.svg"
-                            size="20px"
-                            :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"
-                        ></mdi-icon>
+                        <mdi-icon path="/static/icons/close.svg" size="20px"
+                            :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"></mdi-icon>
                     </view>
                 </view>
                 <view class="choice-list">
-                    <view
-                        v-for="item in themeOptions"
-                        :key="item.value"
-                        class="choice-item"
-                        :class="{
-                            active: settingsStore.options.theme === item.value,
-                            disabled: item.disabled,
-                        }"
-                        @click="!item.disabled && selectTheme(item.value)"
-                    >
+                    <view v-for="item in themeOptions" :key="item.value" class="choice-item" :class="{
+                        active: settingsStore.options.theme === item.value,
+                        disabled: item.disabled,
+                    }" @click="!item.disabled && selectTheme(item.value)">
                         <view class="choice-item__left">
                             <view class="choice-item__icon">
-                                <mdi-icon
-                                    :path="item.icon"
-                                    size="24px"
-                                    :color="
-                                        item.disabled
-                                            ? settingsStore.isDark
-                                                ? '#4b5563'
-                                                : '#cbd5e1'
-                                            : settingsStore.options.theme === item.value
-                                              ? '#28B389'
-                                              : settingsStore.isDark
-                                                ? '#e5e7eb'
-                                                : '#374151'
-                                    "
-                                ></mdi-icon>
+                                <mdi-icon :path="item.icon" size="24px" :color="item.disabled
+                                    ? settingsStore.isDark
+                                        ? '#4b5563'
+                                        : '#cbd5e1'
+                                    : settingsStore.options.theme === item.value
+                                        ? '#28B389'
+                                        : settingsStore.isDark
+                                            ? '#e5e7eb'
+                                            : '#374151'
+                                    "></mdi-icon>
                             </view>
                             <view class="choice-item__text">
-                                <text
-                                    class="choice-item__label"
-                                    :style="{ color: item.disabled ? 'var(--text-tertiary)' : '' }"
-                                >
+                                <text class="choice-item__label"
+                                    :style="{ color: item.disabled ? 'var(--text-tertiary)' : '' }">
                                     {{ item.label }}
                                 </text>
                                 <text class="choice-item__desc">
@@ -346,76 +271,52 @@
                                 </text>
                             </view>
                         </view>
-                        <mdi-icon
-                            v-if="settingsStore.options.theme === item.value && !item.disabled"
-                            path="/static/icons/check.svg"
-                            size="20px"
-                            color="#28B389"
-                        ></mdi-icon>
+                        <mdi-icon v-if="settingsStore.options.theme === item.value && !item.disabled"
+                            path="/static/icons/check.svg" size="20px" color="#28B389"></mdi-icon>
                     </view>
                 </view>
             </view>
         </uni-popup>
 
         <uni-popup ref="languagePopup" type="center" :mask-click="true" :safe-area="true">
-            <view class="choice-popup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+            <view class="choice-popup language-choice-popup"
+                :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="choice-popup__head">
                     <text class="choice-popup__title">{{ t('settings.items.language.label') }}</text>
                     <view class="choice-popup__close" @click="closeLanguagePopup">
-                        <mdi-icon
-                            path="/static/icons/close.svg"
-                            size="20px"
-                            :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"
-                        ></mdi-icon>
+                        <mdi-icon path="/static/icons/close.svg" size="18px"
+                            :color="settingsStore.isDark ? '#9ca3af' : '#6f7786'"></mdi-icon>
                     </view>
                 </view>
                 <view class="choice-list">
-                    <view
-                        v-for="item in languageOptions"
-                        :key="item.value"
-                        class="choice-item"
-                        :class="{ active: languagePreference === item.value }"
-                        @click="selectLanguage(item.value)"
-                    >
+                    <view v-for="item in languageOptions" :key="item.value" class="choice-item"
+                        :class="{ active: languagePreference === item.value }" @click="selectLanguage(item.value)">
                         <view class="choice-item__left">
-                            <view class="choice-item__icon">
-                                <mdi-icon
-                                    :path="item.icon"
-                                    size="24px"
-                                    :color="
-                                        languagePreference === item.value
-                                            ? '#28B389'
-                                            : settingsStore.isDark
-                                              ? '#e5e7eb'
-                                              : '#374151'
-                                    "
-                                ></mdi-icon>
+                            <view class="choice-item__icon" :class="`icon-badge--${item.type}`">
+                                <text v-if="item.badgeText" class="choice-item__badge-txt">{{ item.badgeText }}</text>
+                                <mdi-icon v-else :path="item.icon" size="20px" :color="languagePreference === item.value
+                                    ? '#28B389'
+                                    : settingsStore.isDark
+                                        ? '#e5e7eb'
+                                        : '#374151'
+                                    "></mdi-icon>
                             </view>
                             <view class="choice-item__text">
                                 <text class="choice-item__label">{{ item.label }}</text>
                                 <text v-if="item.desc" class="choice-item__desc">{{ item.desc }}</text>
                             </view>
                         </view>
-                        <mdi-icon
-                            v-if="languagePreference === item.value"
-                            path="/static/icons/check.svg"
-                            size="20px"
-                            color="#28B389"
-                        ></mdi-icon>
+                        <view v-if="languagePreference === item.value" class="choice-item__check-box">
+                            <mdi-icon path="/static/icons/check.svg" size="16px" color="#ffffff"></mdi-icon>
+                        </view>
                     </view>
                 </view>
             </view>
         </uni-popup>
-        <popup-navigation-dialog
-            ref="navDialog"
-            :title="dialogState.title"
-            :description="dialogState.description"
-            :confirmText="dialogState.confirmText"
-            :cancelText="dialogState.cancelText"
-            :showCancel="dialogState.showCancel"
-            @confirm="dialogState.onConfirm"
-            @cancel="dialogState.onCancel"
-        ></popup-navigation-dialog>
+        <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
+            :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            :showCancel="dialogState.showCancel" @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"></popup-navigation-dialog>
     </view>
 </template>
 
@@ -499,8 +400,8 @@ const dialogState = ref({
     confirmText: '',
     cancelText: '',
     showCancel: true,
-    onConfirm: () => {},
-    onCancel: () => {},
+    onConfirm: () => { },
+    onCancel: () => { },
 });
 
 const showNavDialog = (config) => {
@@ -530,8 +431,8 @@ const languagePreference = computed(() => {
 const languageValueLabel = computed(() => {
     const pref = languagePreference.value;
     if (pref === LANGUAGE_PREF_AUTO) return t('settings.items.language.auto');
-    if (pref === LANGUAGE_PREF_EN) return t('settings.items.language.valueEn');
-    return t('settings.items.language.valueZh');
+    if (pref === LANGUAGE_PREF_EN) return 'English';
+    return '简体中文';
 });
 
 const themeValueLabel = computed(() => {
@@ -569,26 +470,38 @@ const themeOptions = computed(() => {
     ];
 });
 
-const languageOptions = computed(() => [
-    {
-        value: LANGUAGE_PREF_AUTO,
-        icon: '/static/icons/translate.svg',
-        label: t('settings.items.language.auto'),
-        desc: t('settings.items.language.sublabel'),
-    },
-    {
-        value: LANGUAGE_PREF_EN,
-        icon: '/static/icons/translate.svg',
-        label: t('settings.items.language.valueEn'),
-        desc: '',
-    },
-    {
-        value: LANGUAGE_PREF_ZH,
-        icon: '/static/icons/translate.svg',
-        label: t('settings.items.language.valueZh'),
-        desc: '',
-    },
-]);
+const languageOptions = computed(() => {
+    // 用 settingsStore.osLanguage（设备真实系统语言，App.vue onShow 时刷新）
+    const isSystemZh = String(settingsStore.osLanguage || '').toLowerCase().startsWith('zh');
+    const systemLangText = isSystemZh ? '简体中文' : 'English';
+
+    return [
+        {
+            value: LANGUAGE_PREF_AUTO,
+            icon: '/static/icons/translate.svg',
+            label: t('settings.items.language.auto'),
+            desc: `${t('settings.items.language.sublabel')} (${systemLangText})`,
+            badgeText: '',
+            type: 'auto',
+        },
+        {
+            value: LANGUAGE_PREF_EN,
+            icon: '/static/icons/translate.svg',
+            label: 'English',
+            desc: t('settings.items.language.valueEn'),
+            badgeText: 'EN',
+            type: 'en',
+        },
+        {
+            value: LANGUAGE_PREF_ZH,
+            icon: '/static/icons/translate.svg',
+            label: '简体中文',
+            desc: t('settings.items.language.valueZh'),
+            badgeText: '中',
+            type: 'zh',
+        },
+    ];
+});
 
 const toggles = reactive({
     twoFA: true,
@@ -687,14 +600,14 @@ const sections = computed(() => {
             items: [
                 ...(userStore.isAdmin
                     ? [
-                          {
-                              key: 'preference_center',
-                              icon: '/static/icons/tag.svg',
-                              label: t('user.settings.preferences'),
-                              sublabel: t('user.settings.managePreferences'),
-                              action: () => uni.navigateTo({ url: '/pages/user/preferences' }),
-                          },
-                      ]
+                        {
+                            key: 'preference_center',
+                            icon: '/static/icons/tag.svg',
+                            label: t('user.settings.preferences'),
+                            sublabel: t('user.settings.managePreferences'),
+                            action: () => uni.navigateTo({ url: '/pages/user/preferences' }),
+                        },
+                    ]
                     : []),
                 {
                     key: 'language',
@@ -803,21 +716,21 @@ const sections = computed(() => {
                 // #ifdef MP-WEIXIN
                 ...(userStore.isAdmin
                     ? [
-                          {
-                              key: 'contact_support_wx',
-                              icon: '/static/icons/forum.svg',
-                              label: t('user.profile.support'),
-                              sublabel: t('settings.items.contactSupport.sublabel'),
-                              action: () => {},
-                          },
-                          {
-                              key: 'send_feedback_wx',
-                              icon: '/static/icons/comment-processing.svg',
-                              label: t('user.profile.feedback'),
-                              sublabel: t('settings.items.sendFeedback.sublabel'),
-                              action: () => {},
-                          },
-                      ]
+                        {
+                            key: 'contact_support_wx',
+                            icon: '/static/icons/forum.svg',
+                            label: t('user.profile.support'),
+                            sublabel: t('settings.items.contactSupport.sublabel'),
+                            action: () => { },
+                        },
+                        {
+                            key: 'send_feedback_wx',
+                            icon: '/static/icons/comment-processing.svg',
+                            label: t('user.profile.feedback'),
+                            sublabel: t('settings.items.sendFeedback.sublabel'),
+                            action: () => { },
+                        },
+                    ]
                     : []),
                 // #endif
                 {
@@ -890,7 +803,7 @@ const sections = computed(() => {
                             sublabel: t('settings.items.share.sublabel'),
                             action: shareApp,
                         },
-                      ]
+                    ]
                     : []),
             ],
         },
@@ -946,17 +859,10 @@ function goBack() {
 function syncLanguagePreference() {
     const storePref = settingsStore.options.language === 'zh-CN' ? LANGUAGE_PREF_ZH : settingsStore.options.language;
     const stored = getLanguagePreference();
+    const currentPref = storePref || stored || LANGUAGE_PREF_AUTO;
 
-    if (storePref && storePref !== LANGUAGE_PREF_AUTO) {
-        if (stored !== storePref || locale.value !== resolveAppLocale(storePref)) {
-            applyLanguagePreference(storePref, locale, t);
-        }
-        return;
-    }
-
-    if (stored) {
-        settingsStore.options.language = stored;
-    }
+    settingsStore.options.language = currentPref;
+    applyLanguagePreference(currentPref, locale);
 }
 
 function selectLanguage(pref) {
@@ -1053,7 +959,7 @@ async function clearCache() {
 
         // #ifdef APP-PLUS
         if (typeof plus !== 'undefined' && plus.cache) {
-            plus.cache.clear(() => {});
+            plus.cache.clear(() => { });
         }
         // #endif
 
@@ -1709,15 +1615,50 @@ function shareApp() {
 }
 
 .choice-item__icon {
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 18rpx;
+    width: 76rpx;
+    height: 76rpx;
+    border-radius: 20rpx;
     background: var(--page-background-secondary);
     border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+
+    &.icon-badge--zh {
+        background: rgba(40, 179, 137, 0.12);
+        border-color: rgba(40, 179, 137, 0.25);
+        color: #28b389;
+    }
+
+    &.icon-badge--en {
+        background: rgba(99, 102, 241, 0.12);
+        border-color: rgba(99, 102, 241, 0.25);
+        color: #6366f1;
+    }
+
+    &.icon-badge--auto {
+        background: rgba(168, 85, 247, 0.12);
+        border-color: rgba(168, 85, 247, 0.25);
+    }
+}
+
+.choice-item__badge-txt {
+    font-size: 26rpx;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.choice-item__check-box {
+    width: 44rpx;
+    height: 44rpx;
+    border-radius: 50%;
+    background: #28b389;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4rpx 12rpx rgba(40, 179, 137, 0.3);
 }
 
 .choice-item__text {
@@ -2147,6 +2088,7 @@ function shareApp() {
         }
     }
 }
+
 .about-popup {
     width: 86vw;
     max-height: 86vh;

@@ -189,6 +189,7 @@ import { useUserStore } from "@/stores/user.js";
 import { apiGetPaymentProducts, apiAlipayOrder, apiGetOrderStatus, apiMockPay } from "@/api/payment.js";
 import { getStatusBarHeight } from "@/utils/layout.js";
 import { useTranslateParams } from "@/utils/i18n.js";
+import { CHANNEL } from "@/common/config.js";
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -396,7 +397,7 @@ const confirmAndExecutePayment = async () => {
 
 // 7. 支付宝支付
 const handleAlipay = async (card, platform) => {
-    const createRes = await apiAlipayOrder({ product_id: card.id, platform });
+    const createRes = await apiAlipayOrder({ product_id: card.id, channel: CHANNEL, platform });
 
     if (!(createRes.code === 200 && createRes.data)) {
         throw new Error(createRes.message || t("membership.orderFailed"));
@@ -407,6 +408,15 @@ const handleAlipay = async (card, platform) => {
     // ── App 真实支付 ──────────────────
     // #ifdef APP
     uni.hideLoading();
+
+    // 测试：获取可使用的服务提供商
+    // uni.getProvider({
+    //     service: 'payment',
+    //     success: (res) => {
+    //         console.log(res.provider); // 应包含 'alipay'
+    //     }
+    // });
+
     uni.requestPayment({
         provider: "alipay",
         orderInfo: order_string,
@@ -415,6 +425,7 @@ const handleAlipay = async (card, platform) => {
             pollOrderStatus(order_no);
         },
         fail: (err) => {
+            // console.log("error:", err)
             if (err.errMsg?.includes("cancel")) {
                 uni.showToast({ title: t("membership.cancelPay"), icon: "none" });
             } else {

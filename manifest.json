@@ -11,11 +11,31 @@
         "themeLocation" : "theme.json",
         "safearea" : {
             "background" : "#f5f5f8",
-            "backgroundDark" : "#1c1c1c"
+            "backgroundDark" : "#1c1c1c",
+            "bottom" : {
+                "offset" : "none"
+            }
         },
-        // "bottom" : {
-        //     "offset" : "none"
-        // }
+        "locales": {
+              "en": {
+                "name": "Ego Wallpapers",
+                "description": "Explore wallpapers, and explore yourself.",
+                "ios": {
+                  "privacyDescription": {
+                    "NSPhotoLibraryUsageDescription": "Need access to your photo library"
+                  }
+                }
+              },
+              "zh-Hans": {
+                "name": "本我壁纸",
+                "description": "探索壁纸，亦探索自我。",
+                "ios": {
+                  "privacyDescription": {
+                    "NSPhotoLibraryUsageDescription": "需要访问您的相册"
+                  }
+                }
+              }
+            },
         "usingComponents" : true,
         "nvueStyleCompiler" : "uni-app",
         "compilerVersion" : 3,
@@ -220,6 +240,17 @@
                     "signAlg" : "SHA256withECDSA",
                     "storeFile" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.p12",
                     "storePassword" : "00000023E5A2CA26358069CADF876CDC9A0A4D2C36C79ABCBF370DDB5A5943C17A1C95190C7BFF3E9B5DA5335FB82B3DD382B9"
+                }
+            },
+            "modules" : {
+                "uni-payment" : {
+                    "alipay" : {},
+                    "wxpay" : {}
+                },
+                "uni-share" : {
+                    "weixin" : {
+                        "appid" : "wx74c392f8525b9268"
+                    }
                 }
             }
         }
