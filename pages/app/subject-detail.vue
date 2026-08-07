@@ -44,10 +44,10 @@
                     <uni-icons type="vip-filled" size="12" color="#ffffff"></uni-icons>
                     <text style="margin-left: 6rpx;">VIP ONLY</text>
                 </view>
-                <view class="hero__badge" v-else-if="currentSubject && currentSubject.tags">
-                    {{ currentSubject.tags.split(',')[0] }}
+                <view class="hero__badge" v-else-if="subjectTag">
+                    {{ subjectTag }}
                 </view>
-                <view class="hero__badge" v-else>专题策划</view>
+                <view class="hero__badge" v-else>{{ t('index.subjectRecommend') }}</view>
                 <view class="hero__title">{{ heroTitle }}</view>
                 <view class="hero__desc">{{ heroDesc }}</view>
             </view>
@@ -142,12 +142,25 @@ const heroTitle = computed(() => {
     if (currentSubject.value) {
         return isEn.value ? (currentSubject.value.name_en || currentSubject.value.name) : currentSubject.value.name;
     }
-    return props.name || '';
+    return isEn.value ? (props.name_en || props.name || '') : (props.name || '');
 });
 
 const heroDesc = computed(() => {
     if (currentSubject.value) {
         return isEn.value ? (currentSubject.value.content_en || currentSubject.value.content) : currentSubject.value.content;
+    }
+    return '';
+});
+
+const subjectTag = computed(() => {
+    if (!currentSubject.value) return '';
+    if (isEn.value && currentSubject.value.tags_en) {
+        const first = currentSubject.value.tags_en.split(',')[0]?.trim();
+        if (first) return first;
+    }
+    if (currentSubject.value.tags) {
+        const first = currentSubject.value.tags.split(',')[0]?.trim();
+        if (first) return first;
     }
     return '';
 });

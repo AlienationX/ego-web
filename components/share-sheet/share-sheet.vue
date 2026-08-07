@@ -16,7 +16,7 @@
                 <!-- 1. 微信好友 -->
                 <view class="share-item" @click="shareToWechat('WXSceneSession')">
                     <view class="icon-wrap icon-weixin">
-                        <uni-icons type="weixin" size="32" color="#ffffff"></uni-icons>
+                        <uni-icons type="weixin" size="40" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.weixinFriend') }}</text>
                 </view>
@@ -24,7 +24,7 @@
                 <!-- 2. 微信朋友圈 (小程序不支持分享朋友圈) -->
                 <view class="share-item" @click="shareToWechat('WXSceneTimeline')">
                     <view class="icon-wrap icon-pyq">
-                        <uni-icons type="pyq" size="32" color="#ffffff"></uni-icons>
+                        <uni-icons type="pyq" size="40" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.weixinTimeline') }}</text>
                 </view>
@@ -32,7 +32,7 @@
                 <!-- 3. 新浪微博 -->
                 <view class="share-item" @click="shareToWeibo">
                     <view class="icon-wrap icon-weibo">
-                        <uni-icons type="weibo" size="32" color="#ffffff"></uni-icons>
+                        <uni-icons type="weibo" size="40" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.weibo') }}</text>
                 </view>
@@ -40,7 +40,7 @@
                 <!-- 4. QQ好友 -->
                 <view class="share-item" @click="shareToQQ">
                     <view class="icon-wrap icon-qq">
-                        <uni-icons type="qq" size="32" color="#ffffff"></uni-icons>
+                        <uni-icons type="qq" size="40" color="#ffffff"></uni-icons>
                     </view>
                     <text class="item-label">{{ t('shareSheet.qq') }}</text>
                 </view>
@@ -48,7 +48,7 @@
                 <!-- 5. 系统原生分享 -->
                 <view class="share-item" @click="shareToSystem">
                     <view class="icon-wrap icon-system">
-                        <mdi-icon path="/static/icons/export.svg" size="30px" color="#ffffff"></mdi-icon>
+                        <mdi-icon path="/static/icons/export.svg" size="32px" color="#ffffff"></mdi-icon>
                     </view>
                     <text class="item-label">{{ t('shareSheet.systemShare') }}</text>
                 </view>

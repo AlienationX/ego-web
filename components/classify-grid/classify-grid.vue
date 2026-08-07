@@ -53,7 +53,7 @@
                             {{ t('common.seeAll') || '探索分类' }}
                         </button>
                         <button class="quick-look-btn secondary" @click="closeQuickLook">
-                            关闭
+                            {{ t('common.cancel') || '关闭' }}
                         </button>
                     </view>
                 </view>
@@ -386,12 +386,21 @@ const goClasslistFromQuickLook = (item) => {
     .quick-look-btn {
         flex: 1;
         height: 88rpx;
-        line-height: 88rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
         border-radius: 100rpx;
         font-size: 28rpx;
         font-weight: 700;
+        text-align: center;
         border: none;
         outline: none;
+
+        &::after {
+            border: none;
+        }
 
         &.primary {
             background: #ffffff;
