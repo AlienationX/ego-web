@@ -53,7 +53,7 @@
             </view>
         </view>
 
-        <custom-ad-banner v-slot="{ adActive }" @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner v-if="IS_INTERNATIONAL" v-slot="{ adActive }" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -65,6 +65,7 @@ import { apiGetSubjectDetail } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { IS_INTERNATIONAL } from '@/utils/system.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();

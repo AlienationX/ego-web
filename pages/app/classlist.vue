@@ -63,7 +63,7 @@
             </view>
         </view>
 
-        <custom-ad-banner v-if="shouldShowHeroHiddenAd" @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner v-if="IS_INTERNATIONAL && shouldShowHeroHiddenAd" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -77,6 +77,7 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
+import { IS_INTERNATIONAL } from '@/utils/system.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();

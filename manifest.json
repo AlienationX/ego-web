@@ -16,26 +16,26 @@
                 "offset" : "none"
             }
         },
-        "locales": {
-              "en": {
-                "name": "Ego Wallpapers",
-                "description": "Explore wallpapers, and explore yourself.",
-                "ios": {
-                  "privacyDescription": {
-                    "NSPhotoLibraryUsageDescription": "Need access to your photo library"
-                  }
+        "locales" : {
+            "en" : {
+                "name" : "Ego Wallpapers",
+                "description" : "Explore wallpapers, and explore yourself.",
+                "ios" : {
+                    "privacyDescription" : {
+                        "NSPhotoLibraryUsageDescription" : "Need access to your photo library"
+                    }
                 }
-              },
-              "zh-Hans": {
-                "name": "本我壁纸",
-                "description": "探索壁纸，亦探索自我。",
-                "ios": {
-                  "privacyDescription": {
-                    "NSPhotoLibraryUsageDescription": "需要访问您的相册"
-                  }
-                }
-              }
             },
+            "zh-Hans" : {
+                "name" : "本我壁纸",
+                "description" : "探索壁纸，亦探索自我。",
+                "ios" : {
+                    "privacyDescription" : {
+                        "NSPhotoLibraryUsageDescription" : "需要访问您的相册"
+                    }
+                }
+            }
+        },
         "usingComponents" : true,
         "nvueStyleCompiler" : "uni-app",
         "compilerVersion" : 3,

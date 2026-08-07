@@ -17,6 +17,7 @@
 import { ref, computed, watch } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 import { getTabBarHeight } from '@/utils/layout.js';
 
 const props = defineProps({
@@ -44,8 +45,9 @@ const calculatedBottom = computed(() => {
 
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 
-const showAd = computed(() => !userStore.isVip && userStore.showAd);
+const showAd = computed(() => !userStore.isVip && !!appStore.versionConfig?.ad_enabled);
 
 const isLoaded = ref(false);
 const isError = ref(false);

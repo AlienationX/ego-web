@@ -1,11 +1,12 @@
-// ifdef APP || MP     # 代表 APP平台 或 小程序平台，只有ifdef才有多个平台的或逻辑
 import { downloadPic } from '@/common/core.js';
 import { t } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user.js';
+import { useAppStore } from '@/stores/app.js';
 
 export const useAdIntersititial = () => {
     // #ifdef APP-PLUS
     const userStore = useUserStore();
+    const appStore = useAppStore();
 
     const adOption = {
         // 1111111113 HBuilder基座的测试广告位
@@ -13,7 +14,7 @@ export const useAdIntersititial = () => {
         adpid: '1129226586',
     };
 
-    const shouldBypassAd = () => userStore.isVip || !userStore.showAd;
+    const shouldBypassAd = () => userStore.isVip || !appStore.versionConfig?.ad_enabled;
     const safeDownload = (url) => {
         if (url) downloadPic(url);
     };
@@ -180,6 +181,7 @@ export const useAdIntersititial = () => {
 export const useAdRewardedVideo = () => {
     // #ifdef APP-PLUS
     const userStore = useUserStore();
+    const appStore = useAppStore();
 
     const adOption = {
         // 1507000689 HBuilder基座的测试广告位
@@ -192,7 +194,7 @@ export const useAdRewardedVideo = () => {
         },
     };
 
-    const shouldBypassAd = () => userStore.isVip || !userStore.showAd;
+    const shouldBypassAd = () => userStore.isVip || !appStore.versionConfig?.ad_enabled;
     const safeDownload = (url) => {
         if (url) downloadPic(url);
     };

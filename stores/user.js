@@ -16,7 +16,6 @@ export const useUserStore = defineStore(
             fontSize: 14,
         });
 
-        const showAd = ref(true); // 全局控制
         const isLoggedIn = computed(() => Boolean(userinfo.value.id) || false); // 登录状态控制
         const isVip = computed(() => userinfo.value.profile?.is_vip || false); // 用户级别控制
         const isDeveloper = computed(
@@ -109,7 +108,6 @@ export const useUserStore = defineStore(
             accessToken,
             refreshToken,
             userinfo,
-            showAd,
             isVip,
             isLoggedIn,
             isDeveloper,
