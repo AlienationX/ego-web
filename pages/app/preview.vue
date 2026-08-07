@@ -652,22 +652,6 @@ const showNavDialog = (config) => {
 };
 
 const clockStylePopup = ref(null);
-const activeSessionClockStyle = ref('default');
-
-onMounted(() => {
-    let savedStyle = settingsStore.options.clockStyle || 'default';
-    const savedItem = clockStyles.value.find(s => s.value === savedStyle);
-    // 如果保存的是 VIP 样式，但当前用户不是 VIP，则回退为普通样式
-    if (savedItem?.isVip && !userStore.isVip) {
-        savedStyle = 'default';
-        settingsStore.options.clockStyle = savedStyle; // 自动修复本地错误状态
-    }
-    activeSessionClockStyle.value = savedStyle;
-});
-
-const currentClockStyle = computed(() => activeSessionClockStyle.value);
-const tempClockStyle = ref('');
-const selectedClockStyleItem = computed(() => clockStyles.value.find(s => s.value === tempClockStyle.value));
 
 const clockStyles = computed(() => [
     { value: 'default', name: 'Default', isVip: false },
@@ -679,6 +663,28 @@ const clockStyles = computed(() => [
     { value: 'elegant-serif', name: 'Elegant Serif', isVip: true },
     { value: 'tech-digital', name: 'Tech Digital', isVip: true }
 ]);
+
+const getInitialClockStyle = () => {
+    let savedStyle = settingsStore.options.clockStyle || 'default';
+    const savedItem = clockStyles.value.find(s => s.value === savedStyle);
+    // 如果保存的是 VIP 样式，但当前用户不是 VIP，则回退为普通样式
+    if (savedItem?.isVip && !userStore.isVip) {
+        savedStyle = 'default';
+        settingsStore.options.clockStyle = savedStyle; // 自动修复本地错误状态
+    }
+    return savedStyle;
+};
+
+const activeSessionClockStyle = ref(getInitialClockStyle());
+
+onMounted(() => {
+    activeSessionClockStyle.value = getInitialClockStyle();
+});
+
+const currentClockStyle = computed(() => activeSessionClockStyle.value);
+const tempClockStyle = ref('');
+const selectedClockStyleItem = computed(() => clockStyles.value.find(s => s.value === tempClockStyle.value));
+
 const isClockStylePopupOpen = ref(false);
 
 const openClockStyle = () => {
@@ -707,19 +713,21 @@ const applyTempClockStyle = async () => {
     const item = selectedClockStyleItem.value;
     if (!item) return;
 
+    // 选中免费样式或用户已是 VIP，直接保存生效，不需要强制要求登录
+    if (!item.isVip || userStore.isVip) {
+        settingsStore.options.clockStyle = item.value;
+        activeSessionClockStyle.value = item.value;
+        uni.showToast({ title: t('previewPage.styleApplied'), icon: 'none' });
+        closeClockStyle();
+        return;
+    }
+
+    // 选了 VIP 且非 VIP 用户，后续解锁需消耗能量/看广告，此时才校验登录
     if (!userStore.isLoggedIn) {
         uni.showToast({ title: t('common.needLogin'), icon: 'none' });
         setTimeout(() => {
             uni.navigateTo({ url: '/pages/user/login' });
         }, 1000);
-        return;
-    }
-
-    if (userStore.isVip || !item.isVip) {
-        settingsStore.options.clockStyle = item.value;
-        activeSessionClockStyle.value = item.value;
-        uni.showToast({ title: t('previewPage.styleApplied'), icon: 'none' });
-        closeClockStyle();
         return;
     }
 

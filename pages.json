@@ -354,7 +354,7 @@
         "backgroundColor": "@backgroundColor"
     },
     "tabBar": {
-        "custom": false, // 仅微信小程序支持这个选项
+        // "custom": false, // 仅微信小程序支持这个选项
         "color": "@tabBarColor",
         "selectedColor": "@tabBarSelectedColor",
         "borderStyle": "@tabBarBorderStyle",
