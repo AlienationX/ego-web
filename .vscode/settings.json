@@ -13,4 +13,6 @@
     },
     // 保存时自动格式化
     "editor.formatOnSave": true,
+    "html.format.wrapLineLength": 0,
+    "prettier.htmlWhitespaceSensitivity": "ignore"
 }

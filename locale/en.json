@@ -38,6 +38,7 @@
         "tip": "Tip",
         "confirm": "Confirm",
         "cancel": "Cancel",
+        "free": "Free",
         "submitting": "Submitting...",
         "submitSuccess": "Submitted successfully",
         "submitFailed": "Submit failed",
@@ -1077,5 +1078,23 @@
             "good": "Good",
             "strong": "Strong"
         }
+    },
+    "wallpaper": {
+        "set": "Apply",
+        "sheetTitle": "Set as Wallpaper",
+        "sheetSubtitle": "Choose where to apply",
+        "setSystem": "Home Screen",
+        "setSystemDesc": "Apply to home screen",
+        "setLock": "Lock Screen",
+        "setLockDesc": "Apply to lock screen",
+        "setBoth": "Both Screens",
+        "setBothDesc": "Apply to home and lock screen",
+        "saveOnly": "Save to Gallery",
+        "saveOnlyDesc": "Download to photos",
+        "applying": "Applying wallpaper...",
+        "vipRequiredTitle": "VIP Exclusive Feature",
+        "vipRequiredHint": "Setting wallpaper directly is a VIP feature. Upgrade to VIP to enjoy unlimited access.",
+        "setSuccess": "Wallpaper set successfully",
+        "setFailed": "Failed to set wallpaper, please try again"
     }
 }

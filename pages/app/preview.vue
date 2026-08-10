@@ -78,8 +78,8 @@
                             </view>
                         </view>
 
-                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">{{ currentIndex + 1 }} / {{
-                            classList.length }}</view>
+                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">{{ currentIndex + 1 }} /
+                            {{ classList.length }}</view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
                             <view class="box" @click="toggleCollect">
@@ -92,7 +92,7 @@
                                 <uni-icons type="star-filled" size="28"></uni-icons>
                                 <view class="text">{{ currentInfo.score || '-' }}</view>
                             </view>
-                            <view class="box" @click="clickDownload">
+                            <view class="box" @click="handleApplyWallpaper">
                                 <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
                                 <uni-icons v-else type="download-filled" size="28"></uni-icons>
                                 <view class="text">{{ t('common.download') }}</view>
@@ -120,7 +120,7 @@
                                             t('previewPage.favorite')
                                     }}</view>
                                 </view>
-                                <view class="action-item" @click="clickDownload">
+                                <view class="action-item" @click="handleApplyWallpaper">
                                     <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="36"
                                         color="#ffffff"></uni-icons>
                                     <uni-icons v-else type="download-filled" size="36" color="#ffffff"></uni-icons>
@@ -528,6 +528,11 @@
             :share-url="shareUrl">
         </share-sheet>
 
+        <!-- 壁纸设置底部弹层（Android 专属） -->
+        <!-- #ifdef APP-PLUS -->
+        <wallpaper-action-sheet />
+        <!-- #endif -->
+
         <!-- 管理员快捷控制面板弹窗 (极简风格) -->
         <uni-popup ref="adminMenuPopup" type="bottom" :safe-area="false">
             <view class="admin-menu-sheet" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
@@ -582,15 +587,13 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted, getCurrentInstance } from 'vue';
+import { ref, computed, reactive, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
-
 import { VIDEO_REWARD_ENERGY, SERVICE_EMAIL } from '@/common/config.js';
-import { downloadPic } from '@/common/core.js';
 import {
     apiPostIncrementViews,
     apiPostIncrementDownloads,
@@ -603,11 +606,11 @@ import {
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
-import ShareSheet from '@/components/share-sheet/share-sheet.vue';
 import { useLibraryStore } from '@/stores/library.js';
 import { useStatusStore } from '@/stores/status.js';
 import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
 import { formatPreviewDate, formatFileSize, handlePicUrl } from '@/utils/common.js';
+import { downloadPic } from '../../common/core';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -618,6 +621,7 @@ const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = u
 
 // UI state
 const hideUI = ref(false);
+
 // 通用导航对话框控制
 const navDialog = ref(null);
 const dialogState = reactive({
@@ -679,6 +683,11 @@ const activeSessionClockStyle = ref(getInitialClockStyle());
 
 onMounted(() => {
     activeSessionClockStyle.value = getInitialClockStyle();
+    uni.$on('triggerClickDownload', clickDownload);
+});
+
+onUnmounted(() => {
+    uni.$off('triggerClickDownload', clickDownload);
 });
 
 const currentClockStyle = computed(() => activeSessionClockStyle.value);
@@ -1382,6 +1391,23 @@ const submitScore = async () => {
     }
 };
 
+/** 跨端物理动作路由 */
+function handleApplyWallpaper(picUrl, itemInfo = null) {
+    if (!picUrl) return;
+
+    // #ifdef APP-PLUS
+    const isAndroidApp = uni.getDeviceInfo().platform === 'android';
+    if (isAndroidApp && appStore.versionConfig?.pay_enabled) {
+        // Android 端：唤起选单弹层，且开启了支付功能
+        uni.$emit('showWallpaperSheet', { picUrl, itemInfo });
+        return;
+    }
+    // #endif
+
+    // iOS / 小程序 / H5 端：物理落地方案为直接保存到相册
+    clickDownload();
+}
+
 // 点击下载弹窗观看广告
 const adPopup = ref(null);
 
@@ -1391,117 +1417,124 @@ const clickDownload = async () => {
         content: t('previewPage.savePrompt'),
         showCancel: false,
     });
+    return;
     // #endif
 
     // #ifndef WEB
-    const unlockType = currentInfo.value?.unlock_type || (currentInfo.value?.is_locked ? 'ad_or_vip' : 'free');
-    const effectiveLevel = currentInfo.value?.effective_access_level ?? (currentInfo.value?.is_locked ? 1 : 0);
+    const picurl = currentInfo.value?.picurl;
+    if (!picurl) return;
 
-    // 1. 免费 或 每日免费福利壁纸
-    if (unlockType === 'free' || effectiveLevel === 0) {
-        showInterstitialAd(currentInfo.value.picurl, {
-            onSuccess: (picurl) => {
-                downloadPic(picurl);
-                incrementDownloads(currentInfo.value.id);
+    // 0. 最高优先级：VIP 用户无视锁与广告，直接放行下载/设置
+    if (userStore.isVip) {
+        downloadPic(picurl);
+        incrementDownloads(currentInfo.value?.id);
+        return;
+    }
+
+    // const unlockType = currentInfo.value?.unlock_type;
+    const effectiveLevel = currentInfo.value.effective_access_level;
+    const isLocked = effectiveLevel > 0;
+
+    // 1. 未锁壁纸 (is_locked === false) -> 直接调用插屏广告 showInterstitialAd 处理
+    if (!isLocked) {
+        showInterstitialAd(picurl, {
+            onSuccess: (url) => {
+                downloadPic(url);
+                incrementDownloads(currentInfo.value?.id);
             },
-            onFallback: (picurl) => {
-                downloadPic(picurl);
-                incrementDownloads(currentInfo.value.id);
+            onFallback: (url) => {
+                downloadPic(url);
+                incrementDownloads(currentInfo.value?.id);
             },
         });
         return;
     }
 
-    // 2. 如果用户已经是 VIP 订阅者，所有壁纸直接免广告/免卡顿下载
-    if (userStore.isVip) {
-        downloadPic(currentInfo.value.picurl);
-        incrementDownloads(currentInfo.value.id);
-        return;
-    }
-
+    // 2. 有锁壁纸 (is_locked === true) 4 矩阵判定
     const adEnabled = appStore.versionConfig?.ad_enabled !== false;
     const payEnabled = appStore.versionConfig?.pay_enabled !== false;
 
-    // 模式 1: 无广告且无支付（审核期/免费福利渠道）-> 所有广告与 VIP 壁纸均直接放行下载
-    if (!adEnabled && !payEnabled) {
-        downloadPic(currentInfo.value.picurl);
-        incrementDownloads(currentInfo.value.id);
-        return;
-    }
-
-    // 3. VIP 专属壁纸 (access_level = 2)
-    if (unlockType === 'vip_only' || effectiveLevel === 2) {
+    // 2.1 特殊锁类型: effectiveLevel === 2 (纯 VIP 壁纸)
+    if (effectiveLevel === 2) {
         if (payEnabled) {
-            showNavDialog({
-                title: t('membership.vipExclusiveTitle') || 'VIP 专属壁纸',
-                content: t('membership.vipExclusiveHint') || '该壁纸为独家 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。',
-                confirmText: t('membership.openVipNow') || '立即开通 VIP',
-                cancelText: t('common.cancel'),
-                onConfirm: () => {
-                    uni.navigateTo({ url: '/pages/member/payment' });
-                },
-            });
+            // 【有支付】 -> 弹出 1 个按钮：开通 VIP
+            if (adPopup.value) {
+                adPopup.value.open({
+                    title: t('membership.vipExclusiveTitle') || 'VIP 专属壁纸',
+                    desc: t('membership.vipExclusiveHint') || '该壁纸为 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。',
+                    showAdBtn: false,
+                    showVipBtn: true,
+                    vipBtnText: t('membership.openVipNow') || '立即开通 VIP',
+                });
+            }
+            return;
+        } else if (adEnabled) {
+            // 【无支付有广告】 -> 弹出 1 个按钮：看广告免费解锁
+            if (adPopup.value) {
+                adPopup.value.open({
+                    title: t('previewPage.unlockTitle') || '解锁高精壁纸',
+                    desc: t('previewPage.unlockHintSingleAd') || '观看一段视频广告即可免费解锁下载。',
+                    showAdBtn: true,
+                    adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费解锁',
+                    showVipBtn: false,
+                });
+            }
+            return;
+        } else {
+            // 【无支付且无广告】 -> 直接放行
+            downloadPic(picurl);
+            incrementDownloads(currentInfo.value?.id);
             return;
         }
-        // 若开启了广告但未开通支付，降级为看激励视频广告解锁 VIP 专属壁纸
     }
 
-    // 4. 看广告/VIP下载 (access_level = 1 或 降级广告处理)
-    // 纯 VIP 模式（开启支付但无广告）：无法播放广告，引导开通 VIP
-    if (!adEnabled && payEnabled) {
-        showNavDialog({
-            title: t('membership.title') || '开通会员',
-            content: t('previewPage.adUnavailablePrompt') || '当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。',
-            confirmText: t('membership.openVipNow') || '开通 VIP',
-            cancelText: t('common.cancel'),
-            onConfirm: () => {
-                uni.navigateTo({ url: '/pages/member/payment' });
-            },
-        });
+    // 2.2 普通锁情况 1: 有广告 + 有支付 -> 弹出 2 个按钮（看广告主按钮 + VIP次要按钮）
+    if (adEnabled && payEnabled) {
+        if (adPopup.value) {
+            adPopup.value.open({
+                title: t('previewPage.unlockTitle') || '解锁高精壁纸',
+                desc: t('previewPage.unlockHint') || '观看一段视频广告即可免费解锁下载，或开通 VIP 享受无广告全站畅下。',
+                showAdBtn: true,
+                adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费解锁',
+                showVipBtn: true,
+                vipBtnText: t('membership.openVipNow') || '开通 VIP 畅下',
+            });
+        }
         return;
     }
 
-    // 调起激励视频广告
-    showRewardedVideoAd(currentInfo.value.picurl, {
-        onSuccess: (picurl) => {
-            downloadPic(picurl);
-            incrementDownloads(currentInfo.value.id);
-        },
-        onError: (err) => {
-            console.error('Reward video ad error:', err);
-            if (payEnabled) {
-                showNavDialog({
-                    title: t('previewPage.adFailedTitle') || '广告加载失败',
-                    content: t('previewPage.adFailedHint') || '激励视频广告暂时无法展示。建议升级 VIP 专享免广告高速下载。',
-                    confirmText: t('membership.title') || '升级 VIP',
-                    cancelText: t('common.cancel'),
-                    onConfirm: () => {
-                        uni.navigateTo({ url: '/pages/member/payment' });
-                    },
-                });
-            } else {
-                // 纯广告模式无支付接口时，广告加载失败直接放行下载
-                downloadPic(currentInfo.value.picurl);
-                incrementDownloads(currentInfo.value.id);
-            }
-        },
-        onFallback: () => {
-            if (payEnabled) {
-                showNavDialog({
-                    title: t('membership.title') || '开通会员',
-                    content: t('previewPage.adUnavailablePrompt') || '当前环境暂不可播放广告，开通 VIP 即可解锁无限壁纸下载。',
-                    confirmText: t('membership.openVipNow') || '开通 VIP',
-                    cancelText: t('common.cancel'),
-                    onConfirm: () => {
-                        uni.navigateTo({ url: '/pages/member/payment' });
-                    },
-                });
-            } else {
-                downloadPic(currentInfo.value.picurl);
-                incrementDownloads(currentInfo.value.id);
-            }
+    // 2.3 普通锁情况 2: 无广告 + 有支付 -> 弹出 1 个按钮（开通 VIP 按钮）
+    if (!adEnabled && payEnabled) {
+        if (adPopup.value) {
+            adPopup.value.open({
+                title: t('membership.vipRequiredTitle') || '开通会员解锁',
+                desc: t('membership.noAdSupportHint') || '本平台暂不支持广告解锁，需开通会员解锁下载。',
+                showAdBtn: false,
+                showVipBtn: true,
+                vipBtnText: t('membership.openVipNow') || '立即开通 VIP',
+            });
         }
-    });
+        return;
+    }
+
+    // 2.4 普通锁情况 3: 有广告 + 无支付 -> 弹出 1 个按钮（看广告免费解锁按钮）
+    if (adEnabled && !payEnabled) {
+        if (adPopup.value) {
+            adPopup.value.open({
+                title: t('previewPage.unlockTitle') || '解锁高精壁纸',
+                desc: t('previewPage.unlockHintSingleAd') || '观看一段视频广告即可免费解锁下载。',
+                showAdBtn: true,
+                adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费解锁',
+                showVipBtn: false,
+            });
+        }
+        return;
+    }
+
+    // 异常情况或数据异常，未捕获 -> 直接放行
+    console.warn('异常情况或数据异常，未捕获 -> 直接放行');
+    downloadPic(picurl);
+    incrementDownloads(currentInfo.value?.id);
     // #endif
 };
 

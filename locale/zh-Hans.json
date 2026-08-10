@@ -38,6 +38,7 @@
         "tip": "提示",
         "confirm": "确定",
         "cancel": "取消",
+        "free": "免费",
         "submitting": "提交中...",
         "submitSuccess": "提交成功",
         "submitFailed": "提交失败",
@@ -625,7 +626,7 @@
         "total": "应付总额",
         "method": "支付方式",
         "vipExclusiveTitle": "VIP 专属壁纸",
-        "vipExclusiveHint": "该壁纸为独家 VIP 专属高精资源，开通会员后可无限制下载全站壁纸。",
+        "vipExclusiveHint": "该壁纸为 VIP 专属高精资源，开通会员后可无限制下载全站壁纸。",
         "openVipNow": "立即开通 VIP"
     },
     "favorite": {
@@ -1077,5 +1078,23 @@
             "good": "良好",
             "strong": "强"
         }
+    },
+    "wallpaper": {
+        "set": "设置",
+        "sheetTitle": "设置为壁纸",
+        "sheetSubtitle": "选择设置位置",
+        "setSystem": "桌面壁纸",
+        "setSystemDesc": "设置为工作台壁纸",
+        "setLock": "锁屏壁纸",
+        "setLockDesc": "设置为锁屏壁纸",
+        "setBoth": "全局壁纸",
+        "setBothDesc": "同时设置桌面与锁屏",
+        "saveOnly": "保存到相册",
+        "saveOnlyDesc": "下载到本地相册",
+        "applying": "设置壁纸中...",
+        "vipRequiredTitle": "VIP 专属功能",
+        "vipRequiredHint": "一键设置手机桌面与锁屏壁纸为 VIP 专属功能，开通会员后可无限次享用。",
+        "setSuccess": "壁纸设置成功",
+        "setFailed": "壁纸设置失败，请重试"
     }
 }

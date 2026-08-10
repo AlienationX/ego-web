@@ -2,26 +2,27 @@
     <uni-popup ref="popup" type="center" :mask-click="true" :safe-area="true">
         <view class="ad-prompt" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
             <view class="ad-prompt__close" @click="close">
-                <mdi-icon
-                    path="/static/icons/close.svg"
-                    size="18px"
-                    :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"
-                ></mdi-icon>
+                <mdi-icon path="/static/icons/close.svg" size="18px"
+                    :color="settingsStore.isDark ? '#e5e7eb' : '#2f3949'"></mdi-icon>
             </view>
 
             <image class="ad-prompt__image" src="/static/images/pictures.svg" mode="aspectFit"></image>
 
-            <text class="ad-prompt__title">{{ $t('message.adText') }}</text>
-            <text class="ad-prompt__desc">{{ $t('message.adEnergyHint') }}</text>
+            <text class="ad-prompt__title">{{ customTitle || $t('message.adText') }}</text>
+            <text class="ad-prompt__desc">{{ customDesc || $t('message.adEnergyHint') }}</text>
 
-            <button class="ad-prompt__button" @click="onWatch">
-                {{ $t('message.adPrompt') }}
+            <!-- 按钮1：当有广告时显示看广告按钮，当无广告有支付时主按钮直接显示开通VIP -->
+            <button v-if="showAdBtn" class="ad-prompt__button" @click="onWatch">
+                {{ adBtnText || $t('message.adPrompt') }}
+            </button>
+            <button v-else-if="showVipBtn" class="ad-prompt__button ad-prompt__button--vip" @click="toMembership">
+                {{ vipBtnText || t('membership.openVipNow') || '立即开通 VIP' }}
             </button>
 
-            <!-- VIP Option for Admin -->
-            <view v-if="userStore.isAdmin" class="ad-prompt__vip-option" @click="toMembership">
+            <!-- 次要 VIP 选项：当既有广告又有支付时，主按钮是看广告，下方显示开通 VIP 链接 -->
+            <view v-if="showAdBtn && showVipBtn" class="ad-prompt__vip-option" @click="toMembership">
                 <mdi-icon path="/static/icons/crown-circle.svg" size="18px" color="#FBBF24"></mdi-icon>
-                <text class="vip-link-text">{{ t('membership.title') }}</text>
+                <text class="vip-link-text">{{ vipBtnText || t('membership.title') || '开通 VIP 畅下' }}</text>
             </view>
         </view>
     </uni-popup>
@@ -47,8 +48,17 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 
+// 动态配置状态
+const customTitle = ref('');
+const customDesc = ref('');
+const showAdBtn = ref(true);
+const adBtnText = ref('');
+const showVipBtn = ref(false);
+const vipBtnText = ref('');
+
 // views字段值+1
 const incrementDownloads = async (id) => {
+    if (!id) return;
     await apiPostIncrementDownloads(id);
     await apiPostActions({
         wall_id: id,
@@ -60,7 +70,16 @@ const incrementDownloads = async (id) => {
 const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
 
 const popup = ref(null);
-const open = () => {
+
+const open = (config = {}) => {
+    if (typeof config === 'object' && config !== null) {
+        customTitle.value = config.title || '';
+        customDesc.value = config.desc || '';
+        showAdBtn.value = config.showAdBtn !== false;
+        adBtnText.value = config.adBtnText || '';
+        showVipBtn.value = !!config.showVipBtn;
+        vipBtnText.value = config.vipBtnText || '';
+    }
     popup.value.open();
 };
 
@@ -73,7 +92,7 @@ const onWatch = () => {
 
     showRewardedVideoAd(props.picurl, {
         onSuccess: async (picurl) => {
-            // 看完广告即下载（核心权益）
+            // 看完广告即下载/设置（核心权益）
             downloadPic(picurl, t);
             incrementDownloads(props.id);
 
@@ -209,7 +228,7 @@ defineExpose({
         align-items: center;
         gap: 8rpx;
         cursor: pointer;
-        
+
         .vip-link-text {
             font-size: 26rpx;
             color: #a855f7;
