@@ -12,9 +12,10 @@
                 <view class="sub-title">{{ t('login.signInSubtitle') }}</view>
             </view>
 
-            <!-- 微信特有快捷登录区域 (微信端第一屏优先展示，且在 showEmailForm 状态为 false 时显示) -->
-            <!-- #ifdef MP-WEIXIN -->
-            <view v-if="!showEmailForm" class="weixin-quick-section">
+            <!-- 微信/鸿蒙快捷登录区域 (微信端及鸿蒙端第一屏优先展示，且在 showEmailForm 状态为 false 时显示) -->
+            <view v-if="!showEmailForm && (isWeixin || isHarmony)" class="weixin-quick-section">
+                <!-- 微信小程序一键登录 -->
+                <!-- #ifdef MP-WEIXIN -->
                 <button class="weixin-quick-btn" @click="handleWechatLogin">
                     <image src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
                     <text>{{ t('login.wechatQuickLogin') }}</text>
@@ -22,6 +23,18 @@
                 <view class="weixin-agreement-hint">
                     {{ t('login.wechatAgreementHint') }}
                 </view>
+                <!-- #endif -->
+
+                <!-- 鸿蒙平台华为账号一键登录 -->
+                <!-- #ifndef MP-WEIXIN -->
+                <button v-if="isHarmony" class="weixin-quick-btn" @click="handleHuaweiLogin">
+                    <image src="/static/icons/brands/huawei.svg" mode="aspectFit" class="social-icon"></image>
+                    <text>{{ t('login.huaweiQuickLogin') }}</text>
+                </button>
+                <view v-if="isHarmony" class="weixin-agreement-hint">
+                    {{ t('login.huaweiAgreementHint') }}
+                </view>
+                <!-- #endif -->
 
                 <!-- 协议复选框 -->
                 <view class="agreement-section">
@@ -41,37 +54,28 @@
                         </view>
                     </view>
                 </view>
-                
+
                 <view class="toggle-other-methods" @click="showEmailForm = true">
                     <text>{{ t('login.useEmailLogin') }}</text>
                     <uni-icons type="arrowdown" size="12" color="#3461fd"></uni-icons>
                 </view>
             </view>
-            <!-- #endif -->
 
             <view v-show="showEmailForm" class="email-form-area">
                 <!-- 登录表单 -->
                 <view class="form-section">
                     <view class="form-item">
-                        <input class="form-input" type="text" :placeholder="t('login.emailPlaceholder')" v-model="form.email" />
+                        <input class="form-input" type="text" :placeholder="t('login.emailPlaceholder')"
+                            v-model="form.email" />
                     </view>
 
                     <view class="form-item password-item" :class="{ focused: passwordFocused }">
-                        <input
-                            class="form-input"
-                            type="text"
-                            :password="!showPassword"
-                            :placeholder="t('login.passwordPlaceholder')"
-                            v-model="form.password"
-                            @focus="passwordFocused = true"
-                            @blur="passwordFocused = false"
-                        />
+                        <input class="form-input" type="text" :password="!showPassword"
+                            :placeholder="t('login.passwordPlaceholder')" v-model="form.password"
+                            @focus="passwordFocused = true" @blur="passwordFocused = false" />
                         <view class="password-toggle" @click="togglePassword">
-                            <mdi-icon
-                                :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
-                                size="20px"
-                                :color="iconMutedColor"
-                            ></mdi-icon>
+                            <mdi-icon :path="showPassword ? '/static/icons/eye-off.svg' : '/static/icons/eye.svg'"
+                                size="20px" :color="iconMutedColor"></mdi-icon>
                         </view>
                     </view>
                 </view>
@@ -124,25 +128,30 @@
                 </view>
 
                 <!-- 分割线 -->
-                <view class="divider" v-if="showDevFeatures || isWeixin">
+                <view class="divider" v-if="showDevFeatures">
                     <view class="divider-line"></view>
                     <text class="divider-text">{{ t('login.or') }}</text>
                     <view class="divider-line"></view>
                 </view>
 
                 <!-- 社交登录按钮 -->
-                <view class="social-section" v-if="showDevFeatures || isWeixin">
+                <view class="social-section" v-if="showDevFeatures">
                     <view class="social-buttons">
                         <view class="social-btn" @click="handleWechatLogin" v-if="showDevFeatures || isWeixin">
                             <image src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
                             <text class="social-text">{{ t('login.wechat') }}</text>
+                        </view>
+                        <view class="social-btn" @click="handleHuaweiLogin" v-if="showDevFeatures || isHarmony">
+                            <image src="/static/icons/brands/huawei.svg" mode="aspectFit" class="social-icon"></image>
+                            <text class="social-text">{{ t('login.huawei') }}</text>
                         </view>
                         <view class="social-btn" @click="handleGoogleLogin" v-if="showDevFeatures">
                             <image src="/static/icons/brands/google.svg" mode="aspectFit" class="social-icon"></image>
                             <text class="social-text">{{ t('login.google') }}</text>
                         </view>
                         <view class="social-btn" @click="handleAppleLogin" v-if="showDevFeatures">
-                            <image src="/static/icons/brands/apple.svg" mode="aspectFit" class="social-icon" :class="{ 'invert-icon': settingsStore.isDark }"></image>
+                            <image src="/static/icons/brands/apple.svg" mode="aspectFit" class="social-icon"
+                                :class="{ 'invert-icon': settingsStore.isDark }"></image>
                             <text class="social-text">{{ t('login.apple') }}</text>
                         </view>
                         <view class="social-btn" @click="handleFacebookLogin" v-if="showDevFeatures">
@@ -153,19 +162,13 @@
                 </view>
             </view>
 
-            
+
         </view>
 
         <!-- 通用导航对话框 -->
-        <popup-navigation-dialog
-            ref="navDialog"
-            :title="dialogState.title"
-            :description="dialogState.description"
-            :confirmText="dialogState.confirmText"
-            :cancelText="dialogState.cancelText"
-            @confirm="dialogState.onConfirm"
-            @cancel="dialogState.onCancel"
-        ></popup-navigation-dialog>
+        <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
+            :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText" @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"></popup-navigation-dialog>
     </view>
 </template>
 
@@ -173,7 +176,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
-import { apiPostLogin, apiPostLoginByWechat } from '@/api/wallpaper.js';
+import { apiPostLogin, apiPostLoginByWechat, apiPostLoginByHuawei } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { encrypt, decrypt } from '@/utils/encryption.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -193,8 +196,8 @@ const dialogState = ref({
     description: '',
     confirmText: '',
     cancelText: '',
-    onConfirm: () => {},
-    onCancel: () => {},
+    onConfirm: () => { },
+    onCancel: () => { },
 });
 
 /**
@@ -230,13 +233,21 @@ const isSubmitting = ref(false);
 const rememberPassword = ref(false);
 const isAgreed = ref(false);
 
-// 控制邮箱密码表单显隐：微信小程序环境默认不展开邮箱表单以优先展示微信一键登录，其他端默认直接显示
+// 控制邮箱密码表单显隐：微信小程序环境与鸿蒙环境默认不展开邮箱表单以优先展示一键登录，其他端默认直接显示
 const showEmailForm = ref(true);
 const isWeixin = ref(false);
+const isHarmony = ref(false);
+
 // #ifdef MP-WEIXIN
 showEmailForm.value = false;
 isWeixin.value = true;
 // #endif
+
+// 判断鸿蒙平台 (uni.getDeviceInfo().platform === 'harmonyos')
+if ((uni.getDeviceInfo().platform).toLowerCase() === 'harmonyos') {
+    isHarmony.value = true;
+    showEmailForm.value = false;
+}
 
 // 开发者选项（用于隐藏审核期间的未完成功能）
 const tapCount = ref(0);
@@ -399,6 +410,60 @@ const handleWechatLogin = () => {
     });
 };
 
+// 华为登录
+const handleHuaweiLogin = () => {
+    // 协议校验
+    if (!isAgreed.value) {
+        uni.showToast({
+            title: t('login.agreeRequired'),
+            icon: 'none',
+        });
+        return;
+    }
+
+    uni.login({
+        provider: 'huawei',
+        onlyAuthorize: true,
+        success: async (loginRes) => {
+            try {
+                const res = await apiPostLoginByHuawei({
+                    code: loginRes.code,
+                    authResult: loginRes.authResult,
+                });
+                const { access, refresh } = res.data;
+                userStore.setToken(access, refresh);
+                await userStore.setUserInfo();
+
+                uni.showToast({
+                    title: t('login.loginSuccess'),
+                    icon: 'success',
+                });
+                finishAuthSuccess();
+            } catch (error) {
+                uni.showToast({
+                    title: error.message || t('login.huaweiLoginFailed'),
+                    icon: 'none',
+                });
+            }
+        },
+        fail: (err) => {
+            console.error('华为登录失败:', err);
+            const errMsg = err?.errMsg || err?.message || '';
+            if (errMsg.includes('not support') || errMsg.includes('invalid provider') || errMsg.includes('module not found')) {
+                uni.showToast({
+                    title: '当前环境不支持华为登录或未在 manifest 配置 AppID',
+                    icon: 'none',
+                });
+            } else {
+                uni.showToast({
+                    title: t('login.huaweiLoginFailed'),
+                    icon: 'none',
+                });
+            }
+        },
+    });
+};
+
 // Google登录
 const handleGoogleLogin = () => {
     uni.showToast({
@@ -485,7 +550,7 @@ const handleLogin = async () => {
             title: t('login.loginSuccess'),
             icon: 'success',
         });
-        
+
         finishAuthSuccess();
     } catch (error) {
         uni.showToast({
@@ -622,6 +687,7 @@ const goBack = () => {
     justify-content: center;
     z-index: 12;
     transition: all 0.3s;
+
     &:active {
         background: var(--panel-background-strong);
         transform: scale(0.92);
@@ -922,6 +988,7 @@ const goBack = () => {
         }
     }
 }
+
 .invert-icon {
     filter: invert(1);
 }

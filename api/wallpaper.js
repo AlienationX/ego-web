@@ -135,6 +135,15 @@ export const apiPostLoginByWechat = (data = {}) => {
     });
 };
 
+// 华为登录接口
+export const apiPostLoginByHuawei = (data = {}) => {
+    return request({
+        url: '/login/huawei/',
+        data,
+        method: 'POST',
+    });
+};
+
 // 登录接口
 export const apiPostLogin = (data = {}) => {
     return request({
