@@ -1392,14 +1392,12 @@ const submitScore = async () => {
 };
 
 /** 跨端物理动作路由 */
-function handleApplyWallpaper(picUrl, itemInfo = null) {
-    if (!picUrl) return;
-
+function handleApplyWallpaper(itemInfo = null) {
     // #ifdef APP-PLUS
     const isAndroidApp = uni.getDeviceInfo().platform === 'android';
-    if (isAndroidApp && appStore.versionConfig?.pay_enabled) {
-        // Android 端：唤起选单弹层，且开启了支付功能
-        uni.$emit('showWallpaperSheet', { picUrl, itemInfo });
+    if (isAndroidApp && appStore.versionConfig?.pay_enabled && appStore.versionConfig?.set_wallpaper_enabled) {
+        // Android 端：唤起选单弹层，且开启了支付功能，且开启了可以直接设置为壁纸
+        uni.$emit('showWallpaperSheet', { picUrl: currentInfo.value.picurl, itemInfo });
         return;
     }
     // #endif

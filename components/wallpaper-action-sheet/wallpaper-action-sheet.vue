@@ -77,8 +77,6 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
-import { useAppStore } from '@/stores/app.js';
-import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
 import { setAndroidWallpaper } from '@/common/core.js';
 
 const { t } = useI18n();
@@ -108,7 +106,6 @@ const handleCancel = () => close();
 
 const handleSelect = (tapIndex) => {
     const targetUrl = picUrl.value;
-    const itemData = currentItem.value || {};
 
     // 选项 4（仅保存到相册）：触发与 preview.vue 相同的 clickDownload 校验与广告流程
     if (tapIndex === 3) {
@@ -128,6 +125,7 @@ const handleSelect = (tapIndex) => {
         uni.downloadFile({
             url: targetUrl,
             success: (dlRes) => {
+                console.log("[WallpaperSheet] download success:", dlRes);
                 if (dlRes.statusCode === 200) {
                     // #ifdef APP-PLUS
                     const localPath = plus.io.convertLocalFileSystemURL(dlRes.tempFilePath);

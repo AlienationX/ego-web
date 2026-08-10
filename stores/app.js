@@ -15,6 +15,7 @@ export const useAppStore = defineStore('app', () => {
         uni.getStorageSync('version_config') || {
             ad_enabled: true,
             pay_enabled: true,
+            set_wallpaper_enabled: true,
         },
     );
 
