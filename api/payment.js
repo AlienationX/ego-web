@@ -25,6 +25,22 @@ export const apiAlipayOrder = (data) => {
 };
 
 /**
+ * 华为应用内支付下单
+ * @param {Object} data
+ * @param {number} data.product_id  商品ID
+ * @param {string} data.platform    平台
+ * @returns {{ order_no, order_string, purchase_params }}
+ */
+export const apiHuaweiOrder = (data) => {
+    return request({
+        url: "/payment/huawei/",
+        method: "POST",
+        data,
+        isAuth: true,
+    });
+};
+
+/**
  * 查询订单状态
  * @param {string} orderNo 订单号
  * @returns {{ order_no, status }}  status: pending / paid / failed / refunded

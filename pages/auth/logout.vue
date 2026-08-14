@@ -146,6 +146,7 @@ const backToUser = () => {
     display: flex;
     flex-direction: column;
     align-items: center;
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .logout-icon-wrap {
@@ -158,6 +159,33 @@ const backToUser = () => {
     align-items: center;
     justify-content: center;
     margin-bottom: 48rpx;
+    animation: popIcon 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIcon {
+    0% {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    70% {
+        opacity: 1;
+        transform: scale(1.12);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(28rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .main-title {
@@ -231,6 +259,13 @@ const backToUser = () => {
     align-items: center;
     justify-content: center;
     gap: 16rpx;
+    box-shadow: 0 8rpx 24rpx rgba(229, 50, 45, 0.25);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:active {
+        opacity: 0.88;
+        transform: scale(0.97);
+    }
 
     &::after {
         border: none;
@@ -249,6 +284,12 @@ const backToUser = () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:active {
+        opacity: 0.88;
+        transform: scale(0.97);
+    }
 
     &::after {
         border: none;
@@ -262,12 +303,14 @@ const backToUser = () => {
     align-items: center;
     justify-content: center;
     padding: 64rpx;
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .success-emoji {
     width: 280rpx;
     height: 280rpx;
     margin-bottom: 50rpx;
+    animation: popIcon 0.55s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .success-title {
@@ -297,6 +340,13 @@ const backToUser = () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 8rpx 24rpx rgba(229, 50, 45, 0.25);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:active {
+        opacity: 0.88;
+        transform: scale(0.97);
+    }
 
     &::after {
         border: none;

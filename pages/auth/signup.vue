@@ -75,8 +75,9 @@
 
             <!-- 创建账号按钮 -->
             <view class="submit-section">
-                <button class="submit-btn" :disabled="!isAgreed || isSubmitting" @click="handleSignup">
-                    {{ isSubmitting ? t('login.creating') : t('login.createAccount') }}
+                <button class="submit-btn" :class="{ loading: isSubmitting }" :disabled="!isAgreed || isSubmitting" @click="handleSignup">
+                    <view class="btn-spinner" v-if="isSubmitting"></view>
+                    <text>{{ isSubmitting ? t('login.creating') : t('login.createAccount') }}</text>
                 </button>
                 <view class="login-link">
                     <text class="normal-text">{{ t('login.haveAccount') }}</text>
@@ -286,6 +287,25 @@ const handleSignup = async () => {
 </script>
 
 <style lang="scss" scoped>
+/* 按钮 Spinner 动画 */
+.btn-spinner {
+    width: 32rpx;
+    height: 32rpx;
+    border: 4rpx solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: btnSpin 0.75s linear infinite;
+}
+
+@keyframes btnSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 .signup-container {
     min-height: 100vh;
     background: var(--page-background);
@@ -356,6 +376,7 @@ const handleSignup = async () => {
 .title-section {
     margin-bottom: 60rpx;
     text-align: center;
+    animation: fadeInDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
     .main-title {
         font-size: 64rpx;
@@ -372,6 +393,34 @@ const handleSignup = async () => {
         color: var(--text-secondary);
         line-height: 1.6;
         opacity: 0.8;
+    }
+}
+
+.form-section,
+.agreement-section,
+.submit-section {
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(28rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -439,7 +488,11 @@ const handleSignup = async () => {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                transition: all 0.3s;
+                transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+                &:active {
+                    transform: scale(0.85);
+                }
 
                 &.checked {
                     background: #3461fd;
@@ -451,6 +504,7 @@ const handleSignup = async () => {
                         display: flex;
                         align-items: center;
                         justify-content: center;
+                        animation: popCheck 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
                     }
                 }
             }
@@ -486,18 +540,26 @@ const handleSignup = async () => {
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 16rpx;
         border: none;
-        transition: all 0.3s;
+        box-shadow: 0 8rpx 24rpx rgba(52, 97, 253, 0.25);
+        transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         margin-bottom: 32rpx;
 
         &:active {
-            opacity: 0.9;
-            transform: scale(0.98);
+            opacity: 0.88;
+            transform: scale(0.97);
+            box-shadow: 0 4rpx 12rpx rgba(52, 97, 253, 0.2);
+        }
+
+        &.loading {
+            opacity: 0.82;
+            pointer-events: none;
         }
 
         &[disabled] {
-            background: #ccc;
-            opacity: 0.6;
+            background: #9ab0fd;
+            opacity: 0.7;
         }
 
         &::after {

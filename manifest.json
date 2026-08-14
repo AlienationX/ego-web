@@ -246,13 +246,19 @@
             },
             "modules" : {
                 "uni-payment" : {
-                    "alipay" : {},
-                    "wxpay" : {},
                     "huawei" : {}
                 },
                 "uni-share" : {
                     "weixin" : {
                         "appid" : "wx74c392f8525b9268"
+                    }
+                },
+                "uni-oauth" : {
+                    "weixin" : {
+                        "appid" : "wx74c392f8525b9268"
+                    },
+                    "huawei" : {
+                        "client_id" : "6917608410154588197"
                     }
                 }
             }

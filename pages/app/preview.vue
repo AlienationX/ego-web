@@ -86,7 +86,7 @@
                                 <uni-icons type="heart-filled" size="28"></uni-icons>
                                 <view class="text">{{
                                     currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
-                                    }}</view>
+                                }}</view>
                             </view>
                             <view class="box" @click="openScore">
                                 <uni-icons type="star-filled" size="28"></uni-icons>
@@ -530,7 +530,7 @@
 
         <!-- 壁纸设置底部弹层（Android 专属） -->
         <!-- #ifdef APP-PLUS -->
-        <wallpaper-action-sheet />
+        <wallpaper-action-sheet v-if="isAndroidApp" />
         <!-- #endif -->
 
         <!-- 管理员快捷控制面板弹窗 (极简风格) -->
@@ -619,8 +619,7 @@ const statusStore = useStatusStore();
 const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
 const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
 
-// UI state
-const hideUI = ref(false);
+const isAndroidApp = uni.getDeviceInfo().platform === 'android';
 
 // 通用导航对话框控制
 const navDialog = ref(null);
@@ -742,44 +741,29 @@ const applyTempClockStyle = async () => {
 
     // Need energy, check if enough
     if (userStore.energy < 1) {
-        const watchAdAndUnlock = () => {
-            showRewardedVideoAd(null, {
-                onSuccess: async () => {
+        closeClockStyle();
+        const payEnabled = appStore.versionConfig?.pay_enabled !== false;
+        if (adPopup.value) {
+            adPopup.value.open({
+                title: t('previewPage.energyNotEnoughTitle') || '能量不足',
+                desc: t('previewPage.energyNotEnoughHint') || '您的能量不足，观看一段视频广告即可免费获取能量，或开通 VIP 享受无限制下载。',
+                showAdBtn: true,
+                adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费解锁',
+                showVipBtn: payEnabled,
+                vipBtnText: t('previewPage.openVipNow') || '开通 VIP',
+                onAdSuccess: async () => {
                     try {
-                        const adRes = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
-                        if (adRes.data?.energy !== undefined) {
-                            userStore.updateEnergy(adRes.data.energy);
-                            uni.showToast({ title: t('common.success'), icon: 'none' });
+                        const consumeRes = await userStore.consumeEnergy(0, 'consume_preview_style');
+                        if (consumeRes.data?.error) {
+                            uni.showToast({ title: consumeRes.data.error, icon: 'none' });
+                            return;
                         }
                     } catch (e) {
-                        uni.showToast({ title: t('common.networkError'), icon: 'none' });
+                        console.error('Consume energy for style error:', e);
                     }
-                }
-            });
-        };
-
-        if (userStore.isAdmin) {
-            uni.showActionSheet({
-                itemList: [t('previewPage.watchAd'), t('membership.title')],
-                success: (res) => {
-                    if (res.tapIndex === 0) {
-                        watchAdAndUnlock();
-                    } else if (res.tapIndex === 1) {
-                        uni.navigateTo({ url: '/pages/member/payment' });
-                    }
-                }
-            });
-        } else {
-            uni.showModal({
-                title: t('previewPage.energyNotEnoughTitle'),
-                content: t('previewPage.energyNotEnoughHint'),
-                confirmText: t('previewPage.watchAd'),
-                cancelText: t('common.cancel'),
-                success: (res) => {
-                    if (res.confirm) {
-                        watchAdAndUnlock();
-                    }
-                }
+                    activeSessionClockStyle.value = item.value;
+                    uni.showToast({ title: t('previewPage.unlockStyleSuccess') || '解锁成功', icon: 'none' });
+                },
             });
         }
         return;
@@ -1394,8 +1378,7 @@ const submitScore = async () => {
 /** 跨端物理动作路由 */
 function handleApplyWallpaper(itemInfo = null) {
     // #ifdef APP-PLUS
-    const isAndroidApp = uni.getDeviceInfo().platform === 'android';
-    if (isAndroidApp && appStore.versionConfig?.pay_enabled && appStore.versionConfig?.set_wallpaper_enabled) {
+    if ((isAndroidApp && appStore.versionConfig?.set_wallpaper_enabled) || userStore.isDeveloper) {
         // Android 端：唤起选单弹层，且开启了支付功能，且开启了可以直接设置为壁纸
         uni.$emit('showWallpaperSheet', { picUrl: currentInfo.value.picurl, itemInfo });
         return;
@@ -1458,11 +1441,11 @@ const clickDownload = async () => {
             // 【有支付】 -> 弹出 1 个按钮：开通 VIP
             if (adPopup.value) {
                 adPopup.value.open({
-                    title: t('membership.vipExclusiveTitle') || 'VIP 专属壁纸',
-                    desc: t('membership.vipExclusiveHint') || '该壁纸为 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。',
+                    title: t('previewPage.vipExclusiveTitle') || 'VIP 专属壁纸',
+                    desc: t('previewPage.vipExclusiveHint') || '该壁纸为 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。',
                     showAdBtn: false,
                     showVipBtn: true,
-                    vipBtnText: t('membership.openVipNow') || '立即开通 VIP',
+                    vipBtnText: t('previewPage.openVipNow') || '立即开通 VIP',
                 });
             }
             return;
@@ -1495,7 +1478,7 @@ const clickDownload = async () => {
                 showAdBtn: true,
                 adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费解锁',
                 showVipBtn: true,
-                vipBtnText: t('membership.openVipNow') || '开通 VIP 畅下',
+                vipBtnText: t('previewPage.openVipNow') || '开通 VIP 畅下',
             });
         }
         return;
@@ -1505,11 +1488,11 @@ const clickDownload = async () => {
     if (!adEnabled && payEnabled) {
         if (adPopup.value) {
             adPopup.value.open({
-                title: t('membership.vipRequiredTitle') || '开通会员解锁',
-                desc: t('membership.noAdSupportHint') || '本平台暂不支持广告解锁，需开通会员解锁下载。',
+                title: t('previewPage.vipRequiredTitle') || '开通会员解锁',
+                desc: t('previewPage.noAdSupportHint') || '本平台暂不支持广告解锁，需开通会员解锁下载。',
                 showAdBtn: false,
                 showVipBtn: true,
-                vipBtnText: t('membership.openVipNow') || '立即开通 VIP',
+                vipBtnText: t('previewPage.openVipNow') || '立即开通 VIP',
             });
         }
         return;

@@ -186,10 +186,11 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/stores/settings.js";
 import { useUserStore } from "@/stores/user.js";
-import { apiGetPaymentProducts, apiAlipayOrder, apiGetOrderStatus, apiMockPay } from "@/api/payment.js";
+import { apiGetPaymentProducts, apiAlipayOrder, apiHuaweiOrder, apiGetOrderStatus, apiMockPay } from "@/api/payment.js";
 import { getStatusBarHeight } from "@/utils/layout.js";
 import { useTranslateParams } from "@/utils/i18n.js";
 import { CHANNEL } from "@/common/config.js";
+import { IS_DEVELOPMENT } from "@/utils/system.js";
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -295,12 +296,19 @@ const selectCard = (index) => {
 };
 
 // 3. 支付方式配置
-const selectedPayment = ref("alipay");
-const paymentMethods = computed(() => [
-    { id: "alipay", name: t("membership.alipay") || "Alipay", iconSrc: "/static/icons/brands/alipay.svg" },
-    // { id: "wechat", name: t("membership.wechat") || "WeChat Pay", iconSrc: "/static/icons/brands/wxpay.svg" },
-    // { id: "paypal", name: t("membership.paypal") || "PayPal", iconSrc: "/static/icons/brands/paypal.svg" },
-]);
+const isHarmonyOS = computed(() => (uni.getDeviceInfo().platform || "").toLowerCase() === "harmonyos");
+const selectedPayment = ref(isHarmonyOS.value ? "huawei" : "alipay");
+
+const paymentMethods = computed(() => {
+    const list = [];
+    if (isHarmonyOS.value) {
+        list.push({ id: "huawei", name: t("membership.huawei") || "Huawei Pay", iconSrc: "/static/icons/brands/huawei.svg" });
+    }
+    if (!isHarmonyOS.value) {
+        list.push({ id: "alipay", name: t("membership.alipay") || "Alipay", iconSrc: "/static/icons/brands/alipay.svg" });
+    }
+    return list.length ? list : [{ id: "huawei", name: t("membership.huawei") || "Huawei Pay", iconSrc: "/static/icons/brands/huawei.svg" }];
+});
 
 // 4. 加载商品
 const isLoading = ref(true);
@@ -382,6 +390,8 @@ const confirmAndExecutePayment = async () => {
     try {
         if (selectedPayment.value === "alipay") {
             await handleAlipay(card, uni.getDeviceInfo().platform);
+        } else if (selectedPayment.value === "huawei") {
+            await handleHuaweiPay(card, uni.getDeviceInfo().platform);
         } else {
             uni.hideLoading();
             uni.showToast({ title: t("membership.comingSoon"), icon: "none" });
@@ -406,7 +416,7 @@ const handleAlipay = async (card, platform) => {
     const { order_no, order_string } = createRes.data;
 
     // ── App 真实支付 ──────────────────
-    // #ifdef APP
+    // #ifdef APP-PLUS
     uni.hideLoading();
 
     // 测试：获取可使用的服务提供商
@@ -426,6 +436,59 @@ const handleAlipay = async (card, platform) => {
         },
         fail: (err) => {
             // console.log("error:", err)
+            if (err.errMsg?.includes("cancel")) {
+                uni.showToast({ title: t("membership.cancelPay"), icon: "none" });
+            } else {
+                uni.showToast({ title: t("membership.payFailed"), icon: "none" });
+            }
+        },
+    });
+    return;
+    // #endif
+
+    // ── 非 App 端：显示 Mock 自定义沙盒弹窗 ──
+    uni.hideLoading();
+    mockOrderNo.value = order_no;
+    mockCard.value = card;
+    sandboxPopup.value?.open();
+};
+
+// 8. 华为应用内支付 (HMS IAP)
+const handleHuaweiPay = async (card, platform) => {
+    const createRes = await apiHuaweiOrder({ product_id: card.id, channel: CHANNEL, platform });
+    console.log("createRes", createRes)
+    if (!(createRes.code === 200 && createRes.data)) {
+        throw new Error(createRes.message || t("membership.orderFailed"));
+    }
+
+    const { order_no, order_string, purchase_params } = createRes.data;
+
+    // ── App 真实支付 ──────────────────
+    // #ifdef APP-HARMONY
+    uni.hideLoading();
+
+    uni.getProvider({
+        service: 'payment',
+        success: (res) => {
+            console.log('当前支持的支付 provider:', res.providers);
+            // 鸿蒙环境应返回 ['huawei'] 或包含 'huawei' 的数组
+            if (res.providers.includes('huawei')) {
+                // 再调用 uni.requestPayment
+                console.log("开始调用huawei支付")
+            }
+        }
+    });
+
+    uni.requestPayment({
+        provider: "huawei",
+        orderInfo: order_string || purchase_params,
+        success: (res) => {
+            console.log("华为支付成功", res);
+            uni.showLoading({ title: t("membership.verifying") });
+            pollOrderStatus(order_no);
+        },
+        fail: (err) => {
+            console.error("华为支付失败:", err);
             if (err.errMsg?.includes("cancel")) {
                 uni.showToast({ title: t("membership.cancelPay"), icon: "none" });
             } else {

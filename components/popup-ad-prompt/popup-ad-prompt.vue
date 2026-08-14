@@ -16,7 +16,7 @@
                 {{ adBtnText || $t('message.adPrompt') }}
             </button>
             <button v-else-if="showVipBtn" class="ad-prompt__button ad-prompt__button--vip" @click="toMembership">
-                {{ vipBtnText || t('membership.openVipNow') || '立即开通 VIP' }}
+                {{ vipBtnText || t('previewPage.openVipNow') || '立即开通 VIP' }}
             </button>
 
             <!-- 次要 VIP 选项：当既有广告又有支付时，主按钮是看广告，下方显示开通 VIP 链接 -->
@@ -55,6 +55,7 @@ const showAdBtn = ref(true);
 const adBtnText = ref('');
 const showVipBtn = ref(false);
 const vipBtnText = ref('');
+const customOnAdSuccess = ref(null);
 
 // views字段值+1
 const incrementDownloads = async (id) => {
@@ -79,6 +80,7 @@ const open = (config = {}) => {
         adBtnText.value = config.adBtnText || '';
         showVipBtn.value = !!config.showVipBtn;
         vipBtnText.value = config.vipBtnText || '';
+        customOnAdSuccess.value = typeof config.onAdSuccess === 'function' ? config.onAdSuccess : null;
     }
     popup.value.open();
 };
@@ -90,22 +92,18 @@ const close = () => {
 const onWatch = () => {
     close();
 
+    const currentSuccessCb = customOnAdSuccess.value;
+
     showRewardedVideoAd(props.picurl, {
         onSuccess: async (picurl) => {
-            // 看完广告即下载/设置（核心权益）
-            downloadPic(picurl, t);
-            incrementDownloads(props.id);
-
-            // 已登录用户额外获取能量奖励
+            // 已登录用户先获取能量奖励
             if (userStore.isLoggedIn) {
                 try {
                     const res = await apiPostEarnEnergy({ action_type: 'watch_ad', amount: VIDEO_REWARD_ENERGY });
                     if (res.data?.energy !== undefined) {
                         userStore.updateEnergy(res.data.energy);
-                        await userStore.consumeEnergy(props.id);
                     }
                 } catch (e) {
-                    // 能量奖励失败不影响下载
                     if (userStore.isAdmin) {
                         uni.showToast({
                             title: 'Earn energy failed: ' + (e?.code || e?.message || 'unknown'),
@@ -115,8 +113,33 @@ const onWatch = () => {
                     }
                 }
             }
+
+            // 如果提供了自定义成功回调（如解锁时钟样式），优先执行自定义回调，不触发壁纸原图下载
+            if (typeof currentSuccessCb === 'function') {
+                try {
+                    await currentSuccessCb({ picurl, id: props.id });
+                } catch (err) {
+                    console.error('customOnAdSuccess error:', err);
+                }
+                return;
+            }
+
+            // 默认行为：看完广告即下载/设置壁纸原图
+            if (userStore.isLoggedIn) {
+                try {
+                    await userStore.consumeEnergy(props.id);
+                } catch (e) {
+                    console.error('Consume energy for download error:', e);
+                }
+            }
+            downloadPic(picurl, t);
+            incrementDownloads(props.id);
         },
         onFallback: (picurl) => {
+            if (typeof currentSuccessCb === 'function') {
+                currentSuccessCb({ picurl, id: props.id });
+                return;
+            }
             downloadPic(picurl, t);
             incrementDownloads(props.id);
         },

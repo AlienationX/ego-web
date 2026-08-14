@@ -16,9 +16,10 @@
             <view v-if="!showEmailForm && (isWeixin || isHarmony)" class="weixin-quick-section">
                 <!-- 微信小程序一键登录 -->
                 <!-- #ifdef MP-WEIXIN -->
-                <button class="weixin-quick-btn" @click="handleWechatLogin">
-                    <image src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
-                    <text>{{ t('login.wechatQuickLogin') }}</text>
+                <button class="weixin-quick-btn" :class="{ loading: isSubmitting && submittingType === 'wechat' }" :disabled="isSubmitting" @click="handleWechatLogin">
+                    <view class="btn-spinner dark" v-if="isSubmitting && submittingType === 'wechat'"></view>
+                    <image v-else src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
+                    <text>{{ isSubmitting && submittingType === 'wechat' ? t('login.loggingIn') : t('login.wechatQuickLogin') }}</text>
                 </button>
                 <view class="weixin-agreement-hint">
                     {{ t('login.wechatAgreementHint') }}
@@ -27,9 +28,10 @@
 
                 <!-- 鸿蒙平台华为账号一键登录 -->
                 <!-- #ifndef MP-WEIXIN -->
-                <button v-if="isHarmony" class="weixin-quick-btn" @click="handleHuaweiLogin">
-                    <image src="/static/icons/brands/huawei.svg" mode="aspectFit" class="social-icon"></image>
-                    <text>{{ t('login.huaweiQuickLogin') }}</text>
+                <button v-if="isHarmony" class="weixin-quick-btn" :class="{ loading: isSubmitting && submittingType === 'huawei' }" :disabled="isSubmitting" @click="handleHuaweiLogin">
+                    <view class="btn-spinner dark" v-if="isSubmitting && submittingType === 'huawei'"></view>
+                    <image v-else src="/static/icons/brands/huawei.svg" mode="aspectFit" class="social-icon"></image>
+                    <text>{{ isSubmitting && submittingType === 'huawei' ? t('login.loggingIn') : t('login.huaweiQuickLogin') }}</text>
                 </button>
                 <view v-if="isHarmony" class="weixin-agreement-hint">
                     {{ t('login.huaweiAgreementHint') }}
@@ -118,8 +120,9 @@
 
                 <!-- 登录按钮 -->
                 <view class="submit-section">
-                    <button class="submit-btn" :disabled="isSubmitting" @click="handleLogin">
-                        {{ isSubmitting ? t('login.loggingIn') : t('login.login') }}
+                    <button class="submit-btn" :class="{ loading: isSubmitting && submittingType === 'email' }" :disabled="isSubmitting" @click="handleLogin">
+                        <view class="btn-spinner" v-if="isSubmitting && submittingType === 'email'"></view>
+                        <text>{{ isSubmitting && submittingType === 'email' ? t('login.loggingIn') : t('login.login') }}</text>
                     </button>
                     <view class="signup-link">
                         <text class="normal-text">{{ t('login.noAccount') }}</text>
@@ -230,6 +233,7 @@ const form = reactive({
 const showPassword = ref(false);
 const passwordFocused = ref(false);
 const isSubmitting = ref(false);
+const submittingType = ref(''); // 'email' | 'huawei' | 'wechat'
 const rememberPassword = ref(false);
 const isAgreed = ref(false);
 
@@ -375,6 +379,9 @@ const handleWechatLogin = () => {
         return;
     }
 
+    isSubmitting.value = true;
+    submittingType.value = 'wechat';
+
     uni.login({
         provider: 'weixin',
         onlyAuthorize: true, // 微信登录仅请求授权认证
@@ -399,9 +406,14 @@ const handleWechatLogin = () => {
                     title: error.message || t('login.loginFailed'),
                     icon: 'none',
                 });
+            } finally {
+                isSubmitting.value = false;
+                submittingType.value = '';
             }
         },
         fail: (err) => {
+            isSubmitting.value = false;
+            submittingType.value = '';
             uni.showToast({
                 title: t('login.wechatLoginFailed'),
                 icon: 'none',
@@ -412,6 +424,7 @@ const handleWechatLogin = () => {
 
 // 华为登录
 const handleHuaweiLogin = () => {
+    if (isSubmitting.value) return;
     // 协议校验
     if (!isAgreed.value) {
         uni.showToast({
@@ -420,6 +433,9 @@ const handleHuaweiLogin = () => {
         });
         return;
     }
+
+    isSubmitting.value = true;
+    submittingType.value = 'huawei';
 
     uni.login({
         provider: 'huawei',
@@ -444,9 +460,14 @@ const handleHuaweiLogin = () => {
                     title: error.message || t('login.huaweiLoginFailed'),
                     icon: 'none',
                 });
+            } finally {
+                isSubmitting.value = false;
+                submittingType.value = '';
             }
         },
         fail: (err) => {
+            isSubmitting.value = false;
+            submittingType.value = '';
             console.error('华为登录失败:', err);
             const errMsg = err?.errMsg || err?.message || '';
             if (errMsg.includes('not support') || errMsg.includes('invalid provider') || errMsg.includes('module not found')) {
@@ -525,6 +546,7 @@ const handleLogin = async () => {
     }
 
     isSubmitting.value = true;
+    submittingType.value = 'email';
     try {
         const res = await apiPostLogin({
             email: form.email.trim(),
@@ -560,6 +582,7 @@ const handleLogin = async () => {
         });
     } finally {
         isSubmitting.value = false;
+        submittingType.value = '';
     }
 };
 
@@ -578,6 +601,30 @@ const goBack = () => {
 </script>
 
 <style lang="scss" scoped>
+/* 按钮 Spinner 动画 */
+.btn-spinner {
+    width: 32rpx;
+    height: 32rpx;
+    border: 4rpx solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: btnSpin 0.75s linear infinite;
+
+    &.dark {
+        border-color: rgba(0, 0, 0, 0.15);
+        border-top-color: var(--text-primary);
+    }
+}
+
+@keyframes btnSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 .signin-container {
     min-height: 100vh;
     background: var(--page-background);
@@ -701,6 +748,7 @@ const goBack = () => {
 .title-section {
     margin-bottom: 60rpx;
     text-align: center;
+    animation: fadeInDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 
     .main-title {
         font-size: 64rpx;
@@ -717,6 +765,33 @@ const goBack = () => {
         color: var(--text-secondary);
         line-height: 1.6;
         opacity: 0.8;
+    }
+}
+
+.weixin-quick-section,
+.email-form-area {
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(28rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -894,16 +969,18 @@ const goBack = () => {
 
 .agreement-content {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     padding: 0 8rpx;
     gap: 16rpx;
 }
 
 .checkbox-wrapper {
-    margin-top: 4rpx;
+    display: flex;
+    align-items: center;
 }
 
-.checkbox {
+.checkbox,
+.remember-checkbox {
     width: 32rpx;
     height: 32rpx;
     border-radius: 8rpx;
@@ -911,7 +988,11 @@ const goBack = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    &:active {
+        transform: scale(0.85);
+    }
 
     &.checked {
         background: #3461fd;
@@ -919,12 +1000,14 @@ const goBack = () => {
     }
 }
 
-.checkbox-inner {
+.checkbox-inner,
+.remember-inner {
     width: 32rpx;
     height: 32rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+    animation: popCheck 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 .agreement-text {
@@ -938,7 +1021,21 @@ const goBack = () => {
 
     .link-text {
         color: #3461fd;
-        text-decoration: underline;
+    }
+}
+
+@keyframes popCheck {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.25);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 
@@ -956,18 +1053,26 @@ const goBack = () => {
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 16rpx;
         border: none;
-        transition: all 0.3s;
+        box-shadow: 0 8rpx 24rpx rgba(52, 97, 253, 0.25);
+        transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
         margin-bottom: 32rpx;
 
         &:active {
-            opacity: 0.9;
-            transform: scale(0.98);
+            opacity: 0.88;
+            transform: scale(0.97);
+            box-shadow: 0 4rpx 12rpx rgba(52, 97, 253, 0.2);
+        }
+
+        &.loading {
+            opacity: 0.82;
+            pointer-events: none;
         }
 
         &[disabled] {
-            background: #ccc;
-            opacity: 0.6;
+            background: #9ab0fd;
+            opacity: 0.7;
         }
 
         &::after {

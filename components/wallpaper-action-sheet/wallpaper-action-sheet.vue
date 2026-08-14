@@ -1,5 +1,4 @@
 <template>
-    <!-- #ifdef APP-PLUS -->
     <view v-if="visible" class="wallpaper-sheet-overlay" :class="themeClass" @click.self="handleCancel">
         <view class="wallpaper-sheet" :class="[themeClass, { 'wallpaper-sheet--visible': sheetVisible }]">
             <view class="wallpaper-sheet__handle-wrap">
@@ -69,7 +68,6 @@
             </view>
         </view>
     </view>
-    <!-- #endif -->
 </template>
 
 <script setup>
@@ -127,7 +125,7 @@ const handleSelect = (tapIndex) => {
             success: (dlRes) => {
                 console.log("[WallpaperSheet] download success:", dlRes);
                 if (dlRes.statusCode === 200) {
-                    // #ifdef APP-PLUS
+                    // #ifdef APP
                     const localPath = plus.io.convertLocalFileSystemURL(dlRes.tempFilePath);
                     setAndroidWallpaper(localPath, wallpaperTarget)
                         .then(() => {
@@ -159,7 +157,7 @@ const handleSelect = (tapIndex) => {
         uni.showModal({
             title: t('wallpaper.vipRequiredTitle') || 'VIP 专属功能',
             content: t('wallpaper.vipRequiredHint') || '一键设置手机桌面与锁屏壁纸为 VIP 专属功能，开通会员后可无限次享用。',
-            confirmText: t('membership.openVipNow') || '立即开通 VIP',
+            confirmText: t('previewPage.openVipNow') || '立即开通 VIP',
             cancelText: t('common.cancel') || '取消',
             success: (res) => {
                 if (res.confirm) {
