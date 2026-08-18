@@ -470,6 +470,7 @@
         "apple": "Apple",
         "wechatLoginFailed": "WeChat login failed",
         "huaweiLoginFailed": "Huawei login failed",
+        "huaweiAccountNotConfigured": "Please log in to your Huawei ID in device settings first",
         "wechatConfirmTitle": "WeChat Login Confirmation",
         "wechatConfirmContent": "Allow the app to access your WeChat public information (nickname, avatar, etc.) for login?",
         "huaweiConfirmTitle": "Huawei Login Confirmation",

@@ -33,7 +33,7 @@ export const apiAlipayOrder = (data) => {
  */
 export const apiHuaweiOrder = (data) => {
     return request({
-        url: "/payment/huawei/",
+        url: "/payment/huawei_pay/",
         method: "POST",
         data,
         isAuth: true,

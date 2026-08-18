@@ -107,8 +107,8 @@
                 <view class="checkout-sheet__header">
                     <text class="checkout-sheet__title">{{ t('membership.checkoutTitle') }}</text>
                     <view class="checkout-sheet__close" @click="closeCheckout">
-                        <uni-icons type="closeempty" size="20"
-                            :color="settingsStore.isDark ? '#a1a1aa' : '#71717a'"></uni-icons>
+                        <uni-icons type="closeempty" size="20" :color="settingsStore.isDark ? '#a1a1aa' : '#71717a'">
+                        </uni-icons>
                     </view>
                 </view>
 
@@ -123,8 +123,8 @@
                         </view>
                     </view>
                     <view class="cpc-right">
-                        <text class="cpc-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price
-                            }}</text>
+                        <text class="cpc-price">
+                            {{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price }}</text>
                     </view>
                 </view>
 
@@ -141,8 +141,8 @@
 
                     <view class="checkout-detail-row is-total">
                         <text class="cd-label">{{ t('membership.total') }}</text>
-                        <text class="cd-total-price">{{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{
-                            activeCard?.price }}</text>
+                        <text class="cd-total-price">
+                            {{ activeCard?.currency === 'USD' ? '$' : '¥' }}{{ activeCard?.price }}</text>
                     </view>
                 </view>
 
@@ -464,6 +464,7 @@ const handleHuaweiPay = async (card, platform) => {
     const { order_no, order_string, purchase_params } = createRes.data;
 
     // ── App 真实支付 ──────────────────
+    // 鸿蒙支付必须在真机上测试，模拟器不支持。
     // #ifdef APP-HARMONY
     uni.hideLoading();
 
@@ -471,10 +472,11 @@ const handleHuaweiPay = async (card, platform) => {
         service: 'payment',
         success: (res) => {
             console.log('当前支持的支付 provider:', res.providers);
-            // 鸿蒙环境应返回 ['huawei'] 或包含 'huawei' 的数组
-            if (res.providers.includes('huawei')) {
-                // 再调用 uni.requestPayment
-                console.log("开始调用huawei支付")
+            // 鸿蒙环境应返回 [ {id: "huawei", description: "华为"} ] 的数组
+            // 检查是否支持华为支付
+            const isHuaweiSupported = res.providers.some(p => p.id === 'huawei');
+            if (isHuaweiSupported) {
+                console.log("开始调用华为支付");
             }
         }
     });
@@ -483,17 +485,18 @@ const handleHuaweiPay = async (card, platform) => {
         provider: "huawei",
         orderInfo: order_string || purchase_params,
         success: (res) => {
-            console.log("华为支付成功", res);
+            // console.log("华为支付成功", res);
             uni.showLoading({ title: t("membership.verifying") });
             pollOrderStatus(order_no);
         },
         fail: (err) => {
-            console.error("华为支付失败:", err);
-            if (err.errMsg?.includes("cancel")) {
-                uni.showToast({ title: t("membership.cancelPay"), icon: "none" });
-            } else {
-                uni.showToast({ title: t("membership.payFailed"), icon: "none" });
-            }
+            // console.error("华为支付失败:", err);
+            // if (err.errMsg?.includes("cancel")) {
+            //     uni.showToast({ title: t("membership.cancelPay"), icon: "none" });
+            // } else {
+            //     uni.showToast({ title: t("membership.payFailed"), icon: "none" });
+            // }
+            uni.showToast({ title: err, icon: "none" });
         },
     });
     return;

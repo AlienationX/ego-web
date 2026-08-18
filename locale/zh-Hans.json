@@ -470,6 +470,7 @@
         "apple": "苹果",
         "wechatLoginFailed": "微信登录失败",
         "huaweiLoginFailed": "华为登录失败",
+        "huaweiAccountNotConfigured": "请前往系统设置中登录/配置华为账号后再试",
         "wechatConfirmTitle": "微信登录确认",
         "wechatConfirmContent": "允许应用获取您的微信公开信息（昵称、头像等）用于账号登录？",
         "huaweiConfirmTitle": "华为登录确认",

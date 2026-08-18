@@ -16,10 +16,12 @@
             <view v-if="!showEmailForm && (isWeixin || isHarmony)" class="weixin-quick-section">
                 <!-- 微信小程序一键登录 -->
                 <!-- #ifdef MP-WEIXIN -->
-                <button class="weixin-quick-btn" :class="{ loading: isSubmitting && submittingType === 'wechat' }" :disabled="isSubmitting" @click="handleWechatLogin">
+                <button class="weixin-quick-btn" :class="{ loading: isSubmitting && submittingType === 'wechat' }"
+                    :disabled="isSubmitting" @click="handleWechatLogin">
                     <view class="btn-spinner dark" v-if="isSubmitting && submittingType === 'wechat'"></view>
                     <image v-else src="/static/icons/brands/wechat.svg" mode="aspectFit" class="social-icon"></image>
-                    <text>{{ isSubmitting && submittingType === 'wechat' ? t('login.loggingIn') : t('login.wechatQuickLogin') }}</text>
+                    <text>{{ isSubmitting && submittingType === 'wechat' ? t('login.loggingIn') :
+                        t('login.wechatQuickLogin') }}</text>
                 </button>
                 <view class="weixin-agreement-hint">
                     {{ t('login.wechatAgreementHint') }}
@@ -28,10 +30,13 @@
 
                 <!-- 鸿蒙平台华为账号一键登录 -->
                 <!-- #ifndef MP-WEIXIN -->
-                <button v-if="isHarmony" class="weixin-quick-btn" :class="{ loading: isSubmitting && submittingType === 'huawei' }" :disabled="isSubmitting" @click="handleHuaweiLogin">
+                <button v-if="isHarmony" class="weixin-quick-btn"
+                    :class="{ loading: isSubmitting && submittingType === 'huawei' }" :disabled="isSubmitting"
+                    @click="handleHuaweiLogin">
                     <view class="btn-spinner dark" v-if="isSubmitting && submittingType === 'huawei'"></view>
                     <image v-else src="/static/icons/brands/huawei.svg" mode="aspectFit" class="social-icon"></image>
-                    <text>{{ isSubmitting && submittingType === 'huawei' ? t('login.loggingIn') : t('login.huaweiQuickLogin') }}</text>
+                    <text>{{ isSubmitting && submittingType === 'huawei' ? t('login.loggingIn') :
+                        t('login.huaweiQuickLogin') }}</text>
                 </button>
                 <view v-if="isHarmony" class="weixin-agreement-hint">
                     {{ t('login.huaweiAgreementHint') }}
@@ -120,9 +125,11 @@
 
                 <!-- 登录按钮 -->
                 <view class="submit-section">
-                    <button class="submit-btn" :class="{ loading: isSubmitting && submittingType === 'email' }" :disabled="isSubmitting" @click="handleLogin">
+                    <button class="submit-btn" :class="{ loading: isSubmitting && submittingType === 'email' }"
+                        :disabled="isSubmitting" @click="handleLogin">
                         <view class="btn-spinner" v-if="isSubmitting && submittingType === 'email'"></view>
-                        <text>{{ isSubmitting && submittingType === 'email' ? t('login.loggingIn') : t('login.login') }}</text>
+                        <text>{{ isSubmitting && submittingType === 'email' ? t('login.loggingIn') : t('login.login')
+                        }}</text>
                     </button>
                     <view class="signup-link">
                         <text class="normal-text">{{ t('login.noAccount') }}</text>
@@ -470,9 +477,9 @@ const handleHuaweiLogin = () => {
             submittingType.value = '';
             console.error('华为登录失败:', err);
             const errMsg = err?.errMsg || err?.message || '';
-            if (errMsg.includes('not support') || errMsg.includes('invalid provider') || errMsg.includes('module not found')) {
+            if (errMsg.includes('Failed to check the fingerprint of the app bundle.Fingerprint verification error')) {
                 uni.showToast({
-                    title: '当前环境不支持华为登录或未在 manifest 配置 AppID',
+                    title: t('login.huaweiAccountNotConfigured'),
                     icon: 'none',
                 });
             } else {
@@ -620,6 +627,7 @@ const goBack = () => {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
@@ -778,6 +786,7 @@ const goBack = () => {
         opacity: 0;
         transform: translateY(-20rpx);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -789,6 +798,7 @@ const goBack = () => {
         opacity: 0;
         transform: translateY(28rpx);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1029,10 +1039,12 @@ const goBack = () => {
         transform: scale(0);
         opacity: 0;
     }
+
     70% {
         transform: scale(1.25);
         opacity: 1;
     }
+
     100% {
         transform: scale(1);
         opacity: 1;
