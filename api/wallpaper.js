@@ -110,6 +110,14 @@ export const apiGetSearchData = (data = {}) => {
     });
 };
 
+// 获取热门搜索关键词推荐列表接口
+export const apiGetHotKeywords = () => {
+    return request({
+        url: '/wall/hot_keywords/',
+        method: 'GET',
+    });
+};
+
 // 增加图片访问量接口
 export const apiPostIncrementViews = (id = '') => {
     return request({

@@ -1,4 +1,4 @@
-import { API_DOMAIN, API_BASE_URL, API_SECRET_KEY } from '@/common/config';
+import { API_DOMAIN, API_BASE_URL, API_SECRET_KEY, CHANNEL } from '@/common/config';
 import { useUserStore } from '@/stores/user.js';
 import { decrypt } from '@/utils/encryption.js';
 import { t } from '@/utils/i18n.js';
@@ -42,6 +42,17 @@ const getDeviceId = () => {
     return _deviceId;
 };
 
+let _platform = null;
+const getPlatform = () => {
+    if (_platform) return _platform;
+    try {
+        _platform = uni.getDeviceInfo()?.platform || uni.getAppBaseInfo()?.uniPlatform || 'unknown';
+    } catch (e) {
+        _platform = 'unknown';
+    }
+    return _platform;
+};
+
 // 发送 request 请求函数，如果token过期，刷新后再次发送 request 请求
 export const request = (config = {}) => {
     return new Promise(async (resolve, reject) => {
@@ -77,6 +88,8 @@ const setHeader = (isAuth) => {
     const header = {
         'Access-Key': API_SECRET_KEY,
         'Device-Id': getDeviceId(),
+        'Platform': getPlatform(),
+        'Channel': CHANNEL || 'unknown',
     };
     // 仅当存在有效 token 时添加 Authorization，避免服务端报 "two space-delimited values"
     if (isAuth && hasValidToken) {

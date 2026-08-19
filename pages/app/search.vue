@@ -167,20 +167,11 @@ const searchData = async () => {
     showWordBoard.value = false;
 };
 
-let debounceTimer = null;
-
 const onInput = (e) => {
     const val = (e.detail?.value || queryParams.value.keyword || '').trim();
     if (!val) {
-        if (debounceTimer) clearTimeout(debounceTimer);
         onClear();
-        return;
     }
-
-    if (debounceTimer) clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        onSearch();
-    }, 400);
 };
 
 const onSearch = () => {
