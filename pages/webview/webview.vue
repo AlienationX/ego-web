@@ -72,6 +72,7 @@ const parseCssToTagStyle = (css) => {
 const pageTitle = computed(() => {
     if (docType.value === 'privacy') return t('about.privacy');
     if (docType.value === 'agreement') return t('about.agreement');
+    if (docType.value === 'vip') return t('membership.vipAgreementTitle');
     return t('common.title');
 });
 
@@ -89,7 +90,7 @@ const effectiveTagStyle = computed(() => {
         li: 'color: var(--text-primary); font-size: 15px; line-height: 1.8; margin-bottom: 8px; opacity: 0.92;',
         ul: 'padding-left: 20px; margin-left: 0; margin-bottom: 16px;',
         ol: 'padding-left: 20px; margin-left: 0; margin-bottom: 16px;',
-        '.note': 'color: var(--text-secondary); background-color: var(--panel-background); border-left: 4px solid #e74c3c; padding: 12px 16px; margin: 20px 0; border-radius: 0 8px 8px 0;',
+        '.note': 'color: var(--text-secondary); background-color: var(--panel-background); border-left: 4px solid #4f46e5; padding: 12px 16px; margin: 20px 0; border-radius: 0 8px 8px 0;',
         '.date': 'color: var(--text-tertiary); text-align: right; margin-bottom: 24px; font-size: 14px;'
     };
 });
@@ -153,6 +154,9 @@ onLoad((options) => {
     } else if (decodedUrl.includes('user_agreement')) {
         docType.value = 'agreement';
         webviewUrl.value = `${PICS_BASE_URL}/user_agreement.html`;
+    } else if (decodedUrl.includes('vip_agreement')) {
+        docType.value = 'vip';
+        webviewUrl.value = `${PICS_BASE_URL}/vip_agreement.html`;
     }
 
     uni.setNavigationBarTitle({ title: pageTitle.value });

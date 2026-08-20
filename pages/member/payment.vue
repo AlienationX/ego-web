@@ -92,12 +92,17 @@
             </view>
         </view>
 
-        <!-- 底部固定悬浮按钮 (已移除随时取消文案) -->
+        <!-- 底部固定悬浮按钮 (醒目会员及用户协议提示) -->
         <view class="sticky-footer">
             <button class="cta-btn" :disabled="selectedCard === null" @click="handlePurchase">
                 <text>{{ t('membership.continue') }}</text>
             </button>
-            <text class="footer-terms">{{ t('membership.terms') }}</text>
+            <view class="footer-terms">
+                <text class="terms-prefix">{{ t('membership.termsPrefix') }}</text>
+                <text class="terms-link" @click.stop="openAgreement('vip')">{{ t('membership.vipAgreement') }}</text>
+                <text class="terms-and">{{ t('membership.and') }}</text>
+                <text class="terms-link" @click.stop="openAgreement('user')">{{ t('membership.userAgreement') }}</text>
+            </view>
             <view class="safe-area-bottom"></view>
         </view>
 
@@ -154,6 +159,12 @@
                 <button class="checkout-pay-btn" @click="confirmAndExecutePayment">
                     <text>{{ t('membership.confirmPay') }}</text>
                 </button>
+                <view class="sheet-terms">
+                    <text class="terms-prefix">{{ t('membership.termsPrefix') }}</text>
+                    <text class="terms-link" @click.stop="openAgreement('vip')">{{ t('membership.vipAgreement') }}</text>
+                    <text class="terms-and">{{ t('membership.and') }}</text>
+                    <text class="terms-link" @click.stop="openAgreement('user')">{{ t('membership.userAgreement') }}</text>
+                </view>
                 <view class="safe-area-bottom"></view>
             </view>
         </uni-popup>
@@ -234,6 +245,15 @@ const activeCard = computed(() => {
 const activePaymentMethod = computed(() => {
     return paymentMethods.value.find((m) => m.id === selectedPayment.value) || null;
 });
+
+const openAgreement = (type) => {
+    let url = 'user_agreement';
+    if (type === 'vip') url = 'vip_agreement';
+    else if (type === 'privacy') url = 'privacy_agreement';
+    uni.navigateTo({
+        url: `/pages/webview/webview?url=${url}`,
+    });
+};
 
 const closeCheckout = () => {
     checkoutPopup.value?.close();
@@ -989,11 +1009,30 @@ const goBack = () => {
         }
     }
 
-    .footer-terms {
+    .footer-terms, .sheet-terms {
         font-size: 22rpx;
         color: var(--text-sub);
         font-weight: 500;
         text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 6rpx;
+
+        .terms-prefix, .terms-and {
+            color: var(--text-sub);
+        }
+
+        .terms-link {
+            color: #7573f6;
+            font-weight: 600;
+            padding: 4rpx 2rpx;
+
+            &:active {
+                opacity: 0.7;
+            }
+        }
     }
 }
 

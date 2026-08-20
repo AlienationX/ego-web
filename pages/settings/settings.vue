@@ -97,6 +97,10 @@
                     <text class="about-legal__link" @click="openHtmlFile('/user_agreement.html')">
                         {{ t('about.agreement') }}
                     </text>
+                    <text class="about-legal__divider">|</text>
+                    <text class="about-legal__link" @click="openHtmlFile('/vip_agreement.html')">
+                        {{ t('about.vipAgreement') }}
+                    </text>
                 </view>
                 <view class="about-record">{{ rightICP }}</view>
                 <view class="about-copyright">{{ copyrightText }}</view>
@@ -189,6 +193,10 @@
                     <view class="about-legal">
                         <view style="height: 18rpx"></view>
                         <view class="about-legal__links">
+                            <text class="about-legal__link" @click="openHtmlFile('/vip_agreement.html')">
+                                {{ t('about.vipAgreement') }}
+                            </text>
+                            <text class="about-legal__divider">|</text>
                             <text class="about-legal__link" @click="openHtmlFile('/privacy_agreement.html')">
                                 {{ t('about.privacy') }}
                             </text>

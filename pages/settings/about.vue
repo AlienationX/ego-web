@@ -48,6 +48,13 @@
 
                 <view class="info-group">
                     <view class="group-title">{{ t('about.legal') }}</view>
+                    <view class="info-item" @click="openHtmlFile('/vip_agreement.html')">
+                        <view class="item-left">
+                            <uni-icons type="vip-filled" size="20" color="#f59e0b"></uni-icons>
+                            <text class="item-text">{{ t('about.vipAgreement') }}</text>
+                        </view>
+                        <uni-icons type="right" size="16" color="#ccc"></uni-icons>
+                    </view>
                     <view class="info-item" @click="openHtmlFile('/privacy_agreement.html')">
                         <view class="item-left">
                             <uni-icons type="locked-filled" size="20" color="#28B389"></uni-icons>
