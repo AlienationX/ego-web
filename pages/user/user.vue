@@ -61,20 +61,23 @@
                         </view>
 
                         <!-- VIP Banner (根据后端版本配置 pay_enabled 决定是否开启显示) -->
-                        <view v-if="appStore.versionConfig?.pay_enabled" class="vip-banner-card" @click="toMembership">
+                        <view v-if="appStore.versionConfig?.pay_enabled" class="vip-banner-card"
+                            :class="{ 'is-active-vip': vipInfo.isVip, 'is-near-expiry': vipInfo.isNearExpiry }"
+                            @click="toMembership">
                             <view class="vip-banner-content">
                                 <view class="vip-banner-title-row">
-                                    <mdi-icon path="/static/icons/crown-circle.svg" size="20px"
+                                    <mdi-icon path="/static/icons/crown-circle.svg" size="22px"
                                         color="#FBBF24"></mdi-icon>
-                                    <text class="vip-banner-title">{{ t('membership.title') }}</text>
+                                    <text class="vip-banner-title">
+                                        {{ vipInfo.isVip ? (locale === 'en' ? 'Ego VIP Membership' : '尊享 VIP 会员') : t('membership.title') }}
+                                    </text>
                                 </view>
-                                <text class="vip-banner-desc">
-                                    {{ userStore.isVip ? (locale === 'en' ? 'VIP active! Click to extend.' :
-                                        '您的会员已开通！点击续费。') :
-                                        t('membership.subtitle') }}
-                                </text>
+                                <text class="vip-banner-desc">{{ vipInfo.desc }}</text>
                             </view>
-                            <uni-icons type="right" size="16" color="#ffffff"></uni-icons>
+                            <view class="vip-action-pill">
+                                <text class="action-text">{{ vipInfo.actionText }}</text>
+                                <uni-icons type="right" size="14" color="#FBBF24"></uni-icons>
+                            </view>
                         </view>
                     </template>
 
@@ -314,6 +317,73 @@ const toPreferences = () => {
 const toMembership = () => {
     uni.navigateTo({ url: '/pages/member/payment' });
 };
+
+// 计算会员到期与倒计时信息
+const vipInfo = computed(() => {
+    const expireTime = userStore.userinfo?.profile?.vip_expire_time;
+    if (!expireTime) {
+        return {
+            isVip: false,
+            remainingDays: 0,
+            formattedDate: '',
+            desc: t('membership.subtitle'),
+            actionText: locale.value === 'en' ? 'Unlock Now' : '立即开通',
+            isNearExpiry: false,
+        };
+    }
+
+    const expireDate = new Date(expireTime);
+    const now = new Date();
+    const diffMs = expireDate.getTime() - now.getTime();
+    const remainingDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    // 格式化日期 YYYY-MM-DD
+    const y = expireDate.getFullYear();
+    const m = String(expireDate.getMonth() + 1).padStart(2, '0');
+    const d = String(expireDate.getDate()).padStart(2, '0');
+    const formattedDate = `${y}-${m}-${d}`;
+
+    const isVipActive = userStore.isVip && remainingDays > 0;
+
+    if (!isVipActive) {
+        return {
+            isVip: false,
+            remainingDays: 0,
+            formattedDate,
+            desc: locale.value === 'en'
+                ? `Expired on ${formattedDate}`
+                : `您的会员已于 ${formattedDate} 到期`,
+            actionText: locale.value === 'en' ? 'Renew' : '重新开通',
+            isNearExpiry: false,
+        };
+    }
+
+    const isNearExpiry = remainingDays <= 7;
+    let desc = '';
+
+    if (locale.value === 'en') {
+        if (isNearExpiry) {
+            desc = `Expiring soon · ${remainingDays} ${remainingDays === 1 ? 'day' : 'days'} left (${formattedDate})`;
+        } else {
+            desc = `Valid until ${formattedDate} · ${remainingDays} days left`;
+        }
+    } else {
+        if (isNearExpiry) {
+            desc = `会员即将到期 · 仅剩 ${remainingDays} 天（${formattedDate} 到期）`;
+        } else {
+            desc = `有效期至 ${formattedDate} · 剩余 ${remainingDays} 天`;
+        }
+    }
+
+    return {
+        isVip: true,
+        remainingDays,
+        formattedDate,
+        desc,
+        actionText: locale.value === 'en' ? 'Extend' : '立即续费',
+        isNearExpiry,
+    };
+});
 
 const toFAQ = () => {
     uni.navigateTo({
@@ -811,17 +881,28 @@ onShow(() => {
 
         .vip-banner-card {
             margin-top: 24rpx;
-            padding: 24rpx 32rpx;
+            padding: 24rpx 30rpx;
             border-radius: 24rpx;
-            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%);
+            border: 1rpx solid rgba(251, 191, 36, 0.25);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 8rpx 20rpx rgba(147, 51, 234, 0.2);
+            box-shadow: 0 10rpx 28rpx rgba(76, 29, 149, 0.25);
             cursor: pointer;
             transition: transform 0.2s ease, opacity 0.2s ease;
             position: relative;
             z-index: 5;
+
+            &.is-active-vip {
+                background: linear-gradient(135deg, #2e1065 0%, #581c87 50%, #701a75 100%);
+                border: 1rpx solid rgba(251, 191, 36, 0.4);
+                box-shadow: 0 12rpx 32rpx rgba(112, 26, 117, 0.3);
+            }
+
+            &.is-near-expiry {
+                border-color: rgba(245, 158, 11, 0.6);
+            }
 
             &:active {
                 transform: scale(0.98);
@@ -831,8 +912,9 @@ onShow(() => {
             .vip-banner-content {
                 display: flex;
                 flex-direction: column;
-                gap: 6rpx;
+                gap: 8rpx;
                 flex: 1;
+                margin-right: 20rpx;
             }
 
             .vip-banner-title-row {
@@ -842,14 +924,34 @@ onShow(() => {
             }
 
             .vip-banner-title {
-                font-size: 28rpx;
+                font-size: 30rpx;
                 font-weight: 800;
-                color: #ffffff;
+                color: #FBBF24;
+                letter-spacing: 0.5rpx;
             }
 
             .vip-banner-desc {
                 font-size: 22rpx;
-                color: rgba(255, 255, 255, 0.85);
+                color: rgba(255, 255, 255, 0.88);
+                line-height: 1.4;
+            }
+
+            .vip-action-pill {
+                display: flex;
+                align-items: center;
+                gap: 6rpx;
+                background: rgba(251, 191, 36, 0.18);
+                border: 1rpx solid rgba(251, 191, 36, 0.35);
+                padding: 10rpx 20rpx;
+                border-radius: 30rpx;
+                backdrop-filter: blur(8px);
+                flex-shrink: 0;
+
+                .action-text {
+                    font-size: 22rpx;
+                    font-weight: 700;
+                    color: #FDE68A;
+                }
             }
         }
 

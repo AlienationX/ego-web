@@ -106,15 +106,13 @@
                     </view>
                 </view>
 
-                <!-- 保存导出操作按钮 -->
+                <!-- 保存导出操作按钮 (单一大按钮，VIP 专属) -->
                 <view class="frosted-maker__actions">
-                    <button class="action-btn action-btn--secondary" :disabled="isSaving" @click="saveBothWallpapers">
-                        <!-- <uni-icons type="download" size="18" color="#4f46e5"></uni-icons> -->
-                        <text>{{ t('frostedMaker.saveBoth') }}</text>
-                    </button>
-                    <button class="action-btn action-btn--primary" :disabled="isSaving" :loading="isSaving"
-                        @click="saveFrostedWallpaper">
-                        <text>{{ isSaving ? t('frostedMaker.generating') : t('frostedMaker.saveFrosted') }}</text>
+                    <button class="action-btn action-btn--primary action-btn--full" :disabled="isSaving"
+                        :loading="isSaving" @click="handleSaveClick">
+                        <mdi-icon v-if="!userStore.isVip" path="/static/icons/crown-circle.svg" size="20px"
+                            color="#FBBF24"></mdi-icon>
+                        <text>{{ isSaving ? t('frostedMaker.generating') : (userStore.isVip ? t('frostedMaker.saveFrosted') : t('frostedMaker.vipSaveFrosted')) }}</text>
                     </button>
                 </view>
             </view>
@@ -141,6 +139,7 @@
 import { computed, ref, getCurrentInstance, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useUserStore } from '@/stores/user.js';
 import { renderFrostedWallpaperToCanvas, saveImageToAlbum } from '@/utils/blur.js';
 
 const props = defineProps({
@@ -154,10 +153,11 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['saveSuccess']);
+const emit = defineEmits(['saveSuccess', 'requireVip']);
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const instance = getCurrentInstance();
 
 const popupRef = ref(null);
@@ -266,8 +266,17 @@ const downloadImageToTemp = (url) => {
     });
 };
 
-// 导出单张磨砂壁纸并保存相册（尺寸与原图 1:1 完全一致）
-const saveFrostedWallpaper = async () => {
+// 点击保存主屏磨砂壁纸
+const handleSaveClick = () => {
+    if (!userStore.isVip) {
+        emit('requireVip');
+        return;
+    }
+    saveFrostedWallpaperCore();
+};
+
+// 核心导出单张磨砂壁纸并保存相册（尺寸与原图 1:1 完全一致）
+const saveFrostedWallpaperCore = async () => {
     if (!props.picurl || isSaving.value) return;
     isSaving.value = true;
     uni.showLoading({ title: t('frostedMaker.generating'), mask: true });
@@ -315,59 +324,10 @@ const saveFrostedWallpaper = async () => {
     }
 };
 
-// 同时保存两张（锁屏原图 + 主屏磨砂，尺寸均与原图 100% 一致）
-const saveBothWallpapers = async () => {
-    if (!props.picurl || isSaving.value) return;
-    isSaving.value = true;
-    uni.showLoading({ title: t('frostedMaker.generating'), mask: true });
-
-    try {
-        // 1. 获取原图本地路径与分辨率并保存原图
-        const imageInfo = await downloadImageToTemp(props.picurl);
-        await saveImageToAlbum(imageInfo.path);
-
-        const originalWidth = imageInfo.width || 1080;
-        const originalHeight = imageInfo.height || 2400;
-
-        canvasW.value = originalWidth;
-        canvasH.value = originalHeight;
-
-        // 2. 生成同等物理分辨率的磨砂伴侣
-        const frostedTempPath = await renderFrostedWallpaperToCanvas({
-            canvasId: 'frostedCanvas',
-            instance,
-            imagePath: imageInfo.path,
-            width: originalWidth,
-            height: originalHeight,
-            blurRadius: blurRadius.value,
-            darkness: darkness.value,
-        });
-
-        // 3. 保存磨砂图到相册
-        await saveImageToAlbum(frostedTempPath);
-
-        uni.showToast({
-            title: t('frostedMaker.saveBothSuccess'),
-            icon: 'none',
-            duration: 3500,
-        });
-        emit('saveSuccess', { originalPath: imageInfo.path, frostedPath: frostedTempPath });
-        close();
-    } catch (e) {
-        console.error('Failed to save both wallpapers:', e);
-        uni.showToast({
-            title: t('user.profile.operationFailed'),
-            icon: 'none',
-        });
-    } finally {
-        isSaving.value = false;
-        uni.hideLoading();
-    }
-};
-
 defineExpose({
     open,
     close,
+    saveFrostedWallpaperCore,
 });
 </script>
 
@@ -710,30 +670,11 @@ defineExpose({
                 display: none !important;
             }
 
-            &--primary {
-                background: #4f46e5;
-                color: #ffffff;
-                box-shadow: 0 6rpx 20rpx rgba(79, 70, 229, 0.35);
-
-                &:active {
-                    opacity: 0.85;
-                }
-            }
-
-            &--secondary {
-                background: rgba(79, 70, 229, 0.08);
-                color: #4f46e5;
-                border: 2rpx solid rgba(79, 70, 229, 0.16);
-
-                .theme-dark & {
-                    background: rgba(79, 70, 229, 0.15);
-                    border-color: rgba(79, 70, 229, 0.3);
-                    color: #818cf8;
-                }
-
-                &:active {
-                    background: rgba(79, 70, 229, 0.16);
-                }
+            &--full {
+                width: 100%;
+                height: 88rpx;
+                border-radius: 44rpx;
+                font-size: 28rpx;
             }
         }
     }

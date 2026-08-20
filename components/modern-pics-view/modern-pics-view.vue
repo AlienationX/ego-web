@@ -65,10 +65,9 @@
                         <view class="gallery-wrapper" v-else-if="tabStates[index].images.length > 0">
                             <!-- 模式 1: 网格视图 (CSS Grid) -->
                             <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
-                                <view class="modern-card grid-card" :class="{ 'is-deleting': item.is_deleting }"
+                                <view class="modern-card grid-card"
                                     v-for="(item, idx) in tabStates[index].images"
-                                    :key="index + '-' + item.id + '-' + idx" @click="openPreview(item.id, index)"
-                                    @longpress="handleLongPress(item, index)">
+                                    :key="index + '-' + item.id + '-' + idx" @click="openPreview(item.id, index)">
                                     <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
                                         @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
                                     <view class="card-overlay" v-if="showCardMeta"></view>
@@ -80,11 +79,7 @@
                                                     color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
                                         </view>
                                     </view>
-                                    <view class="card-action" v-if="showDelete && item.loaded"
-                                        @click.stop="handleDelete(item, index)">
-                                        <uni-icons :type="deleteIcon" size="18" :color="deleteIconColor"></uni-icons>
-                                    </view>
-                                    <view class="card-lock" v-else-if="item.is_locked && item.loaded">
+                                    <view class="card-lock" v-if="item.is_locked && item.loaded">
                                         <uni-icons
                                             v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                             type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
@@ -99,8 +94,7 @@
                                 <view class="waterfall-col">
                                     <view class="modern-card wf-card" v-for="(item, idx) in tabStates[index].leftCol"
                                         :key="index + '-l-' + item.id + '-' + idx"
-                                        :class="{ 'is-deleting': item.is_deleting }"
-                                        @click="openPreview(item.id, index)" @longpress="handleLongPress(item, index)">
+                                        @click="openPreview(item.id, index)">
                                         <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
                                             @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
@@ -113,12 +107,7 @@
                                                 </view>
                                             </view>
                                         </view>
-                                        <view class="card-action" v-if="showDelete && item.loaded"
-                                            @click.stop="handleDelete(item, index)">
-                                            <uni-icons :type="deleteIcon" size="18"
-                                                :color="deleteIconColor"></uni-icons>
-                                        </view>
-                                        <view class="card-lock" v-else-if="item.is_locked && item.loaded">
+                                        <view class="card-lock" v-if="item.is_locked && item.loaded">
                                             <uni-icons
                                                 v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                                 type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
@@ -131,8 +120,7 @@
                                 <view class="waterfall-col">
                                     <view class="modern-card wf-card" v-for="(item, idx) in tabStates[index].rightCol"
                                         :key="index + '-r-' + item.id + '-' + idx"
-                                        :class="{ 'is-deleting': item.is_deleting }"
-                                        @click="openPreview(item.id, index)" @longpress="handleLongPress(item, index)">
+                                        @click="openPreview(item.id, index)">
                                         <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
                                             @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
@@ -145,12 +133,7 @@
                                                 </view>
                                             </view>
                                         </view>
-                                        <view class="card-action" v-if="showDelete && item.loaded"
-                                            @click.stop="handleDelete(item, index)">
-                                            <uni-icons :type="deleteIcon" size="18"
-                                                :color="deleteIconColor"></uni-icons>
-                                        </view>
-                                        <view class="card-lock" v-else-if="item.is_locked && item.loaded">
+                                        <view class="card-lock" v-if="item.is_locked && item.loaded">
                                             <uni-icons
                                                 v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                                 type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
@@ -196,11 +179,10 @@
 <script setup>
 import { ref, reactive, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { apiGetClassList, apiGetSearchData, apiGetActions, apiPostRecommend } from '@/api/wallpaper.js';
+import { apiGetClassList, apiGetSearchData, apiPostRecommend } from '@/api/wallpaper.js';
 import { getTabBarHeight } from '@/utils/layout.js';
 
 import { USE_CUSTOM_TABBAR } from '@/common/config.js';
-
 
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
@@ -219,58 +201,13 @@ const props = defineProps({
     stickyTop: { type: Number, default: 0 },
     layoutMode: { type: String, default: '' }, // '' 跟随全局, 'waterfall', 'grid'
     showCardMeta: { type: Boolean, default: false },
-    showDelete: { type: Boolean, default: false }, // 显示删除按钮
-    deleteIcon: { type: String, default: 'heart-filled' }, // 删除/动作图标
-    deleteIconColor: { type: String, default: '#ffffff' }, // 图标颜色
     bottomSafeSpace: { type: Number, default: 60 },
     adHeight: { type: Number, default: 0 }, // 广告条高度，用于悬浮按钮位置调整
     embedded: { type: Boolean, default: false }, // 是否在 tabbar 页面内嵌入
     active: { type: Boolean, default: true }, // 是否当前可见（用于 v-show 切换时恢复滚动位置）
 });
 
-const emit = defineEmits(['update', 'change', 'scroll', 'remove']);
-
-// 点击右上角动作按钮删除
-const handleDelete = (item, index) => {
-    if (!props.showDelete) return;
-    emit('remove', { item, tabIndex: index });
-};
-
-// 长按删除
-const handleLongPress = (item, index) => {
-    if (!props.showDelete) return;
-    emit('remove', { item, tabIndex: index });
-};
-
-// 外部调用：从本地状态移除指定项
-const removeItem = (tabIndex, wallId) => {
-    const state = tabStates[tabIndex];
-    if (!state) return;
-
-    // 先标记为删除，触发 CSS 过渡动画
-    const markDeleted = (arr) => {
-        if (!Array.isArray(arr)) return;
-        const item = arr.find(i => i.id === wallId);
-        if (item) item.is_deleting = true;
-    };
-    markDeleted(state.images);
-    markDeleted(state.leftCol);
-    markDeleted(state.rightCol);
-
-    // 延时等待动画完成后真正移除数据
-    setTimeout(() => {
-        const removeFrom = (arr) => {
-            if (!Array.isArray(arr)) return;
-            const idx = arr.findIndex(i => i.id === wallId);
-            if (idx !== -1) arr.splice(idx, 1);
-        };
-        removeFrom(state.images);
-        removeFrom(state.leftCol);
-        removeFrom(state.rightCol);
-    }, 350);
-};
-
-defineExpose({ removeItem });
+const emit = defineEmits(['update', 'change', 'scroll']);
 
 // --- Store & State ---
 const { locale } = useI18n();
@@ -383,8 +320,6 @@ const fetchData = async (index, init = false) => {
         if (props.apiType === 'search') {
             if (!params.keyword) { state.isLoading = false; return; }
             res = await apiGetSearchData(params);
-        } else if (props.apiType === 'actions') {
-            res = await apiGetActions(params);
         } else if (props.apiType === 'recommend') {
             if (state.images.length > 0) params.exclude_ids = state.images.map(i => i.id);
             res = await apiPostRecommend(params);
@@ -725,13 +660,6 @@ onShow(() => {
         height: 580rpx;
     }
 
-    &.is-deleting {
-        opacity: 0 !important;
-        transform: scale(0.25) rotate(-5deg) !important;
-        filter: blur(8px) !important;
-        pointer-events: none !important;
-    }
-
     &:active {
         .card-img {
             transform: scale(1.08);
@@ -814,27 +742,6 @@ onShow(() => {
                 font-size: 20rpx;
                 font-weight: bold;
             }
-        }
-    }
-
-    .card-action {
-        position: absolute;
-        top: 20rpx;
-        right: 20rpx;
-        background: rgba(0, 0, 0, 0.35);
-        backdrop-filter: blur(8px);
-        border-radius: 50%;
-        width: 56rpx;
-        height: 56rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        transition: transform 0.2s ease, background-color 0.2s ease;
-
-        &:active {
-            transform: scale(0.85);
-            background: rgba(0, 0, 0, 0.55);
         }
     }
 

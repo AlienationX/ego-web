@@ -321,6 +321,9 @@
     "frostedMaker": {
         "title": "主屏磨砂伴侣",
         "subtitle": "锁屏放原图，主屏放磨砂，桌面更干净",
+        "vipExclusiveTitle": "VIP 专属特权",
+        "vipExclusiveHint": "主屏磨砂伴侣为 VIP 专属功能，开通会员后可无限制一键生成精美主屏伴侣壁纸。",
+        "adUnlockHint": "观看一段视频广告即可免费体验主屏磨砂伴侣功能。",
         "btnTitle": "磨砂伴侣",
         "presets": "磨砂预设",
         "presetLight": "轻度柔化",
@@ -332,6 +335,7 @@
         "showApps": "模拟桌面",
         "hideApps": "隐藏桌面",
         "saveFrosted": "保存主屏磨砂壁纸",
+        "vipSaveFrosted": "保存主屏磨砂壁纸 (VIP)",
         "saveBoth": "同时保存（原图+磨砂）",
         "generating": "正在生成超清磨砂壁纸...",
         "saveSuccess": "已保存主屏伴侣壁纸，快去设置为主屏吧！",
@@ -686,7 +690,19 @@
         "superTitle": "灵感画廊",
         "desc": "收藏那些触动你内心的视觉瞬间。",
         "empty": "还没有收藏任何壁纸",
-        "goBrowse": "去浏览"
+        "goBrowse": "去浏览",
+        "totalCount": "共 {count} 张收藏",
+        "selectHint": "轻触卡片选择壁纸",
+        "selectAll": "全选",
+        "deselectAll": "取消全选",
+        "selectedCount": "已选 {count} 项",
+        "batchManage": "批量管理",
+        "unfavoriteSelected": "取消收藏",
+        "unfavoriteConfirmTitle": "取消收藏确认",
+        "unfavoriteConfirmDesc": "确定取消收藏这幅壁纸吗？",
+        "batchUnfavoriteConfirmDesc": "确定要取消收藏选中的 {count} 幅壁纸吗？",
+        "unfavoriteSuccess": "已取消收藏",
+        "batchUnfavoriteSuccess": "已成功取消收藏所选项"
     },
     "download": {
         "superTitle": "本地图库",

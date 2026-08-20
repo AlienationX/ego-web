@@ -319,9 +319,12 @@
         "incompleteWarning": "Watch the full ad to unlock download"
     },
     "frostedMaker": {
-        "title": "Home Screen Frosted Companion",
+        "title": "Frosted Maker",
         "subtitle": "Lock screen for art, home screen for apps.",
-        "btnTitle": "Frosted Companion",
+        "vipExclusiveTitle": "VIP Exclusive Feature",
+        "vipExclusiveHint": "Frosted Maker is a VIP exclusive feature. Upgrade to VIP for unlimited frosted wallpaper creation.",
+        "adUnlockHint": "Watch a short video ad to unlock Frosted Maker for this session.",
+        "btnTitle": "Frosted Maker",
         "presets": "Blur Presets",
         "presetLight": "Light",
         "presetBalanced": "Balanced",
@@ -332,6 +335,7 @@
         "showApps": "Preview Apps",
         "hideApps": "Hide Apps",
         "saveFrosted": "Save Frosted Wallpaper",
+        "vipSaveFrosted": "Save Frosted Wallpaper (VIP)",
         "saveBoth": "Save Both (Original + Frosted)",
         "generating": "Generating HD frosted wallpaper...",
         "saveSuccess": "Frosted companion saved to photos album!",
@@ -683,10 +687,22 @@
         "openVipNow": "Unlock VIP Now"
     },
     "favorite": {
-        "superTitle": "Inspiration",
-        "desc": "A collection of your favorite visual moments.",
+        "superTitle": "Inspiration Gallery",
+        "desc": "A curated collection of your most cherished visual moments.",
         "empty": "No favorite wallpapers yet",
-        "goBrowse": "Browse Now"
+        "goBrowse": "Browse Now",
+        "totalCount": "{count} Favorites",
+        "selectHint": "Tap to select wallpapers",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "selectedCount": "{count} Selected",
+        "batchManage": "Manage",
+        "unfavoriteSelected": "Unfavorite",
+        "unfavoriteConfirmTitle": "Unfavorite Confirmation",
+        "unfavoriteConfirmDesc": "Are you sure you want to remove this wallpaper from favorites?",
+        "batchUnfavoriteConfirmDesc": "Are you sure you want to remove {count} selected wallpapers from favorites?",
+        "unfavoriteSuccess": "Removed from favorites",
+        "batchUnfavoriteSuccess": "Selected items removed from favorites"
     },
     "download": {
         "superTitle": "Local Library",

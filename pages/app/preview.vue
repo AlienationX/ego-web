@@ -60,9 +60,9 @@
                                 <uni-icons type="more-filled" size="24" color="#ffffff"></uni-icons>
                             </view>
                             <view class="icon-btn" @click="openClockStyle">
-                                <mdi-icon path="/static/icons/clock.svg" size="20px" color="#fff"></mdi-icon>
+                                <mdi-icon path="/static/icons/clock.svg" size="28px" color="#fff"></mdi-icon>
                             </view>
-                            <view v-if="isAdmin" class="icon-btn" @click="openFrostedMaker">
+                            <view class="icon-btn" @click="openFrostedMaker">
                                 <mdi-icon path="/static/icons/blur.svg" size="28px" color="#fff"></mdi-icon>
                             </view>
                             <!-- #ifdef MP-WEIXIN -->
@@ -76,7 +76,7 @@
                             </view>
                             <!-- #endif -->
                             <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
-                                <mdi-icon path="/static/icons/information-symbol.svg" size="32px"
+                                <mdi-icon path="/static/icons/information-symbol.svg" size="34px"
                                     color="#fff"></mdi-icon>
                             </view>
                         </view>
@@ -89,7 +89,7 @@
                                 <uni-icons type="heart-filled" size="28"></uni-icons>
                                 <view class="text">{{
                                     currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
-                                }}</view>
+                                    }}</view>
                             </view>
                             <view class="box" @click="openScore">
                                 <uni-icons type="star-filled" size="28"></uni-icons>
@@ -136,7 +136,7 @@
                                     getLocalizedItem(currentInfo).description ||
                                     getLocalizedItem(currentInfo).classify_name ||
                                     ''
-                                    }}</view>
+                                }}</view>
                             </view>
                         </template>
                     </view>
@@ -149,7 +149,7 @@
                             email:
                                 SERVICE_EMAIL
                         })
-                            }}</text>
+                        }}</text>
                     </view>
 
                     <!-- 第二行与第三行：2列网格指标数据 -->
@@ -521,7 +521,8 @@
         </uni-popup>
 
         <!-- 主屏磨砂伴侣弹窗组件 -->
-        <popup-frosted-maker ref="frostedMakerPopup" :picurl="currentInfo?.picurl" :id="currentInfo?.id" />
+        <popup-frosted-maker ref="frostedMakerPopup" :picurl="currentInfo?.picurl || currentInfo?.smallPicurl"
+            :id="currentInfo?.id" @requireVip="onFrostedRequireVip" />
 
         <!-- 底部分享弹窗组件 -->
         <share-sheet ref="shareSheetRef" :title="t('common.share')"
@@ -700,6 +701,40 @@ const frostedMakerPopup = ref(null);
 
 const openFrostedMaker = () => {
     frostedMakerPopup.value?.open();
+};
+
+const onFrostedRequireVip = () => {
+    const payEnabled = appStore.versionConfig?.pay_enabled !== false;
+    const adEnabled = appStore.versionConfig?.ad_enabled !== false;
+
+    if (payEnabled) {
+        if (adPopup.value) {
+            adPopup.value.open({
+                title: t('frostedMaker.vipExclusiveTitle') || 'VIP 专属特权',
+                desc: t('frostedMaker.vipExclusiveHint') || '主屏磨砂伴侣为 VIP 专属功能，开通会员后可无限制一键保存超清磨砂壁纸。',
+                showAdBtn: false,
+                showVipBtn: true,
+                vipBtnText: t('previewPage.openVipNow') || '立即开通 VIP',
+            });
+        } else {
+            uni.navigateTo({ url: '/pages/member/payment' });
+        }
+    } else if (adEnabled) {
+        if (adPopup.value) {
+            adPopup.value.open({
+                title: t('frostedMaker.title') || '主屏磨砂伴侣',
+                desc: t('frostedMaker.adUnlockHint') || '观看一段视频广告即可免费保存本次磨砂壁纸。',
+                showAdBtn: true,
+                adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费保存',
+                showVipBtn: false,
+                onAdSuccess: () => {
+                    frostedMakerPopup.value?.saveFrostedWallpaperCore();
+                },
+            });
+        }
+    } else {
+        frostedMakerPopup.value?.saveFrostedWallpaperCore();
+    }
 };
 
 const openClockStyle = () => {
