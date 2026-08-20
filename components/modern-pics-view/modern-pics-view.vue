@@ -65,7 +65,8 @@
                         <view class="gallery-wrapper" v-else-if="tabStates[index].images.length > 0">
                             <!-- 模式 1: 网格视图 (CSS Grid) -->
                             <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
-                                <view class="modern-card grid-card" v-for="(item, idx) in tabStates[index].images"
+                                <view class="modern-card grid-card" :class="{ 'is-deleting': item.is_deleting }"
+                                    v-for="(item, idx) in tabStates[index].images"
                                     :key="index + '-' + item.id + '-' + idx" @click="openPreview(item.id, index)"
                                     @longpress="handleLongPress(item, index)">
                                     <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
@@ -248,15 +249,18 @@ const removeItem = (tabIndex, wallId) => {
 
     // 先标记为删除，触发 CSS 过渡动画
     const markDeleted = (arr) => {
+        if (!Array.isArray(arr)) return;
         const item = arr.find(i => i.id === wallId);
         if (item) item.is_deleting = true;
     };
+    markDeleted(state.images);
     markDeleted(state.leftCol);
     markDeleted(state.rightCol);
 
     // 延时等待动画完成后真正移除数据
     setTimeout(() => {
         const removeFrom = (arr) => {
+            if (!Array.isArray(arr)) return;
             const idx = arr.findIndex(i => i.id === wallId);
             if (idx !== -1) arr.splice(idx, 1);
         };
@@ -708,8 +712,11 @@ onShow(() => {
     overflow: hidden;
     box-shadow: 0 4rpx 16rpx var(--shadow-color);
     transform: translateZ(0);
-    /* 开启 GPU 加速 */
-    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* 开启 GPU 加速与平滑过渡 */
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                filter 0.35s ease,
+                box-shadow 0.35s ease;
     max-height: 2000rpx;
     opacity: 1;
     transform-origin: center center;
@@ -719,14 +726,10 @@ onShow(() => {
     }
 
     &.is-deleting {
-        opacity: 0;
-        max-height: 0 !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        border: 0 !important;
-        transform: scale(0.8);
+        opacity: 0 !important;
+        transform: scale(0.25) rotate(-5deg) !important;
+        filter: blur(8px) !important;
+        pointer-events: none !important;
     }
 
     &:active {

@@ -67,9 +67,12 @@ const handleRemove = ({ item, tabIndex }) => {
 
 const onConfirmRemove = async () => {
     if (!itemToRemove.value) return;
+    const targetItem = itemToRemove.value;
+    const targetTabIndex = tabIndexToRemove.value;
+    // 立即触发平滑渐隐缩小动效
+    picsRef.value?.removeItem(targetTabIndex, targetItem.id);
     try {
-        await apiPostActions({ wall_id: itemToRemove.value.id, action_key: 'download', action_value: 0 });
-        picsRef.value?.removeItem(tabIndexToRemove.value, itemToRemove.value.id);
+        await apiPostActions({ wall_id: targetItem.id, action_key: 'download', action_value: 0 });
         uni.showToast({ title: t('user.profile.clearDownloadSuccess'), icon: 'none' });
     } catch (e) {
         uni.showToast({ title: t('user.profile.operationFailed'), icon: 'none' });
