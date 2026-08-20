@@ -72,7 +72,7 @@ export const downloadPic = (picurl) => {
 export function setAndroidWallpaper(localFilePath, target = 'both') {
     return new Promise((resolve, reject) => {
         // #ifdef APP-PLUS
-        if (uni.getSystemInfoSync().platform !== 'android') {
+        if (uni.getDeviceInfo().platform !== 'android') {
             return reject(new Error('仅支持 Android 平台'));
         }
 
@@ -91,7 +91,7 @@ export function setAndroidWallpaper(localFilePath, target = 'both') {
             }
 
             // Step 2: 获取屏幕分辨率
-            const sysInfo = uni.getSystemInfoSync();
+            const sysInfo = uni.getWindowInfo();
             const targetW = Math.round((sysInfo.screenWidth  || 360) * (sysInfo.pixelRatio || 2));
             const targetH = Math.round((sysInfo.screenHeight || 720) * (sysInfo.pixelRatio || 2));
 
@@ -143,7 +143,7 @@ export function setAndroidWallpaper(localFilePath, target = 'both') {
             } catch (e) { /* 非致命，忽略 */ }
 
             // Step 5: 确定 Android SDK 版本与 flag 并调用 setBitmap
-            const sysStr  = sysInfo.system || '';
+            const sysStr  = uni.getDeviceInfo().system || '';
             const sysVer  = parseFloat(sysStr.replace(/Android\s*/i, '')) || 0;
             const isApi24 = sysVer >= 7.0;
 

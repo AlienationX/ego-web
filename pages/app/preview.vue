@@ -62,6 +62,9 @@
                             <view class="icon-btn" @click="openClockStyle">
                                 <mdi-icon path="/static/icons/clock.svg" size="20px" color="#fff"></mdi-icon>
                             </view>
+                            <view v-if="isAdmin" class="icon-btn" @click="openFrostedMaker">
+                                <mdi-icon path="/static/icons/blur.svg" size="28px" color="#fff"></mdi-icon>
+                            </view>
                             <!-- #ifdef MP-WEIXIN -->
                             <button class="icon-btn share-btn-reset" open-type="share">
                                 <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
@@ -101,10 +104,6 @@
 
                         <template v-else>
                             <view class="right-actions">
-                                <!-- <view class="action-item" @click="openClockStyle">
-                                    <mdi-icon path="/static/icons/clock.svg" size="36px" color="#ffffff"></mdi-icon>
-                                    <view class="action-text">{{ t('previewPage.clockStyle') }}</view>
-                                </view> -->
                                 <view class="action-item" @click="openInfo">
                                     <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
                                     <view class="action-text">{{ t('common.information') }}</view>
@@ -521,6 +520,9 @@
             </view>
         </uni-popup>
 
+        <!-- 主屏磨砂伴侣弹窗组件 -->
+        <popup-frosted-maker ref="frostedMakerPopup" :picurl="currentInfo?.picurl" :id="currentInfo?.id" />
+
         <!-- 底部分享弹窗组件 -->
         <share-sheet ref="shareSheetRef" :title="t('common.share')"
             :share-title="getLocalizedItem(currentInfo).description || t('common.appName')"
@@ -694,6 +696,11 @@ const tempClockStyle = ref('');
 const selectedClockStyleItem = computed(() => clockStyles.value.find(s => s.value === tempClockStyle.value));
 
 const isClockStylePopupOpen = ref(false);
+const frostedMakerPopup = ref(null);
+
+const openFrostedMaker = () => {
+    frostedMakerPopup.value?.open();
+};
 
 const openClockStyle = () => {
     tempClockStyle.value = currentClockStyle.value;

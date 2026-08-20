@@ -317,6 +317,35 @@
     "ad": {
         "incompleteWarning": "Watch the full ad to unlock download"
     },
+    "frostedMaker": {
+        "title": "Home Screen Frosted Companion",
+        "subtitle": "Lock screen for art, home screen for apps.",
+        "btnTitle": "Frosted Companion",
+        "presets": "Blur Presets",
+        "presetLight": "Light",
+        "presetBalanced": "Balanced",
+        "presetDeep": "Deep",
+        "presetPure": "Pure",
+        "blurLevel": "Blur Level",
+        "dimLevel": "Dim Level",
+        "showApps": "Preview Apps",
+        "hideApps": "Hide Apps",
+        "saveFrosted": "Save Frosted Wallpaper",
+        "saveBoth": "Save Both (Original + Frosted)",
+        "generating": "Generating HD frosted wallpaper...",
+        "saveSuccess": "Frosted companion saved to photos album!",
+        "saveBothSuccess": "Both wallpapers saved (Lockscreen original + Homescreen frosted)!",
+        "apps": {
+            "wechat": "Chat",
+            "photos": "Photos",
+            "camera": "Camera",
+            "music": "Music",
+            "maps": "Maps",
+            "wallet": "Wallet",
+            "settings": "Settings",
+            "browser": "Browser"
+        }
+    },
     "message": {
         "copyrightStatement": "Statement: Wallpapers on this app are collected from the internet. If your copyright is unintentionally infringed, please send the wallpaper ID and relevant proof of ownership to {email}. We will verify and process it as soon as possible to protect your rights.",
         "saveSuccessful": "Save successful. Please go to the album to view.",

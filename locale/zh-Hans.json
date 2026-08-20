@@ -317,6 +317,35 @@
     "ad": {
         "incompleteWarning": "需要看完广告才能下载"
     },
+    "frostedMaker": {
+        "title": "主屏磨砂伴侣",
+        "subtitle": "锁屏放原图，主屏放磨砂，桌面更干净",
+        "btnTitle": "磨砂伴侣",
+        "presets": "磨砂预设",
+        "presetLight": "轻度柔化",
+        "presetBalanced": "平衡磨砂",
+        "presetDeep": "深层雾化",
+        "presetPure": "极简纯净",
+        "blurLevel": "模糊程度",
+        "dimLevel": "暗度遮罩",
+        "showApps": "模拟桌面",
+        "hideApps": "隐藏桌面",
+        "saveFrosted": "保存主屏磨砂壁纸",
+        "saveBoth": "同时保存（原图+磨砂）",
+        "generating": "正在生成超清磨砂壁纸...",
+        "saveSuccess": "已保存主屏伴侣壁纸，快去设置为主屏吧！",
+        "saveBothSuccess": "已保存两张壁纸（锁屏原图 + 主屏磨砂）！",
+        "apps": {
+            "wechat": "微信",
+            "photos": "相册",
+            "camera": "相机",
+            "music": "音乐",
+            "maps": "地图",
+            "wallet": "钱包",
+            "settings": "设置",
+            "browser": "浏览器"
+        }
+    },
     "message": {
         "copyrightStatement": "声明：本站壁纸均来源于网络收集。如无意侵犯了您的版权，请将壁纸 ID 及相关权属证明发送至 {email}，我们将核实后尽快处理以维护您的权益。",
         "saveSuccessful": "保存成功，请到相册查看",
