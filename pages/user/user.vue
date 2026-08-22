@@ -56,7 +56,7 @@
                             <view class="checkin-btn" @click="checkin" :class="{ 'checked-in': hasCheckedInToday }">
                                 <uni-icons type="refresh" size="18" color="#28B389"></uni-icons>
                                 <text>{{ hasCheckedInToday ? t('user.profile.checkedIn') : t('user.profile.checkin')
-                                    }}</text>
+                                }}</text>
                             </view>
                         </view>
 
@@ -69,7 +69,8 @@
                                     <mdi-icon path="/static/icons/crown-circle.svg" size="22px"
                                         color="#FBBF24"></mdi-icon>
                                     <text class="vip-banner-title">
-                                        {{ vipInfo.isVip ? (locale === 'en' ? 'Ego VIP Membership' : '尊享 VIP 会员') : t('membership.title') }}
+                                        {{ vipInfo.isVip ? (locale === 'en' ? 'Ego VIP Membership' : '尊享 VIP 会员') :
+                                        t('membership.title') }}
                                     </text>
                                 </view>
                                 <text class="vip-banner-desc">{{ vipInfo.desc }}</text>
@@ -105,7 +106,7 @@
                             </view>
                             <view class="stats-number">{{
                                 userStore.userinfo.count ? userStore.userinfo.count.favorite_count : 0
-                                }}</view>
+                            }}</view>
                         </view>
                         <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
                         <view class="card-decoration decoration-1"></view>
@@ -118,7 +119,7 @@
                             </view>
                             <view class="stats-number">{{
                                 userStore.userinfo.count ? userStore.userinfo.count.download_count : 0
-                                }}</view>
+                            }}</view>
                         </view>
                         <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
                         <view class="card-decoration decoration-2"></view>
@@ -131,7 +132,7 @@
                             </view>
                             <view class="stats-number">{{
                                 userStore.userinfo.count ? userStore.userinfo.count.rate_count : 0
-                                }}</view>
+                            }}</view>
                         </view>
                         <view class="stats-label">{{ t('user.profile.myScore') }}</view>
                         <view class="card-decoration decoration-3"></view>
@@ -521,6 +522,14 @@ const sysMenus = computed(() => [
         right_text: `${libraryStore.recentViewed.length}`,
         right_icon: 'right',
         click: toHistory,
+    },
+    {
+        left_icon: '/static/icons/widgets.svg',
+        left_color: '#6B7280',
+        left_text: t('widgets.title'),
+        right_text: '',
+        right_icon: 'right',
+        click: () => uni.navigateTo({ url: '/pages/settings/widgets' }),
     },
     {
         left_icon: '/static/icons/help-circle.svg',

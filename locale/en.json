@@ -513,6 +513,28 @@
         "googleLoginTip": "Google login coming soon",
         "appleLoginTip": "Apple login coming soon"
     },
+    "widgets": {
+        "title": "Desktop Widgets",
+        "subtitle": "Bring art & daily inspiration to your home screen",
+        "heroTitle": "Elevate Your Home Screen",
+        "heroDesc": "Enjoy curated daily wallpapers, poetic quotes, and art clocks right on your launcher.",
+        "dailyTitle": "Daily Inspiration Card",
+        "dailySize": "2x2 Square",
+        "dailyDesc": "HD wallpaper · Minimalist date · Automatic daily rotation",
+        "clockTitle": "Art Clock & Quote",
+        "clockSize": "4x2 Rectangle",
+        "clockDesc": "Wallpaper + live clock + daily quotes · One-tap quick switcher",
+        "largeTitle": "Grand Art Poster",
+        "largeSize": "4x4 Large Square",
+        "largeDesc": "Full-size HD poster + daily quote + quick search/favorite/switcher",
+        "addToHomeScreen": "Add to Home Screen",
+        "pinSuccess": "Pin widget request sent to launcher",
+        "manualAddTitle": "Manual Setup Guide",
+        "manualAddDesc": "If the prompt doesn't appear, long-press any empty space on your home screen -> tap Widgets -> find Ego Wallpapers and place it on your screen.",
+        "faqTitle": "Tips & Background Settings",
+        "faqAutoStartTitle": "Widget not updating automatically?",
+        "faqAutoStartDesc": "Some Android OS restrict background tasks. Go to Phone Settings -> Apps -> Ego Wallpapers, and enable 'Autostart' and 'Allow background activity' to ensure smooth daily updates."
+    },
     "previewPage": {
         "wallpaperInfo": "Wallpaper Information",
         "wallpaperId": "Wallpaper ID:",

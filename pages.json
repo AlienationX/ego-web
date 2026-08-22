@@ -157,6 +157,13 @@
             }
         },
         {
+            "path": "pages/settings/widgets",
+            "style": {
+                "navigationBarTitleText": "桌面小组件",
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/settings/feedback",
             "style": {
                 "navigationBarTitleText": "反馈",

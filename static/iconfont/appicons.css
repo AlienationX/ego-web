@@ -1,11 +1,11 @@
 @font-face {
   font-family: "appicons";
-  src: url('appicons.eot?t=1787195176253'); /* IE9*/
-  src: url('appicons.eot?t=1787195176253#iefix') format('embedded-opentype') /* IE6-IE8 */,
-  url('appicons.woff2?t=1787195176253') format('woff2'),
-  url('appicons.woff?t=1787195176253') format('woff'),
-  url('appicons.ttf?t=1787195176253') format('truetype'),
-  url('appicons.svg?t=1787195176253') format('svg');
+  src: url('appicons.eot?t=1787389721463'); /* IE9*/
+  src: url('appicons.eot?t=1787389721463#iefix') format('embedded-opentype') /* IE6-IE8 */,
+  url('appicons.woff2?t=1787389721463') format('woff2'),
+  url('appicons.woff?t=1787389721463') format('woff'),
+  url('appicons.ttf?t=1787389721463') format('truetype'),
+  url('appicons.svg?t=1787389721463') format('svg');
 }
 
 [class^="appicons-"], [class*=" appicons-"] {
@@ -133,6 +133,7 @@
 .appicons-wallet-bifold::before { content: "\ea71"; }
 .appicons-weather-night::before { content: "\ea72"; }
 .appicons-weather-sunny::before { content: "\ea73"; }
-.appicons-youtube::before { content: "\ea74"; }
+.appicons-widgets::before { content: "\ea74"; }
+.appicons-youtube::before { content: "\ea75"; }
 
 

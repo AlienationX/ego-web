@@ -31,6 +31,22 @@ export const apiGetDailyFeatured = () => {
     });
 };
 
+// 获取桌面小组件每日精选数据接口
+export const apiGetWidgetDaily = (data = {}) => {
+    return request({
+        url: '/widget/daily/',
+        data,
+    });
+};
+
+// 获取桌面小组件随机壁纸接口 (换一张)
+export const apiGetWidgetRandom = (data = {}) => {
+    return request({
+        url: '/widget/random/',
+        data,
+    });
+};
+
 // 获取随机推荐图片接口
 export const apiGetRandomRecommend = (data = {}) => {
     return request({

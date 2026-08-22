@@ -75,10 +75,65 @@ onLaunch(() => {
 
     // 全局隐藏原生 TabBar（适用于 App 和 H5 端）
     // uni.hideTabBar({ animation: false, fail: () => { } });
+
+    // 处理深度链接（如桌面小组件点击）
+    handleDeepLink();
+
+    // #ifdef APP-PLUS
+    plus.globalEvent.addEventListener('newintent', () => {
+        handleDeepLink();
+    });
+    // #endif
 });
+
+// 处理 URL Scheme 深度链接唤起 (支持 egowall://preview?id=xxx, egowall://search, egowall://favorite)
+const handleDeepLink = () => {
+    // #ifdef APP-PLUS
+    const args = plus.runtime.arguments;
+    if (!args) return;
+
+    if (args.includes('preview')) {
+        const idMatch = args.match(/[?&]id=(\d+)/);
+        if (idMatch && idMatch[1]) {
+            const wallId = idMatch[1];
+            // 清除已消费的参数，避免重复跳转
+            plus.runtime.arguments = '';
+            setTimeout(() => {
+                uni.navigateTo({
+                    url: `/pages/app/preview?id=${wallId}`,
+                    fail: () => {
+                        console.error('Failed to navigate to preview from deep link');
+                    }
+                });
+            }, 300);
+        }
+    } else if (args.includes('search')) {
+        plus.runtime.arguments = '';
+        setTimeout(() => {
+            uni.navigateTo({
+                url: '/pages/app/search',
+                fail: () => {
+                    console.error('Failed to navigate to search from deep link');
+                }
+            });
+        }, 300);
+    } else if (args.includes('favorite')) {
+        plus.runtime.arguments = '';
+        setTimeout(() => {
+            uni.navigateTo({
+                url: '/pages/app/favorite',
+                fail: () => {
+                    console.error('Failed to navigate to favorite from deep link');
+                }
+            });
+        }, 300);
+    }
+    // #endif
+};
 
 onShow(() => {
     console.log('App Show');
+    handleDeepLink();
 
     // iOS/鸿蒙修改系统语言不重启 App，切回前台时通过 onShow 重新检测系统语言
     // 注：uni.onLocaleChange 只监听 uni.setLocale() 调用，无法感知系统设置变化
