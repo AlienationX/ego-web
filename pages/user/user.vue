@@ -771,7 +771,7 @@ onShow(() => {
         }
 
         .name {
-            font-size: 36rpx;
+            font-size: 32rpx;
             color: var(--text-primary);
             font-weight: 700;
             letter-spacing: 0.5rpx;
@@ -1053,27 +1053,28 @@ onShow(() => {
         }
 
         .app-name {
-            font-size: 40rpx;
+            font-size: 34rpx;
             color: var(--text-primary);
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: -0.2rpx;
             padding-top: 20rpx;
-            padding-bottom: 12rpx;
+            padding-bottom: 10rpx;
         }
 
         .app-desc {
-            font-size: 28rpx;
+            font-size: 24rpx;
             color: var(--text-tertiary);
-            margin-bottom: 30rpx;
+            margin-bottom: 28rpx;
         }
 
         .login-btn {
-            margin-bottom: 30rpx;
-            width: 360rpx;
-            height: 84rpx;
+            margin-bottom: 28rpx;
+            width: 320rpx;
+            height: 76rpx;
             background: var(--text-primary);
             color: var(--page-background-secondary);
-            font-size: 30rpx;
-            font-weight: 800;
+            font-size: 26rpx;
+            font-weight: 700;
             border-radius: 999rpx;
             border: 1rpx solid var(--panel-border);
             display: flex;
@@ -1225,7 +1226,7 @@ onShow(() => {
             }
 
             .stats-number {
-                font-size: 40rpx;
+                font-size: 36rpx;
                 font-weight: 700;
                 color: var(--text-primary);
                 line-height: 1.2;
@@ -1235,7 +1236,7 @@ onShow(() => {
             }
 
             .stats-label {
-                font-size: 24rpx;
+                font-size: 22rpx;
                 color: var(--text-tertiary);
                 font-weight: 500;
                 text-align: right;
@@ -1277,11 +1278,11 @@ onShow(() => {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 0 30rpx;
-                height: 100rpx;
+                padding: 0 28rpx;
+                height: 94rpx;
                 position: relative;
                 background: var(--page-background-secondary);
-                margin-bottom: 20rpx;
+                margin-bottom: 16rpx;
                 border-radius: 16rpx;
                 border: 2rpx solid var(--panel-border);
                 transition: all 0.3s;
@@ -1299,25 +1300,10 @@ onShow(() => {
                     display: flex;
                     align-items: center;
 
-                    // .icon-wrap {
-                    //     width: 56rpx;
-                    //     height: 56rpx;
-                    //     border-radius: 16rpx;
-                    //     background: rgba(40, 179, 137, 0.12);
-                    //     display: flex;
-                    //     align-items: center;
-                    //     justify-content: center;
-                    //     flex-shrink: 0;
-                    // }
-
-                    // .icon-wrap.exit-icon {
-                    //     background: rgba(229, 50, 45, 0.12);
-                    // }
-
                     .text {
                         padding-left: 20rpx;
                         color: var(--text-primary);
-                        font-size: 30rpx;
+                        font-size: 28rpx;
                         font-weight: 600;
                     }
                 }
@@ -1327,7 +1313,7 @@ onShow(() => {
                     align-items: center;
 
                     .text {
-                        font-size: 26rpx;
+                        font-size: 24rpx;
                         color: var(--text-tertiary);
                         margin-right: 12rpx;
                     }
@@ -1337,7 +1323,7 @@ onShow(() => {
                     position: absolute;
                     top: 0;
                     left: 0;
-                    height: 100rpx;
+                    height: 94rpx;
                     width: 100%;
                     opacity: 0;
                 }

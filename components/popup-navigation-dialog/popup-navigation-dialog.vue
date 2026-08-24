@@ -80,6 +80,14 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
+:deep(.uni-popup) {
+    z-index: 99999 !important;
+}
+
+:deep(.uni-popup__mask) {
+    z-index: 99998 !important;
+}
+
 .dialog {
     width: 520rpx;
     padding: 50rpx 48rpx 30rpx;

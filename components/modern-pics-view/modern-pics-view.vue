@@ -692,55 +692,57 @@ onShow(() => {
         position: absolute;
         inset: 0;
         background: linear-gradient(to top,
-                rgba(0, 0, 0, 0.42) 0%,
-                rgba(0, 0, 0, 0.26) 12%,
-                rgba(0, 0, 0, 0.10) 24%,
-                rgba(0, 0, 0, 0.02) 33%,
-                rgba(0, 0, 0, 0) 40%);
+                rgba(0, 0, 0, 0.48) 0%,
+                rgba(0, 0, 0, 0.24) 14%,
+                rgba(0, 0, 0, 0.08) 28%,
+                rgba(0, 0, 0, 0) 42%);
         pointer-events: none;
     }
 
     .card-meta {
         position: absolute;
-        left: 20rpx;
-        right: 20rpx;
-        bottom: 20rpx;
+        left: 18rpx;
+        right: 18rpx;
+        bottom: 18rpx;
         z-index: 2;
         pointer-events: none;
-        color: #fff;
+        color: rgba(248, 250, 252, 0.92);
 
         .meta-title {
-            font-size: 26rpx;
-            font-weight: bold;
-            line-height: 1.4;
+            font-size: 24rpx;
+            font-weight: 600;
+            line-height: 1.34;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+            text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.45);
         }
 
         .meta-footer {
-            margin-top: 12rpx;
+            margin-top: 10rpx;
             display: flex;
             justify-content: space-between;
             align-items: center;
 
             .meta-tag {
-                background: rgba(255, 255, 255, 0.2);
+                background: rgba(15, 23, 42, 0.36);
+                border: 1rpx solid rgba(255, 255, 255, 0.14);
                 backdrop-filter: blur(8px);
-                padding: 4rpx 12rpx;
+                padding: 3rpx 12rpx;
                 border-radius: 20rpx;
                 font-size: 18rpx;
                 font-weight: 600;
+                color: rgba(241, 245, 249, 0.88);
             }
 
             .meta-score {
                 display: flex;
                 align-items: center;
                 gap: 4rpx;
-                font-size: 20rpx;
-                font-weight: bold;
+                font-size: 19rpx;
+                font-weight: 600;
+                color: rgba(226, 232, 240, 0.86);
             }
         }
     }

@@ -674,10 +674,10 @@ onShow(() => {
 .timeline-card__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 66%, rgba(8, 11, 18, 0.88) 100%);
+    background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0.1) 48%, rgba(8, 11, 18, 0.82) 100%);
 
     .theme-light & {
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.6) 100%);
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.08) 48%, rgba(0, 0, 0, 0.55) 100%);
     }
 }
 
@@ -727,39 +727,40 @@ onShow(() => {
 
 .timeline-card__content {
     position: absolute;
-    left: 22rpx;
-    right: 22rpx;
-    bottom: 22rpx;
+    left: 20rpx;
+    right: 20rpx;
+    bottom: 20rpx;
     z-index: 1;
 }
 
 .timeline-card__classify {
     display: inline-flex;
     align-items: center;
-    min-height: 34rpx;
+    min-height: 32rpx;
     padding: 0 12rpx;
     border-radius: 999rpx;
     background: rgba(97, 154, 239, 0.16);
     border: 1rpx solid rgba(97, 154, 239, 0.2);
     color: #c7dbff;
-    font-size: 18rpx;
+    font-size: 17rpx;
     font-weight: 700;
     max-width: 100%;
 }
 
 .timeline-card__title {
-    font-size: 28rpx;
-    line-height: 1.36;
-    font-weight: 700;
-    color: #f7fbff;
+    font-size: 25rpx;
+    line-height: 1.34;
+    font-weight: 600;
+    color: rgba(248, 250, 252, 0.92);
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow: hidden;
+    text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.35);
 }
 
 .timeline-card__footer {
-    margin-top: 14rpx;
+    margin-top: 10rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -779,9 +780,9 @@ onShow(() => {
 .timeline-card__score {
     display: flex;
     align-items: center;
-    gap: 8rpx;
+    gap: 6rpx;
     font-size: 20rpx;
-    color: #e2e8f0;
+    color: rgba(203, 213, 225, 0.76);
 }
 
 .timeline-card:active {

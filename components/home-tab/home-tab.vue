@@ -124,8 +124,11 @@
                             <uni-icons type="calendar" size="20"
                                 :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
                             <view class="text"> {{ todayDateStr }}{{ $t('common.day') }} </view>
-                            <button class="button refresh-btn" size="mini" :class="{ 'is-loading': isRefreshing }" @click="refreshRandom">
-                                <uni-icons type="refreshempty" size="13" class="refresh-icon" :class="{ 'is-spinning': isRefreshing }" :color="settingsStore.isDark ? '#181818' : '#ffffff'"></uni-icons>
+                            <button class="button refresh-btn" size="mini" :class="{ 'is-loading': isRefreshing }"
+                                @click="refreshRandom">
+                                <uni-icons type="refreshempty" size="13" class="refresh-icon"
+                                    :class="{ 'is-spinning': isRefreshing }"
+                                    :color="settingsStore.isDark ? '#181818' : '#ffffff'"></uni-icons>
                                 <text class="refresh-text">{{ $t('common.refresh') }}</text>
                             </button>
                         </view>
@@ -169,7 +172,7 @@
                     <template #name>{{ $t('index.latestRelease') }}</template>
                     <template #custom>
                         <button size="mini" class="btn is-default" @click="goTimeline">{{ $t('common.seeAll')
-                        }}</button>
+                            }}</button>
                     </template>
                 </index-title>
 
@@ -1102,9 +1105,9 @@ onMounted(() => {
         }
 
         .banner-card__title {
-            font-size: 42rpx;
-            line-height: 1.18;
-            font-weight: 800;
+            font-size: 34rpx;
+            line-height: 1.25;
+            font-weight: 700;
             color: #f8fafc;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -1113,9 +1116,9 @@ onMounted(() => {
         }
 
         .banner-card__desc {
-            margin-top: 10rpx;
-            font-size: 24rpx;
-            line-height: 1.5;
+            margin-top: 8rpx;
+            font-size: 22rpx;
+            line-height: 1.45;
             color: rgba(226, 232, 240, 0.84);
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -1426,7 +1429,7 @@ onMounted(() => {
             .text {
                 color: $wp-theme-color;
                 font-weight: 700;
-                font-size: 24rpx;
+                font-size: 22rpx;
                 line-height: 1;
             }
         }
@@ -1445,7 +1448,7 @@ onMounted(() => {
             display: flex;
             align-items: center;
             height: 100%;
-            font-size: 26rpx;
+            font-size: 24rpx;
             font-weight: 500;
             color: var(--text-primary);
             overflow: hidden;
@@ -1507,10 +1510,10 @@ onMounted(() => {
     .date {
         display: flex;
         align-items: center;
-        gap: 16rpx;
+        gap: 14rpx;
 
         .text {
-            font-size: 26rpx;
+            font-size: 24rpx;
             font-weight: 600;
             color: var(--text-primary);
             letter-spacing: 0.02em;
@@ -1518,7 +1521,7 @@ onMounted(() => {
     }
 
     .benefit-text-tip {
-        font-size: 26rpx;
+        font-size: 24rpx;
         font-weight: 600;
         color: var(--text-secondary, #94a3b8);
         letter-spacing: 0.4rpx;
@@ -1529,10 +1532,10 @@ onMounted(() => {
     .date .button,
     .refresh-btn {
         margin: 0;
-        padding: 0 20rpx;
-        height: 52rpx;
-        line-height: 52rpx;
-        font-size: 22rpx;
+        padding: 0 18rpx;
+        height: 48rpx;
+        line-height: 48rpx;
+        font-size: 21rpx;
         font-weight: 600;
         border-radius: 999rpx;
         border: none;
@@ -1841,12 +1844,14 @@ onMounted(() => {
 
 .classify {
     .more {
-        font-size: 28rpx;
-        color: $uni-text-color-grey;
+        font-size: 24rpx;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        padding-right: 6rpx;
     }
 
     .classify-grid-padding {
-        padding: 20rpx;
+        padding: 30rpx 20rpx 30rpx 20rpx;
     }
 }
 

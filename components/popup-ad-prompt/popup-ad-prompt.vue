@@ -166,6 +166,14 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
+:deep(.uni-popup) {
+    z-index: 99999 !important;
+}
+
+:deep(.uni-popup__mask) {
+    z-index: 99998 !important;
+}
+
 .ad-prompt {
     width: 76vw;
     max-width: 560rpx;

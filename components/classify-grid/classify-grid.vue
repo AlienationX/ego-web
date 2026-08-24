@@ -201,9 +201,9 @@ const goClasslistFromQuickLook = (item) => {
         bottom: 0;
         left: 0;
         right: 0;
-        min-height: 88rpx;
-        padding: 30rpx 20rpx 20rpx;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.2) 60%, transparent);
+        min-height: 80rpx;
+        padding: 24rpx 18rpx 16rpx;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.18) 55%, transparent);
         display: flex;
         align-items: flex-end;
         z-index: 2;
@@ -218,20 +218,21 @@ const goClasslistFromQuickLook = (item) => {
     .mask-info {
         display: flex;
         flex-direction: column;
-        gap: 4rpx;
+        gap: 2rpx;
     }
 
     .mask-text {
-        color: #fff;
-        font-size: 28rpx;
+        color: rgba(248, 250, 252, 0.94);
+        font-size: 24rpx;
         font-weight: 600;
-        letter-spacing: 0.5rpx;
-        text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+        letter-spacing: 0.2rpx;
+        line-height: 1.3;
+        text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.45);
     }
 
     .mask-count {
-        font-size: 20rpx;
-        color: rgba(255, 255, 255, 0.7);
+        font-size: 19rpx;
+        color: rgba(255, 255, 255, 0.65);
     }
 
     .tab {
@@ -240,9 +241,9 @@ const goClasslistFromQuickLook = (item) => {
         left: 0;
         background: rgba(40, 179, 137, 0.85);
         color: #fff;
-        font-size: 22rpx;
-        padding: 6rpx 14rpx;
-        border-radius: 0 0 20rpx 0;
+        font-size: 19rpx;
+        padding: 4rpx 12rpx;
+        border-radius: 0 0 16rpx 0;
         z-index: 2;
         opacity: 0;
         transition: opacity 0.4s ease-in-out;

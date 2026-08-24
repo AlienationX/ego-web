@@ -25,7 +25,7 @@
             <view class="header-benefits-list">
                 <view class="benefit-item" v-for="(benefit, index) in benefits" :key="index">
                     <view class="benefit-icon-box">
-                        <uni-icons type="checkmarkempty" size="18" color="#ffffff"></uni-icons>
+                        <uni-icons type="checkmarkempty" size="14" color="#ffffff"></uni-icons>
                     </view>
                     <text class="benefit-text">{{ benefit.title }}</text>
                 </view>
@@ -631,19 +631,19 @@ const goBack = () => {
 }
 
 .header-title-box {
-    margin: 32rpx 0 28rpx;
+    margin: 28rpx 0 24rpx;
 
     .title-with-badge {
         display: flex;
         align-items: center;
-        gap: 16rpx;
-        margin-bottom: 12rpx;
+        gap: 14rpx;
+        margin-bottom: 10rpx;
 
         .main-title {
-            font-size: 52rpx;
-            font-weight: 800;
-            line-height: 1.15;
-            letter-spacing: -0.5rpx;
+            font-size: 40rpx;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.3rpx;
         }
 
         .header-badge {
@@ -656,7 +656,7 @@ const goBack = () => {
             backdrop-filter: blur(12px);
 
             .badge-text {
-                font-size: 40rpx;
+                font-size: 32rpx;
                 font-weight: 800;
                 color: #fbbf24;
                 letter-spacing: 1rpx;
@@ -665,7 +665,7 @@ const goBack = () => {
     }
 
     .sub-title {
-        font-size: 26rpx;
+        font-size: 24rpx;
         color: rgba(255, 255, 255, 0.85);
         font-weight: 500;
         display: block;
@@ -675,16 +675,16 @@ const goBack = () => {
 .header-benefits-list {
     display: flex;
     flex-direction: column;
-    gap: 20rpx;
+    gap: 16rpx;
 
     .benefit-item {
         display: flex;
         align-items: center;
-        gap: 20rpx;
+        gap: 16rpx;
 
         .benefit-icon-box {
-            width: 44rpx;
-            height: 44rpx;
+            width: 38rpx;
+            height: 38rpx;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.22);
             backdrop-filter: blur(8px);
@@ -695,8 +695,8 @@ const goBack = () => {
         }
 
         .benefit-text {
-            font-size: 30rpx;
-            font-weight: 600;
+            font-size: 26rpx;
+            font-weight: 500;
             color: rgba(255, 255, 255, 0.95);
         }
     }
@@ -842,16 +842,16 @@ const goBack = () => {
     .plan-info {
         display: flex;
         flex-direction: column;
-        gap: 8rpx;
+        gap: 6rpx;
 
         .plan-title {
-            font-size: 36rpx;
+            font-size: 30rpx;
             font-weight: 700;
             color: var(--text-color);
         }
 
         .plan-desc {
-            font-size: 24rpx;
+            font-size: 22rpx;
             color: #64748b;
             font-weight: 500;
 
@@ -865,7 +865,7 @@ const goBack = () => {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 4rpx;
+        gap: 2rpx;
 
         .price-val-box {
             display: flex;
@@ -873,21 +873,21 @@ const goBack = () => {
             gap: 10rpx;
 
             .original-price-strike {
-                font-size: 26rpx;
+                font-size: 22rpx;
                 color: #94a3b8;
                 text-decoration: line-through;
                 font-weight: 500;
             }
 
             .plan-price {
-                font-size: 40rpx;
+                font-size: 34rpx;
                 font-weight: 800;
                 color: var(--text-color);
             }
         }
 
         .plan-avg {
-            font-size: 24rpx;
+            font-size: 22rpx;
             color: var(--text-sub);
             font-weight: 500;
         }
@@ -912,18 +912,18 @@ const goBack = () => {
     margin-bottom: 40rpx;
 
     .pm-title {
-        font-size: 24rpx;
+        font-size: 22rpx;
         font-weight: 700;
         color: var(--text-sub);
         text-transform: uppercase;
         letter-spacing: 1.5rpx;
-        margin-bottom: 24rpx;
+        margin-bottom: 20rpx;
     }
 
     .pm-row {
         display: flex;
         align-items: center;
-        padding: 24rpx 0;
+        padding: 22rpx 0;
         border-bottom: 1rpx solid var(--card-border);
 
         &:last-child {
@@ -931,29 +931,29 @@ const goBack = () => {
         }
 
         .pm-icon-wrapper {
-            width: 60rpx;
-            height: 60rpx;
+            width: 56rpx;
+            height: 56rpx;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 24rpx;
+            margin-right: 20rpx;
 
             .pm-icon {
-                width: 44rpx;
-                height: 44rpx;
+                width: 40rpx;
+                height: 40rpx;
             }
         }
 
         .pm-name {
             flex: 1;
-            font-size: 30rpx;
+            font-size: 28rpx;
             font-weight: 600;
             color: var(--text-color);
         }
 
         .pm-radio-check {
-            width: 44rpx;
-            height: 44rpx;
+            width: 40rpx;
+            height: 40rpx;
             border-radius: 50%;
             border: 3rpx solid var(--card-border);
             display: flex;
@@ -986,12 +986,12 @@ const goBack = () => {
 
     .cta-btn {
         width: 100%;
-        height: 108rpx;
+        height: 96rpx;
         border-radius: 100rpx;
         background: linear-gradient(135deg, #7573f6 0%, #635df0 100%);
         color: #ffffff;
-        font-size: 34rpx;
-        font-weight: 800;
+        font-size: 28rpx;
+        font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1008,30 +1008,34 @@ const goBack = () => {
             opacity: 0.5;
         }
     }
+}
 
-    .footer-terms, .sheet-terms {
-        font-size: 22rpx;
+/* 协议通用样式（主页面底部与收银台弹窗共用） */
+.footer-terms,
+.sheet-terms {
+    font-size: 22rpx;
+    color: var(--text-sub);
+    font-weight: 500;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 14rpx;
+    line-height: 1.4;
+
+    .terms-prefix,
+    .terms-and {
         color: var(--text-sub);
-        font-weight: 500;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-top: 6rpx;
+    }
 
-        .terms-prefix, .terms-and {
-            color: var(--text-sub);
-        }
+    .terms-link {
+        color: #7573f6;
+        font-weight: 600;
+        padding: 4rpx 4rpx;
 
-        .terms-link {
-            color: #7573f6;
-            font-weight: 600;
-            padding: 4rpx 2rpx;
-
-            &:active {
-                opacity: 0.7;
-            }
+        &:active {
+            opacity: 0.7;
         }
     }
 }
@@ -1041,8 +1045,8 @@ const goBack = () => {
     background: var(--card-bg);
     border-top-left-radius: 48rpx;
     border-top-right-radius: 48rpx;
-    padding: 48rpx 40rpx calc(48rpx + env(safe-area-inset-bottom));
-    padding-bottom: calc(48rpx + constant(safe-area-inset-bottom));
+    padding: 44rpx 40rpx calc(40rpx + env(safe-area-inset-bottom));
+    padding-bottom: calc(40rpx + constant(safe-area-inset-bottom));
     border-top: 1rpx solid var(--card-border);
     box-shadow: 0 -12rpx 48rpx rgba(0, 0, 0, 0.12);
     position: relative;
@@ -1052,12 +1056,12 @@ const goBack = () => {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40rpx;
+        margin-bottom: 36rpx;
     }
 
     &__title {
-        font-size: 36rpx;
-        font-weight: 800;
+        font-size: 32rpx;
+        font-weight: 700;
         color: var(--text-color);
     }
 
@@ -1079,24 +1083,24 @@ const goBack = () => {
 
 .checkout-product-card {
     background: var(--bg-main);
-    padding: 32rpx;
-    border-radius: 28rpx;
+    padding: 28rpx;
+    border-radius: 24rpx;
     border: 1rpx solid var(--card-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 32rpx;
+    margin-bottom: 28rpx;
 
     .cpc-left {
         display: flex;
         align-items: center;
-        gap: 20rpx;
+        gap: 18rpx;
     }
 
     .cpc-crown-box {
-        width: 72rpx;
-        height: 72rpx;
-        border-radius: 20rpx;
+        width: 64rpx;
+        height: 64rpx;
+        border-radius: 18rpx;
         background: rgba(251, 191, 36, 0.1);
         display: flex;
         align-items: center;
@@ -1110,7 +1114,7 @@ const goBack = () => {
     }
 
     .cpc-title {
-        font-size: 30rpx;
+        font-size: 28rpx;
         font-weight: 700;
         color: var(--text-color);
     }
@@ -1122,7 +1126,7 @@ const goBack = () => {
     }
 
     .cpc-price {
-        font-size: 36rpx;
+        font-size: 32rpx;
         font-weight: 800;
         color: var(--text-color);
     }
@@ -1130,10 +1134,10 @@ const goBack = () => {
 
 .checkout-details-box {
     background: var(--bg-main);
-    border-radius: 28rpx;
+    border-radius: 24rpx;
     border: 1rpx solid var(--card-border);
-    padding: 32rpx;
-    margin-bottom: 40rpx;
+    padding: 28rpx;
+    margin-bottom: 32rpx;
 
     .checkout-detail-row {
         display: flex;
@@ -1141,7 +1145,7 @@ const goBack = () => {
         align-items: center;
 
         .cd-label {
-            font-size: 26rpx;
+            font-size: 24rpx;
             color: var(--text-sub);
             font-weight: 500;
         }
@@ -1149,7 +1153,7 @@ const goBack = () => {
         .cd-value-box {
             display: flex;
             align-items: center;
-            gap: 12rpx;
+            gap: 10rpx;
         }
 
         .cd-icon {
@@ -1158,20 +1162,20 @@ const goBack = () => {
         }
 
         .cd-value {
-            font-size: 26rpx;
+            font-size: 24rpx;
             color: var(--text-color);
             font-weight: 600;
         }
 
         &.is-total {
             .cd-label {
-                font-size: 28rpx;
+                font-size: 26rpx;
                 color: var(--text-color);
                 font-weight: 700;
             }
 
             .cd-total-price {
-                font-size: 36rpx;
+                font-size: 32rpx;
                 color: var(--radio-active);
                 font-weight: 800;
             }
@@ -1181,7 +1185,7 @@ const goBack = () => {
     .checkout-detail-divider {
         height: 1rpx;
         background: var(--card-border);
-        margin: 24rpx 0;
+        margin: 20rpx 0;
     }
 }
 
@@ -1190,7 +1194,7 @@ const goBack = () => {
     align-items: center;
     justify-content: center;
     gap: 8rpx;
-    margin-bottom: 32rpx;
+    margin-bottom: 28rpx;
 
     .security-text {
         font-size: 22rpx;
@@ -1201,15 +1205,15 @@ const goBack = () => {
 
 .checkout-pay-btn {
     width: 100%;
-    height: 104rpx;
+    height: 96rpx;
     border-radius: 999rpx;
     background: var(--btn-bg);
     color: var(--btn-text);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32rpx;
-    font-weight: 800;
+    font-size: 28rpx;
+    font-weight: 700;
     border: none;
     box-shadow: 0 8rpx 20rpx rgba(147, 51, 234, 0.2);
 

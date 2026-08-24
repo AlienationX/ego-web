@@ -528,36 +528,36 @@ onMounted(() => {
 .hero-card__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 48%, rgba(6, 12, 18, 0.9) 100%);
+    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0.12) 42%, rgba(6, 12, 18, 0.82) 100%);
 
     .theme-light & {
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.6) 100%);
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.08) 42%, rgba(0, 0, 0, 0.55) 100%);
     }
 }
 
 .hero-card__overlay--soft {
-    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 50%, rgba(6, 12, 18, 0.74) 100%);
+    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0.15) 38%, rgba(6, 12, 18, 0.72) 100%);
 
     .theme-light & {
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.1) 38%, rgba(0, 0, 0, 0.5) 100%);
     }
 }
 
 .hero-card__rank {
     position: absolute;
-    top: 22rpx;
-    left: 22rpx;
-    width: 72rpx;
-    height: 72rpx;
+    top: 20rpx;
+    left: 20rpx;
+    width: 64rpx;
+    height: 64rpx;
     border-radius: 999rpx;
     background: rgba(30, 41, 59, 0.92);
     color: #fff;
-    font-size: 30rpx;
+    font-size: 28rpx;
     font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.24);
+    box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.24);
 }
 
 .hero-card__rank--first {
@@ -570,54 +570,62 @@ onMounted(() => {
 
 .hero-card__content {
     position: absolute;
-    left: 28rpx;
-    right: 28rpx;
-    bottom: 28rpx;
+    left: 24rpx;
+    right: 24rpx;
+    bottom: 24rpx;
     z-index: 1;
 }
 
 .hero-card__content--compact {
-    left: 20rpx;
-    right: 20rpx;
-    bottom: 20rpx;
+    left: 18rpx;
+    right: 18rpx;
+    bottom: 18rpx;
 }
 
 .hero-card__tag {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 36rpx;
-    padding: 0 14rpx;
+    height: 34rpx;
+    padding: 0 12rpx;
     border-radius: 999rpx;
     background: rgba(43, 140, 238, 0.188);
     border: 1rpx solid rgba(125, 211, 252, 0.22);
     color: #7dd3fc;
-    font-size: 18rpx;
-    font-weight: 800;
-    margin-bottom: 14rpx;
+    font-size: 17rpx;
+    font-weight: 700;
+    margin-bottom: 10rpx;
 }
 
 .hero-card__title {
-    font-size: 42rpx;
-    line-height: 1.2;
-    font-weight: 800;
-    color: #e2e8f0;
+    font-size: 32rpx;
+    line-height: 1.28;
+    font-weight: 700;
+    color: rgba(248, 250, 252, 0.94);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.35);
 }
 
 .hero-card__title--compact {
-    font-size: 28rpx;
-    line-height: 1.38;
+    font-size: 24rpx;
+    line-height: 1.32;
+    font-weight: 600;
+    color: rgba(248, 250, 252, 0.92);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.4);
 }
 
 .hero-card__meta {
-    margin-top: 16rpx;
+    margin-top: 12rpx;
     display: flex;
     align-items: center;
-    gap: 24rpx;
+    gap: 20rpx;
 }
 
 .hero-card__meta-item,
@@ -625,8 +633,8 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 8rpx;
-    color: #cbd5e1;
-    font-size: 22rpx;
+    color: rgba(203, 213, 225, 0.78);
+    font-size: 20rpx;
 }
 
 .hero-card:active {
@@ -735,10 +743,10 @@ onMounted(() => {
 }
 
 .rank-item__title {
-    color: #dce4ee;
-    font-size: 28rpx;
+    color: rgba(220, 228, 238, 0.92);
+    font-size: 26rpx;
     font-weight: 600;
-    line-height: 1.38;
+    line-height: 1.36;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;

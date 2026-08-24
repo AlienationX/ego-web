@@ -19,8 +19,9 @@
     padding: 0 20rpx;
 
     .name {
-        font-size: 34rpx;
-        font-weight: 500;
+        font-size: 30rpx;
+        font-weight: 600;
+        letter-spacing: -0.2rpx;
         color: var(--text-primary);
         padding-left: 10rpx;
     }

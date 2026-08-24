@@ -317,22 +317,22 @@ onShareTimeline(() => {
     align-items: center;
     justify-content: center;
     color: rgba(15, 23, 42, 0.48);
-    font-size: 35rpx;
+    font-size: 30rpx;
     font-weight: 600;
     letter-spacing: 0;
     transition: all 0.24s ease;
 
     &.is-active {
         color: #111827;
-        font-weight: 800;
+        font-weight: 700;
     }
 
     &.is-active::after {
         content: '';
         position: absolute;
         left: 50%;
-        bottom: 4rpx;
-        width: 32rpx;
+        bottom: 6rpx;
+        width: 28rpx;
         height: 4rpx;
         border-radius: 999rpx;
         background: #111827;
@@ -359,9 +359,9 @@ onShareTimeline(() => {
 
 .home-search {
     flex-shrink: 0;
-    min-width: 170rpx;
-    height: 60rpx;
-    padding: 0 18rpx;
+    min-width: 156rpx;
+    height: 56rpx;
+    padding: 0 16rpx;
     border-radius: 999rpx;
     display: flex;
     align-items: center;
@@ -378,16 +378,16 @@ onShareTimeline(() => {
 }
 
 .home-search--icon {
-    min-width: 60rpx;
-    width: 60rpx;
-    height: 60rpx;
+    min-width: 56rpx;
+    width: 56rpx;
+    height: 56rpx;
     padding: 0;
     border-radius: 50%;
 }
 
 .home-search__text {
-    font-size: 23rpx;
-    font-weight: 700;
+    font-size: 22rpx;
+    font-weight: 600;
 }
 
 // 暗色模式下搜索框

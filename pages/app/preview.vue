@@ -86,18 +86,18 @@
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
                             <view class="box" @click="toggleCollect">
-                                <uni-icons type="heart-filled" size="28"></uni-icons>
+                                <uni-icons type="heart-filled" size="24"></uni-icons>
                                 <view class="text">{{
                                     currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
                                     }}</view>
                             </view>
                             <view class="box" @click="openScore">
-                                <uni-icons type="star-filled" size="28"></uni-icons>
+                                <uni-icons type="star-filled" size="24"></uni-icons>
                                 <view class="text">{{ currentInfo.score || '-' }}</view>
                             </view>
                             <view class="box" @click="handleApplyWallpaper">
-                                <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="28"></uni-icons>
-                                <uni-icons v-else type="download-filled" size="28"></uni-icons>
+                                <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="24"></uni-icons>
+                                <uni-icons v-else type="download-filled" size="24"></uni-icons>
                                 <view class="text">{{ t('common.download') }}</view>
                             </view>
                         </view>
@@ -423,13 +423,6 @@
             </view>
         </uni-popup>
 
-        <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
-
-        <!-- 通用导航对话框 -->
-        <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
-            :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
-            :showCancel="dialogState.showCancel" @confirm="dialogState.onConfirm"
-            @cancel="dialogState.onCancel"></popup-navigation-dialog>
 
         <!-- Clock Style Popup -->
         <uni-popup ref="clockStylePopup" type="bottom" :safe-area="false" @change="onClockStylePopupChange">
@@ -586,6 +579,15 @@
                 </view>
             </view>
         </uni-popup>
+
+        <!-- 模态对话框与提示（放在最底层 DOM 确保层级最高） -->
+        <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
+
+        <!-- 通用导航对话框 -->
+        <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
+            :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
+            :showCancel="dialogState.showCancel" @confirm="dialogState.onConfirm"
+            @cancel="dialogState.onCancel"></popup-navigation-dialog>
     </view>
 </template>
 
@@ -1988,8 +1990,8 @@ onShareTimeline(() => {
             background: rgba(255, 255, 255, 0.85);
             bottom: 10vh;
             width: 80vw;
-            height: 120rpx;
-            border-radius: 120rpx;
+            height: 112rpx;
+            border-radius: 112rpx;
             color: #1a1a1a;
             display: flex;
             justify-content: space-around;
@@ -2011,12 +2013,13 @@ onShareTimeline(() => {
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                padding: 2rpx 12rpx;
-                gap: 4rpx;
+                padding: 2rpx 10rpx;
+                gap: 2rpx;
 
                 .text {
-                    font-size: 26rpx;
-                    font-weight: 500;
+                    font-size: 22rpx;
+                    font-weight: 600;
+                    letter-spacing: 0.2rpx;
                     color: #1a1a1a;
                     text-shadow: none;
                 }
