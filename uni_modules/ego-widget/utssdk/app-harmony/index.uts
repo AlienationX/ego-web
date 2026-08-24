@@ -1,0 +1,72 @@
+import { RequestPinWidgetOptions, RequestPinWidget, UpdateAllWidgets, IsWidgetSupported, GetCardDeepLink } from '../interface.uts';
+import dataPreferences from '@ohos.data.preferences';
+import common from '@ohos.app.ability.common';
+
+class CardPrefOptions implements dataPreferences.Options {
+    name: string = 'ego_card_deeplink';
+}
+
+/**
+ * 鸿蒙 HarmonyOS NEXT 服务卡片添加接口
+ */
+export const requestPinWidget: RequestPinWidget = (options: RequestPinWidgetOptions) => {
+    try {
+        options.fail?.({ errMsg: 'HarmonyOS 服务卡片支持在桌面长按应用图标或上滑选择卡片添加到桌面' });
+    } catch (e) {
+        let msg = 'Failed to request HarmonyOS widget';
+        if (e instanceof Error && e.message != null && e.message.length > 0) {
+            msg = e.message;
+        }
+        options.fail?.({ errMsg: msg });
+    } finally {
+        options.complete?.();
+    }
+};
+
+/**
+ * 触发鸿蒙卡片数据全量更新
+ */
+export const updateAllWidgets: UpdateAllWidgets = () => {
+    try {
+        console.log('[EgoWidget-Harmony] updateAllWidgets invoked');
+    } catch (e) {
+        console.error('Failed to updateAllWidgets on HarmonyOS', e);
+    }
+};
+
+/**
+ * 检测鸿蒙系统是否支持桌面卡片
+ */
+export const isWidgetSupported: IsWidgetSupported = () : boolean => {
+    return true;
+};
+
+/**
+ * 从 Preferences 读取鸿蒙卡片启动深度链接参数（读后即清除）
+ * 返回格式：{ wallId, targetPage, uri } 的 JSON 字符串，无数据时返回空字符串
+ */
+export const getCardDeepLink: GetCardDeepLink = () : string => {
+    try {
+        const ctx = getContext() as common.Context;
+        if (ctx == null) return '';
+
+        const options = new CardPrefOptions();
+        const pref = dataPreferences.getPreferencesSync(ctx, options);
+        const wallId = pref.getSync('wallId', '') as string;
+        const targetPage = pref.getSync('targetPage', '') as string;
+        const uri = pref.getSync('uri', '') as string;
+
+        if (!wallId && !targetPage && !uri) return '';
+
+        // 读后清除，防止重复跳转
+        pref.deleteSync('wallId');
+        pref.deleteSync('targetPage');
+        pref.deleteSync('uri');
+        pref.flush();
+
+        return JSON.stringify({ wallId: wallId, targetPage: targetPage, uri: uri });
+    } catch (e) {
+        console.error('[EgoWidget] getCardDeepLink error:', e);
+        return '';
+    }
+};

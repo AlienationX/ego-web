@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root_4x2"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ego_widget_bg_round"
+    android:orientation="horizontal">
+
+    <!-- 左半部分：壁纸大图展示区 -->
+    <FrameLayout
+        android:id="@+id/widget_layout_left"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.05">
+
+        <ImageView
+            android:id="@+id/widget_img_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/widget_gradient_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ego_widget_overlay_gradient_4x2" />
+
+        <TextView
+            android:id="@+id/widget_tv_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="14dp"
+            android:background="@drawable/ego_widget_pill_bg"
+            android:paddingStart="7dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="7dp"
+            android:paddingBottom="2dp"
+            android:text="@string/widget_badge_featured"
+            android:textColor="#FFFFFF"
+            android:textSize="9sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/widget_tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="12dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text="@string/widget_default_title"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- 右半部分：时钟、诗词日签与换一张 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.35"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingStart="14dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="12dp">
+
+        <!-- 顶部时间与日期、换一张按钮 -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:gravity="bottom"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/widget_tv_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
+                    android:text="16:53"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/widget_tv_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginBottom="2dp"
+                    android:includeFontPadding="false"
+                    android:text="08-22 周六"
+                    android:textColor="#9CA3AF"
+                    android:textSize="10sp" />
+            </LinearLayout>
+
+            <!-- 换一张快捷按钮 -->
+            <ImageView
+                android:id="@+id/widget_btn_refresh"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="@drawable/ego_widget_pill_bg"
+                android:padding="6dp"
+                android:src="@android:drawable/ic_popup_sync" />
+        </RelativeLayout>
+
+        <!-- 中间：诗意日签文案 -->
+        <TextView
+            android:id="@+id/widget_tv_quote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:lineSpacingExtra="3dp"
+            android:maxLines="2"
+            android:text="@string/widget_default_quote"
+            android:textColor="#E5E7EB"
+            android:textSize="12sp" />
+
+        <!-- 底部：名人格言出处作者 -->
+        <TextView
+            android:id="@+id/widget_tv_author"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="end"
+            android:text="@string/widget_default_author"
+            android:textColor="#9CA3AF"
+            android:textSize="10sp" />
+    </LinearLayout>
+</LinearLayout>

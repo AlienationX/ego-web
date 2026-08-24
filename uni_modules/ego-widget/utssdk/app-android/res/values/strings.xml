@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_2x2_desc">每日壁纸日签 (2x2)</string>
+    <string name="widget_4x2_desc">每日精选壁纸与时钟日签 (4x2)</string>
+    <string name="widget_4x4_desc">巨幅壁纸海报与快捷中心 (4x4)</string>
+    <string name="widget_default_title">本我壁纸 · 每日精选</string>
+    <string name="widget_default_quote">生活明朗，万物可爱，未来可期。</string>
+    <string name="widget_default_author">—— 汪曾祺</string>
+
+    <string name="widget_badge_daily">每日灵感</string>
+    <string name="widget_badge_featured">精选</string>
+    <string name="widget_badge_poster">每日灵感海报</string>
+    <string name="widget_action_search">搜索</string>
+    <string name="widget_action_favorite">收藏</string>
+    <string name="widget_action_refresh">换一张</string>
+    <string name="widget_loading_title">✨ 正在探索新壁纸...</string>
+    <string name="widget_loading_quote">正在为您挑选精美壁纸与日签，请稍候...</string>
+    <string name="widget_toast_refreshing">正在为您刷新壁纸...</string>
+</resources>

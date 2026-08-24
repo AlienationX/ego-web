@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_2x2_desc">Daily Wallpaper &amp; Quote (2x2)</string>
+    <string name="widget_4x2_desc">Daily Featured Wallpaper &amp; Clock (4x2)</string>
+    <string name="widget_4x4_desc">Grand Art Poster &amp; Quick Actions (4x4)</string>
+    <string name="widget_default_title">Ego Wallpaper · Daily Pick</string>
+    <string name="widget_default_quote">Life is clear and bright, all things are lovely.</string>
+    <string name="widget_default_author">—— Wang Zengqi</string>
+
+    <string name="widget_badge_daily">Daily Inspiration</string>
+    <string name="widget_badge_featured">Featured</string>
+    <string name="widget_badge_poster">Daily Art Poster</string>
+    <string name="widget_action_search">Search</string>
+    <string name="widget_action_favorite">Favorite</string>
+    <string name="widget_action_refresh">Refresh</string>
+    <string name="widget_loading_title">✨ Exploring new wallpaper...</string>
+    <string name="widget_loading_quote">Fetching fresh inspiration, please wait...</string>
+    <string name="widget_toast_refreshing">Refreshing wallpaper...</string>
+</resources>

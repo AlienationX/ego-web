@@ -1,0 +1,18 @@
+import { RequestPinWidgetOptions, RequestPinWidget, UpdateAllWidgets, IsWidgetSupported, GetCardDeepLink } from './interface.uts';
+
+export const requestPinWidget: RequestPinWidget = (options: RequestPinWidgetOptions) => {
+    options.fail?.({ errMsg: '桌面小组件仅在 Android App 端支持一键添加' });
+    options.complete?.();
+};
+
+export const updateAllWidgets: UpdateAllWidgets = () => {
+    // Non-android no-op
+};
+
+export const isWidgetSupported: IsWidgetSupported = () : boolean => {
+    return false;
+};
+
+export const getCardDeepLink: GetCardDeepLink = () : string => {
+    return '';
+};

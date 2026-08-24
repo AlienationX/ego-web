@@ -1,0 +1,13 @@
+export type WidgetSize = '2x2' | '4x2' | '4x4';
+
+export type RequestPinWidgetOptions = {
+    size?: WidgetSize;
+    success?: (res: any) => void;
+    fail?: (err: any) => void;
+    complete?: () => void;
+};
+
+export type RequestPinWidget = (options: RequestPinWidgetOptions) => void;
+export type UpdateAllWidgets = () => void;
+export type IsWidgetSupported = () => boolean;
+export type GetCardDeepLink = () => string;

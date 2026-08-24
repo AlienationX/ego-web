@@ -238,7 +238,7 @@ const handleAddWidget = (size) => {
             uni.showToast({
                 title: t('widgets.pinSuccess'),
                 icon: 'none',
-                duration: 2500,
+                duration: 5000,
             });
         },
         fail: (err) => {

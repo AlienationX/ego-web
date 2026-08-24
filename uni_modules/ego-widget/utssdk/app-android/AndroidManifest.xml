@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="uts.sdk.modules.egoWidget">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application>
+        <!-- 2x2 每日精选小组件 Receiver -->
+        <receiver
+            android:name="uts.sdk.modules.egoWidget.EgoDailyWidgetProvider2x2"
+            android:exported="true"
+            android:label="@string/widget_2x2_desc">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ego.wallpaper.WIDGET_REFRESH_2X2" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ego_widget_daily_2x2_info" />
+        </receiver>
+
+        <!-- 4x2 每日精选与时钟日签小组件 Receiver -->
+        <receiver
+            android:name="uts.sdk.modules.egoWidget.EgoDailyWidgetProvider4x2"
+            android:exported="true"
+            android:label="@string/widget_4x2_desc">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ego.wallpaper.WIDGET_REFRESH_4X2" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ego_widget_daily_4x2_info" />
+        </receiver>
+
+        <!-- 4x4 巨幅壁纸海报与快捷中心小组件 Receiver -->
+        <receiver
+            android:name="uts.sdk.modules.egoWidget.EgoDailyWidgetProvider4x4"
+            android:exported="true"
+            android:label="@string/widget_4x4_desc">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.ego.wallpaper.WIDGET_REFRESH_4X4" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/ego_widget_daily_4x4_info" />
+        </receiver>
+    </application>
+</manifest>

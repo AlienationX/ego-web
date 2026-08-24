@@ -1,0 +1,49 @@
+{
+  "id": "ego-widget",
+  "displayName": "Ego 桌面壁纸小组件",
+  "version": "1.0.0",
+  "description": "Android 桌面壁纸日签小组件（支持 2x2 与 4x2 经典规格，支持一键添加到桌面与 Deep Link 直达壁纸）",
+  "keywords": [
+    "widget",
+    "appwidget",
+    "桌面小组件",
+    "壁纸"
+  ],
+  "engines": {
+    "HBuilderX": "^4.29",
+    "uni-app": "^3.99",
+    "uni-app-x": "^3.99"
+  },
+  "dcloudext": {
+    "type": "uts"
+  },
+  "uni_modules": {
+    "dependencies": [],
+    "encrypt": [],
+    "platforms": {
+      "cloud": {
+        "tcb": "√",
+        "aliyun": "√",
+        "alipay": "√"
+      },
+      "client": {
+        "uni-app": {
+          "vue": {
+            "vue3": {
+              "extVersion": "1.0.0",
+              "minVersion": ""
+            }
+          }
+        },
+        "app": {
+          "android": {
+            "minVersion": "21"
+          },
+          "harmony": {
+            "minVersion": "12"
+          }
+        }
+      }
+    }
+  }
+}

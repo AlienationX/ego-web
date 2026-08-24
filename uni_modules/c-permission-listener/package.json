@@ -1,0 +1,103 @@
+{
+  "id": "c-permission-listener",
+  "name": "c-permission-listener",
+  "version": "1.1.8",
+  "author": "cai",
+  "main": "c-permission-listener.js",
+  "displayName": "uniapp项目，安卓权限说明，顶部蒙层。全局jssdk，不需要各个页面引入",
+  "description": "uniapp项目，支持android平台全局监听权限的申请。基于uni.createRequestPermissionListener实现。解决软件在运行时，未见向用户告知权限申请的目的，华为上架被拒",
+  "keywords": [
+    "上架",
+    "安卓权限",
+    "权限说明",
+    "顶部蒙层",
+    "权限申请"
+],
+  "repository": "",
+  "engines": {
+    "uni-app": "^4.21",
+    "uni-app-x": ""
+  },
+  "dcloudext": {
+    "type": "sdk-js",
+    "sale": {
+      "regular": {
+        "price": "0.00"
+      },
+      "sourcecode": {
+        "price": "0.00"
+      }
+    },
+    "contact": {
+      "qq": "1814963581"
+    },
+    "declaration": {
+      "ads": "无",
+      "data": "无",
+      "permissions": "按需添加相对应的权限"
+    },
+    "npmurl": "https://www.npmjs.com/package/c-permission-listener",
+    "darkmode": "x",
+    "i18n": "x",
+    "widescreen": "x"
+  },
+  "uni_modules": {
+    "dependencies": [],
+    "encrypt": [],
+    "platforms": {
+      "cloud": {
+        "tcb": "x",
+        "aliyun": "x",
+        "alipay": "x"
+      },
+      "client": {
+        "uni-app": {
+          "vue": {
+            "vue2": "√",
+            "vue3": "√"
+          },
+          "web": {
+            "safari": "x",
+            "chrome": "x"
+          },
+          "app": {
+            "vue": "√",
+            "nvue": "-",
+            "android": "√",
+            "ios": "x",
+            "harmony": "-"
+          },
+          "mp": {
+            "weixin": "x",
+            "alipay": "x",
+            "toutiao": "x",
+            "baidu": "x",
+            "kuaishou": "x",
+            "jd": "x",
+            "harmony": "x",
+            "qq": "x",
+            "lark": "x"
+          },
+          "quickapp": {
+            "huawei": "x",
+            "union": "x"
+          }
+        },
+        "uni-app-x": {
+          "web": {
+            "safari": "x",
+            "chrome": "x"
+          },
+          "app": {
+            "android": "x",
+            "ios": "x",
+            "harmony": "x"
+          },
+          "mp": {
+            "weixin": "x"
+          }
+        }
+      }
+    }
+  }
+}

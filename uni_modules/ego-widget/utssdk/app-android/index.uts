@@ -1,0 +1,54 @@
+import { RequestPinWidgetOptions, RequestPinWidget, UpdateAllWidgets, IsWidgetSupported, GetCardDeepLink } from '../interface.uts';
+
+export const requestPinWidget: RequestPinWidget = (options: RequestPinWidgetOptions) => {
+    try {
+        const context = UTSAndroid.getAppContext();
+        if (context == null) {
+            options.fail?.({ errMsg: 'Context is null' });
+            options.complete?.();
+            return;
+        }
+
+        const widgetSize = options.size != null ? options.size! : '2x2';
+        const success = WidgetHelper.requestPinWidget(context, widgetSize);
+
+        if (success) {
+            options.success?.({ errMsg: 'requestPinWidget:ok' });
+        } else {
+            options.fail?.({ errMsg: 'Failed to request pin widget or launcher not supported' });
+        }
+    } catch (e) {
+        let msg = 'Unknown error';
+        if (e instanceof Error && e.message != null && e.message.length > 0) {
+            msg = e.message;
+        }
+        options.fail?.({ errMsg: msg });
+    } finally {
+        options.complete?.();
+    }
+};
+
+export const updateAllWidgets: UpdateAllWidgets = () => {
+    try {
+        const context = UTSAndroid.getAppContext();
+        if (context != null) {
+            WidgetHelper.updateAllWidgets(context, false);
+        }
+    } catch (e) {
+        console.error('Failed to updateAllWidgets', e);
+    }
+};
+
+export const isWidgetSupported: IsWidgetSupported = () : boolean => {
+    try {
+        const context = UTSAndroid.getAppContext();
+        if (context == null) return false;
+        return WidgetHelper.isWidgetSupported(context);
+    } catch (e) {
+        return false;
+    }
+};
+
+export const getCardDeepLink: GetCardDeepLink = () : string => {
+    return '';
+};
