@@ -1,0 +1,36 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "模块描述"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "$string:app_name"
+    },
+    {
+      "name": "EntryFormAbility_desc",
+      "value": "本我壁纸服务卡片"
+    },
+    {
+      "name": "EntryFormAbility_label",
+      "value": "本我壁纸"
+    },
+    {
+      "name": "widget_2x2_desc",
+      "value": "每日壁纸日签 (2x2)"
+    },
+    {
+      "name": "widget_4x2_desc",
+      "value": "每日精选壁纸与时钟日签 (2x4)"
+    },
+    {
+      "name": "widget_4x4_desc",
+      "value": "巨幅壁纸海报与快捷中心 (4x4)"
+    }
+  ]
+}

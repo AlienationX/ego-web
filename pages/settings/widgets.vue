@@ -184,7 +184,7 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { apiGetWidgetDaily } from '@/api/wallpaper.js';
 
-// #ifdef APP-PLUS
+// #ifdef APP-PLUS || APP-HARMONY
 import { requestPinWidget } from '@/uni_modules/ego-widget';
 // #endif
 
@@ -231,7 +231,7 @@ onMounted(async () => {
 });
 
 const handleAddWidget = (size) => {
-    // #ifdef APP-PLUS
+    // #ifdef APP-PLUS || APP-HARMONY
     requestPinWidget({
         size,
         success: () => {
@@ -253,7 +253,7 @@ const handleAddWidget = (size) => {
     });
     // #endif
 
-    // #ifndef APP-PLUS
+    // #ifndef APP-PLUS || APP-HARMONY
     uni.showModal({
         title: t('common.tip') || '提示',
         content: '桌面小组件目前专为 Android / HarmonyOS App 端提供，请在手机客户端中一键添加到手机桌面体验！',

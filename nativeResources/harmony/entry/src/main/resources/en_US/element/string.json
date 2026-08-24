@@ -1,0 +1,36 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "$string:app_name"
+    },
+    {
+      "name": "EntryFormAbility_desc",
+      "value": "Ego Wallpapers Service Card"
+    },
+    {
+      "name": "EntryFormAbility_label",
+      "value": "Ego Wallpapers"
+    },
+    {
+      "name": "widget_2x2_desc",
+      "value": "Daily Wallpaper & Quote (2x2)"
+    },
+    {
+      "name": "widget_4x2_desc",
+      "value": "Daily Wallpaper & Clock (2x4)"
+    },
+    {
+      "name": "widget_4x4_desc",
+      "value": "Grand Art Poster & Hub (4x4)"
+    }
+  ]
+}

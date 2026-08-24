@@ -529,8 +529,8 @@
         "largeDesc": "Full-size HD poster + daily quote + quick search/favorite/switcher",
         "addToHomeScreen": "Add to Home Screen",
         "pinSuccess": "Pin widget request sent to launcher",
-        "manualAddTitle": "Manual Setup Guide",
-        "manualAddDesc": "If the prompt doesn't appear, long-press any empty space on your home screen -> tap Widgets -> find Ego Wallpapers and place it on your screen.",
+        "manualAddTitle": "Widget / Card Setup Guide",
+        "manualAddDesc": "You can long-press any empty space on your home screen or swipe up the app icon -> tap Widgets / Service Cards -> find Ego Wallpapers to add.",
         "faqTitle": "Tips & Background Settings",
         "faqAutoStartTitle": "Widget not updating automatically?",
         "faqAutoStartDesc": "Some Android OS restrict background tasks. Go to Phone Settings -> Apps -> Ego Wallpapers, and enable 'Autostart' and 'Allow background activity' to ensure smooth daily updates."
