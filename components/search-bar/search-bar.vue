@@ -53,7 +53,7 @@ const goSearch = () => {
 }
 
 .placeholder {
-    font-size: 28rpx;
+    font-size: 26rpx;
     color: var(--text-tertiary);
     letter-spacing: 1rpx;
 }

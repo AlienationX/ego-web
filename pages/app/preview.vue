@@ -81,8 +81,9 @@
                             </view>
                         </view>
 
-                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">{{ currentIndex + 1 }} /
-                            {{ classList.length }}</view>
+                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">
+                            {{ currentIndex + 1 }} / {{ classList.length }}
+                        </view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
                             <view class="box" @click="toggleCollect">
@@ -255,10 +256,9 @@
                                 </view>
                             </view>
                         </view>
-                        <text class="copyright" user-select>{{ tp('message.copyrightStatement', {
-                            email: SERVICE_EMAIL
-                        })
-                            }}</text>
+                        <text class="copyright" user-select>
+                            {{ tp('message.copyrightStatement', { email: SERVICE_EMAIL }) }}
+                        </text>
                     </view>
                 </scroll-view>
             </view>
@@ -450,9 +450,20 @@
                                         <view class="mc-date">10/24</view>
                                         <view class="mc-time ios-time">09:41</view>
                                     </template>
+                                    <template v-else-if="item.value === 'ios-poster'">
+                                        <view class="mc-date ios-poster-date">10/24</view>
+                                        <view class="mc-time ios-poster-time">09:41</view>
+                                    </template>
                                     <template v-else-if="item.value === 'android-stock'">
                                         <view class="mc-time android-time">09:41</view>
                                         <view class="mc-date android-date">Tue, Oct 24</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'pixel-nine'">
+                                        <view class="mc-time pixel-nine-time">
+                                            <text>09</text>
+                                            <text>41</text>
+                                        </view>
+                                        <view class="mc-date pixel-nine-date">Tue, Oct 24</view>
                                     </template>
                                     <template v-else-if="item.value === 'hyperos-magazine'">
                                         <view class="mc-date hyper-date">OCT 24</view>
@@ -598,7 +609,7 @@ import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
-import { VIDEO_REWARD_ENERGY, SERVICE_EMAIL } from '@/common/config.js';
+import { SERVICE_EMAIL } from '@/common/config.js';
 import {
     apiPostIncrementViews,
     apiPostIncrementDownloads,
@@ -613,16 +624,15 @@ import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useStatusStore } from '@/stores/status.js';
-import { useAdIntersititial, useAdRewardedVideo } from '@/hooks/useAd.js';
+import { useAdIntersititial } from '@/hooks/useAd.js';
 import { formatPreviewDate, formatFileSize, handlePicUrl } from '@/utils/common.js';
-import { downloadPic } from '../../common/core';
+import { downloadPic } from '@/common/core.js';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const statusStore = useStatusStore();
 const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
-const { createRewardedVideoAd, showRewardedVideoAd, destroyRewardedVideoAd } = useAdRewardedVideo();
 
 const isAndroidApp = uni.getDeviceInfo().platform === 'android';
 
@@ -665,6 +675,8 @@ const clockStyles = computed(() => [
     { value: 'default', name: 'Default', isVip: false },
     { value: 'ios-classic', name: 'iOS', isVip: false },
     { value: 'android-stock', name: 'Android', isVip: false },
+    { value: 'ios-poster', name: 'iOS Poster', isVip: true },
+    { value: 'pixel-nine', name: 'Pixel 9', isVip: true },
     { value: 'hyperos-magazine', name: 'HyperOS', isVip: true },
     { value: 'harmonyos', name: 'HarmonyOS', isVip: true },
     { value: 'modern-left', name: 'Modern Left', isVip: true },
@@ -774,12 +786,18 @@ const applyTempClockStyle = async () => {
         return;
     }
 
-    // 选了 VIP 且非 VIP 用户，后续解锁需消耗能量/看广告，此时才校验登录
+    // 选了 VIP 且非 VIP 用户，后续解锁需消耗能量/看广告，此时校验登录并使用通用导航弹窗
     if (!userStore.isLoggedIn) {
-        uni.showToast({ title: t('common.needLogin'), icon: 'none' });
-        setTimeout(() => {
-            uni.navigateTo({ url: '/pages/user/login' });
-        }, 1000);
+        closeClockStyle();
+        showNavDialog({
+            title: t('common.tip') || '提示',
+            content: t('previewPage.vipStyleLoginPrompt') || '使用 VIP 锁屏样式需先登录账号，是否立即前往登录？',
+            confirmText: t('user.profile.loginPromptConfirm') || '去登录',
+            cancelText: t('common.cancel') || '取消',
+            onConfirm: () => {
+                uni.navigateTo({ url: '/pages/auth/signin' });
+            },
+        });
         return;
     }
 
@@ -2034,7 +2052,7 @@ onShareTimeline(() => {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 30rpx;
+            gap: 24rpx;
             min-width: 128rpx;
             color: #fff;
             z-index: 10;
@@ -2051,8 +2069,8 @@ onShareTimeline(() => {
             }
 
             .action-text {
-                font-size: 24rpx;
-                font-weight: 600;
+                font-size: 22rpx;
+                font-weight: 500;
                 text-align: center;
                 white-space: nowrap;
                 color: rgba(255, 255, 255, 0.95);
@@ -2127,7 +2145,7 @@ onShareTimeline(() => {
             }
 
             .meta-desc {
-                font-size: 28rpx;
+                font-size: 26rpx;
                 line-height: 44rpx;
                 font-weight: 400;
                 display: -webkit-box;
@@ -2665,6 +2683,13 @@ onShareTimeline(() => {
                     z-index: 2;
                 }
 
+                &.pixel-nine {
+                    .mini-clock-layout {
+                        top: 50% !important;
+                        transform: translateY(-56%) !important;
+                    }
+                }
+
                 .mini-clock-layout {
                     position: absolute;
                     top: 40rpx;
@@ -2707,6 +2732,33 @@ onShareTimeline(() => {
                         margin-top: 4rpx;
                     }
 
+                    .ios-poster-date {
+                        font-size: 14rpx;
+                        font-weight: 600;
+                        margin-bottom: 6rpx;
+                    }
+
+                    .ios-poster-time {
+                        font-weight: 700;
+                        font-size: 66rpx;
+                        letter-spacing: -2rpx;
+                        line-height: 0.80;
+                        transform: scaleY(1.58) scaleX(0.86);
+                        transform-origin: center top;
+                        font-family:
+                            ui-rounded,
+                            "SF Pro Rounded",
+                            "Comfortaa",
+                            "Arial Rounded MT Bold",
+                            "Quicksand",
+                            "Nunito",
+                            "Hiragino Maru Gothic ProN",
+                            "Yuanti SC",
+                            "幼圆",
+                            sans-serif;
+                        margin-top: 6rpx;
+                    }
+
                     .android-time {
                         font-weight: 300;
                         font-size: 46rpx;
@@ -2716,6 +2768,23 @@ onShareTimeline(() => {
                         opacity: 0.9;
                         margin-top: 4rpx;
                         font-size: 16rpx;
+                    }
+
+                    .pixel-nine-time {
+                        display: flex;
+                        flex-direction: column;
+                        font-weight: 800;
+                        font-size: 56rpx;
+                        line-height: 0.82;
+                        color: #e09f7a;
+                        letter-spacing: -1rpx;
+                    }
+
+                    .pixel-nine-date {
+                        font-size: 14rpx;
+                        font-weight: 500;
+                        margin-top: 8rpx;
+                        opacity: 0.9;
                     }
 
                     .hyper-date {

@@ -12,10 +12,9 @@
                         <text class="update-banner__title">{{ $t('index.newWallpapersNoticeTitle') }}</text>
                         <text v-if="bannerTimeAgo" class="update-banner__time">{{ bannerTimeAgo }}</text>
                     </view>
-                    <text class="update-banner__desc">{{ tp('index.newWallpapersNoticeDesc', {
-                        count:
-                            statusStore.newWallpapersCount
-                    }) }}</text>
+                    <text class="update-banner__desc">
+                        {{ tp('index.newWallpapersNoticeDesc', { count: statusStore.newWallpapersCount }) }}
+                    </text>
                 </view>
             </view>
         </view>
@@ -46,7 +45,7 @@
                     <swiper-item class="banner-swiper-item" v-for="item in bannerList" :key="item.id">
                         <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram"
                             :app-id="item.appid" :class="['banner-card', item.accentClass]">
-                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
+                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
                             <view class="banner-card__overlay"></view>
                             <view class="banner-card__content">
                                 <view class="banner-card__tag-row">
@@ -65,7 +64,7 @@
                         </navigator>
 
                         <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
-                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill"></image>
+                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
                             <view class="banner-card__overlay"></view>
                             <view class="banner-card__content">
                                 <view class="banner-card__tag-row">
@@ -1002,7 +1001,7 @@ onMounted(() => {
     }
 
     &__desc {
-        font-size: 26rpx;
+        font-size: 24rpx;
         color: #475569;
         line-height: 1.4;
 
@@ -1046,6 +1045,7 @@ onMounted(() => {
         overflow: hidden;
         border-radius: 28rpx;
         box-sizing: border-box;
+        @extend %sk-shimmer;
 
         .banner-card__image {
             width: 100%;

@@ -40,7 +40,7 @@ onLaunch(() => {
     // 监控系统主题变化
     uni.onThemeChange(({ theme }) => {
         console.log('onThemeChange', theme);
-        settingsStore.osTheme = theme;
+        settingsStore.osTheme = uni.getDeviceInfo().osTheme || uni.getAppBaseInfo().hostTheme || 'light';
 
         // #ifdef APP
         // auto 模式下保持原生 UI 跟随系统（必须传 'auto'，传具体主题会锁死原生 UI，导致后续主题事件停止派发）

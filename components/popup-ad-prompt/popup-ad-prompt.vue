@@ -233,11 +233,12 @@ defineExpose({
         margin-top: 44rpx;
         min-width: 352rpx;
         height: 88rpx;
+        padding: 0 40rpx;
         border-radius: 999rpx;
         background: var(--text-primary);
         color: var(--page-background);
-        font-size: 32rpx;
-        font-weight: 700;
+        font-size: 28rpx;
+        font-weight: 600;
         display: flex;
         align-items: center;
         justify-content: center;

@@ -34,7 +34,7 @@
                         :class="{ 'row-last': index === profileItems.length - 1 }" @click="handleClick(item)">
                         <view class="row-left">
                             <view class="icon-box">
-                                <mdi-icon :path="item.icon" size="28px"
+                                <mdi-icon :path="item.icon" size="20px"
                                     :color="settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
                             </view>
                             <view class="label-block">
@@ -58,7 +58,7 @@
                         @click="handleClick(item)">
                         <view class="row-left">
                             <view class="icon-box" :class="{ destructive: item.destructive }">
-                                <mdi-icon :path="item.icon" size="28px"
+                                <mdi-icon :path="item.icon" size="20px"
                                     :color="item.destructive ? '#E5322D' : settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
                             </view>
                             <view class="label-block">
@@ -1225,8 +1225,8 @@ function shareApp() {
 
 .row {
     position: relative;
-    min-height: 108rpx;
-    padding: 12rpx 24rpx;
+    min-height: 96rpx;
+    padding: 10rpx 24rpx;
     border-bottom: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
@@ -1250,15 +1250,15 @@ function shareApp() {
 .row-left {
     display: flex;
     align-items: center;
-    gap: 24rpx;
+    gap: 20rpx;
     flex: 1;
     min-width: 0;
 }
 
 .icon-box {
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 18rpx;
+    width: 60rpx;
+    height: 60rpx;
+    border-radius: 16rpx;
     // background: var(--panel-background);
     display: flex;
     align-items: center;
@@ -1277,16 +1277,16 @@ function shareApp() {
 
 .label {
     display: block;
-    font-size: 30rpx;
-    line-height: 40rpx;
+    font-size: 28rpx;
+    line-height: 38rpx;
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .sublabel {
     display: block;
-    font-size: 24rpx;
-    line-height: 32rpx;
+    font-size: 22rpx;
+    line-height: 30rpx;
     color: var(--text-tertiary);
     margin-top: 2rpx;
 }
@@ -1555,7 +1555,7 @@ function shareApp() {
 }
 
 .choice-popup__title {
-    font-size: 34rpx;
+    font-size: 30rpx;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -1677,7 +1677,7 @@ function shareApp() {
 }
 
 .choice-item__label {
-    font-size: 30rpx;
+    font-size: 28rpx;
     font-weight: 600;
     color: var(--text-primary);
     line-height: 1.4;
@@ -1710,7 +1710,7 @@ function shareApp() {
 }
 
 .about-title {
-    font-size: 36rpx;
+    font-size: 32rpx;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -1744,14 +1744,14 @@ function shareApp() {
 }
 
 .about-name {
-    font-size: 32rpx;
+    font-size: 30rpx;
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 4rpx;
 }
 
 .about-slogan {
-    font-size: 24rpx;
+    font-size: 22rpx;
     color: var(--text-tertiary);
     margin-bottom: 20rpx;
 }
