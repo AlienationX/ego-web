@@ -8,5 +8,18 @@ export type SetWallpaperOptions = {
     complete?: () => void;
 };
 
+export type AutoRotateOptions = {
+    feedUrl: string;
+    frequency?: string;
+    target?: SetWallpaperTarget;
+    wifiOnly?: boolean;
+    success?: (res: any) => void;
+    fail?: (err: any) => void;
+    complete?: () => void;
+};
+
 export type SetWallpaper = (options: SetWallpaperOptions) => void;
+export type StartAutoRotate = (options: AutoRotateOptions) => void;
+export type StopAutoRotate = () => void;
+export type InitAutoRotate = () => void;
 export type IsWallpaperSupported = () => boolean;

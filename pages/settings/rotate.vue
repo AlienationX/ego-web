@@ -65,14 +65,48 @@
                                 <text class="mode-name">{{ t('autoWallpaper.modeBoardTitle') }}</text>
                                 <text class="mode-desc">{{ t('autoWallpaper.modeBoardDesc') }}</text>
 
-                                <!-- 选中画板指示器 -->
-                                <view v-if="form.mode === 'board'" class="selected-board-pill"
-                                    @click.stop="openBoardPicker">
-                                    <text class="board-pill-text">{{ selectedBoardName ||
-                                        t('autoWallpaper.pickBoardPlaceholder') }}</text>
-                                    <mdi-icon path="/static/icons/chevron-right.svg" size="14px"
-                                        :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></mdi-icon>
+                                <!-- 选中画板指示器与跳转入口 -->
+                                <view v-if="form.mode === 'board'" class="board-action-row">
+                                    <view class="selected-board-pill" @click.stop="openBoardPicker">
+                                        <text class="board-pill-text">{{ selectedBoardName ||
+                                            t('autoWallpaper.pickBoardPlaceholder') }}</text>
+                                        <mdi-icon path="/static/icons/chevron-right.svg" size="14px"
+                                            :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></mdi-icon>
+                                    </view>
+                                    <view class="manage-board-btn" @click.stop="goToFavorite">
+                                        <text class="manage-board-text">{{ t('autoWallpaper.manageBoards') }}</text>
+                                    </view>
                                 </view>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+
+                <!-- 轮播策略 (画板模式可用) -->
+                <view class="section-card" :class="{ 'is-disabled': !form.enabled || form.mode !== 'board' }">
+                    <text class="card-section-title">{{ t('autoWallpaper.strategyTitle') }}</text>
+                    <view class="mode-cards">
+                        <!-- 策略 1：随机轮播 -->
+                        <view class="mode-card" :class="{ 'is-active': form.strategy === 'random' }"
+                            @click="selectStrategy('random')">
+                            <view class="mode-radio">
+                                <view class="radio-circle" :class="{ 'is-checked': form.strategy === 'random' }"></view>
+                            </view>
+                            <view class="mode-info">
+                                <text class="mode-name">{{ t('autoWallpaper.strategyRandom') }}</text>
+                                <text class="mode-desc">{{ t('autoWallpaper.strategyRandomDesc') }}</text>
+                            </view>
+                        </view>
+
+                        <!-- 策略 2：顺序循环 -->
+                        <view class="mode-card" :class="{ 'is-active': form.strategy === 'sequential' }"
+                            @click="selectStrategy('sequential')">
+                            <view class="mode-radio">
+                                <view class="radio-circle" :class="{ 'is-checked': form.strategy === 'sequential' }"></view>
+                            </view>
+                            <view class="mode-info">
+                                <text class="mode-name">{{ t('autoWallpaper.strategySequential') }}</text>
+                                <text class="mode-desc">{{ t('autoWallpaper.strategySequentialDesc') }}</text>
                             </view>
                         </view>
                     </view>
@@ -223,7 +257,8 @@ import { useI18n } from 'vue-i18n';
 import { API_BASE_URL } from '@/common/config.js';
 import { apiGetRotateConfig, apiSaveRotateConfig, apiGetRotateFeed } from '@/api/member.js';
 import { apiGetBoards } from '@/api/wallpaper.js';
-import { setWallpaper, isWallpaperSupported } from '@/uni_modules/ego-wallpaper-manager';
+import { setWallpaper, startAutoRotate, stopAutoRotate, isWallpaperSupported } from '@/uni_modules/ego-wallpaper-manager';
+import { setAndroidWallpaper } from '@/common/core.js';
 import PopupBoardSelect from '@/components/popup-board-select/popup-board-select.vue';
 import PopupNavigationDialog from '@/components/popup-navigation-dialog/popup-navigation-dialog.vue';
 
@@ -411,6 +446,15 @@ const selectFrequency = (freq) => {
     form.value.frequency = freq;
 };
 
+const selectStrategy = (strat) => {
+    if (!form.value.enabled || form.value.mode !== 'board') return;
+    form.value.strategy = strat;
+};
+
+const goToFavorite = () => {
+    uni.navigateTo({ url: '/pages/app/favorite' });
+};
+
 const openBoardPicker = () => {
     if (!form.value.enabled) return;
     const passed = checkAuthAndVip();
@@ -484,28 +528,17 @@ const applyWallpaperNative = () => {
             url: testResult.value.image_url,
             success: (downloadRes) => {
                 if (downloadRes.statusCode === 200) {
-                    try {
-                        const WallpaperManager = plus.android.importClass('android.app.WallpaperManager');
-                        const BitmapFactory = plus.android.importClass('android.graphics.BitmapFactory');
-                        const mainActivity = plus.android.runtimeMainActivity();
-                        const wm = WallpaperManager.getInstance(mainActivity);
-                        const bitmap = BitmapFactory.decodeFile(plus.io.convertLocalFileSystemURL(downloadRes.tempFilePath));
-
-                        const target = form.value.target || 'lock';
-                        const Build = plus.android.importClass('android.os.Build');
-                        if (Build.VERSION.SDK_INT >= 24) {
-                            const flag = (target === 'lock') ? 2 : ((target === 'home') ? 1 : 3);
-                            wm.setBitmap(bitmap, null, true, flag);
-                        } else {
-                            wm.setBitmap(bitmap);
-                        }
-                        uni.hideLoading();
-                        uni.showToast({ title: '壁纸设置成功！', icon: 'success' });
-                        testPopup.value?.close();
-                    } catch (e) {
-                        uni.hideLoading();
-                        uni.showToast({ title: '设置壁纸失败: ' + (e?.message || e), icon: 'none' });
-                    }
+                    const localPath = plus.io.convertLocalFileSystemURL(downloadRes.tempFilePath);
+                    setAndroidWallpaper(localPath, form.value.target || 'lock')
+                        .then(() => {
+                            uni.hideLoading();
+                            uni.showToast({ title: '壁纸设置成功！', icon: 'success' });
+                            testPopup.value?.close();
+                        })
+                        .catch((err) => {
+                            uni.hideLoading();
+                            uni.showToast({ title: '设置壁纸失败: ' + (err?.message || err), icon: 'none' });
+                        });
                 } else {
                     uni.hideLoading();
                     uni.showToast({ title: '壁纸下载失败', icon: 'none' });
@@ -537,7 +570,7 @@ const handleSaveConfig = async () => {
 
     saving.value = true;
     try {
-        await apiSaveRotateConfig({
+        const saveRes = await apiSaveRotateConfig({
             enabled: form.value.enabled,
             mode: form.value.mode,
             board_id: form.value.board,
@@ -546,6 +579,24 @@ const handleSaveConfig = async () => {
             strategy: form.value.strategy,
             wifi_only: form.value.wifi_only,
         });
+
+        if (saveRes?.data?.rotate_token) {
+            form.value.rotate_token = saveRes.data.rotate_token;
+        }
+
+        // #ifdef APP
+        if (form.value.enabled) {
+            startAutoRotate({
+                feedUrl: feedUrl.value,
+                frequency: form.value.frequency || 'unlock',
+                target: form.value.target || 'lock',
+                wifiOnly: form.value.wifi_only !== false,
+            });
+        } else {
+            stopAutoRotate();
+        }
+        // #endif
+
         uni.showToast({ title: t('autoWallpaper.saveSuccess'), icon: 'none' });
     } catch (e) {
         uni.showToast({ title: t('autoWallpaper.saveFailed'), icon: 'none' });
@@ -814,6 +865,14 @@ const handleSaveConfig = async () => {
             }
         }
 
+        .board-action-row {
+            display: flex;
+            align-items: center;
+            gap: 16rpx;
+            margin-top: 14rpx;
+            flex-wrap: wrap;
+        }
+
         .selected-board-pill {
             display: inline-flex;
             align-items: center;
@@ -821,8 +880,6 @@ const handleSaveConfig = async () => {
             padding: 10rpx 20rpx;
             border-radius: 24rpx;
             background: #e2e8f0;
-            margin-top: 14rpx;
-            align-self: flex-start;
             cursor: pointer;
 
             .theme-dark & {
@@ -837,6 +894,33 @@ const handleSaveConfig = async () => {
                 .theme-dark & {
                     color: #818cf8;
                 }
+            }
+        }
+
+        .manage-board-btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10rpx 18rpx;
+            border-radius: 24rpx;
+            background: rgba(79, 70, 229, 0.08);
+            cursor: pointer;
+
+            .theme-dark & {
+                background: rgba(99, 102, 241, 0.15);
+            }
+
+            .manage-board-text {
+                font-size: 22rpx;
+                font-weight: 600;
+                color: #4f46e5;
+
+                .theme-dark & {
+                    color: #a5b4fc;
+                }
+            }
+
+            &:active {
+                opacity: 0.7;
             }
         }
     }

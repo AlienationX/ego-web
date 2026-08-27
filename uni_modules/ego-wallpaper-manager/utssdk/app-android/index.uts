@@ -1,5 +1,4 @@
-import { SetWallpaper, SetWallpaperOptions, IsWallpaperSupported } from '../interface.uts';
-import { WallpaperHelper } from 'uts.sdk.modules.egoWallpaperManager.WallpaperHelper';
+import { SetWallpaper, SetWallpaperOptions, StartAutoRotate, AutoRotateOptions, StopAutoRotate, InitAutoRotate, IsWallpaperSupported } from '../interface.uts';
 
 export const setWallpaper: SetWallpaper = (options: SetWallpaperOptions) => {
     try {
@@ -31,6 +30,60 @@ export const setWallpaper: SetWallpaper = (options: SetWallpaperOptions) => {
         }
         options.fail?.({ errMsg: msg });
         options.complete?.();
+    }
+};
+
+export const startAutoRotate: StartAutoRotate = (options: AutoRotateOptions) => {
+    try {
+        const context = UTSAndroid.getAppContext();
+        if (context == null) {
+            options.fail?.({ errMsg: 'Context is null' });
+            options.complete?.();
+            return;
+        }
+
+        const freq = options.frequency != null ? options.frequency! : 'unlock';
+        const target = options.target != null ? options.target! : 'lock';
+        const wifiOnly = options.wifiOnly != null ? options.wifiOnly! : true;
+
+        WallpaperHelper.startAutoRotate(
+            context,
+            options.feedUrl,
+            freq,
+            target,
+            wifiOnly
+        );
+        options.success?.({ errMsg: 'startAutoRotate:ok' });
+    } catch (e) {
+        let msg = 'Unknown error';
+        if (e instanceof Error && e.message != null && e.message.length > 0) {
+            msg = e.message;
+        }
+        options.fail?.({ errMsg: msg });
+    } finally {
+        options.complete?.();
+    }
+};
+
+export const stopAutoRotate: StopAutoRotate = () => {
+    try {
+        const context = UTSAndroid.getAppContext();
+        if (context != null) {
+            WallpaperHelper.stopAutoRotate(context);
+        }
+    } catch (e) {
+        console.error('Failed to stopAutoRotate', e);
+    }
+};
+
+export const initAutoRotate: InitAutoRotate = () => {
+    try {
+        const context = UTSAndroid.getAppContext();
+        if (context != null) {
+            WallpaperHelper.init(context);
+        }
+    } catch (e) {
+        console.error('Failed to initAutoRotate', e);
     }
 };
 

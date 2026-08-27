@@ -6,6 +6,7 @@ import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { getCardDeepLink } from '@/uni_modules/ego-widget';
+import { initAutoRotate } from '@/uni_modules/ego-wallpaper-manager';
 
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
@@ -15,6 +16,10 @@ import { applyLanguagePreference, getLanguagePreference, LANGUAGE_PREF_AUTO } fr
 onLaunch(() => {
     console.log('App Launch');
     appStore.fetchVersionConfig();
+
+    // #ifdef APP
+    initAutoRotate();
+    // #endif
 
     // 检查是否已看过引导页。
     // TODO 目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小

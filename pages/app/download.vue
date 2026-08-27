@@ -24,8 +24,7 @@
 
         <!-- 主内容滚动区 -->
         <view class="content-wrapper">
-            <scroll-view class="gallery-scroll" scroll-y :refresher-enabled="!isSelectMode"
-                :refresher-triggered="isRefreshing" :scroll-top="scrollTop" @refresherrefresh="onRefresh"
+            <scroll-view class="gallery-scroll" scroll-y :scroll-top="scrollTop"
                 @scrolltolower="onLoadMore" @scroll="onScroll" show-scrollbar="false">
 
                 <!-- 骨架屏加载态 -->

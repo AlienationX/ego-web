@@ -1270,6 +1270,15 @@
         "testing": "Fetching rotate wallpaper...",
         "testResultTitle": "Rotation Test Result",
         "currentFeedWall": "Current Rotate Wallpaper",
-        "applyToSystem": "Apply as System Wallpaper"
+        "applyToSystem": "Apply as System Wallpaper",
+        "strategyTitle": "Rotation Strategy",
+        "strategyRandom": "🔀 Random",
+        "strategyRandomDesc": "Randomly picks wallpapers from the board for surprises",
+        "strategySequential": "🔁 Sequential",
+        "strategySequentialDesc": "Sequentially rotates through wallpapers in order",
+        "manageBoards": "Manage Boards",
+        "setAsRotateBoard": "Set as Rotate Board",
+        "rotatingBadge": "Rotating",
+        "setRotateSuccess": "Set as auto-rotate board successfully"
     }
 }

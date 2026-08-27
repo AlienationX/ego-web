@@ -43,7 +43,6 @@
         <view class="content-wrapper">
             <!-- 视图 1：灵感画板列表视图 (Pinterest Boards Grid) -->
             <scroll-view v-if="activeTab === 'boards' && !currentBoard" class="gallery-scroll" scroll-y
-                :refresher-enabled="true" :refresher-triggered="isRefreshing" @refresherrefresh="onRefreshBoards"
                 show-scrollbar="false">
                 <view class="boards-body">
                     <!-- 新建画板操作条 -->
@@ -75,8 +74,7 @@
             </scroll-view>
 
             <!-- 视图 2：全部收藏瀑布流 或 指定画板内壁纸瀑布流 -->
-            <scroll-view v-else class="gallery-scroll" scroll-y :refresher-enabled="!isSelectMode"
-                :refresher-triggered="isRefreshing" :scroll-top="scrollTop" @refresherrefresh="onRefresh"
+            <scroll-view v-else class="gallery-scroll" scroll-y :scroll-top="scrollTop"
                 @scrolltolower="onLoadMore" @scroll="onScroll" show-scrollbar="false">
 
                 <!-- 骨架屏加载态 -->
@@ -250,6 +248,9 @@ import { ref, computed, onMounted } from 'vue';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+import { useUserStore } from '@/stores/user.js';
+import { API_BASE_URL } from '@/common/config.js';
+import { startAutoRotate, stopAutoRotate } from '@/uni_modules/ego-wallpaper-manager';
 import {
     apiGetActions,
     apiPostActions,
@@ -267,6 +268,7 @@ import { getStatusBarHeight } from '@/utils/layout.js';
 const { t, tp } = useTranslateParams();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
+const userStore = useUserStore();
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
@@ -395,17 +397,58 @@ const handleBoardClick = (board) => {
 
 const toggleBoardRotate = async () => {
     if (!currentBoard.value) return;
+
+    if (!userStore.isLoggedIn && !userStore.userinfo?.id) {
+        dialogTitle.value = t('common.tip');
+        dialogDesc.value = t('autoWallpaper.loginRequiredPrompt');
+        dialogActionType.value = 'to_login';
+        dialogRef.value?.open();
+        return;
+    }
+
+    if (!userStore.isVip) {
+        dialogTitle.value = t('common.tip');
+        dialogDesc.value = t('autoWallpaper.vipRequiredPrompt');
+        dialogActionType.value = 'to_vip';
+        dialogRef.value?.open();
+        return;
+    }
+
     try {
         const res = await apiSetBoardRotate(currentBoard.value.id);
         if (res?.data) {
-            currentBoard.value.is_auto_rotate = res.data.is_auto_rotate;
+            const isRotate = !!res.data.is_auto_rotate;
+            currentBoard.value.is_auto_rotate = isRotate;
+
+            // 联动更新画板列表中所有卡片的轮播微徽章
+            boardsList.value.forEach((b) => {
+                b.is_auto_rotate = (b.id === currentBoard.value.id) ? isRotate : false;
+            });
+
+            // #ifdef APP
+            if (isRotate) {
+                const token = res.data.rotate_token || '';
+                const base = API_BASE_URL.replace(/\/+$/, '');
+                const feedUrl = `${base}/rotate/feed/?token=${token}`;
+                const cfg = res.data.config || {};
+                startAutoRotate({
+                    feedUrl,
+                    frequency: cfg.frequency || 'unlock',
+                    target: cfg.target || 'lock',
+                    wifiOnly: cfg.wifi_only !== false,
+                });
+            } else {
+                stopAutoRotate();
+            }
+            // #endif
+
             uni.showToast({
-                title: res.data.is_auto_rotate ? t('board.setAsRotate') : t('board.cancelRotate'),
+                title: isRotate ? t('autoWallpaper.setRotateSuccess') : t('board.cancelRotate'),
                 icon: 'none',
             });
         }
     } catch (e) {
-        uni.showToast({ title: t('common.failed'), icon: 'none' });
+        uni.showToast({ title: e?.data?.error || t('common.failed'), icon: 'none' });
     }
 };
 
@@ -685,6 +728,16 @@ const handleBatchAction = () => {
 
 const onConfirmDialog = async () => {
     dialogRef.value?.close();
+
+    if (dialogActionType.value === 'to_login') {
+        uni.navigateTo({ url: '/pages/auth/signin' });
+        return;
+    }
+
+    if (dialogActionType.value === 'to_vip') {
+        uni.navigateTo({ url: '/pages/member/payment' });
+        return;
+    }
 
     if (dialogActionType.value === 'delete_board') {
         try {

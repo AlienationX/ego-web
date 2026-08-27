@@ -1270,6 +1270,15 @@
         "testing": "正在拉取轮播壁纸...",
         "testResultTitle": "轮播壁纸测试结果",
         "currentFeedWall": "当前轮播壁纸",
-        "applyToSystem": "一键设为系统壁纸"
+        "applyToSystem": "一键设为系统壁纸",
+        "strategyTitle": "轮播策略",
+        "strategyRandom": "🔀 随机轮播",
+        "strategyRandomDesc": "随机抽取画板壁纸，每次亮屏皆是未知惊喜",
+        "strategySequential": "🔁 顺序循环",
+        "strategySequentialDesc": "按画板添加顺序依次循环轮换展示",
+        "manageBoards": "去整理画板",
+        "setAsRotateBoard": "设为轮播画板",
+        "rotatingBadge": "正在轮播",
+        "setRotateSuccess": "已将该画板设为自动轮播源"
     }
 }

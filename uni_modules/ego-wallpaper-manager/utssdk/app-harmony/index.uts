@@ -137,6 +137,15 @@ export const setWallpaper: SetWallpaper = (options: SetWallpaperOptions) => {
     );
 };
 
+export const startAutoRotate: StartAutoRotate = (options: AutoRotateOptions) => {
+    options.fail?.({ errMsg: '鸿蒙系统安全策略限制第三方应用后台修改系统壁纸' });
+    options.complete?.();
+};
+
+export const stopAutoRotate: StopAutoRotate = () => {};
+
+export const initAutoRotate: InitAutoRotate = () => {};
+
 export const isWallpaperSupported: IsWallpaperSupported = (): boolean => {
     return true;
 };

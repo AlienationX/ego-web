@@ -1,9 +1,18 @@
-import { SetWallpaper, SetWallpaperOptions, IsWallpaperSupported } from './interface.uts';
+import { SetWallpaper, SetWallpaperOptions, StartAutoRotate, AutoRotateOptions, StopAutoRotate, InitAutoRotate, IsWallpaperSupported } from './interface.uts';
 
 export const setWallpaper: SetWallpaper = (options: SetWallpaperOptions) => {
     options.fail?.({ errMsg: '当前平台不支持直接调用系统原生壁纸设置接口' });
     options.complete?.();
 };
+
+export const startAutoRotate: StartAutoRotate = (options: AutoRotateOptions) => {
+    options.fail?.({ errMsg: '当前平台不支持后台自动轮播服务' });
+    options.complete?.();
+};
+
+export const stopAutoRotate: StopAutoRotate = () => {};
+
+export const initAutoRotate: InitAutoRotate = () => {};
 
 export const isWallpaperSupported: IsWallpaperSupported = (): boolean => {
     return false;
