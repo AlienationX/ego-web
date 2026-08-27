@@ -164,6 +164,13 @@
             }
         },
         {
+            "path": "pages/settings/rotate",
+            "style": {
+                "navigationBarTitleText": "自动更换壁纸",
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/settings/feedback",
             "style": {
                 "navigationBarTitleText": "反馈",

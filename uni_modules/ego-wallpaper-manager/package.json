@@ -1,0 +1,44 @@
+{
+  "id": "ego-wallpaper-manager",
+  "displayName": "Ego 壁纸与自动更换原生插件",
+  "version": "1.0.0",
+  "description": "提供 Android / 鸿蒙 原生系统壁纸设置（锁屏、主屏幕）及自动更换壁纸能力的 UTS 插件",
+  "keywords": [
+    "wallpaper",
+    "uts",
+    "android",
+    "harmony"
+  ],
+  "engines": {
+    "HBuilderX": "^4.29",
+    "uni-app": "^3.99",
+    "uni-app-x": "^3.99"
+  },
+  "dcloudext": {
+    "type": "uts"
+  },
+  "uni_modules": {
+    "dependencies": [],
+    "encrypt": [],
+    "platforms": {
+      "client": {
+        "uni-app": {
+          "vue": {
+            "vue3": {
+              "extVersion": "1.0.0",
+              "minVersion": ""
+            }
+          }
+        },
+        "app": {
+          "android": {
+            "minVersion": "21"
+          },
+          "harmony": {
+            "minVersion": "12"
+          }
+        }
+      }
+    }
+  }
+}

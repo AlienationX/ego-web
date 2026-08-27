@@ -1,0 +1,10 @@
+import { SetWallpaper, SetWallpaperOptions, IsWallpaperSupported } from './interface.uts';
+
+export const setWallpaper: SetWallpaper = (options: SetWallpaperOptions) => {
+    options.fail?.({ errMsg: '当前平台不支持直接调用系统原生壁纸设置接口' });
+    options.complete?.();
+};
+
+export const isWallpaperSupported: IsWallpaperSupported = (): boolean => {
+    return false;
+};

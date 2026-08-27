@@ -1,0 +1,12 @@
+export type SetWallpaperTarget = 'both' | 'lock' | 'home';
+
+export type SetWallpaperOptions = {
+    url: string;
+    target?: SetWallpaperTarget;
+    success?: (res: any) => void;
+    fail?: (err: any) => void;
+    complete?: () => void;
+};
+
+export type SetWallpaper = (options: SetWallpaperOptions) => void;
+export type IsWallpaperSupported = () => boolean;

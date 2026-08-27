@@ -1,0 +1,142 @@
+import { SetWallpaper, SetWallpaperOptions, IsWallpaperSupported } from '../interface.uts';
+import wallpaper from '@ohos.wallpaper';
+import http from '@ohos.net.http';
+import fs from '@ohos.file.fs';
+import common from '@ohos.app.ability.common';
+import image from '@ohos.multimedia.image';
+
+class WallpaperHttpOptions implements http.HttpRequestOptions {
+    method: http.RequestMethod = http.RequestMethod.GET;
+    connectTimeout: number = 15000;
+    readTimeout: number = 15000;
+    expectDataType: http.HttpDataType = http.HttpDataType.ARRAY_BUFFER;
+}
+
+/**
+ * 鸿蒙 HarmonyOS NEXT 原生壁纸设置接口
+ */
+export const setWallpaper: SetWallpaper = (options: SetWallpaperOptions) => {
+    const url = options.url;
+    const target = options.target != null ? options.target! : 'lock';
+
+    const ctx = getContext() as common.UIAbilityContext;
+    if (ctx == null) {
+        options.fail?.({ errMsg: 'HarmonyOS Context is null' });
+        options.complete?.();
+        return;
+    }
+
+    const httpRequest = http.createHttp();
+    const reqOptions = new WallpaperHttpOptions();
+
+    httpRequest.request(
+        url,
+        reqOptions,
+        (err, data) => {
+            if (err || data.responseCode !== 200) {
+                options.fail?.({ errMsg: err != null ? err.message : '下载壁纸图片失败' });
+                options.complete?.();
+                httpRequest.destroy();
+                return;
+            }
+
+            try {
+                const arrayBuffer = data.result as ArrayBuffer;
+                
+                // 将下载的图片二进制写入本地沙箱临时文件
+                const tempFilePath = ctx.cacheDir + '/temp_wallpaper_' + Date.now() + '.jpg';
+                try {
+                    const file = fs.openSync(tempFilePath, fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE);
+                    fs.writeSync(file.fd, arrayBuffer);
+                    fs.closeSync(file.fd);
+                } catch (fsErr) {
+                    console.error('[EgoWallpaper-Harmony] File write error:', fsErr);
+                }
+
+                // 目标壁纸类型：0: 桌面壁纸 (WALLPAPER_SYSTEM), 1: 锁屏壁纸 (WALLPAPER_LOCKSCREEN)
+                const applyType = (target === 'home') ? wallpaper.WallpaperType.WALLPAPER_SYSTEM : wallpaper.WallpaperType.WALLPAPER_LOCKSCREEN;
+
+                // 优先通过沙箱文件路径设置系统壁纸
+                const doApplyByPath = (filePath: string) => {
+                    if (target === 'both') {
+                        wallpaper.setWallpaper(filePath, wallpaper.WallpaperType.WALLPAPER_SYSTEM, (err1) => {
+                            wallpaper.setWallpaper(filePath, wallpaper.WallpaperType.WALLPAPER_LOCKSCREEN, (err2) => {
+                                if (err1 || err2) {
+                                    console.warn('[EgoWallpaper-Harmony] setWallpaper by path failed, trying PixelMap...');
+                                    doApplyByPixelMap(arrayBuffer);
+                                } else {
+                                    options.success?.({ errMsg: 'setWallpaper:ok' });
+                                    options.complete?.();
+                                    httpRequest.destroy();
+                                }
+                            });
+                        });
+                    } else {
+                        wallpaper.setWallpaper(filePath, applyType, (wErr) => {
+                            if (wErr) {
+                                console.warn('[EgoWallpaper-Harmony] setWallpaper by path failed, trying PixelMap...', wErr);
+                                doApplyByPixelMap(arrayBuffer);
+                            } else {
+                                options.success?.({ errMsg: 'setWallpaper:ok' });
+                                options.complete?.();
+                                httpRequest.destroy();
+                            }
+                        });
+                    }
+                };
+
+                // 备用策略：通过 PixelMap 设置系统壁纸
+                const doApplyByPixelMap = (buf: ArrayBuffer) => {
+                    const imageSource = image.createImageSource(buf);
+                    imageSource.createPixelMap((pixelErr, pixelMap) => {
+                        if (pixelErr || pixelMap == null) {
+                            options.fail?.({ errMsg: '解析壁纸图像失败' });
+                            options.complete?.();
+                            httpRequest.destroy();
+                            return;
+                        }
+
+                        if (target === 'both') {
+                            wallpaper.setWallpaper(pixelMap, wallpaper.WallpaperType.WALLPAPER_SYSTEM, (err1) => {
+                                wallpaper.setWallpaper(pixelMap, wallpaper.WallpaperType.WALLPAPER_LOCKSCREEN, (err2) => {
+                                    if (err1 || err2) {
+                                        // 鸿蒙系统针对非系统签名的第三方应用限制静默修改壁纸
+                                        options.fail?.({ errMsg: '鸿蒙系统安全策略限制第三方应用直接修改系统壁纸，请前往相册或设置中应用' });
+                                    } else {
+                                        options.success?.({ errMsg: 'setWallpaper:ok' });
+                                    }
+                                    options.complete?.();
+                                    httpRequest.destroy();
+                                });
+                            });
+                        } else {
+                            wallpaper.setWallpaper(pixelMap, applyType, (wErr) => {
+                                if (wErr) {
+                                    // 鸿蒙系统针对非系统签名的第三方应用限制静默修改壁纸
+                                    options.fail?.({ errMsg: '鸿蒙系统安全策略限制第三方应用直接修改系统壁纸，请前往相册或设置中应用' });
+                                } else {
+                                    options.success?.({ errMsg: 'setWallpaper:ok' });
+                                }
+                                options.complete?.();
+                                httpRequest.destroy();
+                            });
+                        }
+                    });
+                };
+
+                // 执行壁纸应用流程
+                doApplyByPath(tempFilePath);
+
+            } catch (e) {
+                let msg = '鸿蒙系统安全策略限制第三方应用直接修改系统壁纸';
+                options.fail?.({ errMsg: msg });
+                options.complete?.();
+                httpRequest.destroy();
+            }
+        }
+    );
+};
+
+export const isWallpaperSupported: IsWallpaperSupported = (): boolean => {
+    return true;
+};

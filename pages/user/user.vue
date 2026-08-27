@@ -524,6 +524,14 @@ const sysMenus = computed(() => [
         click: toHistory,
     },
     {
+        left_icon: '/static/icons/view-carousel.svg',
+        left_color: '#6B7280',
+        left_text: t('autoWallpaper.pageTitle'),
+        right_text: 'VIP',
+        right_icon: 'right',
+        click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
+    },
+    {
         left_icon: '/static/icons/widgets.svg',
         left_color: '#6B7280',
         left_text: t('widgets.title'),

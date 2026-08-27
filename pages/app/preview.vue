@@ -86,7 +86,7 @@
                         </view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
-                            <view class="box" @click="toggleCollect">
+                            <view class="box" @click="toggleCollect" @longpress="openBoardSelect">
                                 <uni-icons type="heart-filled" size="24"></uni-icons>
                                 <view class="text">{{
                                     currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
@@ -113,7 +113,7 @@
                                     <uni-icons type="star-filled" size="36" color="#ffffff"></uni-icons>
                                     <view class="action-text">{{ currentInfo.score }}</view>
                                 </view>
-                                <view class="action-item" @click="toggleCollect">
+                                <view class="action-item" @click="toggleCollect" @longpress="openBoardSelect">
                                     <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
                                     <view class="action-text">{{
                                         currentInfo.is_favorited ? t('previewPage.favorited') :
@@ -599,6 +599,9 @@
             :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText"
             :showCancel="dialogState.showCancel" @confirm="dialogState.onConfirm"
             @cancel="dialogState.onCancel"></popup-navigation-dialog>
+
+        <!-- 存入画板弹窗 -->
+        <popup-board-select ref="popupBoardSelectRef"></popup-board-select>
     </view>
 </template>
 
@@ -627,6 +630,7 @@ import { useStatusStore } from '@/stores/status.js';
 import { useAdIntersititial } from '@/hooks/useAd.js';
 import { formatPreviewDate, formatFileSize, handlePicUrl } from '@/utils/common.js';
 import { downloadPic } from '@/common/core.js';
+import PopupBoardSelect from '@/components/popup-board-select/popup-board-select.vue';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -1379,6 +1383,24 @@ const toggleCollect = async () => {
             icon: 'none',
         });
     }
+};
+
+const popupBoardSelectRef = ref(null);
+const openBoardSelect = () => {
+    if (Object.keys(userStore.userinfo).length === 0) {
+        showNavDialog({
+            title: t('common.information'),
+            content: t('previewPage.loginPrompt'),
+            cancelText: t('previewPage.cancel'),
+            confirmText: t('previewPage.login'),
+            onConfirm: () => {
+                uni.navigateTo({ url: '/pages/auth/signin' });
+            },
+        });
+        return;
+    }
+    if (!currentInfo.value?.id) return;
+    popupBoardSelectRef.value?.open(currentInfo.value.id);
 };
 
 const toggleWatchLater = () => {

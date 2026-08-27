@@ -1,0 +1,39 @@
+import { SetWallpaper, SetWallpaperOptions, IsWallpaperSupported } from '../interface.uts';
+import { WallpaperHelper } from 'uts.sdk.modules.egoWallpaperManager.WallpaperHelper';
+
+export const setWallpaper: SetWallpaper = (options: SetWallpaperOptions) => {
+    try {
+        const context = UTSAndroid.getAppContext();
+        if (context == null) {
+            options.fail?.({ errMsg: 'Context is null' });
+            options.complete?.();
+            return;
+        }
+
+        const target = options.target != null ? options.target! : 'lock';
+        WallpaperHelper.setWallpaper(
+            context,
+            options.url,
+            target,
+            () => {
+                options.success?.({ errMsg: 'setWallpaper:ok' });
+                options.complete?.();
+            },
+            (err: string) => {
+                options.fail?.({ errMsg: err });
+                options.complete?.();
+            }
+        );
+    } catch (e) {
+        let msg = 'Unknown error';
+        if (e instanceof Error && e.message != null && e.message.length > 0) {
+            msg = e.message;
+        }
+        options.fail?.({ errMsg: msg });
+        options.complete?.();
+    }
+};
+
+export const isWallpaperSupported: IsWallpaperSupported = (): boolean => {
+    return true;
+};

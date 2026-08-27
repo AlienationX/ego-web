@@ -635,7 +635,7 @@ const sections = computed(() => {
                 },
                 {
                     key: 'preview_type',
-                    icon: '/static/icons/view-carousel.svg',
+                    icon: '/static/icons/image.svg',
                     label: t('settings.items.previewType.label'),
                     sublabel: t('settings.items.previewType.sublabel'),
                     value:

@@ -407,3 +407,98 @@ export const apiPostDiscoverStream = (data = {}, options = {}) => {
         ...options,
     });
 };
+
+// 获取最新一期每日必应壁纸
+export const apiGetDailyBing = () => {
+    return request({
+        url: '/wall/daily_bing/',
+        method: 'GET',
+    });
+};
+
+// 获取画板列表 (GET /board/)
+export const apiGetBoards = (data = {}) => {
+    return request({
+        url: '/board/',
+        data,
+        method: 'GET',
+        isAuth: true,
+    });
+};
+
+// 创建新画板 (POST /board/)
+export const apiCreateBoard = (data = {}) => {
+    return request({
+        url: '/board/',
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
+// 获取画板详情 (GET /board/{id}/)
+export const apiGetBoardDetail = (id) => {
+    return request({
+        url: `/board/${id}/`,
+        method: 'GET',
+        isAuth: true,
+    });
+};
+
+// 更新画板信息 (PATCH /board/{id}/)
+export const apiUpdateBoard = (id, data = {}) => {
+    return request({
+        url: `/board/${id}/`,
+        data,
+        method: 'PATCH',
+        isAuth: true,
+    });
+};
+
+// 删除画板 (DELETE /board/{id}/)
+export const apiDeleteBoard = (id) => {
+    return request({
+        url: `/board/${id}/`,
+        method: 'DELETE',
+        isAuth: true,
+    });
+};
+
+// 获取画板内壁纸列表 (GET /board/{id}/walls/)
+export const apiGetBoardWalls = (id, data = {}) => {
+    return request({
+        url: `/board/${id}/walls/`,
+        data,
+        method: 'GET',
+        isAuth: true,
+    });
+};
+
+// 批量添加壁纸到指定画板 (POST /board/{id}/add_walls/)
+export const apiAddBoardWalls = (id, data = {}) => {
+    return request({
+        url: `/board/${id}/add_walls/`,
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
+// 批量从画板中移除壁纸 (POST /board/{id}/del_walls/)
+export const apiDelBoardWalls = (id, data = {}) => {
+    return request({
+        url: `/board/${id}/del_walls/`,
+        data,
+        method: 'POST',
+        isAuth: true,
+    });
+};
+
+// 设为/取消自动轮播画板 (POST /board/{id}/set_rotate/)
+export const apiSetBoardRotate = (id) => {
+    return request({
+        url: `/board/${id}/set_rotate/`,
+        method: 'POST',
+        isAuth: true,
+    });
+};
