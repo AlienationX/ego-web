@@ -166,7 +166,8 @@
             },
             "splashscreen" : {
                 "useOriginalMsgbox" : true,
-                "androidStyle" : "common"
+                "androidStyle" : "common",
+                "iosStyle" : "common"
             }
         }
     },
