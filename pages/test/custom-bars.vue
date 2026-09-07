@@ -11,7 +11,6 @@
         <glass-tab-bar
             :current-path="currentTabPath"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
-            :bottom-offset="0"
             :disable-navigation="true"
             @change="(item) => currentTabPath = item.pagePath"
         ></glass-tab-bar>

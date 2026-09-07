@@ -35,7 +35,7 @@
                 <view v-else class="board-items">
                     <view class="board-item" v-for="item in boards" :key="item.id" @click="selectBoard(item)">
                         <view class="board-thumb">
-                            <image v-if="item.preview_images && item.preview_images[0]" :src="formatImgUrl(item.preview_images[0])"
+                            <image v-if="item.preview_images && item.preview_images[0]" class="board-thumb-img" :src="formatImgUrl(item.preview_images[0])"
                                 mode="aspectFill"></image>
                             <mdi-icon v-else path="/static/icons/image-outline.svg" size="20px"
                                 :color="settingsStore.isDark ? '#4b5563' : '#cbd5e1'"></mdi-icon>
@@ -334,7 +334,7 @@ defineExpose({
             background: #1e293b;
         }
 
-        image {
+        .board-thumb-img {
             width: 100%;
             height: 100%;
         }

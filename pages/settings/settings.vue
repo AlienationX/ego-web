@@ -1,10 +1,7 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- #ifndef WEB -->
-        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-        <!-- #endif -->
-        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: titleBarHeight + 'px' }">
-            <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
+        <view class="header" :style="{ paddingTop: `${statusBarHeight}px` }">
+            <view class="header-inner" :style="{ height: `${titleBarHeight}px` }">
                 <view class="back-btn" @click="goBack">
                     <mdi-icon path="/static/icons/arrow-left.svg" size="18px"
                         :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"></mdi-icon>
@@ -97,14 +94,15 @@
                     <text class="about-legal__link" @click="openHtmlFile('/user_agreement.html')">
                         {{ t('about.agreement') }}
                     </text>
-                    <text class="about-legal__divider">|</text>
+                    <!-- <text class="about-legal__divider">|</text>
                     <text class="about-legal__link" @click="openHtmlFile('/vip_agreement.html')">
                         {{ t('about.vipAgreement') }}
-                    </text>
+                    </text> -->
                 </view>
                 <view class="about-record">{{ rightICP }}</view>
                 <view class="about-copyright">{{ copyrightText }}</view>
-                <view style="height: 50rpx"></view>
+                <!-- 底部安全区域占位：参考 ego-pocket，让内容不被 Home Indicator 遮挡 -->
+                <view class="bottom-safe-placeholder"></view>
             </view>
 
             <!-- <text class="app-version"
@@ -523,6 +521,10 @@ const toggles = reactive({
     theme: uni.getAppBaseInfo().theme === 'dark',
     // 瀑布流开关：true = 瀑布流，false = 网格
     waterfallView: settingsStore.options.view === 'waterfall',
+    // 壁纸水印开关：true = 预览角标显示应用名与编号，false = 关闭
+    wallpaperWatermark: !!settingsStore.options.showWatermark,
+    // 悬浮导航栏开关：true = 悬浮毛玻璃胶囊，false = 原生系统默认底栏
+    customTabBar: settingsStore.options.customTabBar !== false,
 });
 
 const profileName = computed(
@@ -653,6 +655,22 @@ const sections = computed(() => {
                         : t('settings.items.viewType.window'),
                     type: 'toggle',
                     toggleKey: 'waterfallView',
+                },
+                {
+                    key: 'wallpaper_watermark',
+                    icon: '/static/icons/tag.svg',
+                    label: t('settings.items.wallpaperWatermark.label'),
+                    sublabel: t('settings.items.wallpaperWatermark.sublabel'),
+                    type: 'toggle',
+                    toggleKey: 'wallpaperWatermark',
+                },
+                {
+                    key: 'custom_tab_bar',
+                    icon: '/static/icons/page-layout-footer.svg',
+                    label: t('settings.items.customTabBar.label'),
+                    sublabel: t('settings.items.customTabBar.sublabel'),
+                    type: 'toggle',
+                    toggleKey: 'customTabBar',
                 },
                 // {
                 //     key: 'availability_status',
@@ -849,6 +867,14 @@ function toggleSwitch(key) {
     // waterfallView 开关同步到 settingsStore
     if (key === 'waterfallView') {
         settingsStore.options.view = toggles.waterfallView ? 'waterfall' : 'window';
+    }
+    // wallpaperWatermark 开关同步到 settingsStore
+    if (key === 'wallpaperWatermark') {
+        settingsStore.options.showWatermark = toggles.wallpaperWatermark;
+    }
+    // customTabBar 开关：true = 悬浮毛玻璃胶囊，false = 经典贴底底栏
+    if (key === 'customTabBar') {
+        settingsStore.options.customTabBar = toggles.customTabBar;
     }
 }
 
@@ -1092,24 +1118,20 @@ function shareApp() {
 .layout {
     background: var(--page-background);
     color: var(--text-primary);
+    min-height: 100vh;
+    box-sizing: border-box;
+    position: relative; /* 参考 ego-pocket profile: 确保安卓 WebView 正确计算全屏高度 */
 }
 
-.status-bar-bg {
-    position: fixed;
+.header {
+    position: sticky;
     top: 0;
     left: 0;
     width: 100%;
     background: var(--page-background);
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 9999;
-}
-
-.header {
-    width: 100%;
-    background: var(--page-background);
-    display: flex;
-    align-items: center;
+    z-index: 100;
+    box-sizing: border-box;
+    border-bottom: 1rpx solid var(--panel-border);
 }
 
 .header-inner {
@@ -1119,6 +1141,7 @@ function shareApp() {
     align-items: center;
     justify-content: space-between;
     gap: 16rpx;
+    box-sizing: border-box;
 }
 
 .back-btn {
@@ -1149,6 +1172,15 @@ function shareApp() {
 
 .content {
     box-sizing: border-box;
+    padding-top: 24rpx;
+}
+
+/* 底部安全区占位：仅保留 iOS home indicator 高度，安卓端内容自然延伸到手势区
+   参考 ego-pocket: 让内容穿透到手势条背后，透明导航栏会透出页面内容 */
+.bottom-safe-placeholder {
+    width: 100%;
+    height: env(safe-area-inset-bottom);
+    flex-shrink: 0;
 }
 
 .section {
@@ -1838,6 +1870,7 @@ function shareApp() {
 
 .about-legal {
     text-align: center;
+    padding-bottom: 40rpx;
 }
 
 .about-legal__links {

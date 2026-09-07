@@ -383,6 +383,9 @@
                     <classify-grid v-if="classifyList.length" :items="classifyPreviewList" />
                 </view>
             </view>
+
+            <!-- 底部安全区与悬浮 TabBar 占位 -->
+            <view class="tabbar-bottom-spacer"></view>
         </scroll-view>
     </view>
 </template>
@@ -888,7 +891,7 @@ onMounted(() => {
 .home-tab-wrapper {
     position: relative;
     width: 100%;
-    height: 100vh;
+    height: 100%;
 }
 
 .update-banner {
@@ -1016,7 +1019,7 @@ onMounted(() => {
     max-width: 100%;
     overflow-x: hidden;
     box-sizing: border-box;
-    height: 100vh;
+    height: 100%;
 }
 
 .banner {
@@ -2198,5 +2201,10 @@ $sk-shine: rgba(148, 163, 184, 0.22);
         width: 100%;
         margin-top: 6rpx;
     }
+}
+
+.tabbar-bottom-spacer {
+    width: 100%;
+    height: calc(96px + env(safe-area-inset-bottom));
 }
 </style>

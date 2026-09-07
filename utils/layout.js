@@ -2,14 +2,21 @@
 // const getWindow = () => uni.getWindowInfo();
 
 // 获取状态栏高度
-export const getStatusBarHeight = () => uni.getWindowInfo().statusBarHeight;
+export const getStatusBarHeight = () => {
+    return uni.getWindowInfo().statusBarHeight || 0;
+};
 
 // 获取标题栏高度
 export const getTitleBarHeight = () => {
-    if (uni.getMenuButtonBoundingClientRect) {
-        let { top, height } = uni.getMenuButtonBoundingClientRect();
-        return height + (top - getStatusBarHeight()) * 2;
-    }
+    try {
+        if (uni.getMenuButtonBoundingClientRect) {
+            let res = uni.getMenuButtonBoundingClientRect();
+            if (res && res.top && res.height) {
+                let { top, height } = res;
+                return height + (top - getStatusBarHeight()) * 2;
+            }
+        }
+    } catch (e) {}
     return 44;
 };
 
@@ -17,29 +24,47 @@ export const getTitleBarHeight = () => {
 export const getNavBarHeight = () => getStatusBarHeight() + getTitleBarHeight();
 
 // 获取底部安全区域高度（原生标准底部安全区域一般为34px）
-export const getSafeAreaBottom = () => uni.getWindowInfo().safeAreaInsets.bottom || 0;
+export const getSafeAreaBottom = () => {
+    try {
+        const info = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync();
+        if (info && info.safeAreaInsets && info.safeAreaInsets.bottom > 0) {
+            return info.safeAreaInsets.bottom;
+        }
+        // 在 Android 全面屏上，由于 manifest 配置 safearea offset none，
+        // 系统返回 safeAreaInsets.bottom 可能为 0。通过判断屏幕长宽比（高/宽 > 1.86）保底返回 34px
+        const screenHeight = info.screenHeight || 0;
+        const screenWidth = info.screenWidth || 1;
+        if (screenHeight / screenWidth > 1.86) {
+            return 34;
+        }
+    } catch (e) {}
+    return 0;
+};
 
-// 获取底部tabbar高度（包含：tabbar主体 50px + 上边距 7px + 底部安全边距）
+// 获取底部 TabBar 高度（根据悬浮胶囊或经典贴底模式动态计算页面底边距）
 export const getTabBarHeight = () => {
-    const customTabBarHeight = 50;
+    let isFloating = true;
+    try {
+        const savedSettings = uni.getStorageSync('settings');
+        if (savedSettings) {
+            const parsed = typeof savedSettings === 'string' ? JSON.parse(savedSettings) : savedSettings;
+            if (typeof parsed.options?.customTabBar === 'boolean') {
+                isFloating = parsed.options.customTabBar;
+            }
+        }
+    } catch (e) {}
 
-    // #ifdef WEB
-    return customTabBarHeight;
-    // #endif
+    const safeBottom = getSafeAreaBottom() || 0;
 
-    // #ifndef WEB
-    const windowBottom = uni.getWindowInfo().windowBottom;
-
-    if (windowBottom && windowBottom > 0) {
-        // 使用原生 tabBar 时自动获取
-        return windowBottom;
-    } else {
-        // 自定义 tabBar (custom: true) 时：主体 50px + 上 padding 7px + 底部安全区(安全区包含下内边距)
-        const safeBottom = getSafeAreaBottom();
-        const bottomPadding = safeBottom > 0 ? safeBottom : 7;
-        return customTabBarHeight + 7 + bottomPadding;
+    // 经典贴底模式：底栏高度 50px + 底部安全区 padding
+    if (!isFloating) {
+        return 50 + safeBottom;
     }
-    // #endif
+
+    // 悬浮胶囊模式：胶囊高 60px + 悬浮底距 18px + 缓冲 10px
+    const floatingBarHeight = 60;
+    const floatingBottomGap = 18;
+    return floatingBarHeight + floatingBottomGap + 10;
 };
 
 // 获取头条左上角图标宽度

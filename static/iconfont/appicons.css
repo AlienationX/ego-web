@@ -1,11 +1,11 @@
 @font-face {
   font-family: "appicons";
-  src: url('appicons.eot?t=1787389721463'); /* IE9*/
-  src: url('appicons.eot?t=1787389721463#iefix') format('embedded-opentype') /* IE6-IE8 */,
-  url('appicons.woff2?t=1787389721463') format('woff2'),
-  url('appicons.woff?t=1787389721463') format('woff'),
-  url('appicons.ttf?t=1787389721463') format('truetype'),
-  url('appicons.svg?t=1787389721463') format('svg');
+  src: url('appicons.eot?t=1788766948856'); /* IE9*/
+  src: url('appicons.eot?t=1788766948856#iefix') format('embedded-opentype') /* IE6-IE8 */,
+  url('appicons.woff2?t=1788766948856') format('woff2'),
+  url('appicons.woff?t=1788766948856') format('woff'),
+  url('appicons.ttf?t=1788766948856') format('truetype'),
+  url('appicons.svg?t=1788766948856') format('svg');
 }
 
 [class^="appicons-"], [class*=" appicons-"] {
@@ -101,39 +101,40 @@
 .appicons-navigation-variant::before { content: "\ea51"; }
 .appicons-numeric-2-box::before { content: "\ea52"; }
 .appicons-numeric-3-box::before { content: "\ea53"; }
-.appicons-palette-swatch::before { content: "\ea54"; }
-.appicons-pencil::before { content: "\ea55"; }
-.appicons-pokeball::before { content: "\ea56"; }
-.appicons-poll::before { content: "\ea57"; }
-.appicons-refresh::before { content: "\ea58"; }
-.appicons-reload::before { content: "\ea59"; }
-.appicons-reply::before { content: "\ea5a"; }
-.appicons-restore::before { content: "\ea5b"; }
-.appicons-rocket::before { content: "\ea5c"; }
-.appicons-scatter-plot::before { content: "\ea5d"; }
-.appicons-security::before { content: "\ea5e"; }
-.appicons-share-variant::before { content: "\ea5f"; }
-.appicons-share::before { content: "\ea60"; }
-.appicons-shield-check::before { content: "\ea61"; }
-.appicons-sitemap-outline::before { content: "\ea62"; }
-.appicons-snowflake::before { content: "\ea63"; }
-.appicons-star::before { content: "\ea64"; }
-.appicons-tag::before { content: "\ea65"; }
-.appicons-theme-light-dark::before { content: "\ea66"; }
-.appicons-tooltip::before { content: "\ea67"; }
-.appicons-translate-variant::before { content: "\ea68"; }
-.appicons-translate::before { content: "\ea69"; }
-.appicons-update::before { content: "\ea6a"; }
-.appicons-upload::before { content: "\ea6b"; }
-.appicons-video-box::before { content: "\ea6c"; }
-.appicons-video::before { content: "\ea6d"; }
-.appicons-view-carousel::before { content: "\ea6e"; }
-.appicons-view-dashboard::before { content: "\ea6f"; }
-.appicons-view-grid::before { content: "\ea70"; }
-.appicons-wallet-bifold::before { content: "\ea71"; }
-.appicons-weather-night::before { content: "\ea72"; }
-.appicons-weather-sunny::before { content: "\ea73"; }
-.appicons-widgets::before { content: "\ea74"; }
-.appicons-youtube::before { content: "\ea75"; }
+.appicons-page-layout-footer::before { content: "\ea54"; }
+.appicons-palette-swatch::before { content: "\ea55"; }
+.appicons-pencil::before { content: "\ea56"; }
+.appicons-pokeball::before { content: "\ea57"; }
+.appicons-poll::before { content: "\ea58"; }
+.appicons-refresh::before { content: "\ea59"; }
+.appicons-reload::before { content: "\ea5a"; }
+.appicons-reply::before { content: "\ea5b"; }
+.appicons-restore::before { content: "\ea5c"; }
+.appicons-rocket::before { content: "\ea5d"; }
+.appicons-scatter-plot::before { content: "\ea5e"; }
+.appicons-security::before { content: "\ea5f"; }
+.appicons-share-variant::before { content: "\ea60"; }
+.appicons-share::before { content: "\ea61"; }
+.appicons-shield-check::before { content: "\ea62"; }
+.appicons-sitemap-outline::before { content: "\ea63"; }
+.appicons-snowflake::before { content: "\ea64"; }
+.appicons-star::before { content: "\ea65"; }
+.appicons-tag::before { content: "\ea66"; }
+.appicons-theme-light-dark::before { content: "\ea67"; }
+.appicons-tooltip::before { content: "\ea68"; }
+.appicons-translate-variant::before { content: "\ea69"; }
+.appicons-translate::before { content: "\ea6a"; }
+.appicons-update::before { content: "\ea6b"; }
+.appicons-upload::before { content: "\ea6c"; }
+.appicons-video-box::before { content: "\ea6d"; }
+.appicons-video::before { content: "\ea6e"; }
+.appicons-view-carousel::before { content: "\ea6f"; }
+.appicons-view-dashboard::before { content: "\ea70"; }
+.appicons-view-grid::before { content: "\ea71"; }
+.appicons-wallet-bifold::before { content: "\ea72"; }
+.appicons-weather-night::before { content: "\ea73"; }
+.appicons-weather-sunny::before { content: "\ea74"; }
+.appicons-widgets::before { content: "\ea75"; }
+.appicons-youtube::before { content: "\ea76"; }
 
 

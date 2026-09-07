@@ -3,8 +3,8 @@
         :class="['homeLayout--' + activeHomeTab, settingsStore.isDark ? 'theme-dark' : 'theme-light']" :style="{
             '--mask-color': pageBackgroundVar,
             backgroundColor: pageBackgroundVar,
-            height: activeHomeTab !== 'home' ? '100vh' : 'auto',
-            overflow: activeHomeTab !== 'home' ? 'hidden' : 'visible',
+            height: '100%',
+            overflow: 'hidden',
         }">
         <!-- #ifndef WEB -->
         <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: pageBackgroundVar }">
@@ -53,6 +53,18 @@
             <home-tab :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></home-tab>
         </view>
 
+        <!-- 灵动头像频道 -->
+        <view v-if="avatarLoaded" v-show="activeHomeTab === 'avatar'" class="home-channel home-channel--avatar"
+            :style="channelBottomStyle">
+            <avatar-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></avatar-tab>
+        </view>
+
+        <!-- 电脑横屏频道 -->
+        <view v-if="desktopLoaded" v-show="activeHomeTab === 'desktop'" class="home-channel home-channel--desktop"
+            :style="channelBottomStyle">
+            <desktop-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></desktop-tab>
+        </view>
+
         <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
         <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend"
             :style="channelBottomStyle">
@@ -78,14 +90,12 @@
             <top-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-tab>
         </view>
 
-        <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
-
         <!-- 自定义 TabBar 组件 (支持多语言实时切换与 Light/Dark 模式) -->
-        <!-- <glass-tab-bar
+        <glass-tab-bar
             current-path="/pages/app/index"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar> -->
+            :placeholder="false"
+        ></glass-tab-bar>
     </view>
 </template>
 
@@ -94,22 +104,26 @@ import { ref, computed, watch } from 'vue';
 import { onLoad, onShow, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
-import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/layout.js';
-import { updateNativeTabBar } from '@/utils/tabbar.js';
+import AvatarTab from '@/components/avatar-tab/avatar-tab.vue';
+import DesktopTab from '@/components/desktop-tab/desktop-tab.vue';
 
 const settingsStore = useSettingsStore();
 const { t } = useI18n();
-
-onShow(() => {
-    updateNativeTabBar(t);
-});
 
 const homeTabList = computed(() => [
     {
         key: 'home',
         label: t('index.tabs.home'),
     },
+    // {
+    //     key: 'avatar',
+    //     label: t('channels.avatar'),
+    // },
+    // {
+    //     key: 'desktop',
+    //     label: t('channels.desktop'),
+    // },
     {
         key: 'recommend',
         label: t('index.tabs.recommend'),
@@ -140,11 +154,15 @@ const activeHomeTab = ref('home');
 const pageBackgroundVar = 'var(--page-background)';
 
 // ── 懒加载标志，首次切入对应 tab 才渲染，之后用 v-show 保持状态 ──
+const avatarLoaded = ref(false);
+const desktopLoaded = ref(false);
 const recommendLoaded = ref(false);
 const latestLoaded = ref(false);
 const hotLoaded = ref(false);
 
 watch(activeHomeTab, (tab) => {
+    if (tab === 'avatar') avatarLoaded.value = true;
+    if (tab === 'desktop') desktopLoaded.value = true;
     if (tab === 'recommend') recommendLoaded.value = true;
     if (tab === 'latest') latestLoaded.value = true;
     if (tab === 'hot') hotLoaded.value = true;
@@ -420,12 +438,7 @@ onShareTimeline(() => {
     box-sizing: border-box;
 }
 
-.home-channel--recommend {
-    height: 100vh;
-    overflow: hidden;
-    background: transparent;
-}
-
+.home-channel--recommend,
 .home-channel--home,
 .home-channel--latest,
 .home-channel--hot {
@@ -433,7 +446,7 @@ onShareTimeline(() => {
     max-width: 100%;
     box-sizing: border-box;
     background: transparent;
-    height: 100vh;
+    height: 100%;
 }
 
 .home-channel--latest,

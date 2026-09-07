@@ -901,6 +901,14 @@
                 "window": "网格",
                 "waterfall": "瀑布流"
             },
+            "wallpaperWatermark": {
+                "label": "壁纸水印角标",
+                "sublabel": "预览右下角显示应用名与编号"
+            },
+            "customTabBar": {
+                "label": "悬浮胶囊导航栏",
+                "sublabel": "开启使用悬浮毛玻璃胶囊，关闭使用经典贴底底栏"
+            },
             "availability": {
                 "label": "在线状态",
                 "available": "当前可用",
@@ -1280,5 +1288,35 @@
         "setAsRotateBoard": "设为轮播画板",
         "rotatingBadge": "正在轮播",
         "setRotateSuccess": "已将该画板设为自动轮播源"
+    },
+    "channels": {
+        "mobile": "手机壁纸",
+        "avatar": "灵动头像",
+        "desktop": "电脑横屏"
+    },
+    "avatar": {
+        "title": "灵动头像",
+        "desc": "精选 1:1 超清头像，适配微信、社交名片与个人资料",
+        "shapeCircle": "圆形",
+        "shapeSquare": "方形",
+        "profileMock": "社交名片",
+        "circleMock": "圆形头像",
+        "squareMock": "圆角方块",
+        "setAsAppAvatar": "设为头像",
+        "saveCircle": "保存圆形PNG",
+        "saveSquare": "保存方形原图",
+        "setSuccess": "已更新为应用内头像",
+        "empty": "暂无头像内容"
+    },
+    "desktop": {
+        "title": "电脑壁纸",
+        "desc": "4K / 8K 宽幅横向桌面视觉大作",
+        "rotateLandscape": "横屏沉浸",
+        "dockMac": "Mac 桌面",
+        "dockWin": "Win 桌面",
+        "resolution4k": "4K 超清",
+        "resolution8k": "8K 极清",
+        "saveOriginal": "下载 4K 原图",
+        "empty": "暂无横屏壁纸"
     }
 }

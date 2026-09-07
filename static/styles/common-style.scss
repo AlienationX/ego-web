@@ -51,16 +51,16 @@ view swiper swiper-item {
     min-height: 80vh;
 }
 
-.loadingLayout {
-    padding: 20rpx 0;
-}
-
 // 安全区，主要是针对手机home键上方的区域
 .safe-area-inset-bottom {
     height: constant(safe-area-inset-bottom);
     height: env(safe-area-inset-bottom);
 }
 
-.container-background {
-    background: #f4e2d8;
+// 底部悬浮 TabBar 通用占位
+.tabbar-placeholder {
+    width: 100%;
+    height: calc(96px + constant(safe-area-inset-bottom));
+    height: calc(96px + env(safe-area-inset-bottom));
+    flex-shrink: 0;
 }

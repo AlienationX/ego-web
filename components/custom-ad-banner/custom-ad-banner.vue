@@ -35,12 +35,10 @@ const props = defineProps({
     },
 });
 
-import { USE_CUSTOM_TABBAR } from '@/common/config.js';
-
 const calculatedBottom = computed(() => {
     if (!props.isFixed) return 'auto';
     if (props.bottomOffset > 0) return `${props.bottomOffset}px`;
-    return USE_CUSTOM_TABBAR ? `${getTabBarHeight()}px` : '0px';
+    return `${getTabBarHeight()}px`;
 });
 
 const userStore = useUserStore();

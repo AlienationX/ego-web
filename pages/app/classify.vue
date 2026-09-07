@@ -1,9 +1,5 @@
 <template>
     <view class="classLayout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="pageStyle">
-        <!-- #ifndef WEB -->
-        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-        <!-- #endif -->
-
         <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
             <view class="page-scroll__content" :style="{ paddingBottom: pagePaddingBottom }">
                 <!-- 沉浸式头部区域 -->
@@ -18,6 +14,26 @@
                     <view class="search-container">
                         <search-bar></search-bar>
                     </view>
+
+                    <!-- 分类类型筛选胶囊条 -->
+                    <view class="channel-filter-bar">
+                        <view class="channel-pill" :class="{ 'is-active': activeType === 0 }"
+                            @click="selectType(0)">
+                            <text>{{ $t('common.recommend') }}</text>
+                        </view>
+                        <view class="channel-pill" :class="{ 'is-active': activeType === 1 }"
+                            @click="selectType(1)">
+                            <text>{{ $t('channels.mobile') }}</text>
+                        </view>
+                        <view class="channel-pill" :class="{ 'is-active': activeType === 4 }"
+                            @click="selectType(4)">
+                            <text>{{ $t('channels.avatar') }}</text>
+                        </view>
+                        <view class="channel-pill" :class="{ 'is-active': activeType === 2 }"
+                            @click="selectType(2)">
+                            <text>{{ $t('channels.desktop') }}</text>
+                        </view>
+                    </view>
                 </view>
 
                 <!-- 加载骨架屏 -->
@@ -31,7 +47,7 @@
                 </view>
 
                 <!-- 空状态 -->
-                <view v-else-if="!classifyList.length" class="empty-container">
+                <view v-else-if="!classifyComputed.length" class="empty-container">
                     <view class="empty-title">{{ $t('category.empty') }}</view>
                     <view class="empty-desc">{{ $t('category.emptyDesc') }}</view>
                 </view>
@@ -43,40 +59,34 @@
             </view>
         </scroll-view>
 
-        <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
-
         <!-- 自定义 TabBar 组件 -->
-        <!-- <glass-tab-bar
+        <glass-tab-bar
             current-path="/pages/app/classify"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar> -->
+        ></glass-tab-bar>
     </view>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad, onShow } from '@dcloudio/uni-app';
+import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 
-import { USE_CUSTOM_TABBAR } from '@/common/config.js';
-
 const pagePaddingBottom = computed(() => {
-    const baseTabSpace = USE_CUSTOM_TABBAR ? getTabBarHeight() : 0;
-    return `${baseTabSpace + adHeight.value + 10}px`;
+    const baseTabSpace = getTabBarHeight();
+    return `${baseTabSpace + 12}px`;
 });
 
 const { t, locale } = useI18n();
 const isEn = computed(() => locale.value === 'en');
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const heroTopPadding = computed(() => statusBarHeight.value + 10);
+const heroTopPadding = computed(() => statusBarHeight.value + 12);
 const appStore = useAppStore();
 const classifyList = computed({
     get: () => appStore.classifyList,
@@ -84,23 +94,31 @@ const classifyList = computed({
 });
 const isLoading = ref(true);
 const settingsStore = useSettingsStore();
+const activeType = ref(0); // 0: 全部, 1: 手机壁纸, 4: 头像, 2: 电脑壁纸
+
+const selectType = (type) => {
+    activeType.value = type;
+};
 
 const classifyComputed = computed(() => {
-    return classifyList.value.map((item) => ({
+    let list = classifyList.value;
+    if (activeType.value > 0) {
+        list = list.filter((item) => {
+            if (activeType.value === 1) {
+                return !item.classify_type || item.classify_type === 1;
+            }
+            return item.classify_type === activeType.value;
+        });
+    }
+    return list.map((item) => ({
         ...item,
-        name: isEn.value ? item.name_en || item.name : item.name,
+        classify_name: isEn.value && item.classify_name_en ? item.classify_name_en : item.classify_name,
     }));
 });
 
-
-// ── 广告高度，控制底部留白 ──
-const adHeight = ref(0);
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
-};
 const pageStyle = computed(() => ({}));
 const pageScrollStyle = computed(() => ({
-    height: `calc(100vh - ${adHeight.value}px)`,
+    height: '100vh',
 }));
 
 const getClassify = async () => {
@@ -115,14 +133,8 @@ const getClassify = async () => {
     }
 };
 
-import { updateNativeTabBar } from '@/utils/tabbar.js';
-
 onLoad(() => {
     getClassify();
-});
-
-onShow(() => {
-    updateNativeTabBar(t);
 });
 </script>
 
@@ -142,18 +154,6 @@ onShow(() => {
 .page-scroll__content {
     min-height: 100%;
     padding-bottom: 2rpx;
-}
-
-.status-bar-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    background: var(--page-background);
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 9999;
 }
 
 .hero-section {
@@ -184,7 +184,42 @@ onShow(() => {
         margin: 10rpx -30rpx 0;
     }
 
+    .channel-filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 14rpx;
+        margin-top: 18rpx;
+        margin-bottom: 8rpx;
+        overflow-x: auto;
+        white-space: nowrap;
 
+        .channel-pill {
+            padding: 10rpx 26rpx;
+            border-radius: 30rpx;
+            background: rgba(0, 0, 0, 0.04);
+            font-size: 24rpx;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+
+            .theme-dark & {
+                background: rgba(255, 255, 255, 0.06);
+            }
+
+            &.is-active {
+                background: #4f46e5;
+                color: #ffffff;
+                box-shadow: 0 4rpx 14rpx rgba(79, 70, 229, 0.28);
+
+                .theme-dark & {
+                    background: #6366f1;
+                    color: #ffffff;
+                }
+            }
+        }
+    }
 
     .hero-ad {
         margin-top: 20rpx;

@@ -152,12 +152,10 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 
-import { USE_CUSTOM_TABBAR } from '@/common/config.js';
-
 
 
 const timelineWrapPaddingBottom = computed(() => {
-    const tabH = (props.embedded && USE_CUSTOM_TABBAR) ? getTabBarHeight() : 0;
+    const tabH = props.embedded ? getTabBarHeight() : 0;
     return `${tabH + 16}px`;
 });
 
@@ -388,7 +386,7 @@ onShow(() => {
 .layout.is-embedded {
     min-height: 0;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
 }
 

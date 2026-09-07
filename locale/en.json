@@ -901,6 +901,14 @@
                 "window": "Grid",
                 "waterfall": "Waterfall"
             },
+            "wallpaperWatermark": {
+                "label": "Wallpaper Watermark",
+                "sublabel": "Show app name and wallpaper ID in corner for sharing"
+            },
+            "customTabBar": {
+                "label": "Floating Capsule TabBar",
+                "sublabel": "Enable for floating capsule, disable for classic docked bar"
+            },
             "availability": {
                 "label": "Availability Status",
                 "available": "Currently available",
@@ -1280,5 +1288,35 @@
         "setAsRotateBoard": "Set as Rotate Board",
         "rotatingBadge": "Rotating",
         "setRotateSuccess": "Set as auto-rotate board successfully"
+    },
+    "channels": {
+        "mobile": "Mobile",
+        "avatar": "Avatars",
+        "desktop": "Desktop"
+    },
+    "avatar": {
+        "title": "Avatars",
+        "desc": "Curated 1:1 HD Avatars for Social & Profile",
+        "shapeCircle": "Circle",
+        "shapeSquare": "Square",
+        "profileMock": "Profile Card",
+        "circleMock": "Circle Avatar",
+        "squareMock": "Rounded Square",
+        "setAsAppAvatar": "Set as Avatar",
+        "saveCircle": "Save Circle PNG",
+        "saveSquare": "Save Original",
+        "setSuccess": "Updated profile avatar successfully",
+        "empty": "No avatars found"
+    },
+    "desktop": {
+        "title": "Desktop Wallpapers",
+        "desc": "4K / 8K Ultra-widescreen Masterpieces",
+        "rotateLandscape": "Landscape View",
+        "dockMac": "Mac Desktop",
+        "dockWin": "Win Desktop",
+        "resolution4k": "4K Ultra HD",
+        "resolution8k": "8K Ultra HD",
+        "saveOriginal": "Download 4K Original",
+        "empty": "No desktop wallpapers found"
     }
 }

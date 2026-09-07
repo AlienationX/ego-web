@@ -327,7 +327,8 @@ const goBack = () => {
 .content {
     box-sizing: border-box;
     padding-top: 16rpx;
-    padding-bottom: 80rpx;
+    padding-bottom: calc(80rpx + constant(safe-area-inset-bottom));
+    padding-bottom: calc(80rpx + env(safe-area-inset-bottom));
 }
 
 .avatar-area {

@@ -1,8 +1,6 @@
 <template>
     <view class="page-header" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: `${statusBarHeight}px` }">
-        <!-- #ifndef WEB -->
-        <view class="page-header__status-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-        <!-- #endif -->
+        <view v-if="statusBarHeight > 0" class="page-header__status-bg" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="page-header__inner">
             <view class="page-header__side page-header__side--left">
                 <view v-if="showBack" class="page-header__action" @click="handleBack">
@@ -67,7 +65,7 @@ const props = defineProps({
 
 defineEmits(['right-click']);
 
-const statusBarHeight = getStatusBarHeight();
+const statusBarHeight = computed(() => getStatusBarHeight());
 
 const handleBack = () => {
     const pages = getCurrentPages();

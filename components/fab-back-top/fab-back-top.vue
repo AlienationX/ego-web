@@ -12,7 +12,9 @@
 <script setup>
 import { computed } from 'vue';
 import { getTabBarHeight } from '@/utils/layout.js';
-import { USE_CUSTOM_TABBAR } from '@/common/config.js';
+import { useSettingsStore } from '@/stores/settings.js';
+
+const settingsStore = useSettingsStore();
 
 const props = defineProps({
     show: {
@@ -39,7 +41,7 @@ const computedStyle = computed(() => {
     if (props.bottomOffset > 0) {
         return { bottom: `${props.bottomOffset}px` };
     }
-    const tabH = (props.embedded && USE_CUSTOM_TABBAR) ? getTabBarHeight() : 0;
+    const tabH = props.embedded ? getTabBarHeight() : 0;
     const adH = props.adHeight > 0 ? props.adHeight : 0;
     return {
         bottom: `${tabH + adH + 16}px`,

@@ -9,7 +9,7 @@
             <view class="hint-text">{{ t('previewPage.swipeUpToView') }}</view>
         </view>
 
-        <view class="preview-statusbar" :style="{
+        <view v-if="enableStatusbarTransition" class="preview-statusbar" :style="{
             height: `${statusBarHeight}px`,
             opacity: statusBarFillOpacity,
         }"></view>
@@ -39,16 +39,24 @@
                                     <view class="preview-loading__text">{{ t('message.loading') }}</view>
                                 </view>
                                 <image v-if="readImgs.includes(index)" class="preview-slide__image"
-                                    :class="{ 'is-loaded': isImageLoaded(index) }" @click="maskChange"
+                                    :class="{ 'is-loaded': isImageLoaded(index), 'is-landscape-rotated': isLandscapeRotated }" @click="maskChange"
                                     @load="handleImageLoad(index, $event)" @error="handleImageLoad(index)"
                                     :src="item.picurl" mode="aspectFill"></image>
                             </view>
                         </swiper-item>
                     </swiper>
 
-                    <!-- 沉浸式锁屏预览模式或正在挑选时钟样式时的时钟 overlay -->
-                    <lock-screen-overlay v-if="!maskState || tempClockStyle"
-                        :clockStyle="tempClockStyle || activeSessionClockStyle" />
+                    <!-- 沉浸式场景预览模式 (仅当非操作模式或正在挑选时钟样式时呈现) -->
+                    <template v-if="!maskState || tempClockStyle">
+                        <!-- 1. 灵动头像专属场景模拟器 (圆形/方形/社交名片) -->
+                        <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.picurl || ''" />
+
+                        <!-- 2. PC 桌面横屏壁纸专属模拟器 (Mac/Win Mockup + 横屏旋转) -->
+                        <desktop-preview-overlay v-else-if="isDesktopMode" @rotate-change="onDesktopRotateChange" />
+
+                        <!-- 3. 常规手机壁纸沉浸式锁屏时钟 -->
+                        <lock-screen-overlay v-else :clockStyle="tempClockStyle || activeSessionClockStyle" />
+                    </template>
 
                     <view class="mask" :class="{ 'mask--loading': isCurrentSlideLoading }" v-if="maskState">
                         <view class="goBack" :style="{ top: backButtonTop + 'px' }" @click="goBack">
@@ -59,10 +67,18 @@
                             <view v-if="isAdmin" class="icon-btn" @click="openAdminMenu">
                                 <uni-icons type="more-filled" size="24" color="#ffffff"></uni-icons>
                             </view>
-                            <view class="icon-btn" @click="openClockStyle">
+                            <!-- 头像专属：一键设为个人头像 -->
+                            <view v-if="isAvatarMode" class="icon-btn" @click="handleSetAsAppAvatar">
+                                <mdi-icon path="/static/icons/account-circle.svg" size="24px" color="#fff"></mdi-icon>
+                            </view>
+                            <!-- 电脑横屏专属：一键 90° 旋转 -->
+                            <view v-if="isDesktopMode" class="icon-btn" @click="isLandscapeRotated = !isLandscapeRotated">
+                                <mdi-icon path="/static/icons/screen-rotation.svg" size="22px" color="#fff"></mdi-icon>
+                            </view>
+                            <view v-if="!isAvatarMode && !isDesktopMode" class="icon-btn" @click="openClockStyle">
                                 <mdi-icon path="/static/icons/clock.svg" size="28px" color="#fff"></mdi-icon>
                             </view>
-                            <view class="icon-btn" @click="openFrostedMaker">
+                            <view v-if="!isAvatarMode" class="icon-btn" @click="openFrostedMaker">
                                 <mdi-icon path="/static/icons/blur.svg" size="28px" color="#fff"></mdi-icon>
                             </view>
                             <!-- #ifdef MP-WEIXIN -->
@@ -92,7 +108,11 @@
                                     currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
                                     }}</view>
                             </view>
-                            <view class="box" @click="openScore">
+                            <view class="box" v-if="isAvatarMode" @click="handleSetAsAppAvatar">
+                                <mdi-icon path="/static/icons/account-circle.svg" size="24px" color="#fff"></mdi-icon>
+                                <view class="text">{{ t('avatar.setAsAppAvatar') }}</view>
+                            </view>
+                            <view class="box" v-else @click="openScore">
                                 <uni-icons type="star-filled" size="24"></uni-icons>
                                 <view class="text">{{ currentInfo.score || '-' }}</view>
                             </view>
@@ -140,6 +160,15 @@
                                 }}</view>
                             </view>
                         </template>
+                    </view>
+
+                    <!-- 小红书博主截图水印角标：右下角常驻显示 appName 和 #壁纸id -->
+                    <view v-if="settingsStore.options.showWatermark && currentInfo && currentInfo.id"
+                        class="wallpaper-watermark" :class="{ 'with-mask': maskState }"
+                        @click.stop="handleCopyWatermarkId">
+                        <text class="watermark-app">{{ t('common.appName') }}</text>
+                        <text class="watermark-sep">·</text>
+                        <text class="watermark-id">#{{ currentInfo.id }}</text>
                     </view>
                 </view>
                 <!-- 作品参数指标与免责声明面板（3行2列扁平化布局） -->
@@ -631,6 +660,8 @@ import { useAdIntersititial } from '@/hooks/useAd.js';
 import { formatPreviewDate, formatFileSize, handlePicUrl } from '@/utils/common.js';
 import { downloadPic } from '@/common/core.js';
 import PopupBoardSelect from '@/components/popup-board-select/popup-board-select.vue';
+import AvatarPreviewOverlay from '@/components/avatar-preview-overlay/avatar-preview-overlay.vue';
+import DesktopPreviewOverlay from '@/components/desktop-preview-overlay/desktop-preview-overlay.vue';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -976,6 +1007,8 @@ const statusBarHeight = ref(getStatusBarHeight() || 0);
 // 使用新版 getWindowInfo API，搭配可选链兜底
 const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || 667;
 const previewViewportHeightPx = previewHeroHeightPx;
+// 控制状态栏是否执行渐变背景填充效果（沉浸式模式下设为 false，不执行渐变遮挡）
+const enableStatusbarTransition = ref(false);
 const statusBarFillOpacity = ref(0);
 
 // ── 广告高度，控制预览页滚动区域 ──
@@ -999,9 +1032,13 @@ const handlePreviewScroll = (e) => {
     const scrollTop = Number(e?.detail?.scrollTop || 0);
     const scrollHeight = Number(e?.detail?.scrollHeight || 0);
 
-    const revealStart = previewHeroHeightPx * 0.05;
-    const revealEnd = previewHeroHeightPx * 0.95;
-    statusBarFillOpacity.value = Math.min(1, Math.max(0, (scrollTop - revealStart) / (revealEnd - revealStart)));
+    if (enableStatusbarTransition.value) {
+        const revealStart = previewHeroHeightPx * 0.05;
+        const revealEnd = previewHeroHeightPx * 0.95;
+        statusBarFillOpacity.value = Math.min(1, Math.max(0, (scrollTop - revealStart) / (revealEnd - revealStart)));
+    } else {
+        statusBarFillOpacity.value = 0;
+    }
 
     const recommendScrollTop = Math.max(0, scrollTop - previewHeroHeightPx);
     const recommendScrollableDistance = Math.max(1, scrollHeight - previewViewportHeightPx - previewHeroHeightPx);
@@ -1062,8 +1099,9 @@ const backButtonTop = computed(() => {
         // 让返回键与胶囊垂直对齐
         return capsuleRect.value.top + (capsuleRect.value.height - 38) / 2;
     }
-    if (getStatusBarHeight() === 0) return 24;
-    return getStatusBarHeight();
+    const sb = getStatusBarHeight();
+    if (sb === 0) return 24;
+    return sb + 8;
 });
 
 const capsuleRightOffset = computed(() => {
@@ -1099,6 +1137,33 @@ const maskChange = () => {
     maskState.value = !maskState.value;
     if (statusStore.appStatus && !statusStore.appStatus.hasSeenTapHint) {
         statusStore.appStatus.hasSeenTapHint = true;
+    }
+};
+
+// ── 全场景视觉资产模式判断 ──
+const isAvatarMode = computed(() => {
+    return currentInfo.value?.classify_type === 4 || currentInfo.value?.classify?.classify_type === 4;
+});
+
+const isDesktopMode = computed(() => {
+    return currentInfo.value?.classify_type === 2 || currentInfo.value?.classify?.classify_type === 2;
+});
+
+const isLandscapeRotated = ref(false);
+const onDesktopRotateChange = (val) => {
+    isLandscapeRotated.value = val;
+};
+
+// 设为应用内个人头像
+const handleSetAsAppAvatar = () => {
+    if (!currentInfo.value?.picurl) return;
+    try {
+        if (!userStore.userinfo) userStore.userinfo = {};
+        userStore.userinfo.avatar = currentInfo.value.picurl;
+        uni.setStorageSync('userinfo', userStore.userinfo);
+        uni.showToast({ title: t('avatar.setSuccess'), icon: 'none' });
+    } catch (e) {
+        uni.showToast({ title: t('common.submitFailed'), icon: 'none' });
     }
 };
 
@@ -1745,12 +1810,27 @@ onShareTimeline(() => {
         query: 'id=' + currentId.value + '&type=share',
     };
 });
+
+// 点击复制水印上的壁纸ID与应用名，方便小红书文案粘贴
+const handleCopyWatermarkId = () => {
+    if (!currentInfo.value?.id) return;
+    const idText = String(currentInfo.value.id);
+    uni.setClipboardData({
+        data: idText,
+        success: () => {
+            uni.showToast({
+                title: `${t('common.appName')} #${idText} ${t('common.copied')}`,
+                icon: 'none',
+            });
+        },
+    });
+};
 </script>
 
 <style lang="scss" scoped>
 .preview-page {
     position: relative;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .preview-statusbar {
@@ -1762,6 +1842,55 @@ onShareTimeline(() => {
     pointer-events: none;
     background: var(--page-background);
     transition: opacity 0.22s ease;
+}
+
+.wallpaper-watermark {
+    position: absolute;
+    right: 24rpx;
+    bottom: 30rpx;
+    display: inline-flex;
+    align-items: center;
+    padding: 8rpx 14rpx;
+    z-index: 50;
+    pointer-events: auto;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: opacity 0.24s ease, transform 0.24s ease;
+
+    // 呼出底部操作栏时优雅隐去，避免与操作卡片按钮遮挡冲突
+    &.with-mask {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    &:active {
+        opacity: 0.5;
+        transform: scale(0.96);
+    }
+
+    .watermark-app {
+        font-size: 22rpx;
+        font-weight: 500;
+        color: #ffffff;
+        letter-spacing: 1.5rpx;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), 0 0 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .watermark-sep {
+        font-size: 18rpx;
+        color: rgba(255, 255, 255, 0.75);
+        margin: 0 6rpx;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+    }
+
+    .watermark-id {
+        font-size: 22rpx;
+        font-weight: 600;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, monospace;
+        letter-spacing: 1rpx;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), 0 0 8px rgba(0, 0, 0, 0.5);
+    }
 }
 
 .mode-tip-toast {
@@ -1872,7 +2001,12 @@ onShareTimeline(() => {
             width: 100%;
             height: 100%;
             opacity: 0;
-            transition: opacity 0.28s ease;
+            transition: opacity 0.28s ease, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: center center;
+
+            &.is-landscape-rotated {
+                transform: rotate(90deg) scale(1.6);
+            }
         }
 
         .preview-slide__image.is-loaded {
@@ -2069,8 +2203,7 @@ onShareTimeline(() => {
         .right-actions {
             position: absolute;
             right: 8rpx;
-            // bottom: calc(env(safe-area-inset-bottom) + 76rpx);
-            bottom: 88rpx;
+            bottom: calc(56rpx + env(safe-area-inset-bottom));
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -2122,7 +2255,7 @@ onShareTimeline(() => {
             color: #fff;
             text-shadow: 0 3rpx 10rpx rgba(0, 0, 0, 0.55);
             z-index: 2;
-            padding: 20rpx 20rpx 140rpx;
+            padding: 20rpx 20rpx calc(96rpx + env(safe-area-inset-bottom));
             margin: 0;
 
             &::before {

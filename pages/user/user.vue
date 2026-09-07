@@ -1,11 +1,5 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="layoutStyle">
-        <!-- #ifndef WEB -->
-        <view class="status-bar-bg" :class="{ 'status-bar-bg--muted': !userStore.userinfo.id }"
-            :style="{ height: `${statusBarHeight}px` }">
-        </view>
-        <!-- #endif -->
-
         <scroll-view scroll-y class="page-scroll" :show-scrollbar="false" enhanced :bounces="true">
             <view class="page-scroll__content" :style="{ paddingBottom: userPaddingBottom }">
                 <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
@@ -164,16 +158,13 @@
             </view>
         </scroll-view>
 
-        <!-- 吸底全局广告 (在 tabBar 之上) -->
-        <custom-ad-banner @height-change="onAdHeightChange" v-if="IS_INTERNATIONAL"></custom-ad-banner>
-
         <!-- 通用导航对话框 -->
         <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
             :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText" @confirm="dialogState.onConfirm"
             @cancel="dialogState.onCancel"></popup-navigation-dialog>
 
         <!-- 自定义 TabBar 组件 -->
-        <!-- <glass-tab-bar current-path="/pages/user/user" :theme="settingsStore.isDark ? 'dark' : 'light'"></glass-tab-bar> -->
+        <glass-tab-bar current-path="/pages/user/user" :theme="settingsStore.isDark ? 'dark' : 'light'"></glass-tab-bar>
     </view>
 </template>
 
@@ -181,15 +172,8 @@
 import { ref, reactive, computed } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiPostProfile, apiPostEarnEnergy } from '@/api/wallpaper.js';
-import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 
-import { USE_CUSTOM_TABBAR } from '@/common/config.js';
-
-const userPaddingBottom = computed(() => {
-    const baseTabSpace = USE_CUSTOM_TABBAR ? getTabBarHeight() : 0;
-    return `${baseTabSpace + adHeight.value + 10}px`;
-});
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -202,6 +186,11 @@ const { t, locale } = useI18n();
 const userStore = useUserStore();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
+
+const userPaddingBottom = computed(() => {
+    const baseTabSpace = getTabBarHeight();
+    return `${baseTabSpace}px`;
+});
 const statusStore = useStatusStore();
 const appStore = useAppStore();
 // const userinfo = reactive(userStore.userinfo);  // 只是userinfo的副本的响应式，和userStore.userinfo不是同一个对象
@@ -588,10 +577,7 @@ const exitMenus = computed(() => [
     },
 ]);
 
-import { updateNativeTabBar } from '@/utils/tabbar.js';
-
 onShow(() => {
-    updateNativeTabBar(t);
     // 检查是否已登录，已登录则获取最新用户信息
     // isFetchedRecently 防止刚登录时 signin 已拉过一次，onShow 再重复拉
     if (userStore.userinfo.id && !userStore.isFetchedRecently(3000)) {
@@ -618,55 +604,6 @@ onShow(() => {
 
     .page-scroll__content {
         min-height: 100%;
-    }
-
-    .status-bar-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background: var(--page-background);
-        overflow: hidden;
-        pointer-events: none;
-        z-index: 9999;
-
-        .status-user-decorative {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            pointer-events: none;
-
-            .bg-circle {
-                position: absolute;
-                border-radius: 50%;
-                opacity: 0.05;
-                background: linear-gradient(135deg, $wp-theme-color 0%, darken($wp-theme-color, 8%) 100%);
-            }
-
-            .circle-1 {
-                width: 300rpx;
-                height: 300rpx;
-                top: -100rpx;
-                right: -50rpx;
-            }
-
-            .circle-2 {
-                width: 200rpx;
-                height: 200rpx;
-                bottom: -50rpx;
-                left: -30rpx;
-            }
-
-            .circle-3 {
-                width: 150rpx;
-                height: 150rpx;
-                top: 50%;
-                left: 20%;
-            }
-        }
     }
 
     .userInfo {
@@ -1349,10 +1286,6 @@ onShow(() => {
     // 页面底色更深，让卡片浮起来
     &.layout {
         background-color: #111114;
-    }
-
-    .status-bar-bg {
-        background: #111114;
     }
 
     .userInfo {

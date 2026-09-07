@@ -117,8 +117,6 @@
             "style": {
                 "navigationBarTitleText": "Access-Key获取",
                 "navigationStyle": "custom"
-                // "navigationBarBackgroundColor": "#0078d4",
-                // "navigationBarTextStyle": "white"
             }
         },
         {
@@ -368,7 +366,7 @@
         "backgroundColor": "@backgroundColor"
     },
     "tabBar": {
-        // "custom": false, // 仅微信小程序支持这个选项
+        "custom": true,
         "color": "@tabBarColor",
         "selectedColor": "@tabBarSelectedColor",
         "borderStyle": "@tabBarBorderStyle",

@@ -1,13 +1,5 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- #ifndef WEB -->
-        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }">
-            <view class="status-decorative-bg">
-                <view class="bg-mesh"></view>
-            </view>
-        </view>
-        <!-- #endif -->
-
         <view class="decorative-bg">
             <view class="bg-mesh"></view>
         </view>
@@ -118,15 +110,15 @@
         </view>
 
         <!-- 自定义 TabBar 组件 -->
-        <!-- <glass-tab-bar
+        <glass-tab-bar
             current-path="/pages/discover/discover"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar> -->
+        ></glass-tab-bar>
     </view>
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, nextTick } from 'vue';
 import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
 import { apiGetActions, apiPostDiscoverStream } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -191,9 +183,10 @@ const canAnalyze = computed(() => {
     if (sourceMode.value === 'local') return !!localImage.value;
     return !!selectedItem.value;
 });
-import { USE_CUSTOM_TABBAR } from '@/common/config.js';
 
-const tabBarHeight = computed(() => (USE_CUSTOM_TABBAR ? (getTabBarHeight() || 60) : 0));
+const tabBarHeight = computed(() => {
+    return getTabBarHeight() || 60;
+});
 const bottomPanelBottom = computed(() => `${tabBarHeight.value}px`);
 
 // 纯公式计算：TabBar高度 + 面板主体高度(折叠 65px / 展开 200px) + 10rpx (5px) 预留间距
@@ -810,14 +803,12 @@ const goFavorite = () => {
     uni.navigateTo({ url: '/pages/app/favorite' });
 };
 
+
 onLoad(() => {
     createAiProfile();
 });
 
-import { updateNativeTabBar } from '@/utils/tabbar.js';
-
 onShow(() => {
-    updateNativeTabBar(t);
     if (userStore.isLoggedIn) {
         getFavoriteList();
     }
@@ -860,17 +851,6 @@ onUnload(() => {
     height: 100%;
 }
 
-.status-bar-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: var(--page-background);
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 9999;
-}
-
 .container {
     position: relative;
     background: transparent;
@@ -886,16 +866,6 @@ onUnload(() => {
     overflow: hidden;
     pointer-events: none;
     z-index: 0;
-}
-
-.status-decorative-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    overflow: hidden;
-    pointer-events: none;
 }
 
 .bg-mesh {
@@ -930,7 +900,7 @@ onUnload(() => {
     z-index: 10;
     padding: 0rpx 30rpx 30rpx;
     margin-bottom: 16rpx;
-    border-bottom: 1rpx solid var(--panel-border);
+    // border-bottom: 1rpx solid var(--panel-border);
 
     .hero-title {
         font-size: 68rpx;
