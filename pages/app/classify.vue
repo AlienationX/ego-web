@@ -1,63 +1,67 @@
 <template>
-    <view class="classLayout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="pageStyle">
-        <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
-            <view class="page-scroll__content" :style="{ paddingBottom: pagePaddingBottom }">
-                <!-- 沉浸式头部区域 -->
-                <view class="hero-section" :style="{ paddingTop: `${heroTopPadding}px` }">
-                    <view class="hero-header">
-                        <view class="title-group">
-                            <view class="hero-title">{{ $t('category.title') }}</view>
-                            <view class="hero-desc">{{ $t('category.desc') }}</view>
-                        </view>
-                    </view>
+    <view class="classLayout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <!-- 顶部毛玻璃状态栏：静止时透明沉浸，向上滑时淡入毛玻璃磨砂效果 -->
+        <glass-status-bar
+            :is-scrolled="isScrolled"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-status-bar>
 
-                    <view class="search-container">
-                        <search-bar></search-bar>
-                    </view>
-
-                    <!-- 分类类型筛选胶囊条 -->
-                    <view class="channel-filter-bar">
-                        <view class="channel-pill" :class="{ 'is-active': activeType === 0 }"
-                            @click="selectType(0)">
-                            <text>{{ $t('common.recommend') }}</text>
-                        </view>
-                        <view class="channel-pill" :class="{ 'is-active': activeType === 1 }"
-                            @click="selectType(1)">
-                            <text>{{ $t('channels.mobile') }}</text>
-                        </view>
-                        <view class="channel-pill" :class="{ 'is-active': activeType === 4 }"
-                            @click="selectType(4)">
-                            <text>{{ $t('channels.avatar') }}</text>
-                        </view>
-                        <view class="channel-pill" :class="{ 'is-active': activeType === 2 }"
-                            @click="selectType(2)">
-                            <text>{{ $t('channels.desktop') }}</text>
-                        </view>
+        <view class="page-content" :style="{ paddingBottom: pagePaddingBottom }">
+            <!-- 沉浸式头部区域 -->
+            <view class="hero-section" :style="{ paddingTop: `${heroTopPadding}px` }">
+                <view class="hero-header">
+                    <view class="title-group">
+                        <view class="hero-title">{{ $t('category.title') }}</view>
+                        <view class="hero-desc">{{ $t('category.desc') }}</view>
                     </view>
                 </view>
 
-                <!-- 加载骨架屏 -->
-                <view v-if="isLoading" class="classify-grid-padding">
-                    <view class="skeleton-grid">
-                        <view v-for="i in 8" :key="i" class="skeleton-item">
-                            <view class="skeleton-pic"></view>
-                            <view class="skeleton-label"></view>
-                        </view>
+                <view class="search-container">
+                    <search-bar></search-bar>
+                </view>
+
+                <!-- 分类类型筛选胶囊条 -->
+                <view class="channel-filter-bar">
+                    <view class="channel-pill" :class="{ 'is-active': activeType === 0 }"
+                        @click="selectType(0)">
+                        <text>{{ $t('common.recommend') }}</text>
                     </view>
-                </view>
-
-                <!-- 空状态 -->
-                <view v-else-if="!classifyComputed.length" class="empty-container">
-                    <view class="empty-title">{{ $t('category.empty') }}</view>
-                    <view class="empty-desc">{{ $t('category.emptyDesc') }}</view>
-                </view>
-
-                <!-- 分类网格 -->
-                <view v-else class="classify-grid-padding">
-                    <classify-grid :items="classifyComputed" />
+                    <view class="channel-pill" :class="{ 'is-active': activeType === 1 }"
+                        @click="selectType(1)">
+                        <text>{{ $t('channels.mobile') }}</text>
+                    </view>
+                    <view class="channel-pill" :class="{ 'is-active': activeType === 4 }"
+                        @click="selectType(4)">
+                        <text>{{ $t('channels.avatar') }}</text>
+                    </view>
+                    <view class="channel-pill" :class="{ 'is-active': activeType === 2 }"
+                        @click="selectType(2)">
+                        <text>{{ $t('channels.desktop') }}</text>
+                    </view>
                 </view>
             </view>
-        </scroll-view>
+
+            <!-- 加载骨架屏 -->
+            <view v-if="isLoading" class="classify-grid-padding">
+                <view class="skeleton-grid">
+                    <view v-for="i in 8" :key="i" class="skeleton-item">
+                        <view class="skeleton-pic"></view>
+                        <view class="skeleton-label"></view>
+                    </view>
+                </view>
+            </view>
+
+            <!-- 空状态 -->
+            <view v-else-if="!classifyComputed.length" class="empty-container">
+                <view class="empty-title">{{ $t('category.empty') }}</view>
+                <view class="empty-desc">{{ $t('category.emptyDesc') }}</view>
+            </view>
+
+            <!-- 分类网格 -->
+            <view v-else class="classify-grid-padding">
+                <classify-grid :items="classifyComputed" />
+            </view>
+        </view>
 
         <!-- 自定义 TabBar 组件 -->
         <glass-tab-bar
@@ -69,13 +73,19 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onPageScroll } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+
+const isScrolled = ref(false);
+
+onPageScroll((e) => {
+    isScrolled.value = e.scrollTop > 8;
+});
 
 const pagePaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();
@@ -116,11 +126,6 @@ const classifyComputed = computed(() => {
     }));
 });
 
-const pageStyle = computed(() => ({}));
-const pageScrollStyle = computed(() => ({
-    height: '100vh',
-}));
-
 const getClassify = async () => {
     try {
         isLoading.value = true;
@@ -142,18 +147,8 @@ onLoad(() => {
 .classLayout {
     background: var(--page-background);
     position: relative;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
     overflow-x: hidden; // 防止任意子元素的水平溢出撑出横向滚动条
-}
-
-.page-scroll {
-    width: 100%;
-}
-
-.page-scroll__content {
-    min-height: 100%;
-    padding-bottom: 2rpx;
 }
 
 .hero-section {

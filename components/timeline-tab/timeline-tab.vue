@@ -683,14 +683,16 @@ onShow(() => {
     position: absolute;
     top: 20rpx;
     right: 20rpx;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(4px);
+    width: 52rpx;
+    height: 52rpx;
     border-radius: 50%;
-    padding: 8rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
     z-index: 5;
+    box-sizing: border-box;
 }
 
 .last-viewed-divider {

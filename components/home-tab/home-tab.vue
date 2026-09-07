@@ -1823,8 +1823,13 @@ onMounted(() => {
     }
 
     .tag-chip {
-        padding: 12rpx 28rpx;
+        height: 56rpx;
+        box-sizing: border-box;
+        padding: 0 24rpx;
         border-radius: 100rpx;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         background: var(--panel-background);
         border: 1rpx solid var(--panel-border);
         box-shadow: 0 4rpx 10rpx var(--shadow-color);
@@ -1840,6 +1845,7 @@ onMounted(() => {
         .tag-label {
             font-size: 24rpx;
             font-weight: 600;
+            line-height: 1;
             color: var(--text-primary);
         }
     }

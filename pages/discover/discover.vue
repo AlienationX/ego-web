@@ -1,66 +1,69 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <!-- 顶部毛玻璃状态栏：静止时透明沉浸，向上滑时淡入毛玻璃磨砂效果 -->
+        <glass-status-bar
+            :is-scrolled="isScrolled"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-status-bar>
+
         <view class="decorative-bg">
             <view class="bg-mesh"></view>
         </view>
 
-        <scroll-view scroll-y class="page-scroll" show-scrollbar="false" :style="pageScrollStyle">
-            <view class="container" @touchstart="onChatTouchStart" @touchend="onChatTouchEnd" :style="{
-                paddingTop: `${containerTopPadding}px`,
-                paddingBottom: `${containerBottomSpace}px`,
-            }">
-                <view class="hero-section">
-                    <view class="hero-title hero-enter-1">{{ $t('discover.title') }}</view>
-                    <view class="hero-subtitle hero-enter-2">{{ $t('discover.subtitle') }}</view>
-                    <view class="hero-desc hero-enter-3">{{ $t('discover.desc') }}</view>
-                </view>
+        <view class="container" @touchstart="onChatTouchStart" @touchend="onChatTouchEnd" :style="{
+            paddingTop: `${containerTopPadding}px`,
+            paddingBottom: `${containerBottomSpace}px`,
+        }">
+            <view class="hero-section">
+                <view class="hero-title hero-enter-1">{{ $t('discover.title') }}</view>
+                <view class="hero-subtitle hero-enter-2">{{ $t('discover.subtitle') }}</view>
+                <view class="hero-desc hero-enter-3">{{ $t('discover.desc') }}</view>
+            </view>
 
-                <view class="chat-panel" v-if="chatMessages.length">
-                    <view v-for="msg in chatMessages" :id="`msg-${msg.id}`" :key="msg.id" class="msg-item"
-                        :class="msg.role">
-                        <template v-if="msg.role === 'assistant'">
-                            <view class="msg-header">
-                                <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
-                                <view class="msg-label">{{ msg.name }}</view>
-                            </view>
-                            <view class="msg-content full-width">
-                                <view class="msg-text markdown">
-                                    <mp-html :content="msg.html" :tag-style="markdownTagStyle"></mp-html>
-                                </view>
-                            </view>
-                        </template>
-                        <template v-else>
-                            <view class="msg-row user">
-                                <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
-                                <view class="msg-content">
-                                    <view class="msg-label">{{ msg.name }}</view>
-                                    <template v-if="msg.image">
-                                        <image class="msg-image" :src="msg.image" mode="aspectFill"></image>
-                                    </template>
-                                    <template v-if="msg.text">
-                                        <view class="msg-text">{{ msg.text }}</view>
-                                    </template>
-                                </view>
-                            </view>
-                        </template>
-                    </view>
-
-                    <view v-if="isThinking" class="msg-item assistant">
+            <view class="chat-panel" v-if="chatMessages.length">
+                <view v-for="msg in chatMessages" :id="`msg-${msg.id}`" :key="msg.id" class="msg-item"
+                    :class="msg.role">
+                    <template v-if="msg.role === 'assistant'">
                         <view class="msg-header">
-                            <image class="msg-avatar" :src="aiProfile.avatar" mode="aspectFill"></image>
-                            <view class="msg-label">{{ aiProfile.name }}</view>
+                            <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
+                            <view class="msg-label">{{ msg.name }}</view>
                         </view>
                         <view class="msg-content full-width">
-                            <view class="thinking-text">
-                                <rotate-loading :size="30" :speed="1.2"></rotate-loading>
-                                <text>{{ $t('discover.analyzingMessage') }} {{ thinkingTime }}s</text>
+                            <view class="msg-text markdown">
+                                <mp-html :content="msg.html" :tag-style="markdownTagStyle"></mp-html>
                             </view>
+                        </view>
+                    </template>
+                    <template v-else>
+                        <view class="msg-row user">
+                            <image class="msg-avatar" :src="msg.avatar" mode="aspectFill"></image>
+                            <view class="msg-content">
+                                <view class="msg-label">{{ msg.name }}</view>
+                                <template v-if="msg.image">
+                                    <image class="msg-image" :src="msg.image" mode="aspectFill"></image>
+                                </template>
+                                <template v-if="msg.text">
+                                    <view class="msg-text">{{ msg.text }}</view>
+                                </template>
+                            </view>
+                        </view>
+                    </template>
+                </view>
+
+                <view v-if="isThinking" class="msg-item assistant">
+                    <view class="msg-header">
+                        <image class="msg-avatar" :src="aiProfile.avatar" mode="aspectFill"></image>
+                        <view class="msg-label">{{ aiProfile.name }}</view>
+                    </view>
+                    <view class="msg-content full-width">
+                        <view class="thinking-text">
+                            <rotate-loading :size="30" :speed="1.2"></rotate-loading>
+                            <text>{{ $t('discover.analyzingMessage') }} {{ thinkingTime }}s</text>
                         </view>
                     </view>
                 </view>
-
             </view>
-        </scroll-view>
+        </view>
 
         <view class="bottom-panel" :style="{ bottom: bottomPanelBottom }">
             <view class="picker-wrap" v-if="pickerOpen">
@@ -102,10 +105,10 @@
                     @click="setSourceMode('favorite')">
                     {{ $t('discover.sourceFavorite') }}
                 </view>
-                <!-- <view class="source-item" :class="{ active: sourceMode === 'local' }" @click="setSourceMode('local')">
-                        {{ $t('discover.sourceLocal') }}
-                        <uni-icons class="lock-icon" type="vip-filled" size="14" color="#b7791f"></uni-icons>
-                    </view> -->
+                <view class="source-item" :class="{ active: sourceMode === 'local' }" @click="setSourceMode('local')">
+                    {{ $t('discover.sourceLocal') }}
+                    <uni-icons class="lock-icon" type="vip-filled" size="14" color="#b7791f"></uni-icons>
+                </view>
             </view>
         </view>
 
@@ -119,7 +122,7 @@
 
 <script setup>
 import { ref, computed, nextTick } from 'vue';
-import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
+import { onLoad, onUnload, onShow, onPageScroll } from '@dcloudio/uni-app';
 import { apiGetActions, apiPostDiscoverStream } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { useUserStore } from '@/stores/user.js';
@@ -129,6 +132,12 @@ import { useSettingsStore } from '@/stores/settings.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
+
+const isScrolled = ref(false);
+
+onPageScroll((e) => {
+    isScrolled.value = e.scrollTop > 8;
+});
 
 const { t } = useI18n();
 
@@ -194,10 +203,6 @@ const containerBottomSpace = computed(() => {
     const panelHeight = pickerOpen.value ? 200 : 65;
     return tabBarHeight.value + panelHeight + 5;
 });
-
-const pageScrollStyle = computed(() => ({
-    height: '100vh',
-}));
 
 const stopTyping = () => {
     if (typingTimer) {
@@ -841,14 +846,8 @@ onUnload(() => {
     }
 
     position: relative;
-    height: 100vh;
+    min-height: 100vh;
     background: var(--page-background);
-    overflow: hidden;
-}
-
-.page-scroll {
-    width: 100%;
-    height: 100%;
 }
 
 .container {

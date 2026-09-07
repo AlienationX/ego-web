@@ -1,8 +1,13 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="layoutStyle">
-        <scroll-view scroll-y class="page-scroll" :show-scrollbar="false" enhanced :bounces="true">
-            <view class="page-scroll__content" :style="{ paddingBottom: userPaddingBottom }">
-                <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
+        <!-- 顶部毛玻璃状态栏：静止时透明沉浸，向上滑时淡入毛玻璃磨砂效果 -->
+        <glass-status-bar
+            :is-scrolled="isScrolled"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-status-bar>
+
+        <view class="page-content" :style="{ paddingBottom: userPaddingBottom }">
+            <view class="userInfo" :style="{ paddingTop: `${userHeaderPaddingTop}px` }">
                     <template v-if="userStore.userinfo.id">
                         <view class="user-content">
                             <view class="avatar">
@@ -155,8 +160,7 @@
                         </view>
                     </view>
                 </view>
-            </view>
-        </scroll-view>
+        </view>
 
         <!-- 通用导航对话框 -->
         <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
@@ -170,9 +174,15 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { onLoad, onUnload, onShow } from '@dcloudio/uni-app';
+import { onLoad, onUnload, onShow, onPageScroll } from '@dcloudio/uni-app';
 import { apiPostProfile, apiPostEarnEnergy } from '@/api/wallpaper.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
+
+const isScrolled = ref(false);
+
+onPageScroll((e) => {
+    isScrolled.value = e.scrollTop > 8;
+});
 
 import { useUserStore } from '@/stores/user.js';
 import { useLibraryStore } from '@/stores/library.js';
@@ -594,17 +604,7 @@ onShow(() => {
 <style lang="scss" scoped>
 .layout {
     background-color: var(--page-background);
-    height: 100vh;
-    overflow: hidden;
-
-    .page-scroll {
-        width: 100%;
-        height: 100%;
-    }
-
-    .page-scroll__content {
-        min-height: 100%;
-    }
+    min-height: 100vh;
 
     .userInfo {
         display: flex;

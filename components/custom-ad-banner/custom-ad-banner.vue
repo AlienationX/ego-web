@@ -35,6 +35,8 @@ const props = defineProps({
     },
 });
 
+const emit = defineEmits(['height-change', 'load', 'close', 'error']);
+
 const calculatedBottom = computed(() => {
     if (!props.isFixed) return 'auto';
     if (props.bottomOffset > 0) return `${props.bottomOffset}px`;

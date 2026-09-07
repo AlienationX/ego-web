@@ -747,11 +747,16 @@ onShow(() => {
         position: absolute;
         top: 20rpx;
         right: 20rpx;
+        width: 52rpx;
+        height: 52rpx;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background: rgba(0, 0, 0, 0.3);
         backdrop-filter: blur(4px);
-        border-radius: 50%;
-        padding: 8rpx;
         z-index: 5;
+        box-sizing: border-box;
     }
 }
 

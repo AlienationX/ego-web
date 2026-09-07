@@ -32,7 +32,7 @@
                 </view>
                 <view class="keyword-cloud">
                     <view class="keyword-chip" v-for="tab in recommendList" :key="tab" @click="clickTab(tab)">
-                        #{{ tab }}
+                        <text class="keyword-chip__text">#{{ tab }}</text>
                     </view>
                 </view>
 
@@ -423,10 +423,13 @@ onUnload(() => {
 }
 
 .keyword-chip {
-    padding: 12rpx 28rpx;
+    height: 56rpx;
+    box-sizing: border-box;
+    padding: 0 24rpx;
     border-radius: 100rpx;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     font-size: 24rpx;
     font-weight: 600;
     color: var(--text-primary);
@@ -441,6 +444,10 @@ onUnload(() => {
         transform: scale(0.95);
         opacity: 0.85;
     }
+
+    &__text {
+        line-height: 1;
+    }
 }
 
 .history-block {
@@ -454,10 +461,13 @@ onUnload(() => {
 }
 
 .history-chip {
-    padding: 12rpx 28rpx;
+    height: 56rpx;
+    box-sizing: border-box;
+    padding: 0 24rpx;
     border-radius: 100rpx;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8rpx;
     font-size: 24rpx;
     font-weight: 600;
@@ -470,12 +480,16 @@ onUnload(() => {
     white-space: nowrap;
 
     &.is-editing {
-        padding: 12rpx 20rpx 12rpx 28rpx;
+        padding: 0 16rpx 0 24rpx;
     }
 
     &:active {
         transform: scale(0.95);
         opacity: 0.85;
+    }
+
+    &__text {
+        line-height: 1;
     }
 
     &__delete {
@@ -487,6 +501,7 @@ onUnload(() => {
         justify-content: center;
         background: rgba(0, 0, 0, 0.03);
         transition: background 0.2s;
+        flex-shrink: 0;
 
         .theme-dark & {
             background: rgba(255, 255, 255, 0.08);
