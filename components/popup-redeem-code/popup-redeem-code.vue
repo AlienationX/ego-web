@@ -71,12 +71,12 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostRedeemCode } from '@/api/payment.js';
 
-const { t } = useI18n();
+const { t, tp } = useTranslateParams();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 
@@ -148,11 +148,11 @@ const handleRedeem = async () => {
         const res = await apiPostRedeemCode({ code: codeVal });
         if (res.code === 200 || res.code === 0) {
             const rewardDays = res.data?.reward_days || 3;
-            // 提示多语言文案，不依赖硬编码
+            // 提示多语言文案，使用 tp 替换参数
             uni.showToast({
-                title: t('redeem.successTip', { days: rewardDays }),
+                title: tp('redeem.successTip', { days: rewardDays }),
                 icon: 'none',
-                duration: 2500,
+                duration: 3000,
             });
 
             // 即时无感更新前端会员状态

@@ -209,7 +209,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/stores/settings.js";
 import { useUserStore } from "@/stores/user.js";
-import { apiGetPaymentProducts, apiAlipayOrder, apiHuaweiOrder, apiGetOrderStatus, apiMockPay } from "@/api/payment.js";
+import { apiGetPaymentProducts, apiAlipayOrder, apiHuaweiOrder, apiWechatVirtualOrder, apiGetOrderStatus, apiMockPay } from "@/api/payment.js";
 import { getStatusBarHeight } from "@/utils/layout.js";
 import { useTranslateParams } from "@/utils/i18n.js";
 import { CHANNEL } from "@/common/config.js";
@@ -285,7 +285,7 @@ const openRedeem = () => {
 };
 
 const onRedeemSuccess = () => {
-    userStore.getUserProfile();
+    userStore.setUserInfo();
     setTimeout(() => {
         uni.navigateBack();
     }, 1800);
@@ -311,11 +311,13 @@ const benefits = computed(() => [
 
 // 2. 动态商品卡片数据
 const membershipCards = computed(() => {
+    const canShowTestProduct = Boolean(userStore.isDeveloper || IS_DEVELOPMENT);
+
     return rawProducts.value
         .filter((p) => {
-            // 非开发者隐藏测试 / test 商品
-            if (!userStore.isDeveloper) {
-                if (p.name === '测试' || p.name_en === 'test') return false;
+            // 既不是开发者账号，也不是开发环境时，隐藏测试商品
+            if (!canShowTestProduct) {
+                if (p.name === '测试' || p.name_en === 'test' || p.code === 'test') return false;
             }
             return true;
         })
@@ -341,10 +343,25 @@ const selectCard = (index) => {
 
 // 3. 支付方式配置
 const isHarmonyOS = computed(() => (uni.getDeviceInfo().platform || "").toLowerCase() === "harmonyos");
-const selectedPayment = ref(isHarmonyOS.value ? "huawei" : "alipay");
+
+const getDefaultPayment = () => {
+    // #ifdef MP-WEIXIN
+    return "wechat_virtual";
+    // #endif
+    // #ifndef MP-WEIXIN
+    return isHarmonyOS.value ? "huawei" : "alipay";
+    // #endif
+};
+const selectedPayment = ref(getDefaultPayment());
 
 const paymentMethods = computed(() => {
     const list = [];
+    // #ifdef MP-WEIXIN
+    list.push({ id: "wechat_virtual", name: t("membership.wechat") || "微信支付", iconSrc: "/static/icons/brands/wxpay.svg" });
+    return list;
+    // #endif
+
+    // #ifndef MP-WEIXIN
     if (isHarmonyOS.value) {
         list.push({ id: "huawei", name: t("membership.huawei") || "Huawei Pay", iconSrc: "/static/icons/brands/huawei.svg" });
     }
@@ -352,6 +369,7 @@ const paymentMethods = computed(() => {
         list.push({ id: "alipay", name: t("membership.alipay") || "Alipay", iconSrc: "/static/icons/brands/alipay.svg" });
     }
     return list.length ? list : [{ id: "huawei", name: t("membership.huawei") || "Huawei Pay", iconSrc: "/static/icons/brands/huawei.svg" }];
+    // #endif
 });
 
 // 4. 加载商品
@@ -382,7 +400,7 @@ let pollTimer = null;
 const onPaymentSuccess = () => {
     uni.hideLoading();
     uni.showToast({ title: t("membership.welcomeVip"), icon: "none" });
-    userStore.getUserProfile();
+    userStore.setUserInfo();
     setTimeout(() => uni.navigateBack(), 2000);
 };
 
@@ -432,7 +450,9 @@ const confirmAndExecutePayment = async () => {
     uni.showLoading({ title: t("membership.creatingOrder") });
 
     try {
-        if (selectedPayment.value === "alipay") {
+        if (selectedPayment.value === "wechat_virtual") {
+            await handleWechatVirtualPay(card, uni.getDeviceInfo().platform);
+        } else if (selectedPayment.value === "alipay") {
             await handleAlipay(card, uni.getDeviceInfo().platform);
         } else if (selectedPayment.value === "huawei") {
             await handleHuaweiPay(card, uni.getDeviceInfo().platform);
@@ -449,7 +469,102 @@ const confirmAndExecutePayment = async () => {
     }
 };
 
-// 7. 支付宝支付
+// 7. 微信小程序虚拟支付 (道具直购 short_series_goods)
+const handleWechatVirtualPay = async (card, platform) => {
+    // 1. iOS 版本前置校验（根据微信官方文档：iOS 需微信 ≥ 8.0.68）
+    // #ifdef MP-WEIXIN
+    if (typeof wx !== 'undefined') {
+        const appBase = wx.getAppBaseInfo ? wx.getAppBaseInfo() : {};
+        const deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {};
+        const platform = deviceInfo.platform || '';
+        const version = appBase.version || '';
+
+        if (platform === 'ios' && version) {
+            const cur = version.split('.').map(Number);
+            const base = [8, 0, 68];
+            let isValid = true;
+            for (let i = 0; i < 3; i++) {
+                if ((cur[i] || 0) > base[i]) { isValid = true; break; }
+                if ((cur[i] || 0) < base[i]) { isValid = false; break; }
+            }
+            if (!isValid) {
+                uni.hideLoading();
+                uni.showModal({
+                    title: t('common.tip') || '提示',
+                    content: '请将微信更新至 8.0.68 及以上版本后再进行支付',
+                    showCancel: false,
+                });
+                return;
+            }
+        }
+    }
+
+    // 2. 获取小程序端临时登录 code，换取最新 session_key 保证签名鲜活有效
+    let loginCode = '';
+    try {
+        const loginRes = await new Promise((resolve) => {
+            wx.login({
+                success: resolve,
+                fail: () => resolve(null),
+            });
+        });
+        if (loginRes && loginRes.code) {
+            loginCode = loginRes.code;
+        }
+    } catch (e) {
+        console.warn('获取 wx.login code 异常:', e);
+    }
+
+    // 3. 请求服务端生成订单并计算签名
+    const createRes = await apiWechatVirtualOrder({
+        product_id: card.id,
+        channel: CHANNEL,
+        platform: 'mp-weixin',
+        code: loginCode,
+    });
+
+    if (!(createRes.code === 200 && createRes.data)) {
+        throw new Error(createRes.message || t("membership.orderFailed"));
+    }
+
+    const { order_no, mode, signData, paySig, signature } = createRes.data;
+    uni.hideLoading();
+
+    // 4. 调用 wx.requestVirtualPayment 拉起原生微信收银台
+    if (typeof wx !== 'undefined' && wx.requestVirtualPayment) {
+        wx.requestVirtualPayment({
+            mode,
+            signData,
+            paySig,
+            signature,
+            success: (res) => {
+                uni.showLoading({ title: t("membership.verifying") });
+                pollOrderStatus(order_no);
+            },
+            fail: (err) => {
+                console.error("wx.requestVirtualPayment fail:", err);
+                const errMsg = err?.errMsg || "";
+                if (errMsg.includes("cancel")) {
+                    uni.showToast({ title: t("membership.cancelPay"), icon: "none" });
+                } else {
+                    uni.showToast({ title: err?.errMsg || t("membership.payFailed"), icon: "none" });
+                }
+            },
+        });
+        return;
+    } else {
+        throw new Error("当前环境不支持微信虚拟支付，请在微信小程序端使用");
+    }
+    // #endif
+
+    // 非微信小程序环境兜底（模拟沙盒）
+    uni.hideLoading();
+    mockOrderNo.value = order_no;
+    mockCard.value = card;
+    sandboxPopup.value?.open();
+};
+
+// 8. 支付宝支付
 const handleAlipay = async (card, platform) => {
     const createRes = await apiAlipayOrder({ product_id: card.id, channel: CHANNEL, platform });
 
@@ -611,7 +726,7 @@ const goBack = () => {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    padding-bottom: 200rpx;
+    padding-bottom: 268rpx;
     transition: all 0.3s ease;
 
     &.theme-light {
@@ -933,7 +1048,7 @@ const goBack = () => {
 
 /* 支付方式选择列 */
 .payment-methods-section {
-    margin-bottom: 40rpx;
+    margin-bottom: 20rpx;
 
     .pm-title {
         font-size: 22rpx;
@@ -997,21 +1112,22 @@ const goBack = () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10rpx 0 40rpx 0;
 
     .redeem-entry-content {
         display: inline-flex;
         align-items: center;
-        gap: 10rpx;
-        padding: 12rpx 28rpx;
+        gap: 12rpx;
+        padding: 14rpx 32rpx;
         border-radius: 40rpx;
         background: rgba(117, 115, 246, 0.08);
-        border: 1rpx solid rgba(117, 115, 246, 0.18);
+        border: 1rpx solid rgba(117, 115, 246, 0.2);
+        box-shadow: 0 4rpx 16rpx rgba(117, 115, 246, 0.06);
         transition: all 0.2s ease;
 
         .theme-dark & {
             background: rgba(117, 115, 246, 0.15);
             border-color: rgba(117, 115, 246, 0.3);
+            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
         }
 
         &:active {
@@ -1020,7 +1136,7 @@ const goBack = () => {
         }
 
         .redeem-entry-text {
-            font-size: 24rpx;
+            font-size: 25rpx;
             font-weight: 500;
             color: #7573f6;
             letter-spacing: 0.5rpx;
@@ -1040,7 +1156,7 @@ const goBack = () => {
     width: 100%;
     background: var(--bg-main);
     border-top: 1rpx solid var(--card-border);
-    padding: 24rpx 40rpx 32rpx;
+    padding: 24rpx 40rpx 30rpx;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;

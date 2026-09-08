@@ -41,6 +41,23 @@ export const apiHuaweiOrder = (data) => {
 };
 
 /**
+ * 微信小程序虚拟支付下单
+ * @param {Object} data
+ * @param {number} data.product_id  商品ID
+ * @param {string} [data.code]        微信登录临时 code
+ * @param {string} [data.platform]    平台
+ * @returns {Promise} payData (mode, signData, paySig, signature, order_no)
+ */
+export const apiWechatVirtualOrder = (data) => {
+    return request({
+        url: "/payment/wechat_virtual_pay/",
+        method: "POST",
+        data,
+        isAuth: true,
+    });
+};
+
+/**
  * 查询订单状态
  * @param {string} orderNo 订单号
  * @returns {{ order_no, status }}  status: pending / paid / failed / refunded

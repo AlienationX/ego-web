@@ -159,7 +159,7 @@ const sendRequest = (config = {}) => {
             timeout: config.timeout || 60000, // 默认1分钟
             header: { ...setHeader(config.isAuth || false), ...config.header },
             success: (res) => {
-                if (res.data.code === 200 || res.data.code === 201) {
+                if (res.data.code === 200 || res.data.code === 201 || res.data.code === 0) {
                     resolve(res.data); // 成功返回数据
                 } else if (res.data.code === 401 || res.data.code === 'token_not_valid') {
                     reject(res.data); // 这里的reject会被外层catch捕获

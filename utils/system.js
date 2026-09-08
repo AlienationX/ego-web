@@ -1,8 +1,6 @@
 import { apiPostAccess } from '@/api/wallpaper.js';
-import { CHANNEL } from '@/common/config.js';
-import { useSettingsStore } from '@/stores/settings.js';
-
 import { getCardDeepLink } from '@/uni_modules/ego-widget';
+import { CHANNEL } from '@/common/config.js';
 
 // 模块加载时评估一次，平台信息不会在运行时改变
 const app = uni.getAppBaseInfo();

@@ -339,7 +339,17 @@ const vipInfo = computed(() => {
         };
     }
 
-    const expireDate = new Date(expireTime);
+    // 兼容多种日期格式（标准 ISO 带 T / 旧版带空格格式）
+    let safeDateStr = expireTime;
+    if (typeof expireTime === 'string') {
+        const trimmed = expireTime.trim();
+        if (trimmed.includes(' ') && !trimmed.includes('T')) {
+            safeDateStr = trimmed.replace(/-/g, '/');
+        } else {
+            safeDateStr = trimmed;
+        }
+    }
+    const expireDate = new Date(safeDateStr);
     const now = new Date();
     const diffMs = expireDate.getTime() - now.getTime();
     const remainingDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
@@ -475,7 +485,7 @@ const onRedeemChange = (show) => {
 
 const onRedeemSuccess = async () => {
     try {
-        await userStore.getUserInfo();
+        await userStore.setUserInfo();
     } catch (e) {}
 };
 
