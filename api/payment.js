@@ -64,3 +64,19 @@ export const apiMockPay = (orderNo) => {
         isAuth: true,
     });
 };
+
+/**
+ * 兑换体验码
+ * @param {Object} data
+ * @param {string} data.code 体验码
+ * @returns {Promise}
+ */
+export const apiPostRedeemCode = (data) => {
+    return request({
+        url: "/redeem/exchange/",
+        method: "POST",
+        data,
+        isAuth: true,
+    });
+};
+

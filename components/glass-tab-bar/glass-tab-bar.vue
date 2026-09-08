@@ -3,7 +3,8 @@
         class="custom-tab-bar"
         :class="[
             isFloatingMode ? 'mode-floating' : 'mode-classic',
-            `theme-${theme}`
+            `theme-${theme}`,
+            { 'is-hidden': !visible }
         ]"
         :style="containerStyle"
     >
@@ -74,6 +75,10 @@ const props = defineProps({
     disableNavigation: {
         type: Boolean,
         default: false,
+    },
+    visible: {
+        type: Boolean,
+        default: true,
     },
 });
 
@@ -161,7 +166,14 @@ const handleSwitch = (item) => {
     pointer-events: auto;
     border-radius: 9999px;
     animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+    transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
+
+    &.is-hidden {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translate3d(-50%, 120px, 0) !important;
+        -webkit-transform: translate3d(-50%, 120px, 0) !important;
+    }
 
     &.theme-light {
         background: rgba(255, 255, 255, 0.82);
@@ -278,7 +290,14 @@ const handleSwitch = (item) => {
     justify-content: space-around;
     padding-top: 5px;
     padding-bottom: max(34px, env(safe-area-inset-bottom, 34px));
-    transition: background-color 0.25s ease, border-color 0.25s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
+
+    &.is-hidden {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translate3d(0, 100%, 0) !important;
+        -webkit-transform: translate3d(0, 100%, 0) !important;
+    }
 
     &.theme-light {
         background-color: #ffffff;

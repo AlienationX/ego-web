@@ -20,7 +20,7 @@ export const MAX_PAGE_SIZE = 12;
 export const PICS_BASE_URL = 'https://api.wp.ego8.space/static/wallpaper/media';
 
 // 备案信息
-export const RIGHT_ICP = '粤ICP备15077732号-2';
+export const RIGHT_ICP = '京ICP备2025123451号-2A';
 
 // 客服邮箱
 export const SERVICE_EMAIL = "le7yi_ss@163.com";

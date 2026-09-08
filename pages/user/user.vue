@@ -167,8 +167,15 @@
             :confirmText="dialogState.confirmText" :cancelText="dialogState.cancelText" @confirm="dialogState.onConfirm"
             @cancel="dialogState.onCancel"></popup-navigation-dialog>
 
+        <!-- 体验码兑换弹窗 -->
+        <popup-redeem-code ref="redeemPopup" @change="onRedeemChange" @success="onRedeemSuccess"></popup-redeem-code>
+
         <!-- 自定义 TabBar 组件 -->
-        <glass-tab-bar current-path="/pages/user/user" :theme="settingsStore.isDark ? 'dark' : 'light'"></glass-tab-bar>
+        <glass-tab-bar
+            current-path="/pages/user/user"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+            :visible="isTabBarVisible"
+        ></glass-tab-bar>
     </view>
 </template>
 
@@ -450,6 +457,28 @@ const checkin = async () => {
     }
 };
 
+const redeemPopup = ref(null);
+const isTabBarVisible = ref(true);
+
+const openRedeemPopup = () => {
+    if (!userStore.isLoggedIn) {
+        toLogin();
+        return;
+    }
+    isTabBarVisible.value = false;
+    redeemPopup.value?.open();
+};
+
+const onRedeemChange = (show) => {
+    isTabBarVisible.value = !show;
+};
+
+const onRedeemSuccess = async () => {
+    try {
+        await userStore.getUserInfo();
+    } catch (e) {}
+};
+
 const resolveMenuIconColor = (baseColor) => {
     if (!baseColor) return '#28B389';
     if (baseColor === '#6B7280') {
@@ -531,6 +560,14 @@ const sysMenus = computed(() => [
         click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
     },
     {
+        left_icon: '/static/icons/credit-card-chip.svg',
+        left_color: '#6B7280',
+        left_text: t('redeem.title'),
+        right_text: '',
+        right_icon: 'right',
+        click: openRedeemPopup,
+    },
+    {
         left_icon: '/static/icons/widgets.svg',
         left_color: '#6B7280',
         left_text: t('widgets.title'),
@@ -598,6 +635,9 @@ onShow(() => {
     const lastCheckinDate = statusStore.appStatus.lastCheckinDate;
     const today = new Date().toISOString().split('T')[0];
     hasCheckedInToday.value = lastCheckinDate === today;
+
+    // 页面切回时恢复 TabBar 状态
+    isTabBarVisible.value = true;
 });
 </script>
 

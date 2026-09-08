@@ -90,6 +90,15 @@
                     </view>
                 </view>
             </view>
+
+            <!-- 体验码兑换入口 -->
+            <view class="redeem-entry-section" @click="openRedeem">
+                <view class="redeem-entry-content">
+                    <mdi-icon path="/static/icons/credit-card-chip.svg" size="15px"
+                        :color="settingsStore.isDark ? '#9d9bf8' : '#7573f6'"></mdi-icon>
+                    <text class="redeem-entry-text">{{ t('membership.haveRedeemCode') }}</text>
+                </view>
+            </view>
         </view>
 
         <!-- 底部固定悬浮按钮 (醒目会员及用户协议提示) -->
@@ -189,6 +198,9 @@
                 </view>
             </view>
         </uni-popup>
+
+        <!-- 体验码兑换弹窗 -->
+        <popup-redeem-code ref="redeemPopup" @success="onRedeemSuccess"></popup-redeem-code>
     </view>
 </template>
 
@@ -234,6 +246,7 @@ const navBarBoxStyle = computed(() => {
 // Popups and mock states
 const checkoutPopup = ref(null);
 const sandboxPopup = ref(null);
+const redeemPopup = ref(null);
 const mockOrderNo = ref("");
 const mockCard = ref(null);
 
@@ -265,6 +278,17 @@ const openCheckout = () => {
 
 const cancelSandbox = () => {
     sandboxPopup.value?.close();
+};
+
+const openRedeem = () => {
+    redeemPopup.value?.open();
+};
+
+const onRedeemSuccess = () => {
+    userStore.getUserProfile();
+    setTimeout(() => {
+        uni.navigateBack();
+    }, 1800);
 };
 
 // Localized selector helper
@@ -963,6 +987,46 @@ const goBack = () => {
             &.is-active {
                 background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
                 border-color: #6366f1;
+            }
+        }
+    }
+}
+
+/* 体验码兑换入口 */
+.redeem-entry-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10rpx 0 40rpx 0;
+
+    .redeem-entry-content {
+        display: inline-flex;
+        align-items: center;
+        gap: 10rpx;
+        padding: 12rpx 28rpx;
+        border-radius: 40rpx;
+        background: rgba(117, 115, 246, 0.08);
+        border: 1rpx solid rgba(117, 115, 246, 0.18);
+        transition: all 0.2s ease;
+
+        .theme-dark & {
+            background: rgba(117, 115, 246, 0.15);
+            border-color: rgba(117, 115, 246, 0.3);
+        }
+
+        &:active {
+            opacity: 0.8;
+            transform: scale(0.98);
+        }
+
+        .redeem-entry-text {
+            font-size: 24rpx;
+            font-weight: 500;
+            color: #7573f6;
+            letter-spacing: 0.5rpx;
+
+            .theme-dark & {
+                color: #9d9bf8;
             }
         }
     }
