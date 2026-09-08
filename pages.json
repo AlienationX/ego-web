@@ -316,6 +316,13 @@
             }
         },
         {
+            "path": "pages/test/discover-test",
+            "style": {
+                "navigationBarTitleText": "Discover Test",
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/test/stream-test",
             "style": {
                 "navigationBarTitleText": "Test",

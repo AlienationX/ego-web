@@ -40,6 +40,7 @@ const testMenus = [
     { name: 'Subscriptions', url: '/pages/user/subscriptions' },
     { name: 'Preference Manager', url: '/pages/user/preferences' },
     { name: 'Membership', url: '/pages/member/payment' },
+    { name: 'Discover (Legacy)', url: '/pages/test/discover-test' },
     { name: 'Stream Test', url: '/pages/test/stream-test' },
     { name: 'MDI Icon Test', url: '/pages/test/mdi-icon-test' },
     { name: 'Custom Bars', url: '/pages/test/custom-bars' },
