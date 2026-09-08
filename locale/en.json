@@ -268,6 +268,8 @@
             "exitConfirm": "Are you sure you want to exit?",
             "appDesc": "Discover more beautiful wallpapers",
             "login": "Login",
+            "clickToLogin": "Sign in / Register",
+            "loginBenefits": "Sync your favorites & unlock 4K wallpapers",
             "loginRequired": "Please login to use this feature",
             "loginPromptTitle": "Continue with login",
             "loginPromptConfirm": "Login now",
@@ -645,7 +647,10 @@
         "noAdSupportHint": "Ad unlock is unavailable. Upgrade to VIP to download.",
         "vipExclusiveTitle": "VIP Exclusive Wallpaper",
         "vipExclusiveHint": "This wallpaper is exclusive to VIP members. Upgrade to unlock unlimited downloads.",
-        "openVipNow": "Upgrade to VIP Now"
+        "openVipNow": "Upgrade to VIP Now",
+        "newUserBenefitSuccess": "Newbie Perk: Ad-free download applied ({count} left)",
+        "newUserBenefitFinal": "Newbie Perk: Final ad-free download applied!",
+        "newUserFreeBadge": "Newbie Free"
     },
     "membership": {
         "title": "Membership",
@@ -1245,7 +1250,8 @@
         "vipRequiredTitle": "VIP Exclusive Feature",
         "vipRequiredHint": "Setting wallpaper directly is a VIP feature. Upgrade to VIP to enjoy unlimited access.",
         "setSuccess": "Wallpaper set successfully",
-        "setFailed": "Failed to set wallpaper, please try again"
+        "setFailed": "Failed to set wallpaper, please try again",
+        "newUserFree": "Newbie Free"
     },
     "board": {
         "boardsTitle": "Boards",

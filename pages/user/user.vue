@@ -58,40 +58,50 @@
                                 }}</text>
                             </view>
                         </view>
-
-                        <!-- VIP Banner (根据后端版本配置 pay_enabled 决定是否开启显示) -->
-                        <view v-if="appStore.versionConfig?.pay_enabled" class="vip-banner-card"
-                            :class="{ 'is-active-vip': vipInfo.isVip, 'is-near-expiry': vipInfo.isNearExpiry }"
-                            @click="toMembership">
-                            <view class="vip-banner-content">
-                                <view class="vip-banner-title-row">
-                                    <mdi-icon path="/static/icons/crown-circle.svg" size="22px"
-                                        color="#FBBF24"></mdi-icon>
-                                    <text class="vip-banner-title">
-                                        {{ vipInfo.isVip ? (locale === 'en' ? 'Ego VIP Membership' : '尊享 VIP 会员') :
-                                        t('membership.title') }}
-                                    </text>
-                                </view>
-                                <text class="vip-banner-desc">{{ vipInfo.desc }}</text>
-                            </view>
-                            <view class="vip-action-pill">
-                                <text class="action-text">{{ vipInfo.actionText }}</text>
-                                <uni-icons type="right" size="14" color="#FBBF24"></uni-icons>
-                            </view>
-                        </view>
                     </template>
 
-                    <view v-else class="not-logged-in-content">
-                        <view class="avatar">
-                            <image src="/static/logo.svg" mode="aspectFill"></image>
+                    <view v-else class="user-content user-content--guest" @click="toLogin">
+                        <view class="avatar avatar--guest">
+                            <image src="/static/logo.svg" mode="aspectFit"></image>
                             <view class="avatar-ring"></view>
-                            <view class="avatar-img-wrap">
-                                <image src="/static/logo.svg" mode="aspectFill"></image>
+                        </view>
+
+                        <view class="user-details">
+                            <view class="details-top">
+                                <view class="name-row">
+                                    <text class="name guest-name">{{ t('user.profile.clickToLogin') }}</text>
+                                </view>
+                            </view>
+
+                            <view class="user-description guest-desc">
+                                {{ t('user.profile.loginBenefits') }}
                             </view>
                         </view>
-                        <view class="app-name">{{ $t('common.appName') }}</view>
-                        <view class="app-desc">{{ t('user.profile.appDesc') }}</view>
-                        <button class="login-btn" @click="toLogin">{{ t('user.profile.login') }}</button>
+
+                        <view class="guest-arrow">
+                            <uni-icons type="right" size="18" :color="settingsStore.isDark ? 'rgba(255,255,255,0.38)' : 'rgba(0,0,0,0.28)'"></uni-icons>
+                        </view>
+                    </view>
+
+                    <!-- VIP Banner (根据后端版本配置 pay_enabled 决定是否开启显示，未登录状态同样展示) -->
+                    <view v-if="appStore.versionConfig?.pay_enabled" class="vip-banner-card"
+                        :class="{ 'is-active-vip': vipInfo.isVip, 'is-near-expiry': vipInfo.isNearExpiry }"
+                        @click="toMembership">
+                        <view class="vip-banner-content">
+                            <view class="vip-banner-title-row">
+                                <mdi-icon path="/static/icons/crown-circle.svg" size="22px"
+                                    color="#FBBF24"></mdi-icon>
+                                <text class="vip-banner-title">
+                                    {{ vipInfo.isVip ? (locale === 'en' ? 'Ego VIP Membership' : '尊享 VIP 会员') :
+                                    (locale === 'en' ? 'Ego VIP Membership' : '尊享 VIP 会员') }}
+                                </text>
+                            </view>
+                            <text class="vip-banner-desc">{{ vipInfo.desc }}</text>
+                        </view>
+                        <view class="vip-action-pill">
+                            <text class="action-text">{{ vipInfo.actionText }}</text>
+                            <uni-icons type="right" size="14" color="#FBBF24"></uni-icons>
+                        </view>
                     </view>
                 </view>
 
@@ -570,20 +580,20 @@ const sysMenus = computed(() => [
         click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
     },
     {
-        left_icon: '/static/icons/credit-card-chip.svg',
-        left_color: '#6B7280',
-        left_text: t('redeem.title'),
-        right_text: '',
-        right_icon: 'right',
-        click: openRedeemPopup,
-    },
-    {
         left_icon: '/static/icons/widgets.svg',
         left_color: '#6B7280',
         left_text: t('widgets.title'),
         right_text: '',
         right_icon: 'right',
         click: () => uni.navigateTo({ url: '/pages/settings/widgets' }),
+    },
+    {
+        left_icon: '/static/icons/credit-card-chip.svg',
+        left_color: '#6B7280',
+        left_text: t('redeem.title'),
+        right_text: '',
+        right_icon: 'right',
+        click: openRedeemPopup,
     },
     {
         left_icon: '/static/icons/help-circle.svg',
@@ -1040,56 +1050,68 @@ onShow(() => {
             }
         }
 
-        .not-logged-in-content {
-            display: flex;
-            flex-direction: column;
+        .user-content--guest {
             align-items: center;
-            padding-top: 40rpx;
-        }
-
-        .app-name {
-            font-size: 34rpx;
-            color: var(--text-primary);
-            font-weight: 700;
-            letter-spacing: -0.2rpx;
-            padding-top: 20rpx;
-            padding-bottom: 10rpx;
-        }
-
-        .app-desc {
-            font-size: 24rpx;
-            color: var(--text-tertiary);
-            margin-bottom: 28rpx;
-        }
-
-        .login-btn {
-            margin-bottom: 28rpx;
-            width: 320rpx;
-            height: 76rpx;
-            background: var(--text-primary);
-            color: var(--page-background-secondary);
-            font-size: 26rpx;
-            font-weight: 700;
-            border-radius: 999rpx;
-            border: 1rpx solid var(--panel-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0.4rpx;
-            box-shadow: none;
-            transition:
-                transform 0.28s ease,
-                background-color 0.28s ease,
-                color 0.28s ease;
+            padding: 8rpx 0;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
 
             &:active {
-                background: #f7f9fc;
-                color: #111827;
-                transform: scale(0.97);
+                transform: scale(0.985);
+                opacity: 0.92;
             }
 
-            &::after {
-                border: none;
+            .avatar--guest {
+                background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 18rpx;
+                box-sizing: border-box;
+
+                image {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                .theme-light & {
+                    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+                    border-color: rgba(59, 130, 246, 0.2);
+                }
+            }
+
+            .guest-name {
+                font-size: 34rpx;
+                font-weight: 700;
+                color: var(--text-primary);
+                letter-spacing: -0.3rpx;
+            }
+
+            .guest-desc {
+                font-size: 22rpx;
+                color: var(--text-tertiary);
+                margin-top: 6rpx;
+                margin-bottom: 0;
+                line-height: 1.4;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .guest-arrow {
+                flex-shrink: 0;
+                margin-left: auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding-right: 6rpx;
+                opacity: 0.7;
+                transition: transform 0.2s ease, opacity 0.2s ease;
+            }
+
+            &:active .guest-arrow {
+                transform: translateX(4rpx);
+                opacity: 1;
             }
         }
     }

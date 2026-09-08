@@ -61,8 +61,8 @@
                         <text class="wallpaper-sheet__option-title">{{ t('wallpaper.saveOnly') }}</text>
                         <text class="wallpaper-sheet__option-desc">{{ t('wallpaper.saveOnlyDesc') }}</text>
                     </view>
-                    <view class="wallpaper-sheet__free-badge">
-                        <text class="wallpaper-sheet__free-text">{{ t('common.free') }}</text>
+                    <view class="wallpaper-sheet__free-badge" :class="{ 'is-newbie': isNewbieBenefit }">
+                        <text class="wallpaper-sheet__free-text">{{ isNewbieBenefit ? (t('wallpaper.newUserFree') || '新人免广') : t('common.free') }}</text>
                     </view>
                 </view>
             </view>
@@ -76,6 +76,7 @@ import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { setAndroidWallpaper } from '@/common/core.js';
+import { isNewUserFreeBenefitAvailable } from '@/utils/benefit.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -86,6 +87,7 @@ const sheetVisible = ref(false);
 const picUrl = ref('');
 const currentItem = ref(null);
 
+const isNewbieBenefit = computed(() => !userStore.isVip && isNewUserFreeBenefitAvailable());
 const themeClass = computed(() => settingsStore.isDark ? 'theme-dark' : 'theme-light');
 
 const open = (url, item = null) => {
@@ -404,6 +406,11 @@ defineExpose({ open, close });
     border-radius: 10rpx;
     padding: 6rpx 14rpx;
     flex-shrink: 0;
+
+    &.is-newbie {
+        background: linear-gradient(135deg, #06b6d4 0%, #0d9488 100%);
+        box-shadow: 0 2rpx 10rpx rgba(13, 148, 136, 0.35);
+    }
 }
 
 .wallpaper-sheet__free-text {

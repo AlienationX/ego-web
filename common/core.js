@@ -1,6 +1,6 @@
 import { t } from '@/utils/i18n.js';
 
-export const downloadPic = (picurl) => {
+export const downloadPic = (picurl, customSuccessTip = '') => {
     uni.showLoading({
         title: t('common.downloading'),
         mask: true,
@@ -13,8 +13,9 @@ export const downloadPic = (picurl) => {
                 filePath: res.path,
                 success: () => {
                     uni.showToast({
-                        title: t('common.saveSuccessful'),
+                        title: (typeof customSuccessTip === 'string' && customSuccessTip) ? customSuccessTip : t('common.saveSuccessful'),
                         icon: 'none',
+                        duration: 2500,
                     });
                 },
                 fail: (err) => {

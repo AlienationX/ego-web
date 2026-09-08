@@ -659,6 +659,7 @@ import { useStatusStore } from '@/stores/status.js';
 import { useAdIntersititial } from '@/hooks/useAd.js';
 import { formatPreviewDate, formatFileSize, handlePicUrl } from '@/utils/common.js';
 import { downloadPic } from '@/common/core.js';
+import { isNewUserFreeBenefitAvailable, consumeNewUserFreeDownload } from '@/utils/benefit.js';
 import PopupBoardSelect from '@/components/popup-board-select/popup-board-select.vue';
 import AvatarPreviewOverlay from '@/components/avatar-preview-overlay/avatar-preview-overlay.vue';
 import DesktopPreviewOverlay from '@/components/desktop-preview-overlay/desktop-preview-overlay.vue';
@@ -1557,6 +1558,17 @@ const clickDownload = async () => {
     // 0. 最高优先级：VIP 用户无视锁与广告，直接放行下载/设置
     if (userStore.isVip) {
         downloadPic(picurl);
+        incrementDownloads(currentInfo.value?.id);
+        return;
+    }
+
+    // 0.1 新人专属福利：前 3 次下载免看广告特权，直接极速下载保存
+    if (isNewUserFreeBenefitAvailable()) {
+        const remainingAfter = consumeNewUserFreeDownload();
+        const tip = remainingAfter > 0
+            ? tp('previewPage.newUserBenefitSuccess', { count: remainingAfter })
+            : t('previewPage.newUserBenefitFinal');
+        downloadPic(picurl, tip);
         incrementDownloads(currentInfo.value?.id);
         return;
     }

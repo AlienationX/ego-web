@@ -360,11 +360,9 @@ const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
 const copyrightText = computed(() => tp('about.copyright', { year: new Date().getFullYear() }));
 
-// ── 缓存大小计算 ──
-const cacheSizeText = ref('0 KB');
-
+// ── 缓存大小工具函数（按需计算，不在页面常驻展示，仅在清理后提示释放量） ──
 const formatBytes = (bytes) => {
-    if (!bytes || bytes <= 0) return '0 KB';
+    if (!bytes || bytes <= 0) return '';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -372,32 +370,26 @@ const formatBytes = (bytes) => {
     return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
 };
 
-const calcCacheSize = () => {
+const getCacheSizeBeforeClear = async () => {
     // #ifdef APP-PLUS
-    if (typeof plus !== 'undefined' && plus.cache) {
-        plus.cache.calculate((size) => {
-            cacheSizeText.value = formatBytes(size);
+    if (typeof plus !== 'undefined' && plus.cache && plus.cache.calculate) {
+        return new Promise((resolve) => {
+            plus.cache.calculate((size) => {
+                resolve(size > 0 ? formatBytes(size) : '');
+            });
         });
-        return;
     }
     // #endif
 
     try {
         const res = uni.getStorageInfoSync();
         const currentKB = res.currentSize || 0;
-        if (currentKB >= 1024) {
-            cacheSizeText.value = (currentKB / 1024).toFixed(2) + ' MB';
-        } else {
-            cacheSizeText.value = currentKB + ' KB';
+        if (currentKB > 0) {
+            return currentKB >= 1024 ? (currentKB / 1024).toFixed(2) + ' MB' : currentKB + ' KB';
         }
-    } catch (e) {
-        cacheSizeText.value = '0 KB';
-    }
+    } catch (e) {}
+    return '';
 };
-
-onLoad(() => {
-    calcCacheSize();
-});
 
 const navDialog = ref(null);
 const dialogState = ref({
@@ -716,7 +708,7 @@ const sections = computed(() => {
                     key: 'clear_cache',
                     icon: '/static/icons/delete-empty.svg',
                     label: t('settings.items.clearCache.label'),
-                    sublabel: `${t('settings.items.clearCache.sublabel')} (${String(locale.value || '').startsWith('en') ? 'Cache size' : '缓存大小'}: ${cacheSizeText.value})`,
+                    sublabel: t('settings.items.clearCache.sublabel'),
                     action: clearCache,
                 },
             ],
@@ -982,28 +974,64 @@ function setPreviewType(type) {
     closePreviewTypePopup();
 }
 
+// 清理缓存白名单：严禁清除核心配置、登录凭据与新人福利标记
+const PRESERVED_STORAGE_KEYS = new Set([
+    'user',                          // Pinia 用户状态与凭据
+    'settings',                      // Pinia 系统全局配置
+    'deviceId',                      // 设备唯一识别 ID
+    'version_config',                // 版本配置
+    'theme',                         // 深色/浅色主题设置
+    'lang',                          // 语言设置
+    'new_user_free_downloads_used',  // 新用户前3次免广告下载计数（防止误清变回新人）
+]);
+
 async function clearCache() {
     uni.showLoading({
-        title: t('user.settings.clearing'),
+        title: t('user.settings.clearing') || '清理中...',
         mask: true,
     });
     try {
-        // 增加 1 秒延时展示转圈动画，避免瞬间完成太突兀
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        // 清理前获取当前缓存大小，以便清理后提示具体释放量
+        const beforeSizeText = await getCacheSizeBeforeClear();
 
+        // 适当微延时平滑视觉过渡
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
+        // 1. App 端：清理原生磁盘与网络图片/Webview文件缓存
         // #ifdef APP-PLUS
-        if (typeof plus !== 'undefined' && plus.cache) {
-            plus.cache.clear(() => { });
+        if (typeof plus !== 'undefined' && plus.cache && plus.cache.clear) {
+            await new Promise((resolve) => {
+                plus.cache.clear(() => resolve());
+            });
         }
         // #endif
 
-        uni.clearStorageSync();
-        calcCacheSize();
+        // 2. 本地 Storage 针对性白名单清理（绝不使用 uni.clearStorageSync() 破坏用户状态）
+        try {
+            const { keys } = uni.getStorageInfoSync();
+            if (Array.isArray(keys)) {
+                keys.forEach((k) => {
+                    if (!PRESERVED_STORAGE_KEYS.has(k)) {
+                        uni.removeStorageSync(k);
+                    }
+                });
+            }
+        } catch (storageErr) {
+            console.warn('Clear storage keys error:', storageErr);
+        }
 
         uni.hideLoading();
+
+        // 3. 提示清理结果及释放的空间量
+        const isEn = String(locale.value || '').startsWith('en');
+        const successTip = beforeSizeText
+            ? (isEn ? `Cleared ${beforeSizeText} of cache` : `清理完成，已释放 ${beforeSizeText} 缓存`)
+            : (isEn ? 'Cache is already optimal' : '清理完成，缓存已处于最佳状态');
+
         uni.showToast({
-            title: t('user.settings.clearSuccess'),
+            title: successTip,
             icon: 'none',
+            duration: 2500,
         });
     } catch (error) {
         uni.hideLoading();
