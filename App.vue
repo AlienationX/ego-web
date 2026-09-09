@@ -22,23 +22,6 @@ onLaunch(() => {
     } catch (e) {
         console.warn("initAutoRotate error:", e);
     }
-
-    // 预加载图标，避免首屏图标闪烁或空白（防止 FOUT 现象）
-    try {
-        uni.loadFontFace({
-            family: 'appicons',
-            source: 'url("/static/iconfont/appicons.ttf")',
-            global: true,
-            success() {
-                console.log('appicons font loaded successfully');
-            },
-            fail(e) {
-                console.warn('appicons loadFontFace error:', e);
-            }
-        });
-    } catch (e) {
-        console.warn('loadFontFace error:', e);
-    }
     // #endif
 
     // 检查是否已看过引导页。

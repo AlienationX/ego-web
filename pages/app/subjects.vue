@@ -1,113 +1,135 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- StatusBar Spacer -->
-        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
+        <!-- 一体化沉浸式渐变毛玻璃遮罩层 (覆盖状态栏+导航栏，向下渐变羽化消散) -->
+        <view
+            class="glass-header-backdrop"
+            :class="{ 'is-scrolled': isScrolled }"
+            :style="{
+                height: `${statusBarHeight + titleBarHeight + 24}px`,
+                '--status-bar-height': `${statusBarHeight}px`,
+                '--title-bar-height': `${titleBarHeight}px`
+            }"
+        ></view>
 
-        <!-- Custom Navbar -->
-        <view class="navbar" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
-            <view class="navbar-inner">
+        <!-- 屏幕顶部固定居中小标题（仅在滚动后在渐变毛玻璃中优雅浮现，保留红框标题动效） -->
+        <view
+            class="subjects-navbar"
+            :style="{
+                top: `${statusBarHeight}px`,
+                height: `${titleBarHeight}px`
+            }"
+        >
+            <text class="navbar-title" :class="{ 'is-visible': isScrolled }">
+                {{ t('subjects.title') }}
+            </text>
+        </view>
+
+        <!-- 页面内容区 (采用原生 Page 页面滚动，支持原生手势与状态栏回顶) -->
+        <view
+            class="subjects-container"
+            :style="{ paddingTop: `${statusBarHeight + 8}px` }"
+        >
+            <!-- 页面内顶部返回按钮 (固定在页面上，随页面滚动) -->
+            <view class="page-topbar">
                 <view class="back-btn" @click="goBack">
                     <mdi-icon
                         path="/static/icons/arrow-left.svg"
                         size="18px"
-                        :color="settingsStore.isDark ? '#e5e7eb' : '#374151'"
+                        :color="settingsStore.isDark ? '#f4f8ff' : '#1f2937'"
                     ></mdi-icon>
                 </view>
-                <text class="navbar-title">{{ t('index.subjectRecommend') }}</text>
-                <view class="navbar-placeholder"></view>
+            </view>
+
+            <!-- Editorial 杂志感大标题区 -->
+            <view class="hero-header">
+                <view class="hero-header__badge">
+                    <text class="hero-header__badge-dot">✦</text>
+                    <text class="hero-header__badge-text">{{ t('subjects.badge') }}</text>
+                </view>
+                <text class="hero-header__title">{{ t('subjects.title') }}</text>
+                <text class="hero-header__subtitle">{{ t('subjects.subtitle') }}</text>
+            </view>
+
+            <!-- Skeleton Loader -->
+            <view v-if="isLoading && !subjectsList.length" class="skeleton-list">
+                <view v-for="i in 4" :key="i" class="skeleton-card">
+                    <view class="skeleton-glow"></view>
+                </view>
+            </view>
+
+            <!-- Empty State -->
+            <view v-else-if="!subjectsList.length" class="empty-state">
+                <uni-icons type="image" size="64" color="var(--text-tertiary)"></uni-icons>
+                <text class="empty-title">{{ t('subjects.emptyTitle') }}</text>
+                <text class="empty-desc">{{ t('subjects.emptyDesc') }}</text>
+            </view>
+
+            <!-- Subject Cards List (卡片序列式依次从右向左滑入) -->
+            <view v-else class="subjects-list">
+                <view
+                    v-for="(item, index) in subjectsList"
+                    :key="item.id"
+                    class="subject-card"
+                    hover-class="subject-card--active"
+                    :hover-stay-time="150"
+                    :style="{ animationDelay: `${index < 8 ? (index * 0.34 + 0.1) : 0}s` }"
+                    @click="goDetail(item)"
+                >
+                    <view class="subject-card__header">
+                        <view class="subject-card__badge-row">
+                            <view class="subject-card__badges-group">
+                                <view class="subject-card__badge" v-if="item.is_locked">
+                                    <uni-icons type="vip-filled" size="10" color="#fbbf24"></uni-icons>
+                                    <text class="badge-text">PREMIUM</text>
+                                </view>
+                                <view class="subject-card__badge subject-card__badge--neutral" v-else-if="item.tags">
+                                    <text class="badge-text">{{ item.tags.split(',')[0] }}</text>
+                                </view>
+                            </view>
+                            <view class="subject-card__meta">
+                                <text class="meta-item">{{ item.wall_count || 0 }} {{ isEn ? 'Walls' : t('subjects.walls') }}</text>
+                                <text class="meta-separator">·</text>
+                                <text class="meta-item">{{ formatUpdateDate(item.updated_at) }}</text>
+                            </view>
+                        </view>
+                        
+                        <text class="subject-card__title">
+                            {{ isEn ? (item.name_en || item.name) : item.name }}
+                        </text>
+                        
+                        <text class="subject-card__desc">
+                            {{ isEn ? (item.content_en || item.content) : item.content }}
+                        </text>
+                    </view>
+
+                    <!-- Wallpaper Previews Row -->
+                    <view class="subject-card__previews" v-if="item.preview_walls && item.preview_walls.length">
+                        <view class="preview-item" v-for="(img, imgIdx) in item.preview_walls" :key="imgIdx">
+                            <image class="preview-img" :src="img.includes('.jpg') ? img.replace('.jpg', '_small.webp') : img" mode="aspectFill" lazy-load></image>
+                        </view>
+                    </view>
+                    <!-- Fallback mesh overlay if empty -->
+                    <view class="subject-card__previews-placeholder" v-else>
+                        <view class="placeholder-mesh"></view>
+                    </view>
+                </view>
+
+                <!-- Loading / No More Indicator -->
+                <view class="loading-more">
+                    <text v-if="isLoading">{{ t('common.loading') }}</text>
+                    <text v-else-if="noMore" class="no-more-text">{{ t('subjects.noMore') }}</text>
+                </view>
             </view>
         </view>
 
-        <!-- List Scroll Area -->
-        <scroll-view
-            show-scrollbar="false"
-            scroll-y
-            class="scroll-area"
-            :style="{ paddingTop: `${statusBarHeight + titleBarHeight}px` }"
-            refresher-enabled
-            :refresher-triggered="isRefreshing"
-            @refresherrefresh="onRefresh"
-            @scrolltolower="onLoadMore"
-        >
-            <view class="subjects-container">
-                <!-- Skeleton Loader -->
-                <view v-if="isLoading && !subjectsList.length" class="skeleton-list">
-                    <view v-for="i in 4" :key="i" class="skeleton-card">
-                        <view class="skeleton-glow"></view>
-                    </view>
-                </view>
-
-                <!-- Empty State -->
-                <view v-else-if="!subjectsList.length" class="empty-state">
-                    <uni-icons type="image" size="64" color="var(--text-tertiary)"></uni-icons>
-                    <text class="empty-title">暂无专题合集</text>
-                    <text class="empty-desc">敬请期待，更多精美策划合集正在路上！</text>
-                </view>
-
-                <!-- Subject Cards List -->
-                <view v-else class="subjects-list">
-                    <view
-                        v-for="(item, index) in subjectsList"
-                        :key="item.id"
-                        class="subject-card"
-                        hover-class="subject-card--active"
-                        :hover-stay-time="150"
-                        :style="{ animationDelay: `${(index % 6) * 0.08}s` }"
-                        @click="goDetail(item)"
-                    >
-                        <view class="subject-card__header">
-                            <view class="subject-card__badge-row">
-                                <view class="subject-card__badges-group">
-                                    <view class="subject-card__badge" v-if="item.is_locked">
-                                        <uni-icons type="vip-filled" size="10" color="#fbbf24"></uni-icons>
-                                        <text class="badge-text">PREMIUM</text>
-                                    </view>
-                                    <view class="subject-card__badge subject-card__badge--neutral" v-else-if="item.tags">
-                                        <text class="badge-text">{{ item.tags.split(',')[0] }}</text>
-                                    </view>
-                                </view>
-                                <view class="subject-card__meta">
-                                    <text class="meta-item">{{ item.wall_count || 0 }} {{ isEn ? 'Walls' : '张壁纸' }}</text>
-                                    <text class="meta-separator">·</text>
-                                    <text class="meta-item">{{ formatUpdateDate(item.updated_at) }}</text>
-                                </view>
-                            </view>
-                            
-                            <text class="subject-card__title">
-                                {{ isEn ? (item.name_en || item.name) : item.name }}
-                            </text>
-                            
-                            <text class="subject-card__desc">
-                                {{ isEn ? (item.content_en || item.content) : item.content }}
-                            </text>
-                        </view>
-
-                        <!-- Wallpaper Previews Row -->
-                        <view class="subject-card__previews" v-if="item.preview_walls && item.preview_walls.length">
-                            <view class="preview-item" v-for="(img, imgIdx) in item.preview_walls" :key="imgIdx">
-                                <image class="preview-img" :src="img.includes('.jpg') ? img.replace('.jpg', '_small.webp') : img" mode="aspectFill" lazy-load></image>
-                            </view>
-                        </view>
-                        <!-- Fallback mesh overlay if empty -->
-                        <view class="subject-card__previews-placeholder" v-else>
-                            <view class="placeholder-mesh"></view>
-                        </view>
-                    </view>
-
-                    <!-- Loading / No More Indicator -->
-                    <view class="loading-more">
-                        <text v-if="isLoading">{{ t('common.loading') }}</text>
-                        <text v-else-if="noMore" class="no-more-text">—— 没有更多专题了 ——</text>
-                    </view>
-                </view>
-            </view>
-        </scroll-view>
+        <!-- 底部向上返回顶部按钮 (下滑半屏后浮现) -->
+        <fab-back-top :show="showScrollTop" :embedded="false" @click="scrollToTop" />
     </view>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow, onPageScroll, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetSubjects } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -120,6 +142,45 @@ const isEn = computed(() => locale.value === 'en');
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
+const isScrolled = ref(false);
+
+const showScrollTop = ref(false);
+const currentScrollTop = ref(0);
+
+// 原生页面滚动监听：控制毛玻璃小标题显隐及回到顶部浮标
+onPageScroll((e) => {
+    const top = Number(e?.scrollTop || 0);
+    isScrolled.value = top > 16;
+    currentScrollTop.value = top;
+
+    const windowHeight = uni.getWindowInfo().windowHeight || 0;
+    const nextVisible = top > windowHeight / 2;
+    if (showScrollTop.value !== nextVisible) {
+        showScrollTop.value = nextVisible;
+    }
+});
+
+// 原生页面触底加载
+onReachBottom(() => {
+    onLoadMore();
+});
+
+// 原生下拉刷新
+onPullDownRefresh(async () => {
+    isRefreshing.value = true;
+    await fetchSubjects(false);
+    uni.stopPullDownRefresh();
+});
+
+// 原生平滑滚动回到顶部
+const scrollToTop = () => {
+    showScrollTop.value = false;
+    currentScrollTop.value = 0;
+    uni.pageScrollTo({
+        scrollTop: 0,
+        duration: 350,
+    });
+};
 
 const subjectsList = ref([]);
 const isLoading = ref(false);
@@ -188,6 +249,13 @@ const goDetail = (item) => {
 onLoad(() => {
     fetchSubjects();
 });
+
+onShow(() => {
+    const windowHeight = uni.getWindowInfo().windowHeight || 0;
+    if (currentScrollTop.value > windowHeight / 2) {
+        showScrollTop.value = true;
+    }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -197,69 +265,204 @@ onLoad(() => {
     position: relative;
 }
 
-.status-bar-bg {
+// ── 一体化沉浸式渐变毛玻璃遮罩层 ──
+.glass-header-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background: var(--page-background);
-    z-index: 100;
+    z-index: 900;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.32s cubic-bezier(0.25, 1, 0.5, 1);
+
+    // 核心毛玻璃模糊与饱和度增益
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+
+    // 向下渐变羽化遮罩：消除生硬截断，实现电影级柔和消隐
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.96) calc(var(--status-bar-height, 24px) + 16px),
+        rgba(0, 0, 0, 0.45) calc(var(--status-bar-height, 24px) + var(--title-bar-height, 44px) + 6px),
+        rgba(0, 0, 0, 0) 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 1) 0%,
+        rgba(0, 0, 0, 0.96) calc(var(--status-bar-height, 24px) + 16px),
+        rgba(0, 0, 0, 0.45) calc(var(--status-bar-height, 24px) + var(--title-bar-height, 44px) + 6px),
+        rgba(0, 0, 0, 0) 100%
+    );
+
+    &.is-scrolled {
+        opacity: 1;
+    }
+
+    .theme-light & {
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.88) 0%,
+            rgba(255, 255, 255, 0.62) calc(var(--status-bar-height, 24px) + 20px),
+            rgba(255, 255, 255, 0.22) calc(var(--status-bar-height, 24px) + var(--title-bar-height, 44px)),
+            rgba(255, 255, 255, 0) 100%
+        );
+    }
+
+    .theme-dark & {
+        background: linear-gradient(
+            to bottom,
+            rgba(24, 24, 24, 0.88) 0%,
+            rgba(24, 24, 24, 0.65) calc(var(--status-bar-height, 24px) + 20px),
+            rgba(24, 24, 24, 0.22) calc(var(--status-bar-height, 24px) + var(--title-bar-height, 44px)),
+            rgba(24, 24, 24, 0) 100%
+        );
+    }
 }
 
-.navbar {
+// ── 屏幕顶部固定悬浮栏 (居中小标题，随滚动淡入淡出) ──
+.subjects-navbar {
     position: fixed;
     left: 0;
     width: 100%;
-    background: var(--page-background);
-    z-index: 99;
-}
-
-.navbar-inner {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 30rpx;
-}
-
-.back-btn {
-    width: 60rpx;
-    height: 60rpx;
+    z-index: 950;
+    pointer-events: none;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
 }
 
 .navbar-title {
     font-size: 32rpx;
     font-weight: 700;
     color: var(--text-primary);
+    opacity: 0;
+    transform: translateY(12rpx);
+    transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+    pointer-events: none;
+
+    &.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.navbar-placeholder {
-    width: 60rpx;
+// ── 页面内顶部栏 (返回按钮随页面滚动) ──
+.page-topbar {
+    height: 80rpx;
+    display: flex;
+    align-items: center;
+    margin-bottom: 8rpx;
 }
 
-.scroll-area {
-    width: 100%;
-    height: 100vh;
-    box-sizing: border-box;
+.back-btn {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 999rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+
+    .theme-light & {
+        background: rgba(255, 255, 255, 0.72);
+        border: 1rpx solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+        backdrop-filter: blur(20rpx);
+        -webkit-backdrop-filter: blur(20rpx);
+    }
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1rpx solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(20rpx);
+        -webkit-backdrop-filter: blur(20rpx);
+    }
+
+    &:active {
+        transform: scale(0.92);
+        opacity: 0.85;
+    }
+}
+
+// ── 杂志感大标题区 (Editorial Hero Header) ──
+.hero-header {
+    padding: 12rpx 6rpx 36rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12rpx;
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8rpx;
+        padding: 8rpx 20rpx;
+        border-radius: 999rpx;
+        font-size: 20rpx;
+        font-weight: 800;
+        letter-spacing: 1.5rpx;
+        text-transform: uppercase;
+
+        .theme-light & {
+            background: rgba(40, 179, 137, 0.08);
+            border: 1rpx solid rgba(40, 179, 137, 0.18);
+            color: #1ea078;
+        }
+
+        .theme-dark & {
+            background: rgba(125, 247, 196, 0.1);
+            border: 1rpx solid rgba(125, 247, 196, 0.2);
+            color: var(--accent-highlight);
+        }
+    }
+
+    &__badge-dot {
+        font-size: 18rpx;
+        line-height: 1;
+    }
+
+    &__badge-text {
+        line-height: 1;
+    }
+
+    &__title {
+        font-size: 54rpx;
+        font-weight: 900;
+        color: var(--text-primary);
+        line-height: 1.2;
+        letter-spacing: -1rpx;
+    }
+
+    &__subtitle {
+        font-size: 26rpx;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        max-width: 620rpx;
+    }
 }
 
 .subjects-container {
-    padding: 30rpx;
-    padding-bottom: 60rpx;
+    padding: 20rpx;
+    padding-bottom: calc(60rpx + env(safe-area-inset-bottom));
 }
 
-@keyframes subjectCardEntrance {
-    from {
+// ── 单张卡片依次从右向左滑入关键帧 (舒缓从容) ──
+@keyframes subjectCardSequentialSlideIn {
+    0% {
         opacity: 0;
-        transform: translateY(32rpx);
+        transform: translate3d(180rpx, -16rpx, 0) scale(0.95);
     }
-    to {
+    60% {
+        opacity: 0.88;
+    }
+    100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: translate3d(0, 0, 0) scale(1);
     }
 }
 
@@ -277,7 +480,7 @@ onLoad(() => {
     box-shadow: 0 12rpx 36rpx var(--shadow-color);
     box-sizing: border-box;
     transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s ease;
-    animation: subjectCardEntrance 0.5s cubic-bezier(0.25, 1, 0.5, 1) both;
+    animation: subjectCardSequentialSlideIn 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -462,7 +665,7 @@ onLoad(() => {
 }
 
 .loading-more {
-    padding: 30rpx 0;
+    padding-top: 30rpx;
     display: flex;
     align-items: center;
     justify-content: center;

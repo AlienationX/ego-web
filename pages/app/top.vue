@@ -1,34 +1,18 @@
 <template>
-    <view class="top10-page" :class="[settingsStore.isDark ? 'theme-dark' : 'theme-light', { 'is-embedded': embedded }]">
-        <view v-if="!embedded" class="top10-status" :style="{ height: `${statusBarHeight}px` }"></view>
+    <view class="top10-page" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <!-- 沉浸式渐变毛玻璃状态栏 -->
+        <glass-status-bar
+            :is-scrolled="isScrolled"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-status-bar>
 
-        <scroll-view scroll-y class="top10-scroll" :style="{ height: scrollHeight }" @scroll="handleScroll" show-scrollbar="false">
-            <!-- Spacer for embedded titlebar -->
-            <view v-if="embedded" :style="{ height: navBarHeight + 'px' }"></view>
-            <view class="top10-wrap" :style="{ paddingBottom: top10WrapPaddingBottom }">
-                <view v-if="!embedded" class="top10-header">
+        <view class="top10-wrap" :style="{ paddingTop: top10WrapPaddingTop, paddingBottom: top10WrapPaddingBottom }">
+                <view class="top10-header">
                     <view class="top10-header__left">
                         <view class="top10-header__back" @click="goBack">
                             <uni-icons type="back" size="20" :color="settingsStore.isDark ? '#f8fafc' : '#374151'"></uni-icons>
                         </view>
                         <view class="top10-header__title">{{ $t('top10.title') }}</view>
-                    </view>
-                </view>
-
-                <view class="metric-switch">
-                    <view
-                        class="metric-switch__item"
-                        :class="{ 'is-active': activeMetric === 'views' }"
-                        @click="switchMetric('views')"
-                    >
-                        {{ $t('top10.tabs.views') }}
-                    </view>
-                    <view
-                        class="metric-switch__item"
-                        :class="{ 'is-active': activeMetric === 'downloads' }"
-                        @click="switchMetric('downloads')"
-                    >
-                        {{ $t('top10.tabs.downloads') }}
                     </view>
                 </view>
 
@@ -61,7 +45,12 @@
 
                 <template v-else-if="rankedList.length">
                     <view class="hero-section">
-                        <view class="hero-card hero-card--first" @click="goPreview(rankedList[0].id)">
+                        <view
+                            class="hero-card hero-card--first"
+                            :key="`${activeMetric}-${rankedList[0].id}`"
+                            :style="{ animationDelay: '0.16s' }"
+                            @click="goPreview(rankedList[0].id)"
+                        >
                             <image
                                 class="hero-card__image"
                                 :src="rankedList[0].mediumPicurl || rankedList[0].picurl"
@@ -92,8 +81,9 @@
                         <view class="hero-grid" v-if="rankedList.length > 1">
                             <view
                                 v-for="(item, idx) in rankedList.slice(1, 3)"
-                                :key="item.id"
+                                :key="`${activeMetric}-${item.id}`"
                                 class="hero-card hero-card--secondary"
+                                :style="{ animationDelay: `${0.38 + idx * 0.18}s` }"
                                 @click="goPreview(item.id)"
                             >
                                 <image
@@ -128,8 +118,9 @@
                         <view class="rank-list">
                             <view
                                 v-for="(item, idx) in rankedList.slice(3)"
-                                :key="item.id"
+                                :key="`${activeMetric}-${item.id}`"
                                 class="rank-item"
+                                :style="{ animationDelay: `${0.74 + idx * 0.12}s` }"
                                 @click="goPreview(item.id)"
                             >
                                 <view class="rank-item__media">
@@ -164,30 +155,84 @@
                     <view class="top10-empty__desc">{{ $t('top10.emptyDesc') }}</view>
                 </view>
             </view>
-        </scroll-view>
 
-        <custom-ad-banner v-if="!embedded" @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
+
+        <!-- 底部毛玻璃悬浮灵动岛 (指标切换 + 条件回顶) -->
+        <view class="floating-dock" :style="{ bottom: dockBottomStyle }">
+            <view class="floating-capsule">
+                <!-- 指标切换两按钮 -->
+                <view class="floating-capsule__tabs">
+                    <view
+                        class="floating-capsule__tab"
+                        :class="{ 'is-active': activeMetric === 'views' }"
+                        @click="switchMetric('views')"
+                    >
+                        <mdi-icon
+                            path="/static/icons/fire.svg"
+                            size="14"
+                            :color="activeMetric === 'views' ? '#ffffff' : (settingsStore.isDark ? '#94a3b8' : '#64748b')"
+                        ></mdi-icon>
+                        <text class="floating-capsule__label">{{ $t('top10.tabs.views') }}</text>
+                    </view>
+                    <view
+                        class="floating-capsule__tab"
+                        :class="{ 'is-active': activeMetric === 'downloads' }"
+                        @click="switchMetric('downloads')"
+                    >
+                        <mdi-icon
+                            path="/static/icons/download.svg"
+                            size="14"
+                            :color="activeMetric === 'downloads' ? '#ffffff' : (settingsStore.isDark ? '#94a3b8' : '#64748b')"
+                        ></mdi-icon>
+                        <text class="floating-capsule__label">{{ $t('top10.tabs.downloads') }}</text>
+                    </view>
+                </view>
+
+                <!-- 回到顶部动态展开区 (下滑时优雅淡入展开) -->
+                <view
+                    class="floating-capsule__action"
+                    :class="{ 'is-visible': showScrollTop }"
+                    @click="scrollToTop"
+                >
+                    <view class="floating-capsule__divider"></view>
+                    <view class="floating-capsule__btn-top">
+                        <uni-icons
+                            type="arrow-up"
+                            size="16"
+                            :color="settingsStore.isDark ? '#cbd5e1' : '#334155'"
+                        ></uni-icons>
+                    </view>
+                </view>
+            </view>
+        </view>
     </view>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
+import { onLoad, onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
 import { apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const isScrolled = ref(false);
+const adHeight = ref(0);
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+};
+
+const top10WrapPaddingTop = computed(() => `${statusBarHeight.value + 10}px`);
+const top10WrapPaddingBottom = computed(() => `calc(${adHeight.value}px + 180rpx + env(safe-area-inset-bottom))`);
+const dockBottomStyle = computed(() => `calc(${adHeight.value}px + 36rpx + env(safe-area-inset-bottom))`);
+
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const isEn = computed(() => locale.value === 'en');
-
-
-const top10WrapPaddingBottom = computed(() => {
-    const tabH = props.embedded ? getTabBarHeight() : 0;
-    return `${tabH + 16}px`;
-});
 
 const getLocalizedItem = (item) => {
     if (!item) return item;
@@ -198,34 +243,32 @@ const getLocalizedItem = (item) => {
     };
 };
 
-const props = defineProps({
-    embedded: {
-        type: Boolean,
-        default: false,
-    },
-    navBarHeight: {
-        type: Number,
-        default: 0,
-    },
+const showScrollTop = ref(false);
+const currentScrollTop = ref(0);
+
+onPageScroll((e) => {
+    const top = Number(e?.scrollTop || 0);
+    isScrolled.value = top > 8;
+    currentScrollTop.value = top;
+    const windowHeight = uni.getWindowInfo().windowHeight || 0;
+    const nextVisible = top > windowHeight / 2;
+    if (showScrollTop.value !== nextVisible) {
+        showScrollTop.value = nextVisible;
+    }
 });
 
-const emit = defineEmits(['scroll']);
-
-const handleScroll = (e) => {
-    emit('scroll', { scrollTop: e.detail.scrollTop });
+const scrollToTop = () => {
+    showScrollTop.value = false;
+    currentScrollTop.value = 0;
+    uni.pageScrollTo({
+        scrollTop: 0,
+        duration: 350,
+    });
 };
 
 const activeMetric = ref('views');
 const loading = ref(false);
 const rankedList = ref([]);
-const statusBarHeight = ref(getStatusBarHeight() || 0);
-const adHeight = ref(0);
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
-};
-const scrollHeight = computed(() =>
-    props.embedded ? '100vh' : `calc(100vh - ${statusBarHeight.value}px - ${adHeight.value}px)`,
-);
 
 const cache = {
     views: null,
@@ -270,6 +313,10 @@ const getTopList = async () => {
 const switchMetric = async (metric) => {
     if (activeMetric.value === metric) return;
     activeMetric.value = metric;
+    uni.pageScrollTo({
+        scrollTop: 0,
+        duration: 250,
+    });
     await getTopList();
 };
 
@@ -312,14 +359,28 @@ const goPreview = (id) => {
 const goBack = () => {
     uni.navigateBack({
         fail: () => {
-            uni.switchTab({ url: '/pages/app/index' });
+            uni.reLaunch({ url: '/pages/app/index' });
         },
     });
 };
 
+onPullDownRefresh(async () => {
+    cache.views = null;
+    cache.downloads = null;
+    await getTopList();
+    uni.stopPullDownRefresh();
+});
+
 onMounted(() => {
     if (!rankedList.value.length) {
         getTopList();
+    }
+});
+
+onShow(() => {
+    const windowHeight = uni.getWindowInfo().windowHeight || 0;
+    if (currentScrollTop.value > windowHeight / 2) {
+        showScrollTop.value = true;
     }
 });
 </script>
@@ -338,10 +399,6 @@ onMounted(() => {
 }
 
 .top10-status {
-    width: 100%;
-}
-
-.top10-scroll {
     width: 100%;
 }
 
@@ -407,46 +464,144 @@ onMounted(() => {
     }
 }
 
-.metric-switch {
-    margin: 0 auto 24rpx;
-    padding: 8rpx;
-    width: fit-content;
+/* ── 底部毛玻璃悬浮灵动岛 ── */
+.floating-dock {
+    position: fixed;
+    left: 0;
+    right: 0;
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 10rpx;
+    z-index: 99;
+    pointer-events: none;
+    transition: bottom 0.28s ease;
+}
+
+.floating-capsule {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    padding: 8rpx 10rpx;
     border-radius: 999rpx;
-    background: rgba(17, 25, 34, 0.9);
-    border: 1rpx solid rgba(148, 163, 184, 0.14);
-    box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.04);
+    background: rgba(22, 32, 44, 0.85);
+    border: 1rpx solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24rpx);
+    -webkit-backdrop-filter: blur(24rpx);
+    box-shadow:
+        0 16rpx 40rpx rgba(0, 0, 0, 0.38),
+        0 2rpx 8rpx rgba(0, 0, 0, 0.16),
+        inset 0 1rpx 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
 
     .theme-light & {
-        background: #e8ecf2;
-        border: 1rpx solid rgba(17, 24, 39, 0.06);
-        box-shadow: none;
+        background: rgba(255, 255, 255, 0.88);
+        border: 1rpx solid rgba(0, 0, 0, 0.08);
+        box-shadow:
+            0 12rpx 36rpx rgba(15, 23, 42, 0.12),
+            0 2rpx 6rpx rgba(15, 23, 42, 0.04),
+            inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
     }
 }
 
-.metric-switch__item {
-    min-width: 220rpx;
-    height: 74rpx;
-    padding: 0 26rpx;
-    border-radius: 999rpx;
+.floating-capsule__tabs {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
+}
+
+.floating-capsule__tab {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10rpx;
+    height: 68rpx;
+    padding: 0 28rpx;
+    border-radius: 999rpx;
     color: #94a3b8;
     font-size: 24rpx;
     font-weight: 700;
+    transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:active {
+        transform: scale(0.96);
+    }
 
     .theme-light & {
         color: #64748b;
     }
+
+    &.is-active {
+        color: #ffffff;
+        background: linear-gradient(135deg, #2b8cee 0%, #1a6fd8 100%);
+        box-shadow: 0 6rpx 20rpx rgba(43, 140, 238, 0.35);
+
+        .theme-light & {
+            color: #ffffff;
+            background: linear-gradient(135deg, #2b8cee 0%, #1f6fd1 100%);
+            box-shadow: 0 6rpx 18rpx rgba(43, 140, 238, 0.3);
+        }
+    }
 }
 
-.metric-switch__item.is-active {
-    color: #fff;
-    background: linear-gradient(135deg, #2b8cee, #1f6fd1);
-    box-shadow: 0 10rpx 24rpx rgba(43, 140, 238, 0.24);
+.floating-capsule__label {
+    line-height: 1;
+}
+
+/* 动态回顶按钮部分 */
+.floating-capsule__action {
+    display: flex;
+    align-items: center;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: scale(0.8) translateX(-12rpx);
+    pointer-events: none;
+    transition:
+        max-width 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.28s ease,
+        transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &.is-visible {
+        max-width: 100rpx;
+        opacity: 1;
+        transform: scale(1) translateX(0);
+        pointer-events: auto;
+    }
+}
+
+.floating-capsule__divider {
+    width: 2rpx;
+    height: 32rpx;
+    background: rgba(148, 163, 184, 0.22);
+    margin: 0 10rpx 0 6rpx;
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.08);
+    }
+}
+
+.floating-capsule__btn-top {
+    width: 60rpx;
+    height: 60rpx;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.06);
+    transition: all 0.2s ease;
+
+    &:active {
+        transform: scale(0.9);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.04);
+
+        &:active {
+            background: rgba(0, 0, 0, 0.08);
+        }
+    }
 }
 
 .top10-intro {
@@ -502,9 +657,40 @@ onMounted(() => {
     }
 }
 
+// ── 冠军第 1 名入场（自右向左平滑滑入带微俯冲聚焦） ──
+@keyframes heroFirstCardReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(140rpx, -12rpx, 0) scale(0.94);
+    }
+    60% {
+        opacity: 0.9;
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+// ── 亚季军 2、3 名入场（自右向左平滑滑入展翼） ──
+@keyframes heroSecondaryReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(110rpx, -10rpx, 0) scale(0.94);
+    }
+    60% {
+        opacity: 0.9;
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
 .hero-card--first {
     aspect-ratio: 16 / 10;
     margin-bottom: 30rpx;
+    animation: heroFirstCardReveal 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero-grid {
@@ -516,6 +702,7 @@ onMounted(() => {
 
 .hero-card--secondary {
     aspect-ratio: 3 / 4;
+    animation: heroSecondaryReveal 0.68s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero-card__image {
@@ -679,6 +866,18 @@ onMounted(() => {
     gap: 30rpx;
 }
 
+// ── 竞争者列表自右向左平滑递进滑入 ──
+@keyframes rankItemSlideUp {
+    0% {
+        opacity: 0;
+        transform: translate3d(100rpx, 0, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 .rank-item {
     height: 280rpx;
     border-radius: 28rpx;
@@ -694,6 +893,7 @@ onMounted(() => {
         transform 0.28s ease,
         box-shadow 0.28s ease,
         border-color 0.28s ease;
+    animation: rankItemSlideUp 0.60s cubic-bezier(0.16, 1, 0.3, 1) both;
 
     .theme-light & {
         background: #f8fafc;

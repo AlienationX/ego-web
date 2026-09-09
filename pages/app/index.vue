@@ -1,94 +1,356 @@
 <template>
-    <view class="homeLayout"
-        :class="['homeLayout--' + activeHomeTab, settingsStore.isDark ? 'theme-dark' : 'theme-light']" :style="{
-            '--mask-color': pageBackgroundVar,
-            backgroundColor: pageBackgroundVar,
-            height: '100%',
-            overflow: 'hidden',
-        }">
-        <!-- #ifndef WEB -->
-        <view class="home-statusbar" :style="{ height: statusBarHeight + 'px', backgroundColor: pageBackgroundVar }">
-        </view>
-        <!-- #endif -->
+    <view class="home-page" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <!-- 顶部渐变毛玻璃状态栏 -->
+        <glass-status-bar
+            :is-scrolled="isScrolled"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-status-bar>
+        <scroll-view scroll-y class="home-tab-layout" show-scrollbar="false" @scroll="handleScroll">
+            <!-- 沉浸式 Hero 头部：头像问候、通知铃铛、灵动气泡、搜索栏、快捷入口胶囊 -->
+            <home-hero-header
+                :status-bar-height="statusBarHeight"
+                @open-notifications="openNotificationSheet"
+            />
 
-        <view class="home-titlebar" :class="{ 'is-hidden': !isTitleBarVisible }" :style="{
-            paddingTop: statusBarHeight + 'px',
-            height: navBarHeight + 'px',
-            paddingRight: titlebarPaddingRight,
-            backgroundColor: pageBackgroundVar,
-        }">
-            <view class="home-titlebar__inner" :style="{ height: titleBarHeight + 'px' }">
-                <view class="home-tabs-wrapper" :class="{ 'is-dark': settingsStore.isDark }">
-                    <view class="home-tabs-scroll-area">
-                        <scroll-view scroll-x class="home-tabs" show-scrollbar="false">
-                            <view class="home-tabs__inner">
-                                <view v-for="tab in homeTabList" :key="tab.key" class="home-tab"
-                                    :class="{ 'is-active': activeHomeTab === tab.key }"
-                                    @click="activeHomeTab = tab.key">
-                                    {{ tab.label }}
+            <!-- Banner -->
+            <view class="banner">
+                <!-- Banner 骨架屏 -->
+                <view v-if="!bannerList.length" class="banner-swiper">
+                    <view class="sk-banner">
+                        <view class="sk-banner__img"></view>
+                        <view class="sk-banner__content">
+                            <view class="sk-banner__tag-row">
+                                <view class="sk-bar sk-bar--tag"></view>
+                                <view class="sk-bar sk-bar--tag sk-bar--short"></view>
+                            </view>
+                            <view class="sk-bar sk-bar--title"></view>
+                            <view class="sk-bar sk-bar--title sk-bar--medium"></view>
+                            <view class="sk-bar sk-bar--desc"></view>
+                        </view>
+                    </view>
+                </view>
+                <swiper v-else class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.5)"
+                    indicator-active-color="#fff" autoplay circular>
+                    <swiper-item class="banner-swiper-item" v-for="item in bannerList" :key="item.id">
+                        <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram"
+                            :app-id="item.appid" :class="['banner-card', item.accentClass]">
+                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
+                            <view class="banner-card__overlay"></view>
+                            <view class="banner-card__content">
+                                <view class="banner-card__tag-row">
+                                    <view class="banner-card__tag">{{ item.badge }}</view>
+                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                </view>
+                                <view class="banner-card__title">{{ item.title }}</view>
+                                <view class="banner-card__desc">{{ item.desc }}</view>
+                                <view class="banner-card__meta">
+                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                    <view class="banner-card__meta-arrow">
+                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                    </view>
                                 </view>
                             </view>
-                        </scroll-view>
-                        <view class="home-tabs-mask"></view>
-                    </view>
+                        </navigator>
 
-                    <!-- #ifdef MP-WEIXIN -->
-                    <view class="home-search home-search--icon" @click="goSearch">
-                        <uni-icons type="search" size="17" :color="searchIconColor"></uni-icons>
-                    </view>
-                    <!-- #endif -->
+                        <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
+                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
+                            <view class="banner-card__overlay"></view>
+                            <view class="banner-card__content">
+                                <view class="banner-card__tag-row">
+                                    <view class="banner-card__tag">{{ item.badge }}</view>
+                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                </view>
+                                <view class="banner-card__title">{{ item.title }}</view>
+                                <view class="banner-card__desc">{{ item.desc }}</view>
+                                <view class="banner-card__meta">
+                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
+                                    <view class="banner-card__meta-arrow">
+                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+                    </swiper-item>
+                </swiper>
+            </view>
 
-                    <!-- #ifndef MP-WEIXIN -->
-                    <view class="home-search" @click="goSearch">
-                        <uni-icons type="search" size="17" :color="searchIconColor"></uni-icons>
-                        <text class="home-search__text">{{ $t('common.search') }}</text>
+            <!-- Inspiration / Random Pick -->
+            <view class="select">
+                <view class="select-watermark">Inspire</view>
+                <index-title>
+                    <template #name>{{ $t('index.randomRecommend') }}</template>
+                    <template #custom>
+                        <view class="date">
+                            <uni-icons type="calendar" size="20"
+                                :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.9)' : '#334155'"></uni-icons>
+                            <view class="text"> {{ todayDateStr }}{{ $t('common.day') }} </view>
+                            <button class="button refresh-btn" size="mini" :class="{ 'is-loading': isRefreshing }"
+                                @click="refreshRandom">
+                                <uni-icons type="refreshempty" size="13" class="refresh-icon"
+                                    :class="{ 'is-spinning': isRefreshing }"
+                                    :color="settingsStore.isDark ? '#181818' : '#ffffff'"></uni-icons>
+                                <text class="refresh-text">{{ $t('common.refresh') }}</text>
+                            </button>
+                        </view>
+                    </template>
+                </index-title>
+
+                <view class="content">
+                    <!-- Daily 骨架屏：1个大卡 + 4个小卡 -->
+                    <view v-if="!randomDailyList.length" class="sk-scroll-row">
+                        <view class="sk-card sk-card--hero"></view>
+                        <view v-for="i in 4" :key="i" class="sk-card"></view>
                     </view>
-                    <!-- #endif -->
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="(item, idx) in randomDailyList" :key="item.id"
+                            :class="{ 'is-hero': idx === 0 }" hover-class="box--active" :hover-stay-time="150"
+                            @click="goPreview(item.id, randomDailyList)">
+                            <image class="box-image"
+                                :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl" mode="aspectFill"
+                                lazy-load fade-in @load="idx === 0 ? (heroImageLoaded = true) : null"></image>
+                            <block v-if="idx === 0">
+                                <view class="box-hero-overlay" :class="{ 'is-visible': heroImageLoaded }"></view>
+                                <view class="box-hero-content" :class="{ 'is-visible': heroImageLoaded }">
+                                    <view class="day-tag">{{ todayDate }}</view>
+                                    <view class="pick-text">PICK OF THE DAY</view>
+                                </view>
+                            </block>
+                            <block v-else>
+                                <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
+                                    {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
+                                </view>
+                            </block>
+                        </view>
+                    </scroll-view>
                 </view>
             </view>
-        </view>
 
-        <!-- home tab：与其他 tab 一致，用 scroll-view 自管滚动，v-show 切换位置天然保留 -->
-        <view v-show="activeHomeTab === 'home'" class="home-channel home-channel--home" :style="channelBottomStyle">
-            <home-tab :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></home-tab>
-        </view>
+            <!-- Latest Release -->
+            <view class="select">
+                <view class="select-watermark">Latest</view>
+                <index-title>
+                    <template #name>{{ $t('index.latestRelease') }}</template>
+                    <template #custom>
+                        <button size="mini" class="btn is-default" @click="goTimeline">{{ $t('common.seeAll')
+                            }}</button>
+                    </template>
+                </index-title>
 
-        <!-- 灵动头像频道 -->
-        <view v-if="avatarLoaded" v-show="activeHomeTab === 'avatar'" class="home-channel home-channel--avatar"
-            :style="channelBottomStyle">
-            <avatar-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></avatar-tab>
-        </view>
+                <view class="content">
+                    <!-- Latest 骨架屏：5个小卡 -->
+                    <view v-if="!latestList.length" class="sk-scroll-row">
+                        <view v-for="i in 5" :key="i" class="sk-card"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="(item, idx) in latestList" :key="item.id" hover-class="box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, latestList)">
+                            <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                            <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--latest">
+                                {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
+                            </view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
 
-        <!-- 电脑横屏频道 -->
-        <view v-if="desktopLoaded" v-show="activeHomeTab === 'desktop'" class="home-channel home-channel--desktop"
-            :style="channelBottomStyle">
-            <desktop-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></desktop-tab>
-        </view>
+            <!-- Daily Benefits (每日福利专区) -->
+            <view class="select daily-benefits-section">
+                <view class="select-watermark">Benefit</view>
+                <index-title>
+                    <template #name>{{ $t('index.dailyBenefits') }}</template>
+                    <template #custom>
+                        <text class="benefit-text-tip">{{ $t('index.dailyBenefitsTip') }}</text>
+                    </template>
+                </index-title>
 
-        <!-- 其他 tab：首次激活后懒加载，之后用 v-show 保持状态，避免反复销毁重建 -->
-        <view v-if="recommendLoaded" v-show="activeHomeTab === 'recommend'" class="home-channel home-channel--recommend"
-            :style="channelBottomStyle">
-            <modern-pics-view 
-                :show-header="false" 
-                :tabs="recommendTabList" 
-                api-type="recommend" 
-                layoutMode="waterfall"
-                :show-card-meta="true" 
-                :header-height="navBarHeight" 
-                embedded
-                @scroll="handleEmbeddedScroll">
-            </modern-pics-view>
-        </view>
+                <view class="content">
+                    <!-- 每日福利 骨架屏：5个小卡 -->
+                    <view v-if="!dailyFeaturedList.length" class="sk-scroll-row">
+                        <view v-for="i in 5" :key="i" class="sk-card"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="item in dailyFeaturedList" :key="item.id" hover-class="box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, dailyFeaturedList)">
+                            <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                            <view v-if="item.is_daily_free" class="box-badge box-badge--free">
+                                {{ $t('index.todayFree') }}
+                            </view>
+                            <view v-else-if="item.is_daily_ad" class="box-badge box-badge--ad">
+                                {{ $t('index.watchUnlock') }}
+                            </view>
+                            <view v-else-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
+                                {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
+                            </view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
 
-        <view v-if="latestLoaded" v-show="activeHomeTab === 'latest'" class="home-channel home-channel--latest"
-            :style="channelBottomStyle">
-            <timeline-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></timeline-tab>
-        </view>
+            <!-- Subscription Signals -->
+            <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout-new"
+                :class="{ 'is-expanded': followingExpanded }">
+                <view class="signal-callout-new__header" @click="toggleFollowingExpanded">
+                    <view class="signal-callout-new__left">
+                        <view class="signal-pulse-dot"></view>
+                        <text class="signal-callout-new__eyebrow">{{ t('index.followingEyebrow') }}</text>
+                    </view>
+                    <view class="signal-callout-new__right">
+                        <uni-icons :type="followingExpanded ? 'arrow-up' : 'arrow-down'" size="11"
+                            color="var(--text-secondary)"></uni-icons>
+                    </view>
+                </view>
 
-        <view v-if="hotLoaded" v-show="activeHomeTab === 'hot'" class="home-channel home-channel--hot"
-            :style="channelBottomStyle">
-            <top-tab embedded :nav-bar-height="navBarHeight" @scroll="handleEmbeddedScroll"></top-tab>
-        </view>
+                <view class="signal-callout-new__body" @click="toggleFollowingExpanded">
+                    <view class="signal-callout-new__title">{{ t('index.followingTitle') }}</view>
+                    <view class="signal-callout-new__desc">{{ followingSummary }}</view>
+                </view>
+
+                <view v-if="followingExpanded" class="signal-callout-new__panel">
+                    <view v-if="subscribedClassifyItems.length" class="signal-group-new">
+                        <view class="signal-group-new__title">{{ t('subscriptionPage.classifyTitle') }}</view>
+                        <view class="signal-group-new__chips">
+                            <view v-for="item in subscribedClassifyItems" :key="item.id" class="signal-chip-new"
+                                @click="goClassify(item)">
+                                <uni-icons type="images" size="10" color="var(--text-secondary)"></uni-icons>
+                                <text class="chip-text">{{ item.name }}</text>
+                            </view>
+                        </view>
+                    </view>
+
+                    <view v-if="libraryStore.subscriptions.tags.length" class="signal-group-new">
+                        <view class="signal-group-new__title">{{ t('subscriptionPage.tagTitle') }}</view>
+                        <view class="signal-group-new__chips">
+                            <view v-for="tag in libraryStore.subscriptions.tags" :key="tag"
+                                class="signal-chip-new signal-chip-new--tag" @click="goSearchByTag(tag)">
+                                <text class="chip-text"># {{ tag }}</text>
+                            </view>
+                        </view>
+                    </view>
+
+                    <navigator url="/pages/user/subscriptions" class="signal-manage-new">
+                        <text>{{ t('index.followingManage') }}</text>
+                        <uni-icons type="right" size="10" color="var(--text-primary)"></uni-icons>
+                    </navigator>
+                </view>
+            </view>
+
+            <!-- Popular Tags Cloud -->
+            <view class="tags-section">
+                <view class="tags-header">
+                    <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
+                    <text class="tags-title">{{ t('category.popularTags') }}</text>
+                </view>
+                <scroll-view scroll-x class="tags-scroll" show-scrollbar="false">
+                    <view class="tags-list">
+                        <view class="tag-chip" v-for="(tag, index) in popularTags" :key="index" @click="searchTag(tag)">
+                            <text class="tag-label">#{{ tag }}</text>
+                        </view>
+                    </view>
+                </scroll-view>
+            </view>
+
+            <!-- Featured Subjects Section -->
+            <view class="select">
+                <view class="select-watermark">Subject</view>
+                <index-title>
+                    <template #name>{{ $t('index.subjectRecommend') }}</template>
+                    <template #custom>
+                        <button size="mini" class="btn is-default" @click="goSubjects">{{ $t('common.more') }}</button>
+                    </template>
+                </index-title>
+
+                <view class="content content--subjects">
+                    <!-- Subject 骨架屏 -->
+                    <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
+                        <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="subject-box-new" v-for="item in subjectsRecommendList" :key="item.id"
+                            hover-class="subject-box-new--active" :hover-stay-time="150" @click="goSubjectDetail(item)">
+                            <!-- Top Image Area -->
+                            <view class="subject-box-new__cover-wrapper">
+                                <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load>
+                                </image>
+
+                                <!-- Floating Badges inside Image (Top-Right) -->
+                                <view class="subject-box-new__floating-badges">
+                                    <view class="subject-box-new__badge" v-if="item.is_locked">
+                                        <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
+                                        <text class="badge-text">VIP</text>
+                                    </view>
+                                    <view class="subject-box-new__floating-count">
+                                        {{ item.wall_count || 0 }}P
+                                    </view>
+                                </view>
+                            </view>
+
+                            <!-- Bottom Info Area -->
+                            <view class="subject-box-new__info">
+                                <text class="subject-box-new__title">
+                                    {{ isEn ? (item.name_en || item.name) : item.name }}
+                                </text>
+                                <text class="subject-box-new__desc">
+                                    {{ isEn ? (item.content_en || item.content) : item.content }}
+                                </text>
+                            </view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- Classify Sections -->
+            <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
+                <view class="select-watermark">{{ classify.name }}</view>
+                <index-title>
+                    <template #name>{{ classify.name }}</template>
+                    <template #custom>
+                        <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]"
+                            @click="goClasslist(classify.id, classify.name)">
+                            {{ $t('common.seeAll') }}
+                        </button>
+                    </template>
+                </index-title>
+
+                <view class="content">
+                    <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
+                    <scroll-view scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="box" v-for="item in classify.data" :key="item.id" hover-class="box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, classify.data)">
+                            <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                            <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
+                                {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
+                            </view>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- Classify Grid -->
+            <view class="classify">
+                <index-title>
+                    <template #name>{{ $t('index.categoryRecommend') }}</template>
+                    <template #custom>
+                        <navigator url="/pages/app/classify" open-type="reLaunch" class="more">{{ $t('common.more') }}+
+                        </navigator>
+                    </template>
+                </index-title>
+
+                <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
+
+                <view class="classify-grid-padding">
+                    <classify-grid v-if="classifyList.length" :items="classifyPreviewList" />
+                </view>
+            </view>
+
+            <!-- 底部安全区与悬浮 TabBar 占位 -->
+            <view class="tabbar-bottom-spacer"></view>
+        </scroll-view>
+
+        <!-- 半屏毛玻璃抽屉通知面板 -->
+        <notification-sheet ref="notificationSheetRef"></notification-sheet>
 
         <!-- 自定义 TabBar 组件 (支持多语言实时切换与 Light/Dark 模式) -->
         <glass-tab-bar
@@ -100,867 +362,1839 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { onLoad, onShow, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { ref, computed, reactive, onMounted } from 'vue';
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
+import { useTranslateParams } from '@/utils/i18n.js';
+import {
+    apiGetBanner,
+    apiGetRandomDay,
+    apiGetDailyFeatured,
+    apiGetRandomRecommend,
+    apiGetNotice,
+    apiGetClassify,
+    apiGetClassList,
+    apiGetSubjects,
+    apiGetCheckUpdates,
+} from '@/api/wallpaper.js';
+import { PICS_BASE_URL } from '@/common/config.js';
+import { handlePicUrl, compareTimestamp } from '@/utils/common.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
+import { useLibraryStore } from '@/stores/library.js';
+import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
-import { getStatusBarHeight, getTitleBarHeight, getNavBarHeight } from '@/utils/layout.js';
-import AvatarTab from '@/components/avatar-tab/avatar-tab.vue';
-import DesktopTab from '@/components/desktop-tab/desktop-tab.vue';
+import { useAppStore } from '@/stores/app.js';
+import { useStatusStore } from '@/stores/status.js';
 
+const { t, locale } = useI18n();
+const { tp } = useTranslateParams();
+const libraryStore = useLibraryStore();
+const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const { t } = useI18n();
+const appStore = useAppStore();
+const statusStore = useStatusStore();
 
-const homeTabList = computed(() => [
-    {
-        key: 'home',
-        label: t('index.tabs.home'),
-    },
-    // {
-    //     key: 'avatar',
-    //     label: t('channels.avatar'),
-    // },
-    // {
-    //     key: 'desktop',
-    //     label: t('channels.desktop'),
-    // },
-    {
-        key: 'recommend',
-        label: t('index.tabs.recommend'),
-    },
-    {
-        key: 'latest',
-        label: t('index.tabs.latest'),
-    },
-    {
-        key: 'hot',
-        label: t('index.tabs.hot'),
-    },
-]);
-
-const recommendTabList = computed(() => [{ label: t('index.tabs.recommend') }]);
-
-const searchIconColor = computed(() => (settingsStore.isDark ? 'rgba(255, 255, 255, 0.7)' : '#64748b'));
-
+const isAdmin = computed(() => !!userStore.isAdmin);
+const isEn = computed(() => locale.value === 'en');
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const navBarHeight = ref(getNavBarHeight() || 0);
-const titleBarHeight = ref(getTitleBarHeight() || 0);
-const isTitleBarVisible = ref(true);
-let lastScrollTop = 0;
+const isScrolled = ref(false);
+const notificationSheetRef = ref(null);
 
-const activeHomeTab = ref('home');
+const openNotificationSheet = () => {
+    notificationSheetRef.value?.open();
+};
 
-/** 与 theme-variables.scss 的 --page-background 一致，依赖根节点 theme-light/theme-dark */
-const pageBackgroundVar = 'var(--page-background)';
+const handleScroll = (e) => {
+    const top = Number(e?.detail?.scrollTop || 0);
+    isScrolled.value = top > 8;
+};
 
-// ── 懒加载标志，首次切入对应 tab 才渲染，之后用 v-show 保持状态 ──
-const avatarLoaded = ref(false);
-const desktopLoaded = ref(false);
-const recommendLoaded = ref(false);
-const latestLoaded = ref(false);
-const hotLoaded = ref(false);
+const navBarHeight = ref(0);
 
-watch(activeHomeTab, (tab) => {
-    if (tab === 'avatar') avatarLoaded.value = true;
-    if (tab === 'desktop') desktopLoaded.value = true;
-    if (tab === 'recommend') recommendLoaded.value = true;
-    if (tab === 'latest') latestLoaded.value = true;
-    if (tab === 'hot') hotLoaded.value = true;
+const bannerTimeAgo = computed(() => {
+    const lastTime = statusStore.appStatus.lastViewedWallpaperTime;
+    if (!lastTime) return '';
+    const ts = new Date(lastTime).getTime();
+    const ago = compareTimestamp(ts, isEn.value);
+    if (!ago) return '';
+    if (isEn.value && ago === 'Just now') return ago;
+    return isEn.value ? `${ago} ago` : `${ago}前`;
 });
 
-// ── 优化：titlebarPaddingRight 只在页面初始化时计算一次，无需 computed ──
-const titlebarPaddingRight = (() => {
-    // #ifdef MP-WEIXIN
-    const menuButtonInfo = uni.getMenuButtonBoundingClientRect ? uni.getMenuButtonBoundingClientRect() : null;
-    if (menuButtonInfo) {
-        return uni.getWindowInfo().windowWidth - menuButtonInfo.left + 10 + 'px';
-    }
-    // #endif
-    return '20rpx';
-})();
+const topCardImageURL = ref(PICS_BASE_URL + '/insets/1699281368061_2-removebg-preview.png');
 
-const SCROLL_DEAD_ZONE = 5;
+// ── 优化4：today 只构造一次，避免模板重渲染时反复 new Date() ──
+const _today = new Date();
+const todayDate = _today.getDate();
+const todayDateStr = todayDate.toString().padStart(2, '0');
 
-// ── 优化：RAF 节流，避免 onPageScroll 高频触发时重复计算 ──
-let rafPending = false;
-const updateTitleBarVisibleByScroll = (scrollTop) => {
-    if (rafPending) return;
-    rafPending = true;
-    setTimeout(() => {
-        rafPending = false;
-        const currentScrollTop = Math.max(0, Number(scrollTop) || 0);
-        const scrollDelta = currentScrollTop - lastScrollTop;
-        if (Math.abs(scrollDelta) > SCROLL_DEAD_ZONE) {
-            if (currentScrollTop > titleBarHeight.value) {
-                isTitleBarVisible.value = scrollDelta <= 0;
-            } else {
-                isTitleBarVisible.value = true;
-            }
-            lastScrollTop = currentScrollTop;
+// --- Data ---
+const rawBannerList = ref([]);
+const bannerList = computed(() => {
+    return rawBannerList.value.map((item) => {
+        const normalized = handlePicUrl(item);
+        return { ...normalized, ...getBannerTextMeta(normalized) };
+    });
+});
+
+const randomDailyList = ref([]);
+const dailyFeaturedList = ref([]);
+const heroImageLoaded = ref(false);
+const randomRecommendList = ref([]);
+const latestList = ref([]);
+const noticeList = ref([]);
+const subjectsRecommendList = ref([]);
+const noticeComputed = computed(() => {
+    return noticeList.value.map((item) => ({
+        ...item,
+        title: isEn.value && item.title_en ? item.title_en : item.title,
+    }));
+});
+const classifyList = ref([]);
+const adVisibleMap = reactive({});
+const followingExpanded = ref(false);
+const themeClasses = ['is-collection', 'is-keyword', 'is-spotlight', 'is-default'];
+
+// --- Latest pagination ---
+const latestLoading = ref(false);
+const latestNoMore = ref(false);
+const latestQuery = ref({
+    pageNum: 1,
+    pageSize: 12, // ── 优化6：与 latestPreviewList 截取数对齐，避免多拉无用数据 ──
+    ordering: '-created_at',
+});
+
+// --- Computed ---
+const subscribedClassifyIds = computed(() => libraryStore.subscriptions.classifyIds || []);
+const hasSubscriptionSignals = computed(
+    () => subscribedClassifyIds.value.length > 0 || libraryStore.subscriptions.tags.length > 0,
+);
+
+const subscribedClassifyItems = computed(() =>
+    classifyComputed.value.filter((item) => subscribedClassifyIds.value.includes(item.id)),
+);
+
+const followingSummary = computed(() => {
+    const classifyCount = subscribedClassifyIds.value.length;
+    const tagCount = libraryStore.subscriptions.tags.length;
+    return tp('index.followingDesc', { classifyCount, tagCount });
+});
+
+// ── 优化3：使用响应式 locale ref，语言切换时 computed 会正确重算 ──
+const randomRecommendComputed = computed(() => {
+    return randomRecommendList.value.map((item) => ({
+        ...item,
+        name: isEn.value && item.name_en ? item.name_en : item.name,
+    }));
+});
+
+const classifyComputed = computed(() => {
+    return classifyList.value.map((item) => ({
+        ...item,
+        name: isEn.value && item.name_en ? item.name_en : item.name,
+    }));
+});
+
+const classifyPreviewList = computed(() => classifyComputed.value.slice(0, 7));
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// --- Time badge helpers ---
+// ── 优化2：badgeCopy 只计算一次，不在每个 item 处理时重复调用 getLocale() ──
+const getBadgeCopy = () => {
+    const isZh = String(uni.getLocale() || '').startsWith('zh');
+    return isZh ? { justIn: '刚更新', latest: '近期', new: '新' } : { justIn: 'JUST IN', latest: 'LATEST', new: 'NEW' };
+};
+const badgeCopy = getBadgeCopy();
+
+const getWallDate = (item) => {
+    const raw = item?.created_at || item?.updated_at || null;
+    if (!raw) return null;
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const timeCache = {
+    todayStart: 0,
+    tomorrowStart: 0,
+    yesterdayStart: 0,
+    lastUpdate: 0,
+};
+
+const updateTimeCache = () => {
+    const now = Date.now();
+    if (now - timeCache.lastUpdate < 60000) return; // 每分钟刷新一次即可
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    timeCache.todayStart = today.getTime();
+    timeCache.tomorrowStart = timeCache.todayStart + 86400000;
+    timeCache.yesterdayStart = timeCache.todayStart - 86400000;
+    timeCache.lastUpdate = now;
+};
+
+const isUpdatedToday = (item) => {
+    const date = getWallDate(item);
+    if (!date) return false;
+    updateTimeCache();
+    const t = date.getTime();
+    return t >= timeCache.todayStart && t < timeCache.tomorrowStart;
+};
+
+const isUpdatedYesterday = (item) => {
+    const date = getWallDate(item);
+    if (!date) return false;
+    updateTimeCache();
+    const t = date.getTime();
+    return t >= timeCache.yesterdayStart && t < timeCache.todayStart;
+};
+
+const isUpdatedWithinDays = (item, days = 5) => {
+    const date = getWallDate(item);
+    if (!date) return false;
+    const diff = Date.now() - date.getTime();
+    return diff >= 0 && diff <= days * DAY_MS;
+};
+
+const getTimeBadgeKey = (item) =>
+    isUpdatedToday(item)
+        ? 'justIn'
+        : isUpdatedYesterday(item)
+            ? 'new'
+            : isUpdatedWithinDays(item, 5)
+                ? 'latest'
+                : '';
+
+const addTimeBadge = (item) => {
+    item._timeBadgeKey = getTimeBadgeKey(item);
+    return item;
+};
+
+const toTimelineDate = (item) => {
+    const raw = item?.created_at || item?.updated_at || Date.now();
+    const date = new Date(raw);
+    return Number.isNaN(date.getTime()) ? new Date() : date;
+};
+
+const getBannerTextMeta = (item) => {
+    const url = String(item.url || '');
+    const decodedUrl = decodeURIComponent(url);
+
+    const nameMatch = decodedUrl.match(/name=([^&]+)/);
+    const nameEnMatch = decodedUrl.match(/name_en=([^&]+)/);
+    const keywordMatch = decodedUrl.match(/keyword=([^&]+)/);
+    const rawTitle = nameMatch?.[1] || (keywordMatch?.[1] ? `#${keywordMatch[1]}` : '');
+    const rawTitleEn = nameEnMatch?.[1] || rawTitle;
+
+    const type = (() => {
+        if (url.includes('/pages/app/classlist')) return 'classify';
+        if (url.includes('/wall/search/')) return 'search';
+        if (url.includes('/preview')) return 'preview';
+        if (item.target === 'miniProgram') return 'miniProgram';
+        return 'default';
+    })();
+
+    const configMap = {
+        classify: {
+            desc: t('index.banner.classifyDesc'),
+            badge: t('index.banner.badge.classify'),
+            meta: t('index.banner.meta.classify'),
+            accent: 'is-collection',
+        },
+        search: {
+            desc: t('index.banner.searchDesc'),
+            badge: t('index.banner.badge.search'),
+            meta: t('index.banner.meta.search'),
+            accent: 'is-keyword',
+        },
+        preview: {
+            desc: t('index.banner.previewDesc'),
+            badge: t('index.banner.badge.spotlight'),
+            meta: t('index.banner.meta.preview'),
+            accent: 'is-spotlight',
+        },
+        miniProgram: {
+            desc: t('index.banner.defaultDesc'),
+            badge: t('index.banner.badge.miniProgram'),
+            meta: t('index.banner.meta.default'),
+            accent: 'is-default',
+        },
+        default: {
+            desc: t('index.banner.defaultDesc'),
+            badge: t('index.banner.badge.default'),
+            meta: t('index.banner.meta.default'),
+            accent: 'is-default',
+        },
+    };
+
+    const targetMap = {
+        self: t('index.banner.target.self'),
+        miniProgram: t('index.banner.target.miniProgram'),
+        external: t('index.banner.target.external'),
+    };
+
+    const config = configMap[type];
+
+    return {
+        title:
+            (isEn.value && rawTitleEn ? rawTitleEn : rawTitle) ||
+            (type === 'miniProgram' ? t('index.banner.discoverMore') : t('index.banner.defaultTitle')),
+        desc:
+            (isEn.value && item.description_en ? item.description_en : item.description) ||
+            (item && item.title && item.title.includes('必应') ? t('index.banner.bingDesc') : config.desc),
+        badge: config.badge,
+        targetLabel: targetMap[item.target] || targetMap.external,
+        metaLabel: config.meta,
+        accentClass: config.accent,
+    };
+};
+
+// --- Data fetching ---
+const getBanner = async () => {
+    let res = await apiGetBanner();
+    rawBannerList.value = res.data;
+};
+
+const getRandomDay = async () => {
+    let res = await apiGetRandomDay();
+    randomDailyList.value = res.data.map((item) => addTimeBadge(handlePicUrl(item)));
+};
+
+const getDailyFeatured = async () => {
+    try {
+        let res = await apiGetDailyFeatured();
+        if (res && res.data) {
+            dailyFeaturedList.value = res.data.map((item) => addTimeBadge(handlePicUrl(item)));
         }
-    }, 0);
+    } catch (e) {
+        console.warn('apiGetDailyFeatured failed:', e);
+    }
 };
 
-const handleEmbeddedScroll = (e) => {
-    updateTitleBarVisibleByScroll(e.scrollTop);
+const getRandomRecommend = async () => {
+    let res = await apiGetRandomRecommend({ classify_ids: '30,62,2,12,10,11,6,9' });
+    randomRecommendList.value = res.data.map((classify) => ({
+        ...classify,
+        data: classify.data.map((item) => addTimeBadge(handlePicUrl(item))),
+    }));
 };
 
-// ── 广告高度，控制底部留白 ──
-const adHeight = ref(0);
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
+const getNotice = async () => {
+    let res = await apiGetNotice();
+    noticeList.value = res.data;
 };
-const channelBottomStyle = computed(() => (adHeight.value > 0 ? { paddingBottom: `${adHeight.value}px` } : {}));
 
-onLoad(() => {
-    uni.$on('app-scroll', updateTitleBarVisibleByScroll);
-});
+const getClassify = async () => {
+    let res = await apiGetClassify({ select: true });
+    classifyList.value = res.data.map((item) => handlePicUrl(item));
+};
 
-const goSearch = () => {
+const getLatest = async (isAppend = false) => {
+    if (latestLoading.value || (isAppend && latestNoMore.value)) return;
+    try {
+        latestLoading.value = true;
+        if (!isAppend) {
+            latestQuery.value.pageNum = 1;
+            latestNoMore.value = false;
+        }
+        const res = await apiGetClassList(latestQuery.value);
+        // ── 优化5：追加时只排新数据再 merge，不对整个列表重排 ──
+        const nextList = (res.data || [])
+            .map((item) => addTimeBadge(handlePicUrl(item)))
+            .sort((a, b) => toTimelineDate(b).getTime() - toTimelineDate(a).getTime());
+
+        // 提取最新时间记录到本地
+        if (nextList.length > 0 && nextList[0].created_at) {
+            statusStore.setLastViewedWallpaperTime(nextList[0].created_at);
+        }
+
+        latestList.value = isAppend ? [...latestList.value, ...nextList] : nextList;
+        const totalPages = Number(res?.pagination?.total_pages || 1);
+        latestNoMore.value = latestQuery.value.pageNum >= totalPages || nextList.length === 0;
+    } finally {
+        latestLoading.value = false;
+    }
+};
+
+const checkUpdates = async () => {
+    const lastTime = statusStore.appStatus.lastViewedWallpaperTime;
+    if (!lastTime) return;
+    try {
+        const res = await apiGetCheckUpdates({ since: lastTime });
+        if (res.data?.new_count > 0) {
+            statusStore.newWallpapersCount = res.data.new_count;
+            // 自动定时关闭横幅 (例如8秒后)
+            setTimeout(() => {
+                statusStore.newWallpapersCount = 0;
+            }, 8000);
+        }
+    } catch (e) {
+        console.error('Check updates failed', e);
+    }
+};
+
+const closeBanner = () => {
+    statusStore.newWallpapersCount = 0;
+};
+
+const goTimeline = () => {
+    const unread = statusStore.newWallpapersCount;
+    // 隐藏横幅
+    statusStore.newWallpapersCount = 0;
+    uni.navigateTo({ url: `/pages/app/timeline?unreadCount=${unread}` });
+};
+
+// --- Navigation ---
+const goBannerPreview = (data) => {
+    if (data.wall) {
+        const wallList = handlePicUrl(data.wall);
+        appStore.wallList = [wallList];
+    }
+    uni.navigateTo({ url: data.url });
+};
+
+const goPreview = (id, data) => {
+    appStore.wallList = data;
+    uni.navigateTo({ url: '/pages/app/preview?id=' + id });
+};
+
+const goSearchByTag = (tag) => {
+    if (isAdmin.value) {
+        libraryStore.bumpPreferredTag(tag);
+    }
+    uni.navigateTo({ url: `/pages/app/search?keyword=${encodeURIComponent(tag)}` });
+};
+
+const goClassify = (item) => {
+    if (!item?.id) return;
+    uni.navigateTo({ url: `/pages/app/classlist?id=${item.id}&name=${encodeURIComponent(item.name || '')}` });
+};
+
+const toggleFollowingExpanded = () => {
+    followingExpanded.value = !followingExpanded.value;
+};
+
+const onAdLoad = (key) => {
+    adVisibleMap[key] = true;
+};
+
+const onAdError = (key) => {
+    adVisibleMap[key] = false;
+};
+
+
+const goClasslist = (id, name) => {
+    uni.navigateTo({ url: `/pages/app/classlist?id=${id}&name=${name}` });
+};
+
+const isRefreshing = ref(false);
+
+const refreshRandom = async () => {
+    if (isRefreshing.value) return;
+    isRefreshing.value = true;
+    heroImageLoaded.value = false;
+    try {
+        await Promise.all([getRandomDay(), getRandomRecommend()]);
+    } catch (e) {
+        console.error('Refresh random error:', e);
+    } finally {
+        setTimeout(() => {
+            isRefreshing.value = false;
+        }, 600);
+    }
+};
+
+const getSubjects = async () => {
+    try {
+        const res = await apiGetSubjects({ select: true });
+        if (res.code === 200 && res.data) {
+            subjectsRecommendList.value = res.data.map((item) => handlePicUrl(item));
+        }
+    } catch (err) {
+        console.error('Failed to load recommended subjects:', err);
+    }
+};
+
+const goSubjects = () => {
+    uni.navigateTo({ url: '/pages/app/subjects' });
+};
+
+const goSubjectDetail = (item) => {
     uni.navigateTo({
-        url: '/pages/app/search',
+        url: `/pages/app/subject-detail?id=${item.id}&name=${encodeURIComponent(item.name)}`
     });
 };
 
-// ── 优化：$off 传入函数引用，只移除本页监听，不影响其他页面的同名监听 ──
-onUnload(() => {
-    uni.$off('app-scroll', updateTitleBarVisibleByScroll);
+const popularTags = computed(() => {
+    const rawTags = t('category.tagList') || '';
+    return rawTags.split(',').map((tag) => tag.trim()).filter(Boolean);
 });
 
-//分享给好友
-onShareAppMessage(() => {
-    return {
-        title: '本我壁纸 - 探索壁纸，亦探索自我',
-        path: '/pages/app/index',
-    };
-});
+const searchTag = (tag) => {
+    uni.navigateTo({
+        url: '/pages/app/search?keyword=' + encodeURIComponent(tag)
+    });
+};
 
-//分享朋友圈
-onShareTimeline(() => {
-    return {
-        title: '本我壁纸 - 探索壁纸，亦探索自我',
-    };
+onMounted(() => {
+    // ── 优化：分优先级延时加载，错峰发请求，减少首屏并发竞争 ──
+    // P1 立即：首屏可见的关键数据
+    getBanner();
+    getRandomDay();
+    getLatest();
+    checkUpdates(); // 静默检查更新
+
+    // P2 延时 300ms：首屏次要数据，让 P1 的渲染先跑起来
+    setTimeout(() => {
+        getDailyFeatured();
+        getRandomRecommend();
+        getNotice();
+        getSubjects();
+    }, 300);
+
+    // P3 延时 800ms：需要滚动才能看到，完全错峰
+    setTimeout(() => {
+        getClassify();
+    }, 800);
 });
+// 分享给好友
+onShareAppMessage(() => ({
+    title: '本我壁纸 - 探索壁纸，亦探索自我',
+    path: '/pages/app/index',
+}));
+
+// 分享朋友圈
+onShareTimeline(() => ({
+    title: '本我壁纸 - 探索壁纸，亦探索自我',
+}));
 </script>
 
 <style lang="scss" scoped>
-// ── 优化：减少 CSS 选择器嵌套层级，BEM 类名直接作为顶层选择器 ──
-
-.homeLayout {
-    min-height: 100vh;
-    box-sizing: border-box;
-    transition: background-color 0.3s ease;
+.home-page {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
     background-color: var(--page-background);
-
-    &.theme-dark {
-        background-color: var(--page-background);
-    }
-}
-
-.home-statusbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 51;
-    pointer-events: none;
-    transition: background-color 0.3s ease;
-}
-
-.home-titlebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    padding: 0 20rpx;
     box-sizing: border-box;
-    background: var(--page-background);
-    transition:
-        transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
-        background-color 0.3s ease;
-
-    &.is-hidden {
-        transform: translateY(-100%);
-    }
 }
 
-.home-titlebar__inner {
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18rpx;
-}
-
-.home-tabs-wrapper {
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-    display: flex;
-    align-items: center;
-}
-
-.home-tabs-scroll-area {
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-    position: relative;
-}
-
-.home-tabs-mask {
+.update-banner {
     position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 40rpx;
-    background: linear-gradient(to right, transparent, var(--mask-color, var(--page-background)));
-    pointer-events: none;
-}
-
-.home-tabs {
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    height: 100%;
-}
-
-.home-tabs__inner {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 28rpx;
-    padding: 0 24rpx 0 8rpx;
-    height: 100%;
-}
-
-.home-tab {
-    position: relative;
-    height: 100%;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: rgba(15, 23, 42, 0.48);
-    font-size: 30rpx;
-    font-weight: 600;
-    letter-spacing: 0;
-    transition: all 0.24s ease;
-
-    &.is-active {
-        color: #111827;
-        font-weight: 700;
-    }
-
-    &.is-active::after {
-        content: '';
-        position: absolute;
-        left: 50%;
-        bottom: 6rpx;
-        width: 28rpx;
-        height: 4rpx;
-        border-radius: 999rpx;
-        background: #111827;
-        transform: translateX(-50%);
-    }
-
-    &:active {
-        opacity: 0.7;
-    }
-}
-
-// 暗色模式下 tab 颜色覆盖
-.is-dark .home-tab {
-    color: rgba(255, 255, 255, 0.6);
-
-    &.is-active {
-        color: #ffffff;
-    }
-
-    &.is-active::after {
-        background: #ffffff;
-    }
-}
-
-.home-search {
-    flex-shrink: 0;
-    min-width: 156rpx;
-    height: 56rpx;
-    padding: 0 16rpx;
-    border-radius: 999rpx;
+    left: 32rpx;
+    right: 32rpx;
+    background: #ffffff;
+    border-radius: 40rpx;
+    padding: 32rpx;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8rpx;
-    background: rgba(255, 255, 255, 0.72);
-    border: 1rpx solid rgba(203, 213, 225, 0.56);
-    color: #64748b;
+    z-index: 100;
+    transform: translateY(-150%);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
 
-    &:active {
-        transform: scale(0.97);
-        background: rgba(226, 232, 240, 0.82);
+    .theme-light & {
+        background: #ffffff;
+        box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
+    }
+
+    /* Dark mode override */
+    .theme-dark & {
+        background: #1e293b;
+        box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.3);
+    }
+
+    &--show {
+        transform: translateY(20rpx);
+        opacity: 1;
+    }
+
+    &__close {
+        position: absolute;
+        top: -12rpx;
+        right: -12rpx;
+        width: 44rpx;
+        height: 44rpx;
+        box-sizing: border-box;
+        padding: 0;
+        border-radius: 50%;
+        background: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        border: none;
+        box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.18);
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        .theme-dark & {
+            background: #475569;
+            box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.35);
+        }
+
+        &:active {
+            transform: scale(0.86);
+            background: #475569;
+
+            .theme-dark & {
+                background: #334155;
+            }
+        }
+    }
+
+    &__inner {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 24rpx;
+    }
+
+    &__logo {
+        width: 96rpx;
+        height: 96rpx;
+        border-radius: 24rpx;
+        background: #4F46E5;
+        flex-shrink: 0;
+    }
+
+    &__content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6rpx;
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 2rpx;
+    }
+
+    &__title {
+        font-size: 28rpx;
+        font-weight: 700;
+        color: #0f172a;
+
+        .theme-dark & {
+            color: #f8fafc;
+        }
+    }
+
+    &__time {
+        font-size: 22rpx;
+        color: #94a3b8;
+    }
+
+    &__desc {
+        font-size: 24rpx;
+        color: #475569;
+        line-height: 1.4;
+
+        .theme-dark & {
+            color: #cbd5e1;
+        }
     }
 }
 
-.home-search--icon {
-    min-width: 56rpx;
-    width: 56rpx;
-    height: 56rpx;
-    padding: 0;
-    border-radius: 50%;
-}
-
-.home-search__text {
-    font-size: 22rpx;
-    font-weight: 600;
-}
-
-// 暗色模式下搜索框
-.is-dark .home-search {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.8);
-
-    &:active {
-        background: rgba(255, 255, 255, 0.15);
-    }
-}
-
-// 暗色模式下遮罩渐变
-.is-dark .home-tabs-mask {
-    background: linear-gradient(to right, transparent, var(--mask-color, var(--page-background)));
-}
-
-.home-channel {
+.home-tab-layout {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
     box-sizing: border-box;
-}
-
-.home-channel--recommend,
-.home-channel--home,
-.home-channel--latest,
-.home-channel--hot {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    background: transparent;
     height: 100%;
 }
 
-.home-channel--latest,
-.home-channel--hot {
-    color: #eaf0fb;
-}
+.banner {
+    width: 750rpx;
+    padding: 0 0 8rpx;
 
-.embedded-hero {
-    padding: 22rpx 8rpx 32rpx;
-}
+    // ── 优化8：使用 class 选择器替代 swiper 标签名，小程序端更可靠 ──
+    .banner-swiper {
+        width: 750rpx;
+        height: 400rpx;
+        margin: 20rpx 0rpx;
+    }
 
-.embedded-hero__eyebrow {
-    font-size: 20rpx;
-    font-weight: 900;
-    letter-spacing: 6rpx;
-    color: rgba(125, 211, 252, 0.88);
-}
+    // swiper-item 在小程序端编译为原生容器，用后代 class 控制内部布局
+    // 通过 padding 保证左右间距，避免 margin 在 overflow:hidden 容器内右侧被裁掉
+    .banner-swiper-item {
+        padding: 0 20rpx;
+        box-sizing: border-box;
+    }
 
-.embedded-hero__title {
-    margin-top: 16rpx;
-    font-size: 74rpx;
-    line-height: 1.08;
-    font-weight: 900;
-    color: #f5f8ff;
-    letter-spacing: -2rpx;
-    white-space: pre-line;
-}
+    .banner-card {
+        width: 100%;
+        height: 100%;
+        display: block;
+        position: relative;
+        overflow: hidden;
+        border-radius: 28rpx;
+        box-sizing: border-box;
+        @extend %sk-shimmer;
 
-.embedded-hero__desc {
-    margin-top: 18rpx;
-    font-size: 27rpx;
-    line-height: 1.8;
-    color: rgba(214, 223, 239, 0.86);
-}
+        .banner-card__image {
+            width: 100%;
+            height: 100%;
+            box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.34);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
 
-.embedded-loading {
-    padding: 120rpx 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+        .banner-card__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg,
+                    rgba(6, 12, 18, 0.06) 0%,
+                    rgba(6, 12, 18, 0.18) 34%,
+                    rgba(6, 12, 18, 0.78) 100%);
+        }
 
-.embedded-empty {
-    min-height: 360rpx;
-    padding: 48rpx;
-    border-radius: 32rpx;
-    background: rgba(18, 28, 41, 0.72);
-    border: 1rpx solid rgba(255, 255, 255, 0.05);
-    color: rgba(226, 232, 240, 0.92);
-    font-size: 28rpx;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 12rpx;
-}
+        .banner-card__content {
+            position: absolute;
+            left: 28rpx;
+            right: 28rpx;
+            bottom: 26rpx;
+            z-index: 1;
+        }
 
-.embedded-empty__desc {
-    font-size: 23rpx;
-    line-height: 1.6;
-    color: rgba(148, 163, 184, 0.9);
-}
+        .banner-card__tag-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16rpx;
+            margin-bottom: 14rpx;
+        }
 
-.embedded-load-more {
-    padding: 20rpx 0 0;
-}
+        .banner-card__tag,
+        .banner-card__target {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40rpx;
+            padding: 0 16rpx;
+            border-radius: 999rpx;
+            font-size: 20rpx;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
 
-.home-month {
-    margin-bottom: 56rpx;
-}
+        .banner-card__tag {
+            color: #7dd3fc;
+            background: rgba(43, 140, 238, 0.18);
+            border: 1rpx solid rgba(125, 211, 252, 0.22);
+        }
 
-.home-month__head {
-    margin-bottom: 28rpx;
-}
+        .banner-card__target {
+            color: rgba(241, 245, 249, 0.92);
+            background: rgba(15, 23, 42, 0.28);
+            border: 1rpx solid rgba(255, 255, 255, 0.14);
+        }
 
-.home-month__ghost {
-    font-size: 82rpx;
-    line-height: 1;
-    font-weight: 900;
-    color: rgba(148, 163, 184, 0.42);
-    letter-spacing: -2rpx;
-}
+        .banner-card__title {
+            font-size: 34rpx;
+            line-height: 1.25;
+            font-weight: 700;
+            color: #f8fafc;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
 
-.home-month__meta {
-    margin-top: -20rpx;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 16rpx;
-}
+        .banner-card__desc {
+            margin-top: 8rpx;
+            font-size: 22rpx;
+            line-height: 1.45;
+            color: rgba(226, 232, 240, 0.84);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
 
-.home-month__year {
-    font-size: 38rpx;
-    font-weight: 800;
-    color: #f5f8ff;
-}
+        .banner-card__meta {
+            margin-top: 18rpx;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
 
-.home-month__line {
-    flex: 1;
-    height: 1rpx;
-    background: rgba(115, 130, 154, 0.34);
-}
+        .banner-card__meta-chip {
+            display: inline-flex;
+            align-items: center;
+            min-height: 42rpx;
+            padding: 0 16rpx;
+            border-radius: 999rpx;
+            font-size: 22rpx;
+            color: #dbe7f5;
+            background: rgba(15, 23, 42, 0.26);
+            border: 1rpx solid rgba(255, 255, 255, 0.12);
+        }
 
-.home-month__tag {
-    font-size: 20rpx;
-    font-weight: 800;
-    letter-spacing: 3rpx;
-    color: #619aef;
-    text-transform: uppercase;
-}
+        .banner-card__meta-arrow {
+            width: 56rpx;
+            height: 56rpx;
+            border-radius: 16rpx;
+            background: rgba(20, 28, 39, 0.32);
+            border: 1rpx solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.home-day {
-    margin-bottom: 56rpx;
-}
+        &:active .banner-card__image {
+            transform: scale(1.08);
+        }
 
-.home-day__marker {
-    display: flex;
-    align-items: center;
-    gap: 16rpx;
-    margin-bottom: 20rpx;
-}
+        @media (hover: hover) {
+            &:hover .banner-card__image {
+                transform: scale(1.08);
+            }
+        }
 
-.home-day__number {
-    font-size: 54rpx;
-    line-height: 1;
-    font-weight: 900;
-    color: #f5f8ff;
-}
+        &.is-collection {
+            .banner-card__tag {
+                color: #f3e8ff;
+                background: rgba(126, 34, 206, 0.32);
+                border-color: rgba(216, 180, 254, 0.34);
+            }
 
-.home-day__divider {
-    width: 4rpx;
-    height: 52rpx;
-    border-radius: 999rpx;
-    background: linear-gradient(180deg, #79a8ff, rgba(121, 168, 255, 0.2));
-}
+            .banner-card__meta-chip {
+                color: #f3e8ff;
+                background: rgba(15, 23, 42, 0.38);
+                border-color: rgba(192, 132, 252, 0.24);
+            }
+        }
 
-.home-day__label {
-    font-size: 20rpx;
-    line-height: 1.5;
-    font-weight: 700;
-    letter-spacing: 2rpx;
-    color: rgba(226, 232, 240, 0.88);
-    text-transform: uppercase;
-}
+        &.is-keyword {
+            .banner-card__tag {
+                color: #ecfccb;
+                background: rgba(101, 163, 13, 0.28);
+                border-color: rgba(190, 242, 100, 0.3);
+            }
 
-.home-timeline-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 28rpx;
-}
+            .banner-card__meta-chip {
+                color: #ecfccb;
+                background: rgba(15, 23, 42, 0.34);
+                border-color: rgba(163, 230, 53, 0.18);
+            }
+        }
 
-.home-timeline-card {
-    position: relative;
-    overflow: hidden;
-    height: 610rpx;
-    border-radius: 28rpx;
-    background: #18222f;
-    box-shadow:
-        0 18rpx 40rpx rgba(0, 0, 0, 0.24),
-        inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
-}
+        &.is-spotlight {
+            .banner-card__tag {
+                color: #fde68a;
+                background: rgba(245, 158, 11, 0.18);
+                border-color: rgba(253, 230, 138, 0.3);
+            }
 
-.home-timeline-card--wide {
-    grid-column: 1 / -1;
-    height: 430rpx;
-}
-
-.home-timeline-card__image {
-    width: 100%;
-    height: 100%;
-}
-
-.home-timeline-card__overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(8, 11, 18, 0) 0%, rgba(8, 11, 18, 0) 60%, rgba(8, 11, 18, 0.88) 100%);
-}
-
-.home-timeline-card__content {
-    position: absolute;
-    left: 22rpx;
-    right: 22rpx;
-    bottom: 22rpx;
-    z-index: 1;
-}
-
-.home-timeline-card__classify {
-    display: inline-flex;
-    align-items: center;
-    min-height: 34rpx;
-    padding: 0 12rpx;
-    margin-bottom: 12rpx;
-    border-radius: 999rpx;
-    background: rgba(97, 154, 239, 0.16);
-    border: 1rpx solid rgba(97, 154, 239, 0.2);
-    color: #c7dbff;
-    font-size: 18rpx;
-    font-weight: 800;
-}
-
-.home-timeline-card__title {
-    font-size: 30rpx;
-    line-height: 1.36;
-    font-weight: 800;
-    color: #f8fafc;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.home-timeline-card__footer {
-    margin-top: 14rpx;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: rgba(226, 232, 240, 0.82);
-    font-size: 22rpx;
-}
-
-.home-timeline-card__score {
-    display: flex;
-    align-items: center;
-    gap: 6rpx;
-}
-
-.hot-switch {
-    margin: 12rpx auto 24rpx;
-    padding: 8rpx;
-    width: fit-content;
-    display: flex;
-    align-items: center;
-    gap: 10rpx;
-    border-radius: 999rpx;
-    background: rgba(17, 25, 34, 0.9);
-    border: 1rpx solid rgba(148, 163, 184, 0.14);
-}
-
-.hot-switch__item {
-    min-width: 220rpx;
-    height: 74rpx;
-    padding: 0 26rpx;
-    border-radius: 999rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #94a3b8;
-    font-size: 24rpx;
-    font-weight: 700;
-
-    &.is-active {
-        color: #fff;
-        background: linear-gradient(135deg, #2b8cee, #1f6fd1);
-        box-shadow: 0 10rpx 24rpx rgba(43, 140, 238, 0.24);
+            .banner-card__meta-chip {
+                color: #fef3c7;
+            }
+        }
     }
 }
 
-.hot-intro {
-    margin-bottom: 28rpx;
+.signal-callout-new {
+    margin: 16rpx 20rpx 32rpx;
+    padding: 28rpx 28rpx;
+    border-radius: 36rpx;
+    background: linear-gradient(135deg, rgba(40, 179, 137, 0.04) 0%, rgba(97, 154, 239, 0.04) 100%);
+    border: 1rpx solid rgba(40, 179, 137, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
+    box-sizing: border-box;
+    box-shadow: 0 10rpx 30rpx var(--shadow-color);
+    transition: all 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+
+    .theme-dark & {
+        background: linear-gradient(135deg, rgba(40, 179, 137, 0.12) 0%, rgba(30, 41, 59, 0.45) 100%);
+        border: 1rpx solid rgba(40, 179, 137, 0.22);
+    }
+
+    &.is-expanded {
+        background: var(--panel-background);
+        border-color: var(--panel-border);
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+    }
+
+    .signal-pulse-dot {
+        width: 12rpx;
+        height: 12rpx;
+        background: #28b389;
+        border-radius: 50%;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #28b389;
+            animation: pulse-ring 1.8s infinite ease-in-out;
+        }
+    }
+
+    &__eyebrow {
+        font-size: 20rpx;
+        font-weight: 900;
+        letter-spacing: 2rpx;
+        color: #28b389;
+        text-transform: uppercase;
+        line-height: 1;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+    }
+
+    &__body {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 6rpx;
+    }
+
+    &__title {
+        font-size: 32rpx;
+        font-weight: 850;
+        color: var(--text-primary);
+        line-height: 1.2;
+    }
+
+    &__desc {
+        font-size: 24rpx;
+        line-height: 1.5;
+        color: var(--text-secondary);
+    }
+
+    &__panel {
+        padding-top: 24rpx;
+        border-top: 1rpx solid var(--panel-border);
+        display: flex;
+        flex-direction: column;
+        gap: 20rpx;
+    }
 }
 
-.hot-intro__badge {
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+}
+
+.signal-group-new {
+    display: flex;
+    flex-direction: column;
+    gap: 12rpx;
+
+    &__title {
+        font-size: 18rpx;
+        font-weight: 900;
+        letter-spacing: 1rpx;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+    }
+
+    &__chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12rpx;
+    }
+}
+
+.signal-chip-new {
     display: inline-flex;
-    height: 40rpx;
-    padding: 0 14rpx;
     align-items: center;
-    border-radius: 999rpx;
-    background: rgba(43, 140, 238, 0.16);
-    color: #7dd3fc;
-    font-size: 18rpx;
-    font-weight: 800;
-    letter-spacing: 2rpx;
-    margin-bottom: 16rpx;
+    gap: 8rpx;
+    padding: 8rpx 20rpx;
+    background: var(--page-background-secondary);
+    border: 1rpx solid var(--panel-border);
+    border-radius: 100rpx;
+    color: var(--text-primary);
+    font-size: 22rpx;
+    font-weight: 700;
+    transition: transform 0.2s;
+
+    &:active {
+        transform: scale(0.96);
+    }
+
+    .chip-text {
+        line-height: 1;
+    }
+
+    &--tag {
+        color: #28b389;
+        background: rgba(40, 179, 137, 0.06);
+        border-color: rgba(40, 179, 137, 0.16);
+
+        .theme-dark & {
+            background: rgba(40, 179, 137, 0.12);
+            border-color: rgba(40, 179, 137, 0.25);
+        }
+    }
 }
 
-.hot-intro__desc {
+.signal-manage-new {
+    min-height: 72rpx;
+    border-radius: 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8rpx;
+    background: var(--panel-background-strong);
+    border: 1rpx solid var(--panel-border);
+    color: var(--text-primary);
     font-size: 24rpx;
-    line-height: 1.8;
-    color: #94a3b8;
+    font-weight: 800;
+    transition: background 0.2s;
+
+    &:active {
+        background: var(--page-background-secondary);
+    }
 }
 
-.hot-hero-section {
-    margin-bottom: 40rpx;
+.notice {
+    width: 710rpx;
+    height: 76rpx;
+    background: var(--panel-background);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1rpx solid var(--panel-border);
+    margin: 0 auto 28rpx;
+    border-radius: 80rpx;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 8rpx 24rpx var(--shadow-color);
+    box-sizing: border-box;
+    padding: 0 16rpx 0 16rpx;
+    transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
+
+    &:active {
+        transform: scale(0.98);
+        filter: brightness(0.95);
+    }
+
+    .left {
+        display: flex;
+        align-items: center;
+        margin-right: 16rpx;
+        flex-shrink: 0;
+
+        .left-tag {
+            display: flex;
+            align-items: center;
+            gap: 8rpx;
+            padding: 8rpx 18rpx;
+            background: rgba(40, 179, 137, 0.12);
+            border-radius: 100rpx;
+
+            .text {
+                color: $wp-theme-color;
+                font-weight: 700;
+                font-size: 22rpx;
+                line-height: 1;
+            }
+        }
+    }
+
+    .center {
+        flex: 1;
+        height: 100%;
+        overflow: hidden;
+
+        .notice-swiper {
+            height: 100%;
+        }
+
+        .notice-swiper-item {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            font-size: 24rpx;
+            font-weight: 500;
+            color: var(--text-primary);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .notice-nav {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .right {
+        width: 48rpx;
+        height: 48rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
 }
 
-.hot-hero-card {
+.select {
     position: relative;
     overflow: hidden;
-    border-radius: 32rpx;
-    background: #182431;
-    box-shadow: 0 24rpx 56rpx rgba(0, 0, 0, 0.28);
+
+    .select-watermark {
+        position: absolute;
+        top: -32rpx;
+        right: -10rpx;
+        font-size: 144rpx;
+        font-weight: 900;
+        color: var(--text-primary);
+        opacity: 0.05;
+        text-transform: uppercase;
+        letter-spacing: -2rpx;
+        pointer-events: none;
+        z-index: 0;
+        white-space: nowrap;
+        user-select: none;
+        -webkit-mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 100%);
+        mask-image: linear-gradient(to left, rgba(0, 0, 0, 1) 40%, rgba(0, 0, 0, 0) 100%);
+        transition: opacity 0.3s ease;
+
+        .theme-dark & {
+            opacity: 0.04;
+        }
+    }
+
+    .index-title {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 24rpx;
+    }
+
+    .date {
+        display: flex;
+        align-items: center;
+        gap: 14rpx;
+
+        .text {
+            font-size: 24rpx;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.02em;
+        }
+    }
+
+    .benefit-text-tip {
+        font-size: 24rpx;
+        font-weight: 600;
+        color: var(--text-secondary, #94a3b8);
+        letter-spacing: 0.4rpx;
+        padding-right: 4rpx;
+    }
+
+    .btn,
+    .date .button,
+    .refresh-btn {
+        margin: 0;
+        padding: 0 18rpx;
+        height: 48rpx;
+        line-height: 48rpx;
+        font-size: 21rpx;
+        font-weight: 600;
+        border-radius: 999rpx;
+        border: none;
+        background-color: var(--text-primary);
+        color: var(--page-background);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8rpx;
+        letter-spacing: 0.4rpx;
+        box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
+        transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
+
+        &::after {
+            border: none;
+        }
+
+        &:active {
+            transform: scale(0.94);
+            filter: brightness(0.92);
+        }
+
+        .refresh-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+            &.is-spinning {
+                animation: refreshSpin 0.7s linear infinite;
+            }
+        }
+
+        &.is-default,
+        &.is-collection,
+        &.is-keyword,
+        &.is-spotlight {
+            background-color: var(--text-primary);
+            color: var(--page-background);
+            border: none;
+            box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
+        }
+    }
+
+    .content {
+        height: 580rpx;
+        position: relative;
+        z-index: 1;
+
+        .home-scroll {
+            white-space: nowrap;
+            height: 100%;
+            box-sizing: border-box;
+
+            .box {
+                width: 280rpx;
+                height: calc(100% - 50rpx);
+                display: inline-flex;
+                justify-content: center;
+                align-items: flex-start;
+                margin: 20rpx 20rpx 50rpx 0rpx;
+                transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease, opacity 0.12s ease, box-shadow 0.3s ease;
+                will-change: transform, filter;
+                position: relative;
+                overflow: hidden;
+                border-radius: 28rpx;
+                box-sizing: border-box;
+                // box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
+                box-shadow: none;
+
+                &:first-child {
+                    margin-left: 20rpx;
+                }
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    border-radius: 28rpx;
+                    background: linear-gradient(90deg,
+                            rgba(200, 200, 200, 0.08) 25%,
+                            rgba(200, 200, 200, 0.18) 50%,
+                            rgba(200, 200, 200, 0.08) 75%);
+                    background-size: 200% 100%;
+                    animation: skeleton-shimmer 1.6s infinite linear;
+                    z-index: 0;
+                    pointer-events: none;
+                }
+
+                .box-image {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 28rpx;
+                    display: block;
+                    position: absolute;
+                    inset: 0;
+                    object-fit: cover;
+                    transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                }
+
+                .box-badge {
+                    position: absolute;
+                    top: 14rpx;
+                    left: 14rpx;
+                    right: auto;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 6rpx 14rpx;
+                    background: rgba(0, 0, 0, 0.6);
+                    color: rgba(255, 255, 255, 0.9);
+                    font-size: 18rpx;
+                    font-weight: 500;
+                    line-height: 1;
+                    border-radius: 9999rpx;
+                    backdrop-filter: blur(4px);
+                    -webkit-backdrop-filter: blur(4px);
+                    border: none;
+                    box-shadow: none;
+                    z-index: 2;
+                    animation: badgeFadeIn 0.3s ease-out;
+                    will-change: transform, opacity;
+                }
+
+                .box-badge--subtle,
+                .box-badge--free,
+                .box-badge--ad,
+                .box-badge--latest,
+                .box-badge--vip {
+                    background: rgba(0, 0, 0, 0.6);
+                    color: rgba(255, 255, 255, 0.9);
+                    font-size: 18rpx;
+                    font-weight: 500;
+                    line-height: 1;
+                    border: none;
+                    box-shadow: none;
+                }
+
+                &--active,
+                &:active {
+                    transform: scale(0.97) !important;
+                    filter: brightness(0.9) !important;
+                }
+
+                // Hero mode
+                &.is-hero {
+                    width: 460rpx;
+                    height: calc(100% - 50rpx);
+                    padding-bottom: 0;
+
+                    &::before {
+                        bottom: 0;
+                    }
+
+                    .box-hero-overlay {
+                        position: absolute;
+                        inset: 0;
+                        border-radius: 28rpx;
+                        background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.65) 100%);
+                        pointer-events: none;
+                        z-index: 2;
+                        opacity: 0;
+                        transition: opacity 0.4s ease-in-out;
+
+                        &.is-visible {
+                            opacity: 1;
+                        }
+                    }
+
+                    .box-hero-shimmer {
+                        position: absolute;
+                        top: -50%;
+                        left: -50%;
+                        width: 60%;
+                        height: 200%;
+                        background: linear-gradient(90deg,
+                                rgba(255, 255, 255, 0) 0%,
+                                rgba(255, 255, 255, 0.18) 50%,
+                                rgba(255, 255, 255, 0) 100%);
+                        pointer-events: none;
+                        z-index: 2;
+                        opacity: 0;
+                        animation: heroShimmerSweep 7s ease-in-out infinite;
+
+                        &.is-visible {
+                            opacity: 1;
+                        }
+                    }
+
+                    .box-hero-content {
+                        position: absolute;
+                        left: 24rpx;
+                        bottom: 30rpx;
+                        right: 24rpx;
+                        z-index: 3;
+                        opacity: 0;
+                        transition: opacity 0.4s ease-in-out, transform 0.3s ease;
+
+                        &.is-visible {
+                            opacity: 1;
+                        }
+
+                        .day-tag {
+                            font-size: 64rpx;
+                            font-weight: 900;
+                            color: rgba(255, 255, 255, 0.98);
+                            line-height: 1;
+                            margin-bottom: 8rpx;
+                            text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.4);
+                        }
+
+                        .pick-text {
+                            font-size: 20rpx;
+                            font-weight: 850;
+                            color: #fde68a;
+                            text-transform: uppercase;
+                            letter-spacing: 4rpx;
+                            text-shadow: 0 2rpx 10rpx rgba(253, 230, 138, 0.35);
+                        }
+                    }
+                }
+            }
+
+            @media (hover: hover) {
+                .box:hover {
+                    box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.45);
+
+                    .box-image {
+                        transform: scale(1.08);
+                    }
+                }
+            }
+
+        }
+    }
 }
 
-.hot-hero-card--first {
-    height: 430rpx;
-    margin-bottom: 30rpx;
+.tags-section {
+    margin: 0 0 20rpx;
+    padding: 0;
+
+    .tags-header {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        margin: 0 20rpx 10rpx;
+
+        .tags-title {
+            font-size: 26rpx;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.5rpx;
+        }
+    }
+
+    .tags-scroll {
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    .tags-list {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 16rpx;
+        padding: 10rpx 0 10rpx 0;
+
+        &::before {
+            content: '';
+            width: 4rpx;
+            flex-shrink: 0;
+        }
+
+        &::after {
+            content: '';
+            width: 4rpx;
+            flex-shrink: 0;
+        }
+    }
+
+    .tag-chip {
+        height: 56rpx;
+        box-sizing: border-box;
+        padding: 0 24rpx;
+        border-radius: 100rpx;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--panel-background);
+        border: 1rpx solid var(--panel-border);
+        box-shadow: 0 4rpx 10rpx var(--shadow-color);
+        transition: transform 0.2s, opacity 0.2s;
+        white-space: nowrap;
+        flex-shrink: 0;
+
+        &:active {
+            transform: scale(0.95);
+            opacity: 0.85;
+        }
+
+        .tag-label {
+            font-size: 24rpx;
+            font-weight: 600;
+            line-height: 1;
+            color: var(--text-primary);
+        }
+    }
 }
 
-.hot-hero-grid {
-    margin-top: 18rpx;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 30rpx;
+.classify {
+    .more {
+        font-size: 24rpx;
+        font-weight: 600;
+        color: var(--text-tertiary);
+        padding-right: 6rpx;
+    }
+
+    .classify-grid-padding {
+        padding: 30rpx 20rpx 30rpx 20rpx;
+    }
 }
 
-.hot-hero-card--secondary {
-    height: 440rpx;
+.ad-slot {
+    padding: 0;
+    margin: 0;
+    min-height: 0;
+    box-sizing: border-box;
+
+    &__inner {
+        display: none;
+    }
+
+    &.ready &__inner {
+        display: block;
+        margin: 0 30rpx 30rpx;
+    }
 }
 
-.hot-hero-card__image {
-    width: 100%;
+@keyframes refreshSpin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes badgeFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4rpx);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// ── 骨架屏公共 mixin ──
+$sk-base: rgba(148, 163, 184, 0.12);
+$sk-shine: rgba(148, 163, 184, 0.22);
+
+%sk-shimmer {
+    background: linear-gradient(90deg, $sk-base 25%, $sk-shine 50%, $sk-base 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s infinite linear;
+}
+
+// ── Banner 骨架 ──
+.sk-banner {
+    margin: 0 20rpx;
+    width: calc(100% - 40rpx);
     height: 100%;
-}
-
-.hot-hero-card__overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 48%, rgba(6, 12, 18, 0.9) 100%);
-}
-
-.hot-hero-card__overlay--soft {
-    background: linear-gradient(180deg, rgba(6, 12, 18, 0) 0%, rgba(6, 12, 18, 0) 50%, rgba(6, 12, 18, 0.74) 100%);
-}
-
-.hot-hero-card__rank {
-    position: absolute;
-    top: 22rpx;
-    left: 22rpx;
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 999rpx;
-    background: rgba(30, 41, 59, 0.92);
-    color: #fff;
-    font-size: 30rpx;
-    font-weight: 800;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 14rpx 30rpx rgba(0, 0, 0, 0.24);
-}
-
-.hot-hero-card__rank--first {
-    background: linear-gradient(135deg, #2b8cee, #60a5fa);
-}
-
-.hot-hero-card__rank--second {
-    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
-}
-
-.hot-hero-card__content {
-    position: absolute;
-    left: 28rpx;
-    right: 28rpx;
-    bottom: 28rpx;
-    z-index: 1;
-}
-
-.hot-hero-card__content--compact {
-    left: 20rpx;
-    right: 20rpx;
-    bottom: 20rpx;
-}
-
-.hot-hero-card__tag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 36rpx;
-    padding: 0 14rpx;
-    border-radius: 999rpx;
-    background: rgba(43, 140, 238, 0.18);
-    border: 1rpx solid rgba(125, 211, 252, 0.22);
-    color: #7dd3fc;
-    font-size: 18rpx;
-    font-weight: 800;
-    margin-bottom: 14rpx;
-}
-
-.hot-hero-card__title {
-    font-size: 42rpx;
-    line-height: 1.2;
-    font-weight: 800;
-    color: #e2e8f0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.hot-hero-card__title--compact {
-    font-size: 28rpx;
-    line-height: 1.38;
-}
-
-.hot-hero-card__meta {
-    margin-top: 16rpx;
-    display: flex;
-    align-items: center;
-    gap: 24rpx;
-}
-
-.hot-hero-card__meta-item,
-.hot-hero-card__sub {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-    color: #cbd5e1;
-    font-size: 22rpx;
-}
-
-.hot-rank-section__title {
-    margin-bottom: 18rpx;
-    display: flex;
-    align-items: center;
-    gap: 14rpx;
-    color: #94a3b8;
-    font-size: 18rpx;
-    font-weight: 800;
-    letter-spacing: 4rpx;
-    text-transform: uppercase;
-}
-
-.hot-rank-section__line {
-    flex: 1;
-    height: 1rpx;
-    background: rgba(51, 65, 85, 0.8);
-}
-
-.hot-rank-list {
-    display: flex;
-    flex-direction: column;
-    gap: 30rpx;
-}
-
-.hot-rank-item {
-    height: 280rpx;
     border-radius: 28rpx;
-    background: rgba(24, 36, 49, 0.92);
-    border: 1rpx solid rgba(51, 65, 85, 0.56);
-    display: flex;
-    align-items: stretch;
     overflow: hidden;
-    box-shadow:
-        0 10rpx 24rpx rgba(0, 0, 0, 0.2),
-        0 24rpx 48rpx rgba(0, 0, 0, 0.16);
-}
-
-.hot-rank-item__media {
     position: relative;
-    width: 190rpx;
-    flex-shrink: 0;
+    @extend %sk-shimmer;
+
+    .sk-banner__img {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        inset: 0;
+    }
+
+    .sk-banner__content {
+        position: absolute;
+        left: 28rpx;
+        right: 28rpx;
+        bottom: 26rpx;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 14rpx;
+    }
+
+    .sk-banner__tag-row {
+        display: flex;
+        gap: 16rpx;
+    }
 }
 
-.hot-rank-item__thumb {
-    width: 100%;
+// ── 通用骨架条 ──
+.sk-bar {
+    @extend %sk-shimmer;
+    border-radius: 8rpx;
+    opacity: 0.5;
+
+    &--tag {
+        height: 40rpx;
+        width: 120rpx;
+        border-radius: 999rpx;
+    }
+
+    &--short {
+        width: 80rpx;
+    }
+
+    &--title {
+        height: 32rpx;
+        width: 90%;
+    }
+
+    &--medium {
+        width: 60%;
+    }
+
+    &--desc {
+        height: 24rpx;
+        width: 75%;
+    }
+
+    &--notice {
+        height: 32rpx;
+        width: 80%;
+        border-radius: 6rpx;
+    }
+}
+
+// ── Notice 骨架 ──
+.sk-notice-bar {
     height: 100%;
-}
-
-.hot-rank-item__index {
-    position: absolute;
-    left: 16rpx;
-    top: 16rpx;
-    width: 50rpx;
-    height: 50rpx;
-    border-radius: 999rpx;
-    background: rgba(15, 23, 42, 0.84);
-    color: #fff;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 22rpx;
-    font-weight: 800;
+    padding-left: 8rpx;
 }
 
-.hot-rank-item__body {
-    min-width: 0;
-    flex: 1;
-    padding: 28rpx 22rpx;
-    display: flex;
+// ── 横向卡片骨架（Daily/Latest）──
+.sk-scroll-row {
+    display: inline-flex;
+    align-items: flex-start;
+    height: calc(100% - 66rpx);
+    padding: 20rpx 20rpx 50rpx;
+    gap: 24rpx;
+    white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
+
+    &--subjects {
+        height: 100%;
+        padding: 10rpx 20rpx;
+        gap: 20rpx;
+    }
+}
+
+.sk-card {
+    width: 280rpx;
+    height: 514rpx;
+    flex-shrink: 0;
+    border-radius: 28rpx;
+    @extend %sk-shimmer;
+
+    &--hero {
+        width: 440rpx;
+    }
+
+    &--subject-skeleton {
+        width: 580rpx !important;
+        height: 400rpx !important;
+        border-radius: 32rpx;
+        flex-shrink: 0;
+    }
+}
+
+@keyframes heroPanCover {
+    0% {
+        transform: scale(1.08) translate(0%, 0%);
+    }
+
+    50% {
+        transform: scale(1.16) translate(-2.5%, -1.5%);
+    }
+
+    100% {
+        transform: scale(1.1) translate(2.5%, 1%);
+    }
+}
+
+@keyframes heroShimmerSweep {
+    0% {
+        transform: translateX(-150%) rotate(25deg);
+    }
+
+    100% {
+        transform: translateX(250%) rotate(25deg);
+    }
+}
+
+@keyframes subjectPanCover {
+    0% {
+        transform: scale(1.06) translate(0%, 0%);
+    }
+
+    50% {
+        transform: scale(1.14) translate(-2.5%, -1.5%);
+    }
+
+    100% {
+        transform: scale(1.08) translate(2.5%, 1%);
+    }
+}
+
+.content--subjects {
+    height: 520rpx !important;
+}
+
+.subject-box-new {
+    width: 660rpx;
+    height: 480rpx;
+    display: inline-flex;
     flex-direction: column;
-    justify-content: center;
-}
-
-.hot-rank-item__title {
-    font-size: 28rpx;
-    line-height: 1.45;
-    font-weight: 800;
-    color: #e2e8f0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    flex-shrink: 0;
+    background: var(--panel-background);
+    margin: 20rpx 20rpx 48rpx 0rpx;
+    position: relative;
+    border-radius: 32rpx;
+    box-sizing: border-box;
+    box-shadow: none;
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease;
+    cursor: pointer;
     overflow: hidden;
+    transform: translateZ(0);
+
+    &:first-child {
+        margin-left: 20rpx;
+    }
+
+    &:hover {
+        .subject-box-new__cover {
+            transform: scale(1.08);
+        }
+    }
+
+    &--active,
+    &:active {
+        transform: scale(0.96) !important;
+        box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0, 0, 0, 0.12)) !important;
+
+        .subject-box-new__cover {
+            transform: scale(1.08) !important;
+        }
+    }
+
+    &__cover-wrapper {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        border-radius: 32rpx 32rpx 0 0;
+        transform: translateZ(0);
+    }
+
+    &__cover {
+        width: 100%;
+        height: 100%;
+        display: block;
+        position: absolute;
+        inset: 0;
+        object-fit: cover;
+        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    &__floating-badges {
+        position: absolute;
+        top: 16rpx;
+        right: 16rpx;
+        display: flex;
+        align-items: center;
+        gap: 10rpx;
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        z-index: 5;
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4rpx;
+        padding: 6rpx 14rpx;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1rpx solid rgba(255, 255, 255, 0.15);
+        border-radius: 100rpx;
+        color: #fbbf24;
+        font-size: 22rpx;
+        font-weight: 900;
+        backdrop-filter: blur(8px);
+
+        .badge-text {
+            line-height: 1;
+        }
+    }
+
+    &__floating-count {
+        padding: 6rpx 14rpx;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1rpx solid rgba(255, 255, 255, 0.15);
+        border-radius: 100rpx;
+        color: #ffffff;
+        font-size: 22rpx;
+        font-weight: 800;
+        backdrop-filter: blur(8px);
+    }
+
+    &__info {
+        flex: 1;
+        width: 100%;
+        padding: 16rpx 24rpx;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--panel-background);
+    }
+
+    &__title {
+        font-size: 28rpx;
+        font-weight: 850;
+        color: var(--text-primary);
+        line-height: 1.2;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__desc {
+        font-size: 22rpx;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+        margin-top: 6rpx;
+    }
 }
 
-.hot-rank-item__meta {
-    margin-top: 18rpx;
-    display: flex;
-    flex-direction: column;
-    gap: 8rpx;
-    color: #94a3b8;
-    font-size: 22rpx;
-}
-
-.hot-rank-item__metric {
-    color: #7dd3fc;
-    font-weight: 800;
-}
-
-.hot-rank-item__action {
-    width: 64rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.tabbar-bottom-spacer {
+    width: 100%;
+    height: calc(96px + env(safe-area-inset-bottom));
 }
 </style>

@@ -692,8 +692,8 @@ const handleSingleRemove = (item) => {
         dialogDesc.value = t('board.removeFromBoard');
         dialogActionType.value = 'remove_wall_board';
     } else {
-        dialogTitle.value = t('favorite.unfavoriteTitle');
-        dialogDesc.value = t('favorite.unfavoriteConfirmSingle');
+        dialogTitle.value = t('favorite.unfavoriteConfirmTitle');
+        dialogDesc.value = t('favorite.unfavoriteConfirmDesc');
         dialogActionType.value = 'unfavorite_single';
     }
     dialogRef.value?.open();
@@ -719,8 +719,8 @@ const handleBatchAction = () => {
         dialogDesc.value = tp('board.removeFromBoard', { count: selectedIds.value.size });
         dialogActionType.value = 'remove_wall_board_batch';
     } else {
-        dialogTitle.value = t('favorite.unfavoriteTitle');
-        dialogDesc.value = tp('favorite.unfavoriteConfirmBatch', { count: selectedIds.value.size });
+        dialogTitle.value = t('favorite.unfavoriteConfirmTitle');
+        dialogDesc.value = tp('favorite.batchUnfavoriteConfirmDesc', { count: selectedIds.value.size });
         dialogActionType.value = 'unfavorite_batch';
     }
     dialogRef.value?.open();
@@ -806,7 +806,7 @@ const onConfirmDialog = async () => {
             redistributeColumns();
             selectedIds.value.clear();
             isSelectMode.value = false;
-            uni.showToast({ title: t('favorite.unfavoriteSuccess'), icon: 'none' });
+            uni.showToast({ title: t('favorite.batchUnfavoriteSuccess'), icon: 'none' });
         } catch (e) {
             uni.showToast({ title: t('common.failed'), icon: 'none' });
         }

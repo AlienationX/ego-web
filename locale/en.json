@@ -5,6 +5,7 @@
     "tabbar.user": "Profile",
     "common": {
         "appName": "Ego Wallpapers",
+        "all": "All",
         "today": "Today",
         "yesterday": "Yesterday",
         "more": "More",
@@ -46,6 +47,7 @@
         "saving": "Saving...",
         "saveSettings": "Save Settings",
         "noMore": "No more wallpapers",
+        "noData": "No data available",
         "needLogin": "Please sign in first",
         "login": "Login",
         "downloading": "Downloading...",
@@ -82,6 +84,8 @@
     },
     "index": {
         "title": "Recommend",
+        "searchPlaceholder": "Explore 4K wallpapers, categories, tags...",
+        "notificationCenter": "Notification Center",
         "notice": "Notice",
         "tabs": {
             "home": "Home",
@@ -236,6 +240,15 @@
         "empty": "No ranking data yet",
         "emptyDesc": "There is not enough ranking data at the moment. Please check back later.",
         "wallpaper": "Wallpaper"
+    },
+    "subjects": {
+        "title": "Curated Collections",
+        "badge": "CURATED COLLECTIONS",
+        "subtitle": "Handcrafted HD wallpaper collections curated for visual inspiration",
+        "emptyTitle": "No Collections Available",
+        "emptyDesc": "Stay tuned, more curated collections are on the way!",
+        "noMore": "—— No more collections ——",
+        "walls": "Walls"
     },
     "category": {
         "title": "Category",

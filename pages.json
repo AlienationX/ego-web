@@ -180,15 +180,15 @@
             "style": {
                 "navigationBarTitleText": "时间轴",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": true
             }
         },
         {
-            "path": "pages/app/topN",
+            "path": "pages/app/top",
             "style": {
                 "navigationBarTitleText": "Top 10",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": true
             }
         },
         {

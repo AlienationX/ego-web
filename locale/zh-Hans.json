@@ -5,6 +5,7 @@
     "tabbar.user": "我的",
     "common": {
         "appName": "本我壁纸",
+        "all": "全部",
         "today": "今天",
         "yesterday": "昨天",
         "more": "更多",
@@ -46,6 +47,7 @@
         "saving": "保存中...",
         "saveSettings": "保存设置",
         "noMore": "没有更多了",
+        "noData": "暂无数据",
         "needLogin": "请先登录",
         "login": "登录",
         "downloading": "下载中...",
@@ -82,6 +84,8 @@
     },
     "index": {
         "title": "推荐",
+        "searchPlaceholder": "探索海量 4K 精选壁纸、分类、标签...",
+        "notificationCenter": "通知中心",
         "notice": "公告",
         "tabs": {
             "home": "首页",
@@ -236,6 +240,15 @@
         "empty": "暂无排行数据",
         "emptyDesc": "当前还没有足够的排行内容，可以稍后再来看看。",
         "wallpaper": "壁纸"
+    },
+    "subjects": {
+        "title": "专题策划",
+        "badge": "CURATED COLLECTIONS",
+        "subtitle": "精心编排的高清壁纸合辑，探索专属灵感与艺术美学",
+        "emptyTitle": "暂无专题合集",
+        "emptyDesc": "敬请期待，更多精美策划合集正在路上！",
+        "noMore": "—— 没有更多专题了 ——",
+        "walls": "张壁纸"
     },
     "category": {
         "title": "分类",
