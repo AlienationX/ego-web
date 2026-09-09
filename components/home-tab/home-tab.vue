@@ -86,7 +86,7 @@
             </view>
 
             <!-- Notice 公告栏 -->
-            <view class="notice">
+            <view v-if="false" class="notice">
                 <view class="left">
                     <view class="left-tag">
                         <uni-icons type="sound-filled" size="16" color="#28B389"></uni-icons>

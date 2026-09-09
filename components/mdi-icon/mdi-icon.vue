@@ -1,17 +1,24 @@
 <template>
-    <!-- #ifdef APP -->
-    <view class="mdi-icon mdi-icon--app" :style="appContainerStyle">
-        <image class="mdi-icon__image" :src="path" :style="appImageStyle" mode="aspectFit"></image>
-    </view>
-    <!-- #endif -->
+    <!-- 统一使用字体图标 (iconfont) 方案，确保在 iOS App、Android App、微信小程序及 Web 端拥有一致的高性能矢量渲染与改色表现 -->
+    <text 
+        v-if="isFontIcon" 
+        :class="['mdi-icon', 'mdi-icon-font', `appicons-${iconName}`]" 
+        :style="iconStyle"
+    ></text>
 
-    <!-- #ifndef APP -->
-    <text :class="['mdi-icon', 'mdi-icon-font', `appicons-${iconName}`]" :style="webMiniStyle"></text>
-    <!-- #endif -->
+    <!-- 兜底模式：若图标不在 appicons 字体库中（如第三方品牌图片或动态 SVG），采用原生图片安全渲染 -->
+    <view 
+        v-else 
+        class="mdi-icon mdi-icon--fallback" 
+        :style="fallbackContainerStyle"
+    >
+        <image class="mdi-icon__image" :src="path" :style="fallbackImageStyle" mode="aspectFit"></image>
+    </view>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import iconList from '@/static/iconfont/appicons-list.js';
 
 defineOptions({
     options: {
@@ -34,6 +41,9 @@ const props = defineProps({
     },
 });
 
+// 构建字体库图标 Set，用于 O(1) 高性能匹配
+const fontIconSet = new Set(iconList);
+
 const sizeValue = computed(() => {
     const s = String(props.size);
     return isNaN(Number(s)) ? s : `${s}px`;
@@ -46,7 +56,13 @@ const iconName = computed(() => {
     return filename.replace(/\.svg$/i, '');
 });
 
-const webMiniStyle = computed(() => ({
+// 判断当前图标是否在字体图标库中
+const isFontIcon = computed(() => {
+    return fontIconSet.has(iconName.value);
+});
+
+// 矢量字体图标样式
+const iconStyle = computed(() => ({
     color: props.color,
     fontSize: sizeValue.value,
     width: sizeValue.value,
@@ -54,33 +70,25 @@ const webMiniStyle = computed(() => ({
     lineHeight: sizeValue.value,
 }));
 
-// ===== APP 原生：drop-shadow 方案 =====
-const appContainerStyle = computed(() => ({
+// 兜底图片容器与图片样式
+const fallbackContainerStyle = computed(() => ({
     width: sizeValue.value,
     height: sizeValue.value,
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
     flexShrink: 0,
 }));
 
-const appImageStyle = computed(() => {
-    const val = parseFloat(sizeValue.value);
-    const unit = sizeValue.value.replace(/[0-9.]/g, '') || 'px';
-    const offset = `${val}${unit}`;
-    return {
-        width: sizeValue.value,
-        height: sizeValue.value,
-        display: 'block',
-        filter: `drop-shadow(0 ${offset} 0 ${props.color})`,
-        transform: `translateY(-${offset})`,
-    };
-});
+const fallbackImageStyle = computed(() => ({
+    width: sizeValue.value,
+    height: sizeValue.value,
+    display: 'block',
+}));
 </script>
 
 <style>
-/* appicons.css 已移至 App.vue 全局样式，避免属性选择器 [class^="appicons-"] 触犯微信小程序组件 wxss 限制 */
+/* appicons.css 已引入 App.vue 全局样式 */
 
 :host {
     display: inline-flex;
@@ -97,10 +105,12 @@ const appImageStyle = computed(() => {
 }
 
 .mdi-icon-font {
+    font-family: 'appicons' !important;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     text-align: center;
+    vertical-align: middle;
     flex-shrink: 0;
 }
 </style>

@@ -9,10 +9,11 @@
             <view class="hint-text">{{ t('previewPage.swipeUpToView') }}</view>
         </view>
 
-        <view v-if="enableStatusbarTransition" class="preview-statusbar" :style="{
-            height: `${statusBarHeight}px`,
-            opacity: statusBarFillOpacity,
-        }"></view>
+        <!-- 顶部毛玻璃状态栏：静止时透明沉浸，向上滑时淡入渐变羽化毛玻璃 (与 classify/user/discover 一致) -->
+        <glass-status-bar
+            :is-scrolled="isScrolled"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-status-bar>
         <scroll-view scroll-y class="previewScroll" show-scrollbar="false" :style="previewScrollStyle"
             @scroll="handlePreviewScroll">
             <view class="previewLayout" :style="previewLayoutStyle">
@@ -1008,9 +1009,8 @@ const statusBarHeight = ref(getStatusBarHeight() || 0);
 // 使用新版 getWindowInfo API，搭配可选链兜底
 const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || 667;
 const previewViewportHeightPx = previewHeroHeightPx;
-// 控制状态栏是否执行渐变背景填充效果（沉浸式模式下设为 false，不执行渐变遮挡）
-const enableStatusbarTransition = ref(false);
-const statusBarFillOpacity = ref(0);
+// 顶部渐变羽化毛玻璃状态栏显示开关 (与 classify.vue / user.vue 一致)
+const isScrolled = ref(false);
 
 // ── 广告高度，控制预览页滚动区域 ──
 const adHeight = ref(0);
@@ -1033,13 +1033,8 @@ const handlePreviewScroll = (e) => {
     const scrollTop = Number(e?.detail?.scrollTop || 0);
     const scrollHeight = Number(e?.detail?.scrollHeight || 0);
 
-    if (enableStatusbarTransition.value) {
-        const revealStart = previewHeroHeightPx * 0.05;
-        const revealEnd = previewHeroHeightPx * 0.95;
-        statusBarFillOpacity.value = Math.min(1, Math.max(0, (scrollTop - revealStart) / (revealEnd - revealStart)));
-    } else {
-        statusBarFillOpacity.value = 0;
-    }
+    // 向上滑动浏览详情时，淡入渐变羽化毛玻璃
+    isScrolled.value = scrollTop > 20;
 
     const recommendScrollTop = Math.max(0, scrollTop - previewHeroHeightPx);
     const recommendScrollableDistance = Math.max(1, scrollHeight - previewViewportHeightPx - previewHeroHeightPx);
@@ -1094,6 +1089,8 @@ const capsuleRect = ref(null);
 // #ifdef MP-WEIXIN
 capsuleRect.value = uni.getMenuButtonBoundingClientRect();
 // #endif
+
+
 
 const backButtonTop = computed(() => {
     if (capsuleRect.value) {
@@ -1845,16 +1842,7 @@ const handleCopyWatermarkId = () => {
     min-height: 100vh;
 }
 
-.preview-statusbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 120;
-    pointer-events: none;
-    background: var(--page-background);
-    transition: opacity 0.22s ease;
-}
+
 
 .wallpaper-watermark {
     position: absolute;
@@ -2098,10 +2086,12 @@ const handleCopyWatermarkId = () => {
             margin-left: 0;
             border-radius: 100rpx;
             backdrop-filter: blur(10rpx);
-            border-radius: 1rpx solid rgba(255, 255, 255, 0.3);
+            -webkit-backdrop-filter: blur(10rpx);
+            border: 1rpx solid rgba(255, 255, 255, 0.3);
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 130;
         }
 
         .top-actions {
@@ -2113,6 +2103,7 @@ const handleCopyWatermarkId = () => {
             left: auto;
             margin: 0;
             pointer-events: auto;
+            z-index: 130;
         }
 
         .icon-btn {
