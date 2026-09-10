@@ -118,6 +118,9 @@
         "latest": "近期",
         "categoryRecommend": "分类推荐",
         "subjectRecommend": "专题策划",
+        "feedRecommend": "为你推荐",
+        "feedClassify": "分类精选",
+        "feedNoMore": "—— 已经到底啦，去分类看看吧 ——",
         "banner": {
             "defaultTitle": "精选壁纸",
             "discoverMore": "发现更多",

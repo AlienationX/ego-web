@@ -5,7 +5,7 @@
             :is-scrolled="isScrolled"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
         ></glass-status-bar>
-        <scroll-view scroll-y class="home-tab-layout" show-scrollbar="false" @scroll="handleScroll">
+        <view class="home-content">
             <!-- 沉浸式 Hero 头部：头像问候、通知铃铛、灵动气泡、搜索栏、快捷入口胶囊 -->
             <home-hero-header
                 :status-bar-height="statusBarHeight"
@@ -259,70 +259,185 @@
                 </scroll-view>
             </view>
 
-            <!-- Classify Sections -->
-            <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
-                <view class="select-watermark">{{ classify.name }}</view>
-                <index-title>
-                    <template #name>{{ classify.name }}</template>
-                    <template #custom>
-                        <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]"
-                            @click="goClasslist(classify.id, classify.name)">
-                            {{ $t('common.seeAll') }}
-                        </button>
-                    </template>
-                </index-title>
-
-                <view class="content">
-                    <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
-                    <scroll-view scroll-x class="home-scroll" show-scrollbar="false">
-                        <view class="box" v-for="item in classify.data" :key="item.id" hover-class="box--active"
-                            :hover-stay-time="150" @click="goPreview(item.id, classify.data)">
-                            <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
-                            </image>
-                            <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
-                                {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
-                            </view>
-                        </view>
-                    </scroll-view>
+            <!-- Feed Switcher (为你推荐 / 分类精选) -->
+            <view class="feed-switcher-section">
+                <view class="feed-switcher">
+                    <view
+                        class="feed-tab"
+                        :class="{ 'is-active': activeFeedTab === 'recommend' }"
+                        @click="switchFeedTab('recommend')"
+                    >
+                        <text class="feed-tab__icon" v-if="activeFeedTab === 'recommend'">✦</text>
+                        <text class="feed-tab__text">{{ t('index.feedRecommend') }}</text>
+                    </view>
+                    <view
+                        class="feed-tab"
+                        :class="{ 'is-active': activeFeedTab === 'classify' }"
+                        @click="switchFeedTab('classify')"
+                    >
+                        <text class="feed-tab__text">{{ t('index.feedClassify') }}</text>
+                    </view>
                 </view>
             </view>
 
-            <!-- Classify Grid -->
-            <view class="classify">
-                <index-title>
-                    <template #name>{{ $t('index.categoryRecommend') }}</template>
-                    <template #custom>
-                        <navigator url="/pages/app/classify" open-type="reLaunch" class="more">{{ $t('common.more') }}+
-                        </navigator>
-                    </template>
-                </index-title>
+            <!-- Mode 1: 为你推荐 (默认，无尽垂直双列瀑布流) -->
+            <view v-show="activeFeedTab === 'recommend'" class="feed-recommend-container">
+                <!-- 骨架屏：首屏加载时 -->
+                <view v-if="recommendLoading && !recommendWallpapers.length" class="feed-skeleton">
+                    <view class="sk-col">
+                        <view class="sk-card" style="height: 520rpx"></view>
+                        <view class="sk-card" style="height: 420rpx"></view>
+                        <view class="sk-card" style="height: 480rpx"></view>
+                    </view>
+                    <view class="sk-col">
+                        <view class="sk-card" style="height: 440rpx"></view>
+                        <view class="sk-card" style="height: 520rpx"></view>
+                        <view class="sk-card" style="height: 400rpx"></view>
+                    </view>
+                </view>
 
-                <rotate-loading v-if="!classifyList.length" style="height: 100%"></rotate-loading>
+                <!-- 双列瀑布流布局 -->
+                <view v-else class="feed-waterfall">
+                    <!-- 左列 -->
+                    <view class="waterfall-col">
+                        <view
+                            v-for="(item, idx) in recommendLeftCol"
+                            :key="'l-' + item.id + '-' + idx"
+                            class="waterfall-card"
+                            hover-class="waterfall-card--active"
+                            :hover-stay-time="120"
+                            @click="goPreview(item.id, recommendWallpapers)"
+                        >
+                            <image
+                                class="waterfall-card__img"
+                                :src="item.smallPicurl || item.picurl"
+                                mode="widthFix"
+                                lazy-load
+                                @load="item.loaded = true"
+                                :class="{ 'is-loaded': item.loaded }"
+                            ></image>
+                            <view class="waterfall-card__overlay"></view>
+                            <view class="waterfall-card__meta">
+                                <text class="meta-title">{{ getWallTitle(item) }}</text>
+                                <view class="meta-footer">
+                                    <text class="meta-tag">{{ getWallTag(item) }}</text>
+                                    <view class="meta-score" v-if="item.score">
+                                        <mdi-icon path="/static/icons/star.svg" size="12px" color="#ffbf66"></mdi-icon>
+                                        <text class="score-num">{{ item.score }}</text>
+                                    </view>
+                                </view>
+                            </view>
+                            <view class="waterfall-card__lock" v-if="item.is_locked">
+                                <uni-icons
+                                    v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                    type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
+                                <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
+                            </view>
+                        </view>
+                    </view>
 
-                <view class="classify-grid-padding">
-                    <classify-grid v-if="classifyList.length" :items="classifyPreviewList" />
+                    <!-- 右列 -->
+                    <view class="waterfall-col">
+                        <view
+                            v-for="(item, idx) in recommendRightCol"
+                            :key="'r-' + item.id + '-' + idx"
+                            class="waterfall-card"
+                            hover-class="waterfall-card--active"
+                            :hover-stay-time="120"
+                            @click="goPreview(item.id, recommendWallpapers)"
+                        >
+                            <image
+                                class="waterfall-card__img"
+                                :src="item.smallPicurl || item.picurl"
+                                mode="widthFix"
+                                lazy-load
+                                @load="item.loaded = true"
+                                :class="{ 'is-loaded': item.loaded }"
+                            ></image>
+                            <view class="waterfall-card__overlay"></view>
+                            <view class="waterfall-card__meta">
+                                <text class="meta-title">{{ getWallTitle(item) }}</text>
+                                <view class="meta-footer">
+                                    <text class="meta-tag">{{ getWallTag(item) }}</text>
+                                    <view class="meta-score" v-if="item.score">
+                                        <mdi-icon path="/static/icons/star.svg" size="12px" color="#ffbf66"></mdi-icon>
+                                        <text class="score-num">{{ item.score }}</text>
+                                    </view>
+                                </view>
+                            </view>
+                            <view class="waterfall-card__lock" v-if="item.is_locked">
+                                <uni-icons
+                                    v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                    type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
+                                <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+
+                <!-- 触底加载状态指示器 -->
+                <view class="feed-load-state" v-if="recommendWallpapers.length">
+                    <view v-if="recommendLoading" class="feed-loading-pill">
+                        <rotate-loading :size="24"></rotate-loading>
+                        <text class="loading-text">{{ t('common.loading') }}</text>
+                    </view>
+                    <text v-else-if="recommendNoMore" class="no-more-text">{{ t('index.feedNoMore') }}</text>
+                </view>
+            </view>
+
+            <!-- Mode 2: 分类精选 (原 Classify Sections 横滑卡片合辑) -->
+            <view v-show="activeFeedTab === 'classify'" class="feed-classify-container">
+                <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
+                    <view class="select-watermark">{{ classify.name }}</view>
+                    <index-title>
+                        <template #name>{{ classify.name }}</template>
+                        <template #custom>
+                            <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]"
+                                @click="goClasslist(classify.id, classify.name)">
+                                {{ $t('common.seeAll') }}
+                            </button>
+                        </template>
+                    </index-title>
+
+                    <view class="content">
+                        <rotate-loading v-if="!classify.data?.length" style="height: 100%"></rotate-loading>
+                        <scroll-view scroll-x class="home-scroll" show-scrollbar="false">
+                            <view class="box" v-for="item in classify.data" :key="item.id" hover-class="box--active"
+                                :hover-stay-time="150" @click="goPreview(item.id, classify.data)">
+                                <image class="box-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                                </image>
+                                <view v-if="item._timeBadgeKey || item._timeBadge" class="box-badge box-badge--subtle">
+                                    {{ item._timeBadgeKey ? $t(`index.${item._timeBadgeKey}`) : item._timeBadge }}
+                                </view>
+                            </view>
+                        </scroll-view>
+                    </view>
                 </view>
             </view>
 
             <!-- 底部安全区与悬浮 TabBar 占位 -->
             <view class="tabbar-bottom-spacer"></view>
-        </scroll-view>
+        </view>
 
         <!-- 半屏毛玻璃抽屉通知面板 -->
         <notification-sheet ref="notificationSheetRef"></notification-sheet>
+
+        <!-- 回到顶部悬浮浮标 (超过阈值优雅滑出，自动避让底部 TabBar) -->
+        <fab-back-top :show="showScrollTop" :embedded="true" @click="scrollToTop" />
 
         <!-- 自定义 TabBar 组件 (支持多语言实时切换与 Light/Dark 模式) -->
         <glass-tab-bar
             current-path="/pages/app/index"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
             :placeholder="false"
+            @tab-reclick="scrollToTop"
         ></glass-tab-bar>
     </view>
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue';
-import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { ref, computed, onMounted } from 'vue';
+import { onShareAppMessage, onShareTimeline, onPageScroll, onReachBottom, onPullDownRefresh, onTabItemTap } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import {
@@ -330,13 +445,12 @@ import {
     apiGetRandomDay,
     apiGetDailyFeatured,
     apiGetRandomRecommend,
-    apiGetNotice,
     apiGetClassify,
     apiGetClassList,
     apiGetCheckUpdates,
+    apiPostRecommend,
 } from '@/api/wallpaper.js';
-import { PICS_BASE_URL } from '@/common/config.js';
-import { handlePicUrl, compareTimestamp } from '@/utils/common.js';
+import { handlePicUrl } from '@/utils/common.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
@@ -356,35 +470,148 @@ const isAdmin = computed(() => !!userStore.isAdmin);
 const isEn = computed(() => locale.value === 'en');
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
+const showScrollTop = ref(false);
 const notificationSheetRef = ref(null);
 
 const openNotificationSheet = () => {
     notificationSheetRef.value?.open();
 };
 
-const handleScroll = (e) => {
-    const top = Number(e?.detail?.scrollTop || 0);
-    isScrolled.value = top > 8;
+// ── 平滑回到顶部逻辑 ──
+const scrollToTop = () => {
+    showScrollTop.value = false;
+    uni.pageScrollTo({
+        scrollTop: 0,
+        duration: 350,
+    });
 };
 
-const navBarHeight = ref(0);
+// ── 原生页面生命周期 ──
+onPageScroll((e) => {
+    const top = Number(e?.scrollTop || 0);
+    isScrolled.value = top > 8;
 
-const bannerTimeAgo = computed(() => {
-    const lastTime = statusStore.appStatus.lastViewedWallpaperTime;
-    if (!lastTime) return '';
-    const ts = new Date(lastTime).getTime();
-    const ago = compareTimestamp(ts, isEn.value);
-    if (!ago) return '';
-    if (isEn.value && ago === 'Just now') return ago;
-    return isEn.value ? `${ago} ago` : `${ago}前`;
+    // 下滑超过 500rpx（或半屏以上）时平滑展示回到顶部悬浮按钮
+    const windowHeight = (uni.getWindowInfo ? uni.getWindowInfo().windowHeight : 600) || 600;
+    const nextShowTop = top > Math.max(windowHeight * 0.55, 450);
+    if (showScrollTop.value !== nextShowTop) {
+        showScrollTop.value = nextShowTop;
+    }
 });
+
+// 点击当前首页 Tab，一键平滑回到顶部
+onTabItemTap(() => {
+    scrollToTop();
+});
+
+onReachBottom(() => {
+    if (activeFeedTab.value === 'recommend') {
+        loadMoreRecommend();
+    }
+});
+
+onPullDownRefresh(async () => {
+    await Promise.allSettled([
+        getBanner(),
+        getRandomDay(),
+        getDailyFeatured(),
+        getRandomRecommend(),
+        getClassify(),
+        getLatest(),
+        getRecommendWallpapers(false),
+    ]);
+    uni.stopPullDownRefresh();
+});
+
+// ── 推荐流与分段切换器状态 ──
+const activeFeedTab = ref('recommend'); // 'recommend' | 'classify'
+const recommendWallpapers = ref([]);
+const recommendLeftCol = ref([]);
+const recommendRightCol = ref([]);
+const recommendLeftHeight = ref(0);
+const recommendRightHeight = ref(0);
+const recommendPageNum = ref(1);
+const recommendLoading = ref(false);
+const recommendNoMore = ref(false);
+
+const switchFeedTab = (tab) => {
+    if (activeFeedTab.value === tab) return;
+    activeFeedTab.value = tab;
+};
+
+// 瀑布流双列高度平衡分发算法
+const distributeRecommendItems = (newItems = []) => {
+    newItems.forEach((item) => {
+        const h = Number(item.height) || 600;
+        const w = Number(item.width) || 300;
+        const virtualHeight = (h / w) * 100;
+        if (recommendLeftHeight.value <= recommendRightHeight.value) {
+            recommendLeftCol.value.push(item);
+            recommendLeftHeight.value += virtualHeight;
+        } else {
+            recommendRightCol.value.push(item);
+            recommendRightHeight.value += virtualHeight;
+        }
+        recommendWallpapers.value.push(item);
+    });
+};
+
+const getRecommendWallpapers = async (isAppend = false) => {
+    if (recommendLoading.value) return;
+    if (!isAppend) {
+        recommendPageNum.value = 1;
+        recommendNoMore.value = false;
+        recommendLeftCol.value = [];
+        recommendRightCol.value = [];
+        recommendLeftHeight.value = 0;
+        recommendRightHeight.value = 0;
+        recommendWallpapers.value = [];
+    }
+    try {
+        recommendLoading.value = true;
+        const params = {
+            pageNum: recommendPageNum.value,
+            pageSize: 12,
+        };
+        if (isAppend && recommendWallpapers.value.length > 0) {
+            params.exclude_ids = recommendWallpapers.value.map((i) => i.id);
+        }
+        const res = await apiPostRecommend(params);
+        if (res.code === 200 && res.data) {
+            const mapped = res.data.map((item) => ({ ...handlePicUrl(item), loaded: false }));
+            distributeRecommendItems(mapped);
+            const totalPages = Number(res.pagination?.total_pages || 1);
+            recommendNoMore.value = recommendPageNum.value >= totalPages || res.data.length === 0;
+        }
+    } catch (err) {
+        console.error('Failed to load recommend wallpapers:', err);
+    } finally {
+        recommendLoading.value = false;
+    }
+};
+
+const loadMoreRecommend = () => {
+    if (recommendLoading.value || recommendNoMore.value) return;
+    recommendPageNum.value += 1;
+    getRecommendWallpapers(true);
+};
+
+const getWallTitle = (item) => {
+    if (!item) return '';
+    if (isEn.value && item.description_en) return item.description_en;
+    return item.description || item.classify_name || `Wall #${item.id}`;
+};
+
+const getWallTag = (item) => {
+    if (!item) return '';
+    if (isEn.value && item.classify_name_en) return item.classify_name_en;
+    return item.classify_name || t('top10.wallpaper') || '壁纸';
+};
 
 const currentBanner = ref(0);
 const onBannerChange = (e) => {
     currentBanner.value = Number(e?.detail?.current || 0);
 };
-
-const topCardImageURL = ref(PICS_BASE_URL + '/insets/1699281368061_2-removebg-preview.png');
 
 // ── 优化4：today 只构造一次，避免模板重渲染时反复 new Date() ──
 const _today = new Date();
@@ -405,15 +632,7 @@ const dailyFeaturedList = ref([]);
 const heroImageLoaded = ref(false);
 const randomRecommendList = ref([]);
 const latestList = ref([]);
-const noticeList = ref([]);
-const noticeComputed = computed(() => {
-    return noticeList.value.map((item) => ({
-        ...item,
-        title: isEn.value && item.title_en ? item.title_en : item.title,
-    }));
-});
 const classifyList = ref([]);
-const adVisibleMap = reactive({});
 const followingExpanded = ref(false);
 const themeClasses = ['is-collection', 'is-keyword', 'is-spotlight', 'is-default'];
 
@@ -457,17 +676,7 @@ const classifyComputed = computed(() => {
     }));
 });
 
-const classifyPreviewList = computed(() => classifyComputed.value.slice(0, 7));
-
 const DAY_MS = 24 * 60 * 60 * 1000;
-
-// --- Time badge helpers ---
-// ── 优化2：badgeCopy 只计算一次，不在每个 item 处理时重复调用 getLocale() ──
-const getBadgeCopy = () => {
-    const isZh = String(uni.getLocale() || '').startsWith('zh');
-    return isZh ? { justIn: '刚更新', latest: '近期', new: '新' } : { justIn: 'JUST IN', latest: 'LATEST', new: 'NEW' };
-};
-const badgeCopy = getBadgeCopy();
 
 const getWallDate = (item) => {
     const raw = item?.created_at || item?.updated_at || null;
@@ -640,11 +849,6 @@ const getRandomRecommend = async () => {
     }));
 };
 
-const getNotice = async () => {
-    let res = await apiGetNotice();
-    noticeList.value = res.data;
-};
-
 const getClassify = async () => {
     let res = await apiGetClassify({ select: true });
     classifyList.value = res.data.map((item) => handlePicUrl(item));
@@ -694,10 +898,6 @@ const checkUpdates = async () => {
     }
 };
 
-const closeBanner = () => {
-    statusStore.newWallpapersCount = 0;
-};
-
 const goTimeline = () => {
     const unread = statusStore.newWallpapersCount;
     // 隐藏横幅
@@ -734,15 +934,6 @@ const goClassify = (item) => {
 const toggleFollowingExpanded = () => {
     followingExpanded.value = !followingExpanded.value;
 };
-
-const onAdLoad = (key) => {
-    adVisibleMap[key] = true;
-};
-
-const onAdError = (key) => {
-    adVisibleMap[key] = false;
-};
-
 
 const goClasslist = (id, name) => {
     uni.navigateTo({ url: `/pages/app/classlist?id=${id}&name=${name}` });
@@ -788,12 +979,12 @@ onMounted(() => {
     setTimeout(() => {
         getDailyFeatured();
         getRandomRecommend();
-        getNotice();
     }, 300);
 
     // P3 延时 800ms：需要滚动才能看到，完全错峰
     setTimeout(() => {
         getClassify();
+        getRecommendWallpapers(false);
     }, 800);
 });
 // 分享给好友
@@ -811,9 +1002,8 @@ onShareTimeline(() => ({
 <style lang="scss" scoped>
 .home-page {
     position: relative;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+    width: 100%;
+    min-height: 100vh;
     background-color: var(--page-background);
     box-sizing: border-box;
 
@@ -822,132 +1012,9 @@ onShareTimeline(() => ({
     }
 }
 
-.update-banner {
-    position: absolute;
-    left: 32rpx;
-    right: 32rpx;
-    background: #ffffff;
-    border-radius: 40rpx;
-    padding: 32rpx;
-    display: flex;
-    align-items: center;
-    z-index: 100;
-    transform: translateY(-150%);
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
-
-    .theme-light & {
-        background: #ffffff;
-        box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
-    }
-
-    /* Dark mode override */
-    .theme-dark & {
-        background: #1e293b;
-        box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.3);
-    }
-
-    &--show {
-        transform: translateY(20rpx);
-        opacity: 1;
-    }
-
-    &__close {
-        position: absolute;
-        top: -12rpx;
-        right: -12rpx;
-        width: 44rpx;
-        height: 44rpx;
-        box-sizing: border-box;
-        padding: 0;
-        border-radius: 50%;
-        background: #64748b;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        border: none;
-        box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.18);
-        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-
-        .theme-dark & {
-            background: #475569;
-            box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.35);
-        }
-
-        &:active {
-            transform: scale(0.86);
-            background: #475569;
-
-            .theme-dark & {
-                background: #334155;
-            }
-        }
-    }
-
-    &__inner {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        gap: 24rpx;
-    }
-
-    &__logo {
-        width: 96rpx;
-        height: 96rpx;
-        border-radius: 24rpx;
-        background: #4F46E5;
-        flex-shrink: 0;
-    }
-
-    &__content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 6rpx;
-    }
-
-    &__header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        margin-bottom: 2rpx;
-    }
-
-    &__title {
-        font-size: 28rpx;
-        font-weight: 700;
-        color: #0f172a;
-
-        .theme-dark & {
-            color: #f8fafc;
-        }
-    }
-
-    &__time {
-        font-size: 22rpx;
-        color: #94a3b8;
-    }
-
-    &__desc {
-        font-size: 24rpx;
-        color: #475569;
-        line-height: 1.4;
-
-        .theme-dark & {
-            color: #cbd5e1;
-        }
-    }
-}
-
-.home-tab-layout {
+.home-content {
     width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
     box-sizing: border-box;
-    height: 100%;
 }
 
 .banner {
@@ -1355,89 +1422,6 @@ onShareTimeline(() => ({
     }
 }
 
-.notice {
-    width: 710rpx;
-    height: 76rpx;
-    background: var(--panel-background);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1rpx solid var(--panel-border);
-    margin: 0 auto 28rpx;
-    border-radius: 80rpx;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 8rpx 24rpx var(--shadow-color);
-    box-sizing: border-box;
-    padding: 0 16rpx 0 16rpx;
-    transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
-
-    &:active {
-        transform: scale(0.98);
-        filter: brightness(0.95);
-    }
-
-    .left {
-        display: flex;
-        align-items: center;
-        margin-right: 16rpx;
-        flex-shrink: 0;
-
-        .left-tag {
-            display: flex;
-            align-items: center;
-            gap: 8rpx;
-            padding: 8rpx 18rpx;
-            background: rgba(40, 179, 137, 0.12);
-            border-radius: 100rpx;
-
-            .text {
-                color: $wp-theme-color;
-                font-weight: 700;
-                font-size: 22rpx;
-                line-height: 1;
-            }
-        }
-    }
-
-    .center {
-        flex: 1;
-        height: 100%;
-        overflow: hidden;
-
-        .notice-swiper {
-            height: 100%;
-        }
-
-        .notice-swiper-item {
-            display: flex;
-            align-items: center;
-            height: 100%;
-            font-size: 24rpx;
-            font-weight: 500;
-            color: var(--text-primary);
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-
-        .notice-nav {
-            width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
-    }
-
-    .right {
-        width: 48rpx;
-        height: 48rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-}
-
 .select {
     position: relative;
     overflow: hidden;
@@ -1812,33 +1796,280 @@ onShareTimeline(() => ({
     }
 }
 
-.classify {
-    .more {
-        font-size: 24rpx;
-        font-weight: 600;
-        color: var(--text-tertiary);
-        padding-right: 6rpx;
+// ── 信息流模式分段选择器 (Segmented Pill Switcher) ──
+.feed-switcher-section {
+    padding: 16rpx 32rpx 28rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feed-switcher {
+    display: inline-flex;
+    align-items: center;
+    padding: 8rpx;
+    border-radius: 999rpx;
+    position: relative;
+    user-select: none;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.05);
+        border: 1rpx solid rgba(0, 0, 0, 0.06);
     }
 
-    .classify-grid-padding {
-        padding: 30rpx 20rpx 30rpx 20rpx;
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1rpx solid rgba(255, 255, 255, 0.1);
     }
 }
 
-.ad-slot {
-    padding: 0;
-    margin: 0;
-    min-height: 0;
+.feed-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8rpx;
+    height: 60rpx;
+    padding: 0 36rpx;
+    border-radius: 999rpx;
+    cursor: pointer;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    z-index: 1;
+
+    &__icon {
+        font-size: 20rpx;
+        line-height: 1;
+        color: inherit;
+    }
+
+    &__text {
+        font-size: 26rpx;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--text-secondary);
+        transition: color 0.25s ease;
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+
+    &.is-active {
+        .theme-light & {
+            background: #18181b;
+            box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.18);
+
+            .feed-tab__text {
+                color: #ffffff;
+                font-weight: 700;
+            }
+
+            .feed-tab__icon {
+                color: #818cf8;
+            }
+        }
+
+        .theme-dark & {
+            background: #f4f4f5;
+            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
+
+            .feed-tab__text {
+                color: #18181b;
+                font-weight: 700;
+            }
+
+            .feed-tab__icon {
+                color: #4f46e5;
+            }
+        }
+    }
+}
+
+// ── 为你推荐 (瀑布流布局) ──
+.feed-recommend-container {
+    width: 100%;
+    padding: 0 32rpx;
     box-sizing: border-box;
+}
 
-    &__inner {
-        display: none;
+.feed-waterfall {
+    display: flex;
+    justify-content: space-between;
+    gap: 20rpx;
+    align-items: flex-start;
+    width: 100%;
+
+    .waterfall-col {
+        flex: 1;
+        width: calc(50% - 10rpx);
+        display: flex;
+        flex-direction: column;
+        gap: 20rpx;
+    }
+}
+
+.waterfall-card {
+    position: relative;
+    width: 100%;
+    border-radius: 28rpx;
+    overflow: hidden;
+    background: var(--panel-background);
+    box-shadow: 0 6rpx 20rpx var(--shadow-color);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+    cursor: pointer;
+
+    &--active,
+    &:active {
+        transform: scale(0.97);
+        box-shadow: 0 2rpx 8rpx var(--shadow-color);
     }
 
-    &.ready &__inner {
+    &__img {
+        width: 100%;
         display: block;
-        margin: 0 30rpx 30rpx;
+        opacity: 0;
+        transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+
+        &.is-loaded {
+            opacity: 1;
+        }
     }
+
+    &__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.7) 100%);
+        pointer-events: none;
+    }
+
+    &__meta {
+        position: absolute;
+        left: 16rpx;
+        right: 16rpx;
+        bottom: 16rpx;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+
+        .meta-title {
+            font-size: 24rpx;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.25;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.6);
+        }
+
+        .meta-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .meta-tag {
+            font-size: 18rpx;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 2rpx 10rpx;
+            border-radius: 999rpx;
+            backdrop-filter: blur(8rpx);
+            -webkit-backdrop-filter: blur(8rpx);
+            border: 1rpx solid rgba(255, 255, 255, 0.15);
+        }
+
+        .meta-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 4rpx;
+
+            .score-num {
+                font-size: 20rpx;
+                font-weight: 700;
+                color: #ffbf66;
+            }
+        }
+    }
+
+    &__lock {
+        position: absolute;
+        top: 14rpx;
+        right: 14rpx;
+        z-index: 3;
+        width: 44rpx;
+        height: 44rpx;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10rpx);
+        -webkit-backdrop-filter: blur(10rpx);
+        border: 1rpx solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+// 骨架屏
+.feed-skeleton {
+    display: flex;
+    justify-content: space-between;
+    gap: 20rpx;
+    width: 100%;
+
+    .sk-col {
+        flex: 1;
+        width: calc(50% - 10rpx);
+        display: flex;
+        flex-direction: column;
+        gap: 20rpx;
+    }
+
+    .sk-card {
+        width: 100%;
+        border-radius: 28rpx;
+        @extend %sk-shimmer;
+    }
+}
+
+// 触底状态
+.feed-load-state {
+    padding: 40rpx 0 20rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .feed-loading-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 12rpx;
+        padding: 8rpx 24rpx;
+        border-radius: 999rpx;
+        background: rgba(0, 0, 0, 0.04);
+
+        .theme-dark & {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .loading-text {
+            font-size: 22rpx;
+            color: var(--text-tertiary);
+        }
+    }
+
+    .no-more-text {
+        font-size: 22rpx;
+        color: var(--text-tertiary);
+        letter-spacing: 1rpx;
+        opacity: 0.7;
+    }
+}
+
+.feed-classify-container {
+    width: 100%;
 }
 
 @keyframes refreshSpin {
@@ -1946,20 +2177,6 @@ $sk-shine: rgba(148, 163, 184, 0.22);
         height: 24rpx;
         width: 75%;
     }
-
-    &--notice {
-        height: 32rpx;
-        width: 80%;
-        border-radius: 6rpx;
-    }
-}
-
-// ── Notice 骨架 ──
-.sk-notice-bar {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    padding-left: 8rpx;
 }
 
 // ── 横向卡片骨架（Daily/Latest）──
@@ -1983,30 +2200,6 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
     &--hero {
         width: 440rpx;
-    }
-}
-
-@keyframes heroPanCover {
-    0% {
-        transform: scale(1.08) translate(0%, 0%);
-    }
-
-    50% {
-        transform: scale(1.16) translate(-2.5%, -1.5%);
-    }
-
-    100% {
-        transform: scale(1.1) translate(2.5%, 1%);
-    }
-}
-
-@keyframes heroShimmerSweep {
-    0% {
-        transform: translateX(-150%) rotate(25deg);
-    }
-
-    100% {
-        transform: translateX(250%) rotate(25deg);
     }
 }
 

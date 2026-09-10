@@ -82,7 +82,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['change']);
+const emit = defineEmits(['change', 'tab-reclick']);
 const { locale, t } = useI18n();
 
 const items = computed(() => {
@@ -130,7 +130,10 @@ const getItemIcon = (item) => {
 };
 
 const handleSwitch = (item) => {
-    if (props.currentPath === item.pagePath) return;
+    if (props.currentPath === item.pagePath) {
+        emit('tab-reclick', item);
+        return;
+    }
     emit('change', item);
     if (props.disableNavigation) return;
     uni.switchTab({

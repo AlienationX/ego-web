@@ -118,6 +118,9 @@
         "latest": "RECENT",
         "categoryRecommend": "Category Recommend",
         "subjectRecommend": "Collections",
+        "feedRecommend": "For You",
+        "feedClassify": "Categories",
+        "feedNoMore": "—— No more recommendations ——",
         "banner": {
             "defaultTitle": "Featured Wallpaper",
             "discoverMore": "Discover More",
