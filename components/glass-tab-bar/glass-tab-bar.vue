@@ -149,7 +149,7 @@ const handleSwitch = (item) => {
     bottom: 24px;
     // #endif
     // #ifndef MP-WEIXIN
-    bottom: max(24px, calc(8px + env(safe-area-inset-bottom, 10px)));
+    bottom: env(safe-area-inset-bottom);
     // #endif
     left: 50%;
     transform: translate3d(-50%, 0, 0);

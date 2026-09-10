@@ -72,7 +72,7 @@
                     class="subject-card"
                     hover-class="subject-card--active"
                     :hover-stay-time="150"
-                    :style="{ animationDelay: `${index < 8 ? (index * 0.34 + 0.1) : 0}s` }"
+                    :style="{ '--card-delay': `${index < 8 ? (index * 0.22 + 0.16) : 0}s`, animationDelay: `${index < 8 ? (index * 0.22 + 0.16) : 0}s` }"
                     @click="goDetail(item)"
                 >
                     <view class="subject-card__header">
@@ -104,7 +104,8 @@
 
                     <!-- Wallpaper Previews Row -->
                     <view class="subject-card__previews" v-if="item.preview_walls && item.preview_walls.length">
-                        <view class="preview-item" v-for="(img, imgIdx) in item.preview_walls" :key="imgIdx">
+                        <view class="preview-item" v-for="(img, imgIdx) in item.preview_walls" :key="imgIdx"
+                            :style="{ animationDelay: `calc(var(--card-delay, 0s) + ${(imgIdx * 0.10 + 0.15).toFixed(2)}s)` }">
                             <image class="preview-img" :src="img.includes('.jpg') ? img.replace('.jpg', '_small.webp') : img" mode="aspectFill" lazy-load></image>
                         </view>
                     </view>
@@ -389,6 +390,30 @@ onShow(() => {
     }
 }
 
+// ── ✦ 星标轻微旋转与光辉脉冲 ──
+@keyframes starSparkle {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.9;
+    }
+    50% {
+        transform: rotate(18deg) scale(1.2);
+        opacity: 1;
+    }
+}
+
+// ── 杂志感大标题区浮现 ──
+@keyframes editorialHeaderReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 28rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 // ── 杂志感大标题区 (Editorial Hero Header) ──
 .hero-header {
     padding: 12rpx 6rpx 36rpx;
@@ -396,6 +421,7 @@ onShow(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 12rpx;
+    animation: editorialHeaderReveal 1.06s cubic-bezier(0.16, 1, 0.3, 1) both;
 
     &__badge {
         display: inline-flex;
@@ -424,6 +450,8 @@ onShow(() => {
     &__badge-dot {
         font-size: 18rpx;
         line-height: 1;
+        display: inline-block;
+        animation: starSparkle 3.6s ease-in-out infinite;
     }
 
     &__badge-text {
@@ -451,18 +479,20 @@ onShow(() => {
     padding-bottom: calc(60rpx + env(safe-area-inset-bottom));
 }
 
-// ── 单张卡片依次从右向左滑入关键帧 (舒缓从容) ──
-@keyframes subjectCardSequentialSlideIn {
+// ── 杂志画报展台 3D 透视立体浮升 ──
+@keyframes subjectCardPerspectiveReveal {
     0% {
         opacity: 0;
-        transform: translate3d(180rpx, -16rpx, 0) scale(0.95);
+        transform: perspective(900px) rotateX(10deg) translate3d(0, 48rpx, 0) scale(0.94);
+        filter: brightness(0.9);
     }
     60% {
-        opacity: 0.88;
+        opacity: 0.95;
     }
     100% {
         opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
+        transform: perspective(900px) rotateX(0deg) translate3d(0, 0, 0) scale(1);
+        filter: brightness(1);
     }
 }
 
@@ -479,16 +509,21 @@ onShow(() => {
     padding: 32rpx;
     box-shadow: 0 12rpx 36rpx var(--shadow-color);
     box-sizing: border-box;
-    transition: transform 0.28s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.28s ease;
-    animation: subjectCardSequentialSlideIn 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.26s ease;
+    animation: subjectCardPerspectiveReveal 1.10s cubic-bezier(0.16, 1, 0.3, 1) both;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: 24rpx;
 
     &--active, &:active {
-        transform: scale(0.97) !important;
-        box-shadow: 0 6rpx 18rpx var(--shadow-color) !important;
+        transform: scale(0.98) !important;
+        box-shadow: 0 4rpx 14rpx var(--shadow-color) !important;
+
+        .preview-item {
+            transform: translateY(-4rpx) scale(1.02);
+            box-shadow: 0 8rpx 20rpx var(--shadow-color);
+        }
     }
 
     &__header {
@@ -566,6 +601,18 @@ onShow(() => {
         width: 100%;
     }
 
+    // ── 画廊三联预览图依次错位微弹展开 ──
+    @keyframes previewTrioReveal {
+        0% {
+            opacity: 0;
+            transform: translate3d(0, 24rpx, 0) scale(0.92);
+        }
+        100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+    }
+
     .preview-item {
         flex: 1;
         height: 288rpx;
@@ -574,13 +621,14 @@ onShow(() => {
         background: var(--page-background-secondary);
         box-shadow: 0 6rpx 16rpx var(--shadow-color);
         transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s ease;
+        animation: previewTrioReveal 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
 
         &:hover {
-            transform: translateY(-10rpx) scale(1.03);
+            transform: translateY(-6rpx) scale(1.02);
             box-shadow: 0 12rpx 28rpx var(--shadow-color);
 
             .preview-img {
-                transform: scale(1.08);
+                transform: scale(1.06);
             }
         }
     }

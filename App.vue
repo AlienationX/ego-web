@@ -14,15 +14,9 @@ const appStore = useAppStore();
 
 onLaunch(() => {
     console.log('App Launch');
-    appStore.fetchVersionConfig();
-
-    // #ifdef APP-PLUS
-    try {
-        initAutoRotate();
-    } catch (e) {
-        console.warn("initAutoRotate error:", e);
-    }
-    // #endif
+    // 优先执行布局设置。全面采用自定义 TabBar，冷启动第一时间隐藏原生 TabBar
+    uni.hideTabBar({ animation: false, fail: () => {} });
+    setAndroidImmersive(settingsStore.isDark);
 
     // 检查是否已看过引导页。
     // TODO 目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
@@ -61,9 +55,6 @@ onLaunch(() => {
     // 初始化应用语言（Android 修改系统语言会重启 App，这里负责正确初始化）
     applyLanguagePreference(getLanguagePreference());
 
-    // 写入启动日志
-    writeAccessLog();
-
     // 处理深度链接（如桌面小组件点击）
     handleDeepLink();
 
@@ -73,14 +64,29 @@ onLaunch(() => {
     });
     // #endif
 
-    // 全面采用自定义 TabBar，冷启动第一时间隐藏原生 TabBar
-    uni.hideTabBar({ animation: false, fail: () => {} });
-    setAndroidImmersive(settingsStore.isDark);
+    // #ifdef APP-PLUS
+    // 自动切换壁纸定时任务
+    try {
+        initAutoRotate();
+    } catch (e) {
+        console.warn("initAutoRotate error:", e);
+    }
+    // #endif
+
+    // 异步获取版本最新配置，主要是广告、支付的开关
+    appStore.fetchVersionConfig();
+
+    // 写入启动日志
+    writeAccessLog();
 });
 
 
 onShow((res) => {
     console.log('App Show', res);
+    // 优先执行布局设置。全面采用自定义 TabBar，原生 TabBar 始终隐藏
+    uni.hideTabBar({ animation: false, fail: () => {} });
+    setAndroidImmersive(settingsStore.isDark);
+
     handleDeepLink(res);
 
     // iOS/鸿蒙修改系统语言不重启 App，切回前台时通过 onShow 重新检测系统语言
@@ -90,10 +96,6 @@ onShow((res) => {
     if (getLanguagePreference() === LANGUAGE_PREF_AUTO) {
         applyLanguagePreference(LANGUAGE_PREF_AUTO);
     }
-
-    // 全面采用自定义 TabBar，原生 TabBar 始终隐藏
-    uni.hideTabBar({ animation: false, fail: () => {} });
-    setAndroidImmersive(settingsStore.isDark);
 
     // permissionEnums枚举建议单独一个js文件，然后引入
     // const permissionEnums = {

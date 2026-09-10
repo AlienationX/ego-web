@@ -62,7 +62,7 @@
 
                     <view v-else class="user-content user-content--guest" @click="toLogin">
                         <view class="avatar avatar--guest">
-                            <image src="/static/logo.svg" mode="aspectFit"></image>
+                            <image src="/static/logo.svg" mode="aspectFill"></image>
                             <view class="avatar-ring"></view>
                         </view>
 
@@ -732,10 +732,14 @@ onShow(() => {
             z-index: 1;
             border: 3rpx solid var(--page-background-secondary);
             box-shadow: 0 4rpx 16rpx var(--shadow-color);
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            box-sizing: border-box;
 
             image {
                 width: 100%;
                 height: 100%;
+                border-radius: 50%;
+                display: block;
             }
 
             .avatar-ring {
@@ -749,6 +753,7 @@ onShow(() => {
                 border-top-color: $wp-theme-color;
                 border-right-color: #ff6b9d;
                 animation: rotate 3s linear infinite;
+                pointer-events: none;
             }
         }
 
@@ -1062,20 +1067,17 @@ onShow(() => {
             }
 
             .avatar--guest {
-                background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 18rpx;
-                box-sizing: border-box;
+                padding: 0;
+                background-color: #000041;
 
                 image {
                     width: 100%;
                     height: 100%;
+                    border-radius: 50%;
+                    display: block;
                 }
 
                 .theme-light & {
-                    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
                     border-color: rgba(59, 130, 246, 0.2);
                 }
             }

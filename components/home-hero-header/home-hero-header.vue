@@ -1,5 +1,5 @@
 <template>
-    <view class="hero-header" :style="{ paddingTop: `${statusBarHeight + 10}px` }">
+    <view class="hero-header" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: `${statusBarHeight + 10}px` }">
         <!-- Row 1: 用户问候 + 通知铃铛 -->
         <view class="hero-header__row hero-header__greeting-row">
             <view class="user-block" @click="goUser">
@@ -33,7 +33,7 @@
 
                 <!-- 铃铛按钮 -->
                 <view class="bell-btn" @click="emit('open-notifications')">
-                    <mdi-icon path="/static/icons/bell.svg" size="20px" color="var(--text-primary)"></mdi-icon>
+                    <mdi-icon path="/static/icons/bell.svg" size="20px" :color="settingsStore.isDark ? '#f7f7fb' : '#15171c'"></mdi-icon>
                     <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge">
                         <text class="badge-num">{{ statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount }}</text>
                     </view>
@@ -41,12 +41,12 @@
             </view>
         </view>
 
-        <!-- Row 2: 沉浸大圆角搜索栏 + 快捷灵感键 -->
+        <!-- Row 2: 沉浸搜索栏 (对齐 classify.vue：小巧淡雅占位符) -->
         <view class="hero-header__row hero-header__search-row">
             <view class="search-bar" @click="goSearch">
                 <view class="search-bar__left">
-                    <uni-icons type="search" size="18" :color="searchIconColor"></uni-icons>
-                    <text class="search-bar__placeholder">{{ t('index.searchPlaceholder') || '探索海量 4K 精选壁纸、分类、标签...' }}</text>
+                    <mdi-icon path="/static/icons/magnify.svg" size="18" :color="settingsStore.isDark ? 'rgba(247, 247, 251, 0.52)' : 'rgba(21, 23, 28, 0.52)'"></mdi-icon>
+                    <text class="search-bar__placeholder">{{ t('search.placeholder') || '搜索壁纸、分类、标签...' }}</text>
                 </view>
                 <view class="search-bar__action" @click.stop="goSearch">
                     <mdi-icon path="/static/icons/palette-swatch.svg" size="16px" color="#ffffff"></mdi-icon>
@@ -54,7 +54,7 @@
             </view>
         </view>
 
-        <!-- Row 3: 四大快捷胶囊入口 (默认激活推荐) -->
+        <!-- Row 3: 四大快捷扁平化入口 (微圆角方块 Squircle，解除与圆形头像冲突) -->
         <view class="hero-header__row hero-header__pills-row">
             <view
                 v-for="pill in navPills"
@@ -63,11 +63,11 @@
                 :class="{ 'is-active': activePill === pill.key }"
                 @click="onPillClick(pill)"
             >
-                <view class="nav-pill__circle">
+                <view class="nav-pill__box">
                     <mdi-icon
                         :path="pill.icon"
-                        size="24px"
-                        :color="activePill === pill.key ? '#ffffff' : 'var(--text-primary)'"
+                        size="26px"
+                        :color="activePill === pill.key ? (settingsStore.isDark ? '#60a5fa' : '#2563eb') : (settingsStore.isDark ? '#e2e8f0' : '#475569')"
                     ></mdi-icon>
                     <!-- 最新角标红点 -->
                     <view v-if="pill.key === 'latest' && statusStore.newWallpapersCount > 0" class="pill-dot"></view>
@@ -364,16 +364,16 @@ const onPillClick = (pill) => {
     width: 80rpx;
     height: 80rpx;
     border-radius: 50%;
-    background: var(--card-bg, rgba(255, 255, 255, 0.85));
-    backdrop-filter: blur(12rpx);
-    -webkit-backdrop-filter: blur(12rpx);
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-    border: 1rpx solid rgba(120, 120, 128, 0.12);
+    background: var(--panel-background);
+    border: 1rpx solid var(--panel-border);
+    backdrop-filter: blur(16rpx);
+    -webkit-backdrop-filter: blur(16rpx);
+    box-shadow: 0 4rpx 16rpx var(--shadow-color);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    transition: transform 0.2s;
+    transition: transform 0.2s, background-color 0.2s;
 
     &:active {
         transform: scale(0.92);
@@ -389,27 +389,27 @@ const onPillClick = (pill) => {
         font-weight: 700;
         padding: 2rpx 8rpx;
         border-radius: 20rpx;
-        border: 2rpx solid var(--card-bg, #ffffff);
+        border: 2rpx solid var(--page-background);
         min-width: 24rpx;
         text-align: center;
     }
 }
 
-// ── 2. 大圆角胶囊搜索栏 ──
+// ── 2. 大圆角胶囊搜索栏 (完美适配 Light/Dark 模式) ──
 .hero-header__search-row {
     .search-bar {
         height: 88rpx;
-        background: var(--card-bg, rgba(255, 255, 255, 0.85));
-        backdrop-filter: blur(16rpx);
-        -webkit-backdrop-filter: blur(16rpx);
+        background: var(--panel-background);
+        backdrop-filter: blur(20rpx);
+        -webkit-backdrop-filter: blur(20rpx);
         border-radius: 28rpx;
-        border: 1rpx solid rgba(120, 120, 128, 0.12);
-        box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+        border: 1rpx solid var(--panel-border);
+        box-shadow: 0 4rpx 20rpx var(--shadow-color);
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 0 16rpx 0 28rpx;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
 
         &:active {
             transform: scale(0.99);
@@ -424,8 +424,9 @@ const onPillClick = (pill) => {
         }
 
         &__placeholder {
-            font-size: 26rpx;
-            color: var(--text-secondary, #94a3b8);
+            font-size: 24rpx;
+            color: var(--text-tertiary);
+            letter-spacing: 0.5rpx;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -441,16 +442,21 @@ const onPillClick = (pill) => {
             justify-content: center;
             box-shadow: 0 4rpx 12rpx rgba(37, 99, 235, 0.3);
             flex-shrink: 0;
+
+            .theme-dark & {
+                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+                box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
+            }
         }
     }
 }
 
-// ── 3. 四大快捷胶囊入口 ──
+// ── 3. 四大快捷扁平化入口 (微圆角方块 Squircle，纯平无阴影，解决与圆形头像冲突) ──
 .hero-header__pills-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 8rpx;
+    padding: 0 10rpx;
 }
 
 .nav-pill {
@@ -459,58 +465,71 @@ const onPillClick = (pill) => {
     align-items: center;
     gap: 12rpx;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: transform 0.2s ease;
 
     &:active {
         transform: scale(0.94);
     }
 
-    &__circle {
-        width: 104rpx;
-        height: 104rpx;
-        border-radius: 50%;
-        background: var(--card-bg, rgba(255, 255, 255, 0.9));
-        backdrop-filter: blur(12rpx);
-        -webkit-backdrop-filter: blur(12rpx);
-        border: 1rpx solid rgba(120, 120, 128, 0.12);
-        box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.05);
+    &__box {
+        width: 92rpx;
+        height: 92rpx;
+        border-radius: 26rpx;
+        background: rgba(0, 0, 0, 0.035);
+        border: 1rpx solid rgba(0, 0, 0, 0.05);
         display: flex;
         align-items: center;
         justify-content: center;
         position: relative;
-        transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.25s ease;
+
+        .theme-dark & {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1rpx solid rgba(255, 255, 255, 0.1);
+        }
 
         .pill-dot {
             position: absolute;
             top: 10rpx;
-            right: 12rpx;
+            right: 10rpx;
             width: 14rpx;
             height: 14rpx;
             background: #ef4444;
             border-radius: 50%;
-            border: 2rpx solid #ffffff;
+            border: 2rpx solid var(--page-background);
         }
     }
 
     &__label {
         font-size: 22rpx;
-        color: var(--text-secondary, #64748b);
+        color: var(--text-secondary);
         font-weight: 500;
         transition: color 0.2s, font-weight 0.2s;
+
+        .theme-dark & {
+            color: rgba(247, 247, 251, 0.72);
+        }
     }
 
-    // 激活态 (推荐默认激活)
+    // 激活态 (扁平化轻量微亮底，彻底去除厚阴影与厚重球体感)
     &.is-active {
-        .nav-pill__circle {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-            border-color: transparent;
-            box-shadow: 0 8rpx 24rpx rgba(37, 99, 235, 0.38);
-            transform: translateY(-2rpx);
+        .nav-pill__box {
+            background: rgba(37, 99, 235, 0.1);
+            border-color: rgba(37, 99, 235, 0.2);
+
+            .theme-dark & {
+                background: rgba(59, 130, 246, 0.18);
+                border-color: rgba(59, 130, 246, 0.35);
+            }
         }
 
         .nav-pill__label {
-            color: #3b82f6;
+            color: #2563eb;
             font-weight: 700;
+
+            .theme-dark & {
+                color: #60a5fa;
+            }
         }
     }
 }

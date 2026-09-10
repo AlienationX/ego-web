@@ -63,8 +63,8 @@
                     <view class="empty__title">{{ t('timeline.empty') }}</view>
                 </view>
 
-                <view v-for="month in monthGroups" :key="month.key" class="month-section">
-                    <view class="month-section__head">
+                <view v-for="(month, mIdx) in monthGroups" :key="month.key" class="month-section">
+                    <view class="month-section__head" :style="{ animationDelay: `${mIdx * 0.22 + 0.10}s` }">
                         <view class="month-section__ghost">{{ month.monthText }}</view>
                         <view class="month-section__meta">
                             <text class="month-section__year">{{ month.year }}</text>
@@ -73,17 +73,17 @@
                         </view>
                     </view>
 
-                    <view v-for="day in month.days" :key="day.key" class="day-section">
-                        <view class="day-section__marker">
+                    <view v-for="(day, dayIdx) in month.days" :key="day.key" class="day-section">
+                        <view class="day-section__marker" :style="{ animationDelay: `${(dayIdx < 5 ? dayIdx * 0.18 + 0.12 : 0)}s` }">
                             <view class="day-section__number">{{ day.day }}</view>
-                            <view class="day-section__divider"></view>
+                            <view class="day-section__divider" :style="{ animationDelay: `${(dayIdx < 5 ? dayIdx * 0.18 + 0.22 : 0)}s` }"></view>
                             <view class="day-section__label">{{ day.label }}</view>
                         </view>
 
                         <view class="editorial-grid">
                             <template v-for="(item, idx) in day.items" :key="item.id">
-                                <view class="timeline-card" :class="{ 'timeline-card--wide': idx === 0 }"
-                                    :style="{ animationDelay: `${(idx < 8 ? idx * 0.18 + 0.08 : 0)}s` }"
+                                <view class="timeline-card" :class="{ 'timeline-card--wide': idx === 0, 'timeline-card--odd': idx % 2 === 1, 'timeline-card--even': idx > 0 && idx % 2 === 0 }"
+                                    :style="{ '--card-delay': `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s`, animationDelay: `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s` }"
                                     @click="goPreview(item.id)">
                                     <image class="timeline-card__image"
                                         :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
@@ -371,6 +371,7 @@ onShow(() => {
     min-height: 100vh;
     background: var(--page-background);
     color: #eaf0fb;
+    overflow-x: hidden;
 
     &.theme-light {
         color: var(--text-primary);
@@ -459,18 +460,36 @@ onShow(() => {
     }
 }
 
+// ── 顶部标题文字柔和升起（避免动态字距导致的换行抖动） ──
+@keyframes heroTextReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 36rpx, 0);
+    }
+    60% {
+        opacity: 0.92;
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 .hero {
     margin-bottom: 52rpx;
     padding: 10rpx 8rpx 0;
+    animation: heroTextReveal 1.06s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero__headline {
     font-size: 82rpx;
-    line-height: 1.06;
+    line-height: 1.08;
     font-weight: 900;
     color: #f5f8ff;
-    letter-spacing: -2.5rpx;
+    letter-spacing: -1.5rpx;
     white-space: pre-line;
+    word-break: keep-all;
+    overflow-wrap: normal;
     text-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.22);
 
     .theme-light & {
@@ -520,10 +539,34 @@ onShow(() => {
     margin-bottom: 60rpx;
 }
 
-.month-section__head {
-    margin-bottom: 28rpx;
+// ── 月份头部自下微浮入 ──
+@keyframes monthHeadReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(-24rpx, 0, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
 }
 
+// ── 日期标记从左侧优雅滑入 ──
+@keyframes dateMarkerReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(-36rpx, 0, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.month-section__head {
+    margin-bottom: 28rpx;
+    animation: monthHeadReveal 0.96s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 .month-section__ghost {
     font-size: 86rpx;
     line-height: 1;
@@ -582,6 +625,7 @@ onShow(() => {
     align-items: center;
     gap: 16rpx;
     margin-bottom: 20rpx;
+    animation: dateMarkerReveal 0.92s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .day-section__number {
@@ -595,11 +639,28 @@ onShow(() => {
     }
 }
 
+// ── 激光刻度竖线自上而下注入生长 ──
+@keyframes timelineLaserFill {
+    0% {
+        opacity: 0;
+        transform: scaleY(0);
+    }
+    40% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+}
+
 .day-section__divider {
     width: 4rpx;
     height: 52rpx;
     border-radius: 999rpx;
     background: linear-gradient(180deg, #79a8ff, rgba(121, 168, 255, 0.2));
+    transform-origin: top center;
+    animation: timelineLaserFill 0.90s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .day-section__label {
@@ -621,14 +682,38 @@ onShow(() => {
     gap: 20rpx;
 }
 
-// ── 时光流转渐进浮现关键帧 (从容舒展) ──
-@keyframes timelineCardReveal {
+// ── 宽幅大卡从屏幕外底部升起 ──
+@keyframes timelineWideReveal {
     0% {
         opacity: 0;
-        transform: translate3d(0, 48rpx, 0) scale(0.95);
+        transform: translate3d(0, 180rpx, 0) scale(0.94);
     }
-    60% {
-        opacity: 0.88;
+    55% {
+        opacity: 0.85;
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+// ── 左列卡片从底部偏左浮现 ──
+@keyframes timelineLeftReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(-24rpx, 160rpx, 0) scale(0.92);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+// ── 右列卡片从底部偏右浮现 ──
+@keyframes timelineRightReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(24rpx, 160rpx, 0) scale(0.92);
     }
     100% {
         opacity: 1;
@@ -645,9 +730,18 @@ onShow(() => {
         0 18rpx 40rpx rgba(0, 0, 0, 0.24),
         inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
     transition:
-        transform 0.28s ease,
-        box-shadow 0.28s ease;
-    animation: timelineCardReveal 0.68s cubic-bezier(0.16, 1, 0.3, 1) both;
+        transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.22s ease;
+    cursor: pointer;
+
+    &:active {
+        transform: scale(0.972);
+        box-shadow: 0 8rpx 18rpx rgba(0, 0, 0, 0.32);
+
+        .timeline-card__score {
+            transform: scale(1.15);
+        }
+    }
 
     .theme-light & {
         background: #ffffff;
@@ -659,6 +753,15 @@ onShow(() => {
     grid-column: 1 / -1;
     aspect-ratio: 16 / 10;
     height: auto;
+    animation: timelineWideReveal 1.08s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.timeline-card--odd:not(.timeline-card--wide) {
+    animation: timelineLeftReveal 1.02s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.timeline-card--even:not(.timeline-card--wide) {
+    animation: timelineRightReveal 1.02s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .editorial-grid .timeline-card:not(.timeline-card--wide) {
@@ -726,12 +829,26 @@ onShow(() => {
     }
 }
 
+// ── 卡片内文字顺延微浮特效 ──
+@keyframes cardContentReveal {
+    0% {
+        opacity: 0;
+        transform: translate3d(24rpx, 12rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 .timeline-card__content {
     position: absolute;
     left: 20rpx;
     right: 20rpx;
     bottom: 20rpx;
     z-index: 1;
+    animation: cardContentReveal 0.92s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--card-delay, 0s) + 0.16s);
 }
 
 .timeline-card__classify {
@@ -777,8 +894,7 @@ onShow(() => {
     flex: 1;
 }
 
-.timeline-card__time,
-.timeline-card__score {
+.timeline-card__time {
     display: flex;
     align-items: center;
     gap: 6rpx;
@@ -786,15 +902,20 @@ onShow(() => {
     color: rgba(203, 213, 225, 0.76);
 }
 
-.timeline-card:active {
-    transform: scale(1.02);
+.timeline-card__score {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    font-size: 20rpx;
+    color: rgba(203, 213, 225, 0.76);
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @media (hover: hover) and (pointer: fine) {
     .timeline-card:hover {
-        transform: translateY(-6rpx) scale(1.02);
+        transform: translateY(-4rpx) scale(1.01);
         box-shadow:
-            0 28rpx 52rpx rgba(0, 0, 0, 0.3),
+            0 24rpx 48rpx rgba(0, 0, 0, 0.28),
             inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
     }
 }

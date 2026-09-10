@@ -20,6 +20,7 @@
         "cacheSize": "Cache Size",
         "information": "Information",
         "download": "Download",
+        "preview": "Immersive",
         "points": "Points",
         "random": "Random",
         "recommend": "Recommend",
@@ -116,7 +117,7 @@
         "new": "NEW",
         "latest": "RECENT",
         "categoryRecommend": "Category Recommend",
-        "subjectRecommend": "Featured Collections",
+        "subjectRecommend": "Collections",
         "banner": {
             "defaultTitle": "Featured Wallpaper",
             "discoverMore": "Discover More",

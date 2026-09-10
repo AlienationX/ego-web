@@ -40,15 +40,21 @@
                                     <view class="preview-loading__text">{{ t('message.loading') }}</view>
                                 </view>
                                 <image v-if="readImgs.includes(index)" class="preview-slide__image"
-                                    :class="{ 'is-loaded': isImageLoaded(index), 'is-landscape-rotated': isLandscapeRotated }" @click="maskChange"
+                                    :class="{
+                                        'is-loaded': isImageLoaded(index),
+                                        'is-landscape-rotated': isLandscapeRotated,
+                                        'is-hero-active': isHeroEntering && index === initialHeroIndex
+                                    }" @click="maskChange"
                                     @load="handleImageLoad(index, $event)" @error="handleImageLoad(index)"
                                     :src="item.picurl" mode="aspectFill"></image>
                             </view>
                         </swiper-item>
                     </swiper>
 
-                    <!-- 沉浸式场景预览模式 (仅当非操作模式或正在挑选时钟样式时呈现) -->
-                    <template v-if="!maskState || tempClockStyle">
+                    <!-- 沉浸式场景预览模式 (锁屏时钟/头像/桌面) -->
+                    <view class="scene-overlay-wrap"
+                        :class="tempClockStyle ? 'is-previewing-clock' : sceneAnimClass"
+                        v-if="isSceneMounted || tempClockStyle">
                         <!-- 1. 灵动头像专属场景模拟器 (圆形/方形/社交名片) -->
                         <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.picurl || ''" />
 
@@ -57,9 +63,9 @@
 
                         <!-- 3. 常规手机壁纸沉浸式锁屏时钟 -->
                         <lock-screen-overlay v-else :clockStyle="tempClockStyle || activeSessionClockStyle" />
-                    </template>
+                    </view>
 
-                    <view class="mask" :class="{ 'mask--loading': isCurrentSlideLoading }" v-if="maskState">
+                    <view class="mask" :class="[maskAnimClass, { 'mask--loading': isCurrentSlideLoading }]" v-if="isMaskMounted">
                         <view class="goBack" :style="{ top: backButtonTop + 'px' }" @click="goBack">
                             <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
                         </view>
@@ -98,7 +104,7 @@
                             </view>
                         </view>
 
-                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count">
+                        <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count" :style="{ top: countTop + 'px' }">
                             {{ currentIndex + 1 }} / {{ classList.length }}
                         </view>
 
@@ -125,6 +131,9 @@
                         </view>
 
                         <template v-else>
+                            <!-- 非经典模式底部渐变阴影遮罩：独立于文字，原地纯透明度渐变，无位移动画 -->
+                            <view class="stream-bottom-shadow"></view>
+
                             <view class="right-actions">
                                 <view class="action-item" @click="openInfo">
                                     <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
@@ -790,19 +799,30 @@ const onFrostedRequireVip = () => {
 
 const openClockStyle = () => {
     tempClockStyle.value = currentClockStyle.value;
+    sceneAnimClass.value = '';
+    isSceneMounted.value = true;
     isClockStylePopupOpen.value = true;
     clockStylePopup.value?.open();
 };
 const closeClockStyle = () => {
     isClockStylePopupOpen.value = false;
+    tempClockStyle.value = '';
     clockStylePopup.value?.close();
+    if (maskState.value) {
+        sceneAnimClass.value = 'is-leaving';
+        isSceneMounted.value = false;
+    }
 };
 
 const onClockStylePopupChange = (e) => {
     isClockStylePopupOpen.value = e.show;
-    // When popup closes, reset preview to saved style if user didn't apply
+    // 当弹窗关闭时，如果用户未点击应用，重置预览并恢复操作模式状态
     if (!e.show) {
         tempClockStyle.value = '';
+        if (maskState.value) {
+            sceneAnimClass.value = 'is-leaving';
+            isSceneMounted.value = false;
+        }
     }
 };
 
@@ -1102,6 +1122,11 @@ const backButtonTop = computed(() => {
     return sb + 8;
 });
 
+const countTop = computed(() => {
+    // 顶部按钮高度为 38px (76rpx)，在其下方留出 14px 优雅呼吸间距，动态适配 iOS 灵动岛、不同高度刘海屏及安卓机型
+    return backButtonTop.value + 38 + 14;
+});
+
 const capsuleRightOffset = computed(() => {
     // #ifdef MP-WEIXIN
     if (capsuleRect.value) {
@@ -1125,16 +1150,58 @@ const goBack = () => {
     });
 };
 
-// 遮罩状态与 3 个手势引导提示逻辑（默认 false 即【预览模式】）
+// 遮罩状态与 3 个手势引导提示逻辑（默认 false 即【沉浸锁屏预览模式】）
 const maskState = ref(false);
 const showTapHint = computed(() => !statusStore.appStatus?.hasSeenTapHint);
 const showSwipeHint = computed(() => !statusStore.appStatus?.hasSeenSwipeHint);
 const showScrollHint = computed(() => !statusStore.appStatus?.hasSeenPreviewHint);
 
+// 锁屏场景层 & 非锁屏操作层 动效生命周期与类名管理
+const isSceneMounted = ref(true); // 首次进入为锁屏
+const sceneAnimClass = ref('is-entering'); // 首次进入锁屏触发入场动画
+const isMaskMounted = ref(false); // 首次进入非锁屏操作层不挂载
+const maskAnimClass = ref(''); // 非锁屏动画类: 'is-entering' | 'is-leaving' | ''
+
+let sceneTimer = null;
+let maskTimer = null;
+
 const maskChange = () => {
     maskState.value = !maskState.value;
     if (statusStore.appStatus && !statusStore.appStatus.hasSeenTapHint) {
         statusStore.appStatus.hasSeenTapHint = true;
+    }
+
+    if (maskState.value) {
+        // === 单击进入【非锁屏】（操作模式） ===
+        // 1. 锁屏层退场：播放向上浮动淡出动画，退场动画结束后卸载 DOM（挑选时钟样式时保持渲染）
+        if (sceneTimer) clearTimeout(sceneTimer);
+        sceneAnimClass.value = 'is-leaving';
+        sceneTimer = setTimeout(() => {
+            if (maskState.value && !tempClockStyle.value) {
+                isSceneMounted.value = false;
+            }
+        }, 850);
+
+        // 2. 非锁屏操作层入场：挂载 DOM 并播放各控件错位滑入动画
+        if (maskTimer) clearTimeout(maskTimer);
+        isMaskMounted.value = true;
+        maskAnimClass.value = 'is-entering';
+    } else {
+        // === 再次单击切回【锁屏】（沉浸预览模式） ===
+        // 1. 非锁屏操作层退场：播放飞出屏幕外动画，完全移出后再卸载 DOM
+        if (maskTimer) clearTimeout(maskTimer);
+        maskAnimClass.value = 'is-leaving';
+        maskTimer = setTimeout(() => {
+            if (!maskState.value) {
+                isMaskMounted.value = false;
+                maskAnimClass.value = '';
+            }
+        }, 1050);
+
+        // 2. 锁屏层入场：挂载 DOM 并播放平滑落座入场动画
+        if (sceneTimer) clearTimeout(sceneTimer);
+        isSceneMounted.value = true;
+        sceneAnimClass.value = 'is-entering';
     }
 };
 
@@ -1705,6 +1772,8 @@ const handleImageLoad = (index, event) => {
 // OnLoad接收参数
 const currentId = ref(null);
 const currentIndex = ref(0);
+const isHeroEntering = ref(true);
+const initialHeroIndex = ref(0);
 
 const isCurrentSlideLoading = computed(
     () => readImgs.value.includes(currentIndex.value) && !loadedImageMap.value[currentIndex.value],
@@ -1744,8 +1813,16 @@ onLoad(async (e) => {
     const matchIndex = classList.value.findIndex((item) => item.id === parseInt(currentId.value));
     if (matchIndex >= 0) {
         currentIndex.value = matchIndex;
+        initialHeroIndex.value = matchIndex;
         currentInfo.value = classList.value[currentIndex.value];
+    } else {
+        initialHeroIndex.value = 0;
     }
+
+    // 页面入场 Hero 呼吸与浮动控件动画在 650ms 后平稳解除
+    setTimeout(() => {
+        isHeroEntering.value = false;
+    }, 650);
 
     // 若本地未找到全量项，或该壁纸缺少技术指标（width / file_size / views），自动从服务端补全详情
     if (!currentInfo.value || !currentInfo.value.width || !currentInfo.value.file_size || e.mode === 'recommend' || e.type === 'share') {
@@ -1763,6 +1840,8 @@ onLoad(async (e) => {
 onUnload(() => {
     clearTimeout(viewDebounceTimer);
     viewDebounceTimer = null;
+    if (sceneTimer) clearTimeout(sceneTimer);
+    if (maskTimer) clearTimeout(maskTimer);
 });
 
 // 滑动事件，变化当前数字
@@ -2007,6 +2086,10 @@ const handleCopyWatermarkId = () => {
             &.is-landscape-rotated {
                 transform: rotate(90deg) scale(1.6);
             }
+
+            &.is-hero-active {
+                animation: heroWallpaperEntrance 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
+            }
         }
 
         .preview-slide__image.is-loaded {
@@ -2059,6 +2142,32 @@ const handleCopyWatermarkId = () => {
         }
     }
 
+    .scene-overlay-wrap {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 5;
+
+        // 挑选时钟样式时保持常亮无位移预览
+        &.is-previewing-clock {
+            opacity: 1 !important;
+            transform: translate3d(0, 0, 0) scale(1) !important;
+            animation: none !important;
+            pointer-events: none;
+        }
+
+        &.is-entering {
+            animation: sceneOverlayEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        &.is-leaving {
+            animation: sceneOverlayExit 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+            pointer-events: none !important;
+        }
+    }
+
     .mask {
         position: absolute;
         top: 0;
@@ -2066,6 +2175,80 @@ const handleCopyWatermarkId = () => {
         width: 100%;
         height: 100%;
         pointer-events: none;
+
+        // 非锁屏元素从屏幕外飞入进场（从容舒展、轨迹清晰）
+        &.is-entering {
+            // 底部阴影遮罩：原地纯颜色渐变淡入，绝对不参与位移！
+            .stream-bottom-shadow {
+                animation: shadowFadeIn 0.8s ease-out both;
+            }
+
+            // 距离近的元素（顶部区域）：约 0.8s 从容入场
+            .goBack {
+                animation: heroControlTopLeftIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+            }
+
+            .top-actions {
+                animation: heroControlTopSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
+            }
+
+            .count {
+                animation: heroControlCountSlideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+            }
+
+            // 距离远的元素（全屏外大位移）：约 1.0s 充分舒展滑入
+            .footer {
+                animation: heroControlBottomSlideIn 1.0s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+            }
+
+            .right-actions {
+                animation: heroControlRightSlideIn 1.0s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+            }
+
+            .left-meta {
+                animation: heroControlLeftMetaIn 1.0s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
+            }
+        }
+
+        // 非锁屏元素飞出屏幕外退场（从容平稳、完整移出）
+        &.is-leaving {
+            pointer-events: none !important;
+
+            & > view {
+                pointer-events: none !important;
+            }
+
+            // 底部阴影遮罩：原地纯颜色渐变淡出，无横移切边！
+            .stream-bottom-shadow {
+                animation: shadowFadeOut 0.8s ease-out both;
+            }
+
+            // 距离近的元素：约 0.8s 从容飞出
+            .goBack {
+                animation: heroControlTopLeftOut 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+
+            .top-actions {
+                animation: heroControlTopSlideOut 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+
+            .count {
+                animation: heroControlCountSlideOut 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+
+            // 距离远的元素：约 1.0s 平稳滑离屏幕
+            .footer {
+                animation: heroControlBottomSlideOut 1.0s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+
+            .right-actions {
+                animation: heroControlRightSlideOut 1.0s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+
+            .left-meta {
+                animation: heroControlLeftMetaOut 1.0s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+        }
 
         &>view {
             // goBack\count\time\date\footer都需要绝对定位，统一在这里设
@@ -2128,7 +2311,6 @@ const handleCopyWatermarkId = () => {
         }
 
         .count {
-            top: 12vh;
             background: rgba(0, 0, 0, 0.25);
             font-size: 26rpx;
             font-weight: 500;
@@ -2247,6 +2429,27 @@ const handleCopyWatermarkId = () => {
             }
         }
 
+        // 非经典模式专属全宽暗影底衬（纯渐变浮现，不发生任何位移）
+        .stream-bottom-shadow {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 440rpx;
+            margin: 0;
+            background: linear-gradient(to top,
+                    rgba(0, 0, 0, 0.72) 0%,
+                    rgba(0, 0, 0, 0.62) 20%,
+                    rgba(0, 0, 0, 0.44) 42%,
+                    rgba(0, 0, 0, 0.22) 65%,
+                    rgba(0, 0, 0, 0.08) 82%,
+                    rgba(0, 0, 0, 0.02) 94%,
+                    transparent 100%);
+            pointer-events: none !important;
+            z-index: 1;
+        }
+
         .left-meta {
             position: absolute;
             left: 44rpx;
@@ -2260,25 +2463,6 @@ const handleCopyWatermarkId = () => {
             z-index: 2;
             padding: 20rpx 20rpx calc(96rpx + env(safe-area-inset-bottom));
             margin: 0;
-
-            &::before {
-                content: '';
-                position: absolute;
-                left: -44rpx;
-                right: -170rpx;
-                bottom: 0;
-                top: -240rpx;
-                background: linear-gradient(to top,
-                        rgba(0, 0, 0, 0.72) 0%,
-                        rgba(0, 0, 0, 0.64) 18%,
-                        rgba(0, 0, 0, 0.46) 38%,
-                        rgba(0, 0, 0, 0.26) 60%,
-                        rgba(0, 0, 0, 0.10) 80%,
-                        rgba(0, 0, 0, 0.02) 92%,
-                        transparent 100%);
-                pointer-events: none;
-                z-index: -1;
-            }
 
             .meta-user {
                 display: flex;
@@ -2317,6 +2501,203 @@ const handleCopyWatermarkId = () => {
                 opacity: 0.95;
             }
         }
+    }
+}
+
+@keyframes heroWallpaperEntrance {
+    0% {
+        transform: scale(1.08);
+        filter: brightness(0.92);
+        opacity: 0.2;
+    }
+    40% {
+        opacity: 0.95;
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+        opacity: 1;
+    }
+}
+
+// ── 锁屏场景进退场关键帧 ──
+@keyframes sceneOverlayEntrance {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -120rpx, 0) scale(0.95);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+@keyframes sceneOverlayExit {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(0, -140rpx, 0) scale(0.95);
+    }
+}
+
+// ── 非锁屏各控件从屏幕外进退场关键帧 ──
+// 返回按钮自屏幕顶部外飞入与飞出
+@keyframes heroControlTopLeftIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -240rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroControlTopLeftOut {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(0, -240rpx, 0);
+    }
+}
+
+// 顶部操作栏自屏幕顶部外飞入与飞出
+@keyframes heroControlTopSlideIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -240rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroControlTopSlideOut {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(0, -240rpx, 0);
+    }
+}
+
+// 居中计数器自屏幕顶部外飞入与飞出
+@keyframes heroControlCountSlideIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -280rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroControlCountSlideOut {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(0, -280rpx, 0);
+    }
+}
+
+// 底部操作栏自屏幕底部外飞入与滑落飞出
+@keyframes heroControlBottomSlideIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 380rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroControlBottomSlideOut {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(0, 380rpx, 0);
+    }
+}
+
+// 右侧操作栏自屏幕右侧外飞入与飞出
+@keyframes heroControlRightSlideIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(260rpx, 0, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroControlRightSlideOut {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(260rpx, 0, 0);
+    }
+}
+
+// ── 底部暗影遮罩纯渐变关键帧（原地淡入淡出，彻底无位移切边） ──
+@keyframes shadowFadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes shadowFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+// 左下角信息自屏幕左侧外飞入与飞出
+@keyframes heroControlLeftMetaIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(-100%, 0, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+@keyframes heroControlLeftMetaOut {
+    0% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(-100%, 0, 0);
     }
 }
 

@@ -48,7 +48,7 @@
                         <view
                             class="hero-card hero-card--first"
                             :key="`${activeMetric}-${rankedList[0].id}`"
-                            :style="{ animationDelay: '0.16s' }"
+                            :style="{ animationDelay: '0.20s' }"
                             @click="goPreview(rankedList[0].id)"
                         >
                             <image
@@ -83,7 +83,8 @@
                                 v-for="(item, idx) in rankedList.slice(1, 3)"
                                 :key="`${activeMetric}-${item.id}`"
                                 class="hero-card hero-card--secondary"
-                                :style="{ animationDelay: `${0.38 + idx * 0.18}s` }"
+                                :class="idx === 0 ? 'hero-card--second' : 'hero-card--third'"
+                                :style="{ animationDelay: `${0.42 + idx * 0.20}s` }"
                                 @click="goPreview(item.id)"
                             >
                                 <image
@@ -92,7 +93,7 @@
                                     mode="aspectFill"
                                 ></image>
                                 <view class="hero-card__overlay hero-card__overlay--soft"></view>
-                                <view class="hero-card__rank" :class="{ 'hero-card__rank--second': idx === 0 }">{{
+                                <view class="hero-card__rank" :class="idx === 0 ? 'hero-card__rank--second' : 'hero-card__rank--third'">{{
                                     idx + 2
                                 }}</view>
                                 <view class="hero-card__content hero-card__content--compact">
@@ -120,7 +121,7 @@
                                 v-for="(item, idx) in rankedList.slice(3)"
                                 :key="`${activeMetric}-${item.id}`"
                                 class="rank-item"
-                                :style="{ animationDelay: `${0.74 + idx * 0.12}s` }"
+                                :style="{ animationDelay: `${0.78 + idx * 0.14}s` }"
                                 @click="goPreview(item.id)"
                             >
                                 <view class="rank-item__media">
@@ -608,6 +609,34 @@ onShow(() => {
     margin-bottom: 28rpx;
 }
 
+// ── TOP 10 标牌自顶部下落微弹 ──
+@keyframes badgeDropIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -32rpx, 0) scale(0.85);
+    }
+    60% {
+        opacity: 1;
+        transform: translate3d(0, 4rpx, 0) scale(1.04);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+// ── 榜单说明文字柔和淡入 ──
+@keyframes introDescFadeIn {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 16rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
 .top10-intro__badge {
     display: inline-flex;
     height: 40rpx;
@@ -620,6 +649,7 @@ onShow(() => {
     font-weight: 800;
     letter-spacing: 2rpx;
     margin-bottom: 16rpx;
+    animation: badgeDropIn 0.92s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 
     .theme-light & {
         background: rgba(37, 99, 235, 0.1);
@@ -631,6 +661,7 @@ onShow(() => {
     font-size: 24rpx;
     line-height: 1.8;
     color: #94a3b8;
+    animation: introDescFadeIn 0.92s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
 
     .theme-light & {
         color: var(--text-secondary);
@@ -648,8 +679,9 @@ onShow(() => {
     background: #182431;
     box-shadow: 0 24rpx 56rpx rgba(0, 0, 0, 0.28);
     transition:
-        transform 0.28s ease,
-        box-shadow 0.28s ease;
+        transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.24s ease;
+    cursor: pointer;
 
     .theme-light & {
         background: #f8fafc;
@@ -657,14 +689,28 @@ onShow(() => {
     }
 }
 
-// ── 冠军第 1 名入场（自右向左平滑滑入带微俯冲聚焦） ──
-@keyframes heroFirstCardReveal {
+// ── 冠军第 1 名入场（领奖台中心聚光升起） ──
+@keyframes heroFirstCardAscend {
     0% {
         opacity: 0;
-        transform: translate3d(140rpx, -12rpx, 0) scale(0.94);
+        transform: translate3d(0, 56rpx, 0) scale(0.92);
+        filter: brightness(0.85);
     }
     60% {
-        opacity: 0.9;
+        opacity: 0.95;
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+        filter: brightness(1);
+    }
+}
+
+// ── 亚军第 2 名从左下方斜向拱卫升起 ──
+@keyframes heroSecondFlank {
+    0% {
+        opacity: 0;
+        transform: translate3d(-60rpx, 48rpx, 0) scale(0.93);
     }
     100% {
         opacity: 1;
@@ -672,25 +718,43 @@ onShow(() => {
     }
 }
 
-// ── 亚季军 2、3 名入场（自右向左平滑滑入展翼） ──
-@keyframes heroSecondaryReveal {
+// ── 季军第 3 名从右下方斜向拱卫升起 ──
+@keyframes heroThirdFlank {
     0% {
         opacity: 0;
-        transform: translate3d(110rpx, -10rpx, 0) scale(0.94);
-    }
-    60% {
-        opacity: 0.9;
+        transform: translate3d(60rpx, 48rpx, 0) scale(0.93);
     }
     100% {
         opacity: 1;
         transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+// ── 冠军金牌徽章 3D 旋转弹簧落座 ──
+@keyframes crownMedalDrop {
+    0% {
+        opacity: 0;
+        transform: scale(0) rotate(-20deg);
+    }
+    65% {
+        opacity: 1;
+        transform: scale(1.18) rotate(4deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
     }
 }
 
 .hero-card--first {
     aspect-ratio: 16 / 10;
     margin-bottom: 30rpx;
-    animation: heroFirstCardReveal 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: heroFirstCardAscend 1.08s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    &:active {
+        transform: scale(0.98);
+        box-shadow: 0 12rpx 28rpx rgba(0, 0, 0, 0.32);
+    }
 }
 
 .hero-grid {
@@ -702,7 +766,18 @@ onShow(() => {
 
 .hero-card--secondary {
     aspect-ratio: 3 / 4;
-    animation: heroSecondaryReveal 0.68s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    &:active {
+        transform: scale(0.975);
+    }
+}
+
+.hero-card--second {
+    animation: heroSecondFlank 1.02s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-card--third {
+    animation: heroThirdFlank 1.02s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hero-card__image {
@@ -747,11 +822,24 @@ onShow(() => {
 }
 
 .hero-card__rank--first {
-    background: linear-gradient(135deg, #2b8cee, #60a5fa);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 55%, #d97706 100%);
+    color: #ffffff;
+    font-weight: 900;
+    border: 2rpx solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+        0 8rpx 24rpx rgba(245, 158, 11, 0.45),
+        0 2rpx 6rpx rgba(0, 0, 0, 0.25);
+    text-shadow: 0 2rpx 4rpx rgba(120, 53, 15, 0.5);
+    animation: crownMedalDrop 0.92s cubic-bezier(0.34, 1.56, 0.64, 1) 0.40s both;
 }
 
-.hero-card__rank--second {
-    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+.hero-card__rank--second,
+.hero-card__rank--third {
+    background: rgba(13, 19, 30, 0.9);
+    border: 1rpx solid rgba(191, 219, 254, 0.2);
+    color: #f8fafc;
+    box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(8px);
 }
 
 .hero-card__content {
@@ -866,15 +954,15 @@ onShow(() => {
     gap: 30rpx;
 }
 
-// ── 竞争者列表自右向左平滑递进滑入 ──
-@keyframes rankItemSlideUp {
+// ── 竞争者列表瀑布微透视阶梯翻折展开 ──
+@keyframes rankItemCascadeFold {
     0% {
         opacity: 0;
-        transform: translate3d(100rpx, 0, 0);
+        transform: perspective(600px) rotateX(10deg) translate3d(0, 48rpx, 0);
     }
     100% {
         opacity: 1;
-        transform: translate3d(0, 0, 0);
+        transform: perspective(600px) rotateX(0deg) translate3d(0, 0, 0);
     }
 }
 
@@ -890,10 +978,21 @@ onShow(() => {
         0 10rpx 24rpx rgba(0, 0, 0, 0.2),
         0 24rpx 48rpx rgba(0, 0, 0, 0.16);
     transition:
-        transform 0.28s ease,
-        box-shadow 0.28s ease,
-        border-color 0.28s ease;
-    animation: rankItemSlideUp 0.60s cubic-bezier(0.16, 1, 0.3, 1) both;
+        transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.22s ease,
+        border-color 0.22s ease;
+    animation: rankItemCascadeFold 1.02s cubic-bezier(0.16, 1, 0.3, 1) both;
+    cursor: pointer;
+
+    &:active {
+        transform: scale(0.982);
+        box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.22);
+
+        .rank-item__action {
+            transform: translateX(6rpx);
+            background: rgba(43, 140, 238, 0.2);
+        }
+    }
 
     .theme-light & {
         background: #f8fafc;
@@ -994,22 +1093,13 @@ onShow(() => {
     background: rgba(159, 180, 209, 0.08);
     align-self: center;
     margin-right: 10rpx;
+    transition:
+        transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.2s ease;
 
     .theme-light & {
         background: rgba(0, 0, 0, 0.04);
     }
-}
-
-.rank-item:active {
-    transform: scale(1.03);
-    box-shadow:
-        0 18rpx 36rpx rgba(0, 0, 0, 0.26),
-        0 32rpx 64rpx rgba(0, 0, 0, 0.22);
-    border-color: rgba(125, 211, 252, 0.28);
-}
-
-.rank-item:active .rank-item__thumb {
-    transform: scale(1.08);
 }
 
 .rank-item__thumb {
@@ -1018,7 +1108,7 @@ onShow(() => {
 
 @media (hover: hover) and (pointer: fine) {
     .hero-card:hover {
-        transform: scale(1.03);
+        transform: scale(1.012);
         box-shadow:
             0 18rpx 36rpx rgba(0, 0, 0, 0.26),
             0 32rpx 64rpx rgba(0, 0, 0, 0.22);
