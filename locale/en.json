@@ -248,8 +248,14 @@
         "subtitle": "Handcrafted HD wallpaper collections curated for visual inspiration",
         "emptyTitle": "No Collections Available",
         "emptyDesc": "Stay tuned, more curated collections are on the way!",
+        "emptyFeaturedTitle": "No Featured Collections",
+        "emptyFeaturedDesc": "No featured collections found. You can switch back to view all collections.",
+        "viewAll": "View All Collections",
         "noMore": "—— No more collections ——",
-        "walls": "Walls"
+        "walls": "Walls",
+        "filterAll": "All",
+        "filterFeatured": "Featured",
+        "featuredBadge": "Featured"
     },
     "category": {
         "title": "Category",

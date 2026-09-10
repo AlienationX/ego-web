@@ -14,8 +14,8 @@
                     </view>
                 </view>
                 <view class="greeting-info">
-                    <text class="greeting-sub">{{ greetingText }}</text>
-                    <text class="greeting-name">{{ userDisplayName }}</text>
+                    <text class="greeting-name">{{ userTitleText }}</text>
+                    <text class="greeting-sub">{{ userSubText }}</text>
                 </view>
             </view>
 
@@ -31,9 +31,9 @@
                     <text class="bubble-text">{{ tp('index.newWallpapersNoticeDesc', { count: statusStore.newWallpapersCount }) || `今日已更新 ${statusStore.newWallpapersCount} 张壁纸` }}</text>
                 </view>
 
-                <!-- 铃铛按钮 -->
+                <!-- 铃铛按钮 (纯白浮岛圆球) -->
                 <view class="bell-btn" @click="emit('open-notifications')">
-                    <mdi-icon path="/static/icons/bell.svg" size="20px" :color="settingsStore.isDark ? '#f7f7fb' : '#15171c'"></mdi-icon>
+                    <mdi-icon path="/static/icons/bell.svg" size="20px" :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"></mdi-icon>
                     <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge">
                         <text class="badge-num">{{ statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount }}</text>
                     </view>
@@ -41,38 +41,16 @@
             </view>
         </view>
 
-        <!-- Row 2: 沉浸搜索栏 (对齐 classify.vue：小巧淡雅占位符) -->
+        <!-- Row 2: 沉浸式质感搜索栏 -->
         <view class="hero-header__row hero-header__search-row">
             <view class="search-bar" @click="goSearch">
                 <view class="search-bar__left">
-                    <mdi-icon path="/static/icons/magnify.svg" size="18" :color="settingsStore.isDark ? 'rgba(247, 247, 251, 0.52)' : 'rgba(21, 23, 28, 0.52)'"></mdi-icon>
+                    <mdi-icon path="/static/icons/magnify.svg" size="20px" :color="settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(30, 41, 59, 0.45)'"></mdi-icon>
                     <text class="search-bar__placeholder">{{ t('search.placeholder') || '搜索壁纸、分类、标签...' }}</text>
                 </view>
                 <view class="search-bar__action" @click.stop="goSearch">
-                    <mdi-icon path="/static/icons/palette-swatch.svg" size="16px" color="#ffffff"></mdi-icon>
+                    <mdi-icon path="/static/icons/palette-swatch.svg" size="18px" color="#ffffff"></mdi-icon>
                 </view>
-            </view>
-        </view>
-
-        <!-- Row 3: 四大快捷扁平化入口 (微圆角方块 Squircle，解除与圆形头像冲突) -->
-        <view class="hero-header__row hero-header__pills-row">
-            <view
-                v-for="pill in navPills"
-                :key="pill.key"
-                class="nav-pill"
-                :class="{ 'is-active': activePill === pill.key }"
-                @click="onPillClick(pill)"
-            >
-                <view class="nav-pill__box">
-                    <mdi-icon
-                        :path="pill.icon"
-                        size="26px"
-                        :color="activePill === pill.key ? (settingsStore.isDark ? '#60a5fa' : '#2563eb') : (settingsStore.isDark ? '#e2e8f0' : '#475569')"
-                    ></mdi-icon>
-                    <!-- 最新角标红点 -->
-                    <view v-if="pill.key === 'latest' && statusStore.newWallpapersCount > 0" class="pill-dot"></view>
-                </view>
-                <text class="nav-pill__label">{{ pill.label }}</text>
             </view>
         </view>
     </view>
@@ -93,7 +71,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['open-notifications', 'select-recommend']);
+const emit = defineEmits(['open-notifications']);
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -101,70 +79,44 @@ const userStore = useUserStore();
 const statusStore = useStatusStore();
 const settingsStore = useSettingsStore();
 
-const activePill = ref('recommend');
 const isBubbleVisible = ref(false);
 const isBubbleFolding = ref(false);
 
 const isEn = computed(() => locale.value === 'en');
-const searchIconColor = computed(() => (settingsStore.isDark ? 'rgba(255, 255, 255, 0.5)' : '#94a3b8'));
 
-// 用户头像与昵称
+// 用户头像
 const userAvatar = computed(() => {
     return userStore.userinfo?.profile?.avatar || '/static/logo.svg';
 });
 
-const userDisplayName = computed(() => {
-    if (userStore.userinfo?.profile?.nickname) {
-        return userStore.userinfo.profile.nickname;
-    }
-    if (userStore.userinfo?.nickname) {
-        return userStore.userinfo.nickname;
-    }
-    return isEn.value ? 'Explorer 👋' : '探索者 · 开启美学之旅';
-});
-
-// 时段动态问候语
-const greetingText = computed(() => {
+// 用户主标题 (问候 + 昵称)
+const userTitleText = computed(() => {
+    const nickname = userStore.userinfo?.profile?.nickname;
     const hour = new Date().getHours();
+    
     if (isEn.value) {
-        if (hour >= 5 && hour < 12) return 'Good morning ☀️';
-        if (hour >= 12 && hour < 18) return 'Good afternoon ☕️';
-        if (hour >= 18 && hour < 22) return 'Good evening 🌙';
-        return 'Late night 🌌';
+        let greeting = 'Hello';
+        if (hour >= 5 && hour < 12) greeting = 'Good morning';
+        else if (hour >= 12 && hour < 18) greeting = 'Good afternoon';
+        else if (hour >= 18 && hour < 22) greeting = 'Good evening';
+        else greeting = 'Hello';
+        return nickname ? `${greeting}, ${nickname}` : 'Hello, Explorer';
     }
-    if (hour >= 5 && hour < 12) return '早上好 ☀️';
-    if (hour >= 12 && hour < 14) return '中午好 ☕️';
-    if (hour >= 14 && hour < 18) return '下午好 🌤';
-    if (hour >= 18 && hour < 22) return '晚上好 🌙';
-    return '夜深了 🌌';
+
+    let timePrefix = '你好';
+    if (hour >= 5 && hour < 12) timePrefix = '早上好';
+    else if (hour >= 12 && hour < 14) timePrefix = '中午好';
+    else if (hour >= 14 && hour < 18) timePrefix = '下午好';
+    else if (hour >= 18 && hour < 22) timePrefix = '晚上好';
+    else timePrefix = '夜深了';
+    
+    return nickname ? `${timePrefix}，${nickname}` : `${timePrefix}，探索者`;
 });
 
-// 4个快捷导航胶囊
-const navPills = computed(() => [
-    {
-        key: 'recommend',
-        label: t('common.recommend') || '每日精选',
-        icon: '/static/icons/star.svg',
-    },
-    {
-        key: 'hot',
-        label: t('index.tabs.hot') || '最热榜单',
-        icon: '/static/icons/fire.svg',
-        path: '/pages/app/top',
-    },
-    {
-        key: 'latest',
-        label: t('index.tabs.latest') || '最新发布',
-        icon: '/static/icons/flash.svg',
-        path: '/pages/app/timeline',
-    },
-    {
-        key: 'subjects',
-        label: t('index.subjectRecommend') || '专题策划',
-        icon: '/static/icons/cards.svg',
-        path: '/pages/app/subjects',
-    },
-]);
+// 副标题描述 (引导探索美学灵感)
+const userSubText = computed(() => {
+    return isEn.value ? 'What aesthetic fits you today?' : '今天想探索什么美学风格？';
+});
 
 // 灵动微气泡生命周期：展示 4.5 秒后优雅吸入铃铛
 onMounted(() => {
@@ -196,27 +148,14 @@ const goTimeline = () => {
         url: `/pages/app/timeline?unreadCount=${statusStore.newWallpapersCount || 0}`,
     });
 };
-
-const onPillClick = (pill) => {
-    if (pill.key === 'recommend') {
-        activePill.value = 'recommend';
-        emit('select-recommend');
-        return;
-    }
-    if (pill.path) {
-        uni.navigateTo({
-            url: pill.path,
-        });
-    }
-};
 </script>
 
 <style lang="scss" scoped>
 .hero-header {
-    padding: 0 32rpx 20rpx;
+    padding: 0 32rpx 14rpx;
     display: flex;
     flex-direction: column;
-    gap: 28rpx;
+    gap: 24rpx;
 
     &__row {
         position: relative;
@@ -228,30 +167,38 @@ const onPillClick = (pill) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding-top: 6rpx;
 }
 
 .user-block {
     display: flex;
     align-items: center;
-    gap: 20rpx;
-    max-width: 60%;
+    gap: 22rpx;
+    max-width: 72%;
     cursor: pointer;
 
     .avatar-wrap {
         position: relative;
-        width: 88rpx;
-        height: 88rpx;
+        width: 92rpx;
+        height: 92rpx;
         border-radius: 50%;
-        background: rgba(120, 120, 128, 0.1);
+        background: #ffffff;
+        border: 2rpx solid rgba(255, 255, 255, 0.8);
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+        box-shadow: 0 6rpx 20rpx rgba(15, 23, 42, 0.08);
+
+        .theme-dark & {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.35);
+        }
 
         .avatar-img {
-            width: 80rpx;
-            height: 80rpx;
+            width: 86rpx;
+            height: 86rpx;
             border-radius: 50%;
         }
 
@@ -273,17 +220,23 @@ const onPillClick = (pill) => {
         flex-direction: column;
         overflow: hidden;
 
-        .greeting-sub {
-            font-size: 24rpx;
-            color: var(--text-secondary, #64748b);
-            margin-bottom: 4rpx;
-            letter-spacing: 0.5rpx;
+        .greeting-name {
+            font-size: 34rpx;
+            line-height: 1.25;
+            font-weight: 800;
+            color: var(--text-primary, #0f172a);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            letter-spacing: -0.5rpx;
         }
 
-        .greeting-name {
-            font-size: 32rpx;
-            font-weight: 700;
-            color: var(--text-primary, #0f172a);
+        .greeting-sub {
+            font-size: 24rpx;
+            line-height: 1.4;
+            color: var(--text-tertiary, #94a3b8);
+            margin-top: 6rpx;
+            letter-spacing: 0.2rpx;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -300,8 +253,8 @@ const onPillClick = (pill) => {
 // 灵动微气泡动画
 .dynamic-bubble {
     position: absolute;
-    right: 92rpx;
-    background: rgba(15, 23, 42, 0.88);
+    right: 96rpx;
+    background: rgba(15, 23, 42, 0.9);
     backdrop-filter: blur(16rpx);
     -webkit-backdrop-filter: blur(16rpx);
     color: #ffffff;
@@ -311,7 +264,7 @@ const onPillClick = (pill) => {
     align-items: center;
     gap: 8rpx;
     white-space: nowrap;
-    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.18);
     border: 1rpx solid rgba(255, 255, 255, 0.15);
     z-index: 10;
     animation: bubbleSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -360,20 +313,25 @@ const onPillClick = (pill) => {
     }
 }
 
+// 纯白浮岛圆球铃铛按钮
 .bell-btn {
-    width: 80rpx;
-    height: 80rpx;
+    width: 84rpx;
+    height: 84rpx;
     border-radius: 50%;
-    background: var(--panel-background);
-    border: 1rpx solid var(--panel-border);
-    backdrop-filter: blur(16rpx);
-    -webkit-backdrop-filter: blur(16rpx);
-    box-shadow: 0 4rpx 16rpx var(--shadow-color);
+    background: #ffffff;
+    border: 1rpx solid rgba(30, 41, 59, 0.06);
+    box-shadow: 0 6rpx 20rpx rgba(15, 23, 42, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    transition: transform 0.2s, background-color 0.2s;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    .theme-dark & {
+        background: #222228;
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.3);
+    }
 
     &:active {
         transform: scale(0.92);
@@ -395,21 +353,25 @@ const onPillClick = (pill) => {
     }
 }
 
-// ── 2. 大圆角胶囊搜索栏 (完美适配 Light/Dark 模式) ──
+// ── 2. 大圆角沉浸搜索栏 (参考原型：白底纯净微浮岛 + 右侧深橄榄操作键) ──
 .hero-header__search-row {
     .search-bar {
-        height: 88rpx;
-        background: var(--panel-background);
-        backdrop-filter: blur(20rpx);
-        -webkit-backdrop-filter: blur(20rpx);
-        border-radius: 28rpx;
-        border: 1rpx solid var(--panel-border);
-        box-shadow: 0 4rpx 20rpx var(--shadow-color);
+        height: 94rpx;
+        background: #ffffff;
+        border-radius: 30rpx;
+        border: 1rpx solid rgba(30, 41, 59, 0.06);
+        box-shadow: 0 6rpx 24rpx rgba(15, 23, 42, 0.04);
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 16rpx 0 28rpx;
-        transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s, border-color 0.2s;
+        padding: 0 16rpx 0 30rpx;
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        .theme-dark & {
+            background: #222228;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.3);
+        }
 
         &:active {
             transform: scale(0.99);
@@ -418,117 +380,39 @@ const onPillClick = (pill) => {
         &__left {
             display: flex;
             align-items: center;
-            gap: 16rpx;
+            gap: 18rpx;
             flex: 1;
             overflow: hidden;
         }
 
         &__placeholder {
-            font-size: 24rpx;
+            font-size: 26rpx;
             color: var(--text-tertiary);
-            letter-spacing: 0.5rpx;
+            letter-spacing: 0.3rpx;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
         &__action {
-            width: 60rpx;
-            height: 60rpx;
-            border-radius: 20rpx;
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            width: 66rpx;
+            height: 66rpx;
+            border-radius: 22rpx;
+            background: #2e382b;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4rpx 12rpx rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4rpx 14rpx rgba(46, 56, 43, 0.25);
             flex-shrink: 0;
+            transition: transform 0.2s;
 
-            .theme-dark & {
-                background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-                box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
+            &:active {
+                transform: scale(0.92);
             }
-        }
-    }
-}
-
-// ── 3. 四大快捷扁平化入口 (微圆角方块 Squircle，纯平无阴影，解决与圆形头像冲突) ──
-.hero-header__pills-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 10rpx;
-}
-
-.nav-pill {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12rpx;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-
-    &:active {
-        transform: scale(0.94);
-    }
-
-    &__box {
-        width: 92rpx;
-        height: 92rpx;
-        border-radius: 26rpx;
-        background: rgba(0, 0, 0, 0.035);
-        border: 1rpx solid rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        transition: all 0.25s ease;
-
-        .theme-dark & {
-            background: rgba(255, 255, 255, 0.07);
-            border: 1rpx solid rgba(255, 255, 255, 0.1);
-        }
-
-        .pill-dot {
-            position: absolute;
-            top: 10rpx;
-            right: 10rpx;
-            width: 14rpx;
-            height: 14rpx;
-            background: #ef4444;
-            border-radius: 50%;
-            border: 2rpx solid var(--page-background);
-        }
-    }
-
-    &__label {
-        font-size: 22rpx;
-        color: var(--text-secondary);
-        font-weight: 500;
-        transition: color 0.2s, font-weight 0.2s;
-
-        .theme-dark & {
-            color: rgba(247, 247, 251, 0.72);
-        }
-    }
-
-    // 激活态 (扁平化轻量微亮底，彻底去除厚阴影与厚重球体感)
-    &.is-active {
-        .nav-pill__box {
-            background: rgba(37, 99, 235, 0.1);
-            border-color: rgba(37, 99, 235, 0.2);
 
             .theme-dark & {
-                background: rgba(59, 130, 246, 0.18);
-                border-color: rgba(59, 130, 246, 0.35);
-            }
-        }
-
-        .nav-pill__label {
-            color: #2563eb;
-            font-weight: 700;
-
-            .theme-dark & {
-                color: #60a5fa;
+                background: #3b82f6;
+                box-shadow: 0 4rpx 14rpx rgba(59, 130, 246, 0.3);
             }
         }
     }

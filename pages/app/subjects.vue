@@ -48,6 +48,28 @@
                 </view>
                 <text class="hero-header__title">{{ t('subjects.title') }}</text>
                 <text class="hero-header__subtitle">{{ t('subjects.subtitle') }}</text>
+
+                <!-- 推荐过滤胶囊筛选栏 (点击主要显示推荐专题，取消显示全部专题) -->
+                <view class="hero-header__filter-bar">
+                    <view
+                        class="filter-pill"
+                        :class="{ 'is-active': !isFeaturedOnly }"
+                        @click="setFeaturedFilter(false)"
+                    >
+                        <text class="filter-pill__text">{{ t('subjects.filterAll') }}</text>
+                    </view>
+                    <view
+                        class="filter-pill filter-pill--featured"
+                        :class="{ 'is-active': isFeaturedOnly }"
+                        @click="toggleFeaturedFilter"
+                    >
+                        <text class="filter-pill__icon">✦</text>
+                        <text class="filter-pill__text">{{ t('subjects.filterFeatured') }}</text>
+                        <view v-if="isFeaturedOnly" class="filter-pill__cancel-icon">
+                            <uni-icons type="closeempty" size="10" color="inherit"></uni-icons>
+                        </view>
+                    </view>
+                </view>
             </view>
 
             <!-- Skeleton Loader -->
@@ -60,24 +82,35 @@
             <!-- Empty State -->
             <view v-else-if="!subjectsList.length" class="empty-state">
                 <uni-icons type="image" size="64" color="var(--text-tertiary)"></uni-icons>
-                <text class="empty-title">{{ t('subjects.emptyTitle') }}</text>
-                <text class="empty-desc">{{ t('subjects.emptyDesc') }}</text>
+                <text class="empty-title">
+                    {{ isFeaturedOnly ? t('subjects.emptyFeaturedTitle') : t('subjects.emptyTitle') }}
+                </text>
+                <text class="empty-desc">
+                    {{ isFeaturedOnly ? t('subjects.emptyFeaturedDesc') : t('subjects.emptyDesc') }}
+                </text>
+                <view v-if="isFeaturedOnly" class="empty-reset-btn" @click="setFeaturedFilter(false)">
+                    <text class="empty-reset-btn__text">{{ t('subjects.viewAll') }}</text>
+                </view>
             </view>
 
-            <!-- Subject Cards List (卡片序列式依次从右向左滑入) -->
-            <view v-else class="subjects-list">
+            <!-- Subject Cards List (卡片序列式依次从右向左立体透视滑入) -->
+            <view v-else class="subjects-list" :key="listRenderKey">
                 <view
                     v-for="(item, index) in subjectsList"
-                    :key="item.id"
+                    :key="`${listRenderKey}-${item.id}`"
                     class="subject-card"
                     hover-class="subject-card--active"
                     :hover-stay-time="150"
-                    :style="{ '--card-delay': `${index < 8 ? (index * 0.22 + 0.16) : 0}s`, animationDelay: `${index < 8 ? (index * 0.22 + 0.16) : 0}s` }"
+                    :style="{ '--card-delay': `${index < 8 ? (index * 0.16 + 0.06) : 0}s`, animationDelay: `${index < 8 ? (index * 0.16 + 0.06) : 0}s` }"
                     @click="goDetail(item)"
                 >
                     <view class="subject-card__header">
                         <view class="subject-card__badge-row">
                             <view class="subject-card__badges-group">
+                                <view class="subject-card__badge subject-card__badge--featured" v-if="item.select">
+                                    <text class="badge-icon">✦</text>
+                                    <text class="badge-text">{{ isEn ? 'FEATURED' : t('subjects.featuredBadge') }}</text>
+                                </view>
                                 <view class="subject-card__badge" v-if="item.is_locked">
                                     <uni-icons type="vip-filled" size="10" color="#fbbf24"></uni-icons>
                                     <text class="badge-text">PREMIUM</text>
@@ -189,6 +222,20 @@ const isRefreshing = ref(false);
 const pageNum = ref(1);
 const noMore = ref(false);
 
+const isFeaturedOnly = ref(false);
+const listRenderKey = ref(0);
+
+const setFeaturedFilter = (val) => {
+    if (isFeaturedOnly.value === val) return;
+    isFeaturedOnly.value = val;
+    fetchSubjects(false);
+};
+
+const toggleFeaturedFilter = () => {
+    isFeaturedOnly.value = !isFeaturedOnly.value;
+    fetchSubjects(false);
+};
+
 const fetchSubjects = async (isAppend = false) => {
     try {
         if (!isAppend) {
@@ -196,13 +243,20 @@ const fetchSubjects = async (isAppend = false) => {
             noMore.value = false;
             isLoading.value = true;
         }
-        const res = await apiGetSubjects({
+        const params = {
             is_active: true,
             pageNum: pageNum.value,
             pageSize: 10,
-        });
+        };
+        if (isFeaturedOnly.value) {
+            params.select = true;
+        }
+        const res = await apiGetSubjects(params);
         if (res.code === 200 && res.data) {
             const mapped = res.data.map((item) => handlePicUrl(item));
+            if (!isAppend) {
+                listRenderKey.value++;
+            }
             subjectsList.value = isAppend ? [...subjectsList.value, ...mapped] : mapped;
             const totalPages = Number(res.pagination?.total_pages || 1);
             noMore.value = pageNum.value >= totalPages || res.data.length === 0;
@@ -247,7 +301,10 @@ const goDetail = (item) => {
     });
 };
 
-onLoad(() => {
+onLoad((options) => {
+    if (options?.select === 'true' || options?.select === true) {
+        isFeaturedOnly.value = true;
+    }
     fetchSubjects();
 });
 
@@ -435,15 +492,15 @@ onShow(() => {
         text-transform: uppercase;
 
         .theme-light & {
-            background: rgba(40, 179, 137, 0.08);
-            border: 1rpx solid rgba(40, 179, 137, 0.18);
-            color: #1ea078;
+            background: rgba(79, 70, 229, 0.08);
+            border: 1rpx solid rgba(79, 70, 229, 0.18);
+            color: #4f46e5;
         }
 
         .theme-dark & {
-            background: rgba(125, 247, 196, 0.1);
-            border: 1rpx solid rgba(125, 247, 196, 0.2);
-            color: var(--accent-highlight);
+            background: rgba(129, 140, 248, 0.12);
+            border: 1rpx solid rgba(129, 140, 248, 0.24);
+            color: #a5b4fc;
         }
     }
 
@@ -471,6 +528,129 @@ onShow(() => {
         color: var(--text-secondary);
         line-height: 1.55;
         max-width: 620rpx;
+    }
+
+    // ── 推荐筛选胶囊栏 ──
+    &__filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+        margin-top: 12rpx;
+    }
+}
+
+.filter-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8rpx;
+    height: 60rpx;
+    padding: 0 28rpx;
+    border-radius: 999rpx;
+    font-size: 24rpx;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    user-select: none;
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.04);
+        border: 1rpx solid rgba(0, 0, 0, 0.08);
+        color: #64748b;
+
+        &:active {
+            transform: scale(0.95);
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        &.is-active {
+            background: #1e293b;
+            border-color: #1e293b;
+            color: #ffffff;
+            box-shadow: 0 4rpx 14rpx rgba(15, 23, 42, 0.16);
+        }
+    }
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.07);
+        border: 1rpx solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+
+        &:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        &.is-active {
+            background: #f1f5f9;
+            border-color: #f1f5f9;
+            color: #0f172a;
+            box-shadow: 0 4rpx 14rpx rgba(255, 255, 255, 0.12);
+        }
+    }
+
+    &--featured {
+        .theme-light & {
+            .filter-pill__icon {
+                color: #4f46e5;
+            }
+        }
+
+        .theme-dark & {
+            .filter-pill__icon {
+                color: #a5b4fc;
+            }
+        }
+
+        .theme-light &.is-active {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            border-color: #4338ca;
+            color: #ffffff;
+            box-shadow: 0 6rpx 20rpx rgba(79, 70, 229, 0.32);
+
+            .filter-pill__icon {
+                color: #e0e7ff;
+            }
+        }
+
+        .theme-dark &.is-active {
+            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            border-color: #6366f1;
+            color: #ffffff;
+            box-shadow: 0 6rpx 22rpx rgba(99, 102, 241, 0.38);
+
+            .filter-pill__icon {
+                color: #ffffff;
+            }
+        }
+    }
+
+    &__icon {
+        font-size: 20rpx;
+        line-height: 1;
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &.is-active &__icon {
+        transform: scale(1.15) rotate(12deg);
+    }
+
+    &__text {
+        line-height: 1;
+    }
+
+    &__cancel-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 4rpx;
+        opacity: 0.9;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+
+        &:hover {
+            opacity: 1;
+            transform: scale(1.15);
+        }
     }
 }
 
@@ -551,6 +731,23 @@ onShow(() => {
         font-size: 18rpx;
         font-weight: 900;
         letter-spacing: 1rpx;
+
+        &--featured {
+            background: rgba(79, 70, 229, 0.08);
+            border: 1rpx solid rgba(79, 70, 229, 0.2);
+            color: #4f46e5;
+
+            .theme-dark & {
+                background: rgba(99, 102, 241, 0.14);
+                border: 1rpx solid rgba(99, 102, 241, 0.28);
+                color: #a5b4fc;
+            }
+
+            .badge-icon {
+                font-size: 16rpx;
+                line-height: 1;
+            }
+        }
 
         &--neutral {
             background: rgba(40, 179, 137, 0.08);
@@ -709,6 +906,38 @@ onShow(() => {
         color: var(--text-tertiary);
         max-width: 480rpx;
         line-height: 1.6;
+    }
+
+    .empty-reset-btn {
+        margin-top: 24rpx;
+        padding: 14rpx 36rpx;
+        border-radius: 999rpx;
+        font-size: 24rpx;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        .theme-light & {
+            background: rgba(79, 70, 229, 0.08);
+            border: 1rpx solid rgba(79, 70, 229, 0.22);
+            color: #4f46e5;
+
+            &:active {
+                transform: scale(0.96);
+                background: rgba(79, 70, 229, 0.15);
+            }
+        }
+
+        .theme-dark & {
+            background: rgba(99, 102, 241, 0.14);
+            border: 1rpx solid rgba(99, 102, 241, 0.28);
+            color: #a5b4fc;
+
+            &:active {
+                transform: scale(0.96);
+                background: rgba(99, 102, 241, 0.22);
+            }
+        }
     }
 }
 

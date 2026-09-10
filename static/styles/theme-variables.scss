@@ -2,21 +2,21 @@
  * 色值与 theme.json 保持一致（theme.json 供 uni-app 原生 tabBar/导航栏） */
 
 .theme-light {
-    --page-background: #eef1f5;
-    --tabbar-background: #f5f5f8;
-    --chrome-background: #f5f5f8;
+    --page-background: #f3f4ef;
+    --tabbar-background: #f7f8f4;
+    --chrome-background: #f7f8f4;
     --page-background-secondary: #ffffff;
-    --panel-background: rgba(255, 255, 255, 0.92);
-    --panel-background-strong: rgba(255, 255, 255, 0.98);
+    --panel-background: rgba(255, 255, 255, 0.94);
+    --panel-background-strong: #ffffff;
     --panel-background-solid: #ffffff;
-    --panel-border: rgba(17, 17, 17, 0.08);
+    --panel-border: rgba(30, 41, 59, 0.06);
     --text-primary: #15171c;
     --text-secondary: rgba(21, 23, 28, 0.72);
     --text-tertiary: rgba(21, 23, 28, 0.52);
     --accent-primary: #ff8db3;
     --accent-secondary: #ffd38f;
     --accent-highlight: #7df7c4;
-    --shadow-color: rgba(19, 25, 39, 0.12);
+    --shadow-color: rgba(19, 25, 39, 0.06);
 
     --popup-background: #ffffff;
     --popup-border: rgba(17, 17, 17, 0.08);

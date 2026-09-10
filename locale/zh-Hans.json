@@ -248,8 +248,14 @@
         "subtitle": "精心编排的高清壁纸合辑，探索专属灵感与艺术美学",
         "emptyTitle": "暂无专题合集",
         "emptyDesc": "敬请期待，更多精美策划合集正在路上！",
+        "emptyFeaturedTitle": "暂无推荐专题",
+        "emptyFeaturedDesc": "暂无精选推荐专题，您可以切换查看全部专题。",
+        "viewAll": "查看全部专题",
         "noMore": "—— 没有更多专题了 ——",
-        "walls": "张壁纸"
+        "walls": "张壁纸",
+        "filterAll": "全部",
+        "filterFeatured": "精选推荐",
+        "featuredBadge": "精选"
     },
     "category": {
         "title": "分类",

@@ -29,50 +29,58 @@
                         </view>
                     </view>
                 </view>
-                <swiper v-else class="banner-swiper" indicator-dots indicator-color="rgba(255,255,255,0.5)"
-                    indicator-active-color="#fff" autoplay circular>
-                    <swiper-item class="banner-swiper-item" v-for="item in bannerList" :key="item.id">
-                        <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram"
-                            :app-id="item.appid" :class="['banner-card', item.accentClass]">
-                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
-                            <view class="banner-card__overlay"></view>
-                            <view class="banner-card__content">
-                                <view class="banner-card__tag-row">
-                                    <view class="banner-card__tag">{{ item.badge }}</view>
-                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
-                                </view>
-                                <view class="banner-card__title">{{ item.title }}</view>
-                                <view class="banner-card__desc">{{ item.desc }}</view>
-                                <view class="banner-card__meta">
-                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
-                                    <view class="banner-card__meta-arrow">
-                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                <view v-else class="banner-carousel-wrap">
+                    <swiper class="banner-swiper" :indicator-dots="false" autoplay circular :interval="4500" :duration="500" @change="onBannerChange">
+                        <swiper-item class="banner-swiper-item" v-for="(item, bIdx) in bannerList" :key="item.id">
+                            <navigator v-if="item.target == 'miniProgram'" :url="item.url" target="miniProgram"
+                                :app-id="item.appid" :class="['banner-card', item.accentClass, { 'banner-card--active': currentBanner === bIdx }]">
+                                <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
+                                <view class="banner-card__overlay"></view>
+                                <view class="banner-card__content">
+                                    <view class="banner-card__tag-row">
+                                        <view class="banner-card__tag">{{ item.badge }}</view>
+                                        <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                    </view>
+                                    <view class="banner-card__title">{{ item.title }}</view>
+                                    <view class="banner-card__desc">{{ item.desc }}</view>
+                                    <view class="banner-card__meta">
+                                        <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
                                     </view>
                                 </view>
-                            </view>
-                        </navigator>
+                            </navigator>
 
-                        <view v-else :class="['banner-card', item.accentClass]" @click="goBannerPreview(item)">
-                            <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
-                            <view class="banner-card__overlay"></view>
-                            <view class="banner-card__content">
-                                <view class="banner-card__tag-row">
-                                    <view class="banner-card__tag">{{ item.badge }}</view>
-                                    <view class="banner-card__target">{{ item.targetLabel }}</view>
-                                </view>
-                                <view class="banner-card__title">{{ item.title }}</view>
-                                <view class="banner-card__desc">{{ item.desc }}</view>
-                                <view class="banner-card__meta">
-                                    <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
-                                    <view class="banner-card__meta-arrow">
-                                        <uni-icons type="right" size="14" color="#e8eef8"></uni-icons>
+                            <view v-else :class="['banner-card', item.accentClass, { 'banner-card--active': currentBanner === bIdx }]" @click="goBannerPreview(item)">
+                                <image class="banner-card__image" :src="item.mediumPicurl" mode="aspectFill" lazy-load fade-in></image>
+                                <view class="banner-card__overlay"></view>
+                                <view class="banner-card__content">
+                                    <view class="banner-card__tag-row">
+                                        <view class="banner-card__tag">{{ item.badge }}</view>
+                                        <view class="banner-card__target">{{ item.targetLabel }}</view>
+                                    </view>
+                                    <view class="banner-card__title">{{ item.title }}</view>
+                                    <view class="banner-card__desc">{{ item.desc }}</view>
+                                    <view class="banner-card__meta">
+                                        <view class="banner-card__meta-chip">{{ item.metaLabel }}</view>
                                     </view>
                                 </view>
                             </view>
-                        </view>
-                    </swiper-item>
-                </swiper>
+                        </swiper-item>
+                    </swiper>
+
+                    <!-- 高定长条动态胶囊指示器 (Active Pill Indicators) -->
+                    <view class="banner-indicators" v-if="bannerList.length > 1">
+                        <view
+                            v-for="(dot, dotIdx) in bannerList"
+                            :key="dotIdx"
+                            class="banner-dot"
+                            :class="{ 'banner-dot--active': currentBanner === dotIdx }"
+                        ></view>
+                    </view>
+                </view>
             </view>
+
+            <!-- 3列高质感功能卡片：最热、最新、专题策划 (参考原型布局) -->
+            <home-nav-tiles />
 
             <!-- Inspiration / Random Pick -->
             <view class="select">
@@ -251,55 +259,6 @@
                 </scroll-view>
             </view>
 
-            <!-- Featured Subjects Section -->
-            <view class="select">
-                <view class="select-watermark">Subject</view>
-                <index-title>
-                    <template #name>{{ $t('index.subjectRecommend') }}</template>
-                    <template #custom>
-                        <button size="mini" class="btn is-default" @click="goSubjects">{{ $t('common.more') }}</button>
-                    </template>
-                </index-title>
-
-                <view class="content content--subjects">
-                    <!-- Subject 骨架屏 -->
-                    <view v-if="!subjectsRecommendList.length" class="sk-scroll-row sk-scroll-row--subjects">
-                        <view v-for="i in 3" :key="i" class="sk-card sk-card--subject-skeleton"></view>
-                    </view>
-                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
-                        <view class="subject-box-new" v-for="item in subjectsRecommendList" :key="item.id"
-                            hover-class="subject-box-new--active" :hover-stay-time="150" @click="goSubjectDetail(item)">
-                            <!-- Top Image Area -->
-                            <view class="subject-box-new__cover-wrapper">
-                                <image class="subject-box-new__cover" :src="item.cover_url" mode="aspectFill" lazy-load>
-                                </image>
-
-                                <!-- Floating Badges inside Image (Top-Right) -->
-                                <view class="subject-box-new__floating-badges">
-                                    <view class="subject-box-new__badge" v-if="item.is_locked">
-                                        <uni-icons type="vip-filled" size="12" color="#fbbf24"></uni-icons>
-                                        <text class="badge-text">VIP</text>
-                                    </view>
-                                    <view class="subject-box-new__floating-count">
-                                        {{ item.wall_count || 0 }}P
-                                    </view>
-                                </view>
-                            </view>
-
-                            <!-- Bottom Info Area -->
-                            <view class="subject-box-new__info">
-                                <text class="subject-box-new__title">
-                                    {{ isEn ? (item.name_en || item.name) : item.name }}
-                                </text>
-                                <text class="subject-box-new__desc">
-                                    {{ isEn ? (item.content_en || item.content) : item.content }}
-                                </text>
-                            </view>
-                        </view>
-                    </scroll-view>
-                </view>
-            </view>
-
             <!-- Classify Sections -->
             <view class="select" v-for="(classify, idx) in randomRecommendComputed" :key="classify.id">
                 <view class="select-watermark">{{ classify.name }}</view>
@@ -374,7 +333,6 @@ import {
     apiGetNotice,
     apiGetClassify,
     apiGetClassList,
-    apiGetSubjects,
     apiGetCheckUpdates,
 } from '@/api/wallpaper.js';
 import { PICS_BASE_URL } from '@/common/config.js';
@@ -421,6 +379,11 @@ const bannerTimeAgo = computed(() => {
     return isEn.value ? `${ago} ago` : `${ago}前`;
 });
 
+const currentBanner = ref(0);
+const onBannerChange = (e) => {
+    currentBanner.value = Number(e?.detail?.current || 0);
+};
+
 const topCardImageURL = ref(PICS_BASE_URL + '/insets/1699281368061_2-removebg-preview.png');
 
 // ── 优化4：today 只构造一次，避免模板重渲染时反复 new Date() ──
@@ -443,7 +406,6 @@ const heroImageLoaded = ref(false);
 const randomRecommendList = ref([]);
 const latestList = ref([]);
 const noticeList = ref([]);
-const subjectsRecommendList = ref([]);
 const noticeComputed = computed(() => {
     return noticeList.value.map((item) => ({
         ...item,
@@ -803,27 +765,6 @@ const refreshRandom = async () => {
     }
 };
 
-const getSubjects = async () => {
-    try {
-        const res = await apiGetSubjects({ select: true });
-        if (res.code === 200 && res.data) {
-            subjectsRecommendList.value = res.data.map((item) => handlePicUrl(item));
-        }
-    } catch (err) {
-        console.error('Failed to load recommended subjects:', err);
-    }
-};
-
-const goSubjects = () => {
-    uni.navigateTo({ url: '/pages/app/subjects' });
-};
-
-const goSubjectDetail = (item) => {
-    uni.navigateTo({
-        url: `/pages/app/subject-detail?id=${item.id}&name=${encodeURIComponent(item.name)}`
-    });
-};
-
 const popularTags = computed(() => {
     const rawTags = t('category.tagList') || '';
     return rawTags.split(',').map((tag) => tag.trim()).filter(Boolean);
@@ -848,7 +789,6 @@ onMounted(() => {
         getDailyFeatured();
         getRandomRecommend();
         getNotice();
-        getSubjects();
     }, 300);
 
     // P3 延时 800ms：需要滚动才能看到，完全错峰
@@ -876,6 +816,10 @@ onShareTimeline(() => ({
     overflow: hidden;
     background-color: var(--page-background);
     box-sizing: border-box;
+
+    &.theme-light {
+        background: linear-gradient(180deg, #edf0e6 0%, var(--page-background) 360rpx, var(--page-background) 100%);
+    }
 }
 
 .update-banner {
@@ -1008,20 +952,56 @@ onShareTimeline(() => ({
 
 .banner {
     width: 750rpx;
-    padding: 0 0 8rpx;
+    padding: 0 0 4rpx;
 
-    // ── 优化8：使用 class 选择器替代 swiper 标签名，小程序端更可靠 ──
-    .banner-swiper {
+    .banner-carousel-wrap {
+        position: relative;
         width: 750rpx;
-        height: 400rpx;
-        margin: 20rpx 0rpx;
     }
 
-    // swiper-item 在小程序端编译为原生容器，用后代 class 控制内部布局
-    // 通过 padding 保证左右间距，避免 margin 在 overflow:hidden 容器内右侧被裁掉
+    .banner-swiper {
+        width: 750rpx;
+        height: 410rpx;
+        margin: 10rpx 0 12rpx;
+    }
+
+    // 统一左右安全边距为 32rpx，与搜索框、3个按钮卡片完全对齐
     .banner-swiper-item {
-        padding: 0 20rpx;
+        padding: 0 32rpx;
         box-sizing: border-box;
+    }
+
+    // 高定长条动态微光胶囊指示器 (Active Pill Indicators)
+    .banner-indicators {
+        position: absolute;
+        bottom: 30rpx;
+        right: 56rpx;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        padding: 6rpx 14rpx;
+        border-radius: 999rpx;
+        background: rgba(0, 0, 0, 0.32);
+        backdrop-filter: blur(12rpx);
+        -webkit-backdrop-filter: blur(12rpx);
+        border: 1rpx solid rgba(255, 255, 255, 0.16);
+        pointer-events: none;
+    }
+
+    .banner-dot {
+        width: 8rpx;
+        height: 8rpx;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.45);
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        &--active {
+            width: 28rpx;
+            border-radius: 999rpx;
+            background: #ffffff;
+            box-shadow: 0 0 10rpx rgba(255, 255, 255, 0.75);
+        }
     }
 
     .banner-card {
@@ -1030,15 +1010,22 @@ onShareTimeline(() => ({
         display: block;
         position: relative;
         overflow: hidden;
-        border-radius: 28rpx;
+        border-radius: 32rpx;
         box-sizing: border-box;
+        box-shadow: 
+            0 16rpx 40rpx -8rpx rgba(15, 23, 42, 0.16),
+            0 4rpx 14rpx rgba(0, 0, 0, 0.06);
         @extend %sk-shimmer;
+
+        .theme-dark & {
+            border: 1rpx solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20rpx 48rpx rgba(0, 0, 0, 0.5);
+        }
 
         .banner-card__image {
             width: 100%;
             height: 100%;
-            box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.34);
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .banner-card__overlay {
@@ -1132,16 +1119,6 @@ onShareTimeline(() => ({
             border: 1rpx solid rgba(255, 255, 255, 0.12);
         }
 
-        .banner-card__meta-arrow {
-            width: 56rpx;
-            height: 56rpx;
-            border-radius: 16rpx;
-            background: rgba(20, 28, 39, 0.32);
-            border: 1rpx solid rgba(255, 255, 255, 0.12);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
 
         &:active .banner-card__image {
             transform: scale(1.08);
@@ -1995,12 +1972,6 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     white-space: nowrap;
     width: 100%;
     box-sizing: border-box;
-
-    &--subjects {
-        height: 100%;
-        padding: 10rpx 20rpx;
-        gap: 20rpx;
-    }
 }
 
 .sk-card {
@@ -2012,13 +1983,6 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
     &--hero {
         width: 440rpx;
-    }
-
-    &--subject-skeleton {
-        width: 580rpx !important;
-        height: 400rpx !important;
-        border-radius: 32rpx;
-        flex-shrink: 0;
     }
 }
 
@@ -2043,153 +2007,6 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
     100% {
         transform: translateX(250%) rotate(25deg);
-    }
-}
-
-@keyframes subjectPanCover {
-    0% {
-        transform: scale(1.06) translate(0%, 0%);
-    }
-
-    50% {
-        transform: scale(1.14) translate(-2.5%, -1.5%);
-    }
-
-    100% {
-        transform: scale(1.08) translate(2.5%, 1%);
-    }
-}
-
-.content--subjects {
-    height: 520rpx !important;
-}
-
-.subject-box-new {
-    width: 660rpx;
-    height: 480rpx;
-    display: inline-flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    background: var(--panel-background);
-    margin: 20rpx 20rpx 48rpx 0rpx;
-    position: relative;
-    border-radius: 32rpx;
-    box-sizing: border-box;
-    box-shadow: none;
-    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease;
-    cursor: pointer;
-    overflow: hidden;
-    transform: translateZ(0);
-
-    &:first-child {
-        margin-left: 20rpx;
-    }
-
-    &:hover {
-        .subject-box-new__cover {
-            transform: scale(1.08);
-        }
-    }
-
-    &--active,
-    &:active {
-        transform: scale(0.96) !important;
-        box-shadow: 0 4rpx 14rpx var(--shadow-color, rgba(0, 0, 0, 0.12)) !important;
-
-        .subject-box-new__cover {
-            transform: scale(1.08) !important;
-        }
-    }
-
-    &__cover-wrapper {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        overflow: hidden;
-        border-radius: 32rpx 32rpx 0 0;
-        transform: translateZ(0);
-    }
-
-    &__cover {
-        width: 100%;
-        height: 100%;
-        display: block;
-        position: absolute;
-        inset: 0;
-        object-fit: cover;
-        transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1), transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-
-    &__floating-badges {
-        position: absolute;
-        top: 16rpx;
-        right: 16rpx;
-        display: flex;
-        align-items: center;
-        gap: 10rpx;
-        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-        z-index: 5;
-    }
-
-    &__badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4rpx;
-        padding: 6rpx 14rpx;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1rpx solid rgba(255, 255, 255, 0.15);
-        border-radius: 100rpx;
-        color: #fbbf24;
-        font-size: 22rpx;
-        font-weight: 900;
-        backdrop-filter: blur(8px);
-
-        .badge-text {
-            line-height: 1;
-        }
-    }
-
-    &__floating-count {
-        padding: 6rpx 14rpx;
-        background: rgba(0, 0, 0, 0.5);
-        border: 1rpx solid rgba(255, 255, 255, 0.15);
-        border-radius: 100rpx;
-        color: #ffffff;
-        font-size: 22rpx;
-        font-weight: 800;
-        backdrop-filter: blur(8px);
-    }
-
-    &__info {
-        flex: 1;
-        width: 100%;
-        padding: 16rpx 24rpx;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        background: var(--panel-background);
-    }
-
-    &__title {
-        font-size: 28rpx;
-        font-weight: 850;
-        color: var(--text-primary);
-        line-height: 1.2;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    &__desc {
-        font-size: 22rpx;
-        color: var(--text-secondary);
-        line-height: 1.4;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 100%;
-        margin-top: 6rpx;
     }
 }
 
