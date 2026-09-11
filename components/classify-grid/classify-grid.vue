@@ -1,7 +1,8 @@
 <template>
     <view class="classify-grid-wrapper">
         <view class="classify-grid">
-            <view v-for="item in items" :key="item.id" class="classify-item">
+            <view v-for="(item, index) in items" :key="item.id" class="classify-item"
+                :style="{ animationDelay: `${0.10 + Math.min(index, 7) * 0.10}s` }">
                 <view class="box" hover-class="box--active" :hover-start-time="20" :hover-stay-time="100"
                     @click="handleClick(item)" @longpress="handleLongPress(item)">
                     <image class="pic" :class="{ 'pic--loaded': loadedMap[item.id] }" :src="item.mediumPicurl"
@@ -136,17 +137,21 @@ const goClasslistFromQuickLook = (item) => {
         grid-column: 1 / -1;
     }
 
-    // 最后一个元素如果是该组的第 1、3、5 个（左列），占满整行，取消跨行
+    // 最后一个元素如果是该组的第 1、3 个（左列），占满整行，取消跨行
     .classify-item:last-child:nth-child(7n + 1),
-    .classify-item:last-child:nth-child(7n + 3),
-    .classify-item:last-child:nth-child(7n + 5) {
+    .classify-item:last-child:nth-child(7n + 3){
         grid-column: 1 / -1;
         grid-row: auto;
     }
 
-    // 倒数第 2 个元素如果是跨 2 行的位置，取消跨行
-    .classify-item:nth-last-child(2):nth-child(7n + 3),
-    .classify-item:nth-last-child(2):nth-child(7n + 5) {
+    // 最后一个元素如果是该组的第 5 个（右列），占右侧一行一列，取消跨行
+    .classify-item:last-child:nth-child(7n + 5){
+        grid-column: 2 / -1;
+        grid-row: span 1;
+    }
+
+    // 倒数第 2 个元素如果是第 3 个（左列），取消跨行
+    .classify-item:nth-last-child(2):nth-child(7n + 3){
         grid-row: auto;
     }
 }
@@ -155,6 +160,25 @@ const goClasslistFromQuickLook = (item) => {
     position: relative;
     border-radius: 24rpx;
     overflow: hidden;
+    animation: classifyCardCascadeFold 1.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: opacity, transform, filter;
+}
+
+// ── 参考 top.vue：3D 微透视阶梯升起与聚光展开 ──
+@keyframes classifyCardCascadeFold {
+    0% {
+        opacity: 0;
+        transform: perspective(800px) rotateX(10deg) translate3d(0, 48rpx, 0) scale(0.94);
+        filter: brightness(0.85);
+    }
+    60% {
+        opacity: 0.95;
+    }
+    100% {
+        opacity: 1;
+        transform: perspective(800px) rotateX(0deg) translate3d(0, 0, 0) scale(1);
+        filter: brightness(1);
+    }
 }
 
 .box {

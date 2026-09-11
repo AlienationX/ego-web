@@ -83,12 +83,12 @@ const onTileClick = (tile) => {
 </script>
 
 <style lang="scss" scoped>
-// 左右 padding 严格与搜索栏、Banner 统一为 32rpx
+// 左右 padding 严格与搜索栏、Banner 以及下方 select 统一为 20rpx
 .nav-tiles {
     display: flex;
     align-items: stretch;
-    gap: 16rpx;
-    padding: 6rpx 32rpx 28rpx;
+    gap: 24rpx;
+    padding: 6rpx 20rpx 28rpx;
     box-sizing: border-box;
 }
 
@@ -151,35 +151,50 @@ const onTileClick = (tile) => {
         }
     }
 
-    // ── 右上角微型胶囊标签 ──
+    // ── 右上角角标徽章 (醒目清晰，比例优雅) ──
     &__badge {
         position: absolute;
         top: 6rpx;
         right: 8rpx;
-        padding: 2rpx 8rpx;
         border-radius: 999rpx;
-        font-size: 14rpx;
         font-weight: 800;
         letter-spacing: 0.5rpx;
         line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
 
         .badge-text {
             line-height: 1;
         }
 
         &.badge--hot {
+            padding: 3rpx 10rpx;
+            font-size: 16rpx;
             background: rgba(239, 68, 68, 0.12);
             color: #ef4444;
             border: 1rpx solid rgba(239, 68, 68, 0.2);
         }
 
         &.badge--new {
+            min-width: 34rpx;
+            height: 34rpx;
+            padding: 0 8rpx;
+            font-size: 20rpx;
             background: #ef4444;
             color: #ffffff;
-            box-shadow: 0 2rpx 6rpx rgba(239, 68, 68, 0.3);
+            border: 2rpx solid #ffffff;
+            box-shadow: 0 4rpx 10rpx rgba(239, 68, 68, 0.4);
+
+            .theme-dark & {
+                border-color: #1e293b;
+            }
         }
 
         &.badge--special {
+            padding: 3rpx 10rpx;
+            font-size: 16rpx;
             background: #facc15;
             color: #1c1917;
             box-shadow: 0 2rpx 6rpx rgba(250, 204, 21, 0.25);

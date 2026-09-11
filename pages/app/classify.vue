@@ -59,7 +59,7 @@
 
             <!-- 分类网格 -->
             <view v-else class="classify-grid-padding">
-                <classify-grid :items="classifyComputed" />
+                <classify-grid :items="classifyComputed" :key="activeType" />
             </view>
         </view>
 
@@ -95,8 +95,8 @@ const pagePaddingBottom = computed(() => {
 const { t, locale } = useI18n();
 const isEn = computed(() => locale.value === 'en');
 
-const statusBarHeight = ref(getStatusBarHeight() || 0);
-const heroTopPadding = computed(() => statusBarHeight.value + 12);
+const statusBarHeight = ref(getStatusBarHeight() || 10);
+const heroTopPadding = computed(() => statusBarHeight.value);
 const appStore = useAppStore();
 const classifyList = computed({
     get: () => appStore.classifyList,
@@ -151,6 +151,39 @@ onLoad(() => {
     overflow-x: hidden; // 防止任意子元素的水平溢出撑出横向滚动条
 }
 
+// ── 参考 top.vue：标题微弹落座动画 ──
+@keyframes classifyTitleDrop {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, -28rpx, 0) scale(0.92);
+    }
+    60% {
+        opacity: 1;
+        transform: translate3d(0, 4rpx, 0) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+}
+
+// ── 参考 top.vue：说明文字与交互栏柔和升起淡入 ──
+@keyframes classifyFadeSlide {
+    0% {
+        opacity: 0;
+        transform: translate3d(0, 24rpx, 0);
+    }
+    100% {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+.page-content {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .hero-section {
     position: relative;
     padding: 0rpx 20rpx;
@@ -163,8 +196,9 @@ onLoad(() => {
         color: var(--text-primary);
         letter-spacing: -2rpx;
         line-height: 1.1;
-        // 针对 Web 端增强投影
         filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.1));
+        animation: classifyTitleDrop 1.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        will-change: opacity, transform;
     }
 
     .hero-desc {
@@ -173,10 +207,14 @@ onLoad(() => {
         margin-top: 15rpx;
         font-weight: 500;
         letter-spacing: 1rpx;
+        animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both;
+        will-change: opacity, transform;
     }
 
     .search-container {
-        margin: 10rpx -30rpx 0;
+        margin: 16rpx 0 0;
+        animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+        will-change: opacity, transform;
     }
 
     .channel-filter-bar {
@@ -187,6 +225,8 @@ onLoad(() => {
         margin-bottom: 8rpx;
         overflow-x: auto;
         white-space: nowrap;
+        animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
+        will-change: opacity, transform;
 
         .channel-pill {
             padding: 10rpx 26rpx;
@@ -245,6 +285,8 @@ onLoad(() => {
     justify-content: center;
     padding: 120rpx 60rpx;
     text-align: center;
+    animation: classifyFadeSlide 1.45s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both;
+    will-change: opacity, transform;
 }
 
 .empty-icon {

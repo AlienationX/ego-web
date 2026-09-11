@@ -8,7 +8,7 @@
             }"
         >
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-            <view class="topbar" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
+            <view class="topbar" :style="{ height: `${titleBarHeight}px` }">
                 <view class="topbar__left">
                     <view class="topbar__back topbar__back--bar" @click="goBack">
                         <mdi-icon
@@ -128,7 +128,7 @@ const tabs = computed(() => {
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
-const navBarHeight = ref(getNavBarHeight() || 88);
+const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
 const heroHeightPx = uni.upx2px(560);
 const adHeight = ref(0);
 
@@ -248,11 +248,7 @@ onShareTimeline(() => {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    background: #0b1017;
-
-    &.theme-light {
-        background: var(--page-background);
-    }
+    background: var(--page-background);
 }
 
 .top-shell {
@@ -262,15 +258,12 @@ onShareTimeline(() => {
     width: 100%;
     z-index: 100;
     transition: opacity 0.2s ease;
+    background: var(--page-background);
 }
 
 .status-bar-bg {
     width: 100%;
-    background: #0b1017;
-
-    .theme-light & {
-        background: var(--page-background);
-    }
+    background: transparent;
 }
 
 .topbar {
@@ -278,13 +271,8 @@ onShareTimeline(() => {
     align-items: center;
     justify-content: space-between;
     padding: 0 24rpx;
-    background: #0b1017;
-    border-bottom: 1rpx solid rgba(255, 255, 255, 0.05);
-
-    .theme-light & {
-        background: var(--page-background);
-        border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
-    }
+    background: transparent;
+    border-bottom: none;
 }
 
 .topbar__left {
@@ -305,20 +293,22 @@ onShareTimeline(() => {
 }
 
 .topbar__back {
-    background: rgba(97, 154, 239, 0.12);
-    border: 1rpx solid rgba(97, 154, 239, 0.16);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1rpx solid rgba(0, 0, 0, 0.06);
 
-    .theme-light & {
-        background: rgba(97, 154, 239, 0.08);
-        border: 1rpx solid rgba(97, 154, 239, 0.12);
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
     }
 }
 
 .topbar__back--bar {
-    background: rgba(97, 154, 239, 0.08);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1rpx solid rgba(0, 0, 0, 0.06);
 
-    .theme-light & {
-        background: rgba(97, 154, 239, 0.06);
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
     }
 }
 
@@ -343,10 +333,12 @@ onShareTimeline(() => {
 }
 
 .topbar__icon {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1rpx solid rgba(0, 0, 0, 0.05);
 
-    .theme-light & {
-        background: rgba(0, 0, 0, 0.04);
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
     }
 }
 
@@ -399,10 +391,10 @@ onShareTimeline(() => {
 .hero__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(8, 12, 18, 0.1) 0%, rgba(8, 12, 18, 0.26) 45%, rgba(8, 12, 18, 0.92) 100%);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(24, 24, 24, 0.35) 45%, rgba(24, 24, 24, 0.95) 100%);
 
     .theme-light & {
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.15) 45%, rgba(0, 0, 0, 0.7) 100%);
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 45%, rgba(0, 0, 0, 0.75) 100%);
     }
 }
 

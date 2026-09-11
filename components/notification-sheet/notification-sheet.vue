@@ -68,7 +68,7 @@
                         @click="goNoticeDetail(item)"
                     >
                         <view class="notify-card__icon-wrap notify-card__icon-wrap--notice">
-                            <mdi-icon path="/static/icons/information-symbol.svg" size="22px" color="#10b981"></mdi-icon>
+                            <mdi-icon path="/static/icons/alert-box.svg" size="22px" color="#f59e0b"></mdi-icon>
                         </view>
                         <view class="notify-card__content">
                             <view class="notify-card__row">
@@ -305,7 +305,6 @@ defineExpose({
 
 .sheet-body {
     max-height: 55vh;
-    min-height: 320rpx;
 }
 
 .notify-card {
@@ -318,6 +317,10 @@ defineExpose({
     margin-bottom: 20rpx;
     border: 1rpx solid rgba(120, 120, 128, 0.1);
     transition: transform 0.2s, background 0.2s;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
 
     &:active {
         transform: scale(0.98);
@@ -335,7 +338,7 @@ defineExpose({
         flex-shrink: 0;
 
         &--notice {
-            background: rgba(16, 185, 129, 0.12);
+            background: rgba(245, 158, 11, 0.12);
         }
     }
 

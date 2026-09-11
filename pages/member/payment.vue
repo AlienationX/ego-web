@@ -1,31 +1,60 @@
 <template>
     <view :class="['layout', settingsStore.isDark ? 'theme-dark' : 'theme-light']">
+        <!-- 沉浸式渐变毛玻璃状态栏 -->
+        <glass-status-bar
+            :is-scrolled="isScrolled"
+            :theme="settingsStore.isDark ? 'dark' : 'light'"
+        ></glass-status-bar>
+
         <!-- 仅上半部分：紫蓝渐变 Header 卡片区 -->
         <view class="hero-gradient-header">
-            <!-- 顶栏导航行（仅独立放返回按钮，防止挤压） -->
+            <!-- 顶栏导航行（左返回 + 中居中标题 + 右兑换/胶囊） -->
             <view class="header-nav-bar" :style="navBarBoxStyle">
-                <view class="back-circle-btn" @click="goBack">
-                    <uni-icons type="back" size="18" color="#ffffff"></uni-icons>
+                <view class="nav-bar-inner">
+                    <view class="nav-bar__left">
+                        <view class="back-circle-btn" @click="goBack">
+                            <uni-icons type="back" size="18" color="#ffffff"></uni-icons>
+                        </view>
+                    </view>
+                    <view class="nav-bar__center">
+                        <text class="nav-bar__title">{{ t('membership.navTitle') || '会员中心' }}</text>
+                    </view>
+                    <view class="nav-bar__right">
+                        <!-- #ifndef MP-WEIXIN -->
+                        <view class="redeem-pill-btn" @click="openRedeem">
+                            <mdi-icon path="/static/icons/credit-card-chip.svg" size="14px" color="#ffffff"></mdi-icon>
+                            <text class="redeem-pill-text">{{ t('membership.redeemCode') || '兑换码' }}</text>
+                        </view>
+                        <!-- #endif -->
+                    </view>
                 </view>
             </view>
 
-            <!-- 核心标题（右侧紧跟 VIP CLUB 胶囊） -->
-            <view class="header-title-box">
-                <view class="title-with-badge">
-                    <mdi-icon path="/static/icons/crown-circle.svg" size="32px" color="#fbbf24"></mdi-icon>
-                    <text class="main-title">{{ t('membership.title') }}</text>
-                    <!-- <view class="header-badge">
-                        <text class="badge-text">VIP CLUB</text>
-                    </view> -->
+            <!-- 核心 Banner 区（左右黄金比例对称：左侧标题文案 + 右侧金色 3D 尊贵微图腾） -->
+            <view class="header-hero-banner">
+                <view class="header-hero-banner__left">
+                    <view class="vip-pill-badge">
+                        <text class="pill-spark">✨</text>
+                        <text class="pill-text">VIP CLUB</text>
+                    </view>
+                    <view class="hero-main-title">{{ t('membership.title') }}</view>
+                    <view class="hero-sub-title">{{ t('membership.subtitle') }}</view>
                 </view>
-                <text class="sub-title">{{ t('membership.subtitle') }}</text>
+                <view class="header-hero-banner__right">
+                    <view class="vip-crown-emblem">
+                        <view class="emblem-glow"></view>
+                        <view class="emblem-inner">
+                            <mdi-icon path="/static/icons/crown-circle.svg" size="44px" color="#fbbf24"></mdi-icon>
+                        </view>
+                    </view>
+                </view>
             </view>
 
-            <!-- 勾选特权列表 (上一版图标样式) -->
-            <view class="header-benefits-list">
-                <view class="benefit-item" v-for="(benefit, index) in benefits" :key="index">
+            <!-- 4 大特权微光晶格 (2x2 毛玻璃卡片网格，彻底告别单列偏左) -->
+            <view class="header-benefits-grid">
+                <view class="benefit-card" v-for="(benefit, index) in benefits" :key="index">
                     <view class="benefit-icon-box">
-                        <uni-icons type="checkmarkempty" size="14" color="#ffffff"></uni-icons>
+                        <uni-icons type="checkmarkempty" size="12" color="#ffffff"></uni-icons>
                     </view>
                     <text class="benefit-text">{{ benefit.title }}</text>
                 </view>
@@ -90,15 +119,7 @@
                     </view>
                 </view>
             </view>
-
-            <!-- 体验码兑换入口 -->
-            <view class="redeem-entry-section" @click="openRedeem">
-                <view class="redeem-entry-content">
-                    <mdi-icon path="/static/icons/credit-card-chip.svg" size="15px"
-                        :color="settingsStore.isDark ? '#9d9bf8' : '#7573f6'"></mdi-icon>
-                    <text class="redeem-entry-text">{{ t('membership.haveRedeemCode') }}</text>
-                </view>
-            </view>
+            
         </view>
 
         <!-- 底部固定悬浮按钮 (醒目会员及用户协议提示) -->
@@ -206,6 +227,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { onPageScroll } from "@dcloudio/uni-app";
 import { useI18n } from "vue-i18n";
 import { useSettingsStore } from "@/stores/settings.js";
 import { useUserStore } from "@/stores/user.js";
@@ -219,6 +241,12 @@ const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+
+const isScrolled = ref(false);
+
+onPageScroll((e) => {
+    isScrolled.value = e.scrollTop > 8;
+});
 
 const selectedCard = ref(0);
 const rawProducts = ref([]);
@@ -743,100 +771,259 @@ const goBack = () => {
 /* ================= 顶级 Header 区域 (透明无缝融入) ================= */
 .hero-gradient-header {
     background: transparent;
-    padding: 0 40rpx 32rpx 40rpx;
+    padding: 0 40rpx 36rpx 40rpx;
     color: #ffffff;
+    box-sizing: border-box;
 }
 
+// 导航栏 (左返回 + 居中标题 + 右兑换/胶囊)
 .header-nav-bar {
-    display: flex;
-    align-items: center;
+    width: 100%;
     box-sizing: content-box;
 
-    .back-circle-btn {
-        width: 64rpx;
-        height: 64rpx;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.18);
-        backdrop-filter: blur(12px);
+    .nav-bar-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
         display: flex;
         align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
+        justify-content: space-between;
 
-        &:active {
-            opacity: 0.7;
-        }
-    }
-}
-
-.header-title-box {
-    margin: 28rpx 0 24rpx;
-
-    .title-with-badge {
-        display: flex;
-        align-items: center;
-        gap: 14rpx;
-        margin-bottom: 10rpx;
-
-        .main-title {
-            font-size: 40rpx;
-            font-weight: 700;
-            line-height: 1.2;
-            letter-spacing: -0.3rpx;
-        }
-
-        .header-badge {
-            display: inline-flex;
+        .nav-bar__left {
+            display: flex;
             align-items: center;
-            gap: 6rpx;
-            padding: 6rpx 18rpx;
-            border-radius: 100rpx;
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(12px);
+            z-index: 10;
 
-            .badge-text {
+            .back-circle-btn {
+                width: 64rpx;
+                height: 64rpx;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.18);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                border: 1rpx solid rgba(255, 255, 255, 0.25);
+                transition: transform 0.2s, opacity 0.2s;
+
+                &:active {
+                    opacity: 0.7;
+                    transform: scale(0.92);
+                }
+            }
+        }
+
+        .nav-bar__center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            white-space: nowrap;
+
+            .nav-bar__title {
                 font-size: 32rpx;
-                font-weight: 800;
-                color: #fbbf24;
-                letter-spacing: 1rpx;
+                font-weight: 700;
+                color: #ffffff;
+                letter-spacing: 0.5rpx;
+                line-height: 1;
+                text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        .nav-bar__right {
+            display: flex;
+            align-items: center;
+            z-index: 10;
+
+            .redeem-pill-btn {
+                height: 56rpx;
+                padding: 0 22rpx;
+                border-radius: 999rpx;
+                background: rgba(255, 255, 255, 0.18);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1rpx solid rgba(255, 255, 255, 0.25);
+                display: flex;
+                align-items: center;
+                gap: 8rpx;
+                cursor: pointer;
+                transition: transform 0.2s, opacity 0.2s;
+
+                &:active {
+                    opacity: 0.7;
+                    transform: scale(0.92);
+                }
+
+                .redeem-pill-text {
+                    font-size: 22rpx;
+                    font-weight: 600;
+                    color: #ffffff;
+                    letter-spacing: 0.5rpx;
+                }
             }
         }
     }
+}
 
-    .sub-title {
-        font-size: 24rpx;
-        color: rgba(255, 255, 255, 0.85);
-        font-weight: 500;
-        display: block;
+// 核心 Banner 区 (左右黄金比例平衡)
+.header-hero-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 24rpx;
+    padding: 0 4rpx;
+
+    &__left {
+        flex: 1;
+        min-width: 0;
+        padding-right: 20rpx;
+
+        .vip-pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8rpx;
+            padding: 4rpx 16rpx;
+            border-radius: 999rpx;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1rpx solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 12rpx;
+
+            .pill-spark {
+                font-size: 20rpx;
+                line-height: 1;
+            }
+
+            .pill-text {
+                font-size: 20rpx;
+                font-weight: 800;
+                color: #fbbf24;
+                letter-spacing: 1.5rpx;
+            }
+        }
+
+        .hero-main-title {
+            font-size: 44rpx;
+            font-weight: 800;
+            line-height: 1.25;
+            letter-spacing: -0.5rpx;
+            color: #ffffff;
+            text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-sub-title {
+            font-size: 24rpx;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 500;
+            line-height: 1.4;
+            margin-top: 10rpx;
+        }
+    }
+
+    &__right {
+        flex-shrink: 0;
+
+        .vip-crown-emblem {
+            position: relative;
+            width: 120rpx;
+            height: 120rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .emblem-glow {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(251, 191, 36, 0.45) 0%, rgba(251, 191, 36, 0) 70%);
+                filter: blur(10px);
+                animation: crownGlowPulse 3s ease-in-out infinite alternate;
+            }
+
+            .emblem-inner {
+                position: relative;
+                z-index: 1;
+                width: 110rpx;
+                height: 110rpx;
+                border-radius: 50%;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.1) 100%);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+                border: 2rpx solid rgba(255, 255, 255, 0.4);
+                box-shadow: 
+                    0 8rpx 28rpx rgba(0, 0, 0, 0.15),
+                    inset 0 2rpx 6rpx rgba(255, 255, 255, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
     }
 }
 
-.header-benefits-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16rpx;
+@keyframes crownGlowPulse {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.15);
+        opacity: 1;
+    }
+}
 
-    .benefit-item {
+// 4 大特权 2x2 毛玻璃卡片晶格 (纯 CSS 弹性驱动：无论中英文长短，所有卡片始终自适应 100% 绝对等高)
+.header-benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr; // 核心机制：以高度最高的一张卡片为基准，所有卡片严格自适应等高
+    align-items: stretch;
+    gap: 16rpx;
+    margin-top: 28rpx;
+
+    .benefit-card {
+        min-height: 88rpx; // 基础高度保障，卡片高度由 grid-auto-rows: 1fr 弹性同步
+        height: 100%;
         display: flex;
         align-items: center;
-        gap: 16rpx;
+        gap: 14rpx;
+        padding: 16rpx 20rpx;
+        border-radius: 20rpx;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1rpx solid rgba(255, 255, 255, 0.22);
+        box-sizing: border-box;
 
         .benefit-icon-box {
-            width: 38rpx;
-            height: 38rpx;
+            width: 34rpx;
+            height: 34rpx;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.22);
-            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.28);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            align-self: center; // 无论文字几行，图标始终在垂直中心
         }
 
         .benefit-text {
-            font-size: 26rpx;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.95);
+            flex: 1;
+            min-width: 0;
+            font-size: 22rpx;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.35;
+            letter-spacing: 0.2rpx;
+            word-break: break-word; // 允许任意长文本按单词自然折行，完整展示绝不被截断
         }
     }
 }

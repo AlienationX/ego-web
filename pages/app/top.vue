@@ -7,18 +7,25 @@
         ></glass-status-bar>
 
         <view class="top10-wrap" :style="{ paddingTop: top10WrapPaddingTop, paddingBottom: top10WrapPaddingBottom }">
-                <view class="top10-header">
-                    <view class="top10-header__left">
-                        <view class="top10-header__back" @click="goBack">
-                            <uni-icons type="back" size="20" :color="settingsStore.isDark ? '#f8fafc' : '#374151'"></uni-icons>
-                        </view>
-                        <view class="top10-header__title">{{ $t('top10.title') }}</view>
+                <!-- 顶部标准返回栏 (对齐 timeline / subjects 规范) -->
+                <view class="topbar">
+                    <view class="topbar__back" @click="goBack">
+                        <mdi-icon
+                            path="/static/icons/arrow-left.svg"
+                            size="20px"
+                            :color="settingsStore.isDark ? '#f4f8ff' : '#1f2937'"
+                        ></mdi-icon>
                     </view>
                 </view>
 
-                <view class="top10-intro">
-                    <view class="top10-intro__badge">{{ metricBadge }}</view>
-                    <view class="top10-intro__desc">{{ metricDescription }}</view>
+                <!-- Editorial 杂志大标题区 (层次清晰：角标 -> 56rpx大标题 -> 说明文本) -->
+                <view class="hero-header">
+                    <view class="hero-header__badge">
+                        <text class="badge-icon">🔥</text>
+                        <text class="badge-text">{{ metricBadge }}</text>
+                    </view>
+                    <text class="hero-header__title">{{ $t('top10.title') }}</text>
+                    <text class="hero-header__desc">{{ metricDescription }}</text>
                 </view>
 
                 <!-- 骨架屏 -->
@@ -229,7 +236,7 @@ const onAdHeightChange = (height) => {
 
 const top10WrapPaddingTop = computed(() => `${statusBarHeight.value + 10}px`);
 const top10WrapPaddingBottom = computed(() => `calc(${adHeight.value}px + 180rpx + env(safe-area-inset-bottom))`);
-const dockBottomStyle = computed(() => `calc(${adHeight.value}px + 36rpx + env(safe-area-inset-bottom))`);
+const dockBottomStyle = computed(() => `calc(${adHeight.value}px + 10rpx + env(safe-area-inset-bottom))`);
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -409,59 +416,51 @@ onShow(() => {
     padding: 20rpx;
 }
 
-.top10-header {
-    margin-bottom: 26rpx;
+// ── 顶部独立返回栏 (对齐 timeline / subjects) ──
+.topbar {
+    height: 80rpx;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 18rpx;
+    margin-bottom: 12rpx;
 }
 
-.top10-header__left {
-    display: flex;
-    align-items: center;
-    gap: 16rpx;
-    min-width: 0;
-}
-
-.top10-header__back {
-    width: 68rpx;
-    height: 68rpx;
-    border-radius: 20rpx;
+.topbar__back {
+    width: 74rpx;
+    height: 74rpx;
+    border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1rpx solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(20rpx);
-    box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-
-    &:active {
-        transform: scale(0.9);
-        background: rgba(255, 255, 255, 0.15);
-    }
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 
     .theme-light & {
-        background: #ffffff;
-        border: 1rpx solid rgba(17, 24, 39, 0.08);
-        box-shadow: 0 4rpx 14rpx rgba(15, 23, 42, 0.06);
-        backdrop-filter: none;
+        background: rgba(255, 255, 255, 0.82);
+        border: 1rpx solid rgba(255, 255, 255, 0.7);
+        box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.06);
+        backdrop-filter: blur(20rpx);
+        -webkit-backdrop-filter: blur(20rpx);
 
         &:active {
             background: #f1f5f9;
         }
     }
-}
 
-.top10-header__title {
-    font-size: 40rpx;
-    font-weight: 800;
-    color: #60a5fa;
-    line-height: 1.2;
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1rpx solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(20rpx);
+        -webkit-backdrop-filter: blur(20rpx);
 
-    .theme-light & {
-        color: #2563eb;
+        &:active {
+            background: rgba(255, 255, 255, 0.22);
+        }
+    }
+
+    &:active {
+        transform: scale(0.92);
+        opacity: 0.85;
     }
 }
 
@@ -605,66 +604,84 @@ onShow(() => {
     }
 }
 
-.top10-intro {
-    margin-bottom: 28rpx;
+// ── 杂志感大标题区 (Editorial Hero Header) ──
+.hero-header {
+    padding: 8rpx 4rpx 36rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14rpx;
+    animation: heroReveal 1.06s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8rpx;
+        padding: 8rpx 22rpx;
+        border-radius: 999rpx;
+        font-size: 20rpx;
+        font-weight: 800;
+        letter-spacing: 1.5rpx;
+        text-transform: uppercase;
+        animation: badgeDropIn 0.92s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+        .badge-icon {
+            font-size: 20rpx;
+            line-height: 1;
+        }
+
+        .badge-text {
+            line-height: 1;
+        }
+
+        .theme-light & {
+            background: rgba(37, 99, 235, 0.08);
+            border: 1rpx solid rgba(37, 99, 235, 0.20);
+            color: #2563eb;
+        }
+
+        .theme-dark & {
+            background: rgba(43, 140, 238, 0.16);
+            border: 1rpx solid rgba(96, 165, 250, 0.28);
+            color: #7dd3fc;
+        }
+    }
+
+    &__title {
+        font-size: 56rpx;
+        font-weight: 900;
+        line-height: 1.18;
+        letter-spacing: -1.2rpx;
+        color: var(--text-primary);
+
+        .theme-dark & {
+            color: #f8fafc;
+            text-shadow: 0 4rpx 24rpx rgba(59, 130, 246, 0.25);
+        }
+
+        .theme-light & {
+            color: #0f172a;
+        }
+    }
+
+    &__desc {
+        font-size: 26rpx;
+        line-height: 1.65;
+        color: var(--text-secondary);
+        max-width: 640rpx;
+        margin-top: 2rpx;
+        animation: introDescFadeIn 0.92s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+    }
 }
 
-// ── TOP 10 标牌自顶部下落微弹 ──
-@keyframes badgeDropIn {
+@keyframes heroReveal {
     0% {
         opacity: 0;
-        transform: translate3d(0, -32rpx, 0) scale(0.85);
-    }
-    60% {
-        opacity: 1;
-        transform: translate3d(0, 4rpx, 0) scale(1.04);
-    }
-    100% {
-        opacity: 1;
-        transform: translate3d(0, 0, 0) scale(1);
-    }
-}
-
-// ── 榜单说明文字柔和淡入 ──
-@keyframes introDescFadeIn {
-    0% {
-        opacity: 0;
-        transform: translate3d(0, 16rpx, 0);
+        transform: translate3d(0, 28rpx, 0);
     }
     100% {
         opacity: 1;
         transform: translate3d(0, 0, 0);
-    }
-}
-
-.top10-intro__badge {
-    display: inline-flex;
-    height: 40rpx;
-    padding: 0 14rpx;
-    align-items: center;
-    border-radius: 999rpx;
-    background: rgba(43, 140, 238, 0.16);
-    color: #7dd3fc;
-    font-size: 18rpx;
-    font-weight: 800;
-    letter-spacing: 2rpx;
-    margin-bottom: 16rpx;
-    animation: badgeDropIn 0.92s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-
-    .theme-light & {
-        background: rgba(37, 99, 235, 0.1);
-        color: #2563eb;
-    }
-}
-
-.top10-intro__desc {
-    font-size: 24rpx;
-    line-height: 1.8;
-    color: #94a3b8;
-    animation: introDescFadeIn 0.92s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
-
-    .theme-light & {
-        color: var(--text-secondary);
     }
 }
 

@@ -351,6 +351,7 @@
         "subtitle": "Lock screen for art, home screen for apps.",
         "vipExclusiveTitle": "VIP Exclusive Feature",
         "vipExclusiveHint": "Frosted Maker is a VIP exclusive feature. Upgrade to VIP for unlimited frosted wallpaper creation.",
+        "unlockHint": "Watch a short video ad to save this frosted wallpaper for free, or upgrade to VIP for unlimited access.",
         "adUnlockHint": "Watch a short video ad to unlock Frosted Maker for this session.",
         "btnTitle": "Frosted Maker",
         "presets": "Blur Presets",
@@ -363,7 +364,7 @@
         "showApps": "Preview Apps",
         "hideApps": "Hide Apps",
         "saveFrosted": "Save Frosted Wallpaper",
-        "vipSaveFrosted": "Save Frosted Wallpaper (VIP)",
+        "vipSaveFrosted": "Save Frosted Wallpaper (VIP/Ads)",
         "saveBoth": "Save Both (Original + Frosted)",
         "generating": "Generating HD frosted wallpaper...",
         "saveSuccess": "Frosted companion saved to photos album!",
@@ -676,6 +677,7 @@
         "newUserFreeBadge": "Newbie Free"
     },
     "membership": {
+        "navTitle": "VIP Center",
         "title": "Membership",
         "continue": "Continue",
         "benefits": "Member Benefits",
@@ -683,6 +685,7 @@
         "benefit2": "Unlimited HD wallpaper downloads",
         "benefit3": "Exclusive VIP wallpaper library",
         "benefit4": "Early access to new features",
+        "redeemCode": "Redeem",
         "monthly": "Monthly",
         "quarterly": "Quarterly",
         "yearly": "Yearly",

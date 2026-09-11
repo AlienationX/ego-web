@@ -1,5 +1,5 @@
 <template>
-    <view class="hero-header" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: `${statusBarHeight + 10}px` }">
+    <view class="hero-header" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: headerPaddingTop }">
         <!-- Row 1: 用户问候 + 通知铃铛 -->
         <view class="hero-header__row hero-header__greeting-row">
             <view class="user-block" @click="goUser">
@@ -20,15 +20,16 @@
             </view>
 
             <view class="notify-wrap">
-                <!-- 瞬时灵动微气泡 (冷启动/有上新时轻量滑出，4.5秒后优雅收缩吸入铃铛) -->
+                <!-- 灵动微抽屉 (高度与铃铛严格保持 84rpx 一致，类似通知小抽屉，6s 自动推回) -->
                 <view
                     v-if="statusStore.newWallpapersCount > 0 && isBubbleVisible"
-                    class="dynamic-bubble"
+                    class="dynamic-drawer"
                     :class="{ 'is-folding': isBubbleFolding }"
                     @click="goTimeline"
                 >
-                    <text class="bubble-spark">✨</text>
-                    <text class="bubble-text">{{ tp('index.newWallpapersNoticeDesc', { count: statusStore.newWallpapersCount }) || `今日已更新 ${statusStore.newWallpapersCount} 张壁纸` }}</text>
+                    <text class="drawer-spark">✨</text>
+                    <text class="drawer-text">{{ isEn ? `+${statusStore.newWallpapersCount} New` : `上新 ${statusStore.newWallpapersCount} 张` }}</text>
+                    <text class="drawer-arrow">›</text>
                 </view>
 
                 <!-- 铃铛按钮 (纯白浮岛圆球) -->
@@ -49,7 +50,11 @@
                     <text class="search-bar__placeholder">{{ t('search.placeholder') || '搜索壁纸、分类、标签...' }}</text>
                 </view>
                 <view class="search-bar__action" @click.stop="goSearch">
-                    <mdi-icon path="/static/icons/palette-swatch.svg" size="18px" color="#ffffff"></mdi-icon>
+                    <mdi-icon
+                        path="/static/icons/tune-variant.svg"
+                        size="20px"
+                        :color="settingsStore.isDark ? '#f1f5f9' : 'rgba(30, 41, 59, 0.75)'"
+                    ></mdi-icon>
                 </view>
             </view>
         </view>
@@ -57,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user.js';
@@ -81,8 +86,27 @@ const settingsStore = useSettingsStore();
 
 const isBubbleVisible = ref(false);
 const isBubbleFolding = ref(false);
+let bubbleTimer = null;
+let foldTimer = null;
 
 const isEn = computed(() => locale.value === 'en');
+
+// 计算顶部内边距：小程序端动态避让右上角胶囊按钮，非小程序端保持 statusBarHeight + 10px
+const headerPaddingTop = computed(() => {
+    let topPx = (props.statusBarHeight || 0) + 10;
+    // #ifdef MP
+    try {
+        const menuButton = uni.getMenuButtonBoundingClientRect();
+        if (menuButton && menuButton.bottom) {
+            // 胶囊底部下方留出 10px 间距，确保整个问候行与铃铛完全在胶囊下方，绝无遮挡
+            topPx = Math.max(menuButton.bottom + 10, topPx);
+        }
+    } catch (e) {
+        topPx = (props.statusBarHeight || 0) + 48;
+    }
+    // #endif
+    return `${topPx}px`;
+});
 
 // 用户头像
 const userAvatar = computed(() => {
@@ -118,17 +142,36 @@ const userSubText = computed(() => {
     return isEn.value ? 'What aesthetic fits you today?' : '今天想探索什么美学风格？';
 });
 
-// 灵动微气泡生命周期：展示 4.5 秒后优雅吸入铃铛
-onMounted(() => {
-    if (statusStore.newWallpapersCount > 0) {
-        isBubbleVisible.value = true;
-        setTimeout(() => {
-            isBubbleFolding.value = true;
-            setTimeout(() => {
-                isBubbleVisible.value = false;
-            }, 600);
-        }, 4500);
-    }
+// 灵动微抽屉展开与吸入动效触发器 (停留 6s 后优雅推回收纳回铃铛)
+const triggerBubbleAnimation = () => {
+    if (bubbleTimer) clearTimeout(bubbleTimer);
+    if (foldTimer) clearTimeout(foldTimer);
+    isBubbleFolding.value = false;
+    isBubbleVisible.value = true;
+    bubbleTimer = setTimeout(() => {
+        isBubbleFolding.value = true;
+        foldTimer = setTimeout(() => {
+            isBubbleVisible.value = false;
+        }, 400);
+    }, 6000);
+};
+
+// 监听新壁纸数量变化：异步接口拿到数据时立刻触发气泡展示
+watch(
+    () => statusStore.newWallpapersCount,
+    (count) => {
+        if (count > 0) {
+            triggerBubbleAnimation();
+        } else {
+            isBubbleVisible.value = false;
+        }
+    },
+    { immediate: true }
+);
+
+onUnmounted(() => {
+    if (bubbleTimer) clearTimeout(bubbleTimer);
+    if (foldTimer) clearTimeout(foldTimer);
 });
 
 const goUser = () => {
@@ -152,7 +195,7 @@ const goTimeline = () => {
 
 <style lang="scss" scoped>
 .hero-header {
-    padding: 0 32rpx 14rpx;
+    padding: 0 20rpx 14rpx;
     display: flex;
     flex-direction: column;
     gap: 24rpx;
@@ -174,7 +217,9 @@ const goTimeline = () => {
     display: flex;
     align-items: center;
     gap: 22rpx;
-    max-width: 72%;
+    flex: 1;
+    min-width: 0;
+    margin-right: 16rpx;
     cursor: pointer;
 
     .avatar-wrap {
@@ -248,68 +293,96 @@ const goTimeline = () => {
     display: flex;
     align-items: center;
     position: relative;
+    flex-shrink: 0;
 }
 
-// 灵动微气泡动画
-.dynamic-bubble {
+// 灵动微抽屉 (高度与通知图标 84rpx 严格 1:1 一致，类似通知小抽屉，从铃铛左侧抽拉滑出)
+.dynamic-drawer {
     position: absolute;
-    right: 96rpx;
-    background: rgba(15, 23, 42, 0.9);
-    backdrop-filter: blur(16rpx);
-    -webkit-backdrop-filter: blur(16rpx);
-    color: #ffffff;
-    padding: 10rpx 22rpx;
-    border-radius: 40rpx;
-    display: flex;
+    right: 42rpx; // 插入圆形铃铛中心 (铃铛宽84rpx，中心在42rpx)
+    top: 0;
+    height: 84rpx; // 严格与铃铛高度 84rpx 1:1 完全一致！
+    display: inline-flex;
+    flex-direction: row;
     align-items: center;
     gap: 8rpx;
+    padding: 0 52rpx 0 24rpx; // 右侧预留52rpx避开圆形铃铛，左侧24rpx呼吸留白
+    border-radius: 42rpx 0 0 42rpx; // 左半圆，右侧平滑伸入铃铛内部无缝衔接
     white-space: nowrap;
-    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.18);
-    border: 1rpx solid rgba(255, 255, 255, 0.15);
-    z-index: 10;
-    animation: bubbleSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    transform-origin: right center;
+    width: max-content;
+    z-index: 1; // 抽屉位于铃铛下层，营造从铃铛背后抽出的物理真实感
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
 
+    // 浅色模式：材质与铃铛 100% 保持一致，无缝一体
+    .theme-light & {
+        background: #ffffff;
+        color: #0f172a;
+        border: 1rpx solid rgba(30, 41, 59, 0.06);
+        border-right: none; // 右侧伸入铃铛内，不需要右边框
+        box-shadow: 
+            -6rpx 6rpx 20rpx rgba(15, 23, 42, 0.06),
+            0 2rpx 6rpx rgba(0, 0, 0, 0.02);
+    }
+
+    // 深色模式：材质与暗夜铃铛 100% 保持一致
+    .theme-dark & {
+        background: #222228;
+        color: #f8fafc;
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
+        border-right: none;
+        box-shadow: -6rpx 6rpx 20rpx rgba(0, 0, 0, 0.3);
+    }
+
+    // 抽屉滑出展开动效
+    animation: drawerSlideOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+    // 抽屉推回收起动效
     &.is-folding {
-        animation: bubbleFoldIntoBell 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation: drawerPushIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
-    .bubble-spark {
+    .drawer-spark {
         font-size: 22rpx;
+        line-height: 1;
     }
 
-    .bubble-text {
+    .drawer-text {
+        font-size: 23rpx;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: 0.2rpx;
+        white-space: nowrap;
+    }
+
+    .drawer-arrow {
         font-size: 22rpx;
-        font-weight: 500;
-        max-width: 320rpx;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        opacity: 0.5;
+        line-height: 1;
+        margin-left: 2rpx;
     }
 }
 
-@keyframes bubbleSlideIn {
+@keyframes drawerSlideOut {
     0% {
         opacity: 0;
-        transform: translateX(30rpx) scale(0.85);
+        transform: translateX(48rpx);
     }
     100% {
         opacity: 1;
-        transform: translateX(0) scale(1);
+        transform: translateX(0);
     }
 }
 
-@keyframes bubbleFoldIntoBell {
+@keyframes drawerPushIn {
     0% {
         opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-    60% {
-        opacity: 0.6;
-        transform: translateX(40rpx) scale(0.5);
+        transform: translateX(0);
     }
     100% {
         opacity: 0;
-        transform: translateX(60rpx) scale(0);
+        transform: translateX(48rpx);
     }
 }
 
@@ -325,7 +398,9 @@ const goTimeline = () => {
     align-items: center;
     justify-content: center;
     position: relative;
+    z-index: 2; // 铃铛置于抽屉之上
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    flex-shrink: 0;
 
     .theme-dark & {
         background: #222228;
@@ -364,7 +439,7 @@ const goTimeline = () => {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 16rpx 0 30rpx;
+        padding: 0 24rpx 0 30rpx;
         transition: transform 0.2s, box-shadow 0.2s;
 
         .theme-dark & {
@@ -395,24 +470,23 @@ const goTimeline = () => {
         }
 
         &__action {
-            width: 66rpx;
-            height: 66rpx;
-            border-radius: 22rpx;
-            background: #2e382b;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4rpx 14rpx rgba(46, 56, 43, 0.25);
+            width: 54rpx;
+            height: 54rpx;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.04);
             flex-shrink: 0;
-            transition: transform 0.2s;
-
-            &:active {
-                transform: scale(0.92);
-            }
+            transition: opacity 0.2s, transform 0.2s, background 0.2s;
 
             .theme-dark & {
-                background: #3b82f6;
-                box-shadow: 0 4rpx 14rpx rgba(59, 130, 246, 0.3);
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            &:active {
+                opacity: 0.6;
+                transform: scale(0.92);
             }
         }
     }

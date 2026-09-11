@@ -717,7 +717,6 @@ onShow(() => {
         .user-content {
             display: flex;
             align-items: flex-start;
-            margin-top: 20rpx;
             gap: 24rpx;
             position: relative;
             z-index: 1;
@@ -1322,7 +1321,7 @@ onShow(() => {
                     .text {
                         padding-left: 20rpx;
                         color: var(--text-primary);
-                        font-size: 28rpx;
+                        font-size: 26rpx;
                         font-weight: 600;
                     }
                 }

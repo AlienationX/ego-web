@@ -648,33 +648,54 @@ defineExpose({
     &__actions {
         display: flex;
         gap: 18rpx;
-        margin-top: 8rpx;
+        margin-top: 14rpx;
         margin-bottom: 8rpx;
 
         .action-btn {
             flex: 1;
-            height: 88rpx;
-            border-radius: 24rpx;
+            height: 94rpx;
+            border-radius: 47rpx;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10rpx;
-            font-size: 26rpx;
+            gap: 12rpx;
+            font-size: 28rpx;
             font-weight: 600;
             border: none;
             outline: none;
             overflow: hidden;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
 
             &::after {
                 border: none !important;
                 display: none !important;
             }
 
+            // 饱满蓝紫科技高质感主按钮（拒绝惨白禁用感）
+            &--primary {
+                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                color: #ffffff;
+                box-shadow: 0 10rpx 28rpx rgba(79, 70, 229, 0.35);
+
+                .theme-dark & {
+                    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+                    box-shadow: 0 10rpx 28rpx rgba(99, 102, 241, 0.45);
+                }
+
+                &:active {
+                    transform: scale(0.98);
+                    opacity: 0.92;
+                }
+            }
+
             &--full {
                 width: 100%;
-                height: 88rpx;
-                border-radius: 44rpx;
-                font-size: 28rpx;
+            }
+
+            &[disabled],
+            &.is-disabled {
+                opacity: 0.75;
+                cursor: not-allowed;
             }
         }
     }

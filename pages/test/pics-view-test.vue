@@ -96,7 +96,7 @@ const classList = ref([]);
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
-const navBarHeight = ref(getNavBarHeight() || 88);
+const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
 const heroHeightPx = uni.upx2px(560);
 
 // ── 调试：点击坐标 & 区域 ──

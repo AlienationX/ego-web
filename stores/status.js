@@ -15,9 +15,9 @@ export const useStatusStore = defineStore(
 
         const newWallpapersCount = ref(0); // 运行时状态，不持久化
 
-        const setLastViewedWallpaperTime = (timeStr) => {
+        const setLastViewedWallpaperTime = (timeStr, force = false) => {
             if (!timeStr) return;
-            if (!appStatus.lastViewedWallpaperTime || new Date(timeStr) > new Date(appStatus.lastViewedWallpaperTime)) {
+            if (force || !appStatus.lastViewedWallpaperTime || new Date(timeStr) > new Date(appStatus.lastViewedWallpaperTime)) {
                 appStatus.lastViewedWallpaperTime = timeStr;
             }
         };

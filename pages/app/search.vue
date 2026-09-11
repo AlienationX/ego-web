@@ -253,8 +253,8 @@ onUnload(() => {
     &.theme-light {
         --search-bg: var(--page-background);
         --search-bg-secondary: #ffffff;
-        --search-panel: rgba(255, 255, 255, 0.96);
-        --search-border: rgba(17, 17, 17, 0.08);
+        --search-panel: #ffffff;
+        --search-border: rgba(30, 41, 59, 0.06);
         --search-text-main: #15171c;
         --search-text-secondary: rgba(21, 23, 28, 0.72);
         --search-text-muted: rgba(21, 23, 28, 0.52);
@@ -268,8 +268,8 @@ onUnload(() => {
     &.theme-dark {
         --search-bg: var(--page-background);
         --search-bg-secondary: #16161a;
-        --search-panel: rgba(29, 37, 49, 0.96);
-        --search-border: rgba(255, 255, 255, 0.06);
+        --search-panel: #222228;
+        --search-border: rgba(255, 255, 255, 0.08);
         --search-text-main: #eef5ff;
         --search-text-secondary: rgba(191, 203, 222, 0.72);
         --search-text-muted: rgba(151, 164, 186, 0.72);
@@ -298,7 +298,7 @@ onUnload(() => {
     gap: 16rpx;
     padding: 0 24rpx;
     background: var(--search-bg);
-    border-bottom: 1rpx solid var(--search-border);
+    border-bottom: none;
 }
 
 .page-wrap {
@@ -334,9 +334,9 @@ onUnload(() => {
 .search-box--shell {
     flex: 1;
     min-width: 0;
-    min-height: 74rpx;
-    height: 74rpx;
-    border-radius: 20rpx;
+    min-height: 76rpx;
+    height: 76rpx;
+    border-radius: 24rpx;
     box-shadow: none;
 }
 

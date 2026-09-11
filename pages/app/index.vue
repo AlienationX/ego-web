@@ -250,13 +250,36 @@
                     <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
                     <text class="tags-title">{{ t('category.popularTags') }}</text>
                 </view>
-                <scroll-view scroll-x class="tags-scroll" show-scrollbar="false">
-                    <view class="tags-list">
-                        <view class="tag-chip" v-for="(tag, index) in popularTags" :key="index" @click="searchTag(tag)">
-                            <text class="tag-label">#{{ tag }}</text>
+                <view class="tags-scroll-wrapper">
+                    <!-- 左侧渐隐羽化蒙版 (滑动后浮现，提示左侧可回滑) -->
+                    <view class="tags-fade tags-fade--left" :class="{ 'is-visible': tagsScrolledLeft }"></view>
+
+                    <scroll-view
+                        scroll-x
+                        class="tags-scroll"
+                        show-scrollbar="false"
+                        :scroll-left="tagsScrollLeft"
+                        @scroll="onTagsScroll"
+                        @scrolltolower="onTagsScrollToLower"
+                    >
+                        <view class="tags-list">
+                            <view class="tag-chip" v-for="(tag, index) in popularTags" :key="index" @click="searchTag(tag)">
+                                <text class="tag-label">#{{ tag }}</text>
+                            </view>
+                            <!-- 尾部更多探索胶囊 -->
+                            <view class="tag-chip tag-chip--more" @click="goSearchPage">
+                                <text class="tag-label">{{ t('common.seeAll') }}</text>
+                                <uni-icons type="right" size="10" color="var(--text-tertiary)"></uni-icons>
+                            </view>
                         </view>
-                    </view>
-                </scroll-view>
+                    </scroll-view>
+
+                    <!-- 右侧渐隐羽化蒙版 (常驻半透虚化边缘，消除未截断时的死板感) -->
+                    <view
+                        class="tags-fade tags-fade--right"
+                        :class="{ 'is-hidden': tagsAtEnd }"
+                    ></view>
+                </view>
             </view>
 
             <!-- Feed Switcher (为你推荐 / 分类精选) -->
@@ -445,7 +468,6 @@ import {
     apiGetRandomDay,
     apiGetDailyFeatured,
     apiGetRandomRecommend,
-    apiGetClassify,
     apiGetClassList,
     apiGetCheckUpdates,
     apiPostRecommend,
@@ -514,10 +536,9 @@ onPullDownRefresh(async () => {
     await Promise.allSettled([
         getBanner(),
         getRandomDay(),
+        getLatest(),
         getDailyFeatured(),
         getRandomRecommend(),
-        getClassify(),
-        getLatest(),
         getRecommendWallpapers(false),
     ]);
     uni.stopPullDownRefresh();
@@ -849,11 +870,6 @@ const getRandomRecommend = async () => {
     }));
 };
 
-const getClassify = async () => {
-    let res = await apiGetClassify({ select: true });
-    classifyList.value = res.data.map((item) => handlePicUrl(item));
-};
-
 const getLatest = async (isAppend = false) => {
     if (latestLoading.value || (isAppend && latestNoMore.value)) return;
     try {
@@ -868,11 +884,6 @@ const getLatest = async (isAppend = false) => {
             .map((item) => addTimeBadge(handlePicUrl(item)))
             .sort((a, b) => toTimelineDate(b).getTime() - toTimelineDate(a).getTime());
 
-        // 提取最新时间记录到本地
-        if (nextList.length > 0 && nextList[0].created_at) {
-            statusStore.setLastViewedWallpaperTime(nextList[0].created_at);
-        }
-
         latestList.value = isAppend ? [...latestList.value, ...nextList] : nextList;
         const totalPages = Number(res?.pagination?.total_pages || 1);
         latestNoMore.value = latestQuery.value.pageNum >= totalPages || nextList.length === 0;
@@ -882,16 +893,16 @@ const getLatest = async (isAppend = false) => {
 };
 
 const checkUpdates = async () => {
-    const lastTime = statusStore.appStatus.lastViewedWallpaperTime;
-    if (!lastTime) return;
+    let lastTime = statusStore.appStatus.lastViewedWallpaperTime;
+    if (!lastTime) {
+        // 首次若无记录，以24小时前为基准，让初次使用的用户能感知今日上新
+        lastTime = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+        statusStore.setLastViewedWallpaperTime(lastTime);
+    }
     try {
         const res = await apiGetCheckUpdates({ since: lastTime });
         if (res.data?.new_count > 0) {
             statusStore.newWallpapersCount = res.data.new_count;
-            // 自动定时关闭横幅 (例如8秒后)
-            setTimeout(() => {
-                statusStore.newWallpapersCount = 0;
-            }, 8000);
         }
     } catch (e) {
         console.error('Check updates failed', e);
@@ -967,6 +978,28 @@ const searchTag = (tag) => {
     });
 };
 
+const tagsScrolledLeft = ref(false);
+const tagsAtEnd = ref(false);
+const tagsScrollLeft = ref(0);
+let tagsCurrentScroll = 0;
+
+const onTagsScroll = (e) => {
+    const { scrollLeft } = e.detail;
+    tagsCurrentScroll = scrollLeft;
+    tagsScrolledLeft.value = scrollLeft > 15;
+    tagsAtEnd.value = false;
+};
+
+const onTagsScrollToLower = () => {
+    tagsAtEnd.value = true;
+};
+
+const goSearchPage = () => {
+    uni.navigateTo({
+        url: '/pages/app/search'
+    });
+};
+
 onMounted(() => {
     // ── 优化：分优先级延时加载，错峰发请求，减少首屏并发竞争 ──
     // P1 立即：首屏可见的关键数据
@@ -978,12 +1011,11 @@ onMounted(() => {
     // P2 延时 300ms：首屏次要数据，让 P1 的渲染先跑起来
     setTimeout(() => {
         getDailyFeatured();
-        getRandomRecommend();
     }, 300);
 
     // P3 延时 800ms：需要滚动才能看到，完全错峰
     setTimeout(() => {
-        getClassify();
+        getRandomRecommend();
         getRecommendWallpapers(false);
     }, 800);
 });
@@ -1012,9 +1044,21 @@ onShareTimeline(() => ({
     }
 }
 
+@keyframes homeEntrance {
+    0% {
+        opacity: 0.15;
+        transform: translateY(16rpx);
+    }
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 .home-content {
     width: 100%;
     box-sizing: border-box;
+    animation: homeEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .banner {
@@ -1032,9 +1076,9 @@ onShareTimeline(() => ({
         margin: 10rpx 0 12rpx;
     }
 
-    // 统一左右安全边距为 32rpx，与搜索框、3个按钮卡片完全对齐
+    // 统一左右安全边距为 20rpx，与搜索框、3个按钮卡片以及 select 板块完全对齐
     .banner-swiper-item {
-        padding: 0 32rpx;
+        padding: 0 20rpx;
         box-sizing: border-box;
     }
 
@@ -1042,7 +1086,7 @@ onShareTimeline(() => ({
     .banner-indicators {
         position: absolute;
         bottom: 30rpx;
-        right: 56rpx;
+        right: 44rpx;
         z-index: 10;
         display: flex;
         align-items: center;
@@ -1727,6 +1771,7 @@ onShareTimeline(() => ({
 .tags-section {
     margin: 0 0 20rpx;
     padding: 0;
+    position: relative;
 
     .tags-header {
         display: flex;
@@ -1742,6 +1787,51 @@ onShareTimeline(() => ({
         }
     }
 
+    .tags-scroll-wrapper {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .tags-fade {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 64rpx;
+        z-index: 5;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+
+        &--left {
+            left: 0;
+            background: linear-gradient(to right, var(--page-background) 20%, rgba(243, 244, 239, 0) 100%);
+            opacity: 0;
+
+            .theme-dark & {
+                background: linear-gradient(to right, var(--page-background) 20%, rgba(24, 24, 24, 0) 100%);
+            }
+
+            &.is-visible {
+                opacity: 1;
+            }
+        }
+
+        &--right {
+            right: 0;
+            background: linear-gradient(to left, var(--page-background) 25%, rgba(243, 244, 239, 0) 100%);
+            opacity: 1;
+
+            .theme-dark & {
+                background: linear-gradient(to left, var(--page-background) 25%, rgba(24, 24, 24, 0) 100%);
+            }
+
+            &.is-hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+    }
+
     .tags-scroll {
         width: 100%;
         white-space: nowrap;
@@ -1751,18 +1841,19 @@ onShareTimeline(() => ({
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
+        align-items: center;
         gap: 16rpx;
         padding: 10rpx 0 10rpx 0;
 
         &::before {
             content: '';
-            width: 4rpx;
+            width: 20rpx;
             flex-shrink: 0;
         }
 
         &::after {
             content: '';
-            width: 4rpx;
+            width: 30rpx;
             flex-shrink: 0;
         }
     }
@@ -1792,6 +1883,23 @@ onShareTimeline(() => ({
             font-weight: 600;
             line-height: 1;
             color: var(--text-primary);
+        }
+
+        &--more {
+            display: inline-flex;
+            align-items: center;
+            gap: 6rpx;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1rpx dashed var(--panel-border);
+
+            .theme-dark & {
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            .tag-label {
+                font-size: 22rpx;
+                color: var(--text-tertiary);
+            }
         }
     }
 }
@@ -1889,7 +1997,7 @@ onShareTimeline(() => ({
 // ── 为你推荐 (瀑布流布局) ──
 .feed-recommend-container {
     width: 100%;
-    padding: 0 32rpx;
+    padding: 0 20rpx;
     box-sizing: border-box;
 }
 

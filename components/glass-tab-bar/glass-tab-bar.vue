@@ -12,7 +12,7 @@
             v-for="item in items"
             :key="item.pagePath"
             class="tab-item"
-            :class="{ 'tab-item--active': currentPath === item.pagePath }"
+            :class="{ 'tab-item--active': isItemActive(item) }"
             @click="handleSwitch(item)"
         >
             <image
@@ -119,8 +119,14 @@ const items = computed(() => {
     ];
 });
 
+const isItemActive = (item) => {
+    if (!props.currentPath) return false;
+    const normalize = (path) => (path || '').replace(/^\//, '').split('?')[0];
+    return normalize(props.currentPath) === normalize(item.pagePath);
+};
+
 const getItemIcon = (item) => {
-    const isActive = props.currentPath === item.pagePath;
+    const isActive = isItemActive(item);
     // 经典贴底模式：激活态直接展示高亮绿色实心图标
     if (!isFloatingMode.value && isActive && item.activeIcon) {
         return item.activeIcon;
@@ -130,7 +136,7 @@ const getItemIcon = (item) => {
 };
 
 const handleSwitch = (item) => {
-    if (props.currentPath === item.pagePath) {
+    if (isItemActive(item)) {
         emit('tab-reclick', item);
         return;
     }
@@ -148,12 +154,7 @@ const handleSwitch = (item) => {
 ───────────────────────────────────────────────────────────── */
 .custom-tab-bar.mode-floating {
     position: fixed;
-    // #ifdef MP-WEIXIN
-    bottom: 24px;
-    // #endif
-    // #ifndef MP-WEIXIN
-    bottom: env(safe-area-inset-bottom);
-    // #endif
+    bottom: max(10px, env(safe-area-inset-bottom));
     left: 50%;
     transform: translate3d(-50%, 0, 0);
     -webkit-transform: translate3d(-50%, 0, 0);
@@ -179,7 +180,7 @@ const handleSwitch = (item) => {
     }
 
     &.theme-light {
-        background: rgba(255, 255, 255, 0.82);
+        background: rgba(255, 255, 255, 0.88);
         backdrop-filter: blur(28px) saturate(190%);
         -webkit-backdrop-filter: blur(28px) saturate(190%);
         border: 1px solid rgba(255, 255, 255, 0.90);
@@ -187,6 +188,29 @@ const handleSwitch = (item) => {
             0 16px 36px rgba(15, 23, 42, 0.08),
             0 2px 6px rgba(0, 0, 0, 0.02),
             inset 0 1px 1px rgba(255, 255, 255, 0.95);
+
+        .tab-icon {
+            opacity: 0.65;
+        }
+
+        .tab-text {
+            color: #64748b;
+        }
+
+        .tab-item--active {
+            background: rgba(15, 23, 42, 0.09);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+
+            .tab-icon {
+                opacity: 1;
+                transform: scale(1.06);
+            }
+
+            .tab-text {
+                color: #0f172a;
+                font-weight: 700;
+            }
+        }
     }
 
     &.theme-dark {
@@ -197,6 +221,29 @@ const handleSwitch = (item) => {
         box-shadow:
             0 20px 44px rgba(0, 0, 0, 0.6),
             inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+        .tab-icon {
+            opacity: 0.75;
+        }
+
+        .tab-text {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .tab-item--active {
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.06);
+
+            .tab-icon {
+                opacity: 1;
+                transform: scale(1.06);
+            }
+
+            .tab-text {
+                color: #ffffff;
+                font-weight: 700;
+            }
+        }
     }
 
     .tab-item {
@@ -222,13 +269,8 @@ const handleSwitch = (item) => {
     .tab-icon {
         width: 22px;
         height: 22px;
-        opacity: 0.85;
         flex-shrink: 0;
         transition: opacity 0.2s ease, transform 0.2s ease;
-
-        .theme-light & {
-            opacity: 0.65;
-        }
     }
 
     .tab-text {
@@ -238,41 +280,18 @@ const handleSwitch = (item) => {
         letter-spacing: 0.2px;
         text-align: center;
         transition: color 0.2s ease, font-weight 0.2s ease;
-
-        .theme-light & {
-            color: #64748b;
-        }
-
-        .theme-dark & {
-            color: rgba(255, 255, 255, 0.85);
-        }
     }
 
+    // 基础激活兜底样式 (跨端无障碍支持)
     .tab-item--active {
-        .theme-light & {
-            background: rgba(15, 23, 42, 0.07);
-        }
-
-        .theme-dark & {
-            background: rgba(255, 255, 255, 0.18);
-        }
+        background: rgba(15, 23, 42, 0.08);
 
         .tab-icon {
             opacity: 1;
-            transform: scale(1.05);
-
-            .theme-light & {
-                opacity: 1;
-            }
+            transform: scale(1.06);
         }
 
-        .theme-light & .tab-text {
-            color: #0f172a;
-            font-weight: 700;
-        }
-
-        .theme-dark & .tab-text {
-            color: #ffffff;
+        .tab-text {
             font-weight: 700;
         }
     }

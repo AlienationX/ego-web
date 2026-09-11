@@ -150,6 +150,7 @@ import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } 
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+import { useStatusStore } from '@/stores/status.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
@@ -158,6 +159,7 @@ const timelineWrapPaddingBottom = '24px';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
+const statusStore = useStatusStore();
 const isEn = computed(() => locale.value === 'en');
 
 const getLocalizedItem = (item) => {
@@ -285,6 +287,10 @@ const getLatest = async (isAppend = false) => {
             latestList.value.push(...newData);
         } else {
             latestList.value = newData;
+            if (newData.length > 0 && newData[0].created_at) {
+                statusStore.setLastViewedWallpaperTime(newData[0].created_at);
+            }
+            statusStore.newWallpapersCount = 0;
         }
 
         latestList.value.sort((a, b) => toDate(b).getTime() - toDate(a).getTime());

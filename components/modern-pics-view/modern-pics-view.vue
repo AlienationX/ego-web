@@ -479,7 +479,7 @@ onShow(() => {
     color: var(--text-primary);
 }
 
-/* 头部 Header */
+/* 头部 Header (沉浸式毛玻璃 Tabs 工具栏) */
 .header-bar {
     position: absolute;
     width: 100%;
@@ -487,8 +487,15 @@ onShow(() => {
     display: flex;
     align-items: center;
     background: var(--page-background);
-    border-bottom: 1rpx solid var(--panel-border);
+    border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
     will-change: transform;
+
+    .theme-dark & {
+        background: var(--page-background);
+        border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.35);
+    }
 }
 
 .tabs-scroll {
@@ -535,8 +542,12 @@ onShow(() => {
 }
 
 .tool-actions {
-    padding: 0 24rpx;
-    border-left: 1rpx solid var(--panel-border);
+    padding: 0 20rpx;
+    border-left: 1rpx solid rgba(0, 0, 0, 0.05);
+
+    .theme-dark & {
+        border-left: 1rpx solid rgba(255, 255, 255, 0.06);
+    }
 
     &.is-single {
         border-left: none;
@@ -552,9 +563,14 @@ onShow(() => {
         align-items: center;
         justify-content: center;
         border-radius: 16rpx;
-        background: var(--panel-background);
-        border: 1rpx solid var(--panel-border);
+        background: rgba(120, 120, 128, 0.08);
+        border: 1rpx solid rgba(0, 0, 0, 0.05);
         transition: transform 0.2s;
+
+        .theme-dark & {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1rpx solid rgba(255, 255, 255, 0.08);
+        }
 
         &:active {
             transform: scale(0.9);
@@ -591,28 +607,28 @@ onShow(() => {
 }
 
 .gallery-wrapper {
-    padding: 24rpx;
+    padding: 20rpx;
 }
 
 /* 网格布局 */
 .grid-layout {
     display: grid;
-    gap: 24rpx;
+    gap: 20rpx;
 }
 
 /* 瀑布流双列 Flex 布局 */
 .waterfall-layout {
     display: flex;
     justify-content: space-between;
-    gap: 24rpx;
+    gap: 20rpx;
     align-items: flex-start;
 
     .waterfall-col {
         flex: 1;
-        width: calc(50% - 12rpx);
+        width: calc(50% - 10rpx);
         display: flex;
         flex-direction: column;
-        gap: 24rpx;
+        gap: 20rpx;
     }
 }
 
@@ -762,24 +778,24 @@ onShow(() => {
 
 /* 骨架屏 */
 .skeleton-wrapper {
-    padding: 24rpx;
+    padding: 20rpx;
 }
 
 .sk-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24rpx;
+    gap: 20rpx;
 }
 
 .sk-waterfall {
     display: flex;
-    gap: 24rpx;
+    gap: 20rpx;
 
     .sk-col {
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 24rpx;
+        gap: 20rpx;
     }
 }
 

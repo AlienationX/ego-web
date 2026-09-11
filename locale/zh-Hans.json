@@ -351,6 +351,7 @@
         "subtitle": "锁屏放原图，主屏放磨砂，桌面更干净",
         "vipExclusiveTitle": "VIP 专属特权",
         "vipExclusiveHint": "主屏磨砂伴侣为 VIP 专属功能，开通会员后可无限制一键生成精美主屏伴侣壁纸。",
+        "unlockHint": "观看一段视频广告即可免费保存本次磨砂壁纸，或开通 VIP 会员无限制免广告随心保存。",
         "adUnlockHint": "观看一段视频广告即可免费体验主屏磨砂伴侣功能。",
         "btnTitle": "磨砂伴侣",
         "presets": "磨砂预设",
@@ -363,7 +364,7 @@
         "showApps": "模拟桌面",
         "hideApps": "隐藏桌面",
         "saveFrosted": "保存主屏磨砂壁纸",
-        "vipSaveFrosted": "保存主屏磨砂壁纸 (VIP)",
+        "vipSaveFrosted": "保存主屏磨砂壁纸 (VIP/广告)",
         "saveBoth": "同时保存（原图+磨砂）",
         "generating": "正在生成超清磨砂壁纸...",
         "saveSuccess": "已保存主屏伴侣壁纸，快去设置为主屏吧！",
@@ -676,6 +677,7 @@
         "newUserFreeBadge": "新人免广"
     },
     "membership": {
+        "navTitle": "会员中心",
         "title": "会员购买",
         "continue": "继续",
         "benefits": "会员特权",
@@ -683,6 +685,7 @@
         "benefit2": "无限下载高清壁纸",
         "benefit3": "专属VIP壁纸库",
         "benefit4": "优先体验新功能",
+        "redeemCode": "兑换码",
         "monthly": "月卡",
         "quarterly": "季卡",
         "yearly": "年卡",
