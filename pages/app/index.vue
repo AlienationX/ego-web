@@ -12,6 +12,9 @@
                 @open-notifications="openNotificationSheet"
             />
 
+            <!-- 搜索框下方快捷药丸胶囊入口 (参考截图设计：最热、最新、专题策划) -->
+            <home-nav-tiles />
+
             <!-- Banner -->
             <view class="banner">
                 <!-- Banner 骨架屏 -->
@@ -79,9 +82,6 @@
                 </view>
             </view>
 
-            <!-- 3列高质感功能卡片：最热、最新、专题策划 (参考原型布局) -->
-            <home-nav-tiles />
-
             <!-- Inspiration / Random Pick -->
             <view class="select">
                 <view class="select-watermark">Inspire</view>
@@ -96,7 +96,7 @@
                                 @click="refreshRandom">
                                 <uni-icons type="refreshempty" size="13" class="refresh-icon"
                                     :class="{ 'is-spinning': isRefreshing }"
-                                    :color="settingsStore.isDark ? '#181818' : '#ffffff'"></uni-icons>
+                                    :color="settingsStore.isDark ? '#f1f5f9' : '#1e293b'"></uni-icons>
                                 <text class="refresh-text">{{ $t('common.refresh') }}</text>
                             </button>
                         </view>
@@ -345,7 +345,7 @@
                                 <view class="meta-footer">
                                     <text class="meta-tag">{{ getWallTag(item) }}</text>
                                     <view class="meta-score" v-if="item.score">
-                                        <mdi-icon path="/static/icons/star.svg" size="12px" color="#ffbf66"></mdi-icon>
+                                        <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
                                         <text class="score-num">{{ item.score }}</text>
                                     </view>
                                 </view>
@@ -383,7 +383,7 @@
                                 <view class="meta-footer">
                                     <text class="meta-tag">{{ getWallTag(item) }}</text>
                                     <view class="meta-score" v-if="item.score">
-                                        <mdi-icon path="/static/icons/star.svg" size="12px" color="#ffbf66"></mdi-icon>
+                                        <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
                                         <text class="score-num">{{ item.score }}</text>
                                     </view>
                                 </view>
@@ -1073,7 +1073,7 @@ onShareTimeline(() => ({
     .banner-swiper {
         width: 750rpx;
         height: 410rpx;
-        margin: 10rpx 0 12rpx;
+        margin: 0 0 12rpx;
     }
 
     // 统一左右安全边距为 20rpx，与搜索框、3个按钮卡片以及 select 板块完全对齐
@@ -1524,30 +1524,51 @@ onShareTimeline(() => ({
     .date .button,
     .refresh-btn {
         margin: 0;
-        padding: 0 18rpx;
+        padding: 0 20rpx;
         height: 48rpx;
         line-height: 48rpx;
         font-size: 21rpx;
         font-weight: 600;
         border-radius: 999rpx;
         border: none;
-        background-color: var(--text-primary);
-        color: var(--page-background);
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8rpx;
         letter-spacing: 0.4rpx;
-        box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
-        transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
+        box-sizing: border-box;
+        transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), background 0.15s, color 0.15s;
 
         &::after {
             border: none;
         }
 
-        &:active {
-            transform: scale(0.94);
-            filter: brightness(0.92);
+        // 浅色模式：实体纯白微浮岛胶囊，质感扎实、轮廓清晰，不轻飘，与顶部深色药丸形成黑白反差层次
+        .theme-light & {
+            background-color: #ffffff;
+            color: #1e293b;
+            font-weight: 650;
+            border: 1rpx solid rgba(15, 23, 42, 0.09);
+            box-shadow: 0 3rpx 10rpx rgba(15, 23, 42, 0.06);
+
+            &:active {
+                background-color: #f8fafc;
+                transform: scale(0.95);
+            }
+        }
+
+        // 深色模式：高质感暗夜卡片微胶囊
+        .theme-dark & {
+            background-color: #242a38;
+            color: #f1f5f9;
+            font-weight: 650;
+            border: 1rpx solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.25);
+
+            &:active {
+                background-color: #2e3546;
+                transform: scale(0.95);
+            }
         }
 
         .refresh-icon {
@@ -1565,10 +1586,7 @@ onShareTimeline(() => ({
         &.is-collection,
         &.is-keyword,
         &.is-spotlight {
-            background-color: var(--text-primary);
-            color: var(--page-background);
-            border: none;
-            box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.16);
+            // 继承次级胶囊样式，保持统一
         }
     }
 
@@ -1843,17 +1861,12 @@ onShareTimeline(() => ({
         flex-wrap: nowrap;
         align-items: center;
         gap: 16rpx;
-        padding: 10rpx 0 10rpx 0;
-
-        &::before {
-            content: '';
-            width: 20rpx;
-            flex-shrink: 0;
-        }
+        padding: 10rpx 20rpx;
+        box-sizing: border-box;
 
         &::after {
             content: '';
-            width: 30rpx;
+            width: 10rpx;
             flex-shrink: 0;
         }
     }
@@ -1964,13 +1977,14 @@ onShareTimeline(() => ({
     }
 
     &.is-active {
+        // 参考最热、最新按钮：统一高级石墨炭灰胶囊，摆脱死黑
         .theme-light & {
-            background: #18181b;
-            box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.18);
+            background: #333b48;
+            box-shadow: 0 3rpx 10rpx rgba(15, 23, 42, 0.08);
 
             .feed-tab__text {
                 color: #ffffff;
-                font-weight: 700;
+                font-weight: 650;
             }
 
             .feed-tab__icon {
@@ -1978,17 +1992,19 @@ onShareTimeline(() => ({
             }
         }
 
+        // 深色模式：与最热/最新保持一致的暗夜黑蓝底 + 细腻微光描边 + 白字
         .theme-dark & {
-            background: #f4f4f5;
-            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
+            background: #252b38;
+            border: 1rpx solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.25);
 
             .feed-tab__text {
-                color: #18181b;
-                font-weight: 700;
+                color: #f8fafc;
+                font-weight: 650;
             }
 
             .feed-tab__icon {
-                color: #4f46e5;
+                color: #818cf8;
             }
         }
     }
@@ -2046,9 +2062,17 @@ onShareTimeline(() => ({
 
     &__overlay {
         position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.7) 100%);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 160rpx;
+        // 贴底极简柔和渐变：仅覆盖底部2行文字保护区，上方完全通透无阴影
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.18) 55%, rgba(0, 0, 0, 0) 100%);
         pointer-events: none;
+
+        .theme-light & {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0) 100%);
+        }
     }
 
     &__meta {
@@ -2093,12 +2117,11 @@ onShareTimeline(() => ({
         .meta-score {
             display: inline-flex;
             align-items: center;
-            gap: 4rpx;
+            gap: 6rpx;
 
             .score-num {
                 font-size: 20rpx;
-                font-weight: 700;
-                color: #ffbf66;
+                color: rgba(203, 213, 225, 0.76);
             }
         }
     }

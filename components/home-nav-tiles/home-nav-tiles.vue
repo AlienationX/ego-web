@@ -1,30 +1,45 @@
 <template>
-    <view class="nav-tiles" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+    <view class="nav-pills-bar" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <!-- 1. 最热榜单 -->
         <view
-            v-for="tile in tiles"
-            :key="tile.key"
-            class="tile-card"
-            hover-class="tile-card--active"
+            class="pill-item"
+            hover-class="pill-item--active"
             :hover-stay-time="120"
-            @click="onTileClick(tile)"
+            @click="goHot"
         >
-            <!-- 右上角精致微标签 (小巧克制，不抢占视觉) -->
-            <view v-if="tile.badge" class="tile-card__badge" :class="tile.badgeClass">
-                <text class="badge-text">{{ tile.badge }}</text>
+            <view class="pill-item__icon">
+                <mdi-icon path="/static/icons/fire.svg" size="16px" color="#ffffff"></mdi-icon>
             </view>
-            <view v-else-if="tile.key === 'latest' && statusStore.newWallpapersCount > 0" class="tile-card__dot"></view>
+            <text class="pill-item__label">{{ isEn ? 'Trending' : '最热' }}</text>
+        </view>
 
-            <!-- 图标区域 -->
-            <view class="tile-card__icon-wrap">
-                <mdi-icon
-                    :path="tile.icon"
-                    size="22px"
-                    :color="settingsStore.isDark ? '#cbd5e1' : '#334155'"
-                ></mdi-icon>
+        <!-- 2. 最新发布 -->
+        <view
+            class="pill-item"
+            hover-class="pill-item--active"
+            :hover-stay-time="120"
+            @click="goLatest"
+        >
+            <view class="pill-item__icon">
+                <mdi-icon path="/static/icons/flash.svg" size="16px" color="#ffffff"></mdi-icon>
             </view>
+            <text class="pill-item__label">{{ isEn ? 'Recent' : '最新' }}</text>
+            <view v-if="statusStore.newWallpapersCount > 0" class="pill-item__badge">
+                <text class="badge-text">{{ newBadgeText }}</text>
+            </view>
+        </view>
 
-            <!-- 标题区域 -->
-            <text class="tile-card__title">{{ tile.label }}</text>
+        <!-- 3. 专题策划 -->
+        <view
+            class="pill-item"
+            hover-class="pill-item--active"
+            :hover-stay-time="120"
+            @click="goSubjects"
+        >
+            <view class="pill-item__icon">
+                <mdi-icon path="/static/icons/cards.svg" size="16px" color="#ffffff"></mdi-icon>
+            </view>
+            <text class="pill-item__label">{{ isEn ? 'Specials' : '专题策划' }}</text>
         </view>
     </view>
 </template>
@@ -41,175 +56,124 @@ const settingsStore = useSettingsStore();
 
 const isEn = computed(() => locale.value === 'en');
 
-const tiles = computed(() => [
-    {
-        key: 'hot',
-        label: t('index.tabs.hot') || '最热榜单',
-        icon: '/static/icons/fire.svg',
-        path: '/pages/app/top',
-        badge: 'HOT',
-        badgeClass: 'badge--hot',
-    },
-    {
-        key: 'latest',
-        label: t('index.tabs.latest') || '最新发布',
-        icon: '/static/icons/flash.svg',
-        path: '/pages/app/timeline',
-        badge: statusStore.newWallpapersCount > 0 ? `${statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount}` : '',
-        badgeClass: 'badge--new',
-    },
-    {
-        key: 'subjects',
-        label: t('index.subjectRecommend') || '专题策划',
-        icon: '/static/icons/cards.svg',
-        path: '/pages/app/subjects',
-        badge: 'SPECIAL',
-        badgeClass: 'badge--special',
-    },
-]);
+// 今日上新徽标数字
+const newBadgeText = computed(() => {
+    const count = statusStore.newWallpapersCount;
+    if (count > 99) return '99+';
+    return count > 0 ? `${count}` : '';
+});
 
-const onTileClick = (tile) => {
-    if (!tile.path) return;
-    if (tile.key === 'latest') {
-        uni.navigateTo({
-            url: `/pages/app/timeline?unreadCount=${statusStore.newWallpapersCount || 0}`,
-        });
-        return;
-    }
+const goHot = () => {
     uni.navigateTo({
-        url: tile.path,
+        url: '/pages/app/top',
+    });
+};
+
+const goLatest = () => {
+    uni.navigateTo({
+        url: `/pages/app/timeline?unreadCount=${statusStore.newWallpapersCount || 0}`,
+    });
+};
+
+const goSubjects = () => {
+    uni.navigateTo({
+        url: '/pages/app/subjects',
     });
 };
 </script>
 
 <style lang="scss" scoped>
-// 左右 padding 严格与搜索栏、Banner 以及下方 select 统一为 20rpx
-.nav-tiles {
+// 放置在搜索框正下方，左右内边距保持 20rpx 与全站严格对齐，左对齐紧凑排开
+.nav-pills-bar {
     display: flex;
-    align-items: stretch;
-    gap: 24rpx;
-    padding: 6rpx 20rpx 28rpx;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16rpx;
+    padding: 16rpx 20rpx;
     box-sizing: border-box;
+    width: 100%;
 }
 
-// 精巧微浮岛卡片 (高度缩减至 120rpx，半透明柔和底色，告别死白与突兀)
-.tile-card {
-    flex: 1;
-    position: relative;
-    height: 120rpx;
-    background: rgba(255, 255, 255, 0.68);
-    backdrop-filter: blur(16rpx);
-    -webkit-backdrop-filter: blur(16rpx);
-    border-radius: 24rpx;
-    border: 1rpx solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4rpx 16rpx rgba(30, 41, 59, 0.03);
-    display: flex;
-    flex-direction: column;
+// 统一黑色药丸胶囊样式：无选中态区分、非等宽自适应、左对齐
+.pill-item {
+    flex: none;
+    height: 64rpx;
+    border-radius: 999rpx;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4rpx;
-    padding: 0 6rpx;
+    gap: 10rpx;
+    padding: 0 24rpx;
     box-sizing: border-box;
     cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s;
+    user-select: none;
+    position: relative;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s, background 0.18s;
 
+    // 浅色模式：更淡、更优雅通透的石墨炭灰，摆脱死黑太重的压迫感
+    .theme-light & {
+        background: #333b48;
+        color: #ffffff;
+        box-shadow: 0 3rpx 10rpx rgba(15, 23, 42, 0.08);
+
+        .pill-item__label {
+            color: #ffffff;
+        }
+    }
+
+    // 深色模式：暗夜黑蓝高透底 + 细腻发光描边 + 白字
     .theme-dark & {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+        background: #252b38;
+        color: #f8fafc;
+        border: 1rpx solid rgba(255, 255, 255, 0.14);
+        box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.25);
+
+        .pill-item__label {
+            color: #f8fafc;
+        }
     }
 
     &--active,
     &:active {
         transform: scale(0.95);
-        background: rgba(255, 255, 255, 0.85);
-
-        .theme-dark & {
-            background: rgba(255, 255, 255, 0.09);
-        }
+        opacity: 0.9;
     }
 
-    &__icon-wrap {
+    &__icon {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 48rpx;
-        height: 48rpx;
-    }
-
-    &__title {
-        font-size: 22rpx;
-        line-height: 1.2;
-        font-weight: 600;
-        color: #334155;
-        letter-spacing: -0.2rpx;
-        white-space: nowrap;
-        text-align: center;
-
-        .theme-dark & {
-            color: #e2e8f0;
-        }
-    }
-
-    // ── 右上角角标徽章 (醒目清晰，比例优雅) ──
-    &__badge {
-        position: absolute;
-        top: 6rpx;
-        right: 8rpx;
-        border-radius: 999rpx;
-        font-weight: 800;
-        letter-spacing: 0.5rpx;
+        flex-shrink: 0;
         line-height: 1;
+    }
+
+    &__label {
+        font-size: 23rpx;
+        font-weight: 650;
+        letter-spacing: -0.2rpx;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    // 精巧数字徽标
+    &__badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        box-sizing: border-box;
+        padding: 2rpx 8rpx;
+        border-radius: 999rpx;
+        background: #ef4444;
+        color: #ffffff;
+        box-shadow: 0 2rpx 6rpx rgba(239, 68, 68, 0.35);
+        line-height: 1;
+        margin-left: 2rpx;
 
         .badge-text {
+            font-size: 16rpx;
+            font-weight: 850;
             line-height: 1;
+            letter-spacing: 0.3rpx;
         }
-
-        &.badge--hot {
-            padding: 3rpx 10rpx;
-            font-size: 16rpx;
-            background: rgba(239, 68, 68, 0.12);
-            color: #ef4444;
-            border: 1rpx solid rgba(239, 68, 68, 0.2);
-        }
-
-        &.badge--new {
-            min-width: 34rpx;
-            height: 34rpx;
-            padding: 0 8rpx;
-            font-size: 20rpx;
-            background: #ef4444;
-            color: #ffffff;
-            border: 2rpx solid #ffffff;
-            box-shadow: 0 4rpx 10rpx rgba(239, 68, 68, 0.4);
-
-            .theme-dark & {
-                border-color: #1e293b;
-            }
-        }
-
-        &.badge--special {
-            padding: 3rpx 10rpx;
-            font-size: 16rpx;
-            background: #facc15;
-            color: #1c1917;
-            box-shadow: 0 2rpx 6rpx rgba(250, 204, 21, 0.25);
-        }
-    }
-
-    &__dot {
-        position: absolute;
-        top: 10rpx;
-        right: 12rpx;
-        width: 12rpx;
-        height: 12rpx;
-        border-radius: 50%;
-        background: #ef4444;
-        box-shadow: 0 0 6rpx rgba(239, 68, 68, 0.4);
     }
 }
 </style>

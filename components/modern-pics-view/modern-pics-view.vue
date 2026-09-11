@@ -75,8 +75,10 @@
                                         <view class="meta-title">{{ getTitle(item) }}</view>
                                         <view class="meta-footer">
                                             <view class="meta-tag">{{ getTag(item) }}</view>
-                                            <view class="meta-score"><mdi-icon path="/static/icons/star.svg" size="14px"
-                                                    color="#ffbf66"></mdi-icon>{{ item.score || '--' }}</view>
+                                            <view class="meta-score">
+                                                <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                <text class="score-text">{{ item.score || '--' }}</text>
+                                            </view>
                                         </view>
                                     </view>
                                     <view class="card-lock" v-if="item.is_locked && item.loaded">
@@ -102,8 +104,9 @@
                                             <view class="meta-title">{{ getTitle(item) }}</view>
                                             <view class="meta-footer">
                                                 <view class="meta-tag">{{ getTag(item) }}</view>
-                                                <view class="meta-score"><mdi-icon path="/static/icons/star.svg"
-                                                        size="14px" color="#ffbf66"></mdi-icon>{{ item.score || '--' }}
+                                                <view class="meta-score">
+                                                    <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                    <text class="score-text">{{ item.score || '--' }}</text>
                                                 </view>
                                             </view>
                                         </view>
@@ -128,8 +131,9 @@
                                             <view class="meta-title">{{ getTitle(item) }}</view>
                                             <view class="meta-footer">
                                                 <view class="meta-tag">{{ getTag(item) }}</view>
-                                                <view class="meta-score"><mdi-icon path="/static/icons/star.svg"
-                                                        size="14px" color="#ffbf66"></mdi-icon>{{ item.score || '--' }}
+                                                <view class="meta-score">
+                                                    <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                    <text class="score-text">{{ item.score || '--' }}</text>
                                                 </view>
                                             </view>
                                         </view>
@@ -702,13 +706,17 @@ onShow(() => {
 
     .card-overlay {
         position: absolute;
-        inset: 0;
-        background: linear-gradient(to top,
-                rgba(0, 0, 0, 0.48) 0%,
-                rgba(0, 0, 0, 0.24) 14%,
-                rgba(0, 0, 0, 0.08) 28%,
-                rgba(0, 0, 0, 0) 42%);
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 160rpx;
+        // 贴底极简柔和渐变：仅覆盖底部2行文字保护区，上方完全通透无阴影
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.18) 55%, rgba(0, 0, 0, 0) 100%);
         pointer-events: none;
+
+        .theme-light & {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0) 100%);
+        }
     }
 
     .card-meta {
@@ -751,10 +759,13 @@ onShow(() => {
             .meta-score {
                 display: flex;
                 align-items: center;
-                gap: 4rpx;
-                font-size: 19rpx;
-                font-weight: 600;
-                color: rgba(226, 232, 240, 0.86);
+                gap: 6rpx;
+                font-size: 20rpx;
+                color: rgba(203, 213, 225, 0.76);
+
+                .score-text {
+                    color: rgba(203, 213, 225, 0.76);
+                }
             }
         }
     }

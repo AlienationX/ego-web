@@ -23,6 +23,7 @@ import iconList from '@/static/iconfont/appicons-list.js';
 defineOptions({
     options: {
         virtualHost: true,
+        styleIsolation: 'apply-shared',
     },
 });
 
@@ -88,7 +89,7 @@ const fallbackImageStyle = computed(() => ({
 </script>
 
 <style>
-/* appicons.css 已引入 App.vue 全局样式 */
+@import '@/static/iconfont/appicons.css';
 
 :host {
     display: inline-flex;

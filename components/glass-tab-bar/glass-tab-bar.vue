@@ -154,7 +154,7 @@ const handleSwitch = (item) => {
 ───────────────────────────────────────────────────────────── */
 .custom-tab-bar.mode-floating {
     position: fixed;
-    bottom: max(10px, env(safe-area-inset-bottom));
+    bottom: max(20px, env(safe-area-inset-bottom));
     left: 50%;
     transform: translate3d(-50%, 0, 0);
     -webkit-transform: translate3d(-50%, 0, 0);

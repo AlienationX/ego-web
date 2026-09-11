@@ -236,7 +236,7 @@ const onAdHeightChange = (height) => {
 
 const top10WrapPaddingTop = computed(() => `${statusBarHeight.value + 10}px`);
 const top10WrapPaddingBottom = computed(() => `calc(${adHeight.value}px + 180rpx + env(safe-area-inset-bottom))`);
-const dockBottomStyle = computed(() => `calc(${adHeight.value}px + 10rpx + env(safe-area-inset-bottom))`);
+const dockBottomStyle = computed(() => `calc(${adHeight.value}px + max(20px, env(safe-area-inset-bottom))`);
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();

@@ -195,7 +195,7 @@ const goTimeline = () => {
 
 <style lang="scss" scoped>
 .hero-header {
-    padding: 0 20rpx 14rpx;
+    padding: 0 20rpx 0;
     display: flex;
     flex-direction: column;
     gap: 24rpx;
