@@ -1,125 +1,127 @@
 <template>
-    <uni-popup ref="popupRef" type="bottom" :safe-area="false" @change="onPopupChange">
-        <view class="frosted-maker" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-            <!-- 弹窗顶部栏 -->
-            <view class="frosted-maker__header">
-                <view class="frosted-maker__header-left">
-                    <text class="frosted-maker__title">{{ t('frostedMaker.title') }}</text>
-                    <text class="frosted-maker__subtitle">{{ t('frostedMaker.subtitle') }}</text>
+    <view class="frosted-maker-root">
+        <uni-popup ref="popupRef" type="bottom" :safe-area="false" @change="onPopupChange">
+            <view class="frosted-maker" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+                <!-- 弹窗顶部栏 -->
+                <view class="frosted-maker__header">
+                    <view class="frosted-maker__header-left">
+                        <text class="frosted-maker__title">{{ t('frostedMaker.title') }}</text>
+                        <text class="frosted-maker__subtitle">{{ t('frostedMaker.subtitle') }}</text>
+                    </view>
+                    <view class="frosted-maker__close" @click="close">
+                        <uni-icons type="clear" size="28" :color="settingsStore.isDark ? '#a1a1aa' : '#888888'"></uni-icons>
+                    </view>
                 </view>
-                <view class="frosted-maker__close" @click="close">
-                    <uni-icons type="clear" size="28" :color="settingsStore.isDark ? '#a1a1aa' : '#888888'"></uni-icons>
-                </view>
-            </view>
 
-            <!-- 实时磨砂预览画板 -->
-            <view class="frosted-maker__preview-area">
-                <view class="frosted-maker__phone-frame">
-                    <!-- 背景壁纸与实时 CSS 模糊滤镜 -->
-                    <image class="frosted-maker__preview-img" :src="picurl" mode="aspectFill"
-                        :style="previewFilterStyle"></image>
+                <!-- 实时磨砂预览画板 -->
+                <view class="frosted-maker__preview-area">
+                    <view class="frosted-maker__phone-frame">
+                        <!-- 背景壁纸与实时 CSS 模糊滤镜 -->
+                        <image class="frosted-maker__preview-img" :src="picurl" mode="aspectFill"
+                            :style="previewFilterStyle"></image>
 
-                    <!-- 暗度遮罩层 -->
-                    <view class="frosted-maker__preview-overlay"
-                        :style="{ backgroundColor: `rgba(0, 0, 0, ${darkness})` }"></view>
+                        <!-- 暗度遮罩层 -->
+                        <view class="frosted-maker__preview-overlay"
+                            :style="{ backgroundColor: `rgba(0, 0, 0, ${darkness})` }"></view>
 
-                    <!-- 模拟主屏桌面 App 图标网格 (开关开启时显示) -->
-                    <view v-if="showMockApps" class="frosted-maker__mock-desktop">
-                        <!-- 顶部小组件栏 -->
-                        <view class="mock-widget">
-                            <text class="mock-widget__date">09:41</text>
-                            <text class="mock-widget__weather">26°C 晴</text>
-                        </view>
+                        <!-- 模拟主屏桌面 App 图标网格 (开关开启时显示) -->
+                        <view v-if="showMockApps" class="frosted-maker__mock-desktop">
+                            <!-- 顶部小组件栏 -->
+                            <view class="mock-widget">
+                                <text class="mock-widget__date">09:41</text>
+                                <text class="mock-widget__weather">26°C 晴</text>
+                            </view>
 
-                        <!-- 桌面应用图标网格 -->
-                        <view class="mock-apps-grid">
-                            <view class="mock-app-item" v-for="(app, idx) in mockAppList" :key="idx">
-                                <view class="mock-app-icon" :style="{ backgroundColor: app.color }">
-                                    <uni-icons :type="app.icon" size="20" color="#ffffff"></uni-icons>
+                            <!-- 桌面应用图标网格 -->
+                            <view class="mock-apps-grid">
+                                <view class="mock-app-item" v-for="(app, idx) in mockAppList" :key="idx">
+                                    <view class="mock-app-icon" :style="{ backgroundColor: app.color }">
+                                        <uni-icons :type="app.icon" size="20" color="#ffffff"></uni-icons>
+                                    </view>
+                                    <text class="mock-app-name">{{ t(app.nameKey) }}</text>
                                 </view>
-                                <text class="mock-app-name">{{ t(app.nameKey) }}</text>
+                            </view>
+
+                            <!-- 底部 Dock 栏 -->
+                            <view class="mock-dock">
+                                <view class="mock-dock__icon" style="background-color: #34c759;">
+                                    <uni-icons type="phone-filled" size="22" color="#ffffff"></uni-icons>
+                                </view>
+                                <view class="mock-dock__icon" style="background-color: #007aff;">
+                                    <uni-icons type="chatbubble-filled" size="22" color="#ffffff"></uni-icons>
+                                </view>
+                                <view class="mock-dock__icon" style="background-color: #ff9500;">
+                                    <uni-icons type="paperplane-filled" size="22" color="#ffffff"></uni-icons>
+                                </view>
+                                <view class="mock-dock__icon" style="background-color: #5856d6;">
+                                    <uni-icons type="camera-filled" size="22" color="#ffffff"></uni-icons>
+                                </view>
                             </view>
                         </view>
 
-                        <!-- 底部 Dock 栏 -->
-                        <view class="mock-dock">
-                            <view class="mock-dock__icon" style="background-color: #34c759;">
-                                <uni-icons type="phone-filled" size="22" color="#ffffff"></uni-icons>
-                            </view>
-                            <view class="mock-dock__icon" style="background-color: #007aff;">
-                                <uni-icons type="chatbubble-filled" size="22" color="#ffffff"></uni-icons>
-                            </view>
-                            <view class="mock-dock__icon" style="background-color: #ff9500;">
-                                <uni-icons type="paperplane-filled" size="22" color="#ffffff"></uni-icons>
-                            </view>
-                            <view class="mock-dock__icon" style="background-color: #5856d6;">
-                                <uni-icons type="camera-filled" size="22" color="#ffffff"></uni-icons>
-                            </view>
+                        <!-- 浮动在预览卡片上的“模拟主屏”切换开关 -->
+                        <view class="frosted-maker__toggle-mock" :class="{ 'is-active': showMockApps }"
+                            @click="toggleMockApps">
+                            <mdi-icon path="/static/icons/view-grid.svg" size="16px"
+                                :color="showMockApps ? '#ffffff' : '#ffffff'"></mdi-icon>
+                            <text class="toggle-text">{{ showMockApps ? t('frostedMaker.hideApps') :
+                                t('frostedMaker.showApps') }}</text>
                         </view>
-                    </view>
-
-                    <!-- 浮动在预览卡片上的“模拟主屏”切换开关 -->
-                    <view class="frosted-maker__toggle-mock" :class="{ 'is-active': showMockApps }"
-                        @click="toggleMockApps">
-                        <mdi-icon path="/static/icons/view-grid.svg" size="16px"
-                            :color="showMockApps ? '#ffffff' : '#ffffff'"></mdi-icon>
-                        <text class="toggle-text">{{ showMockApps ? t('frostedMaker.hideApps') :
-                            t('frostedMaker.showApps') }}</text>
                     </view>
                 </view>
+
+                <!-- 调节控制面板 -->
+                <view class="frosted-maker__controls">
+                    <!-- 预设档位快捷选择 -->
+                    <view class="frosted-maker__section">
+                        <view class="frosted-maker__section-title">{{ t('frostedMaker.presets') }}</view>
+                        <view class="frosted-maker__presets">
+                            <view class="preset-pill" v-for="item in presetOptions" :key="item.value"
+                                :class="{ active: currentPreset === item.value }" @click="selectPreset(item)">
+                                <text class="preset-name">{{ t(item.nameKey) }}</text>
+                                <text class="preset-val">{{ item.blur }}px</text>
+                            </view>
+                        </view>
+                    </view>
+
+                    <!-- 模糊度与暗度微调滑块 -->
+                    <view class="frosted-maker__sliders">
+                        <view class="slider-row">
+                            <view class="slider-label">
+                                <text class="label-name">{{ t('frostedMaker.blurLevel') }}</text>
+                                <text class="label-val">{{ blurRadius }}px</text>
+                            </view>
+                            <slider :value="blurRadius" :min="0" :max="100" :step="1" activeColor="#4f46e5"
+                                backgroundColor="rgba(120, 120, 128, 0.2)" block-size="20" @changing="onBlurChanging"
+                                @change="onBlurChange" />
+                        </view>
+
+                        <view class="slider-row">
+                            <view class="slider-label">
+                                <text class="label-name">{{ t('frostedMaker.dimLevel') }}</text>
+                                <text class="label-val">{{ Math.round(darkness * 100) }}%</text>
+                            </view>
+                            <slider :value="Math.round(darkness * 100)" :min="0" :max="50" :step="1" activeColor="#4f46e5"
+                                backgroundColor="rgba(120, 120, 128, 0.2)" block-size="20" @changing="onDarknessChanging"
+                                @change="onDarknessChange" />
+                        </view>
+                    </view>
+
+                    <!-- 保存导出操作按钮 (单一大按钮，VIP 专属) -->
+                    <view class="frosted-maker__actions">
+                        <button class="action-btn action-btn--primary action-btn--full" :disabled="isSaving"
+                            :loading="isSaving" @click="handleSaveClick">
+                            <mdi-icon v-if="!userStore.isVip" path="/static/icons/crown-circle.svg" size="20px"
+                                color="#FBBF24"></mdi-icon>
+                            <text>{{ isSaving ? t('frostedMaker.generating') : (userStore.isVip ? t('frostedMaker.saveFrosted') : t('frostedMaker.vipSaveFrosted')) }}</text>
+                        </button>
+                    </view>
+                </view>
+
+                <!-- 底部安全间距 -->
+                <view class="safe-area-bottom"></view>
             </view>
-
-            <!-- 调节控制面板 -->
-            <view class="frosted-maker__controls">
-                <!-- 预设档位快捷选择 -->
-                <view class="frosted-maker__section">
-                    <view class="frosted-maker__section-title">{{ t('frostedMaker.presets') }}</view>
-                    <view class="frosted-maker__presets">
-                        <view class="preset-pill" v-for="item in presetOptions" :key="item.value"
-                            :class="{ active: currentPreset === item.value }" @click="selectPreset(item)">
-                            <text class="preset-name">{{ t(item.nameKey) }}</text>
-                            <text class="preset-val">{{ item.blur }}px</text>
-                        </view>
-                    </view>
-                </view>
-
-                <!-- 模糊度与暗度微调滑块 -->
-                <view class="frosted-maker__sliders">
-                    <view class="slider-row">
-                        <view class="slider-label">
-                            <text class="label-name">{{ t('frostedMaker.blurLevel') }}</text>
-                            <text class="label-val">{{ blurRadius }}px</text>
-                        </view>
-                        <slider :value="blurRadius" :min="0" :max="100" :step="1" activeColor="#4f46e5"
-                            backgroundColor="rgba(120, 120, 128, 0.2)" block-size="20" @changing="onBlurChanging"
-                            @change="onBlurChange" />
-                    </view>
-
-                    <view class="slider-row">
-                        <view class="slider-label">
-                            <text class="label-name">{{ t('frostedMaker.dimLevel') }}</text>
-                            <text class="label-val">{{ Math.round(darkness * 100) }}%</text>
-                        </view>
-                        <slider :value="Math.round(darkness * 100)" :min="0" :max="50" :step="1" activeColor="#4f46e5"
-                            backgroundColor="rgba(120, 120, 128, 0.2)" block-size="20" @changing="onDarknessChanging"
-                            @change="onDarknessChange" />
-                    </view>
-                </view>
-
-                <!-- 保存导出操作按钮 (单一大按钮，VIP 专属) -->
-                <view class="frosted-maker__actions">
-                    <button class="action-btn action-btn--primary action-btn--full" :disabled="isSaving"
-                        :loading="isSaving" @click="handleSaveClick">
-                        <mdi-icon v-if="!userStore.isVip" path="/static/icons/crown-circle.svg" size="20px"
-                            color="#FBBF24"></mdi-icon>
-                        <text>{{ isSaving ? t('frostedMaker.generating') : (userStore.isVip ? t('frostedMaker.saveFrosted') : t('frostedMaker.vipSaveFrosted')) }}</text>
-                    </button>
-                </view>
-            </view>
-
-            <!-- 底部安全间距 -->
-            <view class="safe-area-bottom"></view>
-        </view>
+        </uni-popup>
 
         <!-- 微信小程序端使用 Canvas 2D 接口支持同层渲染与 getImageData -->
         <!-- #ifdef MP-WEIXIN -->
@@ -127,16 +129,17 @@
             :style="{ width: `${canvasW}px`, height: `${canvasH}px` }"></canvas>
         <!-- #endif -->
 
-        <!-- 非微信端使用标准 Canvas 容器 -->
+        <!-- 非微信端使用标准 Canvas 容器（直接挂在当前组件根下，确保 instance 寻址稳定） -->
         <!-- #ifndef MP-WEIXIN -->
         <canvas canvas-id="frostedCanvas" id="frostedCanvas" class="frosted-maker__hidden-canvas"
+            :width="canvasW" :height="canvasH"
             :style="{ width: `${canvasW}px`, height: `${canvasH}px` }"></canvas>
         <!-- #endif -->
-    </uni-popup>
+    </view>
 </template>
 
 <script setup>
-import { computed, ref, getCurrentInstance, onMounted } from 'vue';
+import { computed, ref, getCurrentInstance, onMounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
@@ -169,15 +172,11 @@ const isSaving = ref(false);
 
 // 画布尺寸（兼顾 StackBlur 高斯模糊毫秒级计算性能与超清相册导出）
 const canvasW = ref(540);
-const canvasH = ref(1200);
+const canvasH = ref(1170);
 
 onMounted(() => {
-    try {
-        const sys = uni.getWindowInfo();
-        const ratio = (sys.windowHeight || 800) / (sys.windowWidth || 375);
-        canvasW.value = 540;
-        canvasH.value = Math.round(540 * ratio);
-    } catch (e) { }
+    canvasW.value = 540;
+    canvasH.value = 1170;
 });
 
 // 预设选项
@@ -287,16 +286,22 @@ const saveFrostedWallpaperCore = async () => {
         const originalWidth = imageInfo.width || 1080;
         const originalHeight = imageInfo.height || 2400;
 
-        canvasW.value = originalWidth;
-        canvasH.value = originalHeight;
+        const ratio = originalHeight / originalWidth;
+        const sampleW = 540;
+        const sampleH = Math.round(sampleW * ratio);
+        canvasW.value = sampleW;
+        canvasH.value = sampleH;
+        await nextTick();
+        // 缓冲 80ms 确保 App 端原生 Canvas 容器完成尺寸同步
+        await new Promise((resolve) => setTimeout(resolve, 80));
 
-        // 2. 在 Canvas 进行 1:1 原图等比例真实高斯模糊与暗度处理并导出超清临时图片
+        // 2. 在 Canvas 进行真实高斯模糊与暗度处理并导出超清临时图片
         const frostedTempPath = await renderFrostedWallpaperToCanvas({
             canvasId: 'frostedCanvas',
             instance,
             imagePath: imageInfo.path,
-            width: originalWidth,
-            height: originalHeight,
+            originalWidth,
+            originalHeight,
             blurRadius: blurRadius.value,
             darkness: darkness.value,
         });
@@ -704,13 +709,13 @@ defineExpose({
         width: 100%;
         height: 20rpx;
     }
+}
 
-    &__hidden-canvas {
-        position: fixed;
-        left: -9999px;
-        top: -9999px;
-        opacity: 0;
-        pointer-events: none;
-    }
+.frosted-maker__hidden-canvas {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: -9999;
+    pointer-events: none;
 }
 </style>

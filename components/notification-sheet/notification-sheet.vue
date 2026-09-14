@@ -72,10 +72,12 @@
                         </view>
                         <view class="notify-card__content">
                             <view class="notify-card__row">
-                                <text class="notify-card__title">{{ item.title }}</text>
-                                <text v-if="item.created_at" class="notify-card__time">{{ formatTime(item.created_at) }}</text>
+                                <text class="notify-card__title">{{ getNoticeTitle(item) }}</text>
+                                <text v-if="item.created_at || item.publish_date" class="notify-card__time">
+                                    {{ formatTime(item.publish_date || item.created_at) }}
+                                </text>
                             </view>
-                            <text class="notify-card__desc">{{ item.summary || item.title }}</text>
+                            <text class="notify-card__desc">{{ getNoticeDesc(item) }}</text>
                         </view>
                         <view class="notify-card__arrow">
                             <mdi-icon path="/static/icons/chevron-right.svg" size="18px" color="var(--text-tertiary)"></mdi-icon>
@@ -108,7 +110,8 @@ import { useStatusStore } from '@/stores/status.js';
 import { apiGetNotice } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const isEn = computed(() => locale.value === 'en');
 const { tp } = useTranslateParams();
 const settingsStore = useSettingsStore();
 const statusStore = useStatusStore();
@@ -119,6 +122,22 @@ const sheetPaddingTop = computed(() => `${statusBarHeight.value + 12}px`);
 const popupRef = ref(null);
 const activeTab = ref('all');
 const noticeList = ref([]);
+
+const getNoticeTitle = (item) => {
+    if (!item) return '';
+    if (isEn.value && item.title_en) {
+        return item.title_en;
+    }
+    return item.title || '';
+};
+
+const getNoticeDesc = (item) => {
+    if (!item) return '';
+    if (isEn.value) {
+        return item.summary_en || item.title_en || item.summary || item.title || '';
+    }
+    return item.summary || item.title || '';
+};
 
 const hasUnread = computed(() => {
     return statusStore.newWallpapersCount > 0 || noticeList.value.length > 0;
@@ -178,8 +197,9 @@ const goTimeline = () => {
 
 const goNoticeDetail = (item) => {
     close();
+    const title = getNoticeTitle(item);
     uni.navigateTo({
-        url: `/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(item.title)}`,
+        url: `/pages/app/notice-detail?id=${item.id}&name=${encodeURIComponent(title)}`,
     });
 };
 

@@ -65,49 +65,148 @@
             </view>
         </view>
 
-        <view class="bottom-panel" :style="{ bottom: bottomPanelBottom }">
-            <view class="picker-wrap" v-if="pickerOpen">
-                <template v-if="sourceMode === 'favorite'">
-                    <view class="picker-title">{{ $t('discover.pickFavorite') }}</view>
-                    <scroll-view v-if="favoriteList.length" class="favorite-scroll" scroll-x show-scrollbar="false"
-                        :lower-threshold="60" @scrolltolower="loadMoreFavorites">
-                        <view class="favorite-row">
-                            <view v-for="item in favoriteList" :key="item.id" class="fav-card"
-                                :class="{ active: selectedId === item.id }" @click="onSelect(item.id)">
-                                <image class="fav-image" :src="item.smallPicurl || item.picurl" mode="aspectFill">
-                                </image>
-                            </view>
-                            <view v-if="favLoadingMore" class="fav-card fav-card--loading">
-                                <rotate-loading :size="48"></rotate-loading>
-                            </view>
-                        </view>
-                    </scroll-view>
-                    <view v-else-if="!isLoading" class="mini-empty">
-                        <text>{{ $t('discover.empty') }}</text>
-                        <text class="mini-link" @click="goFavorite">{{ $t('discover.goFavorite') }}</text>
+        <!-- 高定悬浮琉璃浮岛操作面板 (Floating Glass Island) -->
+        <view
+            class="discover-island"
+            :class="{ 'is-collapsed': !pickerOpen }"
+            :style="{ bottom: `${islandBottom}px` }"
+        >
+            <!-- 1. 折叠迷你态：极简圆润胶囊，释放 85% 屏幕空间沉浸式阅读 AI 对话 -->
+            <view v-if="!pickerOpen" class="island-mini-bar" @click="openPicker">
+                <view class="mini-left">
+                    <image
+                        v-if="currentSelectedThumb"
+                        class="mini-thumb"
+                        :src="currentSelectedThumb"
+                        mode="aspectFill"
+                    />
+                    <view v-else class="mini-thumb mini-thumb--empty">
+                        <uni-icons type="image" size="16" color="#94a3b8"></uni-icons>
                     </view>
-                </template>
-
-                <template v-else>
-                    <view class="picker-title">{{ $t('discover.pickLocal') }}</view>
-                    <view class="local-line">
-                        <view class="local-preview" v-if="localImage">
-                            <image class="local-image" :src="localImage" mode="aspectFill"></image>
-                        </view>
-                        <button class="pick-local-btn" @click="pickLocalImage">{{ $t('discover.pickLocalBtn')
-                        }}</button>
+                    <view class="mini-info">
+                        <text class="mini-title">{{ isRunning ? $t('discover.analyzingMessage') : (currentImageTitle || '已选图片') }}</text>
+                        <text v-if="isRunning" class="mini-badge-timer">{{ thinkingTime }}s</text>
                     </view>
-                </template>
+                </view>
+                <view class="mini-right">
+                    <text class="mini-action">{{ isRunning ? '分析中' : '更换图片' }}</text>
+                    <uni-icons type="top" size="13" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
+                </view>
             </view>
 
-            <view class="source-switch">
-                <view class="source-item" :class="{ active: sourceMode === 'favorite' }"
-                    @click="setSourceMode('favorite')">
-                    {{ $t('discover.sourceFavorite') }}
+            <!-- 2. 展开完整态：精致选图、来源分段切换与开始探索 -->
+            <view v-else class="island-expanded">
+                <!-- 顶部：分段切换胶囊 + 收起手柄按钮 -->
+                <view class="island-header">
+                    <view class="segmented-pill">
+                        <view
+                            class="segment-btn"
+                            :class="{ active: sourceMode === 'favorite' }"
+                            @click="setSourceMode('favorite')"
+                        >
+                            <uni-icons type="star-filled" size="13" :color="sourceMode === 'favorite' ? (settingsStore.isDark ? '#f8fafc' : '#0f172a') : '#94a3b8'"></uni-icons>
+                            <text class="segment-text">{{ $t('discover.sourceFavorite') }}</text>
+                        </view>
+                        <view
+                            class="segment-btn"
+                            :class="{ active: sourceMode === 'local' }"
+                            @click="setSourceMode('local')"
+                        >
+                            <uni-icons type="folder" size="13" :color="sourceMode === 'local' ? (settingsStore.isDark ? '#f8fafc' : '#0f172a') : '#94a3b8'"></uni-icons>
+                            <text class="segment-text">{{ $t('discover.sourceLocal') }}</text>
+                            <view class="segment-vip-badge">
+                                <uni-icons type="vip-filled" size="11" color="#b7791f"></uni-icons>
+                            </view>
+                        </view>
+                    </view>
+
+                    <!-- 收起面板折叠按钮 -->
+                    <view class="collapse-trigger" @click="closePicker">
+                        <uni-icons type="bottom" size="15" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
+                    </view>
                 </view>
-                <view class="source-item" :class="{ active: sourceMode === 'local' }" @click="setSourceMode('local')">
-                    {{ $t('discover.sourceLocal') }}
-                    <uni-icons class="lock-icon" type="vip-filled" size="14" color="#b7791f"></uni-icons>
+
+                <!-- 中间选图画廊 -->
+                <view class="island-gallery">
+                    <!-- 收藏壁纸流 -->
+                    <template v-if="sourceMode === 'favorite'">
+                        <scroll-view
+                            v-if="favoriteList.length"
+                            class="fav-scroll"
+                            scroll-x
+                            show-scrollbar="false"
+                            :lower-threshold="60"
+                            @scrolltolower="loadMoreFavorites"
+                        >
+                            <view class="fav-track">
+                                <view
+                                    v-for="item in favoriteList"
+                                    :key="item.id"
+                                    class="fav-card"
+                                    :class="{ active: selectedId === item.id }"
+                                    @click="selectFavorite(item.id)"
+                                >
+                                    <image
+                                        class="fav-img"
+                                        :src="item.smallPicurl || item.picurl"
+                                        mode="aspectFill"
+                                        lazy-load
+                                    />
+                                    <view v-if="selectedId === item.id" class="fav-check-badge">
+                                        <uni-icons type="checkmarkempty" size="12" color="#ffffff"></uni-icons>
+                                    </view>
+                                </view>
+                                <view v-if="favLoadingMore" class="fav-card fav-card--loading">
+                                    <rotate-loading :size="36"></rotate-loading>
+                                </view>
+                            </view>
+                        </scroll-view>
+                        <view v-else-if="!isLoading" class="fav-empty-box">
+                            <text class="empty-desc">{{ $t('discover.empty') }}</text>
+                            <text class="empty-action" @click="goFavorite">{{ $t('discover.goFavorite') }}</text>
+                        </view>
+                        <view v-else class="fav-loading-box">
+                            <rotate-loading :size="36"></rotate-loading>
+                        </view>
+                    </template>
+
+                    <!-- 本地选图 -->
+                    <template v-else>
+                        <view class="local-picker-card" @click="pickLocalImage">
+                            <view v-if="localImage" class="local-chosen">
+                                <image class="local-img-preview" :src="localImage" mode="aspectFill"></image>
+                                <view class="local-repick-badge">
+                                    <uni-icons type="camera" size="12" color="#ffffff"></uni-icons>
+                                    <text class="badge-txt">更换图片</text>
+                                </view>
+                            </view>
+                            <view v-else class="local-placeholder">
+                                <view class="uploader-icon-wrap">
+                                    <uni-icons type="plusempty" size="20" :color="settingsStore.isDark ? '#e2e8f0' : '#334155'"></uni-icons>
+                                </view>
+                                <view class="uploader-info">
+                                    <text class="uploader-primary">{{ $t('discover.pickLocalBtn') }}</text>
+                                    <text class="uploader-hint">选择本地壁纸进行性格与美学解析（VIP专享）</text>
+                                </view>
+                            </view>
+                        </view>
+                    </template>
+                </view>
+
+                <!-- 底部行动条 -->
+                <view class="island-action-bar">
+                    <button
+                        class="analyze-action-btn"
+                        :class="{ 'is-disabled': !canAnalyze, 'is-loading': isRunning }"
+                        :disabled="!canAnalyze || isRunning"
+                        @click="startExplore"
+                    >
+                        <rotate-loading v-if="isRunning" :size="32" color="#ffffff"></rotate-loading>
+                        <uni-icons v-else type="sparkles" size="15" color="#ffffff"></uni-icons>
+                        <text class="btn-caption">
+                            {{ isRunning ? `${$t('discover.analyzingMessage')} ${thinkingTime}s` : ($t('discover.analyzeBtn') || '开始深度美学探索') }}
+                        </text>
+                    </button>
                 </view>
             </view>
         </view>
@@ -196,13 +295,47 @@ const canAnalyze = computed(() => {
 const tabBarHeight = computed(() => {
     return getTabBarHeight() || 60;
 });
-const bottomPanelBottom = computed(() => `${tabBarHeight.value}px`);
 
-// 纯公式计算：TabBar高度 + 面板主体高度(折叠 65px / 展开 200px) + 10rpx (5px) 预留间距
-const containerBottomSpace = computed(() => {
-    const panelHeight = pickerOpen.value ? 200 : 65;
-    return tabBarHeight.value + panelHeight + 5;
+// 浮岛底部距离：紧邻悬浮 TabBar 上方，保持 8px 梯级悬浮呼吸间距
+const islandBottom = computed(() => {
+    return tabBarHeight.value + 8;
 });
+
+// 当前选中的缩略图（用于折叠迷你条极简展示）
+const currentSelectedThumb = computed(() => {
+    if (sourceMode.value === 'local') return localImage.value;
+    return selectedItem.value?.smallPicurl || selectedItem.value?.picurl || '';
+});
+
+// 当前选中的图片标题或描述
+const currentImageTitle = computed(() => {
+    if (sourceMode.value === 'local') return '本地相册图片';
+    if (selectedItem.value) return '已选收藏壁纸';
+    return '未选择壁纸';
+});
+
+// 容器底部安全间距（展开态 ~240px，折叠态 ~54px），确保对话滚动不会被浮岛遮挡
+const containerBottomSpace = computed(() => {
+    const islandHeight = pickerOpen.value ? 240 : 54;
+    return islandBottom.value + islandHeight + 16;
+});
+
+const openPicker = () => {
+    pickerOpen.value = true;
+};
+
+const closePicker = () => {
+    pickerOpen.value = false;
+};
+
+const selectFavorite = (id) => {
+    selectedId.value = id;
+};
+
+const startExplore = async () => {
+    if (!canAnalyze.value || isRunning.value) return;
+    await onAnalyze();
+};
 
 const stopTyping = () => {
     if (typingTimer) {
@@ -942,62 +1075,7 @@ onUnload(() => {
     animation-delay: 0.24s;
 }
 
-.panel {
-    background: transparent;
-    padding: 20rpx;
-    border-bottom: 1rpx solid var(--panel-border);
-}
 
-.picker-title {
-    font-size: 26rpx;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 14rpx;
-}
-
-.favorite-scroll {
-    white-space: nowrap;
-    width: 100%;
-}
-
-.favorite-row {
-    display: flex;
-    gap: 16rpx;
-    padding-bottom: 12rpx;
-}
-
-.fav-card {
-    width: 180rpx;
-    height: 320rpx;
-    border-radius: 24rpx;
-    border: 2rpx solid var(--panel-border);
-    overflow: hidden;
-    flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 16rpx 32rpx var(--shadow-color);
-}
-
-.fav-card.active {
-    border-color: var(--discover-border-strong);
-    box-shadow:
-        0 0 0 4rpx rgba(255, 215, 230, 0.16),
-        0 18rpx 36rpx var(--shadow-color);
-}
-
-.fav-card--loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    box-shadow: none;
-}
-
-.fav-image {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
 
 .chat-panel {
     position: relative;
@@ -1264,139 +1342,419 @@ onUnload(() => {
     box-shadow: 0 14rpx 28rpx var(--shadow-color);
 }
 
-.empty {
-    padding: 120rpx 0;
-    text-align: center;
-}
+/* ==========================================================================
+   高定双层悬浮琉璃浮岛 (Floating Glass Island)
+   ========================================================================== */
+.discover-island {
+    position: fixed;
+    left: 24rpx;
+    right: 24rpx;
+    z-index: 99;
+    border-radius: 36rpx;
+    transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    box-sizing: border-box;
 
-.empty-text {
-    color: var(--text-tertiary);
-    margin-bottom: 28rpx;
-    font-size: 30rpx;
-}
+    // 浅色模式磨砂琉璃质感
+    background: rgba(255, 255, 255, 0.88);
+    border: 1rpx solid rgba(255, 255, 255, 0.7);
+    box-shadow: 
+        0 16rpx 40rpx rgba(15, 23, 42, 0.08),
+        0 2rpx 8rpx rgba(15, 23, 42, 0.04);
+    backdrop-filter: blur(28rpx);
+    -webkit-backdrop-filter: blur(28rpx);
 
-.go-btn {
-    width: 280rpx;
-    height: 80rpx;
-    line-height: 80rpx;
-    border: 1rpx solid var(--discover-border-strong);
-    border-radius: 18rpx;
-    color: #111111;
-    background: linear-gradient(135deg, #ffe0f1 0%, #ffd38f 100%);
-    font-size: 28rpx;
-    box-shadow: 0 14rpx 28rpx rgba(255, 190, 128, 0.18);
-}
+    // 深色模式磨砂琉璃质感
+    .theme-dark & {
+        background: rgba(24, 26, 32, 0.86);
+        border: 1rpx solid rgba(255, 255, 255, 0.12);
+        box-shadow: 
+            0 20rpx 48rpx rgba(0, 0, 0, 0.42),
+            0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+    }
 
-.local-panel {
-    margin-top: 8rpx;
-}
+    &.is-collapsed {
+        // 折叠胶囊态更加轻盈
+        box-shadow: 
+            0 10rpx 28rpx rgba(15, 23, 42, 0.06),
+            0 2rpx 6rpx rgba(15, 23, 42, 0.03);
 
-.local-preview {
-    margin-bottom: 16rpx;
-}
-
-.local-image {
-    width: 180rpx;
-    height: 240rpx;
-    border-radius: 18rpx;
-    border: 1rpx solid var(--panel-border);
-    box-shadow: 0 14rpx 28rpx var(--shadow-color);
-}
-
-.pick-local-btn {
-    border-radius: 22rpx;
-    border: none;
-    background: linear-gradient(135deg, #ffe0f1 0%, #ffd38f 100%);
-    color: #111111;
-    font-size: 28rpx;
-    font-weight: 600;
-    box-shadow: 0 16rpx 34rpx rgba(255, 190, 128, 0.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    &::after {
-        border: none;
+        .theme-dark & {
+            box-shadow: 
+                0 12rpx 32rpx rgba(0, 0, 0, 0.35),
+                0 2rpx 6rpx rgba(0, 0, 0, 0.18);
+        }
     }
 }
 
-.bottom-panel {
-    position: fixed;
-    left: 0;
-    right: 0;
-    background: var(--discover-bottom-panel);
-    border-top-left-radius: 34rpx;
-    border-top-right-radius: 34rpx;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    border-top: 1rpx solid var(--panel-border);
-    box-shadow: 0 -12rpx 36rpx var(--shadow-color);
-    backdrop-filter: blur(24rpx);
-    padding: 20rpx;
-    z-index: 99;
-}
-
-.picker-wrap {
-    border: 1rpx solid var(--panel-border);
-    border-radius: 26rpx;
-    background: var(--panel-background);
-    padding: 22rpx;
-    margin-bottom: 14rpx;
-    box-shadow: 0 14rpx 30rpx var(--shadow-color);
-    backdrop-filter: blur(18rpx);
-}
-
-.source-switch {
-    display: flex;
-    gap: 12rpx;
-}
-
-.source-item {
-    flex: 1;
-    text-align: center;
-    font-size: 27rpx;
-    color: var(--text-secondary);
-    border: 1rpx solid var(--panel-border);
-    padding: 16rpx 12rpx;
-    border-radius: 20rpx;
-    background: rgba(255, 255, 255, 0.05);
-    position: relative;
+// 1. 折叠迷你胶囊
+.island-mini-bar {
+    height: 96rpx;
+    padding: 0 24rpx;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8rpx;
-    font-weight: 500;
+    justify-content: space-between;
+
+    .mini-left {
+        display: flex;
+        align-items: center;
+        gap: 16rpx;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .mini-thumb {
+        width: 68rpx;
+        height: 68rpx;
+        border-radius: 18rpx;
+        flex-shrink: 0;
+        background: rgba(120, 120, 128, 0.1);
+        border: 1rpx solid rgba(255, 255, 255, 0.25);
+
+        &--empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    .mini-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2rpx;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .mini-title {
+        font-size: 26rpx;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .mini-badge-timer {
+        font-size: 22rpx;
+        color: var(--accent-primary);
+        font-weight: 500;
+    }
+
+    .mini-right {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        padding-left: 16rpx;
+        flex-shrink: 0;
+    }
+
+    .mini-action {
+        font-size: 24rpx;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
 }
 
-.source-item.active {
-    color: var(--discover-switch-active-text);
-    border-color: var(--discover-border-strong);
-    background: linear-gradient(135deg, #ffe0f1 0%, #ffd38f 100%);
-    box-shadow: 0 10rpx 24rpx rgba(255, 190, 128, 0.18);
+// 2. 展开态浮岛面板
+.island-expanded {
+    padding: 20rpx 20rpx 20rpx;
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
 }
 
-.lock-icon {
-    border: 1rpx solid rgba(255, 215, 143, 0.5);
-    border-radius: 6rpx;
-    padding: 2rpx 6rpx;
-    background: rgba(255, 240, 214, 0.9);
-}
-
-.mini-empty {
-    color: var(--text-tertiary);
-    font-size: 24rpx;
-}
-
-.mini-link {
-    color: var(--accent-primary);
-    font-weight: 600;
-    margin-left: 10rpx;
-}
-
-.local-line {
+// 头部：分段器与收起按钮
+.island-header {
     display: flex;
     align-items: center;
-    gap: 14rpx;
+    justify-content: space-between;
+
+    .segmented-pill {
+        display: flex;
+        align-items: center;
+        padding: 6rpx;
+        border-radius: 40rpx;
+        background: rgba(120, 120, 128, 0.1);
+        gap: 6rpx;
+    }
+
+    .segment-btn {
+        display: flex;
+        align-items: center;
+        gap: 8rpx;
+        padding: 8rpx 22rpx;
+        border-radius: 32rpx;
+        font-size: 24rpx;
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: all 0.22s ease;
+
+        &.active {
+            color: #0f172a;
+            background: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+
+            .theme-dark & {
+                color: #f8fafc;
+                background: rgba(255, 255, 255, 0.16);
+                box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.25);
+            }
+        }
+    }
+
+    .segment-text {
+        font-size: 24rpx;
+    }
+
+    .segment-vip-badge {
+        display: flex;
+        align-items: center;
+        margin-left: 2rpx;
+    }
+
+    .collapse-trigger {
+        width: 52rpx;
+        height: 52rpx;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(120, 120, 128, 0.1);
+        transition: background-color 0.2s ease;
+
+        &:active {
+            background: rgba(120, 120, 128, 0.2);
+        }
+    }
+}
+
+// 中间：选图画廊
+.island-gallery {
+    width: 100%;
+
+    .fav-scroll {
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    .fav-track {
+        display: inline-flex;
+        align-items: center;
+        gap: 16rpx;
+        padding: 6rpx 4rpx 10rpx;
+    }
+
+    .fav-card {
+        width: 116rpx;
+        height: 168rpx;
+        border-radius: 20rpx;
+        position: relative;
+        flex-shrink: 0;
+        overflow: hidden;
+        border: 2rpx solid transparent;
+        transition: all 0.22s ease;
+        background: rgba(120, 120, 128, 0.08);
+
+        &.active {
+            border-color: #3b82f6;
+            box-shadow: 
+                0 0 0 3rpx rgba(59, 130, 246, 0.25),
+                0 8rpx 18rpx rgba(59, 130, 246, 0.2);
+            transform: translateY(-4rpx);
+
+            .theme-dark & {
+                border-color: #60a5fa;
+                box-shadow: 
+                    0 0 0 3rpx rgba(96, 165, 250, 0.3),
+                    0 8rpx 18rpx rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        &--loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+    }
+
+    .fav-img {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+    .fav-check-badge {
+        position: absolute;
+        top: 8rpx;
+        right: 8rpx;
+        width: 32rpx;
+        height: 32rpx;
+        border-radius: 50%;
+        background: #3b82f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.25);
+    }
+
+    .fav-empty-box {
+        height: 168rpx;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10rpx;
+        background: rgba(120, 120, 128, 0.06);
+        border-radius: 20rpx;
+
+        .empty-desc {
+            font-size: 24rpx;
+            color: var(--text-tertiary);
+        }
+
+        .empty-action {
+            font-size: 24rpx;
+            color: var(--accent-primary);
+            font-weight: 600;
+            text-decoration: underline;
+        }
+    }
+
+    .fav-loading-box {
+        height: 168rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    // 本地选图卡片
+    .local-picker-card {
+        height: 168rpx;
+        border-radius: 20rpx;
+        border: 2rpx dashed rgba(120, 120, 128, 0.28);
+        background: rgba(120, 120, 128, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-sizing: border-box;
+
+        .local-chosen {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .local-img-preview {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .local-repick-badge {
+            position: absolute;
+            bottom: 10rpx;
+            right: 10rpx;
+            background: rgba(0, 0, 0, 0.65);
+            border-radius: 20rpx;
+            padding: 4rpx 14rpx;
+            display: flex;
+            align-items: center;
+            gap: 6rpx;
+
+            .badge-txt {
+                font-size: 20rpx;
+                color: #ffffff;
+            }
+        }
+
+        .local-placeholder {
+            display: flex;
+            align-items: center;
+            gap: 20rpx;
+            padding: 0 24rpx;
+        }
+
+        .uploader-icon-wrap {
+            width: 64rpx;
+            height: 64rpx;
+            border-radius: 50%;
+            background: rgba(120, 120, 128, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .uploader-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4rpx;
+        }
+
+        .uploader-primary {
+            font-size: 26rpx;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .uploader-hint {
+            font-size: 22rpx;
+            color: var(--text-tertiary);
+        }
+    }
+}
+
+// 底部：行动按钮
+.island-action-bar {
+    width: 100%;
+
+    .analyze-action-btn {
+        width: 100%;
+        height: 80rpx;
+        border-radius: 40rpx;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12rpx;
+        font-weight: 600;
+        font-size: 28rpx;
+        color: #ffffff;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+        box-shadow: 0 8rpx 24rpx rgba(139, 92, 246, 0.35);
+        transition: all 0.22s ease;
+
+        &::after {
+            border: none;
+        }
+
+        &:active {
+            opacity: 0.9;
+            transform: scale(0.99);
+        }
+
+        &.is-disabled {
+            opacity: 0.45;
+            filter: grayscale(0.5);
+            box-shadow: none;
+        }
+
+        &.is-loading {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            opacity: 0.9;
+        }
+
+        .btn-caption {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 28rpx;
+        }
+    }
 }
 
 @keyframes hero-enter-up {

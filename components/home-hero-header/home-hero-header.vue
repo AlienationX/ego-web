@@ -292,119 +292,120 @@ const goTimeline = () => {
 .notify-wrap {
     display: flex;
     align-items: center;
+    gap: 14rpx; // 独立分离，保持舒适间距，坚决不连在一起
     position: relative;
     flex-shrink: 0;
 }
 
-// 灵动微抽屉 (高度与通知图标 84rpx 严格 1:1 一致，类似通知小抽屉，从铃铛左侧抽拉滑出)
+// 灵动微胶囊 (独立全圆角药丸，与铃铛高度严格 78rpx 1:1 一致，统一对称向下阴影)
 .dynamic-drawer {
-    position: absolute;
-    right: 42rpx; // 插入圆形铃铛中心 (铃铛宽84rpx，中心在42rpx)
-    top: 0;
-    height: 84rpx; // 严格与铃铛高度 84rpx 1:1 完全一致！
+    height: 78rpx; // 严格与铃铛高度 78rpx 1:1 完全一致！
     display: inline-flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
     gap: 8rpx;
-    padding: 0 52rpx 0 24rpx; // 右侧预留52rpx避开圆形铃铛，左侧24rpx呼吸留白
-    border-radius: 42rpx 0 0 42rpx; // 左半圆，右侧平滑伸入铃铛内部无缝衔接
+    padding: 0 22rpx; // 两侧对称呼吸留白
+    border-radius: 999rpx; // 完美全圆角胶囊
     white-space: nowrap;
     width: max-content;
-    z-index: 1; // 抽屉位于铃铛下层，营造从铃铛背后抽出的物理真实感
     cursor: pointer;
     user-select: none;
     box-sizing: border-box;
 
-    // 浅色模式：材质与铃铛 100% 保持一致，无缝一体
+    // 浅色模式：与铃铛完全相同材质、全边框、对称正下方柔光投影
     .theme-light & {
         background: #ffffff;
         color: #0f172a;
-        border: 1rpx solid rgba(30, 41, 59, 0.06);
-        border-right: none; // 右侧伸入铃铛内，不需要右边框
-        box-shadow: 
-            -6rpx 6rpx 20rpx rgba(15, 23, 42, 0.06),
-            0 2rpx 6rpx rgba(0, 0, 0, 0.02);
+        border: 1rpx solid rgba(30, 41, 59, 0.08);
+        box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.06);
     }
 
-    // 深色模式：材质与暗夜铃铛 100% 保持一致，无边框
+    // 深色模式：与暗夜铃铛完全相同材质、全边框、对称暗夜投影
     .theme-dark & {
         background: #222228;
         color: #f8fafc;
-        border: none;
-        box-shadow: -6rpx 6rpx 20rpx rgba(0, 0, 0, 0.3);
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.35);
     }
 
-    // 抽屉滑出展开动效
-    animation: drawerSlideOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    // 胶囊淡入展开动效
+    animation: drawerFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: right center;
 
-    // 抽屉推回收起动效
+    // 胶囊收起动效
     &.is-folding {
-        animation: drawerPushIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation: drawerFadeOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    &:active {
+        transform: scale(0.95);
+        opacity: 0.9;
     }
 
     .drawer-spark {
-        font-size: 22rpx;
+        font-size: 24rpx;
         line-height: 1;
     }
 
     .drawer-text {
-        font-size: 23rpx;
-        font-weight: 600;
+        font-size: 24rpx;
+        font-weight: 650;
         line-height: 1;
         letter-spacing: 0.2rpx;
         white-space: nowrap;
     }
 
     .drawer-arrow {
-        font-size: 22rpx;
+        font-size: 24rpx;
         opacity: 0.5;
         line-height: 1;
         margin-left: 2rpx;
     }
 }
 
-@keyframes drawerSlideOut {
+@keyframes drawerFadeIn {
     0% {
         opacity: 0;
-        transform: translateX(48rpx);
+        transform: scale(0.88) translateX(16rpx);
     }
     100% {
         opacity: 1;
-        transform: translateX(0);
+        transform: scale(1) translateX(0);
     }
 }
 
-@keyframes drawerPushIn {
+@keyframes drawerFadeOut {
     0% {
         opacity: 1;
-        transform: translateX(0);
+        transform: scale(1) translateX(0);
     }
     100% {
         opacity: 0;
-        transform: translateX(48rpx);
+        transform: scale(0.88) translateX(16rpx);
     }
 }
 
-// 纯白浮岛圆球铃铛按钮
+// 独立浮岛圆球铃铛按钮 (尺寸严格保持 78rpx * 78rpx 与胶囊等高)
 .bell-btn {
-    width: 84rpx;
-    height: 84rpx;
+    width: 78rpx;
+    height: 78rpx;
     border-radius: 50%;
     background: #ffffff;
-    border: 1rpx solid rgba(30, 41, 59, 0.06);
-    box-shadow: 0 6rpx 20rpx rgba(15, 23, 42, 0.06);
+    border: 1rpx solid rgba(30, 41, 59, 0.08);
+    box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.06);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    z-index: 2; // 铃铛置于抽屉之上
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     flex-shrink: 0;
+    box-sizing: border-box;
 
     .theme-dark & {
         background: #222228;
-        border: none;
-        box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.3);
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.35);
     }
 
     &:active {
@@ -413,8 +414,8 @@ const goTimeline = () => {
 
     .bell-badge {
         position: absolute;
-        top: 2rpx;
-        right: 2rpx;
+        top: -4rpx;
+        right: -4rpx;
         background: #ef4444;
         color: #ffffff;
         font-size: 18rpx;
@@ -424,6 +425,7 @@ const goTimeline = () => {
         border: 2rpx solid var(--page-background);
         min-width: 24rpx;
         text-align: center;
+        line-height: 1.2;
 
         .theme-dark & {
             border: none;

@@ -111,7 +111,7 @@
                         <view class="footer" v-if="currentPreviewType === 'classic'">
                             <view class="box" @click="openInfo">
                                 <uni-icons type="info-filled" size="24"></uni-icons>
-                                <view class="text">{{ t('common.information') }}</view>
+                                <view class="text">{{ t('previewPage.info') }}</view>
                             </view>
                             <view class="box" @click="toggleCollect" @longpress="openBoardSelect">
                                 <uni-icons type="heart-filled" size="24"></uni-icons>
@@ -125,7 +125,7 @@
                             </view>
                             <view class="box" v-else @click="openScore">
                                 <uni-icons type="star-filled" size="24"></uni-icons>
-                                <view class="text">{{ currentInfo.score || '-' }}</view>
+                                <view class="text">{{ t('previewPage.rate') }}</view>
                             </view>
                             <view class="box" @click="handleApplyWallpaper">
                                 <uni-icons v-if="currentInfo.is_locked" type="locked-filled" size="24"></uni-icons>
@@ -141,11 +141,11 @@
                             <view class="right-actions">
                                 <view class="action-item" @click="openInfo">
                                     <uni-icons type="info-filled" size="36" color="#ffffff"></uni-icons>
-                                    <view class="action-text">{{ t('common.information') }}</view>
+                                    <view class="action-text">{{ t('previewPage.info') }}</view>
                                 </view>
                                 <view class="action-item" @click="openScore">
                                     <uni-icons type="star-filled" size="36" color="#ffffff"></uni-icons>
-                                    <view class="action-text">{{ currentInfo.score }}</view>
+                                    <view class="action-text">{{ t('previewPage.rate') }}</view>
                                 </view>
                                 <view class="action-item" @click="toggleCollect" @longpress="openBoardSelect">
                                     <uni-icons type="heart-filled" size="36" color="#ffffff"></uni-icons>
@@ -2301,7 +2301,7 @@ const handleCopyWatermarkId = () => {
             border-radius: 100rpx;
             backdrop-filter: blur(10rpx);
             -webkit-backdrop-filter: blur(10rpx);
-            border: 1rpx solid rgba(255, 255, 255, 0.3);
+            border: none;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -2329,6 +2329,8 @@ const handleCopyWatermarkId = () => {
             align-items: center;
             justify-content: center;
             padding: 0;
+            border: none;
+            outline: none;
         }
 
         .share-btn-reset {
@@ -2337,7 +2339,7 @@ const handleCopyWatermarkId = () => {
             margin: 0;
 
             &::after {
-                border: none;
+                border: none !important;
             }
         }
 
@@ -2348,6 +2350,7 @@ const handleCopyWatermarkId = () => {
             color: rgba(255, 255, 255, 0.78);
             border-radius: 40rpx;
             padding: 8rpx 28rpx;
+            border: none;
             // backdrop-filter: blur(10rpx);  // 磨砂
         }
 
@@ -2379,19 +2382,20 @@ const handleCopyWatermarkId = () => {
         .footer {
             background: rgba(255, 255, 255, 0.85);
             bottom: 10vh;
-            width: 80vw;
+            width: 82vw;
             height: 112rpx;
             border-radius: 112rpx;
             color: #1a1a1a;
             display: flex;
-            justify-content: space-around;
             align-items: center;
-            /* 增强阴影和细微边框，确保在全白背景下也能看清药丸轮廓 */
             box-shadow:
                 0 4rpx 24rpx rgba(0, 0, 0, 0.12),
                 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
-            border: 1rpx solid rgba(0, 0, 0, 0.04);
+            border: none;
             backdrop-filter: blur(20rpx);
+            -webkit-backdrop-filter: blur(20rpx);
+            padding: 0 12rpx;
+            box-sizing: border-box;
 
             :deep(.uni-icons) {
                 color: #1a1a1a !important;
@@ -2399,12 +2403,16 @@ const handleCopyWatermarkId = () => {
             }
 
             .box {
+                flex: 1;
+                height: 100%;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                padding: 2rpx 10rpx;
-                gap: 2rpx;
+                padding: 0 4rpx;
+                gap: 4rpx;
+                min-width: 0;
+                border: none;
 
                 .text {
                     font-size: 22rpx;
@@ -2412,6 +2420,12 @@ const handleCopyWatermarkId = () => {
                     letter-spacing: 0.2rpx;
                     color: #1a1a1a;
                     text-shadow: none;
+                    text-align: center;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 100%;
+                    line-height: 1.2;
                 }
             }
         }

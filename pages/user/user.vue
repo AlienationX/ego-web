@@ -413,8 +413,9 @@ const vipInfo = computed(() => {
 });
 
 const toFAQ = () => {
+    const title = locale.value === 'en' ? 'FAQ' : '常见问题';
     uni.navigateTo({
-        url: '/pages/app/notice-detail?id=2&name=常见问题',
+        url: `/pages/app/notice-detail?id=2&name=${encodeURIComponent(title)}`,
     });
 };
 

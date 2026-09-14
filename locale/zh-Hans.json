@@ -578,6 +578,8 @@
         "aspectRatio": "比例:",
         "description": "描述:",
         "tags": "标签:",
+        "info": "信息",
+        "rate": "评分",
         "favorite": "收藏",
         "favorited": "已收藏",
         "favoriteSuccess": "收藏成功",
