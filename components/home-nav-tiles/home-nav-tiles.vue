@@ -8,7 +8,7 @@
             @click="goHot"
         >
             <view class="pill-item__icon">
-                <mdi-icon path="/static/icons/fire.svg" size="16px" color="#ffffff"></mdi-icon>
+                <mdi-icon path="/static/icons/fire.svg" size="16px" :color="settingsStore.isDark ? '#f8fafc' : '#ffffff'"></mdi-icon>
             </view>
             <text class="pill-item__label">{{ isEn ? 'Trending' : '最热' }}</text>
         </view>
@@ -21,7 +21,7 @@
             @click="goLatest"
         >
             <view class="pill-item__icon">
-                <mdi-icon path="/static/icons/flash.svg" size="16px" color="#ffffff"></mdi-icon>
+                <mdi-icon path="/static/icons/flash.svg" size="16px" :color="settingsStore.isDark ? '#f8fafc' : '#ffffff'"></mdi-icon>
             </view>
             <text class="pill-item__label">{{ isEn ? 'Recent' : '最新' }}</text>
             <view v-if="statusStore.newWallpapersCount > 0" class="pill-item__badge">
@@ -37,7 +37,7 @@
             @click="goSubjects"
         >
             <view class="pill-item__icon">
-                <mdi-icon path="/static/icons/cards.svg" size="16px" color="#ffffff"></mdi-icon>
+                <mdi-icon path="/static/icons/cards.svg" size="16px" :color="settingsStore.isDark ? '#f8fafc' : '#ffffff'"></mdi-icon>
             </view>
             <text class="pill-item__label">{{ isEn ? 'Specials' : '专题策划' }}</text>
         </view>
@@ -116,17 +116,25 @@ const goSubjects = () => {
         color: #ffffff;
         box-shadow: 0 3rpx 10rpx rgba(15, 23, 42, 0.08);
 
+        .pill-item__icon {
+            color: #ffffff;
+        }
+
         .pill-item__label {
             color: #ffffff;
         }
     }
 
-    // 深色模式：暗夜黑蓝高透底 + 细腻发光描边 + 白字
+    // 深色模式：暗夜黑蓝高透底 + 无边框纯净卡片 + 白字
     .theme-dark & {
         background: #252b38;
         color: #f8fafc;
-        border: 1rpx solid rgba(255, 255, 255, 0.14);
+        border: none;
         box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.25);
+
+        .pill-item__icon {
+            color: #f8fafc;
+        }
 
         .pill-item__label {
             color: #f8fafc;
@@ -145,6 +153,11 @@ const goSubjects = () => {
         justify-content: center;
         flex-shrink: 0;
         line-height: 1;
+        color: #ffffff;
+
+        :deep(.mdi-icon) {
+            color: inherit !important;
+        }
     }
 
     &__label {
@@ -155,24 +168,27 @@ const goSubjects = () => {
         white-space: nowrap;
     }
 
-    // 精巧数字徽标
+    // 饱满圆润数字徽标 (高度充足，绝不挤扁)
     &__badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rpx 8rpx;
+        min-width: 32rpx;
+        height: 32rpx;
+        padding: 0 10rpx;
         border-radius: 999rpx;
         background: #ef4444;
         color: #ffffff;
-        box-shadow: 0 2rpx 6rpx rgba(239, 68, 68, 0.35);
-        line-height: 1;
-        margin-left: 2rpx;
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.4);
+        margin-left: 4rpx;
+        flex-shrink: 0;
 
         .badge-text {
-            font-size: 16rpx;
-            font-weight: 850;
+            font-size: 19rpx;
+            font-weight: 800;
             line-height: 1;
-            letter-spacing: 0.3rpx;
+            text-align: center;
         }
     }
 }

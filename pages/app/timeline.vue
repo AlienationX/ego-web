@@ -452,6 +452,10 @@ onShow(() => {
             background: #f1f5f9;
         }
     }
+
+    .theme-dark & {
+        border: none;
+    }
 }
 
 .topbar__brand {
@@ -529,6 +533,10 @@ onShow(() => {
     .theme-light & {
         background: rgba(241, 245, 249, 0.8);
         border: 1rpx solid rgba(0, 0, 0, 0.06);
+    }
+
+    .theme-dark & {
+        border: none;
     }
 }
 
@@ -869,6 +877,10 @@ onShow(() => {
     font-size: 17rpx;
     font-weight: 700;
     max-width: 100%;
+
+    .theme-dark & {
+        border: none;
+    }
 }
 
 .timeline-card__title {

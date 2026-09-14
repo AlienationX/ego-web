@@ -318,6 +318,10 @@ defineExpose({
     border: 1rpx solid rgba(120, 120, 128, 0.1);
     transition: transform 0.2s, background 0.2s;
 
+    .theme-dark & {
+        border: none;
+    }
+
     &:last-child {
         margin-bottom: 0;
     }

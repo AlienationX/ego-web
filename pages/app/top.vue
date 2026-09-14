@@ -448,7 +448,7 @@ onShow(() => {
 
     .theme-dark & {
         background: rgba(255, 255, 255, 0.12);
-        border: 1rpx solid rgba(255, 255, 255, 0.16);
+        border: none;
         box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
         backdrop-filter: blur(20rpx);
         -webkit-backdrop-filter: blur(20rpx);
@@ -500,6 +500,10 @@ onShow(() => {
             0 12rpx 36rpx rgba(15, 23, 42, 0.12),
             0 2rpx 6rpx rgba(15, 23, 42, 0.04),
             inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+    }
+
+    .theme-dark & {
+        border: none;
     }
 }
 
@@ -642,7 +646,7 @@ onShow(() => {
 
         .theme-dark & {
             background: rgba(43, 140, 238, 0.16);
-            border: 1rpx solid rgba(96, 165, 250, 0.28);
+            border: none;
             color: #7dd3fc;
         }
     }
@@ -848,6 +852,10 @@ onShow(() => {
         0 2rpx 6rpx rgba(0, 0, 0, 0.25);
     text-shadow: 0 2rpx 4rpx rgba(120, 53, 15, 0.5);
     animation: crownMedalDrop 0.92s cubic-bezier(0.34, 1.56, 0.64, 1) 0.40s both;
+
+    .theme-dark & {
+        border: none;
+    }
 }
 
 .hero-card__rank--second,
@@ -857,6 +865,10 @@ onShow(() => {
     color: #f8fafc;
     box-shadow: 0 10rpx 24rpx rgba(0, 0, 0, 0.28);
     backdrop-filter: blur(8px);
+
+    .theme-dark & {
+        border: none;
+    }
 }
 
 .hero-card__content {
@@ -886,6 +898,10 @@ onShow(() => {
     font-size: 17rpx;
     font-weight: 700;
     margin-bottom: 10rpx;
+
+    .theme-dark & {
+        border: none;
+    }
 }
 
 .hero-card__title {
@@ -1046,6 +1062,10 @@ onShow(() => {
     font-size: 24rpx;
     font-weight: 800;
     box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.24);
+
+    .theme-dark & {
+        border: none;
+    }
 }
 
 .rank-item__body {

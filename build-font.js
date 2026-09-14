@@ -35,15 +35,7 @@ svgtofont({
     }
   });
 
-  // 1. 生成可供前端组件快速校验的图标名称列表
-  const iconFiles = fs.readdirSync(path.resolve(__dirname, 'static/icons')).filter(f => f.endsWith('.svg'));
-  const iconNames = iconFiles.map(f => f.replace(/\.svg$/, ''));
-  fs.writeFileSync(
-    path.join(distDir, 'appicons-list.js'),
-    `// 自动生成的所有字体图标名称列表\nexport default ${JSON.stringify(iconNames)};\n`
-  );
-
-  // 2. 优化 appicons.css 中的 @font-face 声明，使其完美兼容 uni-app App-Plus (iOS / Android) 与多端
+  // 优化 appicons.css 中的 @font-face 声明，使其完美兼容 uni-app App-Plus (iOS / Android) 与多端
   const cssPath = path.join(distDir, 'appicons.css');
   if (fs.existsSync(cssPath)) {
     let cssContent = fs.readFileSync(cssPath, 'utf8');
@@ -55,9 +47,11 @@ svgtofont({
        url('appicons.woff') format('woff');
 }`;
     cssContent = cssContent.replace(/@font-face\s*\{[\s\S]*?\}/, fontFaceBlock);
+    // 微信小程序组件 wxss 禁止使用属性选择器 [class^=...]，替换为标准的 class 选择器
+    cssContent = cssContent.replace(/\[class\^=["']appicons-["']\],\s*\[class\*=["']\s*appicons-["']\]/g, '.mdi-icon-font, .appicons');
     fs.writeFileSync(cssPath, cssContent);
   }
 
-  console.log('精简字体图标库打包完成！只保留了核心 CSS 与字体文件，并已生成 appicons-list.js。');
+  console.log('精简字体图标库打包完成！只保留了核心 CSS 与字体文件。');
 });
 

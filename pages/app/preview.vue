@@ -98,10 +98,10 @@
                                 <mdi-icon path="/static/icons/share-variant.svg" size="20px" color="#fff"></mdi-icon>
                             </view>
                             <!-- #endif -->
-                            <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
+                            <!-- <view v-if="currentPreviewType === 'classic'" class="icon-btn" @click="openInfo">
                                 <mdi-icon path="/static/icons/information-symbol.svg" size="34px"
                                     color="#fff"></mdi-icon>
-                            </view>
+                            </view> -->
                         </view>
 
                         <view v-if="!disableSwipe && !isClockStylePopupOpen" class="count" :style="{ top: countTop + 'px' }">
@@ -109,6 +109,10 @@
                         </view>
 
                         <view class="footer" v-if="currentPreviewType === 'classic'">
+                            <view class="box" @click="openInfo">
+                                <uni-icons type="info-filled" size="24"></uni-icons>
+                                <view class="text">{{ t('common.information') }}</view>
+                            </view>
                             <view class="box" @click="toggleCollect" @longpress="openBoardSelect">
                                 <uni-icons type="heart-filled" size="24"></uni-icons>
                                 <view class="text">{{

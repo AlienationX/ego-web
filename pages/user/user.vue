@@ -902,7 +902,7 @@ onShow(() => {
             padding: 24rpx 30rpx;
             border-radius: 24rpx;
             background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4c1d95 100%);
-            border: 1rpx solid rgba(251, 191, 36, 0.25);
+            border: none;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -914,12 +914,12 @@ onShow(() => {
 
             &.is-active-vip {
                 background: linear-gradient(135deg, #2e1065 0%, #581c87 50%, #701a75 100%);
-                border: 1rpx solid rgba(251, 191, 36, 0.4);
+                border: none;
                 box-shadow: 0 12rpx 32rpx rgba(112, 26, 117, 0.3);
             }
 
             &.is-near-expiry {
-                border-color: rgba(245, 158, 11, 0.6);
+                border: none;
             }
 
             &:active {
@@ -959,7 +959,7 @@ onShow(() => {
                 align-items: center;
                 gap: 6rpx;
                 background: rgba(251, 191, 36, 0.18);
-                border: 1rpx solid rgba(251, 191, 36, 0.35);
+                border: none;
                 padding: 10rpx 20rpx;
                 border-radius: 30rpx;
                 backdrop-filter: blur(8px);
@@ -1356,15 +1356,6 @@ onShow(() => {
 // ─────────────────────────────────────────────
 .theme-dark {
 
-    // 页面底色更深，让卡片浮起来
-    &.layout {
-        background-color: #111114;
-    }
-
-    .userInfo {
-        background: #111114;
-    }
-
     .userInfo .checkin-section {
         background: rgba(255, 255, 255, 0.04);
         box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
@@ -1377,6 +1368,20 @@ onShow(() => {
         box-shadow:
             inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
             0 8rpx 24rpx rgba(0, 0, 0, 0.32);
+    }
+
+    // 会员卡片：去边框
+    .vip-banner-card {
+        border: none;
+
+        &.is-active-vip,
+        &.is-near-expiry {
+            border: none;
+        }
+
+        .vip-action-pill {
+            border: none;
+        }
     }
 
     // menu row：独立卡片，去边框，深色背景 + 顶部高光

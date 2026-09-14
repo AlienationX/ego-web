@@ -817,25 +817,21 @@ const onConfirmDialog = async () => {
 <style lang="scss" scoped>
 .layout {
     min-height: 100vh;
-    background: #f8fafc;
+    background: var(--page-background);
     display: flex;
     flex-direction: column;
-
-    &.theme-dark {
-        background: #0f172a;
-    }
 }
 
 .gallery-header {
-    background: #ffffff;
-    border-bottom: 1rpx solid #e2e8f0;
+    background: var(--page-background);
+    border-bottom: 1rpx solid var(--panel-border);
     position: sticky;
     top: 0;
     z-index: 100;
 
     .theme-dark & {
-        background: #1e293b;
-        border-color: #334155;
+        background: var(--page-background);
+        border-color: var(--panel-border);
     }
 }
 

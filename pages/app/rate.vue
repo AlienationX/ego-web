@@ -251,7 +251,7 @@ onPullDownRefresh(() => {
 
 <style lang="scss" scoped>
 .layout {
-    background: var(--page-background-secondary); // 让卡片浮现出来
+    background: var(--page-background);
     min-height: 100vh;
     transition: background-color 0.3s ease;
     display: flex;
@@ -261,8 +261,9 @@ onPullDownRefresh(() => {
         position: sticky;
         top: 0;
         z-index: 100;
-        background: rgba(var(--page-background-rgb), 0.8);
+        background: var(--page-background);
         backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         padding-bottom: 20rpx;
         border-bottom: 1rpx solid var(--panel-border);
 
@@ -352,7 +353,7 @@ onPullDownRefresh(() => {
         }
 
         .journal-card {
-            background: var(--page-background);
+            background: var(--page-background-secondary);
             display: flex;
             flex-direction: column;
             transition: all 0.25s ease;

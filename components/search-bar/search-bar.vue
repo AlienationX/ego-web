@@ -60,7 +60,7 @@ const goSearch = () => {
 
     .theme-dark & {
         background: #222228;
-        border-color: rgba(255, 255, 255, 0.08);
+        border: none;
         box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.3);
     }
 

@@ -1098,6 +1098,10 @@ onShareTimeline(() => ({
         -webkit-backdrop-filter: blur(12rpx);
         border: 1rpx solid rgba(255, 255, 255, 0.16);
         pointer-events: none;
+
+        .theme-dark & {
+            border: none;
+        }
     }
 
     .banner-dot {
@@ -1122,6 +1126,7 @@ onShareTimeline(() => ({
         position: relative;
         overflow: hidden;
         border-radius: 32rpx;
+        border: none;
         box-sizing: border-box;
         box-shadow: 
             0 16rpx 40rpx -8rpx rgba(15, 23, 42, 0.16),
@@ -1129,8 +1134,14 @@ onShareTimeline(() => ({
         @extend %sk-shimmer;
 
         .theme-dark & {
-            border: 1rpx solid rgba(255, 255, 255, 0.12);
+            border: none;
             box-shadow: 0 20rpx 48rpx rgba(0, 0, 0, 0.5);
+
+            .banner-card__tag,
+            .banner-card__target,
+            .banner-card__meta-chip {
+                border: none;
+            }
         }
 
         .banner-card__image {
@@ -1298,7 +1309,7 @@ onShareTimeline(() => ({
 
     .theme-dark & {
         background: linear-gradient(135deg, rgba(40, 179, 137, 0.12) 0%, rgba(30, 41, 59, 0.45) 100%);
-        border: 1rpx solid rgba(40, 179, 137, 0.22);
+        border: none;
     }
 
     &.is-expanded {
@@ -1427,6 +1438,10 @@ onShareTimeline(() => ({
     font-weight: 700;
     transition: transform 0.2s;
 
+    .theme-dark & {
+        border: none;
+    }
+
     &:active {
         transform: scale(0.96);
     }
@@ -1442,7 +1457,7 @@ onShareTimeline(() => ({
 
         .theme-dark & {
             background: rgba(40, 179, 137, 0.12);
-            border-color: rgba(40, 179, 137, 0.25);
+            border: none;
         }
     }
 }
@@ -1460,6 +1475,10 @@ onShareTimeline(() => ({
     font-size: 24rpx;
     font-weight: 800;
     transition: background 0.2s;
+
+    .theme-dark & {
+        border: none;
+    }
 
     &:active {
         background: var(--page-background-secondary);
@@ -1543,13 +1562,13 @@ onShareTimeline(() => ({
             border: none;
         }
 
-        // 浅色模式：实体纯白微浮岛胶囊，质感扎实、轮廓清晰，不轻飘，与顶部深色药丸形成黑白反差层次
+        // 浅色模式：实体纯白微浮岛胶囊，无边框
         .theme-light & {
             background-color: #ffffff;
             color: #1e293b;
             font-weight: 650;
-            border: 1rpx solid rgba(15, 23, 42, 0.09);
-            box-shadow: 0 3rpx 10rpx rgba(15, 23, 42, 0.06);
+            border: none;
+            box-shadow: 0 4rpx 14rpx rgba(15, 23, 42, 0.08);
 
             &:active {
                 background-color: #f8fafc;
@@ -1557,12 +1576,12 @@ onShareTimeline(() => ({
             }
         }
 
-        // 深色模式：高质感暗夜卡片微胶囊
+        // 深色模式：高质感暗夜卡片微胶囊，无边框
         .theme-dark & {
             background-color: #242a38;
             color: #f1f5f9;
             font-weight: 650;
-            border: 1rpx solid rgba(255, 255, 255, 0.12);
+            border: none;
             box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.25);
 
             &:active {
@@ -1886,6 +1905,10 @@ onShareTimeline(() => ({
         white-space: nowrap;
         flex-shrink: 0;
 
+        .theme-dark & {
+            border: none;
+        }
+
         &:active {
             transform: scale(0.95);
             opacity: 0.85;
@@ -1907,6 +1930,7 @@ onShareTimeline(() => ({
 
             .theme-dark & {
                 background: rgba(255, 255, 255, 0.04);
+                border: none;
             }
 
             .tag-label {
@@ -1941,7 +1965,7 @@ onShareTimeline(() => ({
 
     .theme-dark & {
         background: rgba(255, 255, 255, 0.08);
-        border: 1rpx solid rgba(255, 255, 255, 0.1);
+        border: none;
     }
 }
 
@@ -1992,10 +2016,10 @@ onShareTimeline(() => ({
             }
         }
 
-        // 深色模式：与最热/最新保持一致的暗夜黑蓝底 + 细腻微光描边 + 白字
+        // 深色模式：与最热/最新保持一致的暗夜黑蓝底 + 无边框 + 白字
         .theme-dark & {
             background: #252b38;
-            border: 1rpx solid rgba(255, 255, 255, 0.14);
+            border: none;
             box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.25);
 
             .feed-tab__text {
@@ -2112,6 +2136,10 @@ onShareTimeline(() => ({
             backdrop-filter: blur(8rpx);
             -webkit-backdrop-filter: blur(8rpx);
             border: 1rpx solid rgba(255, 255, 255, 0.15);
+
+            .theme-dark & {
+                border: none;
+            }
         }
 
         .meta-score {
@@ -2141,6 +2169,10 @@ onShareTimeline(() => ({
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .theme-dark & {
+            border: none;
+        }
     }
 }
 

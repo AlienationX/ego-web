@@ -435,7 +435,7 @@ onShow(() => {
 
     .theme-dark & {
         background: rgba(255, 255, 255, 0.12);
-        border: 1rpx solid rgba(255, 255, 255, 0.16);
+        border: none;
         box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
         backdrop-filter: blur(20rpx);
         -webkit-backdrop-filter: blur(20rpx);
@@ -499,7 +499,7 @@ onShow(() => {
 
         .theme-dark & {
             background: rgba(129, 140, 248, 0.12);
-            border: 1rpx solid rgba(129, 140, 248, 0.24);
+            border: none;
             color: #a5b4fc;
         }
     }
@@ -573,7 +573,7 @@ onShow(() => {
 
     .theme-dark & {
         background: rgba(255, 255, 255, 0.07);
-        border: 1rpx solid rgba(255, 255, 255, 0.1);
+        border: none;
         color: #94a3b8;
 
         &:active {
@@ -583,7 +583,7 @@ onShow(() => {
 
         &.is-active {
             background: #f1f5f9;
-            border-color: #f1f5f9;
+            border: none;
             color: #0f172a;
             box-shadow: 0 4rpx 14rpx rgba(255, 255, 255, 0.12);
         }
@@ -615,7 +615,7 @@ onShow(() => {
 
         .theme-dark &.is-active {
             background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-            border-color: #6366f1;
+            border: none;
             color: #ffffff;
             box-shadow: 0 6rpx 22rpx rgba(99, 102, 241, 0.38);
 
@@ -719,18 +719,32 @@ onShow(() => {
         margin-bottom: 6rpx;
     }
 
+    &__badges-group {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+    }
+
     &__badge {
         display: inline-flex;
         align-items: center;
+        justify-content: center;
+        height: 38rpx;
+        box-sizing: border-box;
         gap: 6rpx;
-        padding: 6rpx 16rpx;
+        padding: 0 16rpx;
         background: rgba(251, 191, 36, 0.08);
         border: 1rpx solid rgba(251, 191, 36, 0.16);
-        border-radius: 100rpx;
+        border-radius: 999rpx;
         color: #fbbf24;
-        font-size: 18rpx;
+        font-size: 19rpx;
         font-weight: 900;
-        letter-spacing: 1rpx;
+        letter-spacing: 0.5rpx;
+        flex-shrink: 0;
+
+        .theme-dark & {
+            border: none;
+        }
 
         &--featured {
             background: rgba(79, 70, 229, 0.08);
@@ -739,7 +753,7 @@ onShow(() => {
 
             .theme-dark & {
                 background: rgba(99, 102, 241, 0.14);
-                border: 1rpx solid rgba(99, 102, 241, 0.28);
+                border: none;
                 color: #a5b4fc;
             }
 
@@ -756,6 +770,12 @@ onShow(() => {
         }
 
         .badge-text {
+            line-height: 1;
+        }
+
+        :deep(.uni-icons) {
+            display: inline-flex;
+            align-items: center;
             line-height: 1;
         }
     }
@@ -930,7 +950,7 @@ onShow(() => {
 
         .theme-dark & {
             background: rgba(99, 102, 241, 0.14);
-            border: 1rpx solid rgba(99, 102, 241, 0.28);
+            border: none;
             color: #a5b4fc;
 
             &:active {

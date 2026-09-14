@@ -343,6 +343,7 @@ onMounted(() => {
 <style lang="scss" scoped>
 .layout {
     background: var(--page-background);
+    min-height: 100vh;
     height: 100vh;
     display: flex;
     flex-direction: column;

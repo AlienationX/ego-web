@@ -237,7 +237,7 @@ const goTimeline = () => {
 
         .theme-dark & {
             background: #1e293b;
-            border-color: rgba(255, 255, 255, 0.12);
+            border: none;
             box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.35);
         }
 
@@ -326,12 +326,11 @@ const goTimeline = () => {
             0 2rpx 6rpx rgba(0, 0, 0, 0.02);
     }
 
-    // 深色模式：材质与暗夜铃铛 100% 保持一致
+    // 深色模式：材质与暗夜铃铛 100% 保持一致，无边框
     .theme-dark & {
         background: #222228;
         color: #f8fafc;
-        border: 1rpx solid rgba(255, 255, 255, 0.08);
-        border-right: none;
+        border: none;
         box-shadow: -6rpx 6rpx 20rpx rgba(0, 0, 0, 0.3);
     }
 
@@ -404,7 +403,7 @@ const goTimeline = () => {
 
     .theme-dark & {
         background: #222228;
-        border-color: rgba(255, 255, 255, 0.08);
+        border: none;
         box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.3);
     }
 
@@ -425,6 +424,10 @@ const goTimeline = () => {
         border: 2rpx solid var(--page-background);
         min-width: 24rpx;
         text-align: center;
+
+        .theme-dark & {
+            border: none;
+        }
     }
 }
 
@@ -444,7 +447,7 @@ const goTimeline = () => {
 
         .theme-dark & {
             background: #222228;
-            border-color: rgba(255, 255, 255, 0.08);
+            border: none;
             box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.3);
         }
 
