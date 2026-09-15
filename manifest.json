@@ -185,6 +185,9 @@
             "minified" : true,
             "es6" : true
         },
+        "optimization" : {
+            "subPackages" : true
+        },
         "usingComponents" : true
     },
     "mp-alipay" : {

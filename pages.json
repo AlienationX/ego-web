@@ -149,34 +149,6 @@
             }
         },
         {
-            "path": "pages/settings/settings",
-            "style": {
-                "navigationBarTitleText": "设置",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/settings/widgets",
-            "style": {
-                "navigationBarTitleText": "桌面小组件",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/settings/rotate",
-            "style": {
-                "navigationBarTitleText": "自动更换壁纸",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/settings/feedback",
-            "style": {
-                "navigationBarTitleText": "反馈",
-                "navigationStyle": "custom"
-            }
-        },
-        {
             "path": "pages/app/timeline",
             "style": {
                 "navigationBarTitleText": "时间轴",
@@ -248,30 +220,6 @@
             }
         },
         {
-            "path": "pages/settings/about",
-            "style": {
-                "navigationBarTitleText": "关于我们",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/settings/help-centre",
-            "style": {
-                "navigationBarTitleText": "Help Centre",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/settings/revoke-auth",
-            "style": {
-                "navigationBarTitleText": "撤回授权",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
             "path": "pages/auth/change-password",
             "style": {
                 "navigationBarTitleText": "Change Password",
@@ -308,62 +256,126 @@
                 "navigationBarTitleText": "发现",
                 "navigationStyle": "custom"
             }
+        }
+    ],
+    "subPackages": [
+        {
+            "root": "pages/settings",
+            "pages": [
+                {
+                    "path": "settings",
+                    "style": {
+                        "navigationBarTitleText": "设置",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "widgets",
+                    "style": {
+                        "navigationBarTitleText": "桌面小组件",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "rotate",
+                    "style": {
+                        "navigationBarTitleText": "自动更换壁纸",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "feedback",
+                    "style": {
+                        "navigationBarTitleText": "反馈",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "about",
+                    "style": {
+                        "navigationBarTitleText": "关于我们",
+                        "navigationStyle": "custom",
+                        "enablePullDownRefresh": false
+                    }
+                },
+                {
+                    "path": "help-centre",
+                    "style": {
+                        "navigationBarTitleText": "Help Centre",
+                        "navigationStyle": "custom",
+                        "enablePullDownRefresh": false
+                    }
+                },
+                {
+                    "path": "revoke-auth",
+                    "style": {
+                        "navigationBarTitleText": "撤回授权",
+                        "navigationStyle": "custom",
+                        "enablePullDownRefresh": false
+                    }
+                }
+            ]
         },
         {
-            "path": "pages/test/test",
-            "style": {
-                "navigationBarTitleText": "Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/discover-test",
-            "style": {
-                "navigationBarTitleText": "Discover Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/stream-test",
-            "style": {
-                "navigationBarTitleText": "Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/ad-interstitial-test",
-            "style": {
-                "navigationBarTitleText": "Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/ad-rewarded-test",
-            "style": {
-                "navigationBarTitleText": "Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/mdi-icon-test",
-            "style": {
-                "navigationBarTitleText": "MDI Icon Test",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/custom-bars",
-            "style": {
-                "navigationBarTitleText": "Custom Bars",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/test/pics-view-test",
-            "style": {
-                "navigationBarTitleText": "PicsView Test",
-                "navigationStyle": "custom"
-            }
+            "root": "pages/test",
+            "pages": [
+                {
+                    "path": "test",
+                    "style": {
+                        "navigationBarTitleText": "Test",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "discover-test",
+                    "style": {
+                        "navigationBarTitleText": "Discover Test",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "stream-test",
+                    "style": {
+                        "navigationBarTitleText": "Test",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "ad-interstitial-test",
+                    "style": {
+                        "navigationBarTitleText": "Test",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "ad-rewarded-test",
+                    "style": {
+                        "navigationBarTitleText": "Test",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "mdi-icon-test",
+                    "style": {
+                        "navigationBarTitleText": "MDI Icon Test",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "custom-bars",
+                    "style": {
+                        "navigationBarTitleText": "Custom Bars",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "pics-view-test",
+                    "style": {
+                        "navigationBarTitleText": "PicsView Test",
+                        "navigationStyle": "custom"
+                    }
+                }
+            ]
         }
     ],
     "globalStyle": {

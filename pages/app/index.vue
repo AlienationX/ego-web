@@ -1013,11 +1013,15 @@ onMounted(() => {
         getDailyFeatured();
     }, 300);
 
-    // P3 延时 800ms：需要滚动才能看到，完全错峰
+    // P3 延时 1000ms：需要滚动才能看到，完全错峰
+    setTimeout(() => {
+        getRecommendWallpapers(false);
+    }, 1000);
+
+    // P4 延时 2000ms：需要切换才能看到，完全错峰
     setTimeout(() => {
         getRandomRecommend();
-        getRecommendWallpapers(false);
-    }, 800);
+    }, 2000);
 });
 // 分享给好友
 onShareAppMessage(() => ({
