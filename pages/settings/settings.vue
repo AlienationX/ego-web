@@ -334,6 +334,7 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { RIGHT_ICP, SERVICE_EMAIL } from '@/common/config.js';
+import { setAndroidImmersive } from '@/utils/system.js';
 import {
     LANGUAGE_PREF_AUTO,
     LANGUAGE_PREF_EN,
@@ -876,10 +877,22 @@ function handleClick(item) {
 }
 
 function goBack() {
-    // uni.navigateBack({
-    //     fail: () => uni.redirectTo({ url: '/pages/user/user' }),
-    // });
-    uni.switchTab({ url: '/pages/user/user' });
+    // switchTab 返回时 uni-app 会短暂唤醒原生 TabBar，需要在跳转前后压制
+    uni.hideTabBar({ animation: false, fail: () => {} });
+    // #ifdef APP-PLUS
+    setAndroidImmersive(settingsStore.isDark);
+    // #endif
+    uni.switchTab({
+        url: '/pages/user/user',
+        success: () => {
+            // 跳转成功后再压一次（原生层可能在 switchTab 完成后才重绘 TabBar）
+            uni.hideTabBar({ animation: false, fail: () => {} });
+            // #ifdef APP-PLUS
+            setAndroidImmersive(settingsStore.isDark);
+            // #endif
+        },
+        fail: () => uni.redirectTo({ url: '/pages/settings/settings' }),
+    });
 }
 
 function syncLanguagePreference() {
@@ -911,6 +924,17 @@ function selectTheme(theme) {
     if (theme === 'auto') {
         settingsStore.osTheme = uni.getDeviceInfo().osTheme || 'light';
     }
+
+    // setUIStyle 会异步触发原生层重绘并重新显示被隐藏的原生 TabBar，同时可能破坏
+    // Android Edge-to-Edge 沉浸式布局。需要立即 + 延时多次压制，覆盖各平台的重绘时序。
+    const _suppressNativeTabBar = () => {
+        uni.hideTabBar({ animation: false, fail: () => {} });
+        setAndroidImmersive(settingsStore.isDark);
+    };
+    _suppressNativeTabBar();           // 立即
+    setTimeout(_suppressNativeTabBar, 80);   // 覆盖第一次异步重绘
+    setTimeout(_suppressNativeTabBar, 250);  // 覆盖较慢设备的延迟重绘
+    setTimeout(_suppressNativeTabBar, 500);  // 终极兜底
     // #endif
 
     // #ifndef APP

@@ -49,7 +49,16 @@ onLaunch(() => {
             plus.nativeUI.setUIStyle('auto');
         }
         // #endif
-        setAndroidImmersive(settingsStore.isDark);
+
+        // Android 系统在主题切换后会重置 Window Insets，需要立即+延时多次恢复沉浸式
+        const _applyLayout = () => {
+            uni.hideTabBar({ animation: false, fail: () => {} });
+            setAndroidImmersive(settingsStore.isDark);
+        };
+        _applyLayout();
+        setTimeout(_applyLayout, 80);
+        setTimeout(_applyLayout, 250);
+        setTimeout(_applyLayout, 500);
     });
 
     // 初始化应用语言（Android 修改系统语言会重启 App，这里负责正确初始化）
