@@ -328,7 +328,7 @@
 
 <script setup>
 import { computed, reactive, ref } from 'vue';
-import { onLoad } from '@dcloudio/uni-app';
+import { onLoad, onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
@@ -361,9 +361,9 @@ const APP_INFO = uni.getAppBaseInfo();
 const rightICP = RIGHT_ICP;
 const copyrightText = computed(() => tp('about.copyright', { year: new Date().getFullYear() }));
 
-// ── 缓存大小工具函数（按需计算，不在页面常驻展示，仅在清理后提示释放量） ──
+// ── 缓存大小工具函数 ──
 const formatBytes = (bytes) => {
-    if (!bytes || bytes <= 0) return '';
+    if (!bytes || bytes <= 0) return '0.00 KB';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -376,7 +376,7 @@ const getCacheSizeBeforeClear = async () => {
     if (typeof plus !== 'undefined' && plus.cache && plus.cache.calculate) {
         return new Promise((resolve) => {
             plus.cache.calculate((size) => {
-                resolve(size > 0 ? formatBytes(size) : '');
+                resolve(size > 0 ? formatBytes(size) : '0.00 KB');
             });
         });
     }
@@ -386,10 +386,21 @@ const getCacheSizeBeforeClear = async () => {
         const res = uni.getStorageInfoSync();
         const currentKB = res.currentSize || 0;
         if (currentKB > 0) {
-            return currentKB >= 1024 ? (currentKB / 1024).toFixed(2) + ' MB' : currentKB + ' KB';
+            return currentKB >= 1024 ? (currentKB / 1024).toFixed(2) + ' MB' : Number(currentKB).toFixed(2) + ' KB';
         }
     } catch (e) {}
-    return '';
+    return '0.00 KB';
+};
+
+const cacheSizeText = ref('0.00 KB');
+
+const updateCacheSize = async () => {
+    try {
+        const size = await getCacheSizeBeforeClear();
+        cacheSizeText.value = size || '0.00 KB';
+    } catch (e) {
+        cacheSizeText.value = '0.00 KB';
+    }
 };
 
 const navDialog = ref(null);
@@ -606,8 +617,8 @@ const sections = computed(() => {
                         {
                             key: 'preference_center',
                             icon: '/static/icons/tag.svg',
-                            label: t('user.settings.preferences'),
-                            sublabel: t('user.settings.managePreferences'),
+                            label: t('settings.preferences'),
+                            sublabel: t('settings.managePreferences'),
                             action: () => uni.navigateTo({ url: '/pages/user/preferences' }),
                         },
                     ]
@@ -710,6 +721,7 @@ const sections = computed(() => {
                     icon: '/static/icons/delete-empty.svg',
                     label: t('settings.items.clearCache.label'),
                     sublabel: t('settings.items.clearCache.sublabel'),
+                    value: cacheSizeText.value,
                     action: clearCache,
                 },
             ],
@@ -967,6 +979,11 @@ function closeLanguagePopup() {
 
 onLoad(() => {
     syncLanguagePreference();
+    updateCacheSize();
+});
+
+onShow(() => {
+    updateCacheSize();
 });
 
 function openPreviewTypePopup() {
@@ -1011,7 +1028,7 @@ const PRESERVED_STORAGE_KEYS = new Set([
 
 async function clearCache() {
     uni.showLoading({
-        title: t('user.settings.clearing') || '清理中...',
+        title: t('settings.toast.clearing') || '清理中...',
         mask: true,
     });
     try {
@@ -1044,6 +1061,8 @@ async function clearCache() {
             console.warn('Clear storage keys error:', storageErr);
         }
 
+        await updateCacheSize();
+
         uni.hideLoading();
 
         // 3. 提示清理结果及释放的空间量
@@ -1060,7 +1079,7 @@ async function clearCache() {
     } catch (error) {
         uni.hideLoading();
         uni.showToast({
-            title: t('user.settings.clearFailed'),
+            title: t('settings.toast.clearFailed'),
             icon: 'none',
         });
     }

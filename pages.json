@@ -251,9 +251,23 @@
             }
         },
         {
-            "path": "pages/discover/discover",
+            "path": "pages/creation/creation",
             "style": {
-                "navigationBarTitleText": "发现",
+                "navigationBarTitleText": "创作",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/creation/puzzle",
+            "style": {
+                "navigationBarTitleText": "艺术拼图",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/creation/discover",
+            "style": {
+                "navigationBarTitleText": "美学探索",
                 "navigationStyle": "custom"
             }
         }
@@ -405,10 +419,10 @@
                 "selectedIconPath": "@tabIconCategorySelected"
             },
             {
-                "text": "%tabbar.discover%",
-                "pagePath": "pages/discover/discover",
-                "iconPath": "@tabIconDiscover",
-                "selectedIconPath": "@tabIconDiscoverSelected"
+                "text": "%tabbar.creation%",
+                "pagePath": "pages/creation/creation",
+                "iconPath": "@tabIconCreation",
+                "selectedIconPath": "@tabIconCreationSelected"
             },
             {
                 "text": "%tabbar.user%",

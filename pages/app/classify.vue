@@ -89,7 +89,7 @@ onPageScroll((e) => {
 
 const pagePaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();
-    return `${baseTabSpace + 12}px`;
+    return `${baseTabSpace + 20}px`;
 });
 
 const { t, locale } = useI18n();

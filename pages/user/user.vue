@@ -216,7 +216,7 @@ const settingsStore = useSettingsStore();
 
 const userPaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();
-    return `${baseTabSpace}px`;
+    return `${baseTabSpace + 20}px`;
 });
 const statusStore = useStatusStore();
 const appStore = useAppStore();
@@ -482,10 +482,6 @@ const redeemPopup = ref(null);
 const isTabBarVisible = ref(true);
 
 const openRedeemPopup = () => {
-    if (!userStore.isLoggedIn) {
-        toLogin();
-        return;
-    }
     isTabBarVisible.value = false;
     redeemPopup.value?.open();
 };
@@ -549,7 +545,7 @@ const sysMenus = computed(() => [
             {
                 left_icon: '/static/icons/tag.svg',
                 left_color: '#6B7280',
-                left_text: t('user.settings.preferences'),
+                left_text: t('settings.preferences'),
                 right_text: `${libraryStore.preferredTags.length}`,
                 right_icon: 'right',
                 click: toPreferences,
@@ -659,6 +655,13 @@ onShow(() => {
 
     // 页面切回时恢复 TabBar 状态
     isTabBarVisible.value = true;
+
+    // 若从登录页登录成功返回且有暂存体验码，自动唤起兑换弹窗
+    if (userStore.isLoggedIn && uni.getStorageSync('pending_redeem_code')) {
+        setTimeout(() => {
+            openRedeemPopup();
+        }, 350);
+    }
 });
 </script>
 

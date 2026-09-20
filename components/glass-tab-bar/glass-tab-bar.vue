@@ -89,6 +89,7 @@ const items = computed(() => {
     const _locale = locale.value;
     return [
         {
+            key: 'home',
             text: t('tabbar.index'),
             pagePath: '/pages/app/index',
             lightIcon: '/static/tabbar/Light_Home.png',
@@ -96,6 +97,7 @@ const items = computed(() => {
             activeIcon: '/static/tabbar/Fill_Home_Green.png',
         },
         {
+            key: 'category',
             text: t('tabbar.category'),
             pagePath: '/pages/app/classify',
             lightIcon: '/static/tabbar/Light_Category.png',
@@ -103,13 +105,15 @@ const items = computed(() => {
             activeIcon: '/static/tabbar/Fill_Category_Green.png',
         },
         {
-            text: t('tabbar.discover'),
-            pagePath: '/pages/discover/discover',
-            lightIcon: '/static/tabbar/Light_Discover.png',
-            darkIcon: '/static/tabbar/Dark_Discover.png',
-            activeIcon: '/static/tabbar/Fill_Discover_Green.png',
+            key: 'creation',
+            text: t('tabbar.creation'),
+            pagePath: '/pages/creation/creation',
+            lightIcon: '/static/tabbar/Light_Creation.png',
+            darkIcon: '/static/tabbar/Dark_Creation.png',
+            activeIcon: '/static/tabbar/Fill_Creation_Green.png',
         },
         {
+            key: 'user',
             text: t('tabbar.user'),
             pagePath: '/pages/user/user',
             lightIcon: '/static/tabbar/Light_User.png',
@@ -154,7 +158,7 @@ const handleSwitch = (item) => {
 ───────────────────────────────────────────────────────────── */
 .custom-tab-bar.mode-floating {
     position: fixed;
-    bottom: max(20px, env(safe-area-inset-bottom));
+    bottom: max(34px, env(safe-area-inset-bottom));
     left: 50%;
     transform: translate3d(-50%, 0, 0);
     -webkit-transform: translate3d(-50%, 0, 0);

@@ -5,7 +5,7 @@
             :is-scrolled="isScrolled"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
         ></glass-status-bar>
-        <view class="home-content">
+        <view class="home-content" :style="{ paddingBottom: pagePaddingBottom }">
             <!-- 沉浸式 Hero 头部：头像问候、通知铃铛、灵动气泡、搜索栏、快捷入口胶囊 -->
             <home-hero-header
                 :status-bar-height="statusBarHeight"
@@ -438,8 +438,6 @@
                 </view>
             </view>
 
-            <!-- 底部安全区与悬浮 TabBar 占位 -->
-            <view class="tabbar-bottom-spacer"></view>
         </view>
 
         <!-- 半屏毛玻璃抽屉通知面板 -->
@@ -473,7 +471,7 @@ import {
     apiPostRecommend,
 } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { getStatusBarHeight } from '@/utils/layout.js';
+import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -491,6 +489,12 @@ const statusStore = useStatusStore();
 const isAdmin = computed(() => !!userStore.isAdmin);
 const isEn = computed(() => locale.value === 'en');
 const statusBarHeight = ref(getStatusBarHeight() || 0);
+
+const pagePaddingBottom = computed(() => {
+    const baseTabSpace = getTabBarHeight();
+    return `${baseTabSpace + 20}px`;
+});
+
 const isScrolled = ref(false);
 const showScrollTop = ref(false);
 const notificationSheetRef = ref(null);
@@ -2368,10 +2372,5 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     &--hero {
         width: 440rpx;
     }
-}
-
-.tabbar-bottom-spacer {
-    width: 100%;
-    height: calc(96px + env(safe-area-inset-bottom));
 }
 </style>

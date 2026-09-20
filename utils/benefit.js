@@ -41,3 +41,5 @@ export function consumeNewUserFreeDownload() {
         return 0;
     }
 }
+
+export { executeWithAuth } from './auth-action.js';

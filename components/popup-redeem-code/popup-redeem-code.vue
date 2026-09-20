@@ -46,7 +46,7 @@
                 class="redeem-btn"
                 :class="{ 'is-disabled': !canSubmit }"
                 :loading="loading"
-                :disabled="loading || !canSubmit"
+                :disabled="loading"
                 @click="handleRedeem"
             >
                 <text>{{ loading ? t('redeem.submitting') : t('redeem.submit') }}</text>
@@ -115,7 +115,13 @@ const pasteFromClipboard = () => {
 };
 
 const open = () => {
-    code.value = '';
+    const pendingCode = uni.getStorageSync('pending_redeem_code');
+    if (pendingCode) {
+        code.value = pendingCode;
+        uni.removeStorageSync('pending_redeem_code');
+    } else {
+        code.value = '';
+    }
     popup.value?.open();
 };
 
@@ -129,17 +135,23 @@ const onPopupChange = (e) => {
 
 // 提交兑换
 const handleRedeem = async () => {
-    const codeVal = code.value.trim().toUpperCase();
-    if (!codeVal) {
-        uni.showToast({ title: t('redeem.emptyCode'), icon: 'none' });
+    // 只有在点击兑换的时候，没有登录的才跳转到登录页
+    if (!userStore.isLoggedIn) {
+        const currentCode = code.value.trim().toUpperCase();
+        if (currentCode) {
+            uni.setStorageSync('pending_redeem_code', currentCode);
+        }
+        uni.showToast({ title: t('user.profile.loginRequired') || '请先登录', icon: 'none' });
+        setTimeout(() => {
+            close();
+            uni.navigateTo({ url: '/pages/auth/signin' });
+        }, 500);
         return;
     }
 
-    if (!userStore.isLoggedIn) {
-        uni.showToast({ title: t('user.profile.loginRequired'), icon: 'none' });
-        setTimeout(() => {
-            uni.navigateTo({ url: '/pages/auth/signin' });
-        }, 800);
+    const codeVal = code.value.trim().toUpperCase();
+    if (!codeVal) {
+        uni.showToast({ title: t('redeem.emptyCode'), icon: 'none' });
         return;
     }
 

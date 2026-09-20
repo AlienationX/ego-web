@@ -2,7 +2,7 @@
 import permissionListener from '@/uni_modules/c-permission-listener';
 import { writeAccessLog, setAndroidImmersive, handleDeepLink } from '@/utils/system.js';
 import { permissionEnums } from '@/common/app_permission.js';
-import { onLaunch, onShow, onHide } from '@dcloudio/uni-app';
+import { onLaunch, onShow, onHide, onReady, onPageShow } from '@dcloudio/uni-app';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { initAutoRotate } from '@/uni_modules/ego-wallpaper-manager';
@@ -129,6 +129,14 @@ onShow((res) => {
 onHide(() => {
     console.log('App Hide');
     permissionListener && permissionListener.stopFunc();
+});
+
+onReady(() => {
+  console.log('onReady')
+});
+
+onPageShow((res) => {
+  console.log('onPageShow', res)
 });
 
 // export default {

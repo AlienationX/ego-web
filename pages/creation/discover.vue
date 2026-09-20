@@ -6,6 +6,13 @@
             :theme="settingsStore.isDark ? 'dark' : 'light'"
         ></glass-status-bar>
 
+        <!-- 顶部沉浸式返回栏 -->
+        <view class="discover-nav-bar" :style="{ top: `${statusBarHeight}px` }">
+            <view class="nav-back-btn" @click="handleGoBack">
+                <mdi-icon path="/static/icons/arrow-left.svg" size="22px" :color="settingsStore.isDark ? '#f8fafc' : '#0f172a'" />
+            </view>
+        </view>
+
         <view class="decorative-bg">
             <view class="bg-mesh"></view>
         </view>
@@ -211,11 +218,6 @@
             </view>
         </view>
 
-        <!-- 自定义 TabBar 组件 -->
-        <glass-tab-bar
-            current-path="/pages/discover/discover"
-            :theme="settingsStore.isDark ? 'dark' : 'light'"
-        ></glass-tab-bar>
     </view>
 </template>
 
@@ -260,7 +262,19 @@ const isThinking = ref(false);
 const thinkingTime = ref(0);
 let thinkingTimer = null;
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const containerTopPadding = computed(() => statusBarHeight.value + 10);
+const containerTopPadding = computed(() => statusBarHeight.value + 52);
+
+// 返回上一页
+const handleGoBack = () => {
+    const pages = getCurrentPages();
+    if (pages && pages.length > 1) {
+        uni.navigateBack();
+    } else {
+        uni.switchTab({
+            url: '/pages/creation/creation',
+        });
+    }
+};
 
 let typingTimer = null;
 const chatMessages = ref([]);
@@ -293,13 +307,11 @@ const canAnalyze = computed(() => {
 });
 
 const tabBarHeight = computed(() => {
-    return getTabBarHeight() || 60;
+    return 0;
 });
 
-// 浮岛底部距离：紧邻悬浮 TabBar 上方，保持 8px 梯级悬浮呼吸间距
-const islandBottom = computed(() => {
-    return tabBarHeight.value + 8;
-});
+// 浮岛贴在屏幕最底部
+const islandBottom = computed(() => 0);
 
 // 当前选中的缩略图（用于折叠迷你条极简展示）
 const currentSelectedThumb = computed(() => {
@@ -314,10 +326,10 @@ const currentImageTitle = computed(() => {
     return '未选择壁纸';
 });
 
-// 容器底部安全间距（展开态 ~240px，折叠态 ~54px），确保对话滚动不会被浮岛遮挡
+// 容器底部安全间距，确保对话滚动到底部不会被贴底面板遮挡
 const containerBottomSpace = computed(() => {
-    const islandHeight = pickerOpen.value ? 240 : 54;
-    return islandBottom.value + islandHeight + 16;
+    const islandHeight = pickerOpen.value ? 280 : 80;
+    return islandHeight + 24;
 });
 
 const openPicker = () => {
@@ -1342,34 +1354,73 @@ onUnload(() => {
     box-shadow: 0 14rpx 28rpx var(--shadow-color);
 }
 
+/* 顶部返回导航栏 */
+.discover-nav-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 88rpx;
+    display: flex;
+    align-items: center;
+    padding: 0 28rpx;
+    z-index: 100;
+    pointer-events: none;
+
+    .nav-back-btn {
+        width: 72rpx;
+        height: 72rpx;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        box-shadow: 0 4rpx 16rpx rgba(15, 23, 42, 0.08);
+        pointer-events: auto;
+        cursor: pointer;
+        transition: transform 0.18s ease;
+
+        &:active {
+            transform: scale(0.92);
+        }
+
+        .theme-dark & {
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.35);
+        }
+    }
+}
+
 /* ==========================================================================
-   高定双层悬浮琉璃浮岛 (Floating Glass Island)
+   贴底双层磨砂操作面板 (贴底与贴合两侧，复刻原底栏规范)
    ========================================================================== */
 .discover-island {
     position: fixed;
-    left: 24rpx;
-    right: 24rpx;
+    left: 0;
+    right: 0;
+    bottom: 0 !important;
+    width: 100%;
     z-index: 99;
-    border-radius: 36rpx;
+    border-radius: 40rpx 40rpx 0 0;
     transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
     box-sizing: border-box;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
 
     // 浅色模式磨砂琉璃质感
-    background: rgba(255, 255, 255, 0.88);
-    border: 1rpx solid rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 1rpx solid rgba(255, 255, 255, 0.9);
     box-shadow: 
-        0 16rpx 40rpx rgba(15, 23, 42, 0.08),
-        0 2rpx 8rpx rgba(15, 23, 42, 0.04);
+        0 -12rpx 40rpx rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(28rpx);
     -webkit-backdrop-filter: blur(28rpx);
 
     // 深色模式磨砂琉璃质感
     .theme-dark & {
-        background: rgba(24, 26, 32, 0.86);
-        border: 1rpx solid rgba(255, 255, 255, 0.12);
+        background: rgba(24, 26, 32, 0.95);
+        border-top: 1rpx solid rgba(255, 255, 255, 0.12);
         box-shadow: 
-            0 20rpx 48rpx rgba(0, 0, 0, 0.42),
-            0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+            0 -16rpx 44rpx rgba(0, 0, 0, 0.45);
     }
 
     &.is-collapsed {
@@ -1457,7 +1508,7 @@ onUnload(() => {
 
 // 2. 展开态浮岛面板
 .island-expanded {
-    padding: 20rpx 20rpx 20rpx;
+    padding: 24rpx 32rpx 16rpx;
     display: flex;
     flex-direction: column;
     gap: 16rpx;

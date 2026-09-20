@@ -27,6 +27,8 @@
 		"tabIconCategorySelected": "/static/tabbar/Fill_Category_Green.png",
 		"tabIconDiscover": "/static/tabbar/Light_Discover.png",
 		"tabIconDiscoverSelected": "/static/tabbar/Fill_Discover_Green.png",
+		"tabIconCreation": "/static/tabbar/Light_Creation.png",
+		"tabIconCreationSelected": "/static/tabbar/Fill_Creation_Green.png",
 		"tabIconUser": "/static/tabbar/Light_User.png",
 		"tabIconUserSelected": "/static/tabbar/Fill_User_Green.png"
 	},
@@ -58,6 +60,8 @@
 		"tabIconCategorySelected": "/static/tabbar/Fill_Category_Green.png",
 		"tabIconDiscover": "/static/tabbar/Dark_Discover.png",
 		"tabIconDiscoverSelected": "/static/tabbar/Fill_Discover_Green.png",
+		"tabIconCreation": "/static/tabbar/Dark_Creation.png",
+		"tabIconCreationSelected": "/static/tabbar/Fill_Creation_Green.png",
 		"tabIconUser": "/static/tabbar/Dark_User.png",
 		"tabIconUserSelected": "/static/tabbar/Fill_User_Green.png"
 	}
