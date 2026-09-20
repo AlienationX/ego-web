@@ -42,3 +42,22 @@ _channel = 'wechat';
 // #endif
 export const CHANNEL = _channel;
 // ─────────────────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────────────────
+// 广告位配置（微信小程序广告主 & App 端 uni-AD 统一管理）
+// ─────────────────────────────────────────────────────────────
+export const AD_CONFIG = {
+    // 微信小程序广告位
+    weixin: {
+        rewardedVideoUnitId: 'adunit-5bc8686f391d8f66', // 激励视频
+        interstitialUnitId: 'adunit-3ac8c1de4df22d9e',   // 插屏广告
+        bannerUnitId: 'adunit-73a2b212e6dbda91',         // Banner 广告
+    },
+    // App 端 uni-AD 广告位
+    app: {
+        rewardedVideoAdpid: '1892019135',
+        interstitialAdpid: '1129226586',
+        bannerAdpid: '1760125998',
+    },
+};
+

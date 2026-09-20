@@ -135,9 +135,7 @@
                 </view>
             </view>
 
-        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
-
-        <fab-back-top :show="showScrollTop" :embedded="false" :ad-height="adHeight" @click="scrollToTop" />
+        <fab-back-top :show="showScrollTop" :embedded="false" @click="scrollToTop" />
     </view>
 </template>
 
@@ -179,10 +177,6 @@ onLoad((options) => {
     }
 });
 
-const adHeight = ref(0);
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
-};
 const showScrollTop = ref(false);
 const isLoading = ref(false);
 const noMoreData = ref(false);

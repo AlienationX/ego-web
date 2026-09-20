@@ -108,7 +108,7 @@
         </view>
 
         <!-- 广告横幅（如果开启） -->
-        <custom-ad-banner v-if="IS_INTERNATIONAL" v-slot="{ adActive }" @height-change="onAdHeightChange"></custom-ad-banner>
+        <custom-ad-banner v-if="canShowBannerAd" v-slot="{ adActive }" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -122,6 +122,13 @@ import { useAppStore } from '@/stores/app.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
+
+// #ifdef MP-WEIXIN
+const canShowBannerAd = true;
+// #endif
+// #ifndef MP-WEIXIN
+const canShowBannerAd = IS_INTERNATIONAL;
+// #endif
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();

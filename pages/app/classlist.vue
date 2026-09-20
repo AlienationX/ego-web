@@ -62,8 +62,6 @@
                 <view class="hero__desc">{{ heroDesc }}</view>
             </view>
         </view>
-
-        <custom-ad-banner v-if="IS_INTERNATIONAL && shouldShowHeroHiddenAd" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -130,16 +128,8 @@ const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
 const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
 const heroHeightPx = uni.upx2px(560);
-const adHeight = ref(0);
-
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
-};
-
-const shouldShowHeroHiddenAd = computed(() => headerScrollTop.value >= heroHeightPx);
-
 const contentWrapperStyle = computed(() => ({
-    paddingBottom: shouldShowHeroHiddenAd.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
+    paddingBottom: '0px',
 }));
 
 const topbarOpacity = computed(() => {

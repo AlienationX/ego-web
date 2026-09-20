@@ -164,8 +164,6 @@
                 </view>
             </view>
 
-        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
-
         <!-- 底部毛玻璃悬浮灵动岛 (指标切换 + 条件回顶) -->
         <view class="floating-dock" :style="{ bottom: dockBottomStyle }">
             <view class="floating-capsule">
@@ -229,14 +227,10 @@ import { useAppStore } from '@/stores/app.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
-const adHeight = ref(0);
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
-};
 
 const top10WrapPaddingTop = computed(() => `${statusBarHeight.value + 10}px`);
-const top10WrapPaddingBottom = computed(() => `calc(${adHeight.value}px + 180rpx + env(safe-area-inset-bottom))`);
-const dockBottomStyle = computed(() => `calc(${adHeight.value}px + max(20px, env(safe-area-inset-bottom))`);
+const top10WrapPaddingBottom = computed(() => 'calc(180rpx + env(safe-area-inset-bottom))');
+const dockBottomStyle = computed(() => 'max(20px, env(safe-area-inset-bottom))');
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -472,7 +466,7 @@ onShow(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 99;
+    z-index: 105;
     pointer-events: none;
     transition: bottom 0.28s ease;
 }

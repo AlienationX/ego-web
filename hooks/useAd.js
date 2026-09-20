@@ -2,17 +2,12 @@ import { downloadPic } from '@/common/core.js';
 import { t } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user.js';
 import { useAppStore } from '@/stores/app.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 export const useAdIntersititial = () => {
-    // #ifdef APP-PLUS
+    // #ifdef APP-PLUS || MP-WEIXIN
     const userStore = useUserStore();
     const appStore = useAppStore();
-
-    const adOption = {
-        // 1111111113 HBuilder基座的测试广告位
-        // 1129226586 正式的广告位
-        adpid: '1129226586',
-    };
 
     const shouldBypassAd = () => userStore.isVip || !appStore.versionConfig?.ad_enabled;
     const safeDownload = (url) => {
@@ -35,7 +30,21 @@ export const useAdIntersititial = () => {
 
     const ensureInterstitialAd = () => {
         if (interstitialAd) return interstitialAd;
-        interstitialAd = uni.createInterstitialAd(adOption);
+
+        // #ifdef MP-WEIXIN
+        if (typeof wx !== 'undefined' && wx.createInterstitialAd) {
+            interstitialAd = wx.createInterstitialAd({
+                adUnitId: AD_CONFIG.weixin.interstitialUnitId,
+            });
+        }
+        // #endif
+
+        // #ifdef APP-PLUS
+        interstitialAd = uni.createInterstitialAd({
+            adpid: AD_CONFIG.app.interstitialAdpid,
+        });
+        // #endif
+
         return interstitialAd;
     };
 
@@ -48,7 +57,11 @@ export const useAdIntersititial = () => {
 
     const tryDestroyIfNeeded = () => {
         if (!pendingDestroy || isShowing || !interstitialAd) return;
-        interstitialAd.destroy();
+        try {
+            interstitialAd.destroy?.();
+        } catch (e) {
+            console.warn('Destroy interstitial ad error:', e);
+        }
         interstitialAd = null;
         initialized = false;
         loadingPromise = null;
@@ -68,6 +81,8 @@ export const useAdIntersititial = () => {
 
     const createInterstitialAd = () => {
         const ad = ensureInterstitialAd();
+        if (!ad) return;
+
         if (initialized) {
             preloadInterstitial();
             return;
@@ -75,7 +90,7 @@ export const useAdIntersititial = () => {
 
         initialized = true;
         ad.onLoad(() => {
-            // 广告加载成功，不需要额外处理
+            // 广告加载成功
         });
         ad.onClose(() => {
             // 用户关闭广告后执行业务回调（下载等）
@@ -88,7 +103,8 @@ export const useAdIntersititial = () => {
             preloadInterstitial();
             tryDestroyIfNeeded();
         });
-        ad.onError(() => {
+        ad.onError((err) => {
+            console.warn('Interstitial ad error:', err);
             // 广告异常时回退，不阻塞主流程
             if (pendingOnFallback) {
                 pendingOnFallback(pendingPicurl);
@@ -132,12 +148,23 @@ export const useAdIntersititial = () => {
             return;
         }
 
+        if (!interstitialAd) {
+            // 无法创建广告实例时直接回退
+            if (onFallback) {
+                onFallback(inputPicurl);
+            } else {
+                safeDownload(inputPicurl);
+            }
+            return;
+        }
+
         pendingPicurl = inputPicurl || '';
         pendingOnSuccess = onSuccess || null;
         pendingOnFallback = onFallback || null;
         isShowing = true;
 
-        interstitialAd.show().catch(() => {
+        interstitialAd.show().catch((err) => {
+            console.warn('Show interstitial ad failed:', err);
             // show 失败直接回退，不再重试（避免重试导致广告二次展示）
             if (pendingOnFallback) {
                 pendingOnFallback(pendingPicurl);
@@ -162,7 +189,7 @@ export const useAdIntersititial = () => {
     };
     // #endif
 
-    // #ifdef MP || WEB || APP-HARMONY
+    // #ifndef APP-PLUS || MP-WEIXIN
     return {
         createInterstitialAd: function () {},
         showInterstitialAd: function (inputPicurl, options = {}) {
@@ -179,20 +206,9 @@ export const useAdIntersititial = () => {
 };
 
 export const useAdRewardedVideo = () => {
-    // #ifdef APP-PLUS
+    // #ifdef APP-PLUS || MP-WEIXIN
     const userStore = useUserStore();
     const appStore = useAppStore();
-
-    const adOption = {
-        // 1507000689 HBuilder基座的测试广告位
-        // 1892019135 正式的广告位
-        adpid: '1892019135',
-        urlCallback: {
-            // 服务器回调透传参数
-            userId: 'uniapp-testuser',
-            extra: 'uniapp-testdata',
-        },
-    };
 
     const shouldBypassAd = () => userStore.isVip || !appStore.versionConfig?.ad_enabled;
     const safeDownload = (url) => {
@@ -215,7 +231,26 @@ export const useAdRewardedVideo = () => {
 
     const ensureRewardedAd = () => {
         if (rewardedVideoAd) return rewardedVideoAd;
-        rewardedVideoAd = uni.createRewardedVideoAd(adOption);
+
+        // #ifdef MP-WEIXIN
+        if (typeof wx !== 'undefined' && wx.createRewardedVideoAd) {
+            rewardedVideoAd = wx.createRewardedVideoAd({
+                adUnitId: AD_CONFIG.weixin.rewardedVideoUnitId,
+            });
+        }
+        // #endif
+
+        // #ifdef APP-PLUS
+        rewardedVideoAd = uni.createRewardedVideoAd({
+            adpid: AD_CONFIG.app.rewardedVideoAdpid,
+            urlCallback: {
+                // 服务器回调透传参数
+                userId: userStore.userinfo?.id || 'anonymous',
+                extra: 'wallpaper_reward',
+            },
+        });
+        // #endif
+
         return rewardedVideoAd;
     };
 
@@ -228,7 +263,11 @@ export const useAdRewardedVideo = () => {
 
     const tryDestroyIfNeeded = () => {
         if (!pendingDestroy || isShowing || !rewardedVideoAd) return;
-        rewardedVideoAd.destroy();
+        try {
+            rewardedVideoAd.destroy?.();
+        } catch (e) {
+            console.warn('Destroy rewarded video ad error:', e);
+        }
         rewardedVideoAd = null;
         initialized = false;
         loadingPromise = null;
@@ -248,6 +287,8 @@ export const useAdRewardedVideo = () => {
 
     const createRewardedVideoAd = () => {
         const ad = ensureRewardedAd();
+        if (!ad) return;
+
         if (initialized) {
             preloadRewarded();
             return;
@@ -255,7 +296,7 @@ export const useAdRewardedVideo = () => {
 
         initialized = true;
         ad.onLoad(() => {
-            // 广告加载成功，不需要额外处理
+            // 广告加载成功
         });
         ad.onClose((e) => {
             // 用户点击了【关闭广告】按钮
@@ -277,7 +318,8 @@ export const useAdRewardedVideo = () => {
             clearPending();
             tryDestroyIfNeeded();
         });
-        ad.onError(() => {
+        ad.onError((err) => {
+            console.warn('Rewarded video ad error:', err);
             // 广告异常时回退，不阻塞主流程
             adminToast({
                 title: 'Ad loading failed. Download directly.',
@@ -325,20 +367,38 @@ export const useAdRewardedVideo = () => {
             return;
         }
 
+        if (!rewardedVideoAd) {
+            // 无法创建广告实例时直接回退
+            if (onFallback) {
+                onFallback(inputPicurl);
+            } else {
+                safeDownload(inputPicurl);
+            }
+            return;
+        }
+
         pendingPicurl = inputPicurl || '';
         pendingOnSuccess = onSuccess || null;
         pendingOnFallback = onFallback || null;
         isShowing = true;
 
-        rewardedVideoAd.show().catch(() => {
-            // show 失败直接回退，不再重试
-            if (pendingOnFallback) {
-                pendingOnFallback(pendingPicurl);
-            } else {
-                safeDownload(pendingPicurl);
-            }
-            clearPending();
-            tryDestroyIfNeeded();
+        rewardedVideoAd.show().catch((err) => {
+            console.warn('Show rewarded video ad failed:', err);
+            // 尝试重新 load 一次再展示
+            rewardedVideoAd
+                .load()
+                .then(() => rewardedVideoAd.show())
+                .catch((retryErr) => {
+                    console.warn('Retry show rewarded video ad failed:', retryErr);
+                    // show 失败直接回退，不再重试
+                    if (pendingOnFallback) {
+                        pendingOnFallback(pendingPicurl);
+                    } else {
+                        safeDownload(pendingPicurl);
+                    }
+                    clearPending();
+                    tryDestroyIfNeeded();
+                });
         });
     };
 
@@ -355,7 +415,7 @@ export const useAdRewardedVideo = () => {
     };
     // #endif
 
-    // #ifdef MP || WEB || APP-HARMONY
+    // #ifndef APP-PLUS || MP-WEIXIN
     return {
         createRewardedVideoAd: function () {},
         showRewardedVideoAd: function (inputPicurl, options = {}) {

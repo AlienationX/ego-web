@@ -10,20 +10,31 @@
             <ad :adpid="adpid" @load="onload" @close="onclose" @error="onerror"></ad>
         </view>
         <!-- #endif -->
+
+        <!-- #ifdef MP-WEIXIN -->
+        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }">
+            <ad :unit-id="unitId" ad-intervals="30" @load="onload" @close="onclose" @error="onerror"></ad>
+        </view>
+        <!-- #endif -->
     </view>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, getCurrentInstance, nextTick } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { getTabBarHeight } from '@/utils/layout.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 const props = defineProps({
     adpid: {
         type: String,
-        default: '1760125998',
+        default: () => AD_CONFIG.app?.bannerAdpid || '1760125998',
+    },
+    unitId: {
+        type: String,
+        default: () => AD_CONFIG.weixin?.bannerUnitId || 'adunit-73a2b212e6dbda91',
     },
     isFixed: {
         type: Boolean,
@@ -31,7 +42,11 @@ const props = defineProps({
     },
     bottomOffset: {
         type: Number,
-        default: 0,
+        default: null,
+    },
+    hasTabBar: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -39,26 +54,46 @@ const emit = defineEmits(['height-change', 'load', 'close', 'error']);
 
 const calculatedBottom = computed(() => {
     if (!props.isFixed) return 'auto';
-    if (props.bottomOffset > 0) return `${props.bottomOffset}px`;
-    return `${getTabBarHeight()}px`;
+    if (typeof props.bottomOffset === 'number') return `${props.bottomOffset}px`;
+    if (props.hasTabBar) return `${getTabBarHeight()}px`;
+    return '0px';
 });
 
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
+const instance = getCurrentInstance();
 
 const showAd = computed(() => !userStore.isVip && !!appStore.versionConfig?.ad_enabled);
 
 const isLoaded = ref(false);
 const isError = ref(false);
 const currentHeight = ref(0);
-const defaultBannerHeight = uni.upx2px(200);
+const defaultBannerHeight = uni.upx2px(180);
 
 const updateHeight = (height = 0) => {
-    const nextHeight = Math.max(0, Math.round(Number(height) || 0));
-    if (currentHeight.value === nextHeight) return;
-    currentHeight.value = nextHeight;
-    emit('height-change', nextHeight);
+    const rawHeight = Math.max(0, Math.round(Number(height) || 0));
+    const safeBottom = uni.getWindowInfo?.()?.safeAreaInsets?.bottom || 0;
+    const totalHeight = rawHeight > 0 ? rawHeight + safeBottom : 0;
+    if (currentHeight.value === totalHeight) return;
+    currentHeight.value = totalHeight;
+    emit('height-change', totalHeight);
+};
+
+const measureActualHeight = () => {
+    nextTick(() => {
+        setTimeout(() => {
+            const query = uni.createSelectorQuery().in(instance);
+            query.select('.custom-ad-container').boundingClientRect((rect) => {
+                if (rect && rect.height > 0) {
+                    const measuredHeight = Math.max(0, Math.round(rect.height));
+                    if (currentHeight.value === measuredHeight) return;
+                    currentHeight.value = measuredHeight;
+                    emit('height-change', measuredHeight);
+                }
+            }).exec();
+        }, 150);
+    });
 };
 
 // 导出 isLoaded 供父组件通过 ref 访问
@@ -70,6 +105,7 @@ const onload = (e) => {
     emit('load', e);
     const fallbackHeight = Math.max(defaultBannerHeight, Number(e?.detail?.height || e?.detail?.adHeight || 0));
     updateHeight(fallbackHeight);
+    measureActualHeight();
 };
 const onclose = (e) => {
     isError.value = true;
@@ -107,7 +143,16 @@ watch(showAd, (visible) => {
         left: 0;
         right: 0;
         bottom: 0;
-        pointer-events: none; /* Let clicks pass through the container except for the ad */
+        padding-bottom: constant(safe-area-inset-bottom);
+        padding-bottom: env(safe-area-inset-bottom);
+        box-sizing: border-box;
+        background: #ffffff;
+        box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+
+        .theme-dark & {
+            background: #141416;
+            box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.35);
+        }
     }
 }
 
@@ -117,7 +162,7 @@ watch(showAd, (visible) => {
     transition: opacity 0.24s ease;
 
     &.is-loaded {
-        min-height: 180rpx;
+        min-height: 140rpx;
     }
 
     &:not(.is-loaded) {

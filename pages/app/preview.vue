@@ -231,7 +231,7 @@
         </scroll-view>
 
         <!-- ad广告无法在<swiper>、<scroll-view> 中使用，因此保持在滚动容器外固定展示 -->
-        <custom-ad-banner v-if="IS_INTERNATIONAL && shouldShowBottomAd"
+        <custom-ad-banner v-if="canShowBannerAd && shouldShowBottomAd"
             @height-change="onAdHeightChange"></custom-ad-banner>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
@@ -685,6 +685,12 @@ const statusStore = useStatusStore();
 const { createInterstitialAd, showInterstitialAd, destroyInterstitialAd } = useAdIntersititial();
 
 const isAndroidApp = uni.getDeviceInfo().platform === 'android';
+// #ifdef MP-WEIXIN
+const canShowBannerAd = true;
+// #endif
+// #ifndef MP-WEIXIN
+const canShowBannerAd = IS_INTERNATIONAL;
+// #endif
 
 // 通用导航对话框控制
 const navDialog = ref(null);
