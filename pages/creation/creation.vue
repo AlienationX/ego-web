@@ -77,11 +77,11 @@
                 </view>
             </view>
 
-            <!-- 3. 背景模糊 -->
-            <view class="tool-card tool-card--blur" @click="showComingSoon">
+            <!-- 3. 磨砂伴侣 (主屏毛玻璃壁纸伴侣) -->
+            <view class="tool-card tool-card--blur" @click="goToFrosted">
                 <view class="card-text-block">
-                    <text class="card-title">{{ t('creation.blurTitle') }}</text>
-                    <text class="card-desc">{{ t('creation.blurDesc') }}</text>
+                    <text class="card-title">{{ t('creation.frostedTitle') }}</text>
+                    <text class="card-desc">{{ t('creation.frostedDesc') }}</text>
                 </view>
                 <view class="blur-visual">
                     <view class="blur-img-wrapper">
@@ -173,6 +173,13 @@ const goToPuzzle = () => {
     });
 };
 
+// 进入主屏磨砂伴侣功能
+const goToFrosted = () => {
+    uni.navigateTo({
+        url: '/pages/creation/frosted',
+    });
+};
+
 // 进入原 discover 美学探索功能
 const goToDiscover = () => {
     uni.navigateTo({
@@ -180,9 +187,11 @@ const goToDiscover = () => {
     });
 };
 
-// 点击壁纸工作台：引导进入拼图或新建创作
+// 点击壁纸工作台：进入全新壁纸创作工作台
 const handleWorkbenchClick = () => {
-    goToPuzzle();
+    uni.navigateTo({
+        url: '/pages/creation/workbench',
+    });
 };
 
 // 待上线功能提示

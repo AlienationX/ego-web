@@ -4,7 +4,7 @@
             <!-- 头部标题与关闭 -->
             <view class="panel-header">
                 <view class="panel-header__left">
-                    <text class="panel-title">{{ singleMode ? t('puzzle.replacePhoto') : t('puzzle.selectPhotos') }}</text>
+                    <text class="panel-title">{{ displayTitle }}</text>
                     <text class="panel-counter">{{ currentSelected.length }}/{{ maxCount }}</text>
                 </view>
                 <view class="panel-close-btn" @click="handleClose">
@@ -36,16 +36,13 @@
             <scroll-view class="picker-body" scroll-y :show-scrollbar="false">
                 <!-- 1. 我的收藏选择区 (默认置于前面) -->
                 <view v-if="activeTab === 'favorites'" class="favorites-content">
-                    <!-- 1.1 未登录状态：提示去登录，参考 discover.vue -->
+                    <!-- 1.1 未登录状态：提示去登录 -->
                     <view v-if="!userStore.isLoggedIn" class="empty-box">
                         <mdi-icon path="/static/icons/account-circle.svg" size="52px" :color="settingsStore.isDark ? '#475569' : '#cbd5e1'" />
                         <text class="empty-text">您还未登录，请先登录查看我的收藏</text>
                         <view class="empty-action-group">
                             <view class="empty-action-btn" @click="toLogin">
                                 <text>立即登录</text>
-                            </view>
-                            <view class="empty-secondary-btn" @click="activeTab = 'album'">
-                                <text>{{ t('puzzle.localAlbum') || '手机相册' }}</text>
                             </view>
                         </view>
                     </view>
@@ -55,16 +52,13 @@
                         <rotate-loading :size="32" :color="settingsStore.isDark ? '#a855f7' : '#6366f1'" />
                     </view>
 
-                    <!-- 1.3 登录后暂无收藏：提示去收藏，参考 discover.vue -->
+                    <!-- 1.3 登录后暂无收藏：提示去收藏 -->
                     <view v-else-if="favoriteList.length === 0" class="empty-box">
                         <mdi-icon path="/static/icons/heart-broken.svg" size="52px" :color="settingsStore.isDark ? '#475569' : '#cbd5e1'" />
                         <text class="empty-text">{{ t('puzzle.noFavorites') || '您还没有收藏任何壁纸哦' }}</text>
                         <view class="empty-action-group">
                             <view class="empty-action-btn" @click="goFavorite">
                                 <text>{{ $t('discover.goFavorite') || '去我的收藏' }}</text>
-                            </view>
-                            <view class="empty-secondary-btn" @click="activeTab = 'album'">
-                                <text>{{ t('puzzle.openAlbum') || '打开手机相册' }}</text>
                             </view>
                         </view>
                     </view>
@@ -81,7 +75,7 @@
                             <image class="fav-img" :src="item.thumbUrl || item.url" mode="aspectFill" lazy-load />
                             <view class="select-badge" :class="{ 'is-checked': isSelected(item.url) }">
                                 <text v-if="isSelected(item.url)" class="badge-number">
-                                    {{ getSelectedIndex(item.url) }}
+                                    {{ singleMode ? '✓' : getSelectedIndex(item.url) }}
                                 </text>
                             </view>
                         </view>
@@ -95,7 +89,9 @@
                             <mdi-icon path="/static/icons/plus.svg" size="28px" color="#ffffff" />
                         </view>
                         <text class="trigger-title">{{ t('puzzle.openAlbum') }}</text>
-                        <text class="trigger-hint">{{ t('puzzle.freeStyle') }} ({{ maxCount - currentSelected.length }} 可选)</text>
+                        <text class="trigger-hint">
+                            {{ singleMode ? '支持选择手机相册中的高清图片' : `${t('puzzle.freeStyle')} (${maxCount - currentSelected.length} 可选)` }}
+                        </text>
                     </view>
 
                     <!-- 相册已选中的图片预览网格 -->
@@ -129,7 +125,7 @@
                         :class="{ 'is-disabled': currentSelected.length === 0 }"
                         @click="handleConfirm"
                     >
-                        <text class="btn-text">{{ singleMode ? '确定替换' : t('puzzle.startPuzzle') }}</text>
+                        <text class="btn-text">{{ singleMode ? '确定选择' : t('puzzle.startPuzzle') }}</text>
                     </view>
                 </view>
             </view>
@@ -154,6 +150,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    title: {
+        type: String,
+        default: '',
+    },
     maxCount: {
         type: Number,
         default: 9,
@@ -170,6 +170,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible', 'confirm', 'cancel']);
 
+// 自定义或按模式解析标题
+const displayTitle = computed(() => {
+    if (props.title) return props.title;
+    if (props.singleMode) {
+        return '选择壁纸';
+    }
+    return t('puzzle.selectPhotos') || '选择照片';
+});
+
 // 默认将「我的收藏」置于前面
 const activeTab = ref('favorites'); // 'favorites' | 'album'
 const currentSelected = ref([]);
@@ -177,9 +186,9 @@ const albumImages = ref([]);
 const favoriteList = ref([]);
 const isLoadingFavorites = ref(false);
 
-// 兼容跨端带变量翻译插值
+// 兼容跨端动态计算已选数量文本
 const selectedCountText = computed(() => {
-    return tp('puzzle.selectedCount', { count: currentSelected.value.length });
+    return `已选 ${currentSelected.value.length}/${props.maxCount} 张`;
 });
 
 // 跳转登录
@@ -659,19 +668,6 @@ const handleClose = () => {
         &:active {
             opacity: 0.85;
             transform: scale(0.97);
-        }
-    }
-
-    .empty-secondary-btn {
-        padding: 14rpx 32rpx;
-        border-radius: 999px;
-        background: rgba(148, 163, 184, 0.15);
-        color: inherit;
-        font-size: 26rpx;
-        font-weight: 600;
-
-        &:active {
-            opacity: 0.7;
         }
     }
 }

@@ -270,6 +270,22 @@
                 "navigationBarTitleText": "美学探索",
                 "navigationStyle": "custom"
             }
+        },
+        {
+            "path": "pages/creation/frosted",
+            "style": {
+                "navigationBarTitleText": "磨砂伴侣",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
+            "path": "pages/creation/workbench",
+            "style": {
+                "navigationBarTitleText": "创作工作台",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
         }
     ],
     "subPackages": [

@@ -656,6 +656,7 @@ import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { SERVICE_EMAIL } from '@/common/config.js';
+import { executeWithAuth } from '@/utils/auth-action.js';
 import {
     apiPostIncrementViews,
     apiPostIncrementDownloads,
@@ -773,65 +774,34 @@ const openFrostedMaker = () => {
     frostedMakerPopup.value?.open();
 };
 
-const onFrostedRequireVip = () => {
-    const payEnabled = appStore.versionConfig?.pay_enabled !== false;
-    const adEnabled = appStore.versionConfig?.ad_enabled !== false;
-
-    // 1. 既有广告又有支付：看广告免费保存（主按钮）+ VIP 免广告畅享（副选项）
-    if (adEnabled && payEnabled) {
-        if (adPopup.value) {
-            adPopup.value.open({
-                title: t('frostedMaker.title') || '主屏磨砂伴侣',
-                desc: t('frostedMaker.unlockHint') || '观看一段视频广告即可免费保存本次磨砂壁纸，或开通 VIP 享受无限制随心保存。',
-                showAdBtn: true,
-                adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费保存',
-                showVipBtn: true,
-                vipBtnText: t('previewPage.openVipNow') || '开通 VIP 免广告',
-                onAdSuccess: () => {
-                    frostedMakerPopup.value?.saveFrostedWallpaperCore();
-                },
-            });
-        } else {
-            uni.navigateTo({ url: '/pages/member/payment' });
-        }
-        return;
-    }
-
-    // 2. 只有广告（无支付）：看广告免费保存
-    if (adEnabled && !payEnabled) {
-        if (adPopup.value) {
-            adPopup.value.open({
-                title: t('frostedMaker.title') || '主屏磨砂伴侣',
-                desc: t('frostedMaker.adUnlockHint') || '观看一段视频广告即可免费保存本次磨砂壁纸。',
-                showAdBtn: true,
-                adBtnText: t('previewPage.watchAdToUnlock') || '看广告免费保存',
-                showVipBtn: false,
-                onAdSuccess: () => {
-                    frostedMakerPopup.value?.saveFrostedWallpaperCore();
-                },
-            });
-        }
-        return;
-    }
-
-    // 3. 只有支付（无广告）：开通 VIP 解锁
-    if (!adEnabled && payEnabled) {
-        if (adPopup.value) {
-            adPopup.value.open({
-                title: t('frostedMaker.vipExclusiveTitle') || 'VIP 专属特权',
-                desc: t('frostedMaker.vipExclusiveHint') || '主屏磨砂伴侣为 VIP 专属功能，开通会员后可无限制一键保存超清磨砂壁纸。',
-                showAdBtn: false,
-                showVipBtn: true,
-                vipBtnText: t('previewPage.openVipNow') || '立即开通 VIP',
-            });
-        } else {
-            uni.navigateTo({ url: '/pages/member/payment' });
-        }
-        return;
-    }
-
-    // 4. 无广告且无支付：直接放行生成
+const onFrostedRequireVip = async () => {
+    // #ifdef WEB
     frostedMakerPopup.value?.saveFrostedWallpaperCore();
+    return;
+    // #endif
+
+    // #ifndef WEB
+    await executeWithAuth({
+        adPopup: adPopup.value,
+        wallId: currentInfo.value?.id || 0,
+        actionType: 'consume_frosted_export',
+        costEnergy: 1,
+        customConfig: {
+            title: userStore.isLoggedIn ? t('frostedMaker.energyShortageTitle') : t('frostedMaker.unlockTitle'),
+            desc: userStore.isLoggedIn
+                ? t('frostedMaker.energyShortageDesc')
+                : t('frostedMaker.unlockDesc'),
+            adBtnText: t('frostedMaker.watchAdSaveBtn'),
+            vipBtnText: t('frostedMaker.openVipEnjoyBtn'),
+            vipSuccessTip: t('frostedMaker.vipSuccessTip'),
+            energySuccessTip: t('frostedMaker.energySuccessTip'),
+            adSuccessTip: t('frostedMaker.adSuccessTip'),
+        },
+        onSuccess: () => {
+            frostedMakerPopup.value?.saveFrostedWallpaperCore();
+        },
+    });
+    // #endif
 };
 
 const openClockStyle = () => {
