@@ -148,6 +148,19 @@
                     </view>
                 </view>
 
+                <!-- #ifdef MP-WEIXIN -->
+                <!-- 我的页面横版原生广告卡片 -->
+                <view class="user-flow-ad-wrap" v-if="canShowFlowAd && !flowAdFailed">
+                    <view class="user-flow-ad-card">
+                        <ad-custom
+                            :unit-id="customHorizontalAdUnitId"
+                            @load="flowAdLoaded = true"
+                            @error="flowAdFailed = true"
+                        />
+                    </view>
+                </view>
+                <!-- #endif -->
+
                 <view class="section">
                     <view class="list">
                         <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
@@ -207,12 +220,19 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useStatusStore } from '@/stores/status.js';
 import { useAppStore } from '@/stores/app.js';
 import { useI18n } from 'vue-i18n';
+import { AD_CONFIG } from '@/common/config.js';
 
 const { t, locale } = useI18n();
 
 const userStore = useUserStore();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
+
+// 微信横版原生广告配置
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const flowAdLoaded = ref(false);
+const flowAdFailed = ref(false);
+const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 
 const userPaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();
@@ -1288,6 +1308,32 @@ onShow(() => {
         100% {
             transform: scale(1.08);
             opacity: 0.88;
+        }
+    }
+
+    // ── 我的页面横版原生信息流广告卡片 ──
+    .user-flow-ad-wrap {
+        padding: 0 30rpx;
+        margin-bottom: 24rpx;
+        box-sizing: border-box;
+        width: 100%;
+
+        .user-flow-ad-card {
+            width: 100%;
+            border-radius: 20rpx;
+            overflow: hidden;
+            background: var(--page-background-secondary);
+            border: 2rpx solid var(--panel-border);
+            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+            transform: translateZ(0);
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            display: flex;
+            justify-content: center;
+
+            :deep(ad-custom) {
+                width: 100% !important;
+                display: block !important;
+            }
         }
     }
 

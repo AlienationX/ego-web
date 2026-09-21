@@ -15,13 +15,10 @@
                 </view>
 
                 <view class="nav-center">
-                    <view class="subject-badge" v-if="currentSubject?.is_locked">
-                        <uni-icons type="vip-filled" size="12" color="#f59e0b"></uni-icons>
-                        <text class="badge-text">VIP ONLY</text>
-                    </view>
                     <text class="subject-title">{{ heroTitle }}</text>
                 </view>
 
+                <!-- #ifndef MP-WEIXIN -->
                 <view class="nav-btn" @click="handleShare">
                     <mdi-icon
                         path="/static/icons/share-variant.svg"
@@ -29,6 +26,11 @@
                         :color="settingsStore.isDark ? '#ffffff' : '#0f172a'"
                     ></mdi-icon>
                 </view>
+                <!-- #endif -->
+                <!-- #ifdef MP-WEIXIN -->
+                <!-- 小程序端隐藏分享按钮，以对称占位保持结构平衡 -->
+                <view class="nav-placeholder"></view>
+                <!-- #endif -->
             </view>
         </view>
 
@@ -46,7 +48,7 @@
             <button class="empty-btn" @click="goBack">{{ t('common.back') || '返回上一页' }}</button>
         </view>
 
-        <!-- 核心 3D 景深卡片轮播 (Cover Flow: 1:1 还原视频两侧露出比例) -->
+        <!-- 核心 3D 景深卡片轮播 (保持正常黄金比例，上方布局位置恒定不变) -->
         <view class="gallery-wrapper" v-else>
             <swiper
                 class="gallery-swiper"
@@ -84,16 +86,16 @@
                 </swiper-item>
             </swiper>
 
-            <!-- 卡片下方专题与壁纸详细描述区 (纯文本居中展示，无背景无边框) -->
-            <view class="detail-section" :style="{ paddingBottom: `calc(44rpx + env(safe-area-inset-bottom))` }">
-                <!-- 序号指示器 -->
-                <view class="pager-indicator">
-                    <text class="current-num">{{ String(currentIndex + 1).padStart(2, '0') }}</text>
-                    <text class="divider">/</text>
-                    <text class="total-num">{{ String(wallpaperList.length).padStart(2, '0') }}</text>
-                </view>
+            <!-- 序号指示器 (紧随卡片正下方，始终完整清晰展示) -->
+            <view class="pager-indicator">
+                <text class="current-num">{{ String(currentIndex + 1).padStart(2, '0') }}</text>
+                <text class="divider">/</text>
+                <text class="total-num">{{ String(wallpaperList.length).padStart(2, '0') }}</text>
+            </view>
 
-                <!-- 专题详细描述 (纯文本，居中排版，无背景无边框) -->
+            <!-- 卡片下方专题与壁纸详细描述区 (有广告遮挡，无广告展示) -->
+            <view class="detail-section" v-if="!isAdActive">
+                <!-- 专题详细描述 (纯文本，居中排版) -->
                 <view class="desc-container" v-if="heroDesc">
                     <text class="desc-text">{{ heroDesc }}</text>
                 </view>
@@ -107,8 +109,13 @@
             </view>
         </view>
 
-        <!-- 广告横幅（如果开启） -->
-        <custom-ad-banner v-if="canShowBannerAd" v-slot="{ adActive }" @height-change="onAdHeightChange"></custom-ad-banner>
+        <!-- 底部固定广告横幅 (有广告时自然遮挡底部标签描述，无广告时完整展示) -->
+        <custom-ad-banner
+            v-if="canShowBannerAd"
+            @load="onAdLoad"
+            @error="onAdError"
+            @close="onAdClose"
+        ></custom-ad-banner>
     </view>
 </template>
 
@@ -119,6 +126,7 @@ import { useI18n } from 'vue-i18n';
 import { apiGetSubjectDetail, apiGetClassList } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
@@ -133,6 +141,7 @@ const canShowBannerAd = IS_INTERNATIONAL;
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
+const userStore = useUserStore();
 const isEn = computed(() => locale.value === 'en');
 
 const props = defineProps({
@@ -149,10 +158,32 @@ const isLoading = ref(true);
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
-const adHeight = ref(0);
 
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
+// 微信小程序端胶囊宽度占据，用于标题居中平衡
+const menuButtonWidth = ref(0);
+// #ifdef MP-WEIXIN
+try {
+    if (uni.getMenuButtonBoundingClientRect) {
+        const menu = uni.getMenuButtonBoundingClientRect();
+        if (menu && menu.width) {
+            const windowWidth = uni.getWindowInfo().windowWidth || 375;
+            menuButtonWidth.value = Math.max(0, windowWidth - menu.left + 6);
+        }
+    }
+} catch (e) {}
+// #endif
+
+// 广告激活状态控制：有广告时遮挡描述和标签，无广告时完整展示
+const isAdActive = ref(canShowBannerAd && !userStore.isVip && !!appStore.versionConfig?.ad_enabled);
+
+const onAdLoad = () => {
+    isAdActive.value = true;
+};
+const onAdError = () => {
+    isAdActive.value = false;
+};
+const onAdClose = () => {
+    isAdActive.value = false;
 };
 
 // 当前焦点壁纸对象
@@ -356,6 +387,7 @@ onLoad((options) => {
 }
 
 .nav-bar {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -363,6 +395,8 @@ onLoad((options) => {
 }
 
 .nav-btn {
+    position: relative;
+    z-index: 2;
     width: 72rpx;
     height: 72rpx;
     border-radius: 50%;
@@ -396,32 +430,25 @@ onLoad((options) => {
     }
 }
 
-.nav-center {
-    flex: 1;
-    min-width: 0;
-    padding: 0 20rpx;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4rpx;
+.nav-placeholder {
+    width: 72rpx;
+    height: 72rpx;
+    flex-shrink: 0;
+    pointer-events: none;
+    visibility: hidden;
 }
 
-.subject-badge {
-    display: inline-flex;
+.nav-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
     align-items: center;
-    gap: 6rpx;
-    background: rgba(245, 158, 11, 0.2);
-    border: 1rpx solid rgba(245, 158, 11, 0.35);
-    border-radius: 999rpx;
-    padding: 2rpx 12rpx;
-
-    .badge-text {
-        font-size: 18rpx;
-        font-weight: 800;
-        color: #f59e0b;
-        letter-spacing: 1rpx;
-    }
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .subject-title {
@@ -430,7 +457,7 @@ onLoad((options) => {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 440rpx;
+    max-width: 360rpx;
     transition: color 0.3s ease;
 
     .theme-dark & {
@@ -539,41 +566,44 @@ onLoad((options) => {
     }
 }
 
-/* 核心画廊区域 (居中饱满呈现) */
+/* 核心画廊区域 (居中饱满呈现，无论有无广告上方位置恒定不动) */
 .gallery-wrapper {
     position: relative;
     z-index: 10;
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
     align-items: center;
     box-sizing: border-box;
-    padding-top: 12rpx;
+    padding-top: 76rpx;
 }
 
-/* 壁纸卡片轮播：拉高至 61vh，充实画面重心 */
+/* 壁纸卡片轮播：固定为 59vh 经典修长比例，无论有无广告永不变形 */
 .gallery-swiper {
     width: 100%;
-    height: 61vh;
+    height: 59vh;
 }
 
 .swiper-item-box {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    padding: 8rpx 16rpx 44rpx;
+    padding: 6rpx 16rpx 10rpx;
 }
 
-/* 3D 景深卡片 (1:1 还原视频视差与缩放) */
+/* 3D 景深卡片 (锁定 9:18.2 黄金手机修长比例，绝不变形，居中饱满呈现) */
 .gallery-card {
     position: relative;
-    width: 100%;
+    width: auto;
+    max-width: 100%;
     height: 100%;
+    aspect-ratio: 9 / 18.2;
     border-radius: 36rpx;
     overflow: hidden;
-    transform: scale(0.88) translateY(16rpx);
+    transform: scale(0.9) translateY(8rpx);
     transform-origin: center center;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
@@ -631,7 +661,6 @@ onLoad((options) => {
         padding: 6rpx 18rpx;
         border-radius: 999rpx;
         background: rgba(0, 0, 0, 0.48);
-        border: 1rpx solid rgba(255, 255, 255, 0.22);
         backdrop-filter: blur(16rpx);
 
         .badge-label {
@@ -642,16 +671,19 @@ onLoad((options) => {
     }
 }
 
-/* 下方专题与壁纸详细描述区 (纯文本居中排版，无背景无边框) */
+/* 下方专题与壁纸详细描述区 (无广告时展示：占据剩余空间并垂直居中，消除底部大片空白) */
 .detail-section {
     width: 100%;
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16rpx 40rpx 0;
+    padding: 10rpx 40rpx calc(30rpx + env(safe-area-inset-bottom));
     gap: 16rpx;
     box-sizing: border-box;
+    transition: opacity 0.3s ease;
 }
 
 .pager-indicator {
@@ -659,6 +691,7 @@ onLoad((options) => {
     align-items: baseline;
     gap: 8rpx;
     font-weight: 800;
+    padding: 30rpx 0 12rpx;
 
     .current-num {
         font-size: 40rpx;

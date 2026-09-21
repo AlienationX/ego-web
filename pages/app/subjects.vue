@@ -95,58 +95,94 @@
 
             <!-- Subject Cards List (卡片序列式依次从右向左立体透视滑入) -->
             <view v-else class="subjects-list" :key="listRenderKey">
-                <view
-                    v-for="(item, index) in subjectsList"
-                    :key="`${listRenderKey}-${item.id}`"
-                    class="subject-card"
-                    hover-class="subject-card--active"
-                    :hover-stay-time="150"
-                    :style="{ '--card-delay': `${index < 8 ? (index * 0.16 + 0.06) : 0}s`, animationDelay: `${index < 8 ? (index * 0.16 + 0.06) : 0}s` }"
-                    @click="goDetail(item)"
-                >
-                    <view class="subject-card__header">
-                        <view class="subject-card__badge-row">
-                            <view class="subject-card__badges-group">
-                                <view class="subject-card__badge subject-card__badge--featured" v-if="item.select">
-                                    <text class="badge-icon">✦</text>
-                                    <text class="badge-text">{{ isEn ? 'FEATURED' : t('subjects.featuredBadge') }}</text>
-                                </view>
-                                <view class="subject-card__badge" v-if="item.is_locked">
-                                    <uni-icons type="vip-filled" size="10" color="#fbbf24"></uni-icons>
-                                    <text class="badge-text">PREMIUM</text>
-                                </view>
-                                <view class="subject-card__badge subject-card__badge--neutral" v-else-if="item.tags">
-                                    <text class="badge-text">{{ item.tags.split(',')[0] }}</text>
+                <template v-for="(item, index) in displaySubjectsList" :key="item.is_ad ? item.id : `${listRenderKey}-${item.id}`">
+                    <!-- A. 穿插的原生模板横版卡片广告 (标准卡片外壳包裹，实现与普通专题卡片等高与风格统一) -->
+                    <template v-if="item.is_ad">
+                        <!-- #ifdef MP-WEIXIN -->
+                        <view class="subject-card subject-card--ad">
+                            <view class="subject-card__header">
+                                <view class="subject-card__badge-row">
+                                    <view class="subject-card__badges-group">
+                                        <view class="subject-card__badge subject-card__badge--featured">
+                                            <text class="badge-icon">✦</text>
+                                            <text class="badge-text">{{ isEn ? 'SPONSORED' : '精选推荐' }}</text>
+                                        </view>
+                                        <view class="subject-card__badge subject-card__badge--ad">
+                                            <mdi-icon path="/static/icons/advertisements.svg" size="13px" color="currentColor"></mdi-icon>
+                                            <text class="badge-text">{{ isEn ? 'AD' : '广告' }}</text>
+                                        </view>
+                                    </view>
+                                    <view class="subject-card__meta">
+                                        <text class="meta-item">{{ isEn ? 'Official Sponsor' : '官方赞助推荐' }}</text>
+                                    </view>
                                 </view>
                             </view>
-                            <view class="subject-card__meta">
-                                <text class="meta-item">{{ item.wall_count || 0 }} {{ isEn ? 'Walls' : t('subjects.walls') }}</text>
-                                <text class="meta-separator">·</text>
-                                <text class="meta-item">{{ formatUpdateDate(item.updated_at) }}</text>
+                            <view class="subject-card__ad-container">
+                                <view class="ad-inner-clip">
+                                    <ad-custom
+                                        :unit-id="customHorizontalAdUnitId"
+                                        @load="onCustomAdLoad(item, $event)"
+                                        @error="onCustomAdError(item, $event)"
+                                    />
+                                </view>
                             </view>
                         </view>
-                        
-                        <text class="subject-card__title">
-                            {{ isEn ? (item.name_en || item.name) : item.name }}
-                        </text>
-                        
-                        <text class="subject-card__desc">
-                            {{ isEn ? (item.content_en || item.content) : item.content }}
-                        </text>
-                    </view>
+                        <!-- #endif -->
+                    </template>
 
-                    <!-- Wallpaper Previews Row -->
-                    <view class="subject-card__previews" v-if="item.preview_walls && item.preview_walls.length">
-                        <view class="preview-item" v-for="(img, imgIdx) in item.preview_walls" :key="imgIdx"
-                            :style="{ animationDelay: `calc(var(--card-delay, 0s) + ${(imgIdx * 0.10 + 0.15).toFixed(2)}s)` }">
-                            <image class="preview-img" :src="img.includes('.jpg') ? img.replace('.jpg', '_small.webp') : img" mode="aspectFill" lazy-load></image>
+                    <!-- B. 正常专题卡片 -->
+                    <view
+                        v-else
+                        class="subject-card"
+                        hover-class="subject-card--active"
+                        :hover-stay-time="150"
+                        :style="{ '--card-delay': `${index < 8 ? (index * 0.16 + 0.06) : 0}s`, animationDelay: `${index < 8 ? (index * 0.16 + 0.06) : 0}s` }"
+                        @click="goDetail(item)"
+                    >
+                        <view class="subject-card__header">
+                            <view class="subject-card__badge-row">
+                                <view class="subject-card__badges-group">
+                                    <view class="subject-card__badge subject-card__badge--featured" v-if="item.select">
+                                        <text class="badge-icon">✦</text>
+                                        <text class="badge-text">{{ isEn ? 'FEATURED' : t('subjects.featuredBadge') }}</text>
+                                    </view>
+                                    <view class="subject-card__badge" v-if="item.is_locked">
+                                        <uni-icons type="vip-filled" size="10" color="#fbbf24"></uni-icons>
+                                        <text class="badge-text">PREMIUM</text>
+                                    </view>
+                                    <view class="subject-card__badge subject-card__badge--neutral" v-else-if="item.tags">
+                                        <text class="badge-text">{{ item.tags.split(',')[0] }}</text>
+                                    </view>
+                                </view>
+                                <view class="subject-card__meta">
+                                    <text class="meta-item">{{ item.wall_count || 0 }} {{ isEn ? 'Walls' : t('subjects.walls') }}</text>
+                                    <text class="meta-separator">·</text>
+                                    <text class="meta-item">{{ formatUpdateDate(item.updated_at) }}</text>
+                                </view>
+                            </view>
+                            
+                            <text class="subject-card__title">
+                                {{ isEn ? (item.name_en || item.name) : item.name }}
+                            </text>
+                            
+                            <text class="subject-card__desc">
+                                {{ isEn ? (item.content_en || item.content) : item.content }}
+                            </text>
+                        </view>
+
+                        <!-- Wallpaper Previews Row -->
+                        <view class="subject-card__previews" v-if="item.preview_walls && item.preview_walls.length">
+                            <view class="preview-item" v-for="(img, imgIdx) in item.preview_walls" :key="imgIdx"
+                                :style="{ animationDelay: `calc(var(--card-delay, 0s) + ${(imgIdx * 0.10 + 0.15).toFixed(2)}s)` }">
+                                <image class="preview-img" :src="img.includes('.jpg') ? img.replace('.jpg', '_small.webp') : img" mode="aspectFill" lazy-load></image>
+                            </view>
+                        </view>
+                        <!-- Fallback mesh overlay if empty -->
+                        <view class="subject-card__previews-placeholder" v-else>
+                            <view class="placeholder-mesh"></view>
                         </view>
                     </view>
-                    <!-- Fallback mesh overlay if empty -->
-                    <view class="subject-card__previews-placeholder" v-else>
-                        <view class="placeholder-mesh"></view>
-                    </view>
-                </view>
+                </template>
 
                 <!-- Loading / No More Indicator -->
                 <view class="loading-more">
@@ -162,17 +198,39 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, reactive } from 'vue';
 import { onLoad, onShow, onPageScroll, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetSubjects } from '@/api/wallpaper.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const isEn = computed(() => locale.value === 'en');
+
+// 微信原生模板横版卡片广告位 ID
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const AD_INTERVAL = 5;
+const failedAdIds = reactive(new Set());
+
+// 原生模板广告加载成功回调
+const onCustomAdLoad = (item, e) => {
+    if (item) item.adLoaded = true;
+};
+
+// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+const onCustomAdError = (item, e) => {
+    console.warn('[WeChat Ad] 专题列表卡片广告加载失败/未填充:', item?.id, e?.detail);
+    if (item?.id) {
+        failedAdIds.add(item.id);
+        item.adError = true;
+    }
+};
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
@@ -224,6 +282,35 @@ const noMore = ref(false);
 
 const isFeaturedOnly = ref(false);
 const listRenderKey = ref(0);
+
+// 带有穿插广告的专题展示列表
+const displaySubjectsList = computed(() => {
+    const list = [];
+    const isVip = userStore.isVip;
+    const canShowAd = !isVip && !!customHorizontalAdUnitId.value;
+    let count = 0;
+
+    for (let i = 0; i < subjectsList.value.length; i++) {
+        const item = subjectsList.value[i];
+        list.push(item);
+        count++;
+
+        // 每 AD_INTERVAL 个专题后穿插 1 个横版卡片广告
+        if (canShowAd && count > 0 && count % AD_INTERVAL === 0) {
+            const adIndex = Math.floor(count / AD_INTERVAL);
+            const adId = `subject_ad_${adIndex}`;
+            if (!failedAdIds.has(adId)) {
+                list.push({
+                    is_ad: true,
+                    id: adId,
+                    adLoaded: false,
+                    adError: false,
+                });
+            }
+        }
+    }
+    return list;
+});
 
 const setFeaturedFilter = (val) => {
     if (isFeaturedOnly.value === val) return;
@@ -696,6 +783,49 @@ onShow(() => {
     flex-direction: column;
     gap: 24rpx;
 
+    &--ad {
+        min-height: 540rpx;
+        cursor: default;
+        justify-content: space-between;
+
+        &:active {
+            transform: none !important;
+            box-shadow: 0 12rpx 36rpx var(--shadow-color) !important;
+        }
+
+        .subject-card__ad-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20rpx;
+            overflow: hidden;
+            transform: translateZ(0);
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+            mask-image: radial-gradient(white, black);
+            background: var(--page-background-secondary);
+            box-shadow: 0 6rpx 16rpx var(--shadow-color);
+            margin: auto 0;
+
+            .ad-inner-clip {
+                width: 100%;
+                border-radius: 20rpx;
+                overflow: hidden;
+                transform: translateZ(0);
+                -webkit-mask-image: -webkit-radial-gradient(white, black);
+                mask-image: radial-gradient(white, black);
+            }
+
+            ad-custom,
+            :deep(ad-custom) {
+                width: 100%;
+                border-radius: 20rpx;
+                overflow: hidden;
+                display: block;
+            }
+        }
+    }
+
     &--active, &:active {
         transform: scale(0.98) !important;
         box-shadow: 0 4rpx 14rpx var(--shadow-color) !important;
@@ -767,6 +897,21 @@ onShow(() => {
             background: rgba(40, 179, 137, 0.08);
             border: 1rpx solid rgba(40, 179, 137, 0.16);
             color: #28b389;
+        }
+
+        &--ad {
+            background: rgba(40, 179, 137, 0.08);
+            border: 1rpx solid rgba(40, 179, 137, 0.18);
+            color: #28b389;
+            display: inline-flex;
+            align-items: center;
+            gap: 6rpx;
+
+            .theme-dark & {
+                background: rgba(52, 211, 153, 0.12);
+                border: 1rpx solid rgba(52, 211, 153, 0.24);
+                color: #34d399;
+            }
         }
 
         .badge-text {

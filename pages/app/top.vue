@@ -117,6 +117,19 @@
                         </view>
                     </view>
 
+                    <!-- 通栏横版原生卡片广告 (TOP 3 之后黄金位) -->
+                    <!-- #ifdef MP-WEIXIN -->
+                    <view class="top10-ad-wrap" v-if="canShowAd && !heroAdFailed">
+                        <view class="top10-ad-card">
+                            <ad-custom
+                                :unit-id="customHorizontalAdUnitId"
+                                @load="heroAdLoaded = true"
+                                @error="heroAdFailed = true"
+                            />
+                        </view>
+                    </view>
+                    <!-- #endif -->
+
                     <view class="rank-section" v-if="rankedList.length > 3">
                         <view class="rank-section__title">
                             {{ $t('top10.listTitle') }}
@@ -124,36 +137,55 @@
                         </view>
 
                         <view class="rank-list">
-                            <view
+                            <template
                                 v-for="(item, idx) in rankedList.slice(3)"
                                 :key="`${activeMetric}-${item.id}`"
-                                class="rank-item"
-                                :style="{ animationDelay: `${0.78 + idx * 0.14}s` }"
-                                @click="goPreview(item.id)"
                             >
-                                <view class="rank-item__media">
-                                    <image
-                                        class="rank-item__thumb"
-                                        :src="item.smallPicurl || item.picurl"
-                                        mode="aspectFill"
-                                    ></image>
-                                    <view class="rank-item__index">{{ idx + 4 }}</view>
-                                </view>
-                                <view class="rank-item__body">
-                                    <view class="rank-item__title">{{
-                                        getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id
-                                    }}</view>
-                                    <view class="rank-item__meta">
-                                        <text class="rank-item__category">{{
-                                            getLocalizedItem(item).classify_name || $t('top10.wallpaper')
-                                        }}</text>
-                                        <text class="rank-item__metric">{{ formatMetric(item) }}</text>
+                                <view
+                                    class="rank-item"
+                                    :style="{ animationDelay: `${0.78 + idx * 0.14}s` }"
+                                    @click="goPreview(item.id)"
+                                >
+                                    <view class="rank-item__media">
+                                        <image
+                                            class="rank-item__thumb"
+                                            :src="item.smallPicurl || item.picurl"
+                                            mode="aspectFill"
+                                        ></image>
+                                        <view class="rank-item__index">{{ idx + 4 }}</view>
+                                    </view>
+                                    <view class="rank-item__body">
+                                        <view class="rank-item__title">{{
+                                            getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id
+                                        }}</view>
+                                        <view class="rank-item__meta">
+                                            <text class="rank-item__category">{{
+                                                getLocalizedItem(item).classify_name || $t('top10.wallpaper')
+                                            }}</text>
+                                            <text class="rank-item__metric">{{ formatMetric(item) }}</text>
+                                        </view>
+                                    </view>
+                                    <view class="rank-item__action">
+                                        <uni-icons type="right" size="16" color="#9fb4d1"></uni-icons>
                                     </view>
                                 </view>
-                                <view class="rank-item__action">
-                                    <uni-icons type="right" size="16" color="#9fb4d1"></uni-icons>
+
+                                <!-- 榜单次级展位：每 8 个项穿插一个原生卡片广告 ((idx + 1) % 8 === 0) -->
+                                <!-- #ifdef MP-WEIXIN -->
+                                <view
+                                    class="top10-ad-wrap top10-ad-wrap--inline"
+                                    v-if="(idx + 1) % 8 === 0 && canShowAd && !failedListAds.has(idx)"
+                                >
+                                    <view class="top10-ad-card">
+                                        <ad-custom
+                                            :unit-id="customHorizontalAdUnitId"
+                                            @load="onListAdLoad(idx)"
+                                            @error="onListAdError(idx, $event)"
+                                        />
+                                    </view>
                                 </view>
-                            </view>
+                                <!-- #endif -->
+                            </template>
                         </view>
                     </view>
                 </template>
@@ -216,7 +248,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { onLoad, onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
 import { apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -224,17 +256,36 @@ import { getStatusBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+import { useUserStore } from '@/stores/user.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
 
 const top10WrapPaddingTop = computed(() => `${statusBarHeight.value + 10}px`);
-const top10WrapPaddingBottom = computed(() => 'calc(180rpx + env(safe-area-inset-bottom))');
+const top10WrapPaddingBottom = computed(() => 'calc(max(20px, env(safe-area-inset-bottom)) + 110rpx)');
 const dockBottomStyle = computed(() => 'max(20px, env(safe-area-inset-bottom))');
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const isEn = computed(() => locale.value === 'en');
+
+// 微信原生模板横版卡片广告配置
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const canShowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
+const heroAdLoaded = ref(false);
+const heroAdFailed = ref(false);
+const failedListAds = reactive(new Set());
+
+const onListAdLoad = (idx) => {
+    // 列表广告位加载成功
+};
+
+const onListAdError = (idx, e) => {
+    console.warn('[WeChat Ad] 榜单次级卡片广告加载失败:', idx, e?.detail);
+    failedListAds.add(idx);
+};
 
 const getLocalizedItem = (item) => {
     if (!item) return item;
@@ -319,6 +370,7 @@ const switchMetric = async (metric) => {
         scrollTop: 0,
         duration: 250,
     });
+    failedListAds.clear();
     await getTopList();
 };
 
@@ -369,6 +421,7 @@ const goBack = () => {
 onPullDownRefresh(async () => {
     cache.views = null;
     cache.downloads = null;
+    failedListAds.clear();
     await getTopList();
     uni.stopPullDownRefresh();
 });
@@ -1159,6 +1212,49 @@ onShow(() => {
 
     .rank-item:hover .rank-item__thumb {
         transform: scale(1.08);
+    }
+}
+
+// ── 微信原生模板广告位卡片 ──
+.top10-ad-wrap {
+    width: 100%;
+    margin: 0 0 36rpx;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    line-height: 1;
+
+    &--inline {
+        margin: 0;
+        padding: 0;
+    }
+}
+
+.top10-ad-card {
+    width: 100%;
+    border-radius: 28rpx;
+    overflow: hidden;
+    transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+    background: rgba(24, 36, 49, 0.92);
+    box-shadow:
+        0 10rpx 24rpx rgba(0, 0, 0, 0.2),
+        0 24rpx 48rpx rgba(0, 0, 0, 0.16);
+    line-height: 1;
+
+    .theme-light & {
+        background: #f8fafc;
+        box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
+    }
+
+    ad-custom,
+    :deep(ad-custom) {
+        width: 100%;
+        border-radius: 28rpx;
+        overflow: hidden;
+        display: block;
+        line-height: 1;
     }
 }
 

@@ -109,7 +109,8 @@
 
                     <!-- 保存导出操作按钮 (单一大按钮，VIP 专属) -->
                     <view class="frosted-maker__actions">
-                        <button class="action-btn action-btn--primary action-btn--full" :disabled="isSaving"
+                        <button class="action-btn action-btn--primary action-btn--full"
+                            :class="{ 'is-disabled': isSaving }" :disabled="isSaving"
                             :loading="isSaving" @click="handleSaveClick">
                             <mdi-icon v-if="!userStore.isVip" path="/static/icons/crown-circle.svg" size="20px"
                                 color="#FBBF24"></mdi-icon>
@@ -697,7 +698,6 @@ defineExpose({
                 width: 100%;
             }
 
-            &[disabled],
             &.is-disabled {
                 opacity: 0.75;
                 cursor: not-allowed;

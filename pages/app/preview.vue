@@ -226,13 +226,22 @@
                     </view>
                 </view>
 
+                <!-- 作品参数面板下方原生横版卡片广告（红框区域） -->
+                <!-- #ifdef MP-WEIXIN -->
+                <view class="preview-meta-ad-wrap" v-if="canShowCustomAd && !metaAdFailed">
+                    <view class="preview-meta-ad-card">
+                        <ad-custom
+                            :unit-id="customHorizontalAdUnitId"
+                            @load="metaAdLoaded = true"
+                            @error="metaAdFailed = true"
+                        />
+                    </view>
+                </view>
+                <!-- #endif -->
+
                 <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
             </view>
         </scroll-view>
-
-        <!-- ad广告无法在<swiper>、<scroll-view> 中使用，因此保持在滚动容器外固定展示 -->
-        <custom-ad-banner v-if="canShowBannerAd && shouldShowBottomAd"
-            @height-change="onAdHeightChange"></custom-ad-banner>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -678,6 +687,7 @@ import { isNewUserFreeBenefitAvailable, consumeNewUserFreeDownload } from '@/uti
 import PopupBoardSelect from '@/components/popup-board-select/popup-board-select.vue';
 import AvatarPreviewOverlay from '@/components/avatar-preview-overlay/avatar-preview-overlay.vue';
 import DesktopPreviewOverlay from '@/components/desktop-preview-overlay/desktop-preview-overlay.vue';
+import { AD_CONFIG } from '@/common/config.js';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -692,6 +702,12 @@ const canShowBannerAd = true;
 // #ifndef MP-WEIXIN
 const canShowBannerAd = IS_INTERNATIONAL;
 // #endif
+
+// 微信原生模板横版卡片广告配置 (作品参数面板下方红框区域广告)
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const canShowCustomAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
+const metaAdLoaded = ref(false);
+const metaAdFailed = ref(false);
 
 // 通用导航对话框控制
 const navDialog = ref(null);
@@ -1041,32 +1057,18 @@ const isScrolled = ref(false);
 
 // ── 广告高度，控制预览页滚动区域 ──
 const adHeight = ref(0);
-const shouldShowBottomAd = ref(false);
-const onAdHeightChange = (height) => {
-    adHeight.value = Math.max(0, Number(height) || 0);
-};
-const resetBottomAdBanner = () => {
-    shouldShowBottomAd.value = false;
-    adHeight.value = 0;
-};
 const previewScrollStyle = computed(() => ({
     height: '100vh',
 }));
 const previewLayoutStyle = computed(() => ({
-    paddingBottom: shouldShowBottomAd.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
+    paddingBottom: '0px',
 }));
 
 const handlePreviewScroll = (e) => {
     const scrollTop = Number(e?.detail?.scrollTop || 0);
-    const scrollHeight = Number(e?.detail?.scrollHeight || 0);
 
     // 向上滑动浏览详情时，淡入渐变羽化毛玻璃
     isScrolled.value = scrollTop > 20;
-
-    const recommendScrollTop = Math.max(0, scrollTop - previewHeroHeightPx);
-    const recommendScrollableDistance = Math.max(1, scrollHeight - previewViewportHeightPx - previewHeroHeightPx);
-    const recommendProgress = Math.min(1, recommendScrollTop / recommendScrollableDistance);
-    shouldShowBottomAd.value = recommendProgress >= 0.7;
 
     if (scrollTop > 40 && statusStore.appStatus && !statusStore.appStatus.hasSeenPreviewHint) {
         statusStore.appStatus.hasSeenPreviewHint = true;
@@ -1837,7 +1839,6 @@ onLoad(async (e) => {
     }
 
     if (currentInfo.value) {
-        resetBottomAdBanner();
         readImgsFun();
         recordCurrentHistory();
         incrementViews(currentInfo.value.id);
@@ -1865,7 +1866,6 @@ const swiperChange = (e) => {
         fetchSingleWallDetail(currentInfo.value.id);
     }
 
-    resetBottomAdBanner();
     readImgsFun();
     recordCurrentHistory();
     incrementViews(currentInfo.value.id);
@@ -3626,6 +3626,43 @@ const handleCopyWatermarkId = () => {
                 }
             }
         }
+    }
+}
+
+// ── 作品参数面板下方原生模板卡片广告位（红框区域） ──
+.preview-meta-ad-wrap {
+    width: 100%;
+    padding: 0 24rpx;
+    margin: 10rpx 0 16rpx;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+.preview-meta-ad-card {
+    width: 100%;
+    border-radius: 28rpx;
+    overflow: hidden;
+    transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+    background: rgba(24, 36, 49, 0.92);
+    box-shadow:
+        0 10rpx 24rpx rgba(0, 0, 0, 0.2),
+        0 24rpx 48rpx rgba(0, 0, 0, 0.16);
+    line-height: 1;
+
+    .theme-light & {
+        background: #f8fafc;
+        box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
+    }
+
+    ad-custom,
+    :deep(ad-custom) {
+        width: 100%;
+        border-radius: 28rpx;
+        overflow: hidden;
+        display: block;
+        line-height: 1;
     }
 }
 

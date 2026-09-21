@@ -81,50 +81,69 @@
                         </view>
 
                         <view class="editorial-grid">
-                            <template v-for="(item, idx) in day.items" :key="item.id">
-                                <view class="timeline-card" :class="{ 'timeline-card--wide': idx === 0, 'timeline-card--odd': idx % 2 === 1, 'timeline-card--even': idx > 0 && idx % 2 === 0 }"
-                                    :style="{ '--card-delay': `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s`, animationDelay: `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s` }"
-                                    @click="goPreview(item.id)">
-                                    <image class="timeline-card__image"
-                                        :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
-                                        mode="aspectFill" lazy-load></image>
-                                    <view class="timeline-card__lock" v-if="item.is_locked">
-                                        <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                            <template v-for="(item, idx) in day.items" :key="item.is_ad ? item.id : item.id">
+                                <!-- A. 穿插的卡片广告：左侧横版占两列通栏，右侧竖版占单列并排 -->
+                                <template v-if="item.is_ad">
+                                    <!-- #ifdef MP-WEIXIN -->
+                                    <view
+                                        class="timeline-ad-card"
+                                        :class="item.is_horizontal ? 'timeline-ad-card--horizontal' : 'timeline-ad-card--vertical'"
+                                    >
+                                        <ad-custom
+                                            :unit-id="item.is_horizontal ? customHorizontalAdUnitId : customVerticalAdUnitId"
+                                            @load="onCustomAdLoad(item, $event)"
+                                            @error="onCustomAdError(item, $event)"
+                                        />
                                     </view>
-                                    <view class="timeline-card__overlay"></view>
-                                    <view class="timeline-card__content">
-                                        <view class="timeline-card__classify">
-                                            {{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}
+                                    <!-- #endif -->
+                                </template>
+
+                                <!-- B. 壁纸卡片 -->
+                                <template v-else>
+                                    <view class="timeline-card" :class="{ 'timeline-card--wide': item._wallIdx === 0, 'timeline-card--odd': item._cardCol === 0 && item._wallIdx > 0, 'timeline-card--even': item._cardCol === 1 }"
+                                        :style="{ '--card-delay': `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s`, animationDelay: `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s` }"
+                                        @click="goPreview(item.id)">
+                                        <image class="timeline-card__image"
+                                            :src="item._wallIdx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
+                                            mode="aspectFill" lazy-load></image>
+                                        <view class="timeline-card__lock" v-if="item.is_locked">
+                                            <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                         </view>
-                                        <view class="timeline-card__title">
-                                            {{
-                                                getLocalizedItem(item).description ||
-                                                getLocalizedItem(item).classify_name ||
-                                                `#${item.id}`
-                                            }}
-                                        </view>
-                                        <view class="timeline-card__footer">
-                                            <view class="timeline-card__footer-left">
-                                                <view class="timeline-card__time">
-                                                    <text>{{ formatTime(item) }}</text>
+                                        <view class="timeline-card__overlay"></view>
+                                        <view class="timeline-card__content">
+                                            <view class="timeline-card__classify">
+                                                {{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}
+                                            </view>
+                                            <view class="timeline-card__title">
+                                                {{
+                                                    getLocalizedItem(item).description ||
+                                                    getLocalizedItem(item).classify_name ||
+                                                    `#${item.id}`
+                                                }}
+                                            </view>
+                                            <view class="timeline-card__footer">
+                                                <view class="timeline-card__footer-left">
+                                                    <view class="timeline-card__time">
+                                                        <text>{{ formatTime(item) }}</text>
+                                                    </view>
+                                                </view>
+                                                <view class="timeline-card__score">
+                                                    <mdi-icon path="/static/icons/star.svg" size="14px"
+                                                        color="#ffbf66"></mdi-icon>
+                                                    <text>{{ item.score ?? '--' }}</text>
                                                 </view>
                                             </view>
-                                            <view class="timeline-card__score">
-                                                <mdi-icon path="/static/icons/star.svg" size="14px"
-                                                    color="#ffbf66"></mdi-icon>
-                                                <text>{{ item.score ?? '--' }}</text>
-                                            </view>
                                         </view>
                                     </view>
-                                </view>
 
-                                <!-- 上次浏览标记 -->
-                                <view v-if="item.isLastViewedBoundary" class="last-viewed-divider">
-                                    <view class="last-viewed-divider__line"></view>
-                                    <view class="last-viewed-divider__text">{{ t('timeline.aboveNewWallpapers') }}
+                                    <!-- 上次浏览标记 -->
+                                    <view v-if="item.isLastViewedBoundary" class="last-viewed-divider">
+                                        <view class="last-viewed-divider__line"></view>
+                                        <view class="last-viewed-divider__text">{{ t('timeline.aboveNewWallpapers') }}
+                                        </view>
+                                        <view class="last-viewed-divider__line"></view>
                                     </view>
-                                    <view class="last-viewed-divider__line"></view>
-                                </view>
+                                </template>
                             </template>
                         </view>
                     </view>
@@ -140,7 +159,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, reactive } from 'vue';
 import { onLoad, onShow, onPageScroll, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassList } from '@/api/wallpaper.js';
@@ -148,7 +167,9 @@ import { handlePicUrl, getDayLabel as commonGetDayLabel, MONTH_NAMES_UPPER_EN } 
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+import { useUserStore } from '@/stores/user.js';
 import { useStatusStore } from '@/stores/status.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
@@ -157,8 +178,30 @@ const timelineWrapPaddingBottom = '24px';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
 const statusStore = useStatusStore();
 const isEn = computed(() => locale.value === 'en');
+
+// 微信原生模板横版卡片广告位 ID
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+// 微信原生模板竖版卡片广告位 ID
+const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId || 'adunit-a5e6555b54bcb492');
+const AD_INTERVAL = 8;
+const failedAdIds = reactive(new Set());
+
+// 原生模板广告加载成功回调
+const onCustomAdLoad = (item, e) => {
+    if (item) item.adLoaded = true;
+};
+
+// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+const onCustomAdError = (item, e) => {
+    console.warn('[WeChat Ad] 时间线卡片广告加载失败/未填充:', item?.id, e?.detail);
+    if (item?.id) {
+        failedAdIds.add(item.id);
+        item.adError = true;
+    }
+};
 
 const getLocalizedItem = (item) => {
     if (!item) return item;
@@ -195,17 +238,27 @@ const toDate = (item) => {
     return new Date(raw);
 };
 
+const getMonthKey = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
+
+const getDayKey = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 const getMonthText = (date) => {
     if (isZh.value) {
         return `${date.getMonth() + 1}月`;
     }
-    return MONTH_NAMES_UPPER_EN[date.getMonth()];
+    return MONTH_NAMES_UPPER_EN[date.getMonth()] || `${date.getMonth() + 1}M`;
 };
 
 const getDayLabel = (date) => commonGetDayLabel(date, isZh.value);
-
-const getMonthKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}`;
-const getDayKey = (date) => `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 
 const formatTime = (item) => {
     const date = toDate(item);
@@ -224,6 +277,9 @@ const formatRecentTag = (count) => {
 const monthGroups = computed(() => {
     const list = [];
     const monthMap = new Map();
+    const isVip = userStore.isVip;
+    const canShowAd = !isVip && (!!customHorizontalAdUnitId.value || !!customVerticalAdUnitId.value);
+    let globalWallCount = 0;
 
     latestList.value.forEach((item, index) => {
         const date = toDate(item);
@@ -252,10 +308,14 @@ const monthGroups = computed(() => {
                 day: String(date.getDate()).padStart(2, '0'),
                 label: getDayLabel(date),
                 items: [],
+                wallCount: 0,
+                currentCol: 0, // 0 为新行左列，1 为右列
             };
             monthItem.dayMap.set(dayKey, dayItem);
             monthItem.days.push(dayItem);
         }
+
+        const targetDay = monthItem.dayMap.get(dayKey);
 
         // 判断是否为新旧壁纸边界
         const markedItem = { ...item };
@@ -263,7 +323,38 @@ const monthGroups = computed(() => {
             markedItem.isLastViewedBoundary = true;
         }
 
-        monthItem.dayMap.get(dayKey).items.push(markedItem);
+        markedItem._wallIdx = targetDay.wallCount++;
+        // 记录壁纸卡片实际占据的列位置 (0 为左列，1 为右列)，用于进场左右浮现动画
+        markedItem._cardCol = targetDay.currentCol;
+        targetDay.items.push(markedItem);
+        globalWallCount++;
+
+        // 更新列位置：第 0 张是大卡占两列 (占完后新行仍从 0 开始)，普通小卡占 1 列 (0 -> 1, 1 -> 0)
+        if (markedItem._wallIdx === 0) {
+            targetDay.currentCol = 0;
+        } else {
+            targetDay.currentCol = targetDay.currentCol === 0 ? 1 : 0;
+        }
+
+        // 每 AD_INTERVAL 张壁纸后穿插 1 个卡片广告：
+        // 如果位置在左侧 (currentCol === 0)，作为横版广告占整行 (两列)；
+        // 如果位置在右侧 (currentCol === 1)，作为竖版广告占 1 列，与左侧壁纸并排填满当前行！
+        if (canShowAd && globalWallCount > 0 && globalWallCount % AD_INTERVAL === 0) {
+            const adIndex = Math.floor(globalWallCount / AD_INTERVAL);
+            const adId = `timeline_ad_${adIndex}`;
+            if (!failedAdIds.has(adId)) {
+                const isHorizontal = targetDay.currentCol === 0;
+                targetDay.items.push({
+                    is_ad: true,
+                    is_horizontal: isHorizontal,
+                    id: adId,
+                    adLoaded: false,
+                    adError: false,
+                });
+                // 广告占满后 (横版占整行，竖版补齐右列)，当前行均已满，下一张壁纸均从新行左侧 0 开始！
+                targetDay.currentCol = 0;
+            }
+        }
     });
 
     return list;
@@ -688,6 +779,35 @@ onShow(() => {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20rpx;
+}
+
+.timeline-ad-card {
+    width: 100%;
+    border-radius: 28rpx;
+    overflow: hidden;
+    background: transparent;
+    transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+
+    &--horizontal {
+        grid-column: 1 / -1;
+        margin: 12rpx 0;
+    }
+
+    &--vertical {
+        grid-column: span 1;
+        height: 620rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+    }
+
+    ad-custom {
+        width: 100% !important;
+        display: block;
+    }
 }
 
 // ── 宽幅大卡从屏幕外底部升起 ──

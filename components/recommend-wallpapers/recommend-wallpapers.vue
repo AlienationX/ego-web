@@ -16,29 +16,48 @@
         <view v-else-if="!list.length" class="recommend-panel__empty">{{ t('previewPage.recommend.empty') }}</view>
 
         <view v-else class="recommend-list">
-            <view v-for="item in list" :key="item.id" class="recommend-card" @click="openPreview(item)">
-                <image class="recommend-card__image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
-                <view class="recommend-card__body">
-                    <!-- <view v-if="item.reason" class="recommend-card__reason">{{ item.reason }}</view> -->
-                    <view class="recommend-card__title">{{ getLocalizedItem(item).description || `#${item.id}` }}</view>
-                    <view class="recommend-card__meta">
-                        <text class="recommend-card__meta-text">{{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}</text>
-                        <view class="recommend-card__score">
-                            <mdi-icon path="/static/icons/star.svg" size="16px" color="#f4b400"></mdi-icon>
-                            <text class="recommend-card__score-text">{{ item.score ?? '--' }}</text>
+            <template v-for="(item, idx) in list" :key="item.id">
+                <view class="recommend-card" @click="openPreview(item)">
+                    <image class="recommend-card__image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                    <view class="recommend-card__body">
+                        <!-- <view v-if="item.reason" class="recommend-card__reason">{{ item.reason }}</view> -->
+                        <view class="recommend-card__title">{{ getLocalizedItem(item).description || `#${item.id}` }}</view>
+                        <view class="recommend-card__meta">
+                            <text class="recommend-card__meta-text">{{ getLocalizedItem(item).classify_name || t('top10.wallpaper') }}</text>
+                            <view class="recommend-card__score">
+                                <mdi-icon path="/static/icons/star.svg" size="16px" color="#f4b400"></mdi-icon>
+                                <text class="recommend-card__score-text">{{ item.score ?? '--' }}</text>
+                            </view>
                         </view>
                     </view>
+                    <view class="recommend-card__arrow">
+                        <uni-icons type="right" size="16" :color="arrowIconColor"></uni-icons>
+                    </view>
                 </view>
-                <view class="recommend-card__arrow">
-                    <uni-icons type="right" size="16" :color="arrowIconColor"></uni-icons>
+
+                <!-- 推荐列表流：每 8 个项穿插一个原生模板横版卡片广告 -->
+                <!-- #ifdef MP-WEIXIN -->
+                <view
+                    class="recommend-ad-wrap"
+                    v-if="(idx + 1) % 8 === 0 && canShowCustomAd && !failedAdIndices.has(idx)"
+                >
+                    <view class="recommend-ad-card">
+                        <ad-custom
+                            class="recommend-ad-unit"
+                            :unit-id="customHorizontalAdUnitId"
+                            @load="onAdLoad(idx)"
+                            @error="onAdError(idx, $event)"
+                        />
+                    </view>
                 </view>
-            </view>
+                <!-- #endif -->
+            </template>
         </view>
     </view>
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { apiGetSimilarWall } from '@/api/wallpaper.js';
@@ -47,6 +66,7 @@ import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 const props = defineProps({
     currentInfo: {
@@ -68,6 +88,20 @@ const appStore = useAppStore();
 const list = ref([]);
 const loading = ref(false);
 const isAdmin = computed(() => !!userStore.isAdmin);
+
+// 微信原生模板横版卡片广告配置 (推荐列表流每 8 项穿插广告)
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const canShowCustomAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
+const failedAdIndices = reactive(new Set());
+
+const onAdLoad = (idx) => {
+    // 广告加载成功
+};
+
+const onAdError = (idx, e) => {
+    console.warn('[WeChat Ad] 推荐列表卡片广告加载失败:', idx, e?.detail);
+    failedAdIndices.add(idx);
+};
 
 // 语言切换支持
 const isEn = computed(() => locale.value === 'en');
@@ -154,6 +188,7 @@ const openPreview = (item) => {
 watch(
     () => props.currentInfo?.id,
     () => {
+        failedAdIndices.clear();
         loadRecommend();
     },
     { immediate: true },
@@ -368,6 +403,44 @@ watch(
 
     .recommend-card:hover .recommend-card__image {
         transform: scale(1.08);
+    }
+}
+
+// ── 推荐列表流原生模板卡片广告 ──
+.recommend-ad-wrap {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+.recommend-ad-card {
+    width: 100%;
+    border-radius: 28rpx;
+    overflow: hidden;
+    transform: translateZ(0);
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+    mask-image: radial-gradient(white, black);
+    background: rgba(24, 36, 49, 0.92);
+    box-shadow:
+        0 10rpx 24rpx rgba(0, 0, 0, 0.2),
+        0 24rpx 48rpx rgba(0, 0, 0, 0.16);
+    line-height: 1;
+
+    .theme-light & {
+        background: #f8fafc;
+        box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
+    }
+
+    .recommend-ad-unit {
+        width: 100%;
+        border-radius: 28rpx;
+        overflow: hidden;
+        display: block;
+        line-height: 1;
     }
 }
 </style>

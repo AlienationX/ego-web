@@ -65,40 +65,30 @@
                         <view class="gallery-wrapper" v-else-if="tabStates[index].images.length > 0">
                             <!-- 模式 1: 网格视图 (CSS Grid) -->
                             <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
-                                <view class="modern-card grid-card"
-                                    v-for="(item, idx) in tabStates[index].images"
-                                    :key="index + '-' + item.id + '-' + idx" @click="openPreview(item.id, index)">
-                                    <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
-                                        @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
-                                    <view class="card-overlay" v-if="showCardMeta"></view>
-                                    <view class="card-meta" v-if="showCardMeta">
-                                        <view class="meta-title">{{ getTitle(item) }}</view>
-                                        <view class="meta-footer">
-                                            <view class="meta-tag">{{ getTag(item) }}</view>
-                                            <view class="meta-score">
-                                                <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
-                                                <text class="score-text">{{ item.score || '--' }}</text>
-                                            </view>
+                                <view
+                                    class="modern-card grid-card"
+                                    :class="{ 'is-ad-card': item.is_ad }"
+                                    v-for="(item, idx) in tabStates[index].gridItems"
+                                    :key="item._uniqueKey || (item.is_ad ? item.id : (index + '-' + item.id + '-' + idx))"
+                                    @click="!item.is_ad && openPreview(item.id, index)"
+                                >
+                                    <!-- A. 穿插的原生模板卡片广告 (横跨整行通栏展示，宽度>200px满足微信规范) -->
+                                    <template v-if="item.is_ad">
+                                        <!-- #ifdef MP-WEIXIN -->
+                                        <view class="ad-custom-card">
+                                            <ad-custom
+                                                :unit-id="customHorizontalAdUnitId"
+                                                @load="onCustomAdLoad(item, $event)"
+                                                @error="onCustomAdError(item, $event)"
+                                            />
                                         </view>
-                                    </view>
-                                    <view class="card-lock" v-if="item.is_locked && item.loaded">
-                                        <uni-icons
-                                            v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
-                                            type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
-                                        <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
-                                    </view>
-                                </view>
-                            </view>
+                                        <!-- #endif -->
+                                    </template>
 
-                            <!-- 模式 2: 瀑布流视图 (Flex 双列) - 彻底摆脱 absolute bug -->
-                            <view class="waterfall-layout" v-else>
-                                <!-- 左列 -->
-                                <view class="waterfall-col">
-                                    <view class="modern-card wf-card" v-for="(item, idx) in tabStates[index].leftCol"
-                                        :key="index + '-l-' + item.id + '-' + idx"
-                                        @click="openPreview(item.id, index)">
-                                        <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
-                                            @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
+                                    <!-- B. 正常壁纸卡片 -->
+                                    <template v-else>
+                                        <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
+                                            @load="item.loaded = true" @error="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
                                         <view class="card-meta" v-if="showCardMeta">
                                             <view class="meta-title">{{ getTitle(item) }}</view>
@@ -114,36 +104,98 @@
                                             <uni-icons
                                                 v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                                 type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
-                                            <uni-icons v-else type="locked-filled" size="18"
-                                                color="#F9E9B5"></uni-icons>
+                                            <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                         </view>
+                                    </template>
+                                </view>
+                            </view>
+
+                            <!-- 模式 2: 真实的双列动态平衡瀑布流 (单列穿插原生模板广告卡片) -->
+                            <view class="waterfall-layout" v-else>
+                                <!-- 左列 -->
+                                <view class="waterfall-col">
+                                    <view
+                                        class="modern-card wf-card"
+                                        :class="{ 'is-ad-card': item.is_ad, 'is-loaded': item.adLoaded }"
+                                        v-for="(item, idx) in tabStates[index].leftCol"
+                                        :key="item._uniqueKey || (item.is_ad ? item.id : ('w-l-' + item.id + '-' + idx))"
+                                        @click="!item.is_ad && openPreview(item.id, index)"
+                                    >
+                                        <template v-if="item.is_ad">
+                                            <!-- #ifdef MP-WEIXIN -->
+                                            <view class="ad-custom-card">
+                                                <ad-custom
+                                                    :unit-id="customVerticalAdUnitId"
+                                                    @load="onCustomAdLoad(item, $event)"
+                                                    @error="onCustomAdError(item, $event)"
+                                                />
+                                            </view>
+                                            <!-- #endif -->
+                                        </template>
+                                        <template v-else>
+                                            <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
+                                                @load="item.loaded = true" @error="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
+                                            <view class="card-overlay" v-if="showCardMeta"></view>
+                                            <view class="card-meta" v-if="showCardMeta">
+                                                <view class="meta-title">{{ getTitle(item) }}</view>
+                                                <view class="meta-footer">
+                                                    <view class="meta-tag">{{ getTag(item) }}</view>
+                                                    <view class="meta-score">
+                                                        <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                        <text class="score-text">{{ item.score || '--' }}</text>
+                                                    </view>
+                                                </view>
+                                            </view>
+                                            <view class="card-lock" v-if="item.is_locked && item.loaded">
+                                                <uni-icons
+                                                    v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                                    type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+                                                <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            </view>
+                                        </template>
                                     </view>
                                 </view>
                                 <!-- 右列 -->
                                 <view class="waterfall-col">
-                                    <view class="modern-card wf-card" v-for="(item, idx) in tabStates[index].rightCol"
-                                        :key="index + '-r-' + item.id + '-' + idx"
-                                        @click="openPreview(item.id, index)">
-                                        <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
-                                            @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
-                                        <view class="card-overlay" v-if="showCardMeta"></view>
-                                        <view class="card-meta" v-if="showCardMeta">
-                                            <view class="meta-title">{{ getTitle(item) }}</view>
-                                            <view class="meta-footer">
-                                                <view class="meta-tag">{{ getTag(item) }}</view>
-                                                <view class="meta-score">
-                                                    <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
-                                                    <text class="score-text">{{ item.score || '--' }}</text>
+                                    <view
+                                        class="modern-card wf-card"
+                                        :class="{ 'is-ad-card': item.is_ad, 'is-loaded': item.adLoaded }"
+                                        v-for="(item, idx) in tabStates[index].rightCol"
+                                        :key="item._uniqueKey || (item.is_ad ? item.id : ('w-r-' + item.id + '-' + idx))"
+                                        @click="!item.is_ad && openPreview(item.id, index)"
+                                    >
+                                        <template v-if="item.is_ad">
+                                            <!-- #ifdef MP-WEIXIN -->
+                                            <view class="ad-custom-card">
+                                                <ad-custom
+                                                    :unit-id="customVerticalAdUnitId"
+                                                    @load="onCustomAdLoad(item, $event)"
+                                                    @error="onCustomAdError(item, $event)"
+                                                />
+                                            </view>
+                                            <!-- #endif -->
+                                        </template>
+                                        <template v-else>
+                                            <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
+                                                @load="item.loaded = true" @error="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
+                                            <view class="card-overlay" v-if="showCardMeta"></view>
+                                            <view class="card-meta" v-if="showCardMeta">
+                                                <view class="meta-title">{{ getTitle(item) }}</view>
+                                                <view class="meta-footer">
+                                                    <view class="meta-tag">{{ getTag(item) }}</view>
+                                                    <view class="meta-score">
+                                                        <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                                        <text class="score-text">{{ item.score || '--' }}</text>
+                                                    </view>
                                                 </view>
                                             </view>
-                                        </view>
-                                        <view class="card-lock" v-if="item.is_locked && item.loaded">
-                                            <uni-icons
-                                                v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
-                                                type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
-                                            <uni-icons v-else type="locked-filled" size="18"
-                                                color="#F9E9B5"></uni-icons>
-                                        </view>
+                                            <view class="card-lock" v-if="item.is_locked && item.loaded">
+                                                <uni-icons
+                                                    v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                                    type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
+                                                <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            </view>
+                                        </template>
                                     </view>
                                 </view>
                             </view>
@@ -188,6 +240,7 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { useAppStore } from '@/stores/app.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 // --- Props & Emits ---
 const props = defineProps({
@@ -219,6 +272,10 @@ const currentIndex = ref(props.initialIndex);
 const headerScrollTop = ref(0);
 const dateSortAsc = ref(true);
 
+// 微信原生模板卡片广告位 ID（网格通栏横版广告 / 瀑布流单列竖屏广告）
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId || 'adunit-a5e6555b54bcb492');
+
 const isWaterfall = computed(() =>
     props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'
 );
@@ -242,17 +299,21 @@ const shouldShowHeader = computed(() => {
 
 const topSpacerHeight = computed(() => props.showHeader ? props.headerHeight + props.tabsHeight : props.headerHeight || 0);
 
+// 每 8 张壁纸后穿插 1 个原生模板广告
+const AD_INTERVAL = 8;
+// 记录加载失败/无填充的原生广告 ID，确保数据层直接排除不展示
+const failedAdIds = reactive(new Set());
+
 // --- State Management ---
 const createTabState = () => ({
-    images: [], // 扁平化数据供 Grid 使用
-    leftCol: [], // 供双列瀑布流左列使用
-    rightCol: [], // 供双列瀑布流右列使用
-    leftHeight: 0,
-    rightHeight: 0,
+    images: [],         // 纯壁纸数据源
+    gridItems: [],      // 网格展示数据（包含穿插的单列广告）
+    leftCol: [],        // 瀑布流左列数据（含穿插的单列广告）
+    rightCol: [],       // 瀑布流右列数据（含穿插的单列广告）
     pageNum: 1,
     isLoading: false,
     noMoreData: false,
-    scrollIntoViewId: '', // 用于 scroll-into-view 跳转（如返回顶部），不绑定响应式位置
+    scrollIntoViewId: '', // 用于 scroll-into-view 跳转（如返回顶部）
     oldScrollTop: 0,
     showBackTop: false,
     lastQueryStr: '',
@@ -261,37 +322,124 @@ const createTabState = () => ({
 
 const tabStates = reactive(props.tabs.map(() => createTabState()));
 
+// 获取壁纸的相对高度比例，用于左右列动态平衡计算
+const getItemRatio = (item) => {
+    const w = Number(item.width) || 0;
+    const h = Number(item.height) || 0;
+    if (w > 0 && h > 0) {
+        return Math.max(1.1, Math.min(1.8, h / w));
+    }
+    // 若未返回宽高，使用基于 ID 的确定性自然落差，使左右列自然交错而不死板
+    const hash = ((Number(item.id) || 1) * 7) % 5;
+    const ratios = [1.42, 1.6, 1.35, 1.68, 1.48];
+    return ratios[hash];
+};
+
+// 核心分发排版：同时生成 Grid 与 Waterfall 双列数据
+const updateDisplayData = (index) => {
+    const state = tabStates[index];
+    if (!state) return;
+
+    const rawImages = state.images || [];
+    const isVip = userStore.isVip;
+    const canShowGridAd = !isVip && !!customHorizontalAdUnitId.value;
+    const canShowWfAd = !isVip && !!customVerticalAdUnitId.value;
+
+    // 1. 构建 Grid 展示数据（广告作为通栏卡片占满整行）
+    const gridItems = [];
+    let count = 0;
+    for (let i = 0; i < rawImages.length; i++) {
+        const item = rawImages[i];
+        item._uniqueKey = `wall_${item.id}_${i}`;
+        gridItems.push(item);
+        count++;
+
+        if (canShowGridAd && count > 0 && count % AD_INTERVAL === 0) {
+            const adIndex = Math.floor(count / AD_INTERVAL);
+            const adId = `grid_ad_${index}_${adIndex}`;
+            if (!failedAdIds.has(adId)) {
+                gridItems.push({
+                    is_ad: true,
+                    id: adId,
+                    _uniqueKey: adId,
+                    adLoaded: false,
+                    adError: false,
+                });
+            }
+        }
+    }
+    state.gridItems = gridItems;
+
+    // 2. 构建 Waterfall 双列平衡数据（竖屏广告直接作为单列卡片穿插进入较短列）
+    const leftCol = [];
+    const rightCol = [];
+    let leftH = 0;
+    let rightH = 0;
+    let wfCount = 0;
+
+    for (let i = 0; i < rawImages.length; i++) {
+        const item = rawImages[i];
+        item._uniqueKey = `wall_${item.id}_${i}`;
+        const ratio = getItemRatio(item);
+
+        if (leftH <= rightH) {
+            leftCol.push(item);
+            leftH += ratio;
+        } else {
+            rightCol.push(item);
+            rightH += ratio;
+        }
+        wfCount++;
+
+        // 每 8 张壁纸后穿插 1 个单列竖屏原生模板卡片广告
+        if (canShowWfAd && wfCount > 0 && wfCount % AD_INTERVAL === 0) {
+            const adIndex = Math.floor(wfCount / AD_INTERVAL);
+            const adId = `wf_ad_${index}_${adIndex}`;
+            if (!failedAdIds.has(adId)) {
+                const adItem = {
+                    is_ad: true,
+                    id: adId,
+                    _uniqueKey: adId,
+                    adLoaded: false,
+                    adError: false,
+                };
+                const adRatio = 1.5; // 竖屏原生模板卡片预估高宽比
+                if (leftH <= rightH) {
+                    leftCol.push(adItem);
+                    leftH += adRatio;
+                } else {
+                    rightCol.push(adItem);
+                    rightH += adRatio;
+                }
+            }
+        }
+    }
+    state.leftCol = leftCol;
+    state.rightCol = rightCol;
+};
+
+// 原生模板广告加载成功回调
+const onCustomAdLoad = (item, e) => {
+    if (item) item.adLoaded = true;
+};
+
+// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+const onCustomAdError = (item, e) => {
+    console.warn('[WeChat Ad] 原生模板卡片广告加载失败/未填充，自动隐藏占位:', item?.id, e?.detail);
+    if (item?.id) {
+        failedAdIds.add(item.id);
+        item.adError = true;
+        tabStates.forEach((_, idx) => updateDisplayData(idx));
+    }
+};
+
 // --- Data Fetching & Layout Engine ---
 const distributeItems = async (index, newItems) => {
     const state = tabStates[index];
-
-    // 确保有尺寸信息用于计算瀑布流
-    // 因为后端必定返回宽高，所以这个兜底操作暂时关闭
-    // await Promise.all(newItems.map(async (item) => {
-    //     if (!item.width || !item.height) {
-    //         try {
-    //             const info = await new Promise((res, rej) => uni.getImageInfo({ src: item.smallPicurl, success: res, fail: rej }));
-    //             item.width = info.width || 300;
-    //             item.height = info.height || 600;
-    //         } catch (e) {
-    //             item.width = 300;
-    //             item.height = 600;
-    //         }
-    //     }
-    // }));
-
-    // Flex 双列动态分发算法
     newItems.forEach(item => {
-        const virtualHeight = (item.height / item.width) * 100; // 计算相对高度贡献
-        if (state.leftHeight <= state.rightHeight) {
-            state.leftCol.push(item);
-            state.leftHeight += virtualHeight;
-        } else {
-            state.rightCol.push(item);
-            state.rightHeight += virtualHeight;
-        }
         state.images.push(item);
     });
+    updateDisplayData(index);
 };
 
 const fetchData = async (index, init = false) => {
@@ -299,7 +447,15 @@ const fetchData = async (index, init = false) => {
     if (!state || state.isLoading || (state.noMoreData && !init)) return;
 
     if (init) {
-        Object.assign(state, { images: [], leftCol: [], rightCol: [], leftHeight: 0, rightHeight: 0, pageNum: 1, noMoreData: false, hasLoaded: true });
+        Object.assign(state, {
+            images: [],
+            gridItems: [],
+            leftCol: [],
+            rightCol: [],
+            pageNum: 1,
+            noMoreData: false,
+            hasLoaded: true,
+        });
     }
 
     try {
@@ -448,9 +604,17 @@ const handleBackTop = () => {
 
 const openPreview = (id, index) => {
     const appStore = useAppStore();
-    appStore.wallList = tabStates[index].images;
+    // 纯壁纸列表（过滤剔除广告对象）
+    appStore.wallList = (tabStates[index].images || []).filter(item => !item.is_ad);
     uni.navigateTo({ url: `/pages/app/preview?id=${id}` });
 };
+
+// 监听视图模式/列数/VIP 状态变更，重新排版
+watch(() => [isWaterfall.value, colCount.value, userStore.isVip], () => {
+    tabStates.forEach((_, idx) => {
+        updateDisplayData(idx);
+    });
+});
 
 // --- Lifecycle ---
 watch(() => currentIndex.value, (newIdx) => {
@@ -636,22 +800,10 @@ onShow(() => {
     }
 }
 
-/* 瀑布流动画 */
-.waterfall-anim-move,
-.waterfall-anim-enter-active,
-.waterfall-anim-leave-active {
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.waterfall-anim-enter-from,
-.waterfall-anim-leave-to {
-    opacity: 0;
-    transform: scale(0.9) translateY(40rpx);
-}
-
-.waterfall-anim-leave-active {
-    position: absolute !important;
+.ad-custom-card {
     width: 100%;
+    border-radius: 28rpx;
+    overflow: hidden;
 }
 
 /* 卡片 UI (Glassmorphism + 交互) */
@@ -663,45 +815,81 @@ onShow(() => {
     overflow: hidden;
     box-shadow: 0 4rpx 16rpx var(--shadow-color);
     transform: translateZ(0);
+
+    &.grid-card {
+        height: 580rpx;
+
+        &.is-ad-card {
+            grid-column: 1 / -1;
+            width: 100%;
+            height: auto;
+            min-height: 0;
+            background: transparent;
+            box-shadow: none;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    &.wf-card {
+        height: auto;
+
+        &.is-ad-card {
+            width: 100%;
+            height: auto;
+            min-height: 0;
+            background: transparent;
+            box-shadow: none;
+            overflow: hidden;
+        }
+    }
+
+    &.is-ad-card {
+        .ad-custom-card {
+            width: 100%;
+            border-radius: 28rpx;
+            overflow: hidden;
+        }
+    }
+
     /* 开启 GPU 加速与平滑过渡 */
-    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-                opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-                filter 0.35s ease,
-                box-shadow 0.35s ease;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.25s ease;
     max-height: 2000rpx;
     opacity: 1;
     transform-origin: center center;
 
-    &.grid-card {
-        height: 580rpx;
-    }
-
     &:active {
         .card-img {
-            transform: scale(1.08);
+            transform: scale(1.06);
         }
     }
 
     @media (hover: hover) {
         &:hover {
             .card-img {
-                transform: scale(1.08);
+                transform: scale(1.06);
             }
         }
     }
 
     .card-img {
         width: 100%;
-        height: 100%;
         display: block;
         opacity: 0;
-        filter: blur(10px);
-        transition: opacity 0.5s ease, filter 0.6s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        filter: blur(8px);
+        transition: opacity 0.4s ease, filter 0.4s ease, transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 
         &.is-loaded {
             opacity: 1;
             filter: blur(0);
         }
+    }
+
+    &.grid-card:not(.is-ad-card) .card-img {
+        height: 100%;
     }
 
     .card-overlay {

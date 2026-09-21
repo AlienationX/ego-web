@@ -13,8 +13,8 @@
 
         <!-- 工具卡片列表（采用页面原生滚动） -->
         <view class="card-container" :style="{ paddingBottom: pagePaddingBottom }">
-            <!-- 1. 壁纸创作工作台 (Hero 置顶主推大卡) -->
-            <view class="tool-card tool-card--workbench" @click="handleWorkbenchClick">
+            <!-- 1. 壁纸创作工作台 (Hero 置顶主推大卡 - 暂隐藏，待bug修复后开放) -->
+            <view v-if="false" class="tool-card tool-card--workbench" @click="handleWorkbenchClick">
                 <view class="workbench-visual">
                     <!-- 三图层叠艺术展示效果 (复刻附件1) -->
                     <view class="preview-item preview-item--left">
@@ -95,8 +95,21 @@
                 </view>
             </view>
 
-            <!-- 4. 光影边框 -->
-            <view class="tool-card tool-card--frame" @click="showComingSoon">
+            <!-- #ifdef MP-WEIXIN -->
+            <!-- 创作页横版原生广告卡片 -->
+            <view class="creation-flow-ad-wrap" v-if="canShowFlowAd && !flowAdFailed">
+                <view class="creation-flow-ad-card">
+                    <ad-custom
+                        :unit-id="customHorizontalAdUnitId"
+                        @load="flowAdLoaded = true"
+                        @error="flowAdFailed = true"
+                    />
+                </view>
+            </view>
+            <!-- #endif -->
+
+            <!-- 4. 光影边框 (暂隐藏，待bug修复后开放) -->
+            <view v-if="false" class="tool-card tool-card--frame" @click="showComingSoon">
                 <view class="card-text-block">
                     <text class="card-title">{{ t('creation.frameTitle') }}</text>
                     <text class="card-desc">{{ t('creation.frameDesc') }}</text>
@@ -151,13 +164,22 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
+const userStore = useUserStore();
+
+// 微信横版原生广告配置
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const flowAdLoaded = ref(false);
+const flowAdFailed = ref(false);
+const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 
 const statusBarHeight = computed(() => getStatusBarHeight() || 24);
 
@@ -798,6 +820,29 @@ const showComingSoon = () => {
             color: #ffd38f;
             font-size: 26rpx;
             text-shadow: 0 0 8rpx #ffd38f;
+        }
+    }
+}
+
+// ── 创作页横版原生信息流广告卡片 ──
+.creation-flow-ad-wrap {
+    width: 100%;
+    box-sizing: border-box;
+
+    .creation-flow-ad-card {
+        width: 100%;
+        border-radius: 40rpx;
+        overflow: hidden;
+        background: var(--bg-card, rgba(255, 255, 255, 0.8));
+        box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.05);
+        transform: translateZ(0);
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+        display: flex;
+        justify-content: center;
+
+        :deep(ad-custom) {
+            width: 100% !important;
+            display: block !important;
         }
     }
 }

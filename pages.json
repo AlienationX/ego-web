@@ -121,13 +121,6 @@
             }
         },
         {
-            "path": "pages/app/subject",
-            "style": {
-                "navigationBarTitleText": "专题",
-                "navigationStyle": "custom"
-            }
-        },
-        {
             "path": "pages/auth/signup",
             "style": {
                 "navigationBarTitleText": "注册",

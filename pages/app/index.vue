@@ -196,6 +196,19 @@
                 </view>
             </view>
 
+            <!-- #ifdef MP-WEIXIN -->
+            <!-- 首页推荐流横版原生广告卡片 -->
+            <view class="home-flow-ad-wrap" v-if="canShowFlowAd && !homeFlowAdFailed">
+                <view class="home-flow-ad-card">
+                    <ad-custom
+                        :unit-id="customHorizontalAdUnitId"
+                        @load="homeFlowAdLoaded = true"
+                        @error="homeFlowAdFailed = true"
+                    />
+                </view>
+            </view>
+            <!-- #endif -->
+
             <!-- Subscription Signals -->
             <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout-new"
                 :class="{ 'is-expanded': followingExpanded }">
@@ -325,37 +338,51 @@
                     <view class="waterfall-col">
                         <view
                             v-for="(item, idx) in recommendLeftCol"
-                            :key="'l-' + item.id + '-' + idx"
+                            :key="item.is_ad ? item.id : ('l-' + item.id + '-' + idx)"
                             class="waterfall-card"
-                            hover-class="waterfall-card--active"
+                            :class="{ 'is-ad-card': item.is_ad }"
+                            :hover-class="item.is_ad ? '' : 'waterfall-card--active'"
                             :hover-stay-time="120"
-                            @click="goPreview(item.id, recommendWallpapers)"
+                            @click="!item.is_ad && goPreview(item.id, recommendWallpapers)"
                         >
-                            <image
-                                class="waterfall-card__img"
-                                :src="item.smallPicurl || item.picurl"
-                                mode="widthFix"
-                                lazy-load
-                                @load="item.loaded = true"
-                                :class="{ 'is-loaded': item.loaded }"
-                            ></image>
-                            <view class="waterfall-card__overlay"></view>
-                            <view class="waterfall-card__meta">
-                                <text class="meta-title">{{ getWallTitle(item) }}</text>
-                                <view class="meta-footer">
-                                    <text class="meta-tag">{{ getWallTag(item) }}</text>
-                                    <view class="meta-score" v-if="item.score">
-                                        <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
-                                        <text class="score-num">{{ item.score }}</text>
+                            <template v-if="item.is_ad">
+                                <!-- #ifdef MP-WEIXIN -->
+                                <view class="ad-custom-card">
+                                    <ad-custom
+                                        :unit-id="customVerticalAdUnitId"
+                                        @load="onCustomAdLoad(item, $event)"
+                                        @error="onCustomAdError(item, $event)"
+                                    />
+                                </view>
+                                <!-- #endif -->
+                            </template>
+                            <template v-else>
+                                <image
+                                    class="waterfall-card__img"
+                                    :src="item.smallPicurl || item.picurl"
+                                    mode="widthFix"
+                                    lazy-load
+                                    @load="item.loaded = true"
+                                    :class="{ 'is-loaded': item.loaded }"
+                                ></image>
+                                <view class="waterfall-card__overlay"></view>
+                                <view class="waterfall-card__meta">
+                                    <text class="meta-title">{{ getWallTitle(item) }}</text>
+                                    <view class="meta-footer">
+                                        <text class="meta-tag">{{ getWallTag(item) }}</text>
+                                        <view class="meta-score" v-if="item.score">
+                                            <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                            <text class="score-num">{{ item.score }}</text>
+                                        </view>
                                     </view>
                                 </view>
-                            </view>
-                            <view class="waterfall-card__lock" v-if="item.is_locked">
-                                <uni-icons
-                                    v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
-                                    type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
-                                <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
-                            </view>
+                                <view class="waterfall-card__lock" v-if="item.is_locked">
+                                    <uni-icons
+                                        v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                        type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
+                                    <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
+                                </view>
+                            </template>
                         </view>
                     </view>
 
@@ -363,37 +390,51 @@
                     <view class="waterfall-col">
                         <view
                             v-for="(item, idx) in recommendRightCol"
-                            :key="'r-' + item.id + '-' + idx"
+                            :key="item.is_ad ? item.id : ('r-' + item.id + '-' + idx)"
                             class="waterfall-card"
-                            hover-class="waterfall-card--active"
+                            :class="{ 'is-ad-card': item.is_ad }"
+                            :hover-class="item.is_ad ? '' : 'waterfall-card--active'"
                             :hover-stay-time="120"
-                            @click="goPreview(item.id, recommendWallpapers)"
+                            @click="!item.is_ad && goPreview(item.id, recommendWallpapers)"
                         >
-                            <image
-                                class="waterfall-card__img"
-                                :src="item.smallPicurl || item.picurl"
-                                mode="widthFix"
-                                lazy-load
-                                @load="item.loaded = true"
-                                :class="{ 'is-loaded': item.loaded }"
-                            ></image>
-                            <view class="waterfall-card__overlay"></view>
-                            <view class="waterfall-card__meta">
-                                <text class="meta-title">{{ getWallTitle(item) }}</text>
-                                <view class="meta-footer">
-                                    <text class="meta-tag">{{ getWallTag(item) }}</text>
-                                    <view class="meta-score" v-if="item.score">
-                                        <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
-                                        <text class="score-num">{{ item.score }}</text>
+                            <template v-if="item.is_ad">
+                                <!-- #ifdef MP-WEIXIN -->
+                                <view class="ad-custom-card">
+                                    <ad-custom
+                                        :unit-id="customVerticalAdUnitId"
+                                        @load="onCustomAdLoad(item, $event)"
+                                        @error="onCustomAdError(item, $event)"
+                                    />
+                                </view>
+                                <!-- #endif -->
+                            </template>
+                            <template v-else>
+                                <image
+                                    class="waterfall-card__img"
+                                    :src="item.smallPicurl || item.picurl"
+                                    mode="widthFix"
+                                    lazy-load
+                                    @load="item.loaded = true"
+                                    :class="{ 'is-loaded': item.loaded }"
+                                ></image>
+                                <view class="waterfall-card__overlay"></view>
+                                <view class="waterfall-card__meta">
+                                    <text class="meta-title">{{ getWallTitle(item) }}</text>
+                                    <view class="meta-footer">
+                                        <text class="meta-tag">{{ getWallTag(item) }}</text>
+                                        <view class="meta-score" v-if="item.score">
+                                            <mdi-icon path="/static/icons/star.svg" size="14px" color="#ffbf66"></mdi-icon>
+                                            <text class="score-num">{{ item.score }}</text>
+                                        </view>
                                     </view>
                                 </view>
-                            </view>
-                            <view class="waterfall-card__lock" v-if="item.is_locked">
-                                <uni-icons
-                                    v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
-                                    type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
-                                <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
-                            </view>
+                                <view class="waterfall-card__lock" v-if="item.is_locked">
+                                    <uni-icons
+                                        v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
+                                        type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
+                                    <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
+                                </view>
+                            </template>
                         </view>
                     </view>
                 </view>
@@ -457,7 +498,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive, watch } from 'vue';
 import { onShareAppMessage, onShareTimeline, onPageScroll, onReachBottom, onPullDownRefresh, onTabItemTap } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
@@ -471,6 +512,7 @@ import {
     apiPostRecommend,
 } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { AD_CONFIG } from '@/common/config.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
@@ -564,22 +606,88 @@ const switchFeedTab = (tab) => {
     activeFeedTab.value = tab;
 };
 
-// 瀑布流双列高度平衡分发算法
-const distributeRecommendItems = (newItems = []) => {
-    newItems.forEach((item) => {
+// 微信原生模板卡片广告位 ID
+const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId || 'adunit-a5e6555b54bcb492');
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const homeFlowAdLoaded = ref(false);
+const homeFlowAdFailed = ref(false);
+const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
+const AD_INTERVAL = 8;
+const failedAdIds = reactive(new Set());
+
+// 原生模板广告加载成功回调
+const onCustomAdLoad = (item, e) => {
+    if (item) item.adLoaded = true;
+};
+
+// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+const onCustomAdError = (item, e) => {
+    console.warn('[WeChat Ad] 首页推荐竖屏卡片广告加载失败/未填充:', item?.id, e?.detail);
+    if (item?.id) {
+        failedAdIds.add(item.id);
+        item.adError = true;
+        updateRecommendCols();
+    }
+};
+
+// 瀑布流双列高度平衡分发算法（支持竖屏卡片广告穿插）
+const updateRecommendCols = () => {
+    const left = [];
+    const right = [];
+    let leftH = 0;
+    let rightH = 0;
+    let count = 0;
+    const isVip = userStore.isVip;
+    const canShowAd = !isVip && !!customVerticalAdUnitId.value;
+
+    const list = recommendWallpapers.value || [];
+    for (let i = 0; i < list.length; i++) {
+        const item = list[i];
         const h = Number(item.height) || 600;
         const w = Number(item.width) || 300;
         const virtualHeight = (h / w) * 100;
-        if (recommendLeftHeight.value <= recommendRightHeight.value) {
-            recommendLeftCol.value.push(item);
-            recommendLeftHeight.value += virtualHeight;
+
+        if (leftH <= rightH) {
+            left.push(item);
+            leftH += virtualHeight;
         } else {
-            recommendRightCol.value.push(item);
-            recommendRightHeight.value += virtualHeight;
+            right.push(item);
+            rightH += virtualHeight;
         }
-        recommendWallpapers.value.push(item);
-    });
+        count++;
+
+        // 每 8 张壁纸后穿插 1 个单列竖屏原生模板卡片广告
+        if (canShowAd && count > 0 && count % AD_INTERVAL === 0) {
+            const adIndex = Math.floor(count / AD_INTERVAL);
+            const adId = `home_rec_ad_${adIndex}`;
+            if (!failedAdIds.has(adId)) {
+                const adItem = {
+                    is_ad: true,
+                    id: adId,
+                    adLoaded: false,
+                    adError: false,
+                };
+                const adVirtualHeight = 150; // 竖屏预估高度
+                if (leftH <= rightH) {
+                    left.push(adItem);
+                    leftH += adVirtualHeight;
+                } else {
+                    right.push(adItem);
+                    rightH += adVirtualHeight;
+                }
+            }
+        }
+    }
+    recommendLeftCol.value = left;
+    recommendRightCol.value = right;
+    recommendLeftHeight.value = leftH;
+    recommendRightHeight.value = rightH;
 };
+
+// 监听 VIP 状态变化，实时重新平衡分发广告
+watch(() => userStore.isVip, () => {
+    updateRecommendCols();
+});
 
 const getRecommendWallpapers = async (isAppend = false) => {
     if (recommendLoading.value) return;
@@ -591,6 +699,7 @@ const getRecommendWallpapers = async (isAppend = false) => {
         recommendLeftHeight.value = 0;
         recommendRightHeight.value = 0;
         recommendWallpapers.value = [];
+        failedAdIds.clear();
     }
     try {
         recommendLoading.value = true;
@@ -604,7 +713,12 @@ const getRecommendWallpapers = async (isAppend = false) => {
         const res = await apiPostRecommend(params);
         if (res.code === 200 && res.data) {
             const mapped = res.data.map((item) => ({ ...handlePicUrl(item), loaded: false }));
-            distributeRecommendItems(mapped);
+            if (isAppend) {
+                recommendWallpapers.value.push(...mapped);
+            } else {
+                recommendWallpapers.value = mapped;
+            }
+            updateRecommendCols();
             const totalPages = Number(res.pagination?.total_pages || 1);
             recommendNoMore.value = recommendPageNum.value >= totalPages || res.data.length === 0;
         }
@@ -2075,6 +2189,19 @@ onShareTimeline(() => ({
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
     cursor: pointer;
 
+    &.is-ad-card {
+        background: transparent;
+        box-shadow: none;
+        overflow: hidden;
+        cursor: default;
+
+        .ad-custom-card {
+            width: 100%;
+            border-radius: 28rpx;
+            overflow: hidden;
+        }
+    }
+
     &--active,
     &:active {
         transform: scale(0.97);
@@ -2371,6 +2498,31 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
     &--hero {
         width: 440rpx;
+    }
+}
+
+// ── 首页横版原生信息流广告卡片 ──
+.home-flow-ad-wrap {
+    padding: 0 20rpx;
+    margin: -4rpx 0 26rpx;
+    box-sizing: border-box;
+    width: 100%;
+
+    .home-flow-ad-card {
+        width: 100%;
+        border-radius: 28rpx;
+        overflow: hidden;
+        background: var(--bg-card, rgba(255, 255, 255, 0.8));
+        box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.04);
+        transform: translateZ(0);
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
+        display: flex;
+        justify-content: center;
+
+        :deep(ad-custom) {
+            width: 100% !important;
+            display: block !important;
+        }
     }
 }
 </style>

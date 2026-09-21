@@ -81,8 +81,8 @@
             </view>
         </view>
 
-        <!-- 吸底广告 -->
-        <custom-ad-banner @height-change="onAdHeightChange"></custom-ad-banner>
+        <!-- 吸底广告（搜索前在热词与历史面板展示，搜索后进入结果页隐藏） -->
+        <custom-ad-banner v-if="showWordBoard" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
@@ -122,7 +122,7 @@ const onAdHeightChange = (height) => {
     adHeight.value = Math.max(0, Number(height) || 0);
 };
 const pageWrapStyle = computed(() => ({
-    paddingBottom: adHeight.value > 0 ? `${adHeight.value}px` : '0px',
+    paddingBottom: showWordBoard.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
 }));
 
 const tabs = computed(() => [
