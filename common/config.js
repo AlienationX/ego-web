@@ -52,7 +52,6 @@ export const AD_CONFIG = {
         rewardedVideoUnitId: 'adunit-5bc8686f391d8f66', // 激励视频
         interstitialUnitId: 'adunit-3ac8c1de4df22d9e',   // 插屏广告
         bannerUnitId: 'adunit-73a2b212e6dbda91',         // Banner 广告
-        customUnitId: 'adunit-f3aa3a1ce4b9dc32',         // 原生模板卡片广告
         customHorizontalUnitId: 'adunit-f3aa3a1ce4b9dc32', // 横版卡片广告（网格通栏）
         customVerticalUnitId: 'adunit-a5e6555b54bcb492',   // 竖屏卡片广告（瀑布流单列）
     },
@@ -60,6 +59,8 @@ export const AD_CONFIG = {
     app: {
         rewardedVideoAdpid: '1892019135',
         interstitialAdpid: '1129226586',
+        feedAdpid: '1325478186',        // 信息流广告（文字悬浮，新配置）
+        feedAdpidBackup: '1760125998',   // 信息流广告（上下图，备用/已全渠道审核通过）
         bannerAdpid: '1760125998',
     },
 };

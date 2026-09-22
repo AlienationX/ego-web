@@ -108,17 +108,7 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "ks" : {},
-                    "gdt" : {},
-                    "sigmob" : {},
-                    "gm" : {},
-                    "zy" : {},
-                    "bz" : {},
-                    "fl" : {},
-                    "yt" : {},
-                    "jt" : {},
-                    "wa" : {},
-                    "ms" : {}
+                    "ks" : {}
                 },
                 "oauth" : {
                     "weixin" : {

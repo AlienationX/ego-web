@@ -214,7 +214,7 @@ const userStore = useUserStore();
 const isEn = computed(() => locale.value === 'en');
 
 // 微信原生模板横版卡片广告位 ID
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
 const AD_INTERVAL = 5;
 const failedAdIds = reactive(new Set());
 

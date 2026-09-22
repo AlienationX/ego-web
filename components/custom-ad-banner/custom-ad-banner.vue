@@ -30,11 +30,11 @@ import { AD_CONFIG } from '@/common/config.js';
 const props = defineProps({
     adpid: {
         type: String,
-        default: () => AD_CONFIG.app?.bannerAdpid || '1760125998',
+        default: () => AD_CONFIG.app?.bannerAdpid,
     },
     unitId: {
         type: String,
-        default: () => AD_CONFIG.weixin?.bannerUnitId || 'adunit-73a2b212e6dbda91',
+        default: () => AD_CONFIG.weixin?.bannerUnitId,
     },
     isFixed: {
         type: Boolean,

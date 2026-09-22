@@ -273,8 +273,8 @@ const headerScrollTop = ref(0);
 const dateSortAsc = ref(true);
 
 // 微信原生模板卡片广告位 ID（网格通栏横版广告 / 瀑布流单列竖屏广告）
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
-const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId || 'adunit-a5e6555b54bcb492');
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
+const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId);
 
 const isWaterfall = computed(() =>
     props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'

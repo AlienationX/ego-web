@@ -118,14 +118,26 @@
                     </view>
 
                     <!-- 通栏横版原生卡片广告 (TOP 3 之后黄金位) -->
-                    <!-- #ifdef MP-WEIXIN -->
+                    <!-- #ifdef MP-WEIXIN || APP -->
                     <view class="top10-ad-wrap" v-if="canShowAd && !heroAdFailed">
                         <view class="top10-ad-card">
+                            <!-- #ifdef MP-WEIXIN -->
                             <ad-custom
+                                class="top10-ad-content"
                                 :unit-id="customHorizontalAdUnitId"
                                 @load="heroAdLoaded = true"
                                 @error="heroAdFailed = true"
                             />
+                            <!-- #endif -->
+                            <!-- #ifdef APP -->
+                            <ad
+                                class="top10-ad-content"
+                                :adpid="appFeedAdpid"
+                                @load="heroAdLoaded = true"
+                                @error="heroAdFailed = true"
+                                @close="heroAdFailed = true"
+                            />
+                            <!-- #endif -->
                         </view>
                     </view>
                     <!-- #endif -->
@@ -171,17 +183,29 @@
                                 </view>
 
                                 <!-- 榜单次级展位：每 8 个项穿插一个原生卡片广告 ((idx + 1) % 8 === 0) -->
-                                <!-- #ifdef MP-WEIXIN -->
+                                <!-- #ifdef MP-WEIXIN || APP -->
                                 <view
                                     class="top10-ad-wrap top10-ad-wrap--inline"
                                     v-if="(idx + 1) % 8 === 0 && canShowAd && !failedListAds.has(idx)"
                                 >
                                     <view class="top10-ad-card">
+                                        <!-- #ifdef MP-WEIXIN -->
                                         <ad-custom
+                                            class="top10-ad-content"
                                             :unit-id="customHorizontalAdUnitId"
                                             @load="onListAdLoad(idx)"
                                             @error="onListAdError(idx, $event)"
                                         />
+                                        <!-- #endif -->
+                                        <!-- #ifdef APP -->
+                                        <ad
+                                            class="top10-ad-content"
+                                            :adpid="appFeedAdpid"
+                                            @load="onListAdLoad(idx)"
+                                            @error="onListAdError(idx, $event)"
+                                            @close="onListAdClose(idx)"
+                                        />
+                                        <!-- #endif -->
                                     </view>
                                 </view>
                                 <!-- #endif -->
@@ -271,9 +295,24 @@ const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const isEn = computed(() => locale.value === 'en');
 
-// 微信原生模板横版卡片广告配置
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
-const canShowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
+// 广告位配置（支持微信小程序原生模板卡片 & App 端 uni-AD 信息流）
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
+const appFeedAdpid = computed(() => AD_CONFIG.app?.feedAdpid);
+
+// 跨端广告展示条件（非 VIP 且已配置对应端广告位）
+const canShowAd = computed(() => {
+    if (userStore.isVip) return false;
+    // #ifdef MP-WEIXIN
+    return !!customHorizontalAdUnitId.value;
+    // #endif
+    // #ifdef APP
+    return !!appFeedAdpid.value;
+    // #endif
+    // #ifndef MP-WEIXIN || APP
+    return false;
+    // #endif
+});
+
 const heroAdLoaded = ref(false);
 const heroAdFailed = ref(false);
 const failedListAds = reactive(new Set());
@@ -283,7 +322,12 @@ const onListAdLoad = (idx) => {
 };
 
 const onListAdError = (idx, e) => {
-    console.warn('[WeChat Ad] 榜单次级卡片广告加载失败:', idx, e?.detail);
+    console.warn('[Ad] 榜单次级卡片广告加载失败:', idx, e?.detail);
+    failedListAds.add(idx);
+};
+
+const onListAdClose = (idx) => {
+    // 用户手动点击关闭广告按钮
     failedListAds.add(idx);
 };
 
@@ -1248,9 +1292,12 @@ onShow(() => {
         box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
     }
 
+    .top10-ad-content,
+    ad,
     ad-custom,
+    :deep(ad),
     :deep(ad-custom) {
-        width: 100%;
+        width: 100% !important;
         border-radius: 28rpx;
         overflow: hidden;
         display: block;

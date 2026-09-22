@@ -90,7 +90,7 @@ const loading = ref(false);
 const isAdmin = computed(() => !!userStore.isAdmin);
 
 // 微信原生模板横版卡片广告配置 (推荐列表流每 8 项穿插广告)
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
 const canShowCustomAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 const failedAdIndices = reactive(new Set());
 

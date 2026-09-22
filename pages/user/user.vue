@@ -229,7 +229,7 @@ const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 
 // 微信横版原生广告配置
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
 const flowAdLoaded = ref(false);
 const flowAdFailed = ref(false);
 const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);

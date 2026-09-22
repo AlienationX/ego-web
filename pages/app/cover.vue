@@ -142,9 +142,7 @@
                             {{ draftChanged ? '已选择新封面，待保存' : '未修改，保持当前封面' }}
                         </view>
                     </view>
-                    <button class="save-btn" :disabled="!draftChanged || saving" @click="saveCover">
-                        {{ saving ? '保存中...' : '保存封面' }}
-                    </button>
+                    <button class="save-btn" :disabled="!draftChanged || saving" @click="saveCover">{{ saving ? '保存中...' : '保存封面' }}</button>
                 </view>
             </view>
         </view>
@@ -467,8 +465,13 @@ getClassify();
 }
 
 .mini-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     height: 60rpx;
     padding: 0 24rpx;
+    margin: 0;
+    line-height: 1;
     border-radius: 999rpx;
     border: 1rpx solid var(--panel-border);
     background: var(--page-background-secondary);
@@ -505,6 +508,7 @@ getClassify();
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
     font-size: 24rpx;
     font-weight: 600;
     color: var(--text-primary);
@@ -605,6 +609,7 @@ getClassify();
     display: flex;
     align-items: center;
     justify-content: center;
+    line-height: 1;
     color: var(--text-secondary);
     font-size: 23rpx;
     font-weight: 600;
@@ -742,8 +747,14 @@ getClassify();
 }
 
 .save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     min-width: 220rpx;
     height: 76rpx;
+    padding: 0 32rpx;
+    margin: 0;
+    line-height: 1;
     border-radius: 999rpx;
     border: 1rpx solid var(--text-primary);
     background: var(--text-primary);

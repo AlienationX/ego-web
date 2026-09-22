@@ -607,8 +607,8 @@ const switchFeedTab = (tab) => {
 };
 
 // 微信原生模板卡片广告位 ID
-const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId || 'adunit-a5e6555b54bcb492');
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId);
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
 const homeFlowAdLoaded = ref(false);
 const homeFlowAdFailed = ref(false);
 const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);

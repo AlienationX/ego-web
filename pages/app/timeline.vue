@@ -183,9 +183,9 @@ const statusStore = useStatusStore();
 const isEn = computed(() => locale.value === 'en');
 
 // 微信原生模板横版卡片广告位 ID
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
 // 微信原生模板竖版卡片广告位 ID
-const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId || 'adunit-a5e6555b54bcb492');
+const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId);
 const AD_INTERVAL = 8;
 const failedAdIds = reactive(new Set());
 

@@ -704,7 +704,7 @@ const canShowBannerAd = IS_INTERNATIONAL;
 // #endif
 
 // 微信原生模板横版卡片广告配置 (作品参数面板下方红框区域广告)
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customUnitId || 'adunit-f3aa3a1ce4b9dc32');
+const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
 const canShowCustomAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 const metaAdLoaded = ref(false);
 const metaAdFailed = ref(false);
