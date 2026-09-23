@@ -350,13 +350,6 @@
                     }
                 },
                 {
-                    "path": "discover-test",
-                    "style": {
-                        "navigationBarTitleText": "Discover Test",
-                        "navigationStyle": "custom"
-                    }
-                },
-                {
                     "path": "stream-test",
                     "style": {
                         "navigationBarTitleText": "Test",
@@ -374,6 +367,13 @@
                     "path": "ad-rewarded-test",
                     "style": {
                         "navigationBarTitleText": "Test",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "ad-custom-test",
+                    "style": {
+                        "navigationBarTitleText": "Ad Custom Test",
                         "navigationStyle": "custom"
                     }
                 },

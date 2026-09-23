@@ -366,14 +366,19 @@ onShareTimeline(() => {
     position: absolute;
     inset: 0;
     z-index: 0;
-    background: rgba(15, 23, 42, 0.86);
-    backdrop-filter: blur(28rpx);
-    -webkit-backdrop-filter: blur(28rpx);
-    border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
+    background: rgba(238, 241, 244, 0.85);
+    backdrop-filter: blur(28rpx) saturate(180%);
+    -webkit-backdrop-filter: blur(28rpx) saturate(180%);
+    border-bottom: none;
 
     .theme-light & {
-        background: rgba(255, 255, 255, 0.88);
-        border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
+        background: rgba(238, 241, 244, 0.85);
+        border-bottom: none;
+    }
+
+    .theme-dark & {
+        background: rgba(24, 24, 24, 0.85);
+        border-bottom: none;
     }
 }
 
@@ -402,8 +407,8 @@ onShareTimeline(() => {
 
 .topbar__back,
 .topbar__icon {
-    width: 70rpx;
-    height: 70rpx;
+    width: 72rpx;
+    height: 72rpx;
     border-radius: 999rpx;
     display: flex;
     align-items: center;
@@ -425,8 +430,8 @@ onShareTimeline(() => {
         border-color: rgba(255, 255, 255, 0.08);
 
         .theme-light & {
-            background: rgba(0, 0, 0, 0.05);
-            border-color: rgba(0, 0, 0, 0.06);
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.05);
         }
     }
 }

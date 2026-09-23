@@ -15,7 +15,7 @@
                             {{ tab.label }}
                             <view class="sort-icon" v-if="tab.isDate && currentIndex === index">
                                 <uni-icons :type="dateSortAsc ? 'arrow-up' : 'arrow-down'" size="12"
-                                    :color="settingsStore.isDark ? '#181818' : '#eef1f5'"></uni-icons>
+                                    :color="settingsStore.isDark ? '#181818' : '#eef1f4'"></uni-icons>
                             </view>
                         </view>
                     </view>
@@ -319,8 +319,12 @@ const topSpacerHeight = computed(() => props.showHeader ? props.headerHeight + p
 
 // 每 8 张壁纸后穿插 1 个原生模板广告
 const AD_INTERVAL = 8;
+// 单个列表最多展示的原生广告数量（提升上限，支持下滑持续穿插广告）
+const MAX_INLINE_ADS = 30;
 // 记录加载失败/无填充的原生广告 ID，确保数据层直接排除不展示
 const failedAdIds = reactive(new Set());
+// 记录已成功加载的广告 ID，确保在下滑分页重新计算布局时状态不丢失、老广告不坍塌
+const loadedAdIds = reactive(new Set());
 
 // --- State Management ---
 const createTabState = () => ({
@@ -328,6 +332,12 @@ const createTabState = () => ({
     gridItems: [],      // 网格展示数据（包含穿插的单列广告）
     leftCol: [],        // 瀑布流左列数据（含穿插的单列广告）
     rightCol: [],       // 瀑布流右列数据（含穿插的单列广告）
+    leftH: 0,           // 瀑布流左列当前高度权重
+    rightH: 0,          // 瀑布流右列当前高度权重
+    gridCount: 0,       // 网格已排版壁纸数
+    wfCount: 0,         // 瀑布流已排版壁纸数
+    gridAdCount: 0,     // 网格已插入广告数
+    wfAdCount: 0,       // 瀑布流已插入广告数
     pageNum: 1,
     isLoading: false,
     noMoreData: false,
@@ -340,136 +350,156 @@ const createTabState = () => ({
 
 const tabStates = reactive(props.tabs.map(() => createTabState()));
 
+// 手机壁纸基准高宽比 (1028 * 2380) 约为 2.315
+const BASE_WALLPAPER_RATIO = Number((2380 / 1028).toFixed(3));
+
 // 获取壁纸的相对高度比例，用于左右列动态平衡计算
 const getItemRatio = (item) => {
     const w = Number(item.width) || 0;
     const h = Number(item.height) || 0;
     if (w > 0 && h > 0) {
-        return Math.max(1.1, Math.min(1.8, h / w));
+        return Math.max(1.2, Math.min(2.6, h / w));
     }
-    // 若未返回宽高，使用基于 ID 的确定性自然落差，使左右列自然交错而不死板
+    // 若未返回宽高，基于 1028 * 2380 基准比例轻微交错浮动，使左右列自然平衡
     const hash = ((Number(item.id) || 1) * 7) % 5;
-    const ratios = [1.42, 1.6, 1.35, 1.68, 1.48];
-    return ratios[hash];
+    const offsets = [-0.12, 0.08, -0.05, 0.12, -0.02];
+    return Number((BASE_WALLPAPER_RATIO + offsets[hash]).toFixed(3));
 };
 
-// 核心分发排版：同时生成 Grid 与 Waterfall 双列数据
-const updateDisplayData = (index) => {
+// 增量追加排版引擎：分页新数据追加，老数据纹丝不动（性能最优 + 彻底杜绝老广告消失与瀑布流左右跳动）
+const appendDisplayData = (index, newItems, baseOffset = -1) => {
     const state = tabStates[index];
-    if (!state) return;
+    if (!state || !newItems || !newItems.length) return;
 
-    const rawImages = state.images || [];
     const isVip = userStore.isVip;
     const canShowGridAd = !isVip && hasHorizontalAdConfig.value;
     const canShowWfAd = !isVip && hasVerticalAdConfig.value;
 
-    // 1. 构建 Grid 展示数据（广告作为通栏卡片占满整行）
-    const gridItems = [];
-    let count = 0;
-    for (let i = 0; i < rawImages.length; i++) {
-        const item = rawImages[i];
-        item._uniqueKey = `wall_${item.id}_${i}`;
-        gridItems.push(item);
-        count++;
+    const startIdx = baseOffset >= 0 ? baseOffset : state.images.length;
 
-        if (canShowGridAd && count > 0 && count % AD_INTERVAL === 0) {
-            const adIndex = Math.floor(count / AD_INTERVAL);
-            const adId = `grid_ad_${index}_${adIndex}`;
-            if (!failedAdIds.has(adId)) {
-                gridItems.push({
-                    is_ad: true,
-                    id: adId,
-                    _uniqueKey: adId,
-                    adLoaded: false,
-                    adError: false,
-                });
+    for (let i = 0; i < newItems.length; i++) {
+        const item = newItems[i];
+        const currentIdx = startIdx + i;
+        if (!item._uniqueKey) {
+            item._uniqueKey = `wall_${item.id}_${currentIdx}`;
+        }
+
+        // 1. Grid 增量追加
+        state.gridItems.push(item);
+        state.gridCount++;
+
+        if (canShowGridAd && state.gridCount > 0 && state.gridCount % AD_INTERVAL === 0) {
+            if (state.gridAdCount < MAX_INLINE_ADS) {
+                state.gridAdCount++;
+                const adId = `grid_ad_${index}_${state.gridAdCount}`;
+                if (!failedAdIds.has(adId)) {
+                    state.gridItems.push({
+                        is_ad: true,
+                        id: adId,
+                        _uniqueKey: adId,
+                        adLoaded: loadedAdIds.has(adId),
+                        adError: false,
+                    });
+                }
             }
         }
-    }
-    state.gridItems = gridItems;
 
-    // 2. 构建 Waterfall 双列平衡数据（竖屏广告直接作为单列卡片穿插进入较短列）
-    const leftCol = [];
-    const rightCol = [];
-    let leftH = 0;
-    let rightH = 0;
-    let wfCount = 0;
-
-    for (let i = 0; i < rawImages.length; i++) {
-        const item = rawImages[i];
-        item._uniqueKey = `wall_${item.id}_${i}`;
+        // 2. Waterfall 双列增量追加（哪列矮放哪列，老数据位置绝对不动）
         const ratio = getItemRatio(item);
-
-        if (leftH <= rightH) {
-            leftCol.push(item);
-            leftH += ratio;
+        if (state.leftH <= state.rightH) {
+            state.leftCol.push(item);
+            state.leftH += ratio;
         } else {
-            rightCol.push(item);
-            rightH += ratio;
+            state.rightCol.push(item);
+            state.rightH += ratio;
         }
-        wfCount++;
+        state.wfCount++;
 
-        // 每 8 张壁纸后穿插 1 个单列竖屏原生模板卡片广告
-        if (canShowWfAd && wfCount > 0 && wfCount % AD_INTERVAL === 0) {
-            const adIndex = Math.floor(wfCount / AD_INTERVAL);
-            const adId = `wf_ad_${index}_${adIndex}`;
-            if (!failedAdIds.has(adId)) {
-                const adItem = {
-                    is_ad: true,
-                    id: adId,
-                    _uniqueKey: adId,
-                    adLoaded: false,
-                    adError: false,
-                };
-                const adRatio = 1.5; // 竖屏原生模板卡片预估高宽比
-                if (leftH <= rightH) {
-                    leftCol.push(adItem);
-                    leftH += adRatio;
-                } else {
-                    rightCol.push(adItem);
-                    rightH += adRatio;
+        // 穿插单列竖屏原生模板卡片广告
+        if (canShowWfAd && state.wfCount > 0 && state.wfCount % AD_INTERVAL === 0) {
+            if (state.wfAdCount < MAX_INLINE_ADS) {
+                state.wfAdCount++;
+                const adId = `wf_ad_${index}_${state.wfAdCount}`;
+                if (!failedAdIds.has(adId)) {
+                    const isAlreadyLoaded = loadedAdIds.has(adId);
+                    const adItem = {
+                        is_ad: true,
+                        id: adId,
+                        _uniqueKey: adId,
+                        adLoaded: isAlreadyLoaded,
+                        adError: false,
+                    };
+                    const adRatio = 1.8; // 竖屏原生模板卡片预估高宽比 (1:1.8)
+                    if (state.leftH <= state.rightH) {
+                        state.leftCol.push(adItem);
+                        state.leftH += adRatio;
+                    } else {
+                        state.rightCol.push(adItem);
+                        state.rightH += adRatio;
+                    }
                 }
             }
         }
     }
-    state.leftCol = leftCol;
-    state.rightCol = rightCol;
+};
+
+// 全量重新排版：仅在视图模式（网格/瀑布流）、列数或 VIP 权限切换时调用
+const rebuildDisplayData = (index) => {
+    const state = tabStates[index];
+    if (!state) return;
+
+    const allImages = [...state.images];
+    state.gridItems = [];
+    state.leftCol = [];
+    state.rightCol = [];
+    state.leftH = 0;
+    state.rightH = 0;
+    state.gridCount = 0;
+    state.wfCount = 0;
+    state.gridAdCount = 0;
+    state.wfAdCount = 0;
+
+    appendDisplayData(index, allImages, 0);
 };
 
 // 原生模板广告加载成功回调
 const onCustomAdLoad = (item, e) => {
-    if (item) item.adLoaded = true;
+    if (item) {
+        item.adLoaded = true;
+        if (item.id) loadedAdIds.add(item.id);
+    }
 };
 
-// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+// 原生模板广告错误回调 (优雅折叠消除白块与占位，绝不重算影响老数据排版)
 const onCustomAdError = (item, e) => {
-    console.warn('[Ad] 原生模板卡片广告加载失败/未填充，自动隐藏占位:', item?.id, e?.detail);
+    console.warn('[Ad] 原生模板卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
+        if (loadedAdIds.has(item.id)) {
+            return;
+        }
         item.adError = true;
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-            tabStates.forEach((_, idx) => updateDisplayData(idx));
-        }, 500);
+        failedAdIds.add(item.id);
     }
 };
 
 // 原生模板广告关闭回调 (App端关闭)
 const onCustomAdClose = (item, e) => {
     if (item?.id) {
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-            tabStates.forEach((_, idx) => updateDisplayData(idx));
-        }, 500);
+        item.adError = true;
+        failedAdIds.add(item.id);
     }
 };
 
 // --- Data Fetching & Layout Engine ---
 const distributeItems = async (index, newItems) => {
     const state = tabStates[index];
+    if (!state || !newItems) return;
+    // 1. 增量追加至展示列表（老数据绝对不动）
+    appendDisplayData(index, newItems);
+    // 2. 存入纯壁纸总集合
     newItems.forEach(item => {
         state.images.push(item);
     });
-    updateDisplayData(index);
 };
 
 const fetchData = async (index, init = false) => {
@@ -482,9 +512,26 @@ const fetchData = async (index, init = false) => {
             gridItems: [],
             leftCol: [],
             rightCol: [],
+            leftH: 0,
+            rightH: 0,
+            gridCount: 0,
+            wfCount: 0,
+            gridAdCount: 0,
+            wfAdCount: 0,
             pageNum: 1,
             noMoreData: false,
             hasLoaded: true,
+        });
+        // 清理属于当前 Tab 的广告状态缓存
+        loadedAdIds.forEach(id => {
+            if (id.startsWith(`grid_ad_${index}_`) || id.startsWith(`wf_ad_${index}_`)) {
+                loadedAdIds.delete(id);
+            }
+        });
+        failedAdIds.forEach(id => {
+            if (id.startsWith(`grid_ad_${index}_`) || id.startsWith(`wf_ad_${index}_`)) {
+                failedAdIds.delete(id);
+            }
         });
     }
 
@@ -642,7 +689,7 @@ const openPreview = (id, index) => {
 // 监听视图模式/列数/VIP 状态变更，重新排版
 watch(() => [isWaterfall.value, colCount.value, userStore.isVip], () => {
     tabStates.forEach((_, idx) => {
-        updateDisplayData(idx);
+        rebuildDisplayData(idx);
     });
 });
 
@@ -684,15 +731,23 @@ onShow(() => {
     height: 88rpx;
     display: flex;
     align-items: center;
-    background: var(--page-background);
-    border-bottom: 1rpx solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.03);
+    background: rgba(238, 241, 244, 0.85);
+    backdrop-filter: blur(28rpx) saturate(180%);
+    -webkit-backdrop-filter: blur(28rpx) saturate(180%);
+    border-bottom: none;
+    box-shadow: none;
     will-change: transform;
 
+    .theme-light & {
+        background: rgba(238, 241, 244, 0.85);
+        border-bottom: none;
+        box-shadow: none;
+    }
+
     .theme-dark & {
-        background: var(--page-background);
-        border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
-        box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.35);
+        background: rgba(24, 24, 24, 0.85);
+        border-bottom: none;
+        box-shadow: none;
     }
 }
 
@@ -723,13 +778,20 @@ onShow(() => {
             font-size: 26rpx;
             font-weight: 600;
             color: var(--text-tertiary);
-            background: var(--panel-background-strong);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(0, 0, 0, 0.04);
+            border: 1rpx solid rgba(0, 0, 0, 0.05);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+            .theme-dark & {
+                background: rgba(255, 255, 255, 0.08);
+                border: 1rpx solid rgba(255, 255, 255, 0.08);
+            }
 
             &.active {
                 color: var(--page-background);
                 background: var(--text-primary);
-                box-shadow: 0 8rpx 20rpx var(--shadow-color);
+                border-color: transparent;
+                box-shadow: 0 6rpx 16rpx var(--shadow-color);
             }
 
             .sort-icon {
@@ -761,7 +823,7 @@ onShow(() => {
         align-items: center;
         justify-content: center;
         border-radius: 16rpx;
-        background: rgba(120, 120, 128, 0.08);
+        background: rgba(0, 0, 0, 0.04);
         border: 1rpx solid rgba(0, 0, 0, 0.05);
         transition: transform 0.2s;
 

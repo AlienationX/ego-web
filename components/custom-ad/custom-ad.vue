@@ -114,10 +114,10 @@ const canShowAd = computed(() => {
     // #endif
 });
 
-// 计算容器与卡片高度（竖屏默认 520rpx）
+// 计算容器与卡片高度（竖屏默认 620rpx，按 1.8 比例对应 345rpx 列宽：345 * 1.8 ≈ 620rpx）
 const containerHeight = computed(() => {
     if (props.height) return props.height;
-    return props.direction === 'vertical' ? '520rpx' : 'auto';
+    return props.direction === 'vertical' ? '620rpx' : 'auto';
 });
 
 const containerStyle = computed(() => {
@@ -147,7 +147,7 @@ const cardStyle = computed(() => {
     return style;
 });
 
-// App 端原生 ad 标签的具体样式（确保传递明确的高度值如 520rpx，避免原生 SDK 无法获取高度）
+// App 端原生 ad 标签的具体样式（确保传递明确的高度值如 620rpx，避免原生 SDK 无法获取高度）
 const appAdStyle = computed(() => {
     const style = {
         width: '100%',
@@ -239,15 +239,13 @@ defineExpose({
 
     &--vertical {
         width: 100%;
-        height: var(--ad-height, 520rpx);
+        height: var(--ad-height, 620rpx);
 
         .custom-ad-card {
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            // 竖屏瀑布流单列卡片必须完全透明底色、无阴影、无边框，避免未填满或未就绪时暴露灰白大卡片
+            display: block;
+            box-sizing: border-box;
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
@@ -258,7 +256,8 @@ defineExpose({
         ad-custom,
         :deep(ad),
         :deep(ad-custom) {
-            height: 100% !important;
+            width: 100% !important;
+            display: block;
         }
     }
 }

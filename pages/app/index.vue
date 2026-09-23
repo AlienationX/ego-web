@@ -141,7 +141,7 @@
                     <template #custom>
                         <view class="more-btn" @click="goTimeline" hover-class="more-btn--active" :hover-stay-time="120">
                             <text class="more-btn__text">{{ $t('common.seeAll') }}</text>
-                            <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="18px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
+                            <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="16px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
                         </view>
                     </template>
                 </index-title>
@@ -450,7 +450,7 @@
                         <template #custom>
                             <view class="more-btn" @click="goClasslist(classify.id, classify.name)" hover-class="more-btn--active" :hover-stay-time="120">
                                 <text class="more-btn__text">{{ $t('common.seeAll') }}</text>
-                                <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="18px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
+                                <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="16px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
                             </view>
                         </template>
                     </index-title>

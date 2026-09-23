@@ -39,13 +39,11 @@ const testMenus = [
     { name: 'Watch Later', url: '/pages/app/watch-later' },
     { name: 'Subscriptions', url: '/pages/user/subscriptions' },
     { name: 'Preference Manager', url: '/pages/user/preferences' },
-    { name: 'Membership', url: '/pages/member/payment' },
-    { name: 'Discover (Legacy)', url: '/pages/test/discover-test' },
     { name: 'Stream Test', url: '/pages/test/stream-test' },
     { name: 'MDI Icon Test', url: '/pages/test/mdi-icon-test' },
-    { name: 'Custom Bars', url: '/pages/test/custom-bars' },
     { name: 'Interstitial Ad', url: '/pages/test/ad-interstitial-test' },
     { name: 'Rewarded Video Ad', url: '/pages/test/ad-rewarded-test' },
+    { name: 'Custom & Banner Ad', url: '/pages/test/ad-custom-test' },
     { name: 'PicsView Test', url: '/pages/test/pics-view-test' },
 ];
 

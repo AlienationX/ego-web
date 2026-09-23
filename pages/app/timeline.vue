@@ -820,10 +820,19 @@ onShow(() => {
     overflow: hidden;
     background: transparent;
     transform: translateZ(0);
-    -webkit-mask-image: -webkit-radial-gradient(white, black);
-    mask-image: radial-gradient(white, black);
 
-    &:not(.is-loaded),
+    &:not(.is-loaded) {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     &.is-error {
         display: none !important;
         height: 0 !important;
@@ -833,22 +842,30 @@ onShow(() => {
     }
 
     &--horizontal.is-loaded {
+        position: relative;
+        opacity: 1;
         grid-column: 1 / -1;
+        width: 100%;
         margin: 12rpx 0;
+        transition: opacity 0.3s ease;
     }
 
     &--vertical.is-loaded {
+        position: relative;
+        opacity: 1;
         grid-column: span 1;
+        width: 100%;
         height: 620rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-    }
-
-    ad-custom {
-        width: 100% !important;
         display: block;
+        box-sizing: border-box;
+        transition: opacity 0.3s ease;
+
+        custom-ad,
+        :deep(custom-ad) {
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+        }
     }
 }
 

@@ -1,29 +1,41 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-
-        <view class="search-shell" :style="{ top: `${statusBarHeight}px`, height: `${titleBarHeight}px` }">
-            <view class="search-shell__back" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
-                    :color="settingsStore.isDark ? '#eef5ff' : '#15171c'"></mdi-icon>
-            </view>
-            <view class="search-box search-box--shell">
-                <view class="search-box__icon">
-                    <uni-icons type="search" size="18" color="#7f94b8"></uni-icons>
+        <!-- 统一固定在顶部的毛玻璃搜索外壳 -->
+        <view class="search-top-wrapper" :class="{ 'is-exploring': showWordBoard }">
+            <view class="search-top-bg"></view>
+            <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
+            <view class="search-shell" :style="searchShellStyle">
+                <view class="search-shell__back" @click="goBack">
+                    <mdi-icon
+                        path="/static/icons/arrow-left.svg"
+                        size="20px"
+                        :color="backIconColor"
+                    ></mdi-icon>
                 </view>
-                <input v-model="queryParams.keyword" class="search-box__input" :placeholder="t('common.search')"
-                    :placeholder-style="settingsStore.isDark ? 'color: #7f94b8' : 'color: rgba(21, 23, 28, 0.4)'"
-                    confirm-type="search" @confirm="onSearch" @input="onInput" />
-                <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
-                    <uni-icons type="clear" size="16" color="#7f94b8"></uni-icons>
+                <view class="search-box search-box--shell">
+                    <view class="search-box__icon">
+                        <uni-icons type="search" size="18" :color="searchIconColor"></uni-icons>
+                    </view>
+                    <input
+                        v-model="queryParams.keyword"
+                        class="search-box__input"
+                        :placeholder="t('common.search')"
+                        :placeholder-style="placeholderStyle"
+                        confirm-type="search"
+                        @confirm="onSearch"
+                        @input="onInput"
+                    />
+                    <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
+                        <uni-icons type="clear" size="16" :color="clearIconColor"></uni-icons>
+                    </view>
                 </view>
             </view>
         </view>
 
-        <view class="fill" :style="{ height: `${titleBarHeight}px` }"></view>
-
-        <view class="page-wrap" :style="pageWrapStyle">
-            <view v-if="showWordBoard" class="explore-board">
+        <!-- 探索面板（未搜索状态展示） -->
+        <view v-if="showWordBoard" class="explore-wrap" :style="exploreWrapStyle">
+            <view class="search-top-fill" :style="{ height: `${navBarHeight}px` }"></view>
+            <view class="explore-board">
                 <view class="section-head">
                     <view class="section-head__left">
                         <uni-icons type="fire-filled" size="16" color="#ff4d4f"></uni-icons>
@@ -64,21 +76,30 @@
                     </view>
                 </view>
             </view>
+        </view>
 
-            <view v-else class="list-container">
-                <modern-pics-view :show-header="true" :tabs="tabs" api-type="search" :hide-header-if-empty="true">
-                    <template #empty>
-                        <view class="noResult">
-                            <view class="noResult__icon">
-                                <uni-icons type="search" size="56" color="#619aef"></uni-icons>
-                            </view>
-                            <view class="noResult__title">{{ t('search.noResultTitle') }}</view>
-                            <view class="noResult__text">{{ t('common.noResult') }}</view>
-                            <view class="noResult__code">404_NOT_FOUND</view>
+        <!-- 搜索结果列表（全屏容器，贯穿穿透吸顶） -->
+        <view v-else class="list-container">
+            <modern-pics-view
+                :show-header="true"
+                :tabs="tabs"
+                api-type="search"
+                :hide-header-if-empty="true"
+                :header-height="navBarHeight"
+                :tabs-height="44"
+                :sticky-top="navBarHeight"
+            >
+                <template #empty>
+                    <view class="noResult">
+                        <view class="noResult__icon">
+                            <uni-icons type="search" size="56" color="#619aef"></uni-icons>
                         </view>
-                    </template>
-                </modern-pics-view>
-            </view>
+                        <view class="noResult__title">{{ t('search.noResultTitle') }}</view>
+                        <view class="noResult__text">{{ t('common.noResult') }}</view>
+                        <view class="noResult__code">404_NOT_FOUND</view>
+                    </view>
+                </template>
+            </modern-pics-view>
         </view>
 
         <!-- 吸底广告（搜索前在热词与历史面板展示，搜索后进入结果页隐藏） -->
@@ -92,14 +113,55 @@ import { onLoad, onUnload } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
-import { getStatusBarHeight } from '@/utils/layout.js';
+import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 
+// 计算小程序胶囊按钮右侧避让 padding
+const capsuleRightPadding = ref(0);
+// #ifdef MP-WEIXIN
+try {
+    const menuBtn = uni.getMenuButtonBoundingClientRect();
+    if (menuBtn && menuBtn.width) {
+        const sysInfo = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync();
+        const screenWidth = sysInfo.windowWidth || 375;
+        capsuleRightPadding.value = Math.max(0, (screenWidth - menuBtn.left) + 8);
+    }
+} catch (e) {}
+// #endif
+
 const statusBarHeight = ref(getStatusBarHeight() || 0);
+// 搜索栏包含输入框与返回按钮（高度约40px），需要充足的上下安全边距，标准高度为 56px，确保下方的吸顶栏不会上移遮挡
 const titleBarHeight = ref(56);
+const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
+
+const searchShellStyle = computed(() => {
+    const style = {
+        height: `${titleBarHeight.value}px`,
+    };
+    if (capsuleRightPadding.value > 0) {
+        style.paddingRight = `${capsuleRightPadding.value}px`;
+    }
+    return style;
+});
+
+const backIconColor = computed(() => {
+    return settingsStore.isDark ? '#f8fbff' : '#1e293b';
+});
+
+const searchIconColor = computed(() => {
+    return settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(21, 23, 28, 0.45)';
+});
+
+const clearIconColor = computed(() => {
+    return settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(21, 23, 28, 0.45)';
+});
+
+const placeholderStyle = computed(() => {
+    return settingsStore.isDark ? 'color: rgba(247, 247, 251, 0.4)' : 'color: rgba(21, 23, 28, 0.4)';
+});
 
 const queryParams = ref({
     pageNum: 1,
@@ -121,7 +183,7 @@ const adHeight = ref(0);
 const onAdHeightChange = (height) => {
     adHeight.value = Math.max(0, Number(height) || 0);
 };
-const pageWrapStyle = computed(() => ({
+const exploreWrapStyle = computed(() => ({
     paddingBottom: showWordBoard.value && adHeight.value > 0 ? `${adHeight.value}px` : '0px',
 }));
 
@@ -245,10 +307,6 @@ onUnload(() => {
 </script>
 
 <style lang="scss" scoped>
-.status-bar-bg {
-    background: var(--search-bg);
-}
-
 .layout {
     &.theme-light {
         --search-bg: var(--page-background);
@@ -284,39 +342,107 @@ onUnload(() => {
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
-    background: var(--search-bg);
+    background: var(--page-background);
 }
 
-.search-shell {
-    flex-shrink: 0;
+.search-top-wrapper {
     position: fixed;
+    top: 0;
     left: 0;
     right: 0;
     z-index: 100;
+}
+
+.search-top-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: -2rpx; // 微扩展 2rpx，彻底消除与吸顶 Tabs Bar 拼接处 WebKit 亚像素缝隙产生的暗线
+    z-index: 0;
+    background: rgba(238, 241, 244, 0.85);
+    backdrop-filter: blur(28rpx) saturate(180%);
+    -webkit-backdrop-filter: blur(28rpx) saturate(180%);
+    border-bottom: none;
+    box-shadow: none;
+
+    .theme-light & {
+        background: rgba(238, 241, 244, 0.85);
+        border-bottom: none;
+        box-shadow: none;
+    }
+
+    .theme-dark & {
+        background: rgba(24, 24, 24, 0.85);
+        border-bottom: none;
+        box-shadow: none;
+    }
+}
+
+.status-bar-bg {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    background: transparent;
+}
+
+.search-shell {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     gap: 16rpx;
     padding: 0 24rpx;
-    background: var(--search-bg);
+    background: transparent;
     border-bottom: none;
 }
 
-.page-wrap {
-    flex: 1;
+.search-shell__back {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 999rpx;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1rpx solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.15s ease;
+
+    &:active {
+        transform: scale(0.92);
+    }
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
+    }
+}
+
+.search-top-fill {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.explore-wrap {
+    flex: 1;
     min-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--page-background);
 }
 
 .list-container {
-    flex: 1;
-    min-height: 0;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--page-background);
 }
 
 .list-container :deep(.empty-overlay) {
-    top: 44px;
-    /* 让出顶部 titleBar 的高度，避免遮盖 tabs */
+    top: 154px;
+    /* 让出顶部搜索栏和 tabs 的高度 */
 }
 
 .search-box {
@@ -334,14 +460,26 @@ onUnload(() => {
 .search-box--shell {
     flex: 1;
     min-width: 0;
-    min-height: 76rpx;
-    height: 76rpx;
-    border-radius: 24rpx;
+    min-height: 72rpx;
+    height: 72rpx;
+    border-radius: 999rpx;
     box-shadow: none;
+    padding: 0 24rpx;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1rpx solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1rpx solid rgba(255, 255, 255, 0.08);
+    }
 }
 
 .search-box__icon {
     margin-right: 14rpx;
+    display: flex;
+    align-items: center;
 }
 
 .search-box__input {
@@ -353,7 +491,8 @@ onUnload(() => {
 }
 
 .search-box--shell .search-box__input {
-    height: 74rpx;
+    height: 72rpx;
+    line-height: 72rpx;
     font-size: 26rpx;
 }
 
