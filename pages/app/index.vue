@@ -139,8 +139,10 @@
                 <index-title>
                     <template #name>{{ $t('index.latestRelease') }}</template>
                     <template #custom>
-                        <button size="mini" class="btn is-default" @click="goTimeline">{{ $t('common.seeAll')
-                            }}</button>
+                        <view class="more-btn" @click="goTimeline" hover-class="more-btn--active" :hover-stay-time="120">
+                            <text class="more-btn__text">{{ $t('common.seeAll') }}</text>
+                            <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="18px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
+                        </view>
                     </template>
                 </index-title>
 
@@ -196,18 +198,10 @@
                 </view>
             </view>
 
-            <!-- #ifdef MP-WEIXIN -->
             <!-- 首页推荐流横版原生广告卡片 -->
-            <view class="home-flow-ad-wrap" v-if="canShowFlowAd && !homeFlowAdFailed">
-                <view class="home-flow-ad-card">
-                    <ad-custom
-                        :unit-id="customHorizontalAdUnitId"
-                        @load="homeFlowAdLoaded = true"
-                        @error="homeFlowAdFailed = true"
-                    />
-                </view>
+            <view class="home-flow-ad-wrap">
+                <custom-ad />
             </view>
-            <!-- #endif -->
 
             <!-- Subscription Signals -->
             <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout-new"
@@ -340,21 +334,20 @@
                             v-for="(item, idx) in recommendLeftCol"
                             :key="item.is_ad ? item.id : ('l-' + item.id + '-' + idx)"
                             class="waterfall-card"
-                            :class="{ 'is-ad-card': item.is_ad }"
+                            :class="{ 'is-ad-card': item.is_ad, 'is-ad-loaded': item.adLoaded, 'is-ad-error': item.adError }"
                             :hover-class="item.is_ad ? '' : 'waterfall-card--active'"
                             :hover-stay-time="120"
                             @click="!item.is_ad && goPreview(item.id, recommendWallpapers)"
                         >
                             <template v-if="item.is_ad">
-                                <!-- #ifdef MP-WEIXIN -->
                                 <view class="ad-custom-card">
-                                    <ad-custom
-                                        :unit-id="customVerticalAdUnitId"
+                                    <custom-ad
+                                        direction="vertical"
                                         @load="onCustomAdLoad(item, $event)"
                                         @error="onCustomAdError(item, $event)"
+                                        @close="onCustomAdClose(item, $event)"
                                     />
                                 </view>
-                                <!-- #endif -->
                             </template>
                             <template v-else>
                                 <image
@@ -392,21 +385,20 @@
                             v-for="(item, idx) in recommendRightCol"
                             :key="item.is_ad ? item.id : ('r-' + item.id + '-' + idx)"
                             class="waterfall-card"
-                            :class="{ 'is-ad-card': item.is_ad }"
+                            :class="{ 'is-ad-card': item.is_ad, 'is-ad-loaded': item.adLoaded, 'is-ad-error': item.adError }"
                             :hover-class="item.is_ad ? '' : 'waterfall-card--active'"
                             :hover-stay-time="120"
                             @click="!item.is_ad && goPreview(item.id, recommendWallpapers)"
                         >
                             <template v-if="item.is_ad">
-                                <!-- #ifdef MP-WEIXIN -->
                                 <view class="ad-custom-card">
-                                    <ad-custom
-                                        :unit-id="customVerticalAdUnitId"
+                                    <custom-ad
+                                        direction="vertical"
                                         @load="onCustomAdLoad(item, $event)"
                                         @error="onCustomAdError(item, $event)"
+                                        @close="onCustomAdClose(item, $event)"
                                     />
                                 </view>
-                                <!-- #endif -->
                             </template>
                             <template v-else>
                                 <image
@@ -456,10 +448,10 @@
                     <index-title>
                         <template #name>{{ classify.name }}</template>
                         <template #custom>
-                            <button size="mini" class="btn" :class="themeClasses[idx % themeClasses.length]"
-                                @click="goClasslist(classify.id, classify.name)">
-                                {{ $t('common.seeAll') }}
-                            </button>
+                            <view class="more-btn" @click="goClasslist(classify.id, classify.name)" hover-class="more-btn--active" :hover-stay-time="120">
+                                <text class="more-btn__text">{{ $t('common.seeAll') }}</text>
+                                <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="18px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
+                            </view>
                         </template>
                     </index-title>
 
@@ -606,27 +598,40 @@ const switchFeedTab = (tab) => {
     activeFeedTab.value = tab;
 };
 
-// 微信原生模板卡片广告位 ID
-const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId);
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-const homeFlowAdLoaded = ref(false);
-const homeFlowAdFailed = ref(false);
-const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 const AD_INTERVAL = 8;
 const failedAdIds = reactive(new Set());
+const loadedAdIds = reactive(new Set());
 
-// 原生模板广告加载成功回调
+// 广告加载成功回调
 const onCustomAdLoad = (item, e) => {
-    if (item) item.adLoaded = true;
+    if (item) {
+        item.adLoaded = true;
+        if (item.id) loadedAdIds.add(item.id);
+    }
 };
 
-// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+// 广告错误回调 (优雅折叠消除白块与占位)
 const onCustomAdError = (item, e) => {
-    console.warn('[WeChat Ad] 首页推荐竖屏卡片广告加载失败/未填充:', item?.id, e?.detail);
+    console.warn('[Ad] 首页推荐竖屏卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
-        failedAdIds.add(item.id);
         item.adError = true;
-        updateRecommendCols();
+        // 关键防护：延迟 500ms 重排列，避免在当前同步事件中销毁 DOM 导致 uni-app-view 报 getBoundingClientRect null
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+            updateRecommendCols();
+        }, 500);
+    }
+};
+
+// 广告手动关闭回调
+const onCustomAdClose = (item, e) => {
+    console.warn('[Ad] 首页推荐竖屏卡片广告被关闭:', item?.id);
+    if (item?.id) {
+        item.adError = true;
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+            updateRecommendCols();
+        }, 500);
     }
 };
 
@@ -638,7 +643,14 @@ const updateRecommendCols = () => {
     let rightH = 0;
     let count = 0;
     const isVip = userStore.isVip;
-    const canShowAd = !isVip && !!customVerticalAdUnitId.value;
+    let hasVerticalAd = false;
+    // #ifdef MP-WEIXIN
+    hasVerticalAd = !!AD_CONFIG.weixin?.customVerticalUnitId;
+    // #endif
+    // #ifdef APP
+    hasVerticalAd = !!AD_CONFIG.app?.customVerticalAdpid;
+    // #endif
+    const canShowAd = !isVip && hasVerticalAd;
 
     const list = recommendWallpapers.value || [];
     for (let i = 0; i < list.length; i++) {
@@ -661,13 +673,14 @@ const updateRecommendCols = () => {
             const adIndex = Math.floor(count / AD_INTERVAL);
             const adId = `home_rec_ad_${adIndex}`;
             if (!failedAdIds.has(adId)) {
+                const isLoadedAlready = loadedAdIds.has(adId);
                 const adItem = {
                     is_ad: true,
                     id: adId,
-                    adLoaded: false,
+                    adLoaded: isLoadedAlready,
                     adError: false,
                 };
-                const adVirtualHeight = 150; // 竖屏预估高度
+                const adVirtualHeight = isLoadedAlready ? 150 : 0; // 未加载时占位高度为0，不误偏左右分发
                 if (leftH <= rightH) {
                     left.push(adItem);
                     leftH += adVirtualHeight;
@@ -1661,6 +1674,44 @@ onShareTimeline(() => ({
         padding-right: 4rpx;
     }
 
+    // 扁平+箭头 更多按钮 (大小粗细与 VIP Exclusive 保持一致)
+    .more-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 2rpx;
+        padding: 6rpx 0 6rpx 16rpx;
+        cursor: pointer;
+        line-height: 1;
+        box-sizing: border-box;
+        transition: opacity 0.15s ease;
+
+        &__text {
+            font-size: 24rpx;
+            font-weight: 600;
+            color: var(--text-secondary, #94a3b8);
+            letter-spacing: 0.4rpx;
+            line-height: 1;
+        }
+
+        &__icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            line-height: 1;
+            transition: transform 0.15s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+
+        &:active,
+        &--active {
+            opacity: 0.65;
+
+            .more-btn__icon {
+                transform: translateX(4rpx);
+            }
+        }
+    }
+
     .btn,
     .date .button,
     .refresh-btn {
@@ -2190,15 +2241,45 @@ onShareTimeline(() => ({
     cursor: pointer;
 
     &.is-ad-card {
-        background: transparent;
-        box-shadow: none;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
         overflow: hidden;
         cursor: default;
+
+        &:not(.is-ad-loaded),
+        &.is-ad-error {
+            position: absolute !important;
+            left: -99999rpx !important;
+            top: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+        }
+
+        &.is-ad-loaded {
+            position: relative;
+            opacity: 1;
+            transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
 
         .ad-custom-card {
             width: 100%;
             border-radius: 28rpx;
             overflow: hidden;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
         }
     }
 

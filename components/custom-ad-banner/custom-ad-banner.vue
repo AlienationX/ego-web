@@ -1,6 +1,7 @@
 <template>
     <view
-        v-if="showAd && !isError"
+        v-if="showAd"
+        v-show="!isError"
         class="custom-ad-container"
         :class="[isFixed ? 'is-fixed' : '', settingsStore.isDark ? 'theme-dark' : 'theme-light']"
         :style="{ bottom: calculatedBottom }"
@@ -107,17 +108,26 @@ const onload = (e) => {
     updateHeight(fallbackHeight);
     measureActualHeight();
 };
+let bannerTimer = null;
+
 const onclose = (e) => {
-    isError.value = true;
-    isLoaded.value = false;
     updateHeight(0);
-    emit('close', e);
+    if (bannerTimer) clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => {
+        isError.value = true;
+        isLoaded.value = false;
+        emit('close', e);
+    }, 300);
 };
+
 const onerror = (e) => {
-    isError.value = true;
-    isLoaded.value = false;
     updateHeight(0);
-    emit('error', e);
+    if (bannerTimer) clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => {
+        isError.value = true;
+        isLoaded.value = false;
+        emit('error', e);
+    }, 300);
 };
 
 watch(showAd, (visible) => {

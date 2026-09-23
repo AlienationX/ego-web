@@ -109,13 +109,14 @@
             </view>
         </view>
 
-        <!-- 底部固定广告横幅 (有广告时自然遮挡底部标签描述，无广告时完整展示) -->
-        <custom-ad-banner
-            v-if="canShowBannerAd"
-            @load="onAdLoad"
-            @error="onAdError"
-            @close="onAdClose"
-        ></custom-ad-banner>
+        <!-- 底部广告 (使用 custom-ad 信息流组件) -->
+        <view class="subject-detail-ad">
+            <custom-ad
+                @load="onAdLoad"
+                @error="onAdError"
+                @close="onAdClose"
+            />
+        </view>
     </view>
 </template>
 
@@ -131,12 +132,6 @@ import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 
-// #ifdef MP-WEIXIN
-const canShowBannerAd = true;
-// #endif
-// #ifndef MP-WEIXIN
-const canShowBannerAd = IS_INTERNATIONAL;
-// #endif
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -174,7 +169,7 @@ try {
 // #endif
 
 // 广告激活状态控制：有广告时遮挡描述和标签，无广告时完整展示
-const isAdActive = ref(canShowBannerAd && !userStore.isVip && !!appStore.versionConfig?.ad_enabled);
+const isAdActive = ref(false);
 
 const onAdLoad = () => {
     isAdActive.value = true;
@@ -798,5 +793,16 @@ onLoad((options) => {
         font-weight: 500;
         transition: color 0.3s ease;
     }
+}
+
+.subject-detail-ad {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99;
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+    box-sizing: border-box;
 }
 </style>

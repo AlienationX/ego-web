@@ -41,18 +41,10 @@
                 </view>
             </view>
 
-            <!-- #ifdef MP-WEIXIN -->
             <!-- 分类页横版原生广告卡片 -->
-            <view class="classify-flow-ad-wrap" v-if="canShowFlowAd && !flowAdFailed">
-                <view class="classify-flow-ad-card">
-                    <ad-custom
-                        :unit-id="customHorizontalAdUnitId"
-                        @load="flowAdLoaded = true"
-                        @error="flowAdFailed = true"
-                    />
-                </view>
+            <view class="classify-flow-ad-wrap">
+                <custom-ad border-radius="24rpx" />
             </view>
-            <!-- #endif -->
 
             <!-- 加载骨架屏 -->
             <view v-if="isLoading" class="classify-grid-padding">
@@ -94,7 +86,6 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
-import { AD_CONFIG } from '@/common/config.js';
 
 const isScrolled = ref(false);
 
@@ -111,11 +102,6 @@ const { t, locale } = useI18n();
 const isEn = computed(() => locale.value === 'en');
 const userStore = useUserStore();
 
-// 微信横版原生广告配置
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-const flowAdLoaded = ref(false);
-const flowAdFailed = ref(false);
-const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 
 const statusBarHeight = ref(getStatusBarHeight() || 10);
 const heroTopPadding = computed(() => statusBarHeight.value);

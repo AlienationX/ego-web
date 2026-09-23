@@ -114,7 +114,8 @@
                     "weixin" : {
                         "appid" : "wx74c392f8525b9268",
                         "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
-                    }
+                    },
+                    "apple" : {}
                 },
                 "push" : {},
                 "share" : {
@@ -131,7 +132,9 @@
                         "__platform__" : [ "android" ],
                         "appid" : "wx74c392f8525b9268",
                         "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
-                    }
+                    },
+                    "appleiap" : {},
+                    "google" : {}
                 }
             },
             "icons" : {

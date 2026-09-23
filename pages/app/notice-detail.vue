@@ -15,7 +15,11 @@
                     :color="settingsStore.isDark ? '#f4f8ff' : '#1f2937'"
                 ></mdi-icon>
             </view>
+            <view class="topbar-center">
+                <text class="topbar-title">{{ pageTitle }}</text>
+            </view>
             <view class="topbar-action">
+                <!-- #ifndef MP-WEIXIN -->
                 <view class="share-btn" @click="handleShare" v-if="detail.id">
                     <mdi-icon
                         path="/static/icons/share-variant.svg"
@@ -23,6 +27,11 @@
                         :color="settingsStore.isDark ? '#cbd5e1' : '#475569'"
                     ></mdi-icon>
                 </view>
+                <view class="topbar-placeholder" v-else></view>
+                <!-- #endif -->
+                <!-- #ifdef MP-WEIXIN -->
+                <view class="topbar-placeholder"></view>
+                <!-- #endif -->
             </view>
         </view>
 
@@ -119,6 +128,7 @@ import { getStatusBarHeight } from '@/utils/layout.js';
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 const isEn = computed(() => locale.value === 'en');
+const pageTitle = computed(() => (isEn.value ? 'Notice Details' : '公告详情'));
 
 const props = defineProps({
     id: String,
@@ -286,6 +296,8 @@ onLoad((options) => {
     box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
     transition: all 0.2s ease;
 
+    flex-shrink: 0;
+
     &:active {
         transform: scale(0.92);
         background: rgba(255, 255, 255, 0.9);
@@ -302,9 +314,46 @@ onLoad((options) => {
     }
 }
 
-.topbar-action {
+.topbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 24rpx;
+    height: 68rpx;
     display: flex;
     align-items: center;
+    justify-content: center;
+    max-width: 380rpx;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.topbar-title {
+    font-size: 30rpx;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.5rpx;
+}
+
+.topbar-action {
+    width: 68rpx;
+    height: 68rpx;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topbar-placeholder {
+    width: 68rpx;
+    height: 68rpx;
+    flex-shrink: 0;
+    pointer-events: none;
+    visibility: hidden;
 }
 
 /* 文章容器 */

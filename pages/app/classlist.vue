@@ -1,35 +1,61 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <view
-            class="top-shell"
-            :style="{
-                opacity: topbarOpacity,
-                pointerEvents: topbarOpacity > 0.2 ? 'auto' : 'none',
-            }"
-        >
+        <!-- 顶部常驻导航栏：毛玻璃背景渐变 + 优雅自适应返回/搜索 + 标题微升就位 -->
+        <view class="top-shell">
+            <!-- 毛玻璃半透明背景层，随滚动平滑展现 -->
+            <view
+                class="top-shell__bg"
+                :style="{
+                    opacity: topbarProgress,
+                }"
+            ></view>
+
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
             <view class="topbar" :style="{ height: `${titleBarHeight}px` }">
                 <view class="topbar__left">
-                    <view class="topbar__back topbar__back--bar" @click="goBack">
+                    <view
+                        class="topbar__back"
+                        :class="{ 'is-solid': topbarProgress > 0.6 }"
+                        @click="goBack"
+                    >
                         <mdi-icon
                             path="/static/icons/arrow-left.svg"
                             size="20px"
-                            :color="settingsStore.isDark ? '#f8fbff' : '#1e293b'"
+                            :color="backIconColor"
                         ></mdi-icon>
                     </view>
-                    <view class="topbar__title">{{ heroTitle }}</view>
+                    <view class="topbar__title" :style="topbarTitleStyle">
+                        {{ heroTitle }}
+                    </view>
                 </view>
                 <view class="topbar__actions">
-                    <view class="topbar__icon" @click="goSearch">
-                        <uni-icons type="search" size="18" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
+                    <view
+                        class="topbar__icon"
+                        :class="{ 'is-solid': topbarProgress > 0.6 }"
+                        @click="goSearch"
+                    >
+                        <uni-icons
+                            type="search"
+                            size="18"
+                            :color="actionIconColor"
+                        ></uni-icons>
                     </view>
-                    <view class="topbar__icon" v-if="isAdmin">
-                        <uni-icons type="more-filled" size="18" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
+                    <view
+                        class="topbar__icon"
+                        :class="{ 'is-solid': topbarProgress > 0.6 }"
+                        v-if="isAdmin"
+                    >
+                        <uni-icons
+                            type="more-filled"
+                            size="18"
+                            :color="actionIconColor"
+                        ></uni-icons>
                     </view>
                 </view>
             </view>
         </view>
 
+        <!-- 瀑布流/网格内容区域 -->
         <view class="content-wrapper" :style="contentWrapperStyle">
             <modern-pics-view
                 v-if="tabs.length > 0"
@@ -44,19 +70,16 @@
             ></modern-pics-view>
         </view>
 
-        <view
-            class="hero"
-            :style="{
-                transform: `translateY(${-headerScrollTop}px)`,
-                opacity: 1 - headerScrollTop / heroHeightPx,
-            }"
-        >
-            <image class="hero__image" :src="heroImage" mode="aspectFill"></image>
-            <view class="hero__overlay"></view>
-            <view class="hero__back" :style="{ top: `${statusBarHeight + 12}px` }" @click="goBack">
-                <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#ffffff"></mdi-icon>
-            </view>
-            <view class="hero__content">
+        <!-- Hero 区域：视差慢滑 + 下拉拉伸 + 文字升腾淡出 -->
+        <view class="hero" :style="heroContainerStyle">
+            <image
+                class="hero__image"
+                :src="heroImage"
+                mode="aspectFill"
+                :style="heroImageStyle"
+            ></image>
+            <view class="hero__overlay" :style="heroOverlayStyle"></view>
+            <view class="hero__content" :style="heroContentStyle">
                 <view class="hero__badge">{{ heroBadge }}</view>
                 <view class="hero__title">{{ heroTitle }}</view>
                 <view class="hero__desc">{{ heroDesc }}</view>
@@ -132,13 +155,102 @@ const contentWrapperStyle = computed(() => ({
     paddingBottom: '0px',
 }));
 
-const topbarOpacity = computed(() => {
-    const revealStart = Math.max(0, heroHeightPx - navBarHeight.value - topbarFadeLengthPx);
-    const revealEnd = heroHeightPx - uni.upx2px(44);
+// 当 Tabs 触顶吸附的临界滚动距离
+const collapseDistance = computed(() => Math.max(1, heroHeightPx - navBarHeight.value));
+
+// 顶栏背景过渡进度 (0 到 1)
+// 在 Tabs 达到吸顶前约 140rpx (70px) 开始渐变显现，到达吸顶时刚好为 1
+const topbarProgress = computed(() => {
     const scroll = headerScrollTop.value;
-    if (scroll <= revealStart) return 0;
-    if (scroll >= revealEnd) return 1;
-    return (scroll - revealStart) / (revealEnd - revealStart);
+    const fadeDistance = uni.upx2px(140);
+    const start = Math.max(0, collapseDistance.value - fadeDistance);
+    const end = collapseDistance.value;
+    if (scroll <= start) return 0;
+    if (scroll >= end) return 1;
+    const t = (scroll - start) / (end - start);
+    // 平滑缓动 (Hermite S 曲线插值，两端平缓减速)
+    return t * t * (3 - 2 * t);
+});
+
+// 顶栏图标颜色平滑自适应
+const backIconColor = computed(() => {
+    if (topbarProgress.value > 0.5) {
+        return settingsStore.isDark ? '#f8fbff' : '#1e293b';
+    }
+    return '#ffffff';
+});
+
+const actionIconColor = computed(() => {
+    if (topbarProgress.value > 0.5) {
+        return settingsStore.isDark ? '#94a3b8' : '#64748b';
+    }
+    return 'rgba(255, 255, 255, 0.88)';
+});
+
+// 顶栏标题从下方微幅升起浮现样式
+const topbarTitleStyle = computed(() => {
+    const progress = topbarProgress.value;
+    const translateY = (1 - progress) * 14;
+    return {
+        opacity: progress,
+        transform: `translate3d(0, ${translateY}px, 0)`,
+        pointerEvents: progress > 0.2 ? 'auto' : 'none',
+    };
+});
+
+// Hero 容器位移
+const heroContainerStyle = computed(() => {
+    const scroll = headerScrollTop.value;
+    const translateY = scroll > 0 ? -scroll : 0;
+    return {
+        transform: `translate3d(0, ${translateY}px, 0)`,
+        // 完全被顶栏覆盖后隐藏，避免层级穿透与重绘
+        opacity: scroll >= collapseDistance.value + 40 ? 0 : 1,
+    };
+});
+
+// Hero 图片的视差移动与下拉弹性放大
+const heroImageStyle = computed(() => {
+    const scroll = headerScrollTop.value;
+    if (scroll < 0) {
+        // 下拉弹性放大 (根据下拉距离等比缩放)
+        const scale = 1 + Math.abs(scroll) / heroHeightPx;
+        return {
+            transform: `scale(${scale})`,
+            transformOrigin: 'center top',
+        };
+    }
+    // 上滑视差移动（图片以 0.38 倍速度反向位移，产生深邃景深）
+    const parallaxY = scroll * 0.38;
+    return {
+        transform: `translate3d(0, ${parallaxY}px, 0)`,
+    };
+});
+
+// Hero 遮罩浓度微调
+const heroOverlayStyle = computed(() => {
+    const scroll = Math.max(0, headerScrollTop.value);
+    const progress = Math.min(1, scroll / collapseDistance.value);
+    return {
+        opacity: 1 + progress * 0.15,
+    };
+});
+
+// Hero 文字内容（徽标、大标题、副标题）的升腾淡出动效
+const heroContentStyle = computed(() => {
+    const scroll = Math.max(0, headerScrollTop.value);
+    // 在上滑的前 65% 距离内优雅淡出完毕，完全不与顶栏冲突
+    const fadeEnd = Math.max(1, collapseDistance.value * 0.65);
+    const t = Math.min(1, scroll / fadeEnd);
+    const progress = t * t; // 缓出曲线
+    const opacity = Math.max(0, 1 - progress);
+    const translateY = -t * 26; // 向上微浮 26px
+    const scale = 1 - t * 0.04; // 微缩 4%
+    return {
+        opacity,
+        transform: `translate3d(0, ${translateY}px, 0) scale(${scale})`,
+        transformOrigin: 'left bottom',
+    };
 });
 
 const heroImage = computed(() => {
@@ -247,8 +359,22 @@ onShareTimeline(() => {
     left: 0;
     width: 100%;
     z-index: 100;
-    transition: opacity 0.2s ease;
-    background: var(--page-background);
+    pointer-events: auto;
+}
+
+.top-shell__bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: rgba(15, 23, 42, 0.86);
+    backdrop-filter: blur(28rpx);
+    -webkit-backdrop-filter: blur(28rpx);
+    border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
+
+    .theme-light & {
+        background: rgba(255, 255, 255, 0.88);
+        border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
+    }
 }
 
 .status-bar-bg {
@@ -257,6 +383,8 @@ onShareTimeline(() => {
 }
 
 .topbar {
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -280,25 +408,26 @@ onShareTimeline(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-}
+    // 初始浮在大图上的半透明毛玻璃质感，无论背景明暗均清晰醒目
+    background: rgba(10, 14, 21, 0.44);
+    border: 1rpx solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(14rpx);
+    -webkit-backdrop-filter: blur(14rpx);
+    transition: background 0.22s ease, border-color 0.22s ease, transform 0.15s ease;
 
-.topbar__back {
-    background: rgba(0, 0, 0, 0.04);
-    border: 1rpx solid rgba(0, 0, 0, 0.06);
-
-    .theme-dark & {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1rpx solid rgba(255, 255, 255, 0.08);
+    &:active {
+        transform: scale(0.92);
     }
-}
 
-.topbar__back--bar {
-    background: rgba(0, 0, 0, 0.04);
-    border: 1rpx solid rgba(0, 0, 0, 0.06);
+    // 吸顶后的柔和背景胶囊
+    &.is-solid {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.08);
 
-    .theme-dark & {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1rpx solid rgba(255, 255, 255, 0.08);
+        .theme-light & {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.06);
+        }
     }
 }
 
@@ -310,6 +439,7 @@ onShareTimeline(() => {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 420rpx;
+    will-change: transform, opacity;
 
     .theme-light & {
         color: var(--text-primary);
@@ -322,22 +452,9 @@ onShareTimeline(() => {
     gap: 10rpx;
 }
 
-.topbar__icon {
-    background: rgba(0, 0, 0, 0.04);
-    border: 1rpx solid rgba(0, 0, 0, 0.05);
-
-    .theme-dark & {
-        background: rgba(255, 255, 255, 0.06);
-        border: 1rpx solid rgba(255, 255, 255, 0.08);
-    }
-}
-
-.fill {
-    flex-shrink: 0;
-}
-
 .content-wrapper {
     flex: 1;
+    min-height: 0;
     width: 100%;
     position: relative;
     overflow: hidden;
@@ -351,40 +468,27 @@ onShareTimeline(() => {
     height: 560rpx;
     z-index: 10;
     pointer-events: none;
+    overflow: hidden;
     will-change: transform, opacity;
 }
 
-.hero__content,
-.hero__back {
-    pointer-events: auto;
-}
-
-.hero__back {
-    position: absolute;
-    left: 24rpx;
-    z-index: 10;
-    width: 72rpx;
-    height: 72rpx;
-    border-radius: 999rpx;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(10, 14, 21, 0.46);
-    border: 1rpx solid rgba(255, 255, 255, 0.08);
-}
-
 .hero__image {
+    position: absolute;
+    top: -15%;
+    left: 0;
     width: 100%;
-    height: 100%;
+    height: 130%;
+    will-change: transform;
 }
 
 .hero__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(24, 24, 24, 0.35) 45%, rgba(24, 24, 24, 0.95) 100%);
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.14) 0%, rgba(15, 23, 42, 0.38) 45%, rgba(15, 23, 42, 0.96) 100%);
 
     .theme-light & {
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 45%, rgba(0, 0, 0, 0.75) 100%);
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.22) 45%, rgba(0, 0, 0, 0.78) 100%);
     }
 }
 
@@ -393,7 +497,9 @@ onShareTimeline(() => {
     left: 28rpx;
     right: 28rpx;
     bottom: 34rpx;
-    z-index: 1;
+    z-index: 2;
+    pointer-events: auto;
+    will-change: transform, opacity;
 }
 
 .hero__badge {
@@ -402,8 +508,8 @@ onShareTimeline(() => {
     min-height: 40rpx;
     padding: 0 14rpx;
     border-radius: 999rpx;
-    background: rgba(97, 154, 239, 0.16);
-    border: 1rpx solid rgba(97, 154, 239, 0.22);
+    background: rgba(97, 154, 239, 0.18);
+    border: 1rpx solid rgba(97, 154, 239, 0.26);
     color: #7fb2ff;
     font-size: 18rpx;
     font-weight: 800;
@@ -426,12 +532,6 @@ onShareTimeline(() => {
     font-size: 24rpx;
     line-height: 1.7;
     color: rgba(226, 232, 240, 0.76);
-}
-
-.content-wrapper {
-    flex: 1;
-    min-height: 0;
-    position: relative;
 }
 
 .loadingLayout {

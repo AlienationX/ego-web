@@ -98,7 +98,6 @@
                 <template v-for="(item, index) in displaySubjectsList" :key="item.is_ad ? item.id : `${listRenderKey}-${item.id}`">
                     <!-- A. 穿插的原生模板横版卡片广告 (标准卡片外壳包裹，实现与普通专题卡片等高与风格统一) -->
                     <template v-if="item.is_ad">
-                        <!-- #ifdef MP-WEIXIN -->
                         <view class="subject-card subject-card--ad">
                             <view class="subject-card__header">
                                 <view class="subject-card__badge-row">
@@ -118,16 +117,14 @@
                                 </view>
                             </view>
                             <view class="subject-card__ad-container">
-                                <view class="ad-inner-clip">
-                                    <ad-custom
-                                        :unit-id="customHorizontalAdUnitId"
-                                        @load="onCustomAdLoad(item, $event)"
-                                        @error="onCustomAdError(item, $event)"
-                                    />
-                                </view>
+                                <custom-ad
+                                    border-radius="20rpx"
+                                    @load="onCustomAdLoad(item, $event)"
+                                    @error="onCustomAdError(item, $event)"
+                                    @close="onCustomAdClose(item, $event)"
+                                />
                             </view>
                         </view>
-                        <!-- #endif -->
                     </template>
 
                     <!-- B. 正常专题卡片 -->
@@ -213,22 +210,33 @@ const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 const isEn = computed(() => locale.value === 'en');
 
-// 微信原生模板横版卡片广告位 ID
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
 const AD_INTERVAL = 5;
 const failedAdIds = reactive(new Set());
 
-// 原生模板广告加载成功回调
+// 广告加载成功回调
 const onCustomAdLoad = (item, e) => {
     if (item) item.adLoaded = true;
 };
 
-// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+// 广告错误回调 (优雅折叠消除白块与占位)
 const onCustomAdError = (item, e) => {
-    console.warn('[WeChat Ad] 专题列表卡片广告加载失败/未填充:', item?.id, e?.detail);
+    console.warn('[Ad] 专题列表卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
-        failedAdIds.add(item.id);
         item.adError = true;
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+        }, 500);
+    }
+};
+
+// 广告手动关闭回调
+const onCustomAdClose = (item, e) => {
+    console.warn('[Ad] 专题列表卡片广告被关闭:', item?.id);
+    if (item?.id) {
+        item.adError = true;
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+        }, 500);
     }
 };
 
@@ -287,7 +295,14 @@ const listRenderKey = ref(0);
 const displaySubjectsList = computed(() => {
     const list = [];
     const isVip = userStore.isVip;
-    const canShowAd = !isVip && !!customHorizontalAdUnitId.value;
+    let hasAdConfig = false;
+    // #ifdef MP-WEIXIN
+    hasAdConfig = !!AD_CONFIG.weixin?.customHorizontalUnitId;
+    // #endif
+    // #ifdef APP
+    hasAdConfig = !!AD_CONFIG.app?.customHorizontalAdpid;
+    // #endif
+    const canShowAd = !isVip && hasAdConfig;
     let count = 0;
 
     for (let i = 0; i < subjectsList.value.length; i++) {

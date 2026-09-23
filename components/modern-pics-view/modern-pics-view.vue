@@ -67,22 +67,21 @@
                             <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
                                 <view
                                     class="modern-card grid-card"
-                                    :class="{ 'is-ad-card': item.is_ad }"
+                                    :class="{ 'is-ad-card': item.is_ad, 'is-loaded': item.adLoaded }"
                                     v-for="(item, idx) in tabStates[index].gridItems"
                                     :key="item._uniqueKey || (item.is_ad ? item.id : (index + '-' + item.id + '-' + idx))"
                                     @click="!item.is_ad && openPreview(item.id, index)"
                                 >
-                                    <!-- A. 穿插的原生模板卡片广告 (横跨整行通栏展示，宽度>200px满足微信规范) -->
+                                    <!-- A. 穿插的卡片广告 (横跨整行通栏展示，宽度>200px满足微信规范) -->
                                     <template v-if="item.is_ad">
-                                        <!-- #ifdef MP-WEIXIN -->
                                         <view class="ad-custom-card">
-                                            <ad-custom
-                                                :unit-id="customHorizontalAdUnitId"
+                                            <custom-ad
+                                                direction="horizontal"
                                                 @load="onCustomAdLoad(item, $event)"
                                                 @error="onCustomAdError(item, $event)"
+                                                @close="onCustomAdClose(item, $event)"
                                             />
                                         </view>
-                                        <!-- #endif -->
                                     </template>
 
                                     <!-- B. 正常壁纸卡片 -->
@@ -104,7 +103,7 @@
                                             <uni-icons
                                                 v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                                 type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
-                                            <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                                <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                         </view>
                                     </template>
                                 </view>
@@ -122,15 +121,14 @@
                                         @click="!item.is_ad && openPreview(item.id, index)"
                                     >
                                         <template v-if="item.is_ad">
-                                            <!-- #ifdef MP-WEIXIN -->
                                             <view class="ad-custom-card">
-                                                <ad-custom
-                                                    :unit-id="customVerticalAdUnitId"
+                                                <custom-ad
+                                                    direction="vertical"
                                                     @load="onCustomAdLoad(item, $event)"
                                                     @error="onCustomAdError(item, $event)"
+                                                    @close="onCustomAdClose(item, $event)"
                                                 />
                                             </view>
-                                            <!-- #endif -->
                                         </template>
                                         <template v-else>
                                             <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
@@ -165,15 +163,14 @@
                                         @click="!item.is_ad && openPreview(item.id, index)"
                                     >
                                         <template v-if="item.is_ad">
-                                            <!-- #ifdef MP-WEIXIN -->
                                             <view class="ad-custom-card">
-                                                <ad-custom
-                                                    :unit-id="customVerticalAdUnitId"
+                                                <custom-ad
+                                                    direction="vertical"
                                                     @load="onCustomAdLoad(item, $event)"
                                                     @error="onCustomAdError(item, $event)"
+                                                    @close="onCustomAdClose(item, $event)"
                                                 />
                                             </view>
-                                            <!-- #endif -->
                                         </template>
                                         <template v-else>
                                             <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
@@ -272,9 +269,30 @@ const currentIndex = ref(props.initialIndex);
 const headerScrollTop = ref(0);
 const dateSortAsc = ref(true);
 
-// 微信原生模板卡片广告位 ID（网格通栏横版广告 / 瀑布流单列竖屏广告）
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId);
+// 卡片广告位配置（网格通栏横版广告 / 瀑布流单列竖屏广告）
+const hasHorizontalAdConfig = computed(() => {
+    // #ifdef MP-WEIXIN
+    return !!AD_CONFIG.weixin?.customHorizontalUnitId;
+    // #endif
+    // #ifdef APP
+    return !!AD_CONFIG.app?.customHorizontalAdpid;
+    // #endif
+    // #ifndef MP-WEIXIN || APP
+    return false;
+    // #endif
+});
+
+const hasVerticalAdConfig = computed(() => {
+    // #ifdef MP-WEIXIN
+    return !!AD_CONFIG.weixin?.customVerticalUnitId;
+    // #endif
+    // #ifdef APP
+    return !!AD_CONFIG.app?.customVerticalAdpid;
+    // #endif
+    // #ifndef MP-WEIXIN || APP
+    return false;
+    // #endif
+});
 
 const isWaterfall = computed(() =>
     props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'
@@ -342,8 +360,8 @@ const updateDisplayData = (index) => {
 
     const rawImages = state.images || [];
     const isVip = userStore.isVip;
-    const canShowGridAd = !isVip && !!customHorizontalAdUnitId.value;
-    const canShowWfAd = !isVip && !!customVerticalAdUnitId.value;
+    const canShowGridAd = !isVip && hasHorizontalAdConfig.value;
+    const canShowWfAd = !isVip && hasVerticalAdConfig.value;
 
     // 1. 构建 Grid 展示数据（广告作为通栏卡片占满整行）
     const gridItems = [];
@@ -425,11 +443,23 @@ const onCustomAdLoad = (item, e) => {
 
 // 原生模板广告错误回调 (优雅折叠消除白块与占位)
 const onCustomAdError = (item, e) => {
-    console.warn('[WeChat Ad] 原生模板卡片广告加载失败/未填充，自动隐藏占位:', item?.id, e?.detail);
+    console.warn('[Ad] 原生模板卡片广告加载失败/未填充，自动隐藏占位:', item?.id, e?.detail);
     if (item?.id) {
-        failedAdIds.add(item.id);
         item.adError = true;
-        tabStates.forEach((_, idx) => updateDisplayData(idx));
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+            tabStates.forEach((_, idx) => updateDisplayData(idx));
+        }, 500);
+    }
+};
+
+// 原生模板广告关闭回调 (App端关闭)
+const onCustomAdClose = (item, e) => {
+    if (item?.id) {
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+            tabStates.forEach((_, idx) => updateDisplayData(idx));
+        }, 500);
     }
 };
 
@@ -847,6 +877,25 @@ onShow(() => {
     }
 
     &.is-ad-card {
+        &:not(.is-loaded) {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+        }
+
+        &.is-loaded {
+            position: relative;
+            opacity: 1;
+            transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
         .ad-custom-card {
             width: 100%;
             border-radius: 28rpx;

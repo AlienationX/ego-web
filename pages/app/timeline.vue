@@ -21,7 +21,7 @@
                     <view class="hero__desc">{{ t('timeline.desc') }}</view>
                 </view>
 
-                <view v-if="isLoading" class="skeleton-wrap">
+                <view v-if="isLoading && !latestList.length" class="skeleton-wrap">
                     <!-- 月份标题骨架 -->
                     <view class="skeleton-month-head">
                         <view class="skeleton-month-ghost"></view>
@@ -59,7 +59,7 @@
                     </view>
                 </view>
 
-                <view v-else-if="!monthGroups.length" class="empty">
+                <view v-else-if="!isLoading && !monthGroups.length" class="empty">
                     <view class="empty__title">{{ t('timeline.empty') }}</view>
                 </view>
 
@@ -84,18 +84,21 @@
                             <template v-for="(item, idx) in day.items" :key="item.is_ad ? item.id : item.id">
                                 <!-- A. 穿插的卡片广告：左侧横版占两列通栏，右侧竖版占单列并排 -->
                                 <template v-if="item.is_ad">
-                                    <!-- #ifdef MP-WEIXIN -->
                                     <view
                                         class="timeline-ad-card"
-                                        :class="item.is_horizontal ? 'timeline-ad-card--horizontal' : 'timeline-ad-card--vertical'"
+                                        :class="[
+                                            item.is_horizontal ? 'timeline-ad-card--horizontal' : 'timeline-ad-card--vertical',
+                                            { 'is-loaded': item.adLoaded, 'is-error': item.adError }
+                                        ]"
                                     >
-                                        <ad-custom
-                                            :unit-id="item.is_horizontal ? customHorizontalAdUnitId : customVerticalAdUnitId"
+                                        <custom-ad
+                                            :direction="item.is_horizontal ? 'horizontal' : 'vertical'"
+                                            border-radius="28rpx"
                                             @load="onCustomAdLoad(item, $event)"
                                             @error="onCustomAdError(item, $event)"
+                                            @close="onCustomAdClose(item, $event)"
                                         />
                                     </view>
-                                    <!-- #endif -->
                                 </template>
 
                                 <!-- B. 壁纸卡片 -->
@@ -182,24 +185,40 @@ const userStore = useUserStore();
 const statusStore = useStatusStore();
 const isEn = computed(() => locale.value === 'en');
 
-// 微信原生模板横版卡片广告位 ID
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-// 微信原生模板竖版卡片广告位 ID
-const customVerticalAdUnitId = computed(() => AD_CONFIG.weixin?.customVerticalUnitId);
 const AD_INTERVAL = 8;
+const loadedAdIds = reactive(new Set());
 const failedAdIds = reactive(new Set());
 
-// 原生模板广告加载成功回调
+// 广告加载成功回调
 const onCustomAdLoad = (item, e) => {
-    if (item) item.adLoaded = true;
+    if (item) {
+        item.adLoaded = true;
+        if (item.id) loadedAdIds.add(item.id);
+    }
 };
 
-// 原生模板广告错误回调 (优雅折叠消除白块与占位)
+// 广告错误回调 (优雅折叠消除白块与占位)
 const onCustomAdError = (item, e) => {
-    console.warn('[WeChat Ad] 时间线卡片广告加载失败/未填充:', item?.id, e?.detail);
+    console.warn('[Ad] 时间线卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
-        failedAdIds.add(item.id);
         item.adError = true;
+        loadedAdIds.delete(item.id);
+        // 关键防护：延迟 500ms 记录 failedAdIds，避免同步触发 computed 剔除数据销毁 DOM 导致 uni-app-view 报 getBoundingClientRect null
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+        }, 500);
+    }
+};
+
+// 广告手动关闭回调
+const onCustomAdClose = (item, e) => {
+    console.warn('[Ad] 时间线卡片广告被关闭:', item?.id);
+    if (item?.id) {
+        item.adError = true;
+        loadedAdIds.delete(item.id);
+        setTimeout(() => {
+            failedAdIds.add(item.id);
+        }, 500);
     }
 };
 
@@ -278,7 +297,14 @@ const monthGroups = computed(() => {
     const list = [];
     const monthMap = new Map();
     const isVip = userStore.isVip;
-    const canShowAd = !isVip && (!!customHorizontalAdUnitId.value || !!customVerticalAdUnitId.value);
+    let hasAdConfig = false;
+    // #ifdef MP-WEIXIN
+    hasAdConfig = !!(AD_CONFIG.weixin?.customHorizontalUnitId || AD_CONFIG.weixin?.customVerticalUnitId);
+    // #endif
+    // #ifdef APP
+    hasAdConfig = !!(AD_CONFIG.app?.customHorizontalAdpid || AD_CONFIG.app?.customVerticalAdpid);
+    // #endif
+    const canShowAd = !isVip && hasAdConfig;
     let globalWallCount = 0;
 
     latestList.value.forEach((item, index) => {
@@ -348,7 +374,7 @@ const monthGroups = computed(() => {
                     is_ad: true,
                     is_horizontal: isHorizontal,
                     id: adId,
-                    adLoaded: false,
+                    adLoaded: loadedAdIds.has(adId),
                     adError: false,
                 });
                 // 广告占满后 (横版占整行，竖版补齐右列)，当前行均已满，下一张壁纸均从新行左侧 0 开始！
@@ -366,19 +392,26 @@ const getLatest = async (isAppend = false) => {
     try {
         isLoading.value = true;
         const res = await apiGetClassList(queryParams.value);
-        const newData = (res.data || []).map((item) => handlePicUrl(item));
+        const rawList = res.data || [];
+        const newData = rawList.map((item) => handlePicUrl(item));
 
         if (isAppend) {
-            latestList.value.push(...newData);
+            // 追加模式：合并并去重，避免数组多次原地突变引发连续多次布局抖动
+            const currentMap = new Map(latestList.value.map((item) => [item.id, item]));
+            newData.forEach((item) => {
+                currentMap.set(item.id, item);
+            });
+            const mergedList = Array.from(currentMap.values());
+            mergedList.sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
+            latestList.value = mergedList;
         } else {
+            newData.sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
             latestList.value = newData;
             if (newData.length > 0 && newData[0].created_at) {
                 statusStore.setLastViewedWallpaperTime(newData[0].created_at);
             }
             statusStore.newWallpapersCount = 0;
         }
-
-        latestList.value.sort((a, b) => toDate(b).getTime() - toDate(a).getTime());
 
         if (queryParams.value.pageNum >= res.pagination.total_pages) {
             noMoreData.value = true;
@@ -790,12 +823,21 @@ onShow(() => {
     -webkit-mask-image: -webkit-radial-gradient(white, black);
     mask-image: radial-gradient(white, black);
 
-    &--horizontal {
+    &:not(.is-loaded),
+    &.is-error {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    &--horizontal.is-loaded {
         grid-column: 1 / -1;
         margin: 12rpx 0;
     }
 
-    &--vertical {
+    &--vertical.is-loaded {
         grid-column: span 1;
         height: 620rpx;
         display: flex;

@@ -95,18 +95,10 @@
                 </view>
             </view>
 
-            <!-- #ifdef MP-WEIXIN -->
             <!-- 创作页横版原生广告卡片 -->
-            <view class="creation-flow-ad-wrap" v-if="canShowFlowAd && !flowAdFailed">
-                <view class="creation-flow-ad-card">
-                    <ad-custom
-                        :unit-id="customHorizontalAdUnitId"
-                        @load="flowAdLoaded = true"
-                        @error="flowAdFailed = true"
-                    />
-                </view>
+            <view class="creation-flow-ad-wrap">
+                <custom-ad border-radius="40rpx" />
             </view>
-            <!-- #endif -->
 
             <!-- 4. 光影边框 (暂隐藏，待bug修复后开放) -->
             <view v-if="false" class="tool-card tool-card--frame" @click="showComingSoon">
@@ -169,17 +161,11 @@ import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
-import { AD_CONFIG } from '@/common/config.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 
-// 微信横版原生广告配置
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-const flowAdLoaded = ref(false);
-const flowAdFailed = ref(false);
-const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 
 const statusBarHeight = computed(() => getStatusBarHeight() || 24);
 

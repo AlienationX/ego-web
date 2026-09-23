@@ -64,10 +64,8 @@ onLaunch(() => {
     // 初始化应用语言（Android 修改系统语言会重启 App，这里负责正确初始化）
     applyLanguagePreference(getLanguagePreference());
 
-    // 处理深度链接（如桌面小组件点击）
-    handleDeepLink();
-
     // #ifdef APP-PLUS
+    // 监听后台运行时的唤醒事件（小组件/Scheme等外部Intent唤醒）
     plus.globalEvent.addEventListener('newintent', () => {
         handleDeepLink();
     });

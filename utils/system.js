@@ -127,16 +127,20 @@ export function setAndroidImmersive(isDark = false) {
 }
 
 /**
- * 处理 URL Scheme 及桌面小组件深度链接唤起 (支持 HarmonyOS, Android, iOS, H5)
+/**
+ * 处理 URL Scheme 及桌面小组件深度链接唤起 (支持 HarmonyOS, Android, iOS, H5, 小程序)
  */
-let lastDeepLinkTimestamp = 0;
-let lastDeepLinkId = '';
+let lastTargetKey = '';
+let lastTargetTimestamp = 0;
+let isNavigating = false;
+let isColdLaunchHandled = false;
+
 export const handleDeepLink = (showRes = null) => {
     let uri = '';
     let targetPage = '';
     let wallId = '';
 
-    // 0. 从 Preferences 读取鸿蒙卡片深度链接参数（由 EntryAbility.onCreate/onNewWant 写入）
+    // 0. 从 Preferences 读取鸿蒙卡片深度链接参数（内部读后即清除）
     // #ifdef APP
     try {
         const harmonyLink = getCardDeepLink?.();
@@ -145,7 +149,7 @@ export const handleDeepLink = (showRes = null) => {
             try {
                 parsed = JSON.parse(harmonyLink);
             } catch (e) {}
-            if (parsed.wallId) wallId = parsed.wallId;
+            if (parsed.wallId) wallId = String(parsed.wallId);
             if (parsed.targetPage) targetPage = parsed.targetPage;
             if (parsed.uri) uri = parsed.uri;
             console.log('[handleDeepLink] getCardDeepLink =>', { wallId, targetPage, uri });
@@ -155,18 +159,31 @@ export const handleDeepLink = (showRes = null) => {
     }
     // #endif
 
-    // 1. 尝试从 uni-app 标准生命周期参数提取 (适用于 HarmonyOS / 小程序 / App)
-    let options = showRes;
-    if (!options || (!options.query && !options.path)) {
-        try {
-            options = (typeof uni.getEnterOptionsSync === 'function' ? uni.getEnterOptionsSync() : null) ||
-                      (typeof uni.getLaunchOptionsSync === 'function' ? uni.getLaunchOptionsSync() : null) || {};
-        } catch (e) {
-            options = {};
+    // 1. 尝试从 5+ App (Android / iOS) 原生运行时提取最新 Intent 参数（单次消费，读取后立即清空）
+    // #ifdef APP-PLUS
+    if (!uri && !wallId && !targetPage && typeof plus !== 'undefined' && plus.runtime && plus.runtime.arguments) {
+        uri = plus.runtime.arguments;
+        plus.runtime.arguments = ''; // 消费后立刻清空原生参数，防止下次切前台重复触发
+    }
+    // #endif
+
+    // 2. 尝试从生命周期参数提取 (showRes)
+    let query = showRes?.query || {};
+    // 如果 showRes 未带参数且是首次冷启动，安全尝试读取一次冷启动参数
+    if (!uri && !wallId && !targetPage && (!query || Object.keys(query).length === 0)) {
+        if (!isColdLaunchHandled) {
+            try {
+                const launchOpts = (typeof uni.getLaunchOptionsSync === 'function' ? uni.getLaunchOptionsSync() : null) || {};
+                query = launchOpts?.query || {};
+            } catch (e) {
+                query = {};
+            }
+            isColdLaunchHandled = true;
         }
+    } else {
+        isColdLaunchHandled = true;
     }
 
-    const query = options?.query || {};
     if (query.uri) uri = query.uri;
     if (query.targetPage) targetPage = query.targetPage;
     if (query.wallId || query.id) wallId = String(query.wallId || query.id);
@@ -181,60 +198,90 @@ export const handleDeepLink = (showRes = null) => {
         } catch (e) {}
     }
 
-    // 2. 尝试从 5+ App (Android / iOS) 原生运行时提取
-    // #ifdef APP-PLUS
-    if (!uri && !wallId && !targetPage && typeof plus !== 'undefined' && plus.runtime && plus.runtime.arguments) {
-        uri = plus.runtime.arguments;
-        plus.runtime.arguments = '';
-    }
-    // #endif
-
+    // 若无任何深度链接参数，直接静默退出（普通切前台流程）
     if (!uri && !wallId && !targetPage) return;
 
     // 解析壁纸 ID
     const idMatch = uri ? uri.match(/[?&]id=(\d+)/) : null;
     const finalId = wallId || (idMatch ? idMatch[1] : '');
 
-    // 防抖去重：防止短时间内对同一壁纸重复跳转
-    const now = Date.now();
-    if (finalId && finalId === lastDeepLinkId && now - lastDeepLinkTimestamp < 1500) {
-        return;
-    }
-    if (finalId) {
-        lastDeepLinkId = finalId;
-        lastDeepLinkTimestamp = now;
-    }
-
-    console.log('handleDeepLink navigating:', { uri, targetPage, finalId });
-
+    // 确定目标跳转路径
+    let targetUrl = '';
+    let targetKey = '';
     if (targetPage === '/pages/app/preview' || uri.includes('preview') || finalId) {
         if (finalId) {
-            setTimeout(() => {
-                uni.navigateTo({
-                    url: `/pages/app/preview?id=${finalId}`,
-                    fail: (err) => {
-                        console.error('Failed to navigate to preview from deep link', err);
-                    }
-                });
-            }, 350);
+            targetUrl = `/pages/app/preview?id=${finalId}`;
+            targetKey = `preview:${finalId}`;
         }
     } else if (targetPage === '/pages/app/search' || uri.includes('search')) {
-        setTimeout(() => {
-            uni.navigateTo({
-                url: '/pages/app/search',
-                fail: (err) => {
-                    console.error('Failed to navigate to search from deep link', err);
-                }
-            });
-        }, 350);
+        targetUrl = '/pages/app/search';
+        targetKey = 'page:/pages/app/search';
     } else if (targetPage === '/pages/app/favorite' || uri.includes('favorite')) {
-        setTimeout(() => {
-            uni.navigateTo({
-                url: '/pages/app/favorite',
-                fail: (err) => {
-                    console.error('Failed to navigate to favorite from deep link', err);
-                }
-            });
-        }, 350);
+        targetUrl = '/pages/app/favorite';
+        targetKey = 'page:/pages/app/favorite';
     }
+
+    if (!targetUrl || !targetKey) return;
+
+    // 3. 全局频控与防抖（针对完整 targetKey，2000ms 窗口内禁止重复触发相同目标）
+    const now = Date.now();
+    if (targetKey === lastTargetKey && now - lastTargetTimestamp < 2000) {
+        console.log('[handleDeepLink] 频控拦截重复深度链接:', targetKey);
+        return;
+    }
+
+    // 4. 路由并发锁：若前一次跳转尚未完成，禁止并发压栈（防白屏）
+    if (isNavigating) {
+        console.warn('[handleDeepLink] 导航锁生效中，拦截并发跳转:', targetKey);
+        return;
+    }
+
+    // 5. 检查当前页面栈顶：若已经在目标页面，直接无需跳转
+    try {
+        const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+        if (pages && pages.length > 0) {
+            const curPage = pages[pages.length - 1];
+            const curRoute = '/' + (curPage.route || '').replace(/^\//, '');
+            const curOptions = curPage.options || curPage.$page?.options || {};
+
+            if (curRoute === '/pages/app/preview' && targetUrl.includes('/pages/app/preview')) {
+                const curId = String(curOptions.id || '');
+                if (curId && curId === String(finalId)) {
+                    console.log('[handleDeepLink] 当前已在目标预览页，忽略重复跳转');
+                    lastTargetKey = targetKey;
+                    lastTargetTimestamp = now;
+                    return;
+                }
+            } else if (targetPage && curRoute === targetPage) {
+                console.log('[handleDeepLink] 当前已在目标页面，忽略重复跳转:', targetPage);
+                lastTargetKey = targetKey;
+                lastTargetTimestamp = now;
+                return;
+            }
+        }
+    } catch (err) {
+        console.warn('[handleDeepLink] 检测页面栈异常:', err);
+    }
+
+    // 标记跳转开始与防抖记录
+    lastTargetKey = targetKey;
+    lastTargetTimestamp = now;
+    isNavigating = true;
+
+    console.log('[handleDeepLink] 安全调度页面跳转:', targetUrl);
+
+    setTimeout(() => {
+        uni.navigateTo({
+            url: targetUrl,
+            fail: (err) => {
+                console.error('[handleDeepLink] 跳转失败:', err);
+            },
+            complete: () => {
+                // 等待页面转场动画完全结束（约400ms）后释放导航锁
+                setTimeout(() => {
+                    isNavigating = false;
+                }, 400);
+            }
+        });
+    }, 200);
 };

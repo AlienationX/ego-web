@@ -35,22 +35,13 @@
                     </view>
                 </view>
 
-                <!-- 推荐列表流：每 8 个项穿插一个原生模板横版卡片广告 -->
-                <!-- #ifdef MP-WEIXIN -->
+                <!-- 推荐列表流：每 8 个项穿插一个横版卡片广告 -->
                 <view
                     class="recommend-ad-wrap"
-                    v-if="(idx + 1) % 8 === 0 && canShowCustomAd && !failedAdIndices.has(idx)"
+                    v-if="(idx + 1) % 8 === 0 && canShowCustomAd"
                 >
-                    <view class="recommend-ad-card">
-                        <ad-custom
-                            class="recommend-ad-unit"
-                            :unit-id="customHorizontalAdUnitId"
-                            @load="onAdLoad(idx)"
-                            @error="onAdError(idx, $event)"
-                        />
-                    </view>
+                    <custom-ad direction="horizontal" />
                 </view>
-                <!-- #endif -->
             </template>
         </view>
     </view>
@@ -89,19 +80,19 @@ const list = ref([]);
 const loading = ref(false);
 const isAdmin = computed(() => !!userStore.isAdmin);
 
-// 微信原生模板横版卡片广告配置 (推荐列表流每 8 项穿插广告)
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-const canShowCustomAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
-const failedAdIndices = reactive(new Set());
-
-const onAdLoad = (idx) => {
-    // 广告加载成功
-};
-
-const onAdError = (idx, e) => {
-    console.warn('[WeChat Ad] 推荐列表卡片广告加载失败:', idx, e?.detail);
-    failedAdIndices.add(idx);
-};
+// 横版卡片广告配置 (推荐列表流每 8 项穿插广告)
+const canShowCustomAd = computed(() => {
+    if (userStore.isVip) return false;
+    // #ifdef MP-WEIXIN
+    return !!AD_CONFIG.weixin?.customHorizontalUnitId;
+    // #endif
+    // #ifdef APP
+    return !!AD_CONFIG.app?.customHorizontalAdpid;
+    // #endif
+    // #ifndef MP-WEIXIN || APP
+    return false;
+    // #endif
+});
 
 // 语言切换支持
 const isEn = computed(() => locale.value === 'en');
@@ -188,7 +179,6 @@ const openPreview = (item) => {
 watch(
     () => props.currentInfo?.id,
     () => {
-        failedAdIndices.clear();
         loadRecommend();
     },
     { immediate: true },

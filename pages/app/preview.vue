@@ -226,18 +226,10 @@
                     </view>
                 </view>
 
-                <!-- 作品参数面板下方原生横版卡片广告（红框区域） -->
-                <!-- #ifdef MP-WEIXIN -->
-                <view class="preview-meta-ad-wrap" v-if="canShowCustomAd && !metaAdFailed">
-                    <view class="preview-meta-ad-card">
-                        <ad-custom
-                            :unit-id="customHorizontalAdUnitId"
-                            @load="metaAdLoaded = true"
-                            @error="metaAdFailed = true"
-                        />
-                    </view>
+                <!-- 作品参数面板下方横版卡片广告 -->
+                <view class="preview-meta-ad-wrap">
+                    <custom-ad direction="horizontal" />
                 </view>
-                <!-- #endif -->
 
                 <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
             </view>
@@ -703,11 +695,6 @@ const canShowBannerAd = true;
 const canShowBannerAd = IS_INTERNATIONAL;
 // #endif
 
-// 微信原生模板横版卡片广告配置 (作品参数面板下方红框区域广告)
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-const canShowCustomAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
-const metaAdLoaded = ref(false);
-const metaAdFailed = ref(false);
 
 // 通用导航对话框控制
 const navDialog = ref(null);

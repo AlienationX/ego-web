@@ -148,18 +148,10 @@
                     </view>
                 </view>
 
-                <!-- #ifdef MP-WEIXIN -->
                 <!-- 我的页面横版原生广告卡片 -->
-                <view class="user-flow-ad-wrap" v-if="canShowFlowAd && !flowAdFailed">
-                    <view class="user-flow-ad-card">
-                        <ad-custom
-                            :unit-id="customHorizontalAdUnitId"
-                            @load="flowAdLoaded = true"
-                            @error="flowAdFailed = true"
-                        />
-                    </view>
+                <view class="user-flow-ad-wrap">
+                    <custom-ad border-radius="20rpx" />
                 </view>
-                <!-- #endif -->
 
                 <view class="section">
                     <view class="list">
@@ -220,7 +212,6 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useStatusStore } from '@/stores/status.js';
 import { useAppStore } from '@/stores/app.js';
 import { useI18n } from 'vue-i18n';
-import { AD_CONFIG } from '@/common/config.js';
 
 const { t, locale } = useI18n();
 
@@ -228,11 +219,6 @@ const userStore = useUserStore();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
 
-// 微信横版原生广告配置
-const customHorizontalAdUnitId = computed(() => AD_CONFIG.weixin?.customHorizontalUnitId);
-const flowAdLoaded = ref(false);
-const flowAdFailed = ref(false);
-const canShowFlowAd = computed(() => !userStore.isVip && !!customHorizontalAdUnitId.value);
 
 const userPaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();
