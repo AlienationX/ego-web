@@ -1,9 +1,7 @@
 @font-face {
   font-family: "appicons";
   src: url('~@/static/iconfont/appicons.ttf') format('truetype'),
-       url('appicons.ttf') format('truetype'),
-       url('appicons.woff2') format('woff2'),
-       url('appicons.woff') format('woff');
+       url('appicons.ttf') format('truetype');
 }
 
 .mdi-icon-font, .appicons {

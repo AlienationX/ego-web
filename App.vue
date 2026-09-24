@@ -157,7 +157,7 @@ onPageShow((res) => {
 
 <style lang="scss">
 /* 每个页面公共css */
-@import '@/static/styles/common-style.scss';
+@import '@/common/styles/common-style.scss';
 @import '@/static/iconfont/appicons.css';
 
 /* #ifdef APP-PLUS */

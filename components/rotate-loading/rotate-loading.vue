@@ -31,7 +31,7 @@ const spinnerStyle = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/static/styles/variable-style.scss';
+@import '@/common/styles/variable-style.scss';
 
 .loading-container {
     display: flex;

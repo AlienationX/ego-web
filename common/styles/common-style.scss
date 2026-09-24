@@ -1,4 +1,4 @@
-@import '@/static/styles/theme-variables.scss';
+@import '@/common/styles/theme-variables.scss';
 
 /* ================================================================
  * 全局隐藏 H5 端滚动条（三件套覆盖所有现代浏览器）
@@ -29,7 +29,7 @@
 /*  #endif  */
 
 /* 引入 Google 官方正版 Roboto 西文字体 (内联 Base64，100% 兼容微信小程序真机、App、H5 全端) */
-@import '@/static/styles/roboto-font.scss';
+@import '@/common/styles/roboto-font.scss';
 
 /* 全局字体与滚动条样式处理（微信 WXSS 不支持 * 通配符选择器）
  * 1. 苹果设备优先命中 -apple-system 与 PingFang SC（原汁原味 iOS 默认字体）；
