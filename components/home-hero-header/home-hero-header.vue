@@ -273,7 +273,7 @@ const goTimeline = () => {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            letter-spacing: -0.5rpx;
+            letter-spacing: 0rpx;
         }
 
         .greeting-sub {
@@ -281,7 +281,7 @@ const goTimeline = () => {
             line-height: 1.4;
             color: var(--text-tertiary, #94a3b8);
             margin-top: 6rpx;
-            letter-spacing: 0.2rpx;
+            letter-spacing: 0rpx;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -352,7 +352,7 @@ const goTimeline = () => {
         font-size: 24rpx;
         font-weight: 650;
         line-height: 1;
-        letter-spacing: 0.2rpx;
+        letter-spacing: 0rpx;
         white-space: nowrap;
     }
 
@@ -468,7 +468,7 @@ const goTimeline = () => {
         &__placeholder {
             font-size: 26rpx;
             color: var(--text-tertiary);
-            letter-spacing: 0.3rpx;
+            letter-spacing: 0.2rpx;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;

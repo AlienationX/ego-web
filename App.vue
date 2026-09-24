@@ -3,7 +3,7 @@ import permissionListener from '@/uni_modules/c-permission-listener';
 import { writeAccessLog, setAndroidImmersive, handleDeepLink } from '@/utils/system.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide, onReady, onPageShow } from '@dcloudio/uni-app';
-import { useSettingsStore } from '@/stores/settings.js';
+import { useSettingsStore, getSystemTheme } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { initAutoRotate } from '@/uni_modules/ego-wallpaper-manager';
 import { applyLanguagePreference, getLanguagePreference, LANGUAGE_PREF_AUTO } from '@/utils/i18n.js';
@@ -28,21 +28,18 @@ onLaunch(() => {
     //     });
     // }
 
-    // 初始化应用主题（iOS 适用原生 UIStyle，Android 禁止调用 setUIStyle 以防系统将导航栏重置为白底）
-    // #ifdef APP
-    const savedTheme = uni.getStorageSync('theme') || 'auto';
+    // 初始化应用主题设置（支持 auto/light/dark，多端读取持久化存储）
+    const savedTheme = uni.getStorageSync('theme') || settingsStore.options.theme || 'auto';
     settingsStore.options.theme = savedTheme;
+    // #ifdef APP
     plus.nativeUI.setUIStyle(savedTheme);
     // #endif
 
-    // #ifndef APP
-    settingsStore.options.theme = 'auto';
-    // #endif
-
     // 监控系统主题变化
-    uni.onThemeChange(({ theme }) => {
-        console.log('onThemeChange', theme);
-        settingsStore.osTheme = uni.getDeviceInfo().osTheme || uni.getAppBaseInfo().hostTheme || 'light';
+    uni.onThemeChange((res) => {
+        const newTheme = res?.theme || getSystemTheme();
+        console.log('onThemeChange', newTheme);
+        settingsStore.osTheme = newTheme;
 
         // #ifdef APP
         if (settingsStore.options.theme === 'auto') {
@@ -95,6 +92,12 @@ onShow((res) => {
     setAndroidImmersive(settingsStore.isDark);
 
     handleDeepLink(res);
+
+    // 切回前台时重新同步系统主题，解决后台切换系统深浅色无法感知的问题
+    const latestOsTheme = getSystemTheme();
+    if (settingsStore.osTheme !== latestOsTheme) {
+        settingsStore.osTheme = latestOsTheme;
+    }
 
     // iOS/鸿蒙修改系统语言不重启 App，切回前台时通过 onShow 重新检测系统语言
     // 注：uni.onLocaleChange 只监听 uni.setLocale() 调用，无法感知系统设置变化

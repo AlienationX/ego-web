@@ -202,7 +202,7 @@ onLoad(() => {
         font-size: 68rpx;
         font-weight: 900;
         color: var(--text-primary);
-        letter-spacing: -2rpx;
+        letter-spacing: 0rpx;
         line-height: 1.1;
         filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.1));
         animation: classifyTitleDrop 1.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
@@ -214,7 +214,7 @@ onLoad(() => {
         color: var(--text-secondary);
         margin-top: 15rpx;
         font-weight: 500;
-        letter-spacing: 1rpx;
+        letter-spacing: 0rpx;
         animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both;
         will-change: opacity, transform;
     }

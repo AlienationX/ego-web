@@ -279,7 +279,7 @@ const showComingSoon = () => {
     .title-text {
         font-size: 46rpx;
         font-weight: 800;
-        letter-spacing: -0.5rpx;
+        letter-spacing: 0rpx;
         line-height: 1.2;
     }
 
@@ -338,7 +338,7 @@ const showComingSoon = () => {
         font-size: 38rpx;
         font-weight: 800;
         line-height: 1.25;
-        letter-spacing: -0.3rpx;
+        letter-spacing: 0rpx;
     }
 
     .card-desc {
@@ -495,7 +495,7 @@ const showComingSoon = () => {
             color: #ffffff;
             font-size: 26rpx;
             font-weight: 700;
-            letter-spacing: 0.5rpx;
+            letter-spacing: 0rpx;
         }
     }
 }
@@ -770,7 +770,7 @@ const showComingSoon = () => {
         display: inline-block;
         font-size: 18rpx;
         font-weight: 800;
-        letter-spacing: 1rpx;
+        letter-spacing: 0rpx;
         padding: 2rpx 14rpx;
         border-radius: 999px;
         background: #8b5cf6;

@@ -793,7 +793,7 @@ onShow(() => {
             font-size: 32rpx;
             color: var(--text-primary);
             font-weight: 700;
-            letter-spacing: 0.5rpx;
+            letter-spacing: 0rpx;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -955,7 +955,7 @@ onShow(() => {
                 font-size: 30rpx;
                 font-weight: 800;
                 color: #FBBF24;
-                letter-spacing: 0.5rpx;
+                letter-spacing: 0rpx;
             }
 
             .vip-banner-desc {
@@ -1005,7 +1005,7 @@ onShow(() => {
                 color: #fff;
                 font-size: 24rpx;
                 line-height: 1.8;
-                letter-spacing: 0.3rpx;
+                letter-spacing: 0rpx;
                 white-space: pre-line;
                 word-break: break-word;
                 padding: 28rpx 30rpx;
@@ -1095,7 +1095,7 @@ onShow(() => {
                 font-size: 34rpx;
                 font-weight: 700;
                 color: var(--text-primary);
-                letter-spacing: -0.3rpx;
+                letter-spacing: 0rpx;
             }
 
             .guest-desc {
@@ -1358,7 +1358,7 @@ onShow(() => {
                         padding-left: 20rpx;
                         color: var(--text-primary);
                         font-size: 26rpx;
-                        font-weight: 600;
+                        font-weight: 400;
                     }
                 }
 

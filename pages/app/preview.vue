@@ -2380,7 +2380,7 @@ const handleCopyWatermarkId = () => {
                 .text {
                     font-size: 22rpx;
                     font-weight: 600;
-                    letter-spacing: 0.2rpx;
+                    letter-spacing: 0rpx;
                     color: #1a1a1a;
                     text-shadow: none;
                     text-align: center;

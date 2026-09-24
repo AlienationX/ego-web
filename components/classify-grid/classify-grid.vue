@@ -249,7 +249,7 @@ const goClasslistFromQuickLook = (item) => {
         color: rgba(248, 250, 252, 0.94);
         font-size: 24rpx;
         font-weight: 600;
-        letter-spacing: 0.2rpx;
+        letter-spacing: 0rpx;
         line-height: 1.3;
         text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.45);
     }
@@ -395,7 +395,7 @@ const goClasslistFromQuickLook = (item) => {
     font-size: 46rpx;
     font-weight: 900;
     color: #ffffff;
-    letter-spacing: -1rpx;
+    letter-spacing: 0rpx;
     text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.5);
 }
 

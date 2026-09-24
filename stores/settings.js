@@ -1,6 +1,41 @@
 import { defineStore } from 'pinia';
 import { ref, reactive, computed } from 'vue';
 
+/**
+ * 跨平台安全获取当前宿主环境/操作系统的实际主题 ('light' | 'dark')
+ * - 微信小程序：wx.getAppBaseInfo().theme 或 wx.getSystemInfoSync().theme
+ * - App 平台：uni.getDeviceInfo().osTheme
+ * - Web/H5：window.matchMedia('(prefers-color-scheme: dark)') 或 uni.getAppBaseInfo().hostTheme
+ */
+export function getSystemTheme() {
+    try {
+        const appBase = uni.getAppBaseInfo ? uni.getAppBaseInfo() : {};
+        if (appBase.theme) return appBase.theme;
+        if (appBase.hostTheme) return appBase.hostTheme;
+    } catch (e) {}
+
+    try {
+        const sys = uni.getSystemInfoSync ? uni.getSystemInfoSync() : {};
+        if (sys.theme) return sys.theme;
+        if (sys.osTheme) return sys.osTheme;
+    } catch (e) {}
+
+    try {
+        const dev = uni.getDeviceInfo ? uni.getDeviceInfo() : {};
+        if (dev.osTheme) return dev.osTheme;
+    } catch (e) {}
+
+    // #ifdef H5
+    try {
+        if (typeof window !== 'undefined' && window.matchMedia) {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+    } catch (e) {}
+    // #endif
+
+    return 'light';
+}
+
 export const useSettingsStore = defineStore(
     'settings',
     () => {
@@ -37,8 +72,8 @@ export const useSettingsStore = defineStore(
             // TODO 多个primary等颜色的默认值
         });
 
-        // WEB和MP获取宿主主题 hostTheme，APP获取操作系统主题 osTheme
-        const osTheme = ref(uni.getDeviceInfo().osTheme || uni.getAppBaseInfo().hostTheme || 'light');
+        // 跨平台统一获取系统/宿主当前主题
+        const osTheme = ref(getSystemTheme());
         const osLanguage = ref(uni.getDeviceInfo().osLanguage || uni.getAppBaseInfo().hostLanguage || 'en');
 
         // 窗口视图和瀑布流视图的切换

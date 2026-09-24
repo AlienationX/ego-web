@@ -163,7 +163,7 @@ const goSubjects = () => {
     &__label {
         font-size: 23rpx;
         font-weight: 650;
-        letter-spacing: -0.2rpx;
+        letter-spacing: 0rpx;
         line-height: 1;
         white-space: nowrap;
     }

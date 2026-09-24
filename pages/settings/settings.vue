@@ -330,7 +330,7 @@
 import { computed, reactive, ref } from 'vue';
 import { onLoad, onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
-import { useSettingsStore } from '@/stores/settings.js';
+import { useSettingsStore, getSystemTheme } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { RIGHT_ICP, SERVICE_EMAIL } from '@/common/config.js';
@@ -453,29 +453,27 @@ const themeValueLabel = computed(() => {
 });
 
 const themeOptions = computed(() => {
-    const isApp = uni.getAppBaseInfo().uniPlatform === 'app';
-
     return [
         {
             value: 'auto',
             icon: '/static/icons/theme-light-dark.svg',
             label: t('settings.items.theme.auto'),
-            desc: isApp ? t('settings.items.theme.autoDesc') : '跟随系统（微信/浏览器）。系统主题改变时自动切换深浅色。',
+            desc: t('settings.items.theme.autoDesc'),
             disabled: false,
         },
         {
             value: 'light',
             icon: '/static/icons/weather-sunny.svg',
             label: t('settings.items.theme.light'),
-            desc: isApp ? t('settings.items.theme.lightDesc') : '当前端不支持手动锁定浅色，请在微信或系统设置中更改主题。',
-            disabled: !isApp,
+            desc: t('settings.items.theme.lightDesc'),
+            disabled: false,
         },
         {
             value: 'dark',
             icon: '/static/icons/weather-night.svg',
             label: t('settings.items.theme.dark'),
-            desc: isApp ? t('settings.items.theme.darkDesc') : '当前端不支持手动锁定深色，请在微信或系统设置中更改主题。',
-            disabled: !isApp,
+            desc: t('settings.items.theme.darkDesc'),
+            disabled: false,
         },
     ];
 });
@@ -927,15 +925,17 @@ function selectLanguage(pref) {
 }
 
 function selectTheme(theme) {
-    // #ifdef APP
     uni.setStorageSync('theme', theme);
     settingsStore.options.theme = theme;
+
+    // 切回 auto 时手动同步一次当前真实系统/宿主环境主题
+    if (theme === 'auto') {
+        settingsStore.osTheme = getSystemTheme();
+    }
+
+    // #ifdef APP
     // 更新原生UI风格，支持跟随系统主题auto、dark、light主题
     plus.nativeUI.setUIStyle(theme);
-    // 切回 auto 时原生 UI 从锁定状态恢复跟随系统，此刻主题事件不一定触发，手动同步一次系统主题
-    if (theme === 'auto') {
-        settingsStore.osTheme = uni.getDeviceInfo().osTheme || 'light';
-    }
 
     // setUIStyle 会异步触发原生层重绘并重新显示被隐藏的原生 TabBar，同时可能破坏
     // Android Edge-to-Edge 沉浸式布局。需要立即 + 延时多次压制，覆盖各平台的重绘时序。
@@ -947,10 +947,6 @@ function selectTheme(theme) {
     setTimeout(_suppressNativeTabBar, 80);   // 覆盖第一次异步重绘
     setTimeout(_suppressNativeTabBar, 250);  // 覆盖较慢设备的延迟重绘
     setTimeout(_suppressNativeTabBar, 500);  // 终极兜底
-    // #endif
-
-    // #ifndef APP
-    settingsStore.options.theme = 'auto';
     // #endif
 
     uni.showToast({

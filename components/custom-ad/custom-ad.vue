@@ -251,11 +251,7 @@ defineExpose({
             border: none !important;
         }
 
-        .custom-ad-content,
-        ad,
-        ad-custom,
-        :deep(ad),
-        :deep(ad-custom) {
+        .custom-ad-content {
             width: 100% !important;
             display: block;
         }
@@ -277,11 +273,7 @@ defineExpose({
         box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
     }
 
-    .custom-ad-content,
-    ad,
-    ad-custom,
-    :deep(ad),
-    :deep(ad-custom) {
+    .custom-ad-content {
         width: 100% !important;
         overflow: hidden;
         display: block;

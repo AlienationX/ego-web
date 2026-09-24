@@ -21,7 +21,7 @@
     .name {
         font-size: 30rpx;
         font-weight: 600;
-        letter-spacing: -0.2rpx;
+        letter-spacing: 0rpx;
         color: var(--text-primary);
         padding-left: 10rpx;
     }

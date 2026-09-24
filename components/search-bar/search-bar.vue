@@ -79,7 +79,7 @@ const goSearch = () => {
     &__placeholder {
         font-size: 26rpx;
         color: var(--text-tertiary);
-        letter-spacing: 0.3rpx;
+        letter-spacing: 0rpx;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
