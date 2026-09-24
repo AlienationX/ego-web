@@ -1,4 +1,4 @@
-import { SetWallpaper, SetWallpaperOptions, IsWallpaperSupported } from '../interface.uts';
+import { SetWallpaper, SetWallpaperOptions, StartAutoRotate, AutoRotateOptions, StopAutoRotate, InitAutoRotate, IsWallpaperSupported } from '../interface.uts';
 import wallpaper from '@ohos.wallpaper';
 import http from '@ohos.net.http';
 import fs from '@ohos.file.fs';

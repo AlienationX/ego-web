@@ -109,14 +109,13 @@
             </view>
         </view>
 
-        <!-- 底部广告 (使用 custom-ad 信息流组件) -->
-        <view class="subject-detail-ad">
-            <custom-ad
-                @load="onAdLoad"
-                @error="onAdError"
-                @close="onAdClose"
-            />
-        </view>
+        <!-- 吸底 Banner 广告（与 search.vue 保持一致使用 custom-ad-banner） -->
+        <custom-ad-banner
+            @height-change="onAdHeightChange"
+            @load="onAdLoad"
+            @error="onAdError"
+            @close="onAdClose"
+        ></custom-ad-banner>
     </view>
 </template>
 
@@ -168,17 +167,26 @@ try {
 } catch (e) {}
 // #endif
 
-// 广告激活状态控制：有广告时遮挡描述和标签，无广告时完整展示
+// 广告激活状态与高度控制（有广告时遮挡描述和标签，无广告时完整展示）
 const isAdActive = ref(false);
+const adHeight = ref(0);
 
+const onAdHeightChange = (height) => {
+    adHeight.value = Math.max(0, Number(height) || 0);
+    if (adHeight.value === 0) {
+        isAdActive.value = false;
+    }
+};
 const onAdLoad = () => {
     isAdActive.value = true;
 };
 const onAdError = () => {
     isAdActive.value = false;
+    adHeight.value = 0;
 };
 const onAdClose = () => {
     isAdActive.value = false;
+    adHeight.value = 0;
 };
 
 // 当前焦点壁纸对象
@@ -795,14 +803,5 @@ onLoad((options) => {
     }
 }
 
-.subject-detail-ad {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 99;
-    padding-bottom: constant(safe-area-inset-bottom);
-    padding-bottom: env(safe-area-inset-bottom);
-    box-sizing: border-box;
-}
+
 </style>

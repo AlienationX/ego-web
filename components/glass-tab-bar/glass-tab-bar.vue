@@ -6,7 +6,6 @@
             `theme-${theme}`,
             { 'is-hidden': !visible }
         ]"
-        :style="containerStyle"
     >
         <view
             v-for="item in items"
@@ -29,26 +28,12 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
-import { getSafeAreaBottom } from '@/utils/layout.js';
 
 const settingsStore = useSettingsStore();
 
 // 模式切换：true 为 iOS 悬浮胶囊，false 为经典贴底底栏（复刻附件4）
 const isFloatingMode = computed(() => {
     return settingsStore.options.customTabBar !== false;
-});
-
-// 计算底栏垫高样式，保持与原生 1:1 绝对一致
-const containerStyle = computed(() => {
-    // 悬浮模式完全交由 CSS (.mode-floating) 控制 bottom，避免内联样式覆盖
-    if (isFloatingMode.value) {
-        return {};
-    }
-    // 经典贴底模式：垫高安全区，确保文字稳稳当当立于手势横条之上
-    const safeBottom = getSafeAreaBottom() || 34;
-    return {
-        paddingBottom: `${Math.max(safeBottom, 34)}px`,
-    };
 });
 
 // 自定义组件自动接管：挂载时隐藏原生 TabBar，各业务页面无需写额外逻辑
@@ -314,9 +299,10 @@ const handleSwitch = (item) => {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    padding-top: 5px;
-    padding-bottom: max(34px, env(safe-area-inset-bottom, 34px));
-    transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
+    padding-top: 6px;
+    padding-bottom: calc(6px + constant(safe-area-inset-bottom));
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s ease;
 
     &.is-hidden {
         opacity: 0 !important;
@@ -326,13 +312,19 @@ const handleSwitch = (item) => {
     }
 
     &.theme-light {
-        background-color: #ffffff;
-        border-top: 1rpx solid rgba(0, 0, 0, 0.06);
+        background-color: var(--tabbar-background, #f8fafc);
+        border-top: 1rpx solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
 
     &.theme-dark {
-        background-color: #181818;
-        border-top: 1rpx solid rgba(255, 255, 255, 0.08);
+        background-color: var(--tabbar-background, #222226);
+        border-top: 1rpx solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
 
     .tab-item {

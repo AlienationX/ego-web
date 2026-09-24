@@ -7,7 +7,7 @@
 		"tabBarColor": "#94a3b8",
 		"tabBarSelectedColor": "#28b389",
 		"tabBarBorderStyle": "white",
-		"tabBarBackgroundColor": "#ffffff",
+		"tabBarBackgroundColor": "#f8fafc",
         
 		"pageBackground": "#eef1f4",
 		"pageBackgroundSecondary": "#ffffff",
@@ -40,7 +40,7 @@
 		"tabBarColor": "#71717a",
 		"tabBarSelectedColor": "#28b389",
 		"tabBarBorderStyle": "black",
-		"tabBarBackgroundColor": "#181818",
+		"tabBarBackgroundColor": "#222226",
         
 		"pageBackground": "#181818",
 		"pageBackgroundSecondary": "#16161a",

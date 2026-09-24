@@ -28,13 +28,23 @@
 }
 /*  #endif  */
 
-/* 全局字体与滚动条样式处理（微信 WXSS 不支持 * 通配符选择器） */
-page, view, scroll-view {
+/* 引入 Google 官方正版 Roboto 西文字体 (内联 Base64，100% 兼容微信小程序真机、App、H5 全端) */
+@import '@/static/styles/roboto-font.scss';
+
+/* 全局字体与滚动条样式处理（微信 WXSS 不支持 * 通配符选择器）
+ * 1. 苹果设备优先命中 -apple-system 与 PingFang SC（原汁原味 iOS 默认字体）；
+ * 2. 安卓设备（小程序端/App端）自动跳过苹果私有字体，优先命中 Roboto（Pixel 英文）与 Noto Sans SC（Pixel 中文思源黑体）。
+ */
+page, view, text, scroll-view, input, textarea, button {
     font-family:
-        Roboto,
         -apple-system,
-        'Helvetica Neue',
+        BlinkMacSystemFont,
         'PingFang SC',
+        Roboto,
+        'Noto Sans SC',
+        'Source Han Sans CN',
+        'Source Han Sans SC',
+        'Helvetica Neue',
         'Microsoft YaHei',
         sans-serif;
     scrollbar-width: none;
