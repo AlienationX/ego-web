@@ -125,7 +125,7 @@
             </view>
 
             <!-- 5. 灵感美学探索 (原 discover 页面功能) -->
-            <view class="tool-card tool-card--explore" @click="goToDiscover">
+            <view v-if="false" class="tool-card tool-card--explore" @click="goToDiscover">
                 <view class="card-text-block">
                     <view class="explore-tag-row">
                         <text class="explore-badge">AI EXPLORE</text>
