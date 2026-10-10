@@ -1,7 +1,7 @@
 <template>
     <view
         v-if="showAd"
-        v-show="!isError"
+        v-show="!isError && isLoaded"
         class="custom-ad-container"
         :class="[isFixed ? 'is-fixed' : '', settingsStore.isDark ? 'theme-dark' : 'theme-light']"
         :style="{ bottom: calculatedBottom }"
@@ -156,12 +156,12 @@ watch(showAd, (visible) => {
         padding-bottom: constant(safe-area-inset-bottom);
         padding-bottom: env(safe-area-inset-bottom);
         box-sizing: border-box;
-        background: #ffffff;
-        box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+        background: var(--page-background, #ffffff);
+        box-shadow: none;
 
-        .theme-dark & {
-            background: #141416;
-            box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.35);
+        &.theme-dark {
+            background: var(--page-background, #181818);
+            box-shadow: none;
         }
     }
 }

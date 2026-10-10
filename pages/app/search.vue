@@ -5,20 +5,21 @@
             <view class="search-top-bg"></view>
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
             <view class="search-shell" :style="searchShellStyle">
-                <view class="search-shell__back" @click="goBack">
+                <view class="search-shell__back" :style="searchBackBtnStyle" @click="goBack">
                     <mdi-icon
                         path="/static/icons/arrow-left.svg"
-                        size="20px"
+                        size="18px"
                         :color="backIconColor"
                     ></mdi-icon>
                 </view>
-                <view class="search-box search-box--shell">
+                <view class="search-box search-box--shell" :style="searchItemStyle">
                     <view class="search-box__icon">
                         <uni-icons type="search" size="18" :color="searchIconColor"></uni-icons>
                     </view>
                     <input
                         v-model="queryParams.keyword"
                         class="search-box__input"
+                        :style="searchInputStyle"
                         :placeholder="t('common.search')"
                         :placeholder-style="placeholderStyle"
                         confirm-type="search"
@@ -119,22 +120,47 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 
-// 计算小程序胶囊按钮右侧避让 padding
+// 胶囊避让与平齐测量
+const isWeixin = ref(false);
+const capsuleHeight = ref(32);
+const searchControlHeight = ref(36);
 const capsuleRightPadding = ref(0);
-// #ifdef MP-WEIXIN
-try {
-    const menuBtn = uni.getMenuButtonBoundingClientRect();
-    if (menuBtn && menuBtn.width) {
-        const sysInfo = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync();
-        const screenWidth = sysInfo.windowWidth || 375;
-        capsuleRightPadding.value = Math.max(0, (screenWidth - menuBtn.left) + 8);
-    }
-} catch (e) {}
-// #endif
-
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-// 搜索栏包含输入框与返回按钮（高度约40px），需要充足的上下安全边距，标准高度为 56px，确保下方的吸顶栏不会上移遮挡
 const titleBarHeight = ref(56);
+
+const updateCapsuleMetrics = () => {
+    // #ifdef MP-WEIXIN
+    isWeixin.value = true;
+    try {
+        if (uni.getMenuButtonBoundingClientRect) {
+            const menuBtn = uni.getMenuButtonBoundingClientRect();
+            if (menuBtn && menuBtn.width && menuBtn.top) {
+                capsuleHeight.value = menuBtn.height || 32;
+                // 按要求将返回按钮与搜索框高度统一调整为 36px
+                searchControlHeight.value = 36;
+
+                const sysInfo = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync();
+                const screenWidth = sysInfo.windowWidth || 375;
+                capsuleRightPadding.value = Math.max(0, (screenWidth - menuBtn.left) + 8);
+
+                const sHeight = getStatusBarHeight() || 0;
+                statusBarHeight.value = sHeight;
+                const topGap = Math.max(4, menuBtn.top - sHeight);
+                // titleBarHeight 严格对称包裹胶囊，居中时顶部和底部与胶囊严丝合缝平齐
+                titleBarHeight.value = capsuleHeight.value + topGap * 2;
+                return;
+            }
+        }
+    } catch (e) {}
+    // #endif
+
+    // 非微信端保持原有 56px
+    searchControlHeight.value = 38;
+    titleBarHeight.value = 56;
+};
+
+updateCapsuleMetrics();
+
 const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
 
 const searchShellStyle = computed(() => {
@@ -145,6 +171,46 @@ const searchShellStyle = computed(() => {
         style.paddingRight = `${capsuleRightPadding.value}px`;
     }
     return style;
+});
+
+// 微信端让搜索框饱满大方（36px），与胶囊水平中轴线平齐，非微信端保持原有 CSS
+const searchItemStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    if (isWeixin.value) {
+        return {
+            height: `${searchControlHeight.value}px`,
+            minHeight: `${searchControlHeight.value}px`,
+        };
+    }
+    // #endif
+    return {};
+});
+
+// 微信端返回按钮尺寸饱满协调（36px）
+const searchBackBtnStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    if (isWeixin.value) {
+        return {
+            width: `${searchControlHeight.value}px`,
+            height: `${searchControlHeight.value}px`,
+            minWidth: `${searchControlHeight.value}px`,
+            minHeight: `${searchControlHeight.value}px`,
+        };
+    }
+    // #endif
+    return {};
+});
+
+const searchInputStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    if (isWeixin.value) {
+        return {
+            height: `${searchControlHeight.value}px`,
+            lineHeight: `${searchControlHeight.value}px`,
+        };
+    }
+    // #endif
+    return {};
 });
 
 const backIconColor = computed(() => {
@@ -295,6 +361,7 @@ const goBack = () => {
 };
 
 onLoad((options) => {
+    updateCapsuleMetrics();
     const keyword = decodeURIComponent(options?.keyword || '').trim();
     if (!keyword) return;
     queryParams.value.keyword = keyword;
@@ -398,14 +465,14 @@ onUnload(() => {
 }
 
 .search-shell__back {
-    width: 72rpx;
-    height: 72rpx;
+    width: 66rpx;
+    height: 66rpx;
     border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.04);
-    border: 1rpx solid rgba(0, 0, 0, 0.05);
+    border: none;
     transition: transform 0.15s ease;
 
     &:active {
@@ -414,7 +481,7 @@ onUnload(() => {
 
     .theme-dark & {
         background: rgba(255, 255, 255, 0.08);
-        border: 1rpx solid rgba(255, 255, 255, 0.08);
+        border: none;
     }
 }
 
@@ -472,7 +539,7 @@ onUnload(() => {
 
     .theme-dark & {
         background: rgba(255, 255, 255, 0.08);
-        border: 1rpx solid rgba(255, 255, 255, 0.08);
+        border: none;
     }
 }
 
@@ -579,6 +646,12 @@ onUnload(() => {
     cursor: pointer;
     white-space: nowrap;
 
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        box-shadow: none;
+    }
+
     &:active {
         transform: scale(0.95);
         opacity: 0.85;
@@ -617,6 +690,12 @@ onUnload(() => {
     transition: transform 0.2s, opacity 0.2s, padding 0.2s;
     cursor: pointer;
     white-space: nowrap;
+
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.08);
+        border: none;
+        box-shadow: none;
+    }
 
     &.is-editing {
         padding: 0 16rpx 0 24rpx;

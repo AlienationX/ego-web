@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
@@ -98,7 +98,6 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
-import { IS_INTERNATIONAL } from '@/utils/system.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -148,8 +147,36 @@ const tabs = computed(() => {
 });
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const titleBarHeight = ref(getTitleBarHeight() || 44);
-const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
+const titleBarHeight = ref(44);
+const navBarHeight = ref(88);
+
+const updateNavMetrics = () => {
+    let sHeight = getStatusBarHeight() || 0;
+    let tHeight = 44;
+    let nHeight = sHeight + 44;
+
+    // #ifdef MP-WEIXIN
+    try {
+        if (uni.getMenuButtonBoundingClientRect) {
+            const menu = uni.getMenuButtonBoundingClientRect();
+            if (menu && menu.top && menu.height) {
+                sHeight = menu.top > 0 ? (sHeight || (menu.top - 4)) : sHeight;
+                const topGap = Math.max(6, menu.top - sHeight);
+                const bottomGap = Math.max(8, topGap);
+                tHeight = menu.height + topGap + bottomGap;
+                nHeight = sHeight + tHeight;
+            }
+        }
+    } catch (e) {}
+    // #endif
+
+    statusBarHeight.value = sHeight;
+    titleBarHeight.value = Math.max(44, tHeight);
+    navBarHeight.value = statusBarHeight.value + titleBarHeight.value;
+};
+
+updateNavMetrics();
+
 const heroHeightPx = uni.upx2px(560);
 const contentWrapperStyle = computed(() => ({
     paddingBottom: '0px',
@@ -316,7 +343,12 @@ const goSearch = () => {
     });
 };
 
+onMounted(() => {
+    updateNavMetrics();
+});
+
 onLoad((e) => {
+    updateNavMetrics();
     const { id } = e;
     if (!id) {
         gotoHome();
@@ -358,7 +390,7 @@ onShareTimeline(() => {
     top: 0;
     left: 0;
     width: 100%;
-    z-index: 100;
+    z-index: 999;
     pointer-events: auto;
 }
 
@@ -407,31 +439,31 @@ onShareTimeline(() => {
 
 .topbar__back,
 .topbar__icon {
-    width: 72rpx;
-    height: 72rpx;
+    width: 64rpx;
+    height: 64rpx;
     border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    // 初始浮在大图上的半透明毛玻璃质感，无论背景明暗均清晰醒目
     background: rgba(10, 14, 21, 0.44);
-    border: 1rpx solid rgba(255, 255, 255, 0.12);
+    border: none !important;
+    box-shadow: none;
     backdrop-filter: blur(14rpx);
     -webkit-backdrop-filter: blur(14rpx);
-    transition: background 0.22s ease, border-color 0.22s ease, transform 0.15s ease;
+    transition: background 0.22s ease, transform 0.15s ease;
 
     &:active {
         transform: scale(0.92);
     }
 
-    // 吸顶后的柔和背景胶囊
+    // 吸顶后的柔和背景胶囊：保留之前的半透明背景，移除边框
     &.is-solid {
         background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.08);
+        border: none !important;
 
         .theme-light & {
             background: rgba(0, 0, 0, 0.04);
-            border-color: rgba(0, 0, 0, 0.05);
+            border: none !important;
         }
     }
 }

@@ -852,7 +852,7 @@ onShow(() => {
 
             .theme-dark & {
                 background: rgba(255, 255, 255, 0.08);
-                border: 1rpx solid rgba(255, 255, 255, 0.08);
+                border: none;
             }
 
             &.active {
@@ -874,7 +874,7 @@ onShow(() => {
     border-left: 1rpx solid rgba(0, 0, 0, 0.05);
 
     .theme-dark & {
-        border-left: 1rpx solid rgba(255, 255, 255, 0.06);
+        border-left: none;
     }
 
     &.is-single {
@@ -897,7 +897,7 @@ onShow(() => {
 
         .theme-dark & {
             background: rgba(255, 255, 255, 0.08);
-            border: 1rpx solid rgba(255, 255, 255, 0.08);
+            border: none;
         }
 
         &:active {
