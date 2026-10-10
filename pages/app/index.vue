@@ -334,7 +334,14 @@
                             v-for="(item, idx) in recommendLeftCol"
                             :key="item.is_ad ? item.id : ('l-' + item.id + '-' + idx)"
                             class="waterfall-card"
-                            :class="{ 'is-ad-card': item.is_ad, 'is-ad-loaded': item.adLoaded, 'is-ad-error': item.adError }"
+                            :class="{
+                                'is-ad-card': item.is_ad,
+                                'is-ad-loaded': item.adLoaded,
+                                'is-ad-error': item.adError,
+                                'is-loading': !item.is_ad && !item.loaded && !item.loadError,
+                                'is-error': !item.is_ad && item.loadError
+                            }"
+                            :style="!item.is_ad ? `aspect-ratio: ${item.aspectRatio || '9 / 16'};` : ''"
                             :hover-class="item.is_ad ? '' : 'waterfall-card--active'"
                             :hover-stay-time="120"
                             @click="!item.is_ad && goPreview(item.id, recommendWallpapers)"
@@ -353,9 +360,10 @@
                                 <image
                                     class="waterfall-card__img"
                                     :src="item.smallPicurl || item.picurl"
-                                    mode="widthFix"
+                                    mode="aspectFill"
                                     lazy-load
-                                    @load="item.loaded = true"
+                                    @load="onImageLoad(item)"
+                                    @error="onImageError(item)"
                                     :class="{ 'is-loaded': item.loaded }"
                                 ></image>
                                 <view class="waterfall-card__overlay"></view>
@@ -374,6 +382,9 @@
                                         v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                         type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
                                     <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
+                                </view>
+                                <view class="waterfall-card__err" v-if="item.loadError">
+                                    <uni-icons type="image" size="26" color="var(--text-tertiary)"></uni-icons>
                                 </view>
                             </template>
                         </view>
@@ -385,7 +396,14 @@
                             v-for="(item, idx) in recommendRightCol"
                             :key="item.is_ad ? item.id : ('r-' + item.id + '-' + idx)"
                             class="waterfall-card"
-                            :class="{ 'is-ad-card': item.is_ad, 'is-ad-loaded': item.adLoaded, 'is-ad-error': item.adError }"
+                            :class="{
+                                'is-ad-card': item.is_ad,
+                                'is-ad-loaded': item.adLoaded,
+                                'is-ad-error': item.adError,
+                                'is-loading': !item.is_ad && !item.loaded && !item.loadError,
+                                'is-error': !item.is_ad && item.loadError
+                            }"
+                            :style="!item.is_ad ? `aspect-ratio: ${item.aspectRatio || '9 / 16'};` : ''"
                             :hover-class="item.is_ad ? '' : 'waterfall-card--active'"
                             :hover-stay-time="120"
                             @click="!item.is_ad && goPreview(item.id, recommendWallpapers)"
@@ -404,9 +422,10 @@
                                 <image
                                     class="waterfall-card__img"
                                     :src="item.smallPicurl || item.picurl"
-                                    mode="widthFix"
+                                    mode="aspectFill"
                                     lazy-load
-                                    @load="item.loaded = true"
+                                    @load="onImageLoad(item)"
+                                    @error="onImageError(item)"
                                     :class="{ 'is-loaded': item.loaded }"
                                 ></image>
                                 <view class="waterfall-card__overlay"></view>
@@ -425,6 +444,9 @@
                                         v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                         type="vip-filled" size="16" color="#f9e9b5"></uni-icons>
                                     <uni-icons v-else type="locked-filled" size="16" color="#f9e9b5"></uni-icons>
+                                </view>
+                                <view class="waterfall-card__err" v-if="item.loadError">
+                                    <uni-icons type="image" size="26" color="var(--text-tertiary)"></uni-icons>
                                 </view>
                             </template>
                         </view>
@@ -602,6 +624,22 @@ const AD_INTERVAL = 8;
 const failedAdIds = reactive(new Set());
 const loadedAdIds = reactive(new Set());
 
+// 壁纸卡片图片加载成功回调
+const onImageLoad = (item) => {
+    if (item) {
+        item.loaded = true;
+        item.loadError = false;
+    }
+};
+
+// 壁纸卡片图片加载失败回调
+const onImageError = (item) => {
+    if (item) {
+        item.loaded = true;
+        item.loadError = true;
+    }
+};
+
 // 广告加载成功回调
 const onCustomAdLoad = (item, e) => {
     if (item) {
@@ -655,8 +693,11 @@ const updateRecommendCols = () => {
     const list = recommendWallpapers.value || [];
     for (let i = 0; i < list.length; i++) {
         const item = list[i];
-        const h = Number(item.height) || 600;
-        const w = Number(item.width) || 300;
+        const h = Number(item.height) || 1920;
+        const w = Number(item.width) || 1080;
+        if (!item.aspectRatio) {
+            item.aspectRatio = `${w} / ${h}`;
+        }
         const virtualHeight = (h / w) * 100;
 
         if (leftH <= rightH) {
@@ -725,7 +766,17 @@ const getRecommendWallpapers = async (isAppend = false) => {
         }
         const res = await apiPostRecommend(params);
         if (res.code === 200 && res.data) {
-            const mapped = res.data.map((item) => ({ ...handlePicUrl(item), loaded: false }));
+            const mapped = res.data.map((item) => {
+                const normalized = handlePicUrl(item);
+                const w = Number(normalized.width) || 1080;
+                const h = Number(normalized.height) || 1920;
+                return {
+                    ...normalized,
+                    aspectRatio: `${w} / ${h}`,
+                    loaded: false,
+                    loadError: false,
+                };
+            });
             if (isAppend) {
                 recommendWallpapers.value.push(...mapped);
             } else {
@@ -1167,12 +1218,26 @@ onShareTimeline(() => ({
 </script>
 
 <style lang="scss" scoped>
+/* ─────────────────────────────────────────────────────────────
+   0. 全局清除本页面所有容器及原生滚动条显示 (防止偶发横向滚动条)
+───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar,
+:deep(::-webkit-scrollbar) {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    -webkit-appearance: none;
+    background: transparent;
+}
+
 .home-page {
     position: relative;
     width: 100%;
+    max-width: 100vw;
     min-height: 100vh;
     background-color: var(--page-background);
     box-sizing: border-box;
+    overflow-x: hidden;
 
     &.theme-light {
         background: linear-gradient(180deg, #edf0e6 0%, var(--page-background) 360rpx, var(--page-background) 100%);
@@ -1192,23 +1257,29 @@ onShareTimeline(() => ({
 
 .home-content {
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
+    overflow-x: hidden;
     animation: homeEntrance 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .banner {
-    width: 750rpx;
+    width: 100%;
     padding: 0 0 4rpx;
+    box-sizing: border-box;
+    overflow-x: hidden;
 
     .banner-carousel-wrap {
         position: relative;
-        width: 750rpx;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .banner-swiper {
-        width: 750rpx;
+        width: 100%;
         height: 410rpx;
         margin: 0 0 12rpx;
+        box-sizing: border-box;
     }
 
     // 统一左右安全边距为 20rpx，与搜索框、3个按钮卡片以及 select 板块完全对齐
@@ -1622,12 +1693,15 @@ onShareTimeline(() => ({
 
 .select {
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
     overflow: hidden;
 
     .select-watermark {
         position: absolute;
         top: -32rpx;
-        right: -10rpx;
+        right: 0;
+        max-width: 100%;
         font-size: 144rpx;
         font-weight: 900;
         color: var(--text-primary);
@@ -1727,7 +1801,7 @@ onShareTimeline(() => ({
         align-items: center;
         justify-content: center;
         gap: 8rpx;
-        letter-spacing: 0.4rpx;
+        letter-spacing: 0rpx;
         box-sizing: border-box;
         transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), background 0.15s, color 0.15s;
 
@@ -1788,9 +1862,18 @@ onShareTimeline(() => ({
         z-index: 1;
 
         .home-scroll {
+            width: 100%;
             white-space: nowrap;
             height: 100%;
             box-sizing: border-box;
+            overflow-y: hidden;
+
+            &::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                background: transparent;
+            }
 
             .box {
                 width: 280rpx;
@@ -2045,6 +2128,14 @@ onShareTimeline(() => ({
     .tags-scroll {
         width: 100%;
         white-space: nowrap;
+        box-sizing: border-box;
+
+        &::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent;
+        }
     }
 
     .tags-list {
@@ -2220,10 +2311,13 @@ onShareTimeline(() => ({
     gap: 20rpx;
     align-items: flex-start;
     width: 100%;
+    box-sizing: border-box;
 
     .waterfall-col {
         flex: 1;
         width: calc(50% - 10rpx);
+        min-width: 0;
+        box-sizing: border-box;
         display: flex;
         flex-direction: column;
         gap: 20rpx;
@@ -2240,7 +2334,12 @@ onShareTimeline(() => ({
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
     cursor: pointer;
 
+    &.is-loading {
+        @extend %sk-shimmer;
+    }
+
     &.is-ad-card {
+        aspect-ratio: auto !important;
         background: transparent !important;
         box-shadow: none !important;
         border: none !important;
@@ -2250,7 +2349,7 @@ onShareTimeline(() => ({
         &:not(.is-ad-loaded),
         &.is-ad-error {
             position: absolute !important;
-            left: -99999rpx !important;
+            left: 0 !important;
             top: 0 !important;
             width: 0 !important;
             height: 0 !important;
@@ -2291,6 +2390,7 @@ onShareTimeline(() => ({
 
     &__img {
         width: 100%;
+        height: 100%;
         display: block;
         opacity: 0;
         transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
@@ -2300,18 +2400,33 @@ onShareTimeline(() => ({
         }
     }
 
+    &__err {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.04);
+        z-index: 1;
+        pointer-events: none;
+
+        .theme-dark & {
+            background: rgba(255, 255, 255, 0.04);
+        }
+    }
+
     &__overlay {
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
-        height: 160rpx;
-        // 贴底极简柔和渐变：仅覆盖底部2行文字保护区，上方完全通透无阴影
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.18) 55%, rgba(0, 0, 0, 0) 100%);
+        height: 180rpx;
+        // 贴底极简柔和渐变：覆盖底部2行文字及footer保护区，上方完全通透无阴影
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.22) 60%, rgba(0, 0, 0, 0) 100%);
         pointer-events: none;
 
         .theme-light & {
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0) 100%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.48) 0%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, 0) 100%);
         }
     }
 
@@ -2329,10 +2444,13 @@ onShareTimeline(() => ({
             font-size: 24rpx;
             font-weight: 700;
             color: #ffffff;
-            line-height: 1.25;
+            line-height: 1.34;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap;
+            word-break: break-word;
             text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.6);
         }
 

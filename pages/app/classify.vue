@@ -11,8 +11,11 @@
             <view class="hero-section" :style="{ paddingTop: `${heroTopPadding}px` }">
                 <view class="hero-header">
                     <view class="title-group">
-                        <view class="hero-title">{{ $t('category.title') }}</view>
-                        <view class="hero-desc">{{ $t('category.desc') }}</view>
+                        <view class="title-row">
+                            <image class="category-icon" src="/static/icons/categroy.svg" mode="aspectFit" />
+                            <text class="hero-title">{{ $t('category.title') }}</text>
+                        </view>
+                        <text class="hero-desc">{{ $t('category.desc') }}</text>
                     </view>
                 </view>
 
@@ -104,7 +107,7 @@ const userStore = useUserStore();
 
 
 const statusBarHeight = ref(getStatusBarHeight() || 10);
-const heroTopPadding = computed(() => statusBarHeight.value);
+const heroTopPadding = computed(() => statusBarHeight.value + 12);
 const appStore = useAppStore();
 const classifyList = computed({
     get: () => appStore.classifyList,
@@ -157,17 +160,29 @@ onLoad(() => {
     position: relative;
     min-height: 100vh;
     overflow-x: hidden; // 防止任意子元素的水平溢出撑出横向滚动条
+
+    &.theme-light {
+        .category-icon {
+            filter: invert(18%) sepia(85%) saturate(2200%) hue-rotate(252deg) brightness(85%) contrast(98%);
+        }
+    }
+
+    &.theme-dark {
+        .category-icon {
+            filter: invert(80%) sepia(20%) saturate(1500%) hue-rotate(220deg);
+        }
+    }
 }
 
 // ── 参考 top.vue：标题微弹落座动画 ──
 @keyframes classifyTitleDrop {
     0% {
         opacity: 0;
-        transform: translate3d(0, -28rpx, 0) scale(0.92);
+        transform: translate3d(0, -16rpx, 0) scale(0.96);
     }
     60% {
         opacity: 1;
-        transform: translate3d(0, 4rpx, 0) scale(1.02);
+        transform: translate3d(0, 2rpx, 0) scale(1.01);
     }
     100% {
         opacity: 1;
@@ -198,29 +213,48 @@ onLoad(() => {
     z-index: 10;
     overflow: hidden; // 防止内部子元素负 margin 撑出滚动条
 
+    .hero-header {
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8rpx;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 12rpx;
+        }
+
+        .category-icon {
+            width: 44rpx;
+            height: 44rpx;
+            flex-shrink: 0;
+        }
+    }
+
     .hero-title {
-        font-size: 68rpx;
-        font-weight: 900;
+        font-size: 46rpx;
+        font-weight: 800;
         color: var(--text-primary);
         letter-spacing: 0rpx;
-        line-height: 1.1;
-        filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.1));
+        line-height: 1.2;
         animation: classifyTitleDrop 1.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
         will-change: opacity, transform;
     }
 
     .hero-desc {
-        font-size: 28rpx;
+        font-size: 26rpx;
+        font-weight: 400;
         color: var(--text-secondary);
-        margin-top: 15rpx;
-        font-weight: 500;
+        line-height: 1.4;
         letter-spacing: 0rpx;
         animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both;
         will-change: opacity, transform;
     }
 
     .search-container {
-        margin: 16rpx 0 0;
+        margin: 20rpx 0 0;
         animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
         will-change: opacity, transform;
     }

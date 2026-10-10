@@ -67,7 +67,12 @@
                             <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
                                 <view
                                     class="modern-card grid-card"
-                                    :class="{ 'is-ad-card': item.is_ad, 'is-loaded': item.adLoaded }"
+                                    :class="{
+                                        'is-ad-card': item.is_ad,
+                                        'is-loaded': item.adLoaded,
+                                        'is-loading': !item.is_ad && !item.loaded && !item.loadError,
+                                        'is-error': !item.is_ad && item.loadError
+                                    }"
                                     v-for="(item, idx) in tabStates[index].gridItems"
                                     :key="item._uniqueKey || (item.is_ad ? item.id : (index + '-' + item.id + '-' + idx))"
                                     @click="!item.is_ad && openPreview(item.id, index)"
@@ -87,7 +92,7 @@
                                     <!-- B. 正常壁纸卡片 -->
                                     <template v-else>
                                         <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
-                                            @load="item.loaded = true" @error="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
+                                            @load="onImageLoad(item)" @error="onImageError(item)" :class="{ 'is-loaded': item.loaded }"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
                                         <view class="card-meta" v-if="showCardMeta">
                                             <view class="meta-title">{{ getTitle(item) }}</view>
@@ -103,7 +108,10 @@
                                             <uni-icons
                                                 v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                                 type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
-                                                <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                        </view>
+                                        <view class="card-err" v-if="item.loadError">
+                                            <uni-icons type="image" size="26" color="var(--text-tertiary)"></uni-icons>
                                         </view>
                                     </template>
                                 </view>
@@ -115,7 +123,13 @@
                                 <view class="waterfall-col">
                                     <view
                                         class="modern-card wf-card"
-                                        :class="{ 'is-ad-card': item.is_ad, 'is-loaded': item.adLoaded }"
+                                        :class="{
+                                            'is-ad-card': item.is_ad,
+                                            'is-loaded': item.adLoaded,
+                                            'is-loading': !item.is_ad && !item.loaded && !item.loadError,
+                                            'is-error': !item.is_ad && item.loadError
+                                        }"
+                                        :style="!item.is_ad ? `aspect-ratio: ${item.aspectRatio || '9 / 16'};` : ''"
                                         v-for="(item, idx) in tabStates[index].leftCol"
                                         :key="item._uniqueKey || (item.is_ad ? item.id : ('w-l-' + item.id + '-' + idx))"
                                         @click="!item.is_ad && openPreview(item.id, index)"
@@ -131,8 +145,8 @@
                                             </view>
                                         </template>
                                         <template v-else>
-                                            <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
-                                                @load="item.loaded = true" @error="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
+                                            <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
+                                                @load="onImageLoad(item)" @error="onImageError(item)" :class="{ 'is-loaded': item.loaded }"></image>
                                             <view class="card-overlay" v-if="showCardMeta"></view>
                                             <view class="card-meta" v-if="showCardMeta">
                                                 <view class="meta-title">{{ getTitle(item) }}</view>
@@ -150,6 +164,9 @@
                                                     type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
                                                 <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                             </view>
+                                            <view class="card-err" v-if="item.loadError">
+                                                <uni-icons type="image" size="26" color="var(--text-tertiary)"></uni-icons>
+                                            </view>
                                         </template>
                                     </view>
                                 </view>
@@ -157,7 +174,13 @@
                                 <view class="waterfall-col">
                                     <view
                                         class="modern-card wf-card"
-                                        :class="{ 'is-ad-card': item.is_ad, 'is-loaded': item.adLoaded }"
+                                        :class="{
+                                            'is-ad-card': item.is_ad,
+                                            'is-loaded': item.adLoaded,
+                                            'is-loading': !item.is_ad && !item.loaded && !item.loadError,
+                                            'is-error': !item.is_ad && item.loadError
+                                        }"
+                                        :style="!item.is_ad ? `aspect-ratio: ${item.aspectRatio || '9 / 16'};` : ''"
                                         v-for="(item, idx) in tabStates[index].rightCol"
                                         :key="item._uniqueKey || (item.is_ad ? item.id : ('w-r-' + item.id + '-' + idx))"
                                         @click="!item.is_ad && openPreview(item.id, index)"
@@ -173,8 +196,8 @@
                                             </view>
                                         </template>
                                         <template v-else>
-                                            <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
-                                                @load="item.loaded = true" @error="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
+                                            <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
+                                                @load="onImageLoad(item)" @error="onImageError(item)" :class="{ 'is-loaded': item.loaded }"></image>
                                             <view class="card-overlay" v-if="showCardMeta"></view>
                                             <view class="card-meta" v-if="showCardMeta">
                                                 <view class="meta-title">{{ getTitle(item) }}</view>
@@ -191,6 +214,9 @@
                                                     v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                                     type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
                                                 <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                            </view>
+                                            <view class="card-err" v-if="item.loadError">
+                                                <uni-icons type="image" size="26" color="var(--text-tertiary)"></uni-icons>
                                             </view>
                                         </template>
                                     </view>
@@ -383,6 +409,13 @@ const appendDisplayData = (index, newItems, baseOffset = -1) => {
         if (!item._uniqueKey) {
             item._uniqueKey = `wall_${item.id}_${currentIdx}`;
         }
+        if (!item.aspectRatio) {
+            const w = Number(item.width) || 1080;
+            const h = Number(item.height) || 1920;
+            item.aspectRatio = `${w} / ${h}`;
+        }
+        if (item.loaded === undefined) item.loaded = false;
+        if (item.loadError === undefined) item.loadError = false;
 
         // 1. Grid 增量追加
         state.gridItems.push(item);
@@ -460,6 +493,22 @@ const rebuildDisplayData = (index) => {
     state.wfAdCount = 0;
 
     appendDisplayData(index, allImages, 0);
+};
+
+// 壁纸卡片图片加载成功回调
+const onImageLoad = (item) => {
+    if (item) {
+        item.loaded = true;
+        item.loadError = false;
+    }
+};
+
+// 壁纸卡片图片加载失败回调
+const onImageError = (item) => {
+    if (item) {
+        item.loaded = true;
+        item.loadError = true;
+    }
 };
 
 // 原生模板广告加载成功回调
@@ -540,7 +589,16 @@ const fetchData = async (index, init = false) => {
 
         if (props.apiType === 'local') {
             const rawData = props.tabs[index].data || [];
-            const newItems = rawData.map(item => ({ ...item, loaded: false }));
+            const newItems = rawData.map(item => {
+                const w = Number(item.width) || 1080;
+                const h = Number(item.height) || 1920;
+                return {
+                    ...item,
+                    aspectRatio: `${w} / ${h}`,
+                    loaded: false,
+                    loadError: false,
+                };
+            });
             await distributeItems(index, newItems);
             state.noMoreData = true;
             return;
@@ -561,7 +619,17 @@ const fetchData = async (index, init = false) => {
             res = await apiGetClassList(params);
         }
 
-        const newItems = (res.data || []).map(item => ({ ...handlePicUrl(item), loaded: false }));
+        const newItems = (res.data || []).map(item => {
+            const normalized = handlePicUrl(item);
+            const w = Number(normalized.width) || 1080;
+            const h = Number(normalized.height) || 1920;
+            return {
+                ...normalized,
+                aspectRatio: `${w} / ${h}`,
+                loaded: false,
+                loadError: false,
+            };
+        });
         await distributeItems(index, newItems);
 
         if (index === currentIndex.value) emit('update', { images: state.images, index });
@@ -908,6 +976,12 @@ onShow(() => {
     box-shadow: 0 4rpx 16rpx var(--shadow-color);
     transform: translateZ(0);
 
+    &.is-loading {
+        background: linear-gradient(90deg, var(--panel-background) 25%, var(--panel-background-strong) 50%, var(--panel-background) 75%);
+        background-size: 200% 100%;
+        animation: sk-shimmer 1.5s infinite linear;
+    }
+
     &.grid-card {
         height: 580rpx;
 
@@ -928,7 +1002,12 @@ onShow(() => {
     &.wf-card {
         height: auto;
 
+        &:not(.is-ad-card) .card-img {
+            height: 100%;
+        }
+
         &.is-ad-card {
+            aspect-ratio: auto !important;
             width: 100%;
             height: auto;
             min-height: 0;
@@ -1003,18 +1082,33 @@ onShow(() => {
         height: 100%;
     }
 
+    .card-err {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.04);
+        z-index: 1;
+        pointer-events: none;
+
+        .theme-dark & {
+            background: rgba(255, 255, 255, 0.04);
+        }
+    }
+
     .card-overlay {
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
-        height: 160rpx;
-        // 贴底极简柔和渐变：仅覆盖底部2行文字保护区，上方完全通透无阴影
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.18) 55%, rgba(0, 0, 0, 0) 100%);
+        height: 180rpx;
+        // 贴底极简柔和渐变：覆盖底部2行文字及footer保护区，上方完全通透无阴影
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.22) 60%, rgba(0, 0, 0, 0) 100%);
         pointer-events: none;
 
         .theme-light & {
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.46) 0%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0) 100%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.48) 0%, rgba(0, 0, 0, 0.15) 60%, rgba(0, 0, 0, 0) 100%);
         }
     }
 

@@ -12,6 +12,8 @@
             :key="item.pagePath"
             class="tab-item"
             :class="{ 'tab-item--active': isItemActive(item) }"
+            hover-class="none"
+            :hover-stop-propagation="true"
             @click="handleSwitch(item)"
         >
             <image
@@ -139,6 +141,43 @@ const handleSwitch = (item) => {
 
 <style lang="scss" scoped>
 /* ─────────────────────────────────────────────────────────────
+   0. 全端触摸与点击默认高亮清除 (彻底去除 tap-highlight 阴影)
+───────────────────────────────────────────────────────────── */
+.custom-tab-bar {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    outline: none;
+
+    .tab-item {
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        outline: none !important;
+
+        &:active,
+        &:focus,
+        &:focus-visible,
+        &:hover {
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+        }
+    }
+
+    .tab-icon,
+    .tab-text {
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+        pointer-events: none;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
    1. 悬浮毛玻璃胶囊模式 (Floating Capsule)
 ───────────────────────────────────────────────────────────── */
 .custom-tab-bar.mode-floating {
@@ -252,6 +291,13 @@ const handleSwitch = (item) => {
 
         &:active {
             transform: scale(0.93);
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        &:focus,
+        &:focus-visible {
+            outline: none !important;
         }
     }
 
@@ -313,7 +359,7 @@ const handleSwitch = (item) => {
 
     &.theme-light {
         background-color: var(--tabbar-background, #f8fafc);
-        border-top: 1rpx solid rgba(0, 0, 0, 0.08);
+        // border-top: 1rpx solid rgba(0, 0, 0, 0.08);
         box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.05);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -321,7 +367,7 @@ const handleSwitch = (item) => {
 
     &.theme-dark {
         background-color: var(--tabbar-background, #222226);
-        border-top: 1rpx solid rgba(255, 255, 255, 0.12);
+        // border-top: 1rpx solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.45);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
@@ -337,9 +383,24 @@ const handleSwitch = (item) => {
         box-sizing: border-box;
         cursor: pointer;
         transition: transform 0.15s ease;
+        background-color: transparent !important;
+        -webkit-tap-highlight-color: transparent !important;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+        outline: none !important;
 
         &:active {
             transform: scale(0.92);
+            background-color: transparent !important;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+        }
+
+        &:focus,
+        &:focus-visible,
+        &:hover {
+            outline: none !important;
+            background-color: transparent !important;
+            -webkit-tap-highlight-color: transparent !important;
         }
     }
 

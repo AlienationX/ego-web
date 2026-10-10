@@ -232,7 +232,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { onLoad, onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
 import { apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -240,7 +240,6 @@ import { getStatusBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
-import { useUserStore } from '@/stores/user.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
@@ -251,9 +250,7 @@ const dockBottomStyle = computed(() => 'max(20px, env(safe-area-inset-bottom))')
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
-const userStore = useUserStore();
 const isEn = computed(() => locale.value === 'en');
-
 
 const getLocalizedItem = (item) => {
     if (!item) return item;
@@ -338,8 +335,12 @@ const switchMetric = async (metric) => {
         scrollTop: 0,
         duration: 250,
     });
-    failedListAds.clear();
-    await getTopList();
+    if (cache[metric]) {
+        rankedList.value = cache[metric];
+    } else {
+        rankedList.value = [];
+        await getTopList();
+    }
 };
 
 const formatCount = (value) => {
@@ -389,7 +390,6 @@ const goBack = () => {
 onPullDownRefresh(async () => {
     cache.views = null;
     cache.downloads = null;
-    failedListAds.clear();
     await getTopList();
     uni.stopPullDownRefresh();
 });

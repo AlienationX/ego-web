@@ -1215,8 +1215,8 @@ function shareApp() {
     width: 64rpx;
     height: 64rpx;
     border-radius: 16rpx;
-    background: var(--page-background-secondary);
-    border: 2rpx solid var(--panel-border);
+    // background: var(--page-background-secondary);
+    // border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1379,7 +1379,7 @@ function shareApp() {
     font-size: 28rpx;
     line-height: 38rpx;
     color: var(--text-primary);
-    font-weight: 600;
+    font-weight: 400;
 }
 
 .sublabel {
@@ -1997,11 +1997,11 @@ function shareApp() {
     }
 
     // 返回按钮：毛玻璃质感，去掉描边
-    .back-btn {
-        background: rgba(255, 255, 255, 0.07);
-        border: none;
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
-    }
+    // .back-btn {
+    //     // background: rgba(255, 255, 255, 0.07);
+    //     // border: none;
+    //     box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    // }
 
     // section 标题：更克制的颜色
     .section-title {

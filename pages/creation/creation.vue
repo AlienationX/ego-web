@@ -254,7 +254,7 @@ const showComingSoon = () => {
 
 /* 顶部标题区 */
 .creation-header {
-    padding: 0 40rpx 20rpx;
+    padding: 0 20rpx 20rpx;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -291,7 +291,7 @@ const showComingSoon = () => {
 }
 
 .card-container {
-    padding: 12rpx 36rpx;
+    padding: 12rpx 20rpx;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
