@@ -31,8 +31,8 @@
                         :class="{ 'row-last': index === profileItems.length - 1 }" @click="handleClick(item)">
                         <view class="row-left">
                             <view class="icon-box">
-                                <mdi-icon :path="item.icon" size="20px"
-                                    :color="settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
+                                <mdi-icon :path="item.icon" size="22px"
+                                    :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></mdi-icon>
                             </view>
                             <view class="label-block">
                                 <text class="label">{{ item.label }}</text>
@@ -55,8 +55,8 @@
                         @click="handleClick(item)">
                         <view class="row-left">
                             <view class="icon-box" :class="{ destructive: item.destructive }">
-                                <mdi-icon :path="item.icon" size="20px"
-                                    :color="item.destructive ? '#E5322D' : settingsStore.isDark ? '#9ca3af' : '#6B7280'"></mdi-icon>
+                                <mdi-icon :path="item.icon" size="22px"
+                                    :color="item.destructive ? '#E5322D' : settingsStore.isDark ? '#94a3b8' : '#64748b'"></mdi-icon>
                             </view>
                             <view class="label-block">
                                 <text class="label">{{ item.label }}</text>
@@ -1355,10 +1355,9 @@ function shareApp() {
 }
 
 .icon-box {
-    width: 60rpx;
-    height: 60rpx;
-    border-radius: 16rpx;
-    // background: var(--panel-background);
+    width: 48rpx;
+    height: 48rpx;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1366,7 +1365,7 @@ function shareApp() {
 }
 
 .icon-box.destructive {
-    background: rgba(229, 50, 45, 0.1);
+    background: transparent;
 }
 
 .label-block {
@@ -2055,15 +2054,17 @@ function shareApp() {
         }
     }
 
-    // icon-box：带轻微色调，按功能分区域感知
+    // icon-box：扁平化处理，彻底去除暗色下的色块底色、描边和高光阴影
     .icon-box {
-        // background: rgba(255, 255, 255, 0.08);
+        background: transparent;
         border: none;
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+        box-shadow: none;
     }
 
     .icon-box.destructive {
-        background: rgba(229, 50, 45, 0.14);
+        background: transparent;
+        border: none;
+        box-shadow: none;
     }
 
     // value 文字颜色更低调

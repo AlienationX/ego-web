@@ -1,7 +1,7 @@
 <template>
     <view class="creation-page" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- 沉浸式顶部安全区与标题 -->
-        <view class="creation-header" :style="{ paddingTop: `${statusBarHeight + 12}px` }">
+        <view class="creation-header" :style="{ paddingTop: `${headerPaddingTop}px` }">
             <view class="header-main">
                 <view class="title-row">
                     <image class="sparkle-icon" src="/static/icons/creation.svg" mode="aspectFit" />
@@ -167,7 +167,8 @@ const settingsStore = useSettingsStore();
 const userStore = useUserStore();
 
 
-const statusBarHeight = computed(() => getStatusBarHeight() || 24);
+const statusBarHeight = computed(() => getStatusBarHeight() || 0);
+const headerPaddingTop = computed(() => (statusBarHeight.value > 0 ? statusBarHeight.value + 4 : 10));
 
 const pagePaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();

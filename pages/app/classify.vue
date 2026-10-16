@@ -106,8 +106,8 @@ const isEn = computed(() => locale.value === 'en');
 const userStore = useUserStore();
 
 
-const statusBarHeight = ref(getStatusBarHeight() || 10);
-const heroTopPadding = computed(() => statusBarHeight.value + 12);
+const statusBarHeight = ref(getStatusBarHeight() || 0);
+const heroTopPadding = computed(() => (statusBarHeight.value > 0 ? statusBarHeight.value + 4 : 10));
 const appStore = useAppStore();
 const classifyList = computed({
     get: () => appStore.classifyList,
@@ -262,9 +262,9 @@ onLoad(() => {
     .channel-filter-bar {
         display: flex;
         align-items: center;
-        gap: 14rpx;
-        margin-top: 18rpx;
-        margin-bottom: 8rpx;
+        gap: 16rpx;
+        margin-top: 24rpx;
+        margin-bottom: 22rpx;
         overflow-x: auto;
         white-space: nowrap;
         animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;

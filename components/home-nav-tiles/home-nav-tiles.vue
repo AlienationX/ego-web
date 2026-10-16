@@ -89,7 +89,7 @@ const goSubjects = () => {
     align-items: center;
     justify-content: flex-start;
     gap: 16rpx;
-    padding: 16rpx 20rpx;
+    padding: 24rpx 20rpx 26rpx;
     box-sizing: border-box;
     width: 100%;
 }

@@ -105,10 +105,9 @@
                     </view>
                 </view>
 
-                <!-- 统计卡片 -->
+                <!-- 统计卡片 (扁平化无阴影极简卡片) -->
                 <view class="stats-section">
                     <view class="stats-card heart-card" @click="toMyFavorite">
-                        <view class="card-bg"></view>
                         <view class="stats-row">
                             <view class="stats-icon heart">
                                 <uni-icons type="heart-filled" size="32" color="#ff6b9d"></uni-icons>
@@ -118,10 +117,8 @@
                             }}</view>
                         </view>
                         <view class="stats-label">{{ t('user.profile.myFavorite') }}</view>
-                        <view class="card-decoration decoration-1"></view>
                     </view>
                     <view class="stats-card download-card" @click="toMyDownload">
-                        <view class="card-bg"></view>
                         <view class="stats-row">
                             <view class="stats-icon download">
                                 <uni-icons type="download-filled" size="32" color="#28B389"></uni-icons>
@@ -131,10 +128,8 @@
                             }}</view>
                         </view>
                         <view class="stats-label">{{ t('user.profile.myDownload') }}</view>
-                        <view class="card-decoration decoration-2"></view>
                     </view>
                     <view class="stats-card star-card" @click="toMyScore">
-                        <view class="card-bg"></view>
                         <view class="stats-row">
                             <view class="stats-icon star">
                                 <uni-icons type="star-filled" size="32" color="#ffc107"></uni-icons>
@@ -144,7 +139,6 @@
                             }}</view>
                         </view>
                         <view class="stats-label">{{ t('user.profile.myScore') }}</view>
-                        <view class="card-decoration decoration-3"></view>
                     </view>
                 </view>
 
@@ -153,24 +147,45 @@
                     <custom-ad border-radius="20rpx" />
                 </view>
 
-                <view class="section">
-                    <view class="list">
-                        <view class="row" v-for="item in sysMenus" :key="item.left_text" @click="item.click">
-                            <view class="left">
-                                <view class="icon-wrap">
-                                    <mdi-icon :path="item.left_icon" size="24px"
-                                        :color="resolveMenuIconColor(item.left_color)"></mdi-icon>
+                <!-- 扁平化分组菜单列表 (参考 iOS Inset Grouped 极简美学) -->
+                <view class="menu-section">
+                    <view
+                        v-for="group in menuGroups"
+                        :key="group.key"
+                        class="menu-card"
+                    >
+                        <view
+                            v-for="(item, idx) in group.items"
+                            :key="item.left_text"
+                            class="menu-row"
+                            :class="{ 'is-last': idx === group.items.length - 1 }"
+                            @click="item.click"
+                        >
+                            <view class="menu-row__left">
+                                <view class="menu-icon-wrap">
+                                    <mdi-icon
+                                        :path="item.left_icon"
+                                        size="22px"
+                                        :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"
+                                    ></mdi-icon>
                                 </view>
-                                <view class="text">
-                                    {{ item.left_text }}
-                                </view>
+                                <text class="menu-title">{{ item.left_text }}</text>
                             </view>
-                            <view class="right">
-                                <view class="text">
-                                    {{ item.right_text }}
+
+                            <view class="menu-row__right">
+                                <!-- VIP 特权徽标 -->
+                                <view v-if="item.badge === 'vip'" class="vip-badge-pill">
+                                    <text class="badge-text">VIP</text>
                                 </view>
-                                <mdi-icon path="/static/icons/chevron-right.svg" size="20px"
-                                    :color="settingsStore.isDark ? '#4b5563' : '#a3a8b3'"></mdi-icon>
+                                <!-- 普通右侧信息 (如浏览数量) -->
+                                <text v-else-if="item.right_text" class="menu-extra">{{ item.right_text }}</text>
+
+                                <!-- 极简细向右箭头 -->
+                                <mdi-icon
+                                    path="/static/icons/chevron-right.svg"
+                                    size="18px"
+                                    :color="settingsStore.isDark ? 'rgba(255, 255, 255, 0.28)' : 'rgba(15, 23, 42, 0.28)'"
+                                ></mdi-icon>
                             </view>
                         </view>
                     </view>
@@ -232,7 +247,7 @@ const appStore = useAppStore();
 const hasCheckedInToday = ref(false);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const tabBarHeight = ref(getTabBarHeight() || 0);
-const userHeaderPaddingTop = computed(() => statusBarHeight.value + 10);
+const userHeaderPaddingTop = computed(() => (statusBarHeight.value > 0 ? statusBarHeight.value + 4 : 10));
 
 // ── 广告高度，控制底部留白 ──
 const adHeight = ref(0);
@@ -537,103 +552,98 @@ const appMenus = computed(() => [
     },
 ]);
 
-const sysMenus = computed(() => [
-    ...(userStore.isAdmin
-        ? [
+// 扁平化分组菜单数据结构 (参考附件1设计：功能特权、通用设置、帮助与服务)
+const menuGroups = computed(() => [
+    {
+        key: 'features',
+        items: [
+            ...(userStore.isAdmin
+                ? [
+                    {
+                        left_icon: '/static/icons/bell.svg',
+                        left_text: t('user.profile.subscription'),
+                        right_text: `${libraryStore.subscriptions.classifyIds.length + libraryStore.subscriptions.tags.length}`,
+                        click: toSubscriptions,
+                    },
+                    {
+                        left_icon: '/static/icons/tag.svg',
+                        left_text: t('settings.preferences'),
+                        right_text: `${libraryStore.preferredTags.length}`,
+                        click: toPreferences,
+                    },
+                    {
+                        left_icon: '/static/icons/bookmark.svg',
+                        left_text: t('historyPage.watchLaterTitle'),
+                        right_text: `${libraryStore.watchLater.length}`,
+                        click: toWatchLater,
+                    },
+                ]
+                : []),
             {
-                left_icon: '/static/icons/bell.svg',
-                left_color: '#6B7280',
-                left_text: t('user.profile.subscription'),
-                right_text: `${libraryStore.subscriptions.classifyIds.length + libraryStore.subscriptions.tags.length}`,
-                right_icon: 'right',
-                click: toSubscriptions,
+                left_icon: '/static/icons/clock.svg',
+                left_text: t('historyPage.title'),
+                right_text: `${libraryStore.recentViewed.length}`,
+                click: toHistory,
             },
             {
-                left_icon: '/static/icons/tag.svg',
-                left_color: '#6B7280',
-                left_text: t('settings.preferences'),
-                right_text: `${libraryStore.preferredTags.length}`,
-                right_icon: 'right',
-                click: toPreferences,
+                left_icon: '/static/icons/view-carousel.svg',
+                left_text: t('autoWallpaper.pageTitle'),
+                right_text: 'VIP',
+                badge: 'vip',
+                click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
             },
             {
-                left_icon: '/static/icons/bookmark.svg',
-                left_color: '#6B7280',
-                left_text: t('historyPage.watchLaterTitle'),
-                right_text: `${libraryStore.watchLater.length}`,
-                right_icon: 'right',
-                click: toWatchLater,
-            },
-        ]
-        : []),
-    {
-        left_icon: '/static/icons/clock.svg',
-        left_color: '#6B7280',
-        left_text: t('historyPage.title'),
-        right_text: `${libraryStore.recentViewed.length}`,
-        right_icon: 'right',
-        click: toHistory,
-    },
-    {
-        left_icon: '/static/icons/view-carousel.svg',
-        left_color: '#6B7280',
-        left_text: t('autoWallpaper.pageTitle'),
-        right_text: 'VIP',
-        right_icon: 'right',
-        click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
-    },
-    {
-        left_icon: '/static/icons/widgets.svg',
-        left_color: '#6B7280',
-        left_text: t('widgets.title'),
-        right_text: '',
-        right_icon: 'right',
-        click: () => uni.navigateTo({ url: '/pages/settings/widgets' }),
-    },
-    {
-        left_icon: '/static/icons/credit-card-chip.svg',
-        left_color: '#6B7280',
-        left_text: t('redeem.title'),
-        right_text: '',
-        right_icon: 'right',
-        click: openRedeemPopup,
-    },
-    {
-        left_icon: '/static/icons/help-circle.svg',
-        left_color: '#6B7280',
-        left_text: t('user.profile.question'),
-        right_text: '',
-        right_icon: 'right',
-        click: toFAQ,
-    },
-    {
-        left_icon: '/static/icons/comment-processing.svg',
-        left_color: '#6B7280',
-        left_text: t('user.profile.feedback'),
-        right_text: '',
-        right_icon: 'right',
-        click: toFeedback,
-    },
-    {
-        left_icon: '/static/icons/cog.svg',
-        left_color: '#6B7280',
-        left_text: t('user.profile.settings'),
-        right_text: '',
-        right_icon: 'right',
-        click: toSettings,
-    },
-    ...(userStore.isAdmin
-        ? [
-            {
-                left_icon: '/static/icons/ab-testing.svg',
-                left_color: '#6B7280',
-                left_text: t('user.profile.testLab'),
+                left_icon: '/static/icons/widgets.svg',
+                left_text: t('widgets.title'),
                 right_text: '',
-                right_icon: 'right',
-                click: toTest,
+                click: () => uni.navigateTo({ url: '/pages/settings/widgets' }),
             },
-        ]
-        : []),
+            {
+                left_icon: '/static/icons/credit-card-chip.svg',
+                left_text: t('redeem.title'),
+                right_text: '',
+                click: openRedeemPopup,
+            },
+        ],
+    },
+    {
+        key: 'preferences',
+        items: [
+            {
+                left_icon: '/static/icons/cog.svg',
+                left_text: t('user.profile.settings'),
+                right_text: '',
+                click: toSettings,
+            },
+        ],
+    },
+    {
+        key: 'support',
+        items: [
+            {
+                left_icon: '/static/icons/help-circle.svg',
+                left_text: t('user.profile.question'),
+                right_text: '',
+                click: toFAQ,
+            },
+            {
+                left_icon: '/static/icons/comment-processing.svg',
+                left_text: t('user.profile.feedback'),
+                right_text: '',
+                click: toFeedback,
+            },
+            ...(userStore.isAdmin
+                ? [
+                    {
+                        left_icon: '/static/icons/ab-testing.svg',
+                        left_text: t('user.profile.testLab'),
+                        right_text: '',
+                        click: toTest,
+                    },
+                ]
+                : []),
+        ],
+    },
 ]);
 
 const exitMenus = computed(() => [
@@ -1131,146 +1141,78 @@ onShow(() => {
         display: flex;
         gap: 20rpx;
         padding: 0 30rpx;
-        margin-bottom: 30rpx;
+        margin-bottom: 28rpx;
         position: relative;
         z-index: 1;
 
         .stats-card {
             flex: 1;
             background: var(--page-background-secondary);
-            border-radius: 20rpx;
-            padding: 30rpx 20rpx 24rpx;
+            border-radius: 28rpx;
+            padding: 24rpx 20rpx 22rpx;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s;
-            box-shadow: 0 4rpx 20rpx var(--shadow-color);
-            border: 2rpx solid var(--panel-border);
+            transition: background 0.15s ease;
+            box-shadow: none; // 彻底扁平化，去除立体阴影
+            border: none;
 
             &:active {
-                transform: translateY(-4rpx) scale(0.98);
-                box-shadow: 0 8rpx 30rpx var(--shadow-color);
-            }
-
-            .card-bg {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                opacity: 0;
-                transition: opacity 0.3s;
-            }
-
-            .card-decoration {
-                position: absolute;
-                width: 120rpx;
-                height: 120rpx;
-                border-radius: 50%;
-                opacity: 0.08;
-                pointer-events: none;
-            }
-
-            &.heart-card {
-                .card-bg {
-                    background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(255, 107, 157, 0.05) 100%);
-                }
-
-                .decoration-1 {
-                    background: #ff6b9d;
-                    top: -30rpx;
-                    right: -30rpx;
-                }
-            }
-
-            &.download-card {
-                .card-bg {
-                    background: linear-gradient(135deg, rgba($wp-theme-color, 0.1) 0%, rgba($wp-theme-color, 0.05) 100%);
-                }
-
-                .decoration-2 {
-                    background: $wp-theme-color;
-                    bottom: -30rpx;
-                    left: -30rpx;
-                }
-            }
-
-            &.star-card {
-                .card-bg {
-                    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
-                }
-
-                .decoration-3 {
-                    background: #ffc107;
-                    top: -20rpx;
-                    left: -20rpx;
-                }
-            }
-
-            &:active .card-bg {
-                opacity: 1;
+                background: rgba(0, 0, 0, 0.03);
             }
 
             .stats-row {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                margin-bottom: 16rpx;
+                margin-bottom: 12rpx;
                 position: relative;
                 z-index: 1;
             }
 
             .stats-icon {
-                width: 64rpx;
-                height: 64rpx;
+                width: 56rpx;
+                height: 56rpx;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 flex-shrink: 0;
                 position: relative;
-                z-index: 1;
-                transition: all 0.3s;
+                box-shadow: none;
 
                 &.heart {
-                    background: linear-gradient(135deg, rgba(255, 107, 157, 0.15) 0%, rgba(255, 107, 157, 0.08) 100%);
-                    box-shadow: 0 4rpx 12rpx rgba(255, 107, 157, 0.2);
+                    background: rgba(255, 107, 157, 0.12);
                 }
 
                 &.download {
-                    background: linear-gradient(135deg, rgba($wp-theme-color, 0.15) 0%, rgba($wp-theme-color, 0.08) 100%);
-                    box-shadow: 0 4rpx 12rpx rgba($wp-theme-color, 0.2);
+                    background: rgba(40, 179, 137, 0.12);
                 }
 
                 &.star {
-                    background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.08) 100%);
-                    box-shadow: 0 4rpx 12rpx rgba(255, 193, 7, 0.2);
+                    background: rgba(255, 193, 7, 0.12);
                 }
             }
 
-            &:active .stats-icon {
-                transform: scale(1.1);
-            }
-
             .stats-number {
-                font-size: 36rpx;
+                font-size: 38rpx;
                 font-weight: 700;
                 color: var(--text-primary);
                 line-height: 1.2;
                 flex: 1;
                 text-align: right;
-                padding-right: 8rpx;
+                padding-right: 6rpx;
             }
 
             .stats-label {
                 font-size: 22rpx;
                 color: var(--text-tertiary);
-                font-weight: 500;
+                font-weight: 400;
                 text-align: right;
                 position: relative;
                 z-index: 1;
-                margin-top: 4rpx;
+                margin-top: 2rpx;
             }
         }
     }
@@ -1323,53 +1265,112 @@ onShow(() => {
         }
     }
 
-    .section {
-        margin-bottom: 10rpx;
+    // ─────────────────────────────────────────────
+    // 扁平化分组卡片菜单 (参考 Attachment 1)
+    // ─────────────────────────────────────────────
+    .menu-section {
         padding: 0 30rpx;
+        margin-bottom: 24rpx;
 
-        .list {
-            .row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0 28rpx;
-                height: 94rpx;
+        .menu-card {
+            background: var(--page-background-secondary);
+            border-radius: 28rpx;
+            // border: 1rpx solid var(--panel-border);
+            margin-bottom: 22rpx;
+            overflow: hidden;
+            box-shadow: none; // 彻底扁平化，去浮夸投影
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .menu-row {
                 position: relative;
-                background: var(--page-background-secondary);
-                margin-bottom: 16rpx;
-                border-radius: 16rpx;
-                border: 2rpx solid var(--panel-border);
-                transition: all 0.3s;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 104rpx;
+                padding: 0 28rpx;
+                background: transparent;
+                transition: background 0.15s ease;
 
+                // 细线分割线（参考 iOS Inset 分割线，起点对齐文字）：
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 92rpx; // 避让左侧图标，对齐文字边缘
+                    right: 0;
+                    height: 1rpx;
+                    background: var(--panel-border, rgba(30, 41, 59, 0.05));
+                    pointer-events: none;
+                }
+
+                // 最后一项去除分割线
+                &.is-last::after {
+                    display: none;
+                }
+
+                // 点按反馈：扁平细腻底色加深，不形变、不缩放
                 &:active {
-                    opacity: 0.8;
-                    transform: scale(0.99);
+                    background: rgba(0, 0, 0, 0.025);
                 }
 
-                &:last-child {
-                    margin-bottom: 0;
-                }
-
-                .left {
+                &__left {
                     display: flex;
                     align-items: center;
+                    gap: 22rpx;
+                    flex: 1;
+                    min-width: 0;
 
-                    .text {
-                        padding-left: 20rpx;
+                    .menu-icon-wrap {
+                        width: 44rpx;
+                        height: 44rpx;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                    }
+
+                    .menu-title {
+                        font-size: 28rpx;
+                        font-weight: 500;
                         color: var(--text-primary);
-                        font-size: 26rpx;
-                        font-weight: 400;
+                        letter-spacing: 0rpx;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
                     }
                 }
 
-                .right {
+                &__right {
                     display: flex;
                     align-items: center;
+                    gap: 12rpx;
+                    flex-shrink: 0;
 
-                    .text {
-                        font-size: 24rpx;
+                    .menu-extra {
+                        font-size: 26rpx;
                         color: var(--text-tertiary);
-                        margin-right: 12rpx;
+                        font-weight: 400;
+                    }
+
+                    .vip-badge-pill {
+                        padding: 2rpx 14rpx;
+                        border-radius: 999rpx;
+                        background: rgba(245, 158, 11, 0.12);
+                        border: 1rpx solid rgba(245, 158, 11, 0.25);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        .badge-text {
+                            font-size: 20rpx;
+                            font-weight: 700;
+                            color: #f59e0b;
+                            line-height: 1.3;
+                            letter-spacing: 0.5rpx;
+                        }
                     }
                 }
 
@@ -1377,7 +1378,7 @@ onShow(() => {
                     position: absolute;
                     top: 0;
                     left: 0;
-                    height: 94rpx;
+                    height: 100%;
                     width: 100%;
                     opacity: 0;
                 }
@@ -1388,22 +1389,40 @@ onShow(() => {
 
 // ─────────────────────────────────────────────
 // 暗色模式专属覆盖（user.vue）
-// 每个 row 是独立卡片，用背景色差 + 顶部高光代替边框
 // ─────────────────────────────────────────────
-.theme-dark {
+.theme-dark,
+.layout.theme-dark {
 
     .userInfo .checkin-section {
         background: rgba(255, 255, 255, 0.04);
         box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
     }
 
-    // stats 卡片：去边框，换深色背景 + 顶部高光
+    // stats 卡片：彻底扁平化，深色背景，无边框、无阴影、无外发光
     .stats-section .stats-card {
         background: #1e1e22;
         border: none;
-        box-shadow:
-            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
-            0 8rpx 24rpx rgba(0, 0, 0, 0.32);
+        box-shadow: none;
+
+        &:active {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .stats-icon {
+            box-shadow: none;
+
+            &.heart {
+                background: rgba(255, 107, 157, 0.14);
+            }
+
+            &.download {
+                background: rgba(40, 179, 137, 0.14);
+            }
+
+            &.star {
+                background: rgba(255, 193, 7, 0.14);
+            }
+        }
     }
 
     // 会员卡片：去边框
@@ -1420,18 +1439,28 @@ onShow(() => {
         }
     }
 
-    // menu row：独立卡片，去边框，深色背景 + 顶部高光
-    .section .list .row {
+    // 扁平菜单卡片暗色适配：与 stats-card 严格保持一致的 #1e1e22 背景与微细边框
+    .menu-section .menu-card {
         background: #1e1e22;
-        border: none;
-        box-shadow:
-            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
-            0 4rpx 16rpx rgba(0, 0, 0, 0.28);
+        // border: 1rpx solid rgba(255, 255, 255, 0.06);
 
-        &:active {
-            background: rgba(255, 255, 255, 0.04);
-            opacity: 1; // 覆盖原来的 opacity:0.8，避免和背景变化叠加
-            transform: scale(0.99);
+        .menu-row {
+            &::after {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            &:active {
+                background: rgba(255, 255, 255, 0.04);
+            }
+
+            .vip-badge-pill {
+                background: rgba(251, 191, 36, 0.15);
+                border: 1rpx solid rgba(251, 191, 36, 0.3);
+
+                .badge-text {
+                    color: #fbbf24;
+                }
+            }
         }
     }
 }

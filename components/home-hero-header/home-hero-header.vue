@@ -1,7 +1,41 @@
 <template>
     <view class="hero-header" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" :style="{ paddingTop: headerPaddingTop }">
+        <!-- #ifdef MP-WEIXIN -->
+        <!-- 微信小程序端：固定在右上角胶囊按钮左侧的常驻通知栏 (等高对齐) -->
+        <view class="mp-capsule-bar" :style="capsuleBarStyle">
+            <!-- 灵动微抽屉 (+N New 上新提醒，展开 6s 自动收回) -->
+            <view
+                v-if="statusStore.newWallpapersCount > 0 && isBubbleVisible"
+                class="dynamic-drawer dynamic-drawer--capsule"
+                :class="{ 'is-folding': isBubbleFolding }"
+                :style="{ height: `${capsuleInfo.height}px` }"
+                @click="goTimeline"
+            >
+                <text class="drawer-spark">✨</text>
+                <text class="drawer-text">{{ isEn ? `+${statusStore.newWallpapersCount} New` : `上新 ${statusStore.newWallpapersCount} 张` }}</text>
+                <text class="drawer-arrow">›</text>
+            </view>
+
+            <!-- 铃铛按钮 (等高于微信胶囊) -->
+            <view
+                class="bell-btn bell-btn--capsule"
+                :style="capsuleBellStyle"
+                @click="emit('open-notifications')"
+            >
+                <mdi-icon
+                    path="/static/icons/bell.svg"
+                    :size="capsuleIconSize"
+                    :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"
+                ></mdi-icon>
+                <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge">
+                    <text class="badge-num">{{ statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount }}</text>
+                </view>
+            </view>
+        </view>
+        <!-- #endif -->
+
         <!-- Row 1: 用户问候 + 通知铃铛 -->
-        <view class="hero-header__row hero-header__greeting-row">
+        <view class="hero-header__row hero-header__greeting-row" :style="greetingRowStyle">
             <view class="user-block" @click="goUser">
                 <view class="avatar-wrap">
                     <image
@@ -19,6 +53,8 @@
                 </view>
             </view>
 
+            <!-- #ifndef MP-WEIXIN -->
+            <!-- 非微信小程序端：保持在问候行右侧不变 -->
             <view class="notify-wrap">
                 <!-- 灵动微抽屉 (高度与铃铛严格保持 84rpx 一致，类似通知小抽屉，6s 自动推回) -->
                 <view
@@ -40,6 +76,7 @@
                     </view>
                 </view>
             </view>
+            <!-- #endif -->
         </view>
 
         <!-- Row 2: 沉浸式质感搜索栏 -->
@@ -68,6 +105,7 @@ import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user.js';
 import { useStatusStore } from '@/stores/status.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 
 const props = defineProps({
     statusBarHeight: {
@@ -91,21 +129,92 @@ let foldTimer = null;
 
 const isEn = computed(() => locale.value === 'en');
 
-// 计算顶部内边距：小程序端动态避让右上角胶囊按钮，非小程序端保持 statusBarHeight + 10px
+// 计算实际安全状态栏高度
+const actualStatusBarHeight = computed(() => {
+    return props.statusBarHeight || getStatusBarHeight() || 0;
+});
+
+// 计算顶部内边距：采用方案2（状态栏高度 + 4px微留白，H5保底10px）
 const headerPaddingTop = computed(() => {
-    let topPx = (props.statusBarHeight || 0) + 10;
-    // #ifdef MP
+    const sHeight = actualStatusBarHeight.value;
+    return `${sHeight > 0 ? sHeight + 4 : 10}px`;
+});
+
+// 微信小程序右上角胶囊尺寸与定位
+const capsuleInfo = ref({
+    top: 48,
+    height: 32,
+    rightOffset: 100,
+    safeGreetingPadding: 140,
+});
+
+const updateCapsuleInfo = () => {
+    // #ifdef MP-WEIXIN
     try {
-        const menuButton = uni.getMenuButtonBoundingClientRect();
-        if (menuButton && menuButton.bottom) {
-            // 胶囊底部下方留出 10px 间距，确保整个问候行与铃铛完全在胶囊下方，绝无遮挡
-            topPx = Math.max(menuButton.bottom + 10, topPx);
+        if (uni.getMenuButtonBoundingClientRect) {
+            const menuBtn = uni.getMenuButtonBoundingClientRect();
+            if (menuBtn && menuBtn.top && menuBtn.height) {
+                const sysInfo = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync();
+                const screenWidth = sysInfo.windowWidth || 375;
+                // 计算胶囊左侧到屏幕右边缘的距离，外加 8px 间距
+                const rightOffset = Math.max(0, screenWidth - menuBtn.left + 8);
+                capsuleInfo.value = {
+                    top: menuBtn.top,
+                    height: menuBtn.height,
+                    rightOffset,
+                    // 问候语右侧安全留白：胶囊右边距 + 铃铛宽度 + 呼吸间距
+                    safeGreetingPadding: Math.round(rightOffset + menuBtn.height + 12),
+                };
+                return;
+            }
         }
-    } catch (e) {
-        topPx = (props.statusBarHeight || 0) + 48;
-    }
+    } catch (e) {}
+    const sHeight = actualStatusBarHeight.value;
+    capsuleInfo.value = {
+        top: sHeight + 6,
+        height: 32,
+        rightOffset: 103,
+        safeGreetingPadding: 145,
+    };
     // #endif
-    return `${topPx}px`;
+};
+
+// 立即同步执行一次胶囊信息计算
+updateCapsuleInfo();
+
+onMounted(() => {
+    updateCapsuleInfo();
+});
+
+const capsuleBarStyle = computed(() => {
+    return {
+        top: `${capsuleInfo.value.top}px`,
+        right: `${capsuleInfo.value.rightOffset}px`,
+        height: `${capsuleInfo.value.height}px`,
+    };
+});
+
+const capsuleBellStyle = computed(() => {
+    const h = capsuleInfo.value.height;
+    return {
+        width: `${h}px`,
+        height: `${h}px`,
+    };
+});
+
+const capsuleIconSize = computed(() => {
+    return `${Math.round(capsuleInfo.value.height * 0.58)}px`;
+});
+
+const greetingRowStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    return {
+        paddingRight: `${capsuleInfo.value.safeGreetingPadding}px`,
+    };
+    // #endif
+    // #ifndef MP-WEIXIN
+    return {};
+    // #endif
 });
 
 // 用户头像
@@ -494,6 +603,47 @@ const goTimeline = () => {
                 transform: scale(0.92);
             }
         }
+    }
+}
+
+// ── 微信小程序：胶囊左侧常驻通知条 ──
+.mp-capsule-bar {
+    position: fixed;
+    z-index: 995;
+    display: flex;
+    align-items: center;
+    gap: 12rpx;
+    pointer-events: auto;
+}
+
+.bell-btn--capsule {
+    backdrop-filter: blur(20rpx);
+    -webkit-backdrop-filter: blur(20rpx);
+}
+
+.dynamic-drawer--capsule {
+    padding: 0 18rpx;
+    gap: 6rpx;
+    box-sizing: border-box;
+
+    .drawer-spark {
+        font-size: 20rpx;
+        line-height: 1;
+    }
+
+    .drawer-text {
+        font-size: 20rpx;
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: 0rpx;
+        white-space: nowrap;
+    }
+
+    .drawer-arrow {
+        font-size: 20rpx;
+        opacity: 0.5;
+        line-height: 1;
+        margin-left: 2rpx;
     }
 }
 </style>
