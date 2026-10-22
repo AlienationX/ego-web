@@ -17,7 +17,7 @@
         <scroll-view scroll-y class="previewScroll" show-scrollbar="false" :style="previewScrollStyle"
             @scroll="handlePreviewScroll">
             <view class="previewLayout" :style="previewLayoutStyle">
-                <view class="previewHero">
+                <view class="previewHero" :style="previewHeroStyle">
                     <!-- 1. 轻触屏幕提示：仅在【预览模式】显示，使用过的用户不展示 -->
                     <view v-if="!maskState && showTapHint" class="mode-tip-toast">
                         <text>{{ t('previewPage.tapToToggleControls') }}</text>
@@ -43,29 +43,32 @@
                                     :class="{
                                         'is-loaded': isImageLoaded(index),
                                         'is-landscape-rotated': isLandscapeRotated,
-                                        'is-hero-active': isHeroEntering && index === initialHeroIndex
+                                        'is-hero-active': isHeroEntering && index === initialHeroIndex,
+                                        'is-card-active': isAvatarMode && isAvatarCardActive,
+                                        'is-avatar-image': isAvatarMode
                                     }" @click="maskChange"
                                     @load="handleImageLoad(index, $event)" @error="handleImageLoad(index)"
-                                    :src="item.picurl" mode="aspectFill"></image>
+                                    :src="item.picurl" :mode="(isDesktopMode || isAvatarMode) ? 'aspectFit' : 'aspectFill'"></image>
                             </view>
                         </swiper-item>
                     </swiper>
 
                     <!-- 沉浸式场景预览模式 (锁屏时钟/头像/桌面) -->
                     <view class="scene-overlay-wrap"
-                        :class="tempClockStyle ? 'is-previewing-clock' : sceneAnimClass"
-                        v-if="isSceneMounted || tempClockStyle">
+                        :class="[tempClockStyle ? 'is-previewing-clock' : (isAvatarMode ? 'is-avatar-scene' : sceneAnimClass)]"
+                        v-if="isSceneMounted || tempClockStyle || isAvatarMode">
                         <!-- 1. 灵动头像专属场景模拟器 (圆形/方形/社交名片) -->
-                        <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.picurl || ''" />
+                        <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.picurl || ''" :show-controls="!maskState" :is-image-loaded="isImageLoaded(currentIndex)" @card-active-change="onAvatarCardActiveChange" />
 
-                        <!-- 2. PC 桌面横屏壁纸专属模拟器 (Mac/Win Mockup + 横屏旋转) -->
-                        <desktop-preview-overlay v-else-if="isDesktopMode" @rotate-change="onDesktopRotateChange" />
+                        <!-- 2. PC 桌面横屏壁纸专属模拟器 (横屏旋转与全屏沉浸) -->
+                        <desktop-preview-overlay v-else-if="isDesktopMode" :is-rotated="isLandscapeRotated" :show-controls="!maskState" @rotate-change="onDesktopRotateChange" />
 
                         <!-- 3. 常规手机壁纸沉浸式锁屏时钟 -->
                         <lock-screen-overlay v-else :clockStyle="tempClockStyle || activeSessionClockStyle" />
                     </view>
 
                     <view class="mask" :class="[maskAnimClass, { 'mask--loading': isCurrentSlideLoading }]" v-if="isMaskMounted">
+                        <!-- 返回按钮（跟随 mask 操作栏一同进入与退出） -->
                         <view class="goBack" :style="{ top: backButtonTop + 'px' }" @click="goBack">
                             <mdi-icon path="/static/icons/arrow-left.svg" size="20px" color="#fff"></mdi-icon>
                         </view>
@@ -74,13 +77,9 @@
                             <view v-if="isAdmin" class="icon-btn" @click="openAdminMenu">
                                 <uni-icons type="more-filled" size="24" color="#ffffff"></uni-icons>
                             </view>
-                            <!-- 头像专属：一键设为个人头像 -->
-                            <view v-if="isAvatarMode" class="icon-btn" @click="handleSetAsAppAvatar">
-                                <mdi-icon path="/static/icons/account-circle.svg" size="24px" color="#fff"></mdi-icon>
-                            </view>
                             <!-- 电脑横屏专属：一键 90° 旋转 -->
                             <view v-if="isDesktopMode" class="icon-btn" @click="isLandscapeRotated = !isLandscapeRotated">
-                                <mdi-icon path="/static/icons/screen-rotation.svg" size="22px" color="#fff"></mdi-icon>
+                                <mdi-icon :path="isLandscapeRotated ? '/static/icons/phone-rotate-portrait.svg' : '/static/icons/phone-rotate-landscape.svg'" size="22px" color="#fff"></mdi-icon>
                             </view>
                             <view v-if="!isAvatarMode && !isDesktopMode" class="icon-btn" @click="openClockStyle">
                                 <mdi-icon path="/static/icons/clock.svg" size="28px" color="#fff"></mdi-icon>
@@ -119,11 +118,7 @@
                                     currentInfo.is_favorited ? t('previewPage.favorited') : t('previewPage.favorite')
                                     }}</view>
                             </view>
-                            <view class="box" v-if="isAvatarMode" @click="handleSetAsAppAvatar">
-                                <mdi-icon path="/static/icons/account-circle.svg" size="24px" color="#fff"></mdi-icon>
-                                <view class="text">{{ t('avatar.setAsAppAvatar') }}</view>
-                            </view>
-                            <view class="box" v-else @click="openScore">
+                            <view class="box" @click="openScore">
                                 <uni-icons type="star-filled" size="24"></uni-icons>
                                 <view class="text">{{ t('previewPage.rate') }}</view>
                             </view>
@@ -650,7 +645,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
@@ -1173,7 +1168,7 @@ const maskChange = () => {
         if (sceneTimer) clearTimeout(sceneTimer);
         sceneAnimClass.value = 'is-leaving';
         sceneTimer = setTimeout(() => {
-            if (maskState.value && !tempClockStyle.value) {
+            if (maskState.value && !tempClockStyle.value && !isAvatarMode.value) {
                 isSceneMounted.value = false;
             }
         }, 850);
@@ -1201,13 +1196,22 @@ const maskChange = () => {
     }
 };
 
+// ── 当前壁纸详情数据 ──
+const currentInfo = ref(null);
+
 // ── 全场景视觉资产模式判断 ──
 const isAvatarMode = computed(() => {
-    return currentInfo.value?.classify_type === 4 || currentInfo.value?.classify?.classify_type === 4;
+    const info = currentInfo.value;
+    if (!info) return false;
+    const type = Number(info.classify_type ?? info.classify?.classify_type);
+    return type === 4;
 });
 
 const isDesktopMode = computed(() => {
-    return currentInfo.value?.classify_type === 2 || currentInfo.value?.classify?.classify_type === 2;
+    const info = currentInfo.value;
+    if (!info) return false;
+    const type = Number(info.classify_type ?? info.classify?.classify_type);
+    return type === 2;
 });
 
 const isLandscapeRotated = ref(false);
@@ -1215,17 +1219,22 @@ const onDesktopRotateChange = (val) => {
     isLandscapeRotated.value = val;
 };
 
-// 设为应用内个人头像
-const handleSetAsAppAvatar = () => {
-    if (!currentInfo.value?.picurl) return;
-    try {
-        if (!userStore.userinfo) userStore.userinfo = {};
-        userStore.userinfo.avatar = currentInfo.value.picurl;
-        uni.setStorageSync('userinfo', userStore.userinfo);
-        uni.showToast({ title: t('avatar.setSuccess'), icon: 'none' });
-    } catch (e) {
-        uni.showToast({ title: t('common.submitFailed'), icon: 'none' });
-    }
+// ── 电脑横屏壁纸旋转 90° 精准满屏缩放比例（基于设备高宽比，消除黑边并防止拉伸） ──
+const windowInfo = uni.getWindowInfo?.() || uni.getSystemInfoSync?.() || {};
+const deviceScreenWidth = windowInfo.windowWidth || 375;
+const deviceScreenHeight = windowInfo.windowHeight || 667;
+const landscapeScaleRatio = computed(() => {
+    if (!deviceScreenWidth || !deviceScreenHeight) return 2.16;
+    return Number((deviceScreenHeight / deviceScreenWidth).toFixed(3));
+});
+const previewHeroStyle = computed(() => ({
+    '--landscape-scale': landscapeScaleRatio.value,
+}));
+
+// 头像名片模式激活状态：卡片弹起至回落原位期间为 true，用于隐藏底层原图，确保画面始终只有一张图片
+const isAvatarCardActive = ref(false);
+const onAvatarCardActiveChange = (val) => {
+    isAvatarCardActive.value = !!val;
 };
 
 // 点击信息弹窗
@@ -1774,7 +1783,6 @@ const initialHeroIndex = ref(0);
 const isCurrentSlideLoading = computed(
     () => readImgs.value.includes(currentIndex.value) && !loadedImageMap.value[currentIndex.value],
 );
-const currentInfo = ref(null);
 const fetchSingleWallDetail = async (id) => {
     if (!id) return;
     try {
@@ -1811,6 +1819,9 @@ onLoad(async (e) => {
         currentIndex.value = matchIndex;
         initialHeroIndex.value = matchIndex;
         currentInfo.value = classList.value[currentIndex.value];
+        if (e.classify_type && currentInfo.value && currentInfo.value.classify_type === undefined) {
+            currentInfo.value.classify_type = Number(e.classify_type);
+        }
     } else {
         initialHeroIndex.value = 0;
     }
@@ -2058,6 +2069,7 @@ const handleCopyWatermarkId = () => {
     width: 100%;
     height: 100vh;
     position: relative;
+    overflow: hidden;
 
     .preview-swiper {
         width: 100%;
@@ -2067,7 +2079,10 @@ const handleCopyWatermarkId = () => {
             width: 100%;
             height: 100%;
             position: relative;
-            background: var(--page-background);
+            background: #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .preview-slide__image {
@@ -2078,7 +2093,7 @@ const handleCopyWatermarkId = () => {
             transform-origin: center center;
 
             &.is-landscape-rotated {
-                transform: rotate(90deg) scale(1.6);
+                transform: rotate(90deg) scale(var(--landscape-scale, 2.16));
             }
 
             &.is-hero-active {
@@ -2088,6 +2103,16 @@ const handleCopyWatermarkId = () => {
 
         .preview-slide__image.is-loaded {
             opacity: 1;
+
+            &.is-avatar-image {
+                transition: none !important;
+            }
+
+            &.is-card-active {
+                opacity: 0 !important;
+                visibility: hidden !important;
+                transition: none !important;
+            }
         }
 
         .preview-loading {
@@ -2143,6 +2168,14 @@ const handleCopyWatermarkId = () => {
         height: 100%;
         pointer-events: none;
         z-index: 5;
+
+        // 头像场景模式：保持常显，不随锁屏时钟退场淡出
+        &.is-avatar-scene {
+            opacity: 1 !important;
+            transform: translate3d(0, 0, 0) scale(1) !important;
+            animation: none !important;
+            pointer-events: none;
+        }
 
         // 挑选时钟样式时保持常亮无位移预览
         &.is-previewing-clock {

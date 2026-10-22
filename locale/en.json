@@ -1489,6 +1489,7 @@
     "avatar": {
         "title": "Avatars",
         "desc": "Curated 1:1 HD Avatars for Social & Profile",
+        "avatarPreview": "Avatar Focus",
         "shapeCircle": "Circle",
         "shapeSquare": "Square",
         "profileMock": "Profile Card",

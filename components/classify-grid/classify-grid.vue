@@ -126,22 +126,29 @@ const goClasslistFromQuickLook = (item) => {
     grid-auto-rows: 210rpx;
     gap: 20rpx;
 
+    // 只有一个分类项时（如灵动头像或电脑横屏目前各1个分类），呈现 16:10 黄金大卡，告别被压扁为 210rpx 细条
+    .classify-item:only-child {
+        grid-column: 1 / -1;
+        grid-row: span 2;
+    }
+
     // 7 个为一组循环：第 3、5 个跨 2 行
     .classify-item:nth-child(7n + 3),
     .classify-item:nth-child(7n + 5) {
         grid-row: span 2;
     }
 
-    // 7 个为一组循环：第 7 个跨 2 列（占满整行）
+    // 7 个为一组循环：第 7 个跨 2 列（占满整行），高度跨 2 行保持黄金比例
     .classify-item:nth-child(7n) {
         grid-column: 1 / -1;
+        grid-row: span 2;
     }
 
-    // 最后一个元素如果是该组的第 1、3 个（左列），占满整行，取消跨行
+    // 最后一个元素如果是该组的第 1、3 个（左列），占满整行，高度跨 2 行避免压扁
     .classify-item:last-child:nth-child(7n + 1),
     .classify-item:last-child:nth-child(7n + 3){
         grid-column: 1 / -1;
-        grid-row: auto;
+        grid-row: span 2;
     }
 
     // 最后一个元素如果是该组的第 5 个（右列），占右侧一行一列，取消跨行

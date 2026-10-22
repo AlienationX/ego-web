@@ -4,33 +4,80 @@
         <view class="search-top-wrapper" :class="{ 'is-exploring': showWordBoard }">
             <view class="search-top-bg"></view>
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-            <view class="search-shell" :style="searchShellStyle">
-                <view class="search-shell__back" :style="searchBackBtnStyle" @click="goBack">
-                    <mdi-icon
-                        path="/static/icons/arrow-left.svg"
-                        size="18px"
-                        :color="backIconColor"
-                    ></mdi-icon>
-                </view>
-                <view class="search-box search-box--shell" :style="searchItemStyle">
-                    <view class="search-box__icon">
-                        <uni-icons type="search" size="18" :color="searchIconColor"></uni-icons>
+            <!-- #ifdef MP-WEIXIN -->
+            <!-- 微信小程序端：双行优雅布局 (第1行纯净返回键与胶囊水平居中对齐，第2行全宽白底大圆角搜索卡片) -->
+            <view class="mp-search-container">
+                <!-- 第 1 行：导航行 (左侧扁平纯净返回键，右侧胶囊自然对齐，中间留白不再放置冗余标题) -->
+                <view class="mp-nav-bar" :style="{ height: `${capsuleRowHeight}px` }">
+                    <view class="nav-back-btn nav-back-btn--flat" @click="goBack">
+                        <mdi-icon
+                            path="/static/icons/arrow-left.svg"
+                            size="22px"
+                            :color="backIconColor"
+                        ></mdi-icon>
                     </view>
-                    <input
-                        v-model="queryParams.keyword"
-                        class="search-box__input"
-                        :style="searchInputStyle"
-                        :placeholder="t('common.search')"
-                        :placeholder-style="placeholderStyle"
-                        confirm-type="search"
-                        @confirm="onSearch"
-                        @input="onInput"
-                    />
-                    <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
-                        <uni-icons type="clear" size="16" :color="clearIconColor"></uni-icons>
+                </view>
+
+                <!-- 第 2 行：独立全宽搜索框行 (位于胶囊正下方，样式与首页搜索框 1:1 统一) -->
+                <view class="mp-search-field-row">
+                    <view class="search-box search-box--full">
+                        <view class="search-box__left">
+                            <mdi-icon
+                                path="/static/icons/magnify.svg"
+                                size="20px"
+                                :color="searchIconColor"
+                            ></mdi-icon>
+                            <input
+                                v-model="queryParams.keyword"
+                                class="search-box__input"
+                                :placeholder="searchPlaceholder"
+                                :placeholder-style="placeholderStyle"
+                                confirm-type="search"
+                                @confirm="onSearch"
+                                @input="onInput"
+                            />
+                        </view>
+                        <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
+                            <uni-icons type="clear" size="18" :color="clearIconColor"></uni-icons>
+                        </view>
                     </view>
                 </view>
             </view>
+            <!-- #endif -->
+
+            <!-- #ifndef MP-WEIXIN -->
+            <!-- APP / H5 端：单行满血一体化紧凑布局 -->
+            <view class="search-shell" :style="searchShellStyle">
+                <view class="nav-back-btn nav-back-btn--flat" @click="goBack">
+                    <mdi-icon
+                        path="/static/icons/arrow-left.svg"
+                        size="22px"
+                        :color="backIconColor"
+                    ></mdi-icon>
+                </view>
+                <view class="search-box search-box--shell">
+                    <view class="search-box__left">
+                        <mdi-icon
+                            path="/static/icons/magnify.svg"
+                            size="20px"
+                            :color="searchIconColor"
+                        ></mdi-icon>
+                        <input
+                            v-model="queryParams.keyword"
+                            class="search-box__input"
+                            :placeholder="searchPlaceholder"
+                            :placeholder-style="placeholderStyle"
+                            confirm-type="search"
+                            @confirm="onSearch"
+                            @input="onInput"
+                        />
+                    </view>
+                    <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
+                        <uni-icons type="clear" size="18" :color="clearIconColor"></uni-icons>
+                    </view>
+                </view>
+            </view>
+            <!-- #endif -->
         </view>
 
         <!-- 探索面板（未搜索状态展示） -->
@@ -120,11 +167,12 @@ const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 
-// 胶囊避让与平齐测量
+// 胶囊避让与两端布局测量
 const isWeixin = ref(false);
+const capsuleWidth = ref(87);
 const capsuleHeight = ref(32);
-const searchControlHeight = ref(36);
-const capsuleRightPadding = ref(0);
+const capsuleRowHeight = ref(44);
+const searchRowHeight = ref(56); // 搜索卡片高度 88rpx (~44px) + 上下间距 12px
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(56);
 
@@ -135,27 +183,28 @@ const updateCapsuleMetrics = () => {
         if (uni.getMenuButtonBoundingClientRect) {
             const menuBtn = uni.getMenuButtonBoundingClientRect();
             if (menuBtn && menuBtn.width && menuBtn.top) {
+                capsuleWidth.value = menuBtn.width || 87;
                 capsuleHeight.value = menuBtn.height || 32;
-                // 按要求将返回按钮与搜索框高度统一调整为 36px
-                searchControlHeight.value = 36;
-
-                const sysInfo = uni.getWindowInfo ? uni.getWindowInfo() : uni.getSystemInfoSync();
-                const screenWidth = sysInfo.windowWidth || 375;
-                capsuleRightPadding.value = Math.max(0, (screenWidth - menuBtn.left) + 8);
 
                 const sHeight = getStatusBarHeight() || 0;
                 statusBarHeight.value = sHeight;
+
+                // 微信第1行：导航栏高度严格对称包裹胶囊，让返回键与胶囊水平中轴平齐
                 const topGap = Math.max(4, menuBtn.top - sHeight);
-                // titleBarHeight 严格对称包裹胶囊，居中时顶部和底部与胶囊严丝合缝平齐
-                titleBarHeight.value = capsuleHeight.value + topGap * 2;
+                capsuleRowHeight.value = capsuleHeight.value + topGap * 2;
+
+                // 微信第2行：独立全宽搜索框行高度 (44px 卡片 + 12px 上下间距)
+                searchRowHeight.value = 56;
+
+                // 微信端总高度 = 胶囊行高度 + 独立搜索框行高度
+                titleBarHeight.value = capsuleRowHeight.value + searchRowHeight.value;
                 return;
             }
         }
     } catch (e) {}
     // #endif
 
-    // 非微信端保持原有 56px
-    searchControlHeight.value = 38;
+    // 非微信端（APP / H5）单行紧凑布局保持 56px
     titleBarHeight.value = 56;
 };
 
@@ -163,70 +212,30 @@ updateCapsuleMetrics();
 
 const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
 
-const searchShellStyle = computed(() => {
-    const style = {
-        height: `${titleBarHeight.value}px`,
-    };
-    if (capsuleRightPadding.value > 0) {
-        style.paddingRight = `${capsuleRightPadding.value}px`;
-    }
-    return style;
-});
-
-// 微信端让搜索框饱满大方（36px），与胶囊水平中轴线平齐，非微信端保持原有 CSS
-const searchItemStyle = computed(() => {
-    // #ifdef MP-WEIXIN
-    if (isWeixin.value) {
-        return {
-            height: `${searchControlHeight.value}px`,
-            minHeight: `${searchControlHeight.value}px`,
-        };
-    }
-    // #endif
-    return {};
-});
-
-// 微信端返回按钮尺寸饱满协调（36px）
-const searchBackBtnStyle = computed(() => {
-    // #ifdef MP-WEIXIN
-    if (isWeixin.value) {
-        return {
-            width: `${searchControlHeight.value}px`,
-            height: `${searchControlHeight.value}px`,
-            minWidth: `${searchControlHeight.value}px`,
-            minHeight: `${searchControlHeight.value}px`,
-        };
-    }
-    // #endif
-    return {};
-});
-
-const searchInputStyle = computed(() => {
-    // #ifdef MP-WEIXIN
-    if (isWeixin.value) {
-        return {
-            height: `${searchControlHeight.value}px`,
-            lineHeight: `${searchControlHeight.value}px`,
-        };
-    }
-    // #endif
-    return {};
-});
+const searchShellStyle = computed(() => ({
+    height: `${titleBarHeight.value}px`,
+}));
 
 const backIconColor = computed(() => {
     return settingsStore.isDark ? '#f8fbff' : '#1e293b';
 });
 
 const searchIconColor = computed(() => {
-    return settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(21, 23, 28, 0.45)';
+    return settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(30, 41, 59, 0.45)';
 });
 
 const clearIconColor = computed(() => {
-    return settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(21, 23, 28, 0.45)';
+    return settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(30, 41, 59, 0.45)';
+});
+
+const searchPlaceholder = computed(() => {
+    return t('search.placeholder') || t('common.search') || '搜索壁纸、分类、标签...';
 });
 
 const placeholderStyle = computed(() => {
-    return settingsStore.isDark ? 'color: rgba(247, 247, 251, 0.4)' : 'color: rgba(21, 23, 28, 0.4)';
+    return settingsStore.isDark
+        ? 'color: rgba(247, 247, 251, 0.4); font-size: 26rpx;'
+        : 'color: rgba(30, 41, 59, 0.45); font-size: 26rpx;';
 });
 
 const queryParams = ref({
@@ -453,6 +462,29 @@ onUnload(() => {
     background: transparent;
 }
 
+/* 微信端双行布局容器 */
+.mp-search-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.mp-nav-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 0 24rpx;
+    box-sizing: border-box;
+}
+
+.mp-search-field-row {
+    padding: 6rpx 24rpx 18rpx;
+    box-sizing: border-box;
+}
+
+/* APP / H5 端单行满血一体化容器 */
 .search-shell {
     position: relative;
     z-index: 1;
@@ -460,28 +492,28 @@ onUnload(() => {
     align-items: center;
     gap: 16rpx;
     padding: 0 24rpx;
-    background: transparent;
-    border-bottom: none;
+    box-sizing: border-box;
 }
 
-.search-shell__back {
-    width: 66rpx;
-    height: 66rpx;
-    border-radius: 999rpx;
+/* 纯净扁平返回按钮 (无背景、无边框、无阴影，仅留纯图标与交互透明度反馈) */
+.nav-back-btn--flat {
+    width: 68rpx;
+    height: 68rpx;
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.04);
-    border: none;
-    transition: transform 0.15s ease;
+    justify-content: flex-start;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 
     &:active {
+        opacity: 0.5;
         transform: scale(0.92);
-    }
-
-    .theme-dark & {
-        background: rgba(255, 255, 255, 0.08);
-        border: none;
     }
 }
 
@@ -512,63 +544,115 @@ onUnload(() => {
     /* 让出顶部搜索栏和 tabs 的高度 */
 }
 
-.search-box {
-    position: relative;
-    min-height: 96rpx;
+/* 微信端独立全宽搜索卡片 (与首页 home-hero-header 样式质感 1:1 统一) */
+.search-box--full {
+    width: 100%;
+    height: 88rpx;
+    min-height: 88rpx;
+    border-radius: 30rpx;
     display: flex;
     align-items: center;
-    border-radius: 24rpx;
-    background: var(--search-panel);
-    border: 1rpx solid var(--search-border);
-    box-shadow: 0 18rpx 40rpx var(--search-shadow);
-    padding: 0 22rpx;
-}
+    justify-content: space-between;
+    padding: 0 20rpx 0 28rpx;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 
-.search-box--shell {
-    flex: 1;
-    min-width: 0;
-    min-height: 72rpx;
-    height: 72rpx;
-    border-radius: 999rpx;
-    box-shadow: none;
-    padding: 0 24rpx;
-    background: rgba(0, 0, 0, 0.04);
-    border: 1rpx solid rgba(0, 0, 0, 0.05);
-    display: flex;
-    align-items: center;
+    .theme-light & {
+        background: #ffffff;
+        border: 1rpx solid rgba(30, 41, 59, 0.06);
+        box-shadow: 0 6rpx 24rpx rgba(15, 23, 42, 0.04);
+    }
 
     .theme-dark & {
-        background: rgba(255, 255, 255, 0.08);
-        border: none;
+        background: #222228;
+        border: 1rpx solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.3);
+    }
+
+    &:focus-within {
+        .theme-light & {
+            border-color: rgba(97, 154, 239, 0.45);
+            box-shadow: 0 8rpx 28rpx rgba(97, 154, 239, 0.12);
+        }
+        .theme-dark & {
+            border-color: rgba(97, 154, 239, 0.45);
+            box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.4);
+        }
     }
 }
 
-.search-box__icon {
-    margin-right: 14rpx;
+/* APP端单行搜索卡片 */
+.search-box--shell {
+    flex: 1;
+    min-width: 0;
+    height: 80rpx;
+    min-height: 80rpx;
+    border-radius: 26rpx;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding: 0 20rpx 0 24rpx;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+    .theme-light & {
+        background: #ffffff;
+        border: 1rpx solid rgba(30, 41, 59, 0.06);
+        box-shadow: 0 4rpx 20rpx rgba(15, 23, 42, 0.04);
+    }
+
+    .theme-dark & {
+        background: #222228;
+        border: 1rpx solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.3);
+    }
+
+    &:focus-within {
+        .theme-light & {
+            border-color: rgba(97, 154, 239, 0.45);
+            box-shadow: 0 6rpx 24rpx rgba(97, 154, 239, 0.12);
+        }
+        .theme-dark & {
+            border-color: rgba(97, 154, 239, 0.45);
+            box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.4);
+        }
+    }
+}
+
+.search-box__left {
+    display: flex;
+    align-items: center;
+    gap: 16rpx;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
 }
 
 .search-box__input {
     flex: 1;
     min-width: 0;
-    height: 96rpx;
-    color: var(--search-text-main);
+    height: 100%;
     font-size: 28rpx;
-}
-
-.search-box--shell .search-box__input {
-    height: 72rpx;
-    line-height: 72rpx;
-    font-size: 26rpx;
+    font-weight: 500;
+    color: var(--search-text-main);
+    background: transparent;
+    border: none;
 }
 
 .search-box__clear {
-    width: 40rpx;
-    height: 40rpx;
+    width: 48rpx;
+    height: 48rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    margin-left: 8rpx;
+
+    &:active {
+        opacity: 0.7;
+    }
 }
 
 .explore-board {

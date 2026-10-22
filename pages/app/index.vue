@@ -1109,7 +1109,10 @@ const goBannerPreview = (data) => {
 
 const goPreview = (id, data) => {
     appStore.wallList = data;
-    uni.navigateTo({ url: '/pages/app/preview?id=' + id });
+    uni.setStorageSync('classList', data);
+    uni.navigateTo({
+        url: `/pages/app/preview?id=${id}`,
+    });
 };
 
 const goSearchByTag = (tag) => {
@@ -1895,6 +1898,12 @@ onShareTimeline(() => ({
                     margin-left: 20rpx;
                 }
 
+                &--active,
+                &:active {
+                    transform: scale(0.94) !important;
+                    filter: brightness(0.92);
+                }
+
                 &::before {
                     content: '';
                     position: absolute;
@@ -2333,6 +2342,12 @@ onShareTimeline(() => ({
     box-shadow: 0 6rpx 20rpx var(--shadow-color);
     transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
     cursor: pointer;
+
+    &--active,
+    &:active {
+        transform: scale(0.95) !important;
+        filter: brightness(0.92);
+    }
 
     &.is-loading {
         @extend %sk-shimmer;

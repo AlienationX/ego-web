@@ -12,8 +12,9 @@
                 <view class="hero-header">
                     <view class="title-group">
                         <view class="title-row">
-                            <image class="category-icon" src="/static/icons/categroy.svg" mode="aspectFit" />
+                            
                             <text class="hero-title">{{ $t('category.title') }}</text>
+                            <image class="category-icon" src="/static/icons/categroy.svg" mode="aspectFit" />
                         </view>
                         <text class="hero-desc">{{ $t('category.desc') }}</text>
                     </view>
@@ -42,11 +43,6 @@
                         <text>{{ $t('channels.desktop') }}</text>
                     </view>
                 </view>
-            </view>
-
-            <!-- 分类页横版原生广告卡片 -->
-            <view class="classify-flow-ad-wrap">
-                <custom-ad border-radius="24rpx" />
             </view>
 
             <!-- 加载骨架屏 -->
@@ -264,7 +260,7 @@ onLoad(() => {
         align-items: center;
         gap: 16rpx;
         margin-top: 24rpx;
-        margin-bottom: 22rpx;
+        margin-bottom: 10rpx;
         overflow-x: auto;
         white-space: nowrap;
         animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both;
@@ -296,11 +292,6 @@ onLoad(() => {
                 }
             }
         }
-    }
-
-    .hero-ad {
-        margin-top: 20rpx;
-        padding-bottom: 30rpx;
     }
 }
 
@@ -357,7 +348,7 @@ onLoad(() => {
 }
 
 .classify-grid-padding {
-    padding: 20rpx 20rpx 10rpx 20rpx;
+    padding: 10rpx 20rpx 10rpx 20rpx;
 }
 
 // ── 骨架屏 ──
@@ -404,31 +395,6 @@ onLoad(() => {
 
     100% {
         background-position: -200% 0;
-    }
-}
-
-// ── 分类页横版原生信息流广告卡片 ──
-.classify-flow-ad-wrap {
-    padding: 0 20rpx;
-    margin: 12rpx 0 0;
-    box-sizing: border-box;
-    width: 100%;
-
-    .classify-flow-ad-card {
-        width: 100%;
-        border-radius: 24rpx;
-        overflow: hidden;
-        background: var(--bg-card, rgba(255, 255, 255, 0.8));
-        box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
-        transform: translateZ(0);
-        -webkit-mask-image: -webkit-radial-gradient(white, black);
-        display: flex;
-        justify-content: center;
-
-        :deep(ad-custom) {
-            width: 100% !important;
-            display: block !important;
-        }
     }
 }
 </style>

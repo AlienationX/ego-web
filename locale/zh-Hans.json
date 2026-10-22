@@ -1489,6 +1489,7 @@
     "avatar": {
         "title": "灵动头像",
         "desc": "精选 1:1 超清头像，适配微信、社交名片与个人资料",
+        "avatarPreview": "头像预览",
         "shapeCircle": "圆形",
         "shapeSquare": "方形",
         "profileMock": "社交名片",

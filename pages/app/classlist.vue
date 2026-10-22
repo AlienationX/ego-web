@@ -65,6 +65,7 @@
                 :header-height="heroHeightPx"
                 :tabs-height="44"
                 :sticky-top="navBarHeight"
+                :classify-type="currentClassify?.classify_type"
                 @update="onListUpdate"
                 @scroll="onScroll"
             ></modern-pics-view>

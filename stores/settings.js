@@ -52,6 +52,7 @@ export const useSettingsStore = defineStore(
             clockStyle: 'ios-classic', // ios-classic / android-stock / hyperos-magazine / harmonyos / minimalist-art
             showWatermark: false, // 预览壁纸右下角显示应用名与壁纸编号水印（方便截屏分享）
             customTabBar: true, // 悬浮自定义 TabBar 开关：true = 悬浮毛玻璃胶囊，false = 原生系统默认底栏
+            avatarRadius: 374, // 头像预览聚焦框圆角半径 (rpx)，默认 374rpx (正圆 50%)
 
             // vuetify项目的配置，后续修改
             navBarFlat: false, // 导航栏扁平效果

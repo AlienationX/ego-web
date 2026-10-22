@@ -1,7 +1,15 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- Studio 展厅聚光柔光漫反射背景 (纯净、高级、永不过时) -->
-        <view class="studio-backdrop"></view>
+        <!-- 动态壁纸漫反射氛围背景 (随当前壁纸实时变幻色彩光晕) -->
+        <view class="dynamic-ambient-backdrop">
+            <image
+                v-if="currentWallpaperPic"
+                class="ambient-wallpaper-img"
+                :src="currentWallpaperPic"
+                mode="aspectFill"
+            />
+            <view class="ambient-mask-scrim"></view>
+        </view>
 
         <!-- 顶部沉浸式毛玻璃导航条 -->
         <view class="top-nav" :style="{ paddingTop: `${statusBarHeight}px` }">
@@ -9,8 +17,8 @@
                 <view class="nav-btn" @click="goBack">
                     <mdi-icon
                         path="/static/icons/arrow-left.svg"
-                        size="20px"
-                        :color="settingsStore.isDark ? '#ffffff' : '#0f172a'"
+                        size="18px"
+                        :color="settingsStore.isDark ? '#f4f8ff' : '#1f2937'"
                     ></mdi-icon>
                 </view>
 
@@ -23,7 +31,7 @@
                     <mdi-icon
                         path="/static/icons/share-variant.svg"
                         size="18px"
-                        :color="settingsStore.isDark ? '#ffffff' : '#0f172a'"
+                        :color="settingsStore.isDark ? '#f4f8ff' : '#1f2937'"
                     ></mdi-icon>
                 </view>
                 <!-- #endif -->
@@ -355,29 +363,50 @@ onLoad((options) => {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Studio 展厅柔光背景：中心微弱聚光漫反射渐变，高级通透，百搭任何壁纸 */
-.studio-backdrop {
+/* 动态壁纸漫反射氛围背景层：随当前壁纸实时变幻色彩光晕 */
+.dynamic-ambient-backdrop {
     position: absolute;
     inset: 0;
     z-index: 0;
+    overflow: hidden;
     pointer-events: none;
-    transition: background 0.3s ease;
+}
+
+.ambient-wallpaper-img {
+    position: absolute;
+    top: -10%;
+    left: -10%;
+    width: 120%;
+    height: 120%;
+    display: block;
+    object-fit: cover;
+    filter: blur(80rpx) saturate(180%);
+    -webkit-filter: blur(80rpx) saturate(180%);
+    opacity: 0.9;
+    transform: scale(1.1) translateZ(0);
+    transition: opacity 0.5s ease;
+}
+
+.ambient-mask-scrim {
+    position: absolute;
+    inset: 0;
+    transition: background 0.4s ease;
 
     .theme-light & {
         background: radial-gradient(
             circle at 50% 38%,
-            #ffffff 0%,
-            #f8fafc 48%,
-            #edf2f7 100%
+            rgba(255, 255, 255, 0.68) 0%,
+            rgba(248, 250, 252, 0.82) 50%,
+            rgba(237, 242, 247, 0.94) 100%
         );
     }
 
     .theme-dark & {
         background: radial-gradient(
             circle at 50% 38%,
-            #171c26 0%,
-            #0f141d 50%,
-            #090c12 100%
+            rgba(18, 24, 38, 0.55) 0%,
+            rgba(12, 16, 26, 0.78) 50%,
+            rgba(7, 10, 16, 0.92) 100%
         );
     }
 }
@@ -402,34 +431,32 @@ onLoad((options) => {
     z-index: 2;
     width: 72rpx;
     height: 72rpx;
-    border-radius: 50%;
+    border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(20rpx);
-    -webkit-backdrop-filter: blur(20rpx);
-    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-
-    .theme-dark & {
-        background: rgba(255, 255, 255, 0.14);
-        border: 1rpx solid rgba(255, 255, 255, 0.18);
-
-        &:active {
-            background: rgba(255, 255, 255, 0.26);
-        }
-    }
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
 
     .theme-light & {
-        background: rgba(0, 0, 0, 0.05);
-        border: 1rpx solid rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 0.72);
+        border: 1rpx solid rgba(255, 255, 255, 0.6);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
+        backdrop-filter: blur(20rpx);
+        -webkit-backdrop-filter: blur(20rpx);
+    }
 
-        &:active {
-            background: rgba(0, 0, 0, 0.1);
-        }
+    .theme-dark & {
+        background: rgba(255, 255, 255, 0.12);
+        border: none;
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(20rpx);
+        -webkit-backdrop-filter: blur(20rpx);
     }
 
     &:active {
         transform: scale(0.92);
+        opacity: 0.85;
     }
 }
 

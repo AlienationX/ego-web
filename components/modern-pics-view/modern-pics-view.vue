@@ -64,7 +64,7 @@
                         <!-- 实际渲染数据 -->
                         <view class="gallery-wrapper" v-else-if="tabStates[index].images.length > 0">
                             <!-- 模式 1: 网格视图 (CSS Grid) -->
-                            <view class="grid-layout" :style="gridStyle" v-if="!isWaterfall">
+                            <view class="grid-layout" :class="{ 'is-single-col': isDesktopClassify }" :style="gridStyle" v-if="!isWaterfall">
                                 <view
                                     class="modern-card grid-card"
                                     :class="{
@@ -108,7 +108,7 @@
                                             <uni-icons
                                                 v-if="item.effective_access_level === 2 || item.unlock_type === 'vip_only' || item.access_level === 2"
                                                 type="vip-filled" size="18" color="#F9E9B5"></uni-icons>
-                                            <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
+                                                <uni-icons v-else type="locked-filled" size="18" color="#F9E9B5"></uni-icons>
                                         </view>
                                         <view class="card-err" v-if="item.loadError">
                                             <uni-icons type="image" size="26" color="var(--text-tertiary)"></uni-icons>
@@ -117,8 +117,8 @@
                                 </view>
                             </view>
 
-                            <!-- 模式 2: 真实的双列动态平衡瀑布流 (单列穿插原生模板广告卡片) -->
-                            <view class="waterfall-layout" v-else>
+                            <!-- 模式 2: 真实的双列动态平衡瀑布流 (电脑壁纸单列通栏展示) -->
+                            <view class="waterfall-layout" :class="{ 'is-single-col': isDesktopClassify }" v-else>
                                 <!-- 左列 -->
                                 <view class="waterfall-col">
                                     <view
@@ -281,6 +281,7 @@ const props = defineProps({
     adHeight: { type: Number, default: 0 }, // 广告条高度，用于悬浮按钮位置调整
     embedded: { type: Boolean, default: false }, // 是否在 tabbar 页面内嵌入
     active: { type: Boolean, default: true }, // 是否当前可见（用于 v-show 切换时恢复滚动位置）
+    classifyType: { type: [Number, String], default: null }, // 分类类型 (1:手机, 2:电脑横屏, 4:头像)
 });
 
 const emit = defineEmits(['update', 'change', 'scroll']);
@@ -294,6 +295,15 @@ const isEn = computed(() => locale.value === 'en');
 const currentIndex = ref(props.initialIndex);
 const headerScrollTop = ref(0);
 const dateSortAsc = ref(true);
+
+// 判断当前分类是否为电脑横屏桌面壁纸（classify_type === 2）
+const isDesktopClassify = computed(() => {
+    if (props.classifyType !== null && props.classifyType !== undefined && props.classifyType !== '') {
+        return Number(props.classifyType) === 2;
+    }
+    const firstWall = tabStates[currentIndex.value]?.images?.[0];
+    return Number(firstWall?.classify_type) === 2;
+});
 
 // 卡片广告位配置（网格通栏横版广告 / 瀑布流单列竖屏广告）
 const hasHorizontalAdConfig = computed(() => {
@@ -324,7 +334,10 @@ const isWaterfall = computed(() =>
     props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'
 );
 
-const colCount = computed(() => settingsStore.options.column || 2);
+const colCount = computed(() => {
+    if (isDesktopClassify.value) return 1; // 桌面横屏壁纸单列宽屏流展示
+    return settingsStore.options.column || 2;
+});
 const gridStyle = computed(() => ({
     gridTemplateColumns: `repeat(${colCount.value}, 1fr)`
 }));
@@ -437,14 +450,19 @@ const appendDisplayData = (index, newItems, baseOffset = -1) => {
             }
         }
 
-        // 2. Waterfall 双列增量追加（哪列矮放哪列，老数据位置绝对不动）
-        const ratio = getItemRatio(item);
-        if (state.leftH <= state.rightH) {
+        // 2. Waterfall 双列增量追加（桌面横屏壁纸全部排入单列，普通手机壁纸双列动态平衡）
+        if (isDesktopClassify.value) {
             state.leftCol.push(item);
-            state.leftH += ratio;
+            state.leftH += 1;
         } else {
-            state.rightCol.push(item);
-            state.rightH += ratio;
+            const ratio = getItemRatio(item);
+            if (state.leftH <= state.rightH) {
+                state.leftCol.push(item);
+                state.leftH += ratio;
+            } else {
+                state.rightCol.push(item);
+                state.rightH += ratio;
+            }
         }
         state.wfCount++;
 
@@ -751,7 +769,10 @@ const openPreview = (id, index) => {
     const appStore = useAppStore();
     // 纯壁纸列表（过滤剔除广告对象）
     appStore.wallList = (tabStates[index].images || []).filter(item => !item.is_ad);
-    uni.navigateTo({ url: `/pages/app/preview?id=${id}` });
+    const targetItem = tabStates[index].images.find(item => item.id === id);
+    const typeVal = targetItem?.classify_type || (isDesktopClassify.value ? 2 : '');
+    const cType = typeVal ? `&classify_type=${typeVal}` : '';
+    uni.navigateTo({ url: `/pages/app/preview?id=${id}${cType}` });
 };
 
 // 监听视图模式/列数/VIP 状态变更，重新排版
@@ -942,6 +963,13 @@ onShow(() => {
 .grid-layout {
     display: grid;
     gap: 20rpx;
+
+    &.is-single-col {
+        .modern-card.grid-card {
+            height: 400rpx;
+            aspect-ratio: 16 / 9;
+        }
+    }
 }
 
 /* 瀑布流双列 Flex 布局 */
@@ -957,6 +985,20 @@ onShow(() => {
         display: flex;
         flex-direction: column;
         gap: 20rpx;
+    }
+
+    &.is-single-col {
+        display: block;
+        width: 100%;
+
+        .waterfall-col {
+            width: 100%;
+            flex: none;
+        }
+
+        .waterfall-col:last-child {
+            display: none;
+        }
     }
 }
 
