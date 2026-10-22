@@ -19,6 +19,14 @@
             }
         },
         {
+            "path": "pages/guide/pc-prompt",
+            "style": {
+                "navigationBarTitleText": "请使用手机访问",
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+            }
+        },
+        {
             "path": "pages/app/classify",
             "style": {
                 "navigationBarTitleText": "分类",

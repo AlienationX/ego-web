@@ -14,6 +14,26 @@ export const IS_DEVELOPMENT =
 
 export const IS_INTERNATIONAL = typeof plus !== 'undefined' ? plus.runtime.channel === 'google' : false;
 
+/**
+ * 判定当前是否运行在微信小程序 PC 桌面客户端（Windows 或 Mac）
+ * 排除微信开发者工具环境 (devtools)
+ */
+export const isPCWechat = () => {
+    // #ifdef MP-WEIXIN
+    try {
+        const dev = uni.getDeviceInfo();
+        const platform = dev.platform.toLowerCase();
+        const deviceType = dev.deviceType;
+        if (platform === 'windows' || platform === 'mac' || deviceType === 'pc') {
+            return true;
+        }
+    } catch (e) {
+        console.warn('isPCWechat check error:', e);
+    }
+    // #endif
+    return false;
+};
+
 // ── 以下为系统级功能（布局测量请用 @/utils/layout.js）──
 
 export const writeAccessLog = async () => {

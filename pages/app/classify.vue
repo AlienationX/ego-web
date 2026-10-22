@@ -12,9 +12,8 @@
                 <view class="hero-header">
                     <view class="title-group">
                         <view class="title-row">
-                            
+                            <image class="category-icon" src="/static/icons/view-dashboard.svg" mode="aspectFit" />
                             <text class="hero-title">{{ $t('category.title') }}</text>
-                            <image class="category-icon" src="/static/icons/categroy.svg" mode="aspectFit" />
                         </view>
                         <text class="hero-desc">{{ $t('category.desc') }}</text>
                     </view>
@@ -43,6 +42,20 @@
                         <text>{{ $t('channels.desktop') }}</text>
                     </view>
                 </view>
+            </view>
+
+            <!-- 分类页横版原生广告卡片：未加载成功或失败时脱离文档流，零像素占位 -->
+            <view
+                v-if="canShowAd"
+                class="classify-ad-wrap"
+                :class="{ 'is-loaded': isAdLoaded, 'is-error': isAdError }"
+            >
+                <custom-ad
+                    border-radius="24rpx"
+                    @load="onAdLoad"
+                    @error="onAdError"
+                    @close="onAdClose"
+                />
             </view>
 
             <!-- 加载骨架屏 -->
@@ -85,12 +98,44 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
+import { AD_CONFIG } from '@/common/config.js';
 
 const isScrolled = ref(false);
 
 onPageScroll((e) => {
     isScrolled.value = e.scrollTop > 8;
 });
+
+const isAdLoaded = ref(false);
+const isAdError = ref(false);
+
+const canShowAd = computed(() => {
+    if (userStore.isVip) return false;
+    // #ifdef MP-WEIXIN
+    return !!AD_CONFIG.weixin?.customHorizontalUnitId;
+    // #endif
+    // #ifdef APP
+    return !!AD_CONFIG.app?.customHorizontalAdpid;
+    // #endif
+    // #ifndef MP-WEIXIN || APP
+    return false;
+    // #endif
+});
+
+const onAdLoad = () => {
+    isAdLoaded.value = true;
+    isAdError.value = false;
+};
+
+const onAdError = () => {
+    isAdLoaded.value = false;
+    isAdError.value = true;
+};
+
+const onAdClose = () => {
+    isAdLoaded.value = false;
+    isAdError.value = true;
+};
 
 const pagePaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();
@@ -395,6 +440,45 @@ onLoad(() => {
 
     100% {
         background-position: -200% 0;
+    }
+}
+
+// ── 分类页横版原生广告卡片：未加载成功时脱离文档流零占位，加载成功后平滑展开 ──
+.classify-ad-wrap {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 20rpx;
+    background: transparent;
+
+    &:not(.is-loaded) {
+        position: absolute;
+        top: -9999rpx;
+        left: -9999rpx;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    &.is-error {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    &.is-loaded {
+        position: relative;
+        opacity: 1;
+        margin-top: 10rpx;
+        margin-bottom: 10rpx;
+        animation: classifyFadeSlide 0.4s ease both;
     }
 }
 </style>

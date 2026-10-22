@@ -119,6 +119,7 @@
 
         <!-- 吸底 Banner 广告（与 search.vue 保持一致使用 custom-ad-banner） -->
         <custom-ad-banner
+            background="transparent"
             @height-change="onAdHeightChange"
             @load="onAdLoad"
             @error="onAdError"
@@ -355,6 +356,9 @@ onLoad((options) => {
     position: relative;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
     background-color: var(--page-background);
     color: var(--text-primary);
@@ -367,6 +371,8 @@ onLoad((options) => {
 .dynamic-ambient-backdrop {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
@@ -374,16 +380,16 @@ onLoad((options) => {
 
 .ambient-wallpaper-img {
     position: absolute;
-    top: -10%;
-    left: -10%;
-    width: 120%;
-    height: 120%;
+    top: -15%;
+    left: -15%;
+    width: 130%;
+    height: 130%;
     display: block;
     object-fit: cover;
     filter: blur(80rpx) saturate(180%);
     -webkit-filter: blur(80rpx) saturate(180%);
-    opacity: 0.9;
-    transform: scale(1.1) translateZ(0);
+    opacity: 0.95;
+    transform: scale(1.15) translateZ(0);
     transition: opacity 0.5s ease;
 }
 
@@ -395,9 +401,9 @@ onLoad((options) => {
     .theme-light & {
         background: radial-gradient(
             circle at 50% 38%,
-            rgba(255, 255, 255, 0.68) 0%,
-            rgba(248, 250, 252, 0.82) 50%,
-            rgba(237, 242, 247, 0.94) 100%
+            rgba(255, 255, 255, 0.65) 0%,
+            rgba(255, 255, 255, 0.78) 55%,
+            rgba(255, 255, 255, 0.86) 100%
         );
     }
 
@@ -608,10 +614,10 @@ onLoad((options) => {
     padding-top: 76rpx;
 }
 
-/* 壁纸卡片轮播：固定为 59vh 经典修长比例，无论有无广告永不变形 */
+/* 壁纸卡片轮播：固定为 60.5vh 经典修长比例，无论有无广告永不变形 */
 .gallery-swiper {
     width: 100%;
-    height: 59vh;
+    height: 60.5vh;
 }
 
 .swiper-item-box {
@@ -621,7 +627,8 @@ onLoad((options) => {
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    padding: 6rpx 16rpx 10rpx;
+    padding: 8rpx 16rpx 48rpx;
+    overflow: visible;
 }
 
 /* 3D 景深卡片 (锁定 9:18.2 黄金手机修长比例，绝不变形，居中饱满呈现) */
@@ -648,23 +655,25 @@ onLoad((options) => {
 
     .theme-dark & {
         background-color: #1e293b;
-        box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
 
         &.is-active {
             box-shadow:
-                0 6rpx 16rpx rgba(0, 0, 0, 0.25),
-                0 20rpx 48rpx -6rpx rgba(0, 0, 0, 0.55);
+                0 4rpx 12rpx rgba(0, 0, 0, 0.18),
+                0 12rpx 26rpx -2rpx rgba(0, 0, 0, 0.28),
+                0 22rpx 50rpx -6rpx rgba(0, 0, 0, 0.42);
         }
     }
 
     .theme-light & {
         background-color: #ffffff;
-        box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.03);
+        box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.02);
 
         &.is-active {
             box-shadow:
-                0 4rpx 12rpx rgba(0, 0, 0, 0.03),
-                0 14rpx 36rpx -4rpx rgba(15, 23, 42, 0.08);
+                0 4rpx 10rpx rgba(15, 23, 42, 0.02),
+                0 10rpx 22rpx -2rpx rgba(15, 23, 42, 0.035),
+                0 20rpx 42rpx -6rpx rgba(15, 23, 42, 0.045);
         }
     }
 
@@ -721,7 +730,7 @@ onLoad((options) => {
     align-items: baseline;
     gap: 8rpx;
     font-weight: 800;
-    padding: 30rpx 0 12rpx;
+    padding: 12rpx 0 12rpx;
 
     .current-num {
         font-size: 40rpx;

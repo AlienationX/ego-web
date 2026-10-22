@@ -1,6 +1,6 @@
 <script setup>
 import permissionListener from '@/uni_modules/c-permission-listener';
-import { writeAccessLog, setAndroidImmersive, handleDeepLink } from '@/utils/system.js';
+import { writeAccessLog, setAndroidImmersive, handleDeepLink, isPCWechat } from '@/utils/system.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide, onReady, onPageShow } from '@dcloudio/uni-app';
 import { useSettingsStore, getSystemTheme } from '@/stores/settings.js';
@@ -11,9 +11,39 @@ import { applyLanguagePreference, getLanguagePreference, LANGUAGE_PREF_AUTO } fr
 const settingsStore = useSettingsStore();
 const appStore = useAppStore();
 
+// 微信小程序 PC 客户端运行拦截与重定向
+const checkPCPlatformIntercept = (options) => {
+    // #ifdef MP-WEIXIN
+    if (isPCWechat()) {
+        const pages = getCurrentPages();
+        const currentPage = pages[pages.length - 1];
+        const route = currentPage?.route || options?.path;
+        if (route !== 'pages/guide/pc-prompt') {
+            uni.reLaunch({
+                url: '/pages/guide/pc-prompt',
+            });
+        }
+    }
+    // #endif
+};
 
-onLaunch(() => {
-    console.log('App Launch');
+// #ifdef MP-WEIXIN
+if (isPCWechat()) {
+    ['navigateTo', 'redirectTo', 'reLaunch', 'switchTab'].forEach((method) => {
+        uni.addInterceptor(method, {
+            invoke(args) {
+                if (args && args.url && !args.url.includes('pages/guide/pc-prompt')) {
+                    args.url = '/pages/guide/pc-prompt';
+                }
+            },
+        });
+    });
+}
+// #endif
+
+onLaunch((options) => {
+    console.log('App Launch', options);
+    checkPCPlatformIntercept(options);
     // 优先执行布局设置。全面采用自定义 TabBar，冷启动第一时间隐藏原生 TabBar
     uni.hideTabBar({ animation: false, fail: () => {} });
     setAndroidImmersive(settingsStore.isDark);
@@ -87,6 +117,7 @@ onLaunch(() => {
 
 onShow((res) => {
     console.log('App Show', res);
+    checkPCPlatformIntercept(res);
     // 优先执行布局设置。全面采用自定义 TabBar，原生 TabBar 始终隐藏
     uni.hideTabBar({ animation: false, fail: () => {} });
     setAndroidImmersive(settingsStore.isDark);

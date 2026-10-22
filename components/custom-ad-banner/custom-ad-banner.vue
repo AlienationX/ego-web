@@ -4,7 +4,7 @@
         v-show="!isError && isLoaded"
         class="custom-ad-container"
         :class="[isFixed ? 'is-fixed' : '', settingsStore.isDark ? 'theme-dark' : 'theme-light']"
-        :style="{ bottom: calculatedBottom }"
+        :style="containerStyle"
     >
         <!-- #ifdef APP -->
         <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }">
@@ -49,6 +49,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    background: {
+        type: String,
+        default: '',
+    },
 });
 
 const emit = defineEmits(['height-change', 'load', 'close', 'error']);
@@ -58,6 +62,16 @@ const calculatedBottom = computed(() => {
     if (typeof props.bottomOffset === 'number') return `${props.bottomOffset}px`;
     if (props.hasTabBar) return `${getTabBarHeight()}px`;
     return '0px';
+});
+
+const containerStyle = computed(() => {
+    const style = {
+        bottom: calculatedBottom.value,
+    };
+    if (props.background) {
+        style.background = props.background;
+    }
+    return style;
 });
 
 const userStore = useUserStore();
@@ -156,11 +170,11 @@ watch(showAd, (visible) => {
         padding-bottom: constant(safe-area-inset-bottom);
         padding-bottom: env(safe-area-inset-bottom);
         box-sizing: border-box;
-        background: var(--page-background, #ffffff);
+        background: transparent;
         box-shadow: none;
 
         &.theme-dark {
-            background: var(--page-background, #181818);
+            background: transparent;
             box-shadow: none;
         }
     }
