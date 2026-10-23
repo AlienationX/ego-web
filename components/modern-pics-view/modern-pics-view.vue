@@ -23,7 +23,7 @@
             </scroll-view>
 
             <view class="tool-actions" :class="{ 'is-single': tabs.length <= 1 }">
-                <view class="action-btn" @click="toggleViewMode">
+                <view class="action-btn" v-if="canToggleViewMode" @click="toggleViewMode">
                     <image class="icon-svg" v-if="!isWaterfall" src="/static/icons/view-grid.svg" mode="aspectFit">
                     </image>
                     <image class="icon-svg" v-else src="/static/icons/view-dashboard.svg" mode="aspectFit"></image>
@@ -306,6 +306,18 @@ const isDesktopClassify = computed(() => {
     return Number(firstWall?.classify_type) === 2;
 });
 
+// 头像分类（classify_type=4）：头像固定方块网格展示
+const isAvatarClassify = computed(() => {
+    if (props.classifyType !== null && props.classifyType !== undefined && props.classifyType !== '') {
+        return Number(props.classifyType) === 4;
+    }
+    const firstWall = tabStates[currentIndex.value]?.images?.[0];
+    return Number(firstWall?.classify_type) === 4;
+});
+
+// 头像(4)/桌面(2) 展示形态固定（方块网格 / 单列整行），不存在瀑布流与网格切换问题，隐藏切换按钮
+const canToggleViewMode = computed(() => !isAvatarClassify.value && !isDesktopClassify.value);
+
 // 卡片广告位配置（网格通栏横版广告 / 瀑布流单列竖屏广告）
 const hasHorizontalAdConfig = computed(() => {
     // #ifdef MP-WEIXIN
@@ -331,9 +343,11 @@ const hasVerticalAdConfig = computed(() => {
     // #endif
 });
 
-const isWaterfall = computed(() =>
-    props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window'
-);
+const isWaterfall = computed(() => {
+    // 头像分类固定方块网格展示，不走瀑布流
+    if (isAvatarClassify.value) return false;
+    return props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window';
+});
 
 const colCount = computed(() => {
     if (isDesktopClassify.value) return 1; // 桌面横屏壁纸单列宽屏流展示
