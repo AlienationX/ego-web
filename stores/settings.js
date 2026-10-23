@@ -46,7 +46,7 @@ export const useSettingsStore = defineStore(
             column: 2,
             width: 100, // 窗口宽度，用来计算瀑布流每列的宽度
 
-            theme: 'auto',
+            theme: 'dark',
             language: 'auto',
             previewType: 'classic', // classic / floating
             clockStyle: 'ios-classic', // ios-classic / android-stock / hyperos-magazine / harmonyos / minimalist-art

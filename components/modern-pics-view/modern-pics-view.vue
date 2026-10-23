@@ -70,6 +70,7 @@
                                     :class="{
                                         'is-ad-card': item.is_ad,
                                         'is-loaded': item.adLoaded,
+                                        'is-ad-error': item.is_ad && item.adError,
                                         'is-loading': !item.is_ad && !item.loaded && !item.loadError,
                                         'is-error': !item.is_ad && item.loadError
                                     }"
@@ -1060,7 +1061,8 @@ onShow(() => {
     }
 
     &.is-ad-card {
-        &:not(.is-loaded) {
+        // 广告加载失败：折叠脱离文档流（唯一需要折叠的场景；加载中由 custom-ad 内部决定是否占位，避免瀑布流抖动）
+        &.is-ad-error {
             position: absolute;
             opacity: 0;
             pointer-events: none;
@@ -1073,6 +1075,7 @@ onShow(() => {
             border: none !important;
         }
 
+        // 加载中与加载成功都占位：竖版加载中内部显示骨架，成功后替换为广告，高度一致
         &.is-loaded {
             position: relative;
             opacity: 1;

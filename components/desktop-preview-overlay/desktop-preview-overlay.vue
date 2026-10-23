@@ -56,9 +56,6 @@ const setRotateState = (state) => {
     if (currentRotated.value === state) return;
     currentRotated.value = state;
     emit('rotate-change', state);
-    try {
-        uni.vibrateShort?.();
-    } catch (e) { }
 };
 </script>
 

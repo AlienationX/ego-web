@@ -27,7 +27,7 @@
                 <view class="channel-filter-bar">
                     <view class="channel-pill" :class="{ 'is-active': activeType === 0 }"
                         @click="selectType(0)">
-                        <text>{{ $t('common.recommend') }}</text>
+                        <text>{{ $t('common.all') }}</text>
                     </view>
                     <view class="channel-pill" :class="{ 'is-active': activeType === 1 }"
                         @click="selectType(1)">
@@ -90,7 +90,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad, onPageScroll } from '@dcloudio/uni-app';
+import { onLoad, onShow, onPageScroll } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -192,6 +192,16 @@ const getClassify = async () => {
 
 onLoad(() => {
     getClassify();
+});
+
+onShow(() => {
+    // 支持从首页「头像/桌面壁纸」专区 switchTab 跳转过来时，自动选中对应类型 Tab
+    // （tabbar 页已存在时不会触发 onLoad，必须在 onShow 消费跳转参数）
+    const pendingType = uni.getStorageSync('classifyActiveType');
+    if (pendingType === 2 || pendingType === 4) {
+        activeType.value = pendingType;
+        uni.removeStorageSync('classifyActiveType');
+    }
 });
 </script>
 

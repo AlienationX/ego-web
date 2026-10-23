@@ -203,6 +203,60 @@
                 <custom-ad />
             </view>
 
+            <!-- 桌面壁纸专区 -->
+            <view class="select desktop-section">
+                <view class="select-watermark">Desktop</view>
+                <index-title>
+                    <template #name>{{ $t('channels.desktop') }}</template>
+                    <template #custom>
+                        <view class="more-btn" @click="goClassifyType(2)" hover-class="more-btn--active" :hover-stay-time="120">
+                            <text class="more-btn__text">{{ $t('common.seeAll') }}</text>
+                            <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="16px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
+                        </view>
+                    </template>
+                </index-title>
+
+                <view class="content desktop-content">
+                    <view v-if="!desktopList.length" class="sk-scroll-row">
+                        <view v-for="i in 4" :key="i" class="sk-card sk-card--desktop"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="desktop-box" v-for="item in desktopList" :key="item.id" hover-class="desktop-box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, desktopList)">
+                            <image class="desktop-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
+            <!-- 头像专区 -->
+            <view class="select avatar-section">
+                <view class="select-watermark">Avatar</view>
+                <index-title>
+                    <template #name>{{ $t('channels.avatar') }}</template>
+                    <template #custom>
+                        <view class="more-btn" @click="goClassifyType(4)" hover-class="more-btn--active" :hover-stay-time="120">
+                            <text class="more-btn__text">{{ $t('common.seeAll') }}</text>
+                            <mdi-icon class="more-btn__icon" path="/static/icons/chevron-right.svg" size="16px" color="var(--text-secondary, #94a3b8)"></mdi-icon>
+                        </view>
+                    </template>
+                </index-title>
+
+                <view class="content avatar-content">
+                    <view v-if="!avatarList.length" class="sk-scroll-row">
+                        <view v-for="i in 5" :key="i" class="sk-card sk-card--avatar"></view>
+                    </view>
+                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                        <view class="avatar-box" v-for="item in avatarList" :key="item.id" hover-class="avatar-box--active"
+                            :hover-stay-time="150" @click="goPreview(item.id, avatarList)">
+                            <image class="avatar-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
+                            </image>
+                        </view>
+                    </scroll-view>
+                </view>
+            </view>
+
             <!-- Subscription Signals -->
             <view v-if="isAdmin && hasSubscriptionSignals" class="signal-callout-new"
                 :class="{ 'is-expanded': followingExpanded }">
@@ -598,6 +652,8 @@ onPullDownRefresh(async () => {
         getRandomDay(),
         getLatest(),
         getDailyFeatured(),
+        getAvatarList(),
+        getDesktopList(),
         getRandomRecommend(),
         getRecommendWallpapers(false),
     ]);
@@ -721,7 +777,8 @@ const updateRecommendCols = () => {
                     adLoaded: isLoadedAlready,
                     adError: false,
                 };
-                const adVirtualHeight = isLoadedAlready ? 150 : 0; // 未加载时占位高度为0，不误偏左右分发
+                // 广告始终按固定高度参与左右列平衡（加载中显示骨架占位、加载成功替换内容，高度不变，避免布局抖动）
+                const adVirtualHeight = 150;
                 if (leftH <= rightH) {
                     left.push(adItem);
                     leftH += adVirtualHeight;
@@ -835,6 +892,8 @@ const dailyFeaturedList = ref([]);
 const heroImageLoaded = ref(false);
 const randomRecommendList = ref([]);
 const latestList = ref([]);
+const avatarList = ref([]);
+const desktopList = ref([]);
 const classifyList = ref([]);
 const followingExpanded = ref(false);
 const themeClasses = ['is-collection', 'is-keyword', 'is-spotlight', 'is-default'];
@@ -1044,6 +1103,30 @@ const getDailyFeatured = async () => {
     }
 };
 
+// 头像专区（classify_type=4）
+const getAvatarList = async () => {
+    try {
+        let res = await apiGetClassList({ classify_type: 4, pageNum: 1, pageSize: 12, ordering: '-created_at' });
+        if (res && res.data) {
+            avatarList.value = res.data.map((item) => handlePicUrl(item));
+        }
+    } catch (e) {
+        console.warn('apiGetClassList(avatar) failed:', e);
+    }
+};
+
+// 桌面壁纸专区（classify_type=2）
+const getDesktopList = async () => {
+    try {
+        let res = await apiGetClassList({ classify_type: 2, pageNum: 1, pageSize: 8, ordering: '-created_at' });
+        if (res && res.data) {
+            desktopList.value = res.data.map((item) => handlePicUrl(item));
+        }
+    } catch (e) {
+        console.warn('apiGetClassList(desktop) failed:', e);
+    }
+};
+
 const getRandomRecommend = async () => {
     let res = await apiGetRandomRecommend({ classify_ids: '30,62,2,12,10,11,6,9' });
     randomRecommendList.value = res.data.map((classify) => ({
@@ -1135,6 +1218,12 @@ const goClasslist = (id, name) => {
     uni.navigateTo({ url: `/pages/app/classlist?id=${id}&name=${name}` });
 };
 
+// 跳转到分类页并选中对应类型（2=桌面壁纸, 4=头像）
+const goClassifyType = (type) => {
+    uni.setStorageSync('classifyActiveType', type);
+    uni.switchTab({ url: '/pages/app/classify' });
+};
+
 const isRefreshing = ref(false);
 
 const refreshRandom = async () => {
@@ -1196,6 +1285,8 @@ onMounted(() => {
     // P2 延时 300ms：首屏次要数据，让 P1 的渲染先跑起来
     setTimeout(() => {
         getDailyFeatured();
+        getAvatarList();
+        getDesktopList();
     }, 300);
 
     // P3 延时 1000ms：需要滚动才能看到，完全错峰
@@ -2361,7 +2452,7 @@ onShareTimeline(() => ({
         overflow: hidden;
         cursor: default;
 
-        &:not(.is-ad-loaded),
+        // 广告加载失败：隐藏并脱离文档流（唯一需要折叠的场景，加载中/成功都占位避免抖动）
         &.is-ad-error {
             position: absolute !important;
             left: 0 !important;
@@ -2381,6 +2472,7 @@ onShareTimeline(() => ({
             visibility: hidden !important;
         }
 
+        // 加载中与加载成功都占位：加载中内部显示骨架，成功后替换为广告，高度一致
         &.is-ad-loaded {
             position: relative;
             opacity: 1;
@@ -2713,6 +2805,19 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     &--hero {
         width: 440rpx;
     }
+
+    // 头像圆形骨架
+    &--avatar {
+        width: 180rpx;
+        height: 180rpx;
+        border-radius: 50%;
+    }
+
+    // 桌面横版骨架
+    &--desktop {
+        width: 560rpx;
+        height: 315rpx;
+    }
 }
 
 // ── 首页横版原生信息流广告卡片 ──
@@ -2736,6 +2841,93 @@ $sk-shine: rgba(148, 163, 184, 0.22);
         :deep(ad-custom) {
             width: 100% !important;
             display: block !important;
+        }
+    }
+}
+
+// ── 头像专区（圆形卡片） ──
+.avatar-section {
+    .avatar-content {
+        height: 240rpx;
+    }
+
+    .home-scroll {
+        .avatar-box {
+            width: 180rpx;
+            height: 180rpx;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20rpx 24rpx 40rpx 0;
+            border-radius: 50%;
+            position: relative;
+            overflow: visible;
+            box-sizing: border-box;
+            transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
+            will-change: transform, filter;
+            // 外圈描边，让圆形头像在浅色背景上有明确边界
+            box-shadow: 0 0 0 6rpx var(--page-background), 0 0 0 8rpx var(--panel-border);
+
+            &:first-child {
+                margin-left: 20rpx;
+            }
+
+            &--active,
+            &:active {
+                transform: scale(0.92) !important;
+                filter: brightness(0.92);
+            }
+
+            .avatar-image {
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                display: block;
+                object-fit: cover;
+            }
+        }
+    }
+}
+
+// ── 桌面壁纸专区（横版卡片） ──
+.desktop-section {
+    .desktop-content {
+        height: 380rpx;
+    }
+
+    .home-scroll {
+        .desktop-box {
+            width: 560rpx;
+            height: 315rpx;
+            display: inline-flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin: 20rpx 20rpx 45rpx 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 28rpx;
+            box-sizing: border-box;
+            box-shadow: none;
+            transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
+            will-change: transform, filter;
+
+            &:first-child {
+                margin-left: 20rpx;
+            }
+
+            &--active,
+            &:active {
+                transform: scale(0.96) !important;
+                filter: brightness(0.92);
+            }
+
+            .desktop-image {
+                width: 100%;
+                height: 100%;
+                border-radius: 28rpx;
+                display: block;
+                object-fit: cover;
+            }
         }
     }
 }

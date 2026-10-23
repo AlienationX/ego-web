@@ -10,9 +10,15 @@
         :style="containerStyle"
     >
         <view class="custom-ad-card" :style="cardStyle">
+            <!-- 竖版广告加载中的占位骨架（固定高度，避免布局抖动） -->
+            <view
+                v-if="direction === 'vertical' && !isLoaded && !isFailed && !isClosed"
+                class="custom-ad-skeleton"
+            ></view>
+
             <!-- #ifdef MP-WEIXIN -->
             <ad-custom
-                v-if="effectiveUnitId"
+                v-if="effectiveUnitId && !isRemoved"
                 class="custom-ad-content"
                 :unit-id="effectiveUnitId"
                 @load="handleLoad"
@@ -22,7 +28,7 @@
 
             <!-- #ifdef APP -->
             <ad
-                v-if="effectiveAdpid"
+                v-if="effectiveAdpid && !isRemoved"
                 class="custom-ad-content"
                 :adpid="effectiveAdpid"
                 :style="appAdStyle"
@@ -36,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { AD_CONFIG } from '@/common/config.js';
@@ -83,6 +89,8 @@ const settingsStore = useSettingsStore();
 const isLoaded = ref(false);
 const isFailed = ref(false);
 const isClosed = ref(false);
+// 广告失败/关闭后彻底卸载原生组件（原生组件在 display:none 容器内仍可能残留渲染层资源，导致后续页面白屏）
+const isRemoved = ref(false);
 
 // 微信端生效 unitId
 const effectiveUnitId = computed(() => {
@@ -124,10 +132,17 @@ const containerStyle = computed(() => {
     if (isFailed.value || isClosed.value) {
         return { display: 'none', height: '0px' };
     }
+    // 竖版广告：加载中与加载后都占固定高度，加载成功仅替换内容，避免瀑布流布局跳动
+    if (props.direction === 'vertical') {
+        return {
+            '--ad-height': containerHeight.value,
+            height: containerHeight.value,
+        };
+    }
     if (!isLoaded.value) return {};
     return {
         '--ad-height': containerHeight.value,
-        height: props.direction === 'vertical' ? containerHeight.value : 'auto',
+        height: 'auto',
     };
 });
 
@@ -141,7 +156,7 @@ const cardStyle = computed(() => {
     if (props.background) {
         style.background = props.background;
     }
-    if (props.direction === 'vertical' && isLoaded.value) {
+    if (props.direction === 'vertical') {
         style.height = containerHeight.value;
     }
     return style;
@@ -151,6 +166,9 @@ const cardStyle = computed(() => {
 const appAdStyle = computed(() => {
     const style = {
         width: '100%',
+        // APP 端 ad 是原生组件，父级 overflow:hidden 无法裁剪它；圆角必须直接设置在 ad 标签上
+        // （uni-app 会将样式同步到原生视图的 cornerRadius，部分版本生效，需真机验证）
+        borderRadius: props.borderRadius,
     };
     if (props.direction === 'vertical') {
         style.height = containerHeight.value;
@@ -176,6 +194,8 @@ const handleError = (e) => {
     // 防止业务层同步销毁 DOM 导致 uni-app-view.umd.js 报 Cannot read properties of null (reading 'getBoundingClientRect')
     noticeTimer = setTimeout(() => {
         emit('error', e);
+        // error 事件分发后，再延迟卸载原生组件，彻底释放原生渲染层资源，避免跳转其他页面白屏
+        isRemoved.value = true;
     }, 300);
 };
 
@@ -185,8 +205,14 @@ const handleClose = (e) => {
     if (noticeTimer) clearTimeout(noticeTimer);
     noticeTimer = setTimeout(() => {
         emit('close', e);
+        isRemoved.value = true;
     }, 300);
 };
+
+onUnmounted(() => {
+    if (noticeTimer) clearTimeout(noticeTimer);
+    noticeTimer = null;
+});
 
 defineExpose({
     isLoaded,
@@ -241,6 +267,19 @@ defineExpose({
         width: 100%;
         height: var(--ad-height, 620rpx);
 
+        // 竖版广告加载中也占固定高度（覆盖上方 :not(.is-loaded) 的 height:0），仅隐藏原生组件、展示占位骨架
+        &:not(.is-loaded) {
+            opacity: 1;
+            height: var(--ad-height, 620rpx) !important;
+            min-height: var(--ad-height, 620rpx) !important;
+            overflow: hidden !important;
+
+            .custom-ad-card {
+                height: 100% !important;
+                min-height: 100% !important;
+            }
+        }
+
         .custom-ad-card {
             width: 100%;
             height: 100%;
@@ -255,6 +294,27 @@ defineExpose({
             width: 100% !important;
             display: block;
         }
+
+        .custom-ad-skeleton {
+            width: 100%;
+            height: 100%;
+            border-radius: 28rpx;
+            background: linear-gradient(90deg,
+                    rgba(148, 163, 184, 0.12) 25%,
+                    rgba(148, 163, 184, 0.24) 50%,
+                    rgba(148, 163, 184, 0.12) 75%);
+            background-size: 200% 100%;
+            animation: custom-ad-shimmer 1.6s infinite linear;
+        }
+    }
+}
+
+@keyframes custom-ad-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
     }
 }
 
