@@ -72,10 +72,20 @@
                 </view>
             </view>
 
-            <!-- Skeleton Loader -->
+            <!-- Skeleton Loader (结构、间距、文字尺寸与真实专题卡片 1:1 对齐) -->
             <view v-if="isLoading && !subjectsList.length" class="skeleton-list">
-                <view v-for="i in 4" :key="i" class="skeleton-card">
-                    <view class="skeleton-glow"></view>
+                <view v-for="i in 3" :key="i" class="skeleton-card">
+                    <view class="skeleton-card__header">
+                        <view class="skeleton-badge-row">
+                            <view class="skeleton-badge"></view>
+                            <view class="skeleton-meta"></view>
+                        </view>
+                        <view class="skeleton-title" :class="'skeleton-title--' + i"></view>
+                        <view class="skeleton-desc"></view>
+                    </view>
+                    <view class="skeleton-previews">
+                        <view v-for="j in 3" :key="j" class="skeleton-preview"></view>
+                    </view>
                 </view>
             </view>
 
@@ -1032,34 +1042,98 @@ onShow(() => {
     }
 }
 
-// ── 骨架屏 ──
+// ── 骨架屏 (1:1 复刻真实专题卡片的布局、间距、圆角与文字字号) ──
 .skeleton-list {
     display: flex;
     flex-direction: column;
-    gap: 30rpx;
+    gap: 40rpx; // 与 .subjects-list 一致
 }
 
 .skeleton-card {
-    height: 280rpx;
-    border-radius: 28rpx;
+    display: flex;
+    flex-direction: column;
+    gap: 24rpx; // 与 .subject-card 一致
+    padding: 32rpx; // 与 .subject-card 一致
+    border-radius: 36rpx;
+    border: 1rpx solid var(--panel-border);
     background: var(--panel-background);
+    box-sizing: border-box;
     overflow: hidden;
-    position: relative;
 }
 
-.skeleton-glow {
-    position: absolute;
-    inset: 0;
+.skeleton-card__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8rpx; // 与 .subject-card__header 一致
+}
+
+.skeleton-badge-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6rpx; // 与 .subject-card__badge-row 一致
+}
+
+// 所有占位块共用的微光质感
+.skeleton-badge,
+.skeleton-meta,
+.skeleton-title,
+.skeleton-desc,
+.skeleton-preview {
     background: linear-gradient(
         90deg,
-        rgba(150, 150, 150, 0.05) 25%,
-        rgba(150, 150, 150, 0.12) 50%,
-        rgba(150, 150, 150, 0.05) 75%
+        rgba(150, 150, 150, 0.06) 25%,
+        rgba(150, 150, 150, 0.14) 50%,
+        rgba(150, 150, 150, 0.06) 75%
     );
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.6s infinite linear;
-    transform: translate3d(0, 0, 0);
-    will-change: background-position;
+}
+
+// 徽标占位：高度对齐 .subject-card__badge 的 38rpx 胶囊
+.skeleton-badge {
+    width: 132rpx;
+    height: 38rpx;
+    border-radius: 999rpx;
+}
+
+// 元信息占位：对齐 20rpx 字号
+.skeleton-meta {
+    width: 210rpx;
+    height: 20rpx;
+    border-radius: 6rpx;
+}
+
+// 标题占位：对齐 38rpx 字号，宽度错落模拟真实长短标题
+.skeleton-title {
+    height: 38rpx;
+    border-radius: 8rpx;
+
+    &--1 { width: 82%; }
+    &--2 { width: 62%; }
+    &--3 { width: 74%; }
+}
+
+// 描述占位：对齐 24rpx 字号
+.skeleton-desc {
+    width: 90%;
+    height: 24rpx;
+    margin-top: 4rpx;
+    border-radius: 6rpx;
+    opacity: 0.75;
+}
+
+// 三联预览占位：对齐 .preview-item 的 288rpx 高、16rpx 间距、20rpx 圆角
+.skeleton-previews {
+    display: flex;
+    gap: 16rpx;
+    width: 100%;
+}
+
+.skeleton-preview {
+    flex: 1;
+    height: 288rpx;
+    border-radius: 20rpx;
 }
 
 @keyframes skeleton-shimmer {

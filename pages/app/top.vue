@@ -6,7 +6,7 @@
             :theme="settingsStore.isDark ? 'dark' : 'light'"
         ></glass-status-bar>
 
-        <view class="top10-wrap" :style="{ paddingTop: top10WrapPaddingTop, paddingBottom: top10WrapPaddingBottom }">
+        <view class="top10-wrap" :style="{ paddingTop: top10WrapPaddingTop }">
                 <!-- 顶部标准返回栏 (对齐 timeline / subjects 规范) -->
                 <view class="topbar">
                     <view class="topbar__back" @click="goBack">
@@ -118,8 +118,17 @@
                     </view>
 
                     <!-- 通栏横版原生卡片广告 (TOP 3 之后黄金位) -->
-                    <view class="top10-ad-wrap">
-                        <custom-ad />
+                    <view
+                        v-if="!heroAdFailed"
+                        class="top10-ad-wrap"
+                        :class="{ 'is-loaded': heroAdLoaded, 'is-error': heroAdFailed }"
+                    >
+                        <custom-ad
+                            border-radius="28rpx"
+                            @load="heroAdLoaded = true"
+                            @error="heroAdFailed = true"
+                            @close="heroAdFailed = true"
+                        />
                     </view>
 
                     <view class="rank-section" v-if="rankedList.length > 3">
@@ -136,6 +145,8 @@
                                 <view
                                     class="rank-item"
                                     :style="{ animationDelay: `${0.78 + idx * 0.14}s` }"
+                                    hover-class="none"
+                                    :hover-stop-propagation="true"
                                     @click="goPreview(item.id)"
                                 >
                                     <view class="rank-item__media">
@@ -165,9 +176,15 @@
                                 <!-- 榜单次级展位：每 8 个项穿插一个原生卡片广告 ((idx + 1) % 8 === 0) -->
                                 <view
                                     class="top10-ad-wrap top10-ad-wrap--inline"
-                                    v-if="(idx + 1) % 8 === 0"
+                                    v-if="(idx + 1) % 8 === 0 && !failedListAds.has(idx)"
+                                    :class="{ 'is-loaded': loadedListAds.has(idx) }"
                                 >
-                                    <custom-ad />
+                                    <custom-ad
+                                        border-radius="28rpx"
+                                        @load="loadedListAds.add(idx)"
+                                        @error="failedListAds.add(idx)"
+                                        @close="failedListAds.add(idx)"
+                                    />
                                 </view>
                             </template>
                         </view>
@@ -180,51 +197,60 @@
                 </view>
             </view>
 
-        <!-- 底部毛玻璃悬浮灵动岛 (指标切换 + 条件回顶) -->
-        <view class="floating-dock" :style="{ bottom: dockBottomStyle }">
-            <view class="floating-capsule">
-                <!-- 指标切换两按钮 -->
-                <view class="floating-capsule__tabs">
-                    <view
-                        class="floating-capsule__tab"
-                        :class="{ 'is-active': activeMetric === 'views' }"
-                        @click="switchMetric('views')"
-                    >
-                        <mdi-icon
-                            path="/static/icons/fire.svg"
-                            size="14"
-                            :color="activeMetric === 'views' ? '#ffffff' : (settingsStore.isDark ? '#94a3b8' : '#64748b')"
-                        ></mdi-icon>
-                        <text class="floating-capsule__label">{{ $t('top10.tabs.views') }}</text>
-                    </view>
-                    <view
-                        class="floating-capsule__tab"
-                        :class="{ 'is-active': activeMetric === 'downloads' }"
-                        @click="switchMetric('downloads')"
-                    >
-                        <mdi-icon
-                            path="/static/icons/download.svg"
-                            size="14"
-                            :color="activeMetric === 'downloads' ? '#ffffff' : (settingsStore.isDark ? '#94a3b8' : '#64748b')"
-                        ></mdi-icon>
-                        <text class="floating-capsule__label">{{ $t('top10.tabs.downloads') }}</text>
-                    </view>
-                </view>
+        <!-- 底部毛玻璃悬浮灵动岛 (对齐 glass-tab-bar 与 fab-back-top 交互规范) -->
+        <view
+            class="floating-capsule"
+            :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
+            hover-class="none"
+        >
+            <view
+                class="capsule-item"
+                :class="{ 'is-active': activeMetric === 'views' }"
+                hover-class="none"
+                :hover-stop-propagation="true"
+                @click="switchMetric('views')"
+            >
+                <mdi-icon
+                    class="capsule-icon"
+                    path="/static/icons/fire.svg"
+                    size="15px"
+                    :color="activeMetric === 'views' ? '#ffffff' : (settingsStore.isDark ? '#94a3b8' : '#64748b')"
+                ></mdi-icon>
+                <text class="capsule-label">{{ $t('top10.tabs.views') }}</text>
+            </view>
 
-                <!-- 回到顶部动态展开区 (下滑时优雅淡入展开) -->
-                <view
-                    class="floating-capsule__action"
-                    :class="{ 'is-visible': showScrollTop }"
-                    @click="scrollToTop"
-                >
-                    <view class="floating-capsule__divider"></view>
-                    <view class="floating-capsule__btn-top">
-                        <uni-icons
-                            type="arrow-up"
-                            size="16"
-                            :color="settingsStore.isDark ? '#cbd5e1' : '#334155'"
-                        ></uni-icons>
-                    </view>
+            <view
+                class="capsule-item"
+                :class="{ 'is-active': activeMetric === 'downloads' }"
+                hover-class="none"
+                :hover-stop-propagation="true"
+                @click="switchMetric('downloads')"
+            >
+                <mdi-icon
+                    class="capsule-icon"
+                    path="/static/icons/download.svg"
+                    size="15px"
+                    :color="activeMetric === 'downloads' ? '#ffffff' : (settingsStore.isDark ? '#94a3b8' : '#64748b')"
+                ></mdi-icon>
+                <text class="capsule-label">{{ $t('top10.tabs.downloads') }}</text>
+            </view>
+
+            <!-- 回到顶部动态展开区 (下滑时优雅淡入展开，回顶后自动收起) -->
+            <view
+                class="capsule-action"
+                :class="{ 'is-visible': showScrollTop }"
+                hover-class="none"
+                :hover-stop-propagation="true"
+                @click="scrollToTop"
+            >
+                <view class="capsule-divider"></view>
+                <view class="capsule-item capsule-item--top">
+                    <uni-icons
+                        class="capsule-icon"
+                        type="arrow-up"
+                        size="16"
+                        :color="settingsStore.isDark ? '#cbd5e1' : '#334155'"
+                    ></uni-icons>
                 </view>
             </view>
         </view>
@@ -232,7 +258,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { onLoad, onShow, onPageScroll, onPullDownRefresh } from '@dcloudio/uni-app';
 import { apiGetTopWall } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
@@ -245,8 +271,6 @@ const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
 
 const top10WrapPaddingTop = computed(() => `${statusBarHeight.value + 10}px`);
-const top10WrapPaddingBottom = computed(() => 'calc(max(20px, env(safe-area-inset-bottom)) + 110rpx)');
-const dockBottomStyle = computed(() => 'max(20px, env(safe-area-inset-bottom))');
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -268,7 +292,7 @@ onPageScroll((e) => {
     const top = Number(e?.scrollTop || 0);
     isScrolled.value = top > 8;
     currentScrollTop.value = top;
-    const windowHeight = uni.getWindowInfo().windowHeight || 0;
+    const windowHeight = uni.getWindowInfo().windowHeight || 800;
     const nextVisible = top > windowHeight / 2;
     if (showScrollTop.value !== nextVisible) {
         showScrollTop.value = nextVisible;
@@ -280,13 +304,25 @@ const scrollToTop = () => {
     currentScrollTop.value = 0;
     uni.pageScrollTo({
         scrollTop: 0,
-        duration: 350,
+        duration: 300,
     });
 };
 
 const activeMetric = ref('views');
 const loading = ref(false);
 const rankedList = ref([]);
+
+const heroAdLoaded = ref(false);
+const heroAdFailed = ref(false);
+const loadedListAds = reactive(new Set());
+const failedListAds = reactive(new Set());
+
+const resetAdsState = () => {
+    heroAdLoaded.value = false;
+    heroAdFailed.value = false;
+    loadedListAds.clear();
+    failedListAds.clear();
+};
 
 const cache = {
     views: null,
@@ -329,12 +365,13 @@ const getTopList = async () => {
 };
 
 const switchMetric = async (metric) => {
-    if (activeMetric.value === metric) return;
+    if (activeMetric.value === metric) {
+        scrollToTop();
+        return;
+    }
     activeMetric.value = metric;
-    uni.pageScrollTo({
-        scrollTop: 0,
-        duration: 250,
-    });
+    scrollToTop();
+    resetAdsState();
     if (cache[metric]) {
         rankedList.value = cache[metric];
     } else {
@@ -390,6 +427,7 @@ const goBack = () => {
 onPullDownRefresh(async () => {
     cache.views = null;
     cache.downloads = null;
+    resetAdsState();
     await getTopList();
     uni.stopPullDownRefresh();
 });
@@ -412,6 +450,8 @@ onShow(() => {
 .top10-page {
     min-height: 100vh;
     background: var(--page-background);
+    position: relative;
+    -webkit-tap-highlight-color: transparent !important;
 }
 
 .top10-page.is-embedded {
@@ -429,6 +469,8 @@ onShow(() => {
     max-width: 860rpx;
     margin: 0 auto;
     padding: 20rpx;
+    padding-bottom: calc(max(34px, env(safe-area-inset-bottom)) + 160rpx);
+    position: relative;
 }
 
 // ── 顶部独立返回栏 (对齐 timeline / subjects) ──
@@ -476,150 +518,6 @@ onShow(() => {
     &:active {
         transform: scale(0.92);
         opacity: 0.85;
-    }
-}
-
-/* ── 底部毛玻璃悬浮灵动岛 ── */
-.floating-dock {
-    position: fixed;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 105;
-    pointer-events: none;
-    transition: bottom 0.28s ease;
-}
-
-.floating-capsule {
-    pointer-events: auto;
-    display: inline-flex;
-    align-items: center;
-    padding: 8rpx 10rpx;
-    border-radius: 999rpx;
-    background: rgba(22, 32, 44, 0.85);
-    border: 1rpx solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(24rpx);
-    -webkit-backdrop-filter: blur(24rpx);
-    box-shadow:
-        0 16rpx 40rpx rgba(0, 0, 0, 0.38),
-        0 2rpx 8rpx rgba(0, 0, 0, 0.16),
-        inset 0 1rpx 0 rgba(255, 255, 255, 0.1);
-    transition: all 0.32s cubic-bezier(0.16, 1, 0.3, 1);
-
-    .theme-light & {
-        background: rgba(255, 255, 255, 0.88);
-        border: 1rpx solid rgba(0, 0, 0, 0.08);
-        box-shadow:
-            0 12rpx 36rpx rgba(15, 23, 42, 0.12),
-            0 2rpx 6rpx rgba(15, 23, 42, 0.04),
-            inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
-    }
-
-    .theme-dark & {
-        border: none;
-    }
-}
-
-.floating-capsule__tabs {
-    display: flex;
-    align-items: center;
-    gap: 8rpx;
-}
-
-.floating-capsule__tab {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10rpx;
-    height: 68rpx;
-    padding: 0 28rpx;
-    border-radius: 999rpx;
-    color: #94a3b8;
-    font-size: 24rpx;
-    font-weight: 700;
-    transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-
-    &:active {
-        transform: scale(0.96);
-    }
-
-    .theme-light & {
-        color: #64748b;
-    }
-
-    &.is-active {
-        color: #ffffff;
-        background: linear-gradient(135deg, #2b8cee 0%, #1a6fd8 100%);
-        box-shadow: 0 6rpx 20rpx rgba(43, 140, 238, 0.35);
-
-        .theme-light & {
-            color: #ffffff;
-            background: linear-gradient(135deg, #2b8cee 0%, #1f6fd1 100%);
-            box-shadow: 0 6rpx 18rpx rgba(43, 140, 238, 0.3);
-        }
-    }
-}
-
-.floating-capsule__label {
-    line-height: 1;
-}
-
-/* 动态回顶按钮部分 */
-.floating-capsule__action {
-    display: flex;
-    align-items: center;
-    max-width: 0;
-    opacity: 0;
-    overflow: hidden;
-    transform: scale(0.8) translateX(-12rpx);
-    pointer-events: none;
-    transition:
-        max-width 0.36s cubic-bezier(0.16, 1, 0.3, 1),
-        opacity 0.28s ease,
-        transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
-
-    &.is-visible {
-        max-width: 100rpx;
-        opacity: 1;
-        transform: scale(1) translateX(0);
-        pointer-events: auto;
-    }
-}
-
-.floating-capsule__divider {
-    width: 2rpx;
-    height: 32rpx;
-    background: rgba(148, 163, 184, 0.22);
-    margin: 0 10rpx 0 6rpx;
-
-    .theme-light & {
-        background: rgba(0, 0, 0, 0.08);
-    }
-}
-
-.floating-capsule__btn-top {
-    width: 60rpx;
-    height: 60rpx;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.06);
-    transition: all 0.2s ease;
-
-    &:active {
-        transform: scale(0.9);
-        background: rgba(255, 255, 255, 0.15);
-    }
-
-    .theme-light & {
-        background: rgba(0, 0, 0, 0.04);
-
-        &:active {
-            background: rgba(0, 0, 0, 0.08);
-        }
     }
 }
 
@@ -690,6 +588,146 @@ onShow(() => {
         max-width: 640rpx;
         margin-top: 2rpx;
         animation: introDescFadeIn 0.92s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   底部毛玻璃悬浮灵动岛 (对齐 glass-tab-bar 与 fab-back-top 定位规范)
+───────────────────────────────────────────────────────────── */
+.floating-capsule {
+    position: fixed;
+    bottom: calc(max(34px, env(safe-area-inset-bottom)) + 16px);
+    left: 50%;
+    transform: translate3d(-50%, 0, 0);
+    -webkit-transform: translate3d(-50%, 0, 0);
+    height: 76rpx;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6rpx 10rpx;
+    border-radius: 9999px;
+    z-index: 1000;
+    pointer-events: auto;
+    box-sizing: border-box;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none;
+    transition: background 0.3s ease, border 0.3s ease, box-shadow 0.3s ease;
+
+    &.theme-light {
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(28px) saturate(190%);
+        -webkit-backdrop-filter: blur(28px) saturate(190%);
+        border: 1px solid rgba(255, 255, 255, 0.90);
+        box-shadow:
+            0 16px 36px rgba(15, 23, 42, 0.12),
+            0 2px 6px rgba(0, 0, 0, 0.04),
+            inset 0 1px 1px rgba(255, 255, 255, 0.95);
+    }
+
+    &.theme-dark {
+        background: rgba(18, 18, 20, 0.92);
+        backdrop-filter: blur(28px) saturate(190%);
+        -webkit-backdrop-filter: blur(28px) saturate(190%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow:
+            0 20px 44px rgba(0, 0, 0, 0.6),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+}
+
+.capsule-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8rpx;
+    height: 64rpx;
+    padding: 0 22rpx;
+    border-radius: 9999px;
+    color: #94a3b8;
+    font-size: 24rpx;
+    font-weight: 700;
+    cursor: pointer;
+    box-sizing: border-box;
+    white-space: nowrap;
+    flex-shrink: 0;
+    pointer-events: auto;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent !important;
+    outline: none !important;
+
+    &:active {
+        transform: scale(0.94);
+        opacity: 0.85;
+    }
+
+    .capsule-icon,
+    .capsule-label {
+        pointer-events: none !important;
+        line-height: 1;
+        white-space: nowrap;
+    }
+
+    .theme-light & {
+        color: #64748b;
+    }
+
+    &.is-active {
+        color: #ffffff;
+        background: linear-gradient(135deg, #2b8cee 0%, #1a6fd8 100%);
+        box-shadow: 0 6rpx 18rpx rgba(43, 140, 238, 0.35);
+
+        .theme-light & {
+            color: #ffffff;
+            background: linear-gradient(135deg, #2b8cee 0%, #1f6fd1 100%);
+            box-shadow: 0 6rpx 16rpx rgba(43, 140, 238, 0.3);
+        }
+    }
+
+    &--top {
+        width: 60rpx;
+        height: 60rpx;
+        padding: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+
+        .theme-light & {
+            background: rgba(0, 0, 0, 0.04);
+        }
+    }
+}
+
+.capsule-divider {
+    width: 2rpx;
+    height: 30rpx;
+    background: rgba(148, 163, 184, 0.22);
+    margin: 0 4rpx;
+    flex-shrink: 0;
+
+    .theme-light & {
+        background: rgba(0, 0, 0, 0.08);
+    }
+}
+
+/* 动态回顶按钮部分 (仅在向下滚动后平滑展开，未滚动时零宽度隐藏) */
+.capsule-action {
+    display: flex;
+    align-items: center;
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: scale(0.8) translateX(-12rpx);
+    pointer-events: none;
+    transition:
+        max-width 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 0.28s ease,
+        transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &.is-visible {
+        max-width: 120rpx;
+        opacity: 1;
+        transform: scale(1) translateX(0);
+        pointer-events: auto;
     }
 }
 
@@ -1183,7 +1221,7 @@ onShow(() => {
     }
 }
 
-// ── 微信原生模板广告位卡片 ──
+// ── 横版原生广告位卡片：未加载成功时脱离文档流零占位，加载成功后平滑展开 ──
 .top10-ad-wrap {
     width: 100%;
     margin: 0 0 36rpx;
@@ -1191,6 +1229,35 @@ onShow(() => {
     justify-content: center;
     box-sizing: border-box;
     line-height: 1;
+
+    &:not(.is-loaded) {
+        position: absolute;
+        top: -9999rpx;
+        left: -9999rpx;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    &.is-error {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    &.is-loaded {
+        position: relative;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
 
     &--inline {
         margin: 0;

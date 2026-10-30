@@ -64,7 +64,9 @@
                         <!-- 实际渲染数据 -->
                         <view class="gallery-wrapper" v-else-if="tabStates[index].images.length > 0">
                             <!-- 模式 1: 网格视图 (CSS Grid) -->
-                            <view class="grid-layout" :class="{ 'is-single-col': isDesktopClassify }" :style="gridStyle" v-if="!isWaterfall">
+                            <view class="grid-layout"
+                                :class="{ 'is-single-col': isDesktopClassify, 'is-avatar': isAvatarClassify }"
+                                :style="gridStyle" v-if="!isWaterfall">
                                 <view
                                     class="modern-card grid-card"
                                     :class="{
@@ -143,6 +145,10 @@
                                                     @error="onCustomAdError(item, $event)"
                                                     @close="onCustomAdClose(item, $event)"
                                                 />
+                                                <!-- 广告未展示时显示居中文字占位 -->
+                                                <view class="ad-placeholder" v-if="!item.adLoaded && !item.adError">
+                                                    <text class="ad-placeholder__text">{{ isEn ? 'AD' : '广告' }}</text>
+                                                </view>
                                             </view>
                                         </template>
                                         <template v-else>
@@ -194,6 +200,10 @@
                                                     @error="onCustomAdError(item, $event)"
                                                     @close="onCustomAdClose(item, $event)"
                                                 />
+                                                <!-- 广告未展示时显示居中文字占位 -->
+                                                <view class="ad-placeholder" v-if="!item.adLoaded && !item.adError">
+                                                    <text class="ad-placeholder__text">{{ isEn ? 'AD' : '广告' }}</text>
+                                                </view>
                                             </view>
                                         </template>
                                         <template v-else>
@@ -344,13 +354,14 @@ const hasVerticalAdConfig = computed(() => {
 });
 
 const isWaterfall = computed(() => {
-    // 头像分类固定方块网格展示，不走瀑布流
-    if (isAvatarClassify.value) return false;
+    // 头像分类固定 2 列方格、桌面横屏壁纸固定单列整行，均不存在瀑布流/网格切换
+    if (isAvatarClassify.value || isDesktopClassify.value) return false;
     return props.layoutMode ? props.layoutMode === 'waterfall' : settingsStore.options.view !== 'window';
 });
 
 const colCount = computed(() => {
-    if (isDesktopClassify.value) return 1; // 桌面横屏壁纸单列宽屏流展示
+    if (isDesktopClassify.value) return 1; // 桌面横屏壁纸单列整行展示
+    if (isAvatarClassify.value) return 2; // 头像固定 2 列方格展示
     return settingsStore.options.column || 2;
 });
 const gridStyle = computed(() => ({
@@ -427,7 +438,9 @@ const appendDisplayData = (index, newItems, baseOffset = -1) => {
 
     const isVip = userStore.isVip;
     const canShowGridAd = !isVip && hasHorizontalAdConfig.value;
-    const canShowWfAd = !isVip && hasVerticalAdConfig.value;
+    // 头像/桌面固定整行网格展示，只穿插一整行的横版广告，不再插入瀑布流竖版广告
+    const canShowWfAd =
+        !isVip && hasVerticalAdConfig.value && !isAvatarClassify.value && !isDesktopClassify.value;
 
     const startIdx = baseOffset >= 0 ? baseOffset : state.images.length;
 
@@ -980,9 +993,17 @@ onShow(() => {
     gap: 20rpx;
 
     &.is-single-col {
-        .modern-card.grid-card {
+        .modern-card.grid-card:not(.is-ad-card) {
             height: 400rpx;
             aspect-ratio: 16 / 9;
+        }
+    }
+
+    // 头像分类：2 列 1:1 方格（广告卡片仍按通栏自适应高度）
+    &.is-avatar {
+        .modern-card.grid-card:not(.is-ad-card) {
+            height: auto;
+            aspect-ratio: 1 / 1;
         }
     }
 }
@@ -1018,9 +1039,32 @@ onShow(() => {
 }
 
 .ad-custom-card {
+    position: relative;
     width: 100%;
     border-radius: 28rpx;
     overflow: hidden;
+}
+
+// 广告加载中/未填充时的居中文字占位
+.ad-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 1;
+
+    &__text {
+        font-size: 24rpx;
+        font-weight: 600;
+        letter-spacing: 6rpx;
+        color: var(--text-tertiary);
+        opacity: 0.7;
+    }
 }
 
 /* 卡片 UI (Glassmorphism + 交互) */

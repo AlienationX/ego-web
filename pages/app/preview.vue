@@ -14,9 +14,8 @@
             :is-scrolled="isScrolled"
             :theme="settingsStore.isDark ? 'dark' : 'light'"
         ></glass-status-bar>
-        <scroll-view scroll-y class="previewScroll" show-scrollbar="false" :style="previewScrollStyle"
-            @scroll="handlePreviewScroll">
-            <view class="previewLayout" :style="previewLayoutStyle">
+        <view class="previewBody">
+            <view class="previewLayout">
                 <view class="previewHero" :style="previewHeroStyle">
                     <!-- 1. 轻触屏幕提示：仅在【预览模式】显示，使用过的用户不展示 -->
                     <view v-if="!maskState && showTapHint" class="mode-tip-toast">
@@ -228,7 +227,7 @@
 
                 <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
             </view>
-        </scroll-view>
+        </view>
 
         <!-- safe-area安全区域设置为false，手机显示底部就不回有空白 -->
         <uni-popup ref="infoPopup" type="bottom" :safe-area="false">
@@ -648,7 +647,7 @@
 import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
-import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { onLoad, onUnload, onPageScroll, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { SERVICE_EMAIL } from '@/common/config.js';
@@ -674,7 +673,6 @@ import { isNewUserFreeBenefitAvailable, consumeNewUserFreeDownload } from '@/uti
 import PopupBoardSelect from '@/components/popup-board-select/popup-board-select.vue';
 import AvatarPreviewOverlay from '@/components/avatar-preview-overlay/avatar-preview-overlay.vue';
 import DesktopPreviewOverlay from '@/components/desktop-preview-overlay/desktop-preview-overlay.vue';
-import { AD_CONFIG } from '@/common/config.js';
 
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
@@ -1031,23 +1029,12 @@ classList.value = wallList.map((item) => {
 });
 const disableSwipe = ref(false);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-// 使用新版 getWindowInfo API，搭配可选链兜底
-const previewHeroHeightPx = uni.getWindowInfo?.()?.windowHeight || 667;
-const previewViewportHeightPx = previewHeroHeightPx;
 // 顶部渐变羽化毛玻璃状态栏显示开关 (与 classify.vue / user.vue 一致)
 const isScrolled = ref(false);
 
-// ── 广告高度，控制预览页滚动区域 ──
-const adHeight = ref(0);
-const previewScrollStyle = computed(() => ({
-    height: '100vh',
-}));
-const previewLayoutStyle = computed(() => ({
-    paddingBottom: '0px',
-}));
-
-const handlePreviewScroll = (e) => {
-    const scrollTop = Number(e?.detail?.scrollTop || 0);
+// 页面级滚动：App 端原生广告无法在 scroll-view 内跟随滚动，因此预览页改用页面滚动
+onPageScroll((e) => {
+    const scrollTop = Number(e?.scrollTop || 0);
 
     // 向上滑动浏览详情时，淡入渐变羽化毛玻璃
     isScrolled.value = scrollTop > 20;
@@ -1055,7 +1042,7 @@ const handlePreviewScroll = (e) => {
     if (scrollTop > 40 && statusStore.appStatus && !statusStore.appStatus.hasSeenPreviewHint) {
         statusStore.appStatus.hasSeenPreviewHint = true;
     }
-};
+});
 
 // views字段值+1，防抖 + 请求锁，防止快速滑动时重复调用
 const requestingViewIds = new Set();
@@ -2061,8 +2048,9 @@ const handleCopyWatermarkId = () => {
     background: var(--page-background);
 }
 
-.previewScroll {
-    height: 100vh;
+// 页面级滚动容器：不再限制高度，由页面自身滚动，原生广告才能跟随滚动
+.previewBody {
+    width: 100%;
 }
 
 .previewHero {

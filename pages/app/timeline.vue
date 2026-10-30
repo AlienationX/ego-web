@@ -494,8 +494,8 @@ onShow(() => {
 .layout {
     min-height: 100vh;
     background: var(--page-background);
+    position: relative;
     color: #eaf0fb;
-    overflow-x: hidden;
 
     &.theme-light {
         color: var(--text-primary);

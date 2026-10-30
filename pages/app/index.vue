@@ -408,6 +408,10 @@
                                         @error="onCustomAdError(item, $event)"
                                         @close="onCustomAdClose(item, $event)"
                                     />
+                                    <!-- 广告未展示时显示居中文字占位 -->
+                                    <view class="ad-placeholder" v-if="!item.adLoaded && !item.adError">
+                                        <text class="ad-placeholder__text">{{ isEn ? 'AD' : '广告' }}</text>
+                                    </view>
                                 </view>
                             </template>
                             <template v-else>
@@ -470,6 +474,10 @@
                                         @error="onCustomAdError(item, $event)"
                                         @close="onCustomAdClose(item, $event)"
                                     />
+                                    <!-- 广告未展示时显示居中文字占位 -->
+                                    <view class="ad-placeholder" v-if="!item.adLoaded && !item.adError">
+                                        <text class="ad-placeholder__text">{{ isEn ? 'AD' : '广告' }}</text>
+                                    </view>
                                 </view>
                             </template>
                             <template v-else>
@@ -2480,12 +2488,35 @@ onShareTimeline(() => ({
         }
 
         .ad-custom-card {
+            position: relative;
             width: 100%;
             border-radius: 28rpx;
             overflow: hidden;
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
+        }
+
+        // 广告加载中/未填充时的居中文字占位
+        .ad-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 1;
+
+            &__text {
+                font-size: 24rpx;
+                font-weight: 600;
+                letter-spacing: 6rpx;
+                color: var(--text-tertiary);
+                opacity: 0.7;
+            }
         }
     }
 

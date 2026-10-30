@@ -242,13 +242,13 @@
             },
             "signingConfigs" : {
                 "default" : {
-                    "certpath" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.cer",
+                    "certpath" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1790156644377.cer",
                     "keyAlias" : "debugKey",
-                    "keyPassword" : "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4",
-                    "profile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1782699924419.p7b",
+                    "keyPassword" : "0000001BEFE152AC61DFB5EF8DF7DD5B73F7A4AE65C93D3985ADD5341DF5990890F98BD15885948FA2B5FB",
+                    "profile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1793083167305.p7b",
                     "signAlg" : "SHA256withECDSA",
-                    "storeFile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1777442169260.p12",
-                    "storePassword" : "0000001B09AFC60D42EE1B000DF4B4811832AFDC1B777E421ED282505962957F007B83F314EF1FD8B2C8E4"
+                    "storeFile" : "/Users/tangzy/Library/Application Support/HBuilder X/extensions/launcher/agc-certs/1790156644377.p12",
+                    "storePassword" : "0000001BEFE152AC61DFB5EF8DF7DD5B73F7A4AE65C93D3985ADD5341DF5990890F98BD15885948FA2B5FB"
                 },
                 "release" : {
                     "certpath" : "/Users/tangzy/Documents/apps/wallpapers/harmonyOS/wallpaper.cer",

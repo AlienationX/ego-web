@@ -1,6 +1,6 @@
 <template>
     <view
-        v-if="canShowAd"
+        v-if="canShowAd && !isFailed && !isClosed && !isRemoved"
         class="custom-ad-container"
         :class="[
             `custom-ad-container--${direction}`,
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { AD_CONFIG } from '@/common/config.js';
@@ -177,41 +177,62 @@ const appAdStyle = computed(() => {
 });
 
 let noticeTimer = null;
+let timeoutTimer = null;
+
+const clearTimers = () => {
+    if (noticeTimer) {
+        clearTimeout(noticeTimer);
+        noticeTimer = null;
+    }
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+        timeoutTimer = null;
+    }
+};
 
 const handleLoad = (e) => {
-    if (noticeTimer) clearTimeout(noticeTimer);
+    clearTimers();
     isLoaded.value = true;
     isFailed.value = false;
     emit('load', e);
 };
 
 const handleError = (e) => {
+    clearTimers();
     console.warn(`[CustomAd ${props.direction}] 广告加载失败/未填充:`, e?.detail || e);
     isFailed.value = true;
     isLoaded.value = false;
-    if (noticeTimer) clearTimeout(noticeTimer);
-    // 延迟 300ms 抛出 error 事件，给 uni-app 渲染层处理原生广告异常与生命周期留出安全执行窗口，
-    // 防止业务层同步销毁 DOM 导致 uni-app-view.umd.js 报 Cannot read properties of null (reading 'getBoundingClientRect')
+    // 延迟 300ms 抛出 error 事件并卸载原生组件，彻底释放原生渲染层资源
     noticeTimer = setTimeout(() => {
         emit('error', e);
-        // error 事件分发后，再延迟卸载原生组件，彻底释放原生渲染层资源，避免跳转其他页面白屏
         isRemoved.value = true;
     }, 300);
 };
 
 const handleClose = (e) => {
+    clearTimers();
     isClosed.value = true;
     isLoaded.value = false;
-    if (noticeTimer) clearTimeout(noticeTimer);
     noticeTimer = setTimeout(() => {
         emit('close', e);
         isRemoved.value = true;
     }, 300);
 };
 
+onMounted(() => {
+    // #ifdef APP
+    // 超时强制熔断器：APP 端若 3 秒内未触发 @load，视为加载失败/未填充，强制销毁原生组件以防原生视图阻断触控
+    timeoutTimer = setTimeout(() => {
+        if (!isLoaded.value && !isFailed.value && !isClosed.value) {
+            console.warn(`[CustomAd ${props.direction}] 3000ms 加载超时，触发强制熔断与物理销毁`);
+            handleError({ detail: { errMsg: 'timeout 3000ms' } });
+        }
+    }, 3000);
+    // #endif
+});
+
 onUnmounted(() => {
-    if (noticeTimer) clearTimeout(noticeTimer);
-    noticeTimer = null;
+    clearTimers();
 });
 
 defineExpose({
@@ -229,16 +250,24 @@ defineExpose({
     line-height: 1;
 
     &:not(.is-loaded) {
-        opacity: 0;
-        pointer-events: none;
+        position: absolute !important;
+        top: -9999rpx !important;
+        left: -9999rpx !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        width: 0 !important;
         height: 0 !important;
         min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
         overflow: hidden !important;
 
         .custom-ad-card {
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
+            width: 0 !important;
             height: 0 !important;
             min-height: 0 !important;
             overflow: hidden !important;
@@ -246,6 +275,9 @@ defineExpose({
     }
 
     &.is-loaded {
+        position: relative;
+        top: 0;
+        left: 0;
         opacity: 1;
         transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
