@@ -96,8 +96,17 @@
             </view>
 
             <!-- 创作页横版原生广告卡片 -->
-            <view class="creation-flow-ad-wrap">
-                <custom-ad border-radius="40rpx" />
+            <view
+                v-if="!adFailed"
+                class="creation-flow-ad-wrap"
+                :class="{ 'is-loaded': adLoaded, 'is-error': adFailed }"
+            >
+                <custom-ad
+                    border-radius="40rpx"
+                    @load="adLoaded = true"
+                    @error="adFailed = true"
+                    @close="adFailed = true"
+                />
             </view>
 
             <!-- 4. 光影边框 (暂隐藏，待bug修复后开放) -->
@@ -165,6 +174,9 @@ import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+
+const adLoaded = ref(false);
+const adFailed = ref(false);
 
 
 const statusBarHeight = computed(() => getStatusBarHeight() || 0);
@@ -815,6 +827,29 @@ const showComingSoon = () => {
 .creation-flow-ad-wrap {
     width: 100%;
     box-sizing: border-box;
+
+    &:not(.is-loaded) {
+        position: absolute;
+        top: -9999rpx;
+        left: -9999rpx;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    &.is-error {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 
     .creation-flow-ad-card {
         width: 100%;

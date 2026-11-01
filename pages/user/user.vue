@@ -143,8 +143,17 @@
                 </view>
 
                 <!-- 我的页面横版原生广告卡片 -->
-                <view class="user-flow-ad-wrap">
-                    <custom-ad border-radius="20rpx" />
+                <view
+                    v-if="!adFailed"
+                    class="user-flow-ad-wrap"
+                    :class="{ 'is-loaded': adLoaded, 'is-error': adFailed }"
+                >
+                    <custom-ad
+                        border-radius="20rpx"
+                        @load="adLoaded = true"
+                        @error="adFailed = true"
+                        @close="adFailed = true"
+                    />
                 </view>
 
                 <!-- 扁平化分组菜单列表 (参考 iOS Inset Grouped 极简美学) -->
@@ -233,6 +242,9 @@ const { t, locale } = useI18n();
 const userStore = useUserStore();
 const libraryStore = useLibraryStore();
 const settingsStore = useSettingsStore();
+
+const adLoaded = ref(false);
+const adFailed = ref(false);
 
 
 const userPaddingBottom = computed(() => {
@@ -1245,6 +1257,29 @@ onShow(() => {
         margin-bottom: 24rpx;
         box-sizing: border-box;
         width: 100%;
+
+        &:not(.is-loaded) {
+            position: absolute;
+            top: -9999rpx;
+            left: -9999rpx;
+            width: 0 !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        &.is-error {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
 
         .user-flow-ad-card {
             width: 100%;

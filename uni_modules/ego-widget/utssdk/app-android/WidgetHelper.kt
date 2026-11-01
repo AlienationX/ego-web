@@ -27,7 +27,7 @@ import java.util.concurrent.Executors
 
 object WidgetHelper {
     private const val TAG = "EgoWidget"
-    private const val BASE_API_URL = "https://api.wp.ego8.space/wallpaper/api/widget/"
+    private const val BASE_API_URL = "https://api.egofish.cn/wallpaper/api/widget/"
     private val executor = Executors.newFixedThreadPool(3)
 
     const val ACTION_REFRESH_2X2 = "com.ego.wallpaper.WIDGET_REFRESH_2X2"

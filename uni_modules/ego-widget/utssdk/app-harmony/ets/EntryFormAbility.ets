@@ -11,7 +11,7 @@ import { BusinessError } from '@ohos.base';
 
 const DOMAIN = 0x0000;
 const TAG = 'EgoWidgetForm';
-const BASE_API_URL = 'https://api.wp.ego8.space/wallpaper/api/widget/';
+const BASE_API_URL = 'https://api.egofish.cn/wallpaper/api/widget/';
 
 export class WidgetFormData {
   wallId: number = 1;

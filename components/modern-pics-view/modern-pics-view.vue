@@ -82,7 +82,7 @@
                                 >
                                     <!-- A. 穿插的卡片广告 (横跨整行通栏展示，宽度>200px满足微信规范) -->
                                     <template v-if="item.is_ad">
-                                        <view class="ad-custom-card">
+                                        <view class="ad-custom-card" v-if="!item.adError">
                                             <custom-ad
                                                 direction="horizontal"
                                                 @load="onCustomAdLoad(item, $event)"
@@ -138,7 +138,7 @@
                                         @click="!item.is_ad && openPreview(item.id, index)"
                                     >
                                         <template v-if="item.is_ad">
-                                            <view class="ad-custom-card">
+                                            <view class="ad-custom-card" v-if="!item.adError">
                                                 <custom-ad
                                                     direction="vertical"
                                                     @load="onCustomAdLoad(item, $event)"
@@ -193,7 +193,7 @@
                                         @click="!item.is_ad && openPreview(item.id, index)"
                                     >
                                         <template v-if="item.is_ad">
-                                            <view class="ad-custom-card">
+                                            <view class="ad-custom-card" v-if="!item.adError">
                                                 <custom-ad
                                                     direction="vertical"
                                                     @load="onCustomAdLoad(item, $event)"
@@ -1121,9 +1121,12 @@ onShow(() => {
     &.is-ad-card {
         // 广告加载失败：折叠脱离文档流（唯一需要折叠的场景；加载中由 custom-ad 内部决定是否占位，避免瀑布流抖动）
         &.is-ad-error {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
+            position: absolute !important;
+            top: -9999rpx !important;
+            left: -9999rpx !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            width: 0 !important;
             height: 0 !important;
             min-height: 0 !important;
             max-height: 0 !important;

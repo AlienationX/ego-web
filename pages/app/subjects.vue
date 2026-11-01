@@ -108,7 +108,11 @@
                 <template v-for="(item, index) in displaySubjectsList" :key="item.is_ad ? item.id : `${listRenderKey}-${item.id}`">
                     <!-- A. 穿插的原生模板横版卡片广告 (标准卡片外壳包裹，实现与普通专题卡片等高与风格统一) -->
                     <template v-if="item.is_ad">
-                        <view class="subject-card subject-card--ad">
+                        <view
+                            v-if="!item.adError"
+                            class="subject-card subject-card--ad"
+                            :class="{ 'is-loaded': item.adLoaded, 'is-error': item.adError }"
+                        >
                             <view class="subject-card__header">
                                 <view class="subject-card__badge-row">
                                     <view class="subject-card__badges-group">
@@ -812,6 +816,30 @@ onShow(() => {
         min-height: 540rpx;
         cursor: default;
         justify-content: space-between;
+
+        &:not(.is-loaded) {
+            position: absolute !important;
+            top: -9999rpx !important;
+            left: -9999rpx !important;
+            width: 0 !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        &.is-error {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
 
         &:active {
             transform: none !important;

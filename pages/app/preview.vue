@@ -221,8 +221,17 @@
                 </view>
 
                 <!-- 作品参数面板下方横版卡片广告 -->
-                <view class="preview-meta-ad-wrap">
-                    <custom-ad direction="horizontal" />
+                <view
+                    v-if="!previewAdFailed"
+                    class="preview-meta-ad-wrap"
+                    :class="{ 'is-loaded': previewAdLoaded, 'is-error': previewAdFailed }"
+                >
+                    <custom-ad
+                        direction="horizontal"
+                        @load="previewAdLoaded = true"
+                        @error="previewAdFailed = true"
+                        @close="previewAdFailed = true"
+                    />
                 </view>
 
                 <recommend-wallpapers :key="currentInfo.id" :current-info="currentInfo"></recommend-wallpapers>
@@ -1185,6 +1194,8 @@ const maskChange = () => {
 
 // ── 当前壁纸详情数据 ──
 const currentInfo = ref(null);
+const previewAdLoaded = ref(false);
+const previewAdFailed = ref(false);
 
 // ── 全场景视觉资产模式判断 ──
 const isAvatarMode = computed(() => {
@@ -3644,6 +3655,29 @@ const handleCopyWatermarkId = () => {
     margin: 10rpx 0 16rpx;
     box-sizing: border-box;
     line-height: 1;
+
+    &:not(.is-loaded) {
+        position: absolute;
+        top: -9999rpx;
+        left: -9999rpx;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    &.is-error {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 }
 
 .preview-meta-ad-card {

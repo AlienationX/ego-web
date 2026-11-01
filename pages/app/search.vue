@@ -174,9 +174,10 @@ const capsuleHeight = ref(32);
 const capsuleRowHeight = ref(44);
 const searchRowHeight = ref(56); // 搜索卡片高度 88rpx (~44px) + 上下间距 12px
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const titleBarHeight = ref(56);
+const titleBarHeight = ref(44);
 
 const updateCapsuleMetrics = () => {
+    statusBarHeight.value = getStatusBarHeight() || 0;
     // #ifdef MP-WEIXIN
     isWeixin.value = true;
     try {
@@ -204,8 +205,8 @@ const updateCapsuleMetrics = () => {
     } catch (e) {}
     // #endif
 
-    // 非微信端（APP / H5）单行紧凑布局保持 56px
-    titleBarHeight.value = 56;
+    // 非微信端（APP / H5）单行紧凑布局严格对齐标准导航栏 44px (88rpx)
+    titleBarHeight.value = 44;
 };
 
 updateCapsuleMetrics();
@@ -434,7 +435,7 @@ onUnload(() => {
     top: 0;
     left: 0;
     right: 0;
-    bottom: -2rpx; // 微扩展 2rpx，彻底消除与吸顶 Tabs Bar 拼接处 WebKit 亚像素缝隙产生的暗线
+    bottom: -4rpx; // 扩展 4rpx，彻底消除与吸顶 Tabs Bar 拼接处 WebKit 亚像素缝隙产生的暗线
     z-index: 0;
     background: rgba(238, 241, 244, 0.85);
     backdrop-filter: blur(28rpx) saturate(180%);
@@ -493,6 +494,8 @@ onUnload(() => {
     gap: 16rpx;
     padding: 0 24rpx;
     box-sizing: border-box;
+    height: 88rpx;
+    min-height: 88rpx;
 }
 
 /* 纯净扁平返回按钮 (无背景、无边框、无阴影，仅留纯图标与交互透明度反馈) */

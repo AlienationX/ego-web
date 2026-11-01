@@ -199,8 +199,16 @@
             </view>
 
             <!-- 首页推荐流横版原生广告卡片 -->
-            <view class="home-flow-ad-wrap">
-                <custom-ad />
+            <view
+                v-if="!homeAdFailed"
+                class="home-flow-ad-wrap"
+                :class="{ 'is-loaded': homeAdLoaded, 'is-error': homeAdFailed }"
+            >
+                <custom-ad
+                    @load="homeAdLoaded = true"
+                    @error="homeAdFailed = true"
+                    @close="homeAdFailed = true"
+                />
             </view>
 
             <!-- 桌面壁纸专区 -->
@@ -683,6 +691,9 @@ const switchFeedTab = (tab) => {
     if (activeFeedTab.value === tab) return;
     activeFeedTab.value = tab;
 };
+
+const homeAdLoaded = ref(false);
+const homeAdFailed = ref(false);
 
 const AD_INTERVAL = 8;
 const failedAdIds = reactive(new Set());
@@ -2857,6 +2868,29 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     margin: -4rpx 0 26rpx;
     box-sizing: border-box;
     width: 100%;
+
+    &:not(.is-loaded) {
+        position: absolute;
+        top: -9999rpx;
+        left: -9999rpx;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    &.is-error {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
 
     .home-flow-ad-card {
         width: 100%;

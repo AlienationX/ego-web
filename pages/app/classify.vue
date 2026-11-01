@@ -46,7 +46,7 @@
 
             <!-- 分类页横版原生广告卡片：未加载成功或失败时脱离文档流，零像素占位 -->
             <view
-                v-if="canShowAd"
+                v-if="canShowAd && !isAdError"
                 class="classify-ad-wrap"
                 :class="{ 'is-loaded': isAdLoaded, 'is-error': isAdError }"
             >

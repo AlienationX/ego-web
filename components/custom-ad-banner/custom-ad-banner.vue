@@ -1,9 +1,12 @@
 <template>
     <view
-        v-if="showAd"
-        v-show="!isError && isLoaded"
+        v-if="showAd && !isError && !isRemoved"
         class="custom-ad-container"
-        :class="[isFixed ? 'is-fixed' : '', settingsStore.isDark ? 'theme-dark' : 'theme-light']"
+        :class="[
+            isFixed ? 'is-fixed' : '',
+            settingsStore.isDark ? 'theme-dark' : 'theme-light',
+            { 'is-loaded': isLoaded, 'is-failed': isError }
+        ]"
         :style="containerStyle"
     >
         <!-- #ifdef APP -->
@@ -21,7 +24,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, getCurrentInstance, nextTick } from 'vue';
+import { ref, computed, watch, getCurrentInstance, nextTick, onMounted, onUnmounted } from 'vue';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -83,8 +86,23 @@ const showAd = computed(() => !userStore.isVip && !!appStore.versionConfig?.ad_e
 
 const isLoaded = ref(false);
 const isError = ref(false);
+const isRemoved = ref(false);
 const currentHeight = ref(0);
 const defaultBannerHeight = uni.upx2px(180);
+
+let bannerTimer = null;
+let timeoutTimer = null;
+
+const clearTimers = () => {
+    if (bannerTimer) {
+        clearTimeout(bannerTimer);
+        bannerTimer = null;
+    }
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+        timeoutTimer = null;
+    }
+};
 
 const updateHeight = (height = 0) => {
     const rawHeight = Math.max(0, Math.round(Number(height) || 0));
@@ -112,9 +130,10 @@ const measureActualHeight = () => {
 };
 
 // 导出 isLoaded 供父组件通过 ref 访问
-defineExpose({ isLoaded });
+defineExpose({ isLoaded, isError });
 
 const onload = (e) => {
+    clearTimers();
     isError.value = false;
     isLoaded.value = true;
     emit('load', e);
@@ -122,32 +141,51 @@ const onload = (e) => {
     updateHeight(fallbackHeight);
     measureActualHeight();
 };
-let bannerTimer = null;
 
 const onclose = (e) => {
+    clearTimers();
     updateHeight(0);
-    if (bannerTimer) clearTimeout(bannerTimer);
+    isError.value = true;
+    isLoaded.value = false;
     bannerTimer = setTimeout(() => {
-        isError.value = true;
-        isLoaded.value = false;
         emit('close', e);
+        isRemoved.value = true;
     }, 300);
 };
 
 const onerror = (e) => {
+    clearTimers();
     updateHeight(0);
-    if (bannerTimer) clearTimeout(bannerTimer);
+    isError.value = true;
+    isLoaded.value = false;
     bannerTimer = setTimeout(() => {
-        isError.value = true;
-        isLoaded.value = false;
         emit('error', e);
+        isRemoved.value = true;
     }, 300);
 };
 
+onMounted(() => {
+    // #ifdef APP
+    // APP 端 3 秒超时强制熔断器，避免原生 ad 挂起阻断触控
+    timeoutTimer = setTimeout(() => {
+        if (!isLoaded.value && !isError.value) {
+            // console.warn('[CustomAdBanner] 3000ms 加载超时，触发强制熔断与物理销毁');
+            onerror({ detail: { errMsg: 'timeout 3000ms' } });
+        }
+    }, 3000);
+    // #endif
+});
+
+onUnmounted(() => {
+    clearTimers();
+});
+
 watch(showAd, (visible) => {
     if (!visible) {
+        clearTimers();
         isLoaded.value = false;
         isError.value = false;
+        isRemoved.value = false;
         updateHeight(0);
     }
 });
@@ -161,6 +199,25 @@ watch(showAd, (visible) => {
     display: flex;
     justify-content: center;
     background: transparent;
+
+    &:not(.is-loaded) {
+        position: absolute !important;
+        top: -9999rpx !important;
+        left: -9999rpx !important;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        overflow: hidden !important;
+    }
+
+    &.is-failed {
+        display: none !important;
+        height: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 
     &.is-fixed {
         position: fixed;
@@ -190,10 +247,14 @@ watch(showAd, (visible) => {
     }
 
     &:not(.is-loaded) {
-        height: 0;
-        overflow: hidden;
-        opacity: 0;
-        pointer-events: none;
+        position: absolute !important;
+        top: -9999rpx !important;
+        left: -9999rpx !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
 }
 </style>

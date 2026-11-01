@@ -199,7 +199,7 @@ const handleLoad = (e) => {
 
 const handleError = (e) => {
     clearTimers();
-    console.warn(`[CustomAd ${props.direction}] 广告加载失败/未填充:`, e?.detail || e);
+    // console.warn(`[CustomAd ${props.direction}] 广告加载失败/未填充:`, e?.detail || e);
     isFailed.value = true;
     isLoaded.value = false;
     // 延迟 300ms 抛出 error 事件并卸载原生组件，彻底释放原生渲染层资源
@@ -224,7 +224,7 @@ onMounted(() => {
     // 超时强制熔断器：APP 端若 3 秒内未触发 @load，视为加载失败/未填充，强制销毁原生组件以防原生视图阻断触控
     timeoutTimer = setTimeout(() => {
         if (!isLoaded.value && !isFailed.value && !isClosed.value) {
-            console.warn(`[CustomAd ${props.direction}] 3000ms 加载超时，触发强制熔断与物理销毁`);
+            // console.warn(`[CustomAd ${props.direction}] 3000ms 加载超时，触发强制熔断与物理销毁`);
             handleError({ detail: { errMsg: 'timeout 3000ms' } });
         }
     }, 3000);
@@ -301,14 +301,29 @@ defineExpose({
 
         // 竖版广告加载中也占固定高度（覆盖上方 :not(.is-loaded) 的 height:0），仅隐藏原生组件、展示占位骨架
         &:not(.is-loaded) {
+            position: relative !important;
+            top: 0 !important;
+            left: 0 !important;
             opacity: 1;
             height: var(--ad-height, 620rpx) !important;
             min-height: var(--ad-height, 620rpx) !important;
             overflow: hidden !important;
 
             .custom-ad-card {
+                width: 100% !important;
                 height: 100% !important;
                 min-height: 100% !important;
+            }
+
+            // 原生广告控件在未就绪前绝对定位至视口外，杜绝在骨架屏位置拦截触控
+            .custom-ad-content {
+                position: absolute !important;
+                top: -9999rpx !important;
+                left: -9999rpx !important;
+                width: 0 !important;
+                height: 0 !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
             }
         }
 

@@ -85,6 +85,7 @@
                                 <!-- A. 穿插的卡片广告：左侧横版占两列通栏，右侧竖版占单列并排 -->
                                 <template v-if="item.is_ad">
                                     <view
+                                        v-if="!item.adError"
                                         class="timeline-ad-card"
                                         :class="[
                                             item.is_horizontal ? 'timeline-ad-card--horizontal' : 'timeline-ad-card--vertical',
@@ -823,8 +824,11 @@ onShow(() => {
 
     &:not(.is-loaded) {
         position: absolute;
+        top: -9999rpx;
+        left: -9999rpx;
         opacity: 0;
         pointer-events: none;
+        width: 0 !important;
         height: 0 !important;
         min-height: 0 !important;
         max-height: 0 !important;

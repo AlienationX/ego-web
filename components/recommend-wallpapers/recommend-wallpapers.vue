@@ -38,9 +38,15 @@
                 <!-- 推荐列表流：每 8 个项穿插一个横版卡片广告 -->
                 <view
                     class="recommend-ad-wrap"
-                    v-if="(idx + 1) % 8 === 0 && canShowCustomAd"
+                    v-if="(idx + 1) % 8 === 0 && canShowCustomAd && !failedListAds.has(idx)"
+                    :class="{ 'is-loaded': loadedListAds.has(idx) }"
                 >
-                    <custom-ad direction="horizontal" />
+                    <custom-ad
+                        direction="horizontal"
+                        @load="loadedListAds.add(idx)"
+                        @error="failedListAds.add(idx)"
+                        @close="failedListAds.add(idx)"
+                    />
                 </view>
             </template>
         </view>
@@ -79,6 +85,8 @@ const appStore = useAppStore();
 const list = ref([]);
 const loading = ref(false);
 const isAdmin = computed(() => !!userStore.isAdmin);
+const failedListAds = reactive(new Set());
+const loadedListAds = reactive(new Set());
 
 // 横版卡片广告配置 (推荐列表流每 8 项穿插广告)
 const canShowCustomAd = computed(() => {
@@ -140,6 +148,8 @@ const getRecommendReason = (item = {}, current = {}) => {
 };
 
 const loadRecommend = async () => {
+    failedListAds.clear();
+    loadedListAds.clear();
     const current = props.currentInfo || {};
     const currentId = Number(current.id) || current.id;
 
@@ -405,6 +415,19 @@ watch(
     justify-content: center;
     box-sizing: border-box;
     line-height: 1;
+
+    &:not(.is-loaded) {
+        position: absolute;
+        top: -9999rpx;
+        left: -9999rpx;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
 }
 
 .recommend-ad-card {

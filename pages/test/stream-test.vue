@@ -42,7 +42,7 @@
 import { onUnmounted, ref } from 'vue';
 import { apiPostDiscoverStream } from '@/api/wallpaper.js';
 
-const imageUrl = ref('https://api.wp.ego8.space/static/wallpaper/media/pics/classify_bing/20250320-春日仙境.jpg');
+const imageUrl = ref('https://api.egofish.cn/media/wallpaper/pics/classify_bing/20250320-春日仙境.jpg');
 const logs = ref([]);
 const streamText = ref('');
 const isRunning = ref(false);
