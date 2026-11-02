@@ -25,11 +25,11 @@
                     <text>{{ t('helpCentre.contactSupport') }}</text>
                     <uni-icons type="forward" size="15" :color="iconForwardColor"></uni-icons>
                 </view>
-                <view class="action-row" @click="openHtml('/privacy_agreement.html')">
+                <view class="action-row" @click="openLegalAgreement('privacy')">
                     <text>{{ t('helpCentre.privacy') }}</text>
                     <uni-icons type="forward" size="15" :color="iconForwardColor"></uni-icons>
                 </view>
-                <view class="action-row" @click="openHtml('/user_agreement.html')">
+                <view class="action-row" @click="openLegalAgreement('terms')">
                     <text>{{ t('helpCentre.agreement') }}</text>
                     <uni-icons type="forward" size="15" :color="iconForwardColor"></uni-icons>
                 </view>
@@ -42,6 +42,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { openLegalAgreement } from '@/utils/common.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -60,12 +61,6 @@ const toggle = (id) => {
 
 const goFeedback = () => {
     uni.navigateTo({ url: '/pages/settings/feedback' });
-};
-
-const openHtml = (path) => {
-    uni.navigateTo({
-        url: `/pages/webview/webview?url=${encodeURIComponent(path)}`,
-    });
 };
 </script>
 

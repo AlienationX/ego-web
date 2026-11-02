@@ -190,6 +190,7 @@ import { apiPostLogin, apiPostLoginByWechat, apiPostLoginByHuawei } from '@/api/
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { encrypt, decrypt } from '@/utils/encryption.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { openLegalAgreement } from '@/utils/common.js';
 
 const { t } = useI18n();
 const userStore = useUserStore();
@@ -323,16 +324,12 @@ const toggleAgreement = () => {
 
 // 打开服务条款
 const openTerms = () => {
-    uni.navigateTo({
-        url: '/pages/webview/webview?url=user_agreement',
-    });
+    openLegalAgreement('terms');
 };
 
 // 打开隐私政策
 const openPrivacy = () => {
-    uni.navigateTo({
-        url: '/pages/webview/webview?url=privacy_agreement',
-    });
+    openLegalAgreement('privacy');
 };
 
 // 忘记密码

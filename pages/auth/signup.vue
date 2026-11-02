@@ -95,6 +95,7 @@ import { apiPostRegister, apiPostLogin } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
+import { openLegalAgreement } from '@/utils/common.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -163,16 +164,12 @@ const finishAuthSuccess = () => {
 
 // 打开服务条款
 const openTerms = () => {
-    uni.navigateTo({
-        url: '/pages/webview/webview?url=user_agreement',
-    });
+    openLegalAgreement('terms');
 };
 
 // 打开隐私政策
 const openPrivacy = () => {
-    uni.navigateTo({
-        url: '/pages/webview/webview?url=privacy_agreement',
-    });
+    openLegalAgreement('privacy');
 };
 
 // 表单验证

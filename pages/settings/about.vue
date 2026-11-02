@@ -48,21 +48,21 @@
 
                 <view class="info-group">
                     <view class="group-title">{{ t('about.legal') }}</view>
-                    <view class="info-item" @click="openHtmlFile('/vip_agreement.html')">
+                    <view class="info-item" @click="openLegalAgreement('vip')">
                         <view class="item-left">
                             <uni-icons type="vip-filled" size="20" color="#f59e0b"></uni-icons>
                             <text class="item-text">{{ t('about.vipAgreement') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                     </view>
-                    <view class="info-item" @click="openHtmlFile('/privacy_agreement.html')">
+                    <view class="info-item" @click="openLegalAgreement('privacy')">
                         <view class="item-left">
                             <uni-icons type="locked-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.privacy') }}</text>
                         </view>
                         <uni-icons type="right" size="16" color="#ccc"></uni-icons>
                     </view>
-                    <view class="info-item" @click="openHtmlFile('/user_agreement.html')">
+                    <view class="info-item" @click="openLegalAgreement('terms')">
                         <view class="item-left">
                             <uni-icons type="paperplane-filled" size="20" color="#28B389"></uni-icons>
                             <text class="item-text">{{ t('about.agreement') }}</text>
@@ -126,18 +126,13 @@ import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { SERVICE_EMAIL } from '@/common/config.js';
+import { openLegalAgreement } from '@/utils/common.js';
 
 const { t } = useI18n();
 const { tp } = useTranslateParams();
 
 const APP_INFO = uni.getAppBaseInfo();
 const currentYear = new Date().getFullYear();
-
-const openHtmlFile = (url) => {
-    uni.navigateTo({
-        url: `/pages/webview/webview?url=${encodeURIComponent(url)}`,
-    });
-};
 
 const contactSupport = () => {
     uni.navigateTo({

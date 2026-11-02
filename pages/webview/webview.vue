@@ -9,8 +9,8 @@
         </view>
         <!-- 加载失败 -->
         <view v-else-if="loadError" class="mp-error">
-            <text class="mp-error__text">内容加载失败，请检查网络后重试</text>
-            <view class="mp-error__btn" @click="fetchHtmlContent">重新加载</view>
+            <text class="mp-error__text">{{ isEn ? 'Failed to load content, please check your network and try again' : '内容加载失败，请检查网络后重试' }}</text>
+            <view class="mp-error__btn" @click="fetchHtmlContent">{{ isEn ? 'Reload' : '重新加载' }}</view>
         </view>
         <!-- mp-html：tag-style 采用 CSS 变量自适应，实现与 notice 一致的 Light/Dark 主题秒切 -->
         <mp-html
@@ -36,12 +36,14 @@ import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { PICS_BASE_URL } from '@/common/config.js';
+import { getCurrentLocale } from '@/utils/i18n.js';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
 
 const docType = ref('');
 const webviewUrl = ref('');
+const isEn = computed(() => String(locale.value || getCurrentLocale()).toLowerCase().startsWith('en'));
 
 // 小程序端状态
 const loading = ref(true);
@@ -72,7 +74,7 @@ const parseCssToTagStyle = (css) => {
 const pageTitle = computed(() => {
     if (docType.value === 'privacy') return t('about.privacy');
     if (docType.value === 'agreement') return t('about.agreement');
-    if (docType.value === 'vip') return t('membership.vipAgreementTitle');
+    if (docType.value === 'vip') return t('about.vipAgreement') || t('membership.vipAgreementTitle');
     return t('common.title');
 });
 
@@ -143,21 +145,59 @@ const fetchHtmlContent = () => {
     });
 };
 
+/**
+ * 根据文档标识和当前语言解析线上 URL 与类型
+ */
+const resolveAgreementInfo = (rawUrl, explicitLang) => {
+    if (!rawUrl) return { type: '', url: '' };
+
+    if (/^https?:\/\//i.test(rawUrl)) {
+        return { type: 'custom', url: rawUrl };
+    }
+
+    const currentLang = explicitLang || locale.value || getCurrentLocale();
+    const isEnglish = String(currentLang).toLowerCase().startsWith('en');
+    const lower = String(rawUrl).toLowerCase();
+
+    // 1. 隐私政策
+    if (lower.includes('privacy')) {
+        return {
+            type: 'privacy',
+            url: `${PICS_BASE_URL}/${isEnglish ? 'privacy_en.html' : 'privacy.html'}`
+        };
+    }
+
+    // 2. 会员/订阅服务协议
+    if (lower.includes('vip') || lower.includes('subscription')) {
+        return {
+            type: 'vip',
+            url: `${PICS_BASE_URL}/${isEnglish ? 'vip_terms_en.html' : 'vip_terms.html'}`
+        };
+    }
+
+    // 3. 用户服务协议 / 使用条款
+    if (lower.includes('user') || lower.includes('agreement') || lower.includes('terms')) {
+        return {
+            type: 'agreement',
+            url: `${PICS_BASE_URL}/${isEnglish ? 'terms_en.html' : 'terms.html'}`
+        };
+    }
+
+    const cleanPath = rawUrl.startsWith('/') ? rawUrl.slice(1) : rawUrl;
+    return {
+        type: 'custom',
+        url: `${PICS_BASE_URL}/${cleanPath}`
+    };
+};
+
 onLoad((options) => {
     if (!options.url) return;
 
     const decodedUrl = decodeURIComponent(options.url);
+    const resolved = resolveAgreementInfo(decodedUrl, options.lang);
 
-    if (decodedUrl.includes('privacy_agreement')) {
-        docType.value = 'privacy';
-        webviewUrl.value = `${PICS_BASE_URL}/privacy_agreement.html`;
-    } else if (decodedUrl.includes('user_agreement')) {
-        docType.value = 'agreement';
-        webviewUrl.value = `${PICS_BASE_URL}/user_agreement.html`;
-    } else if (decodedUrl.includes('vip_agreement')) {
-        docType.value = 'vip';
-        webviewUrl.value = `${PICS_BASE_URL}/vip_agreement.html`;
-    }
+    docType.value = resolved.type;
+    webviewUrl.value = resolved.url;
 
     uni.setNavigationBarTitle({ title: pageTitle.value });
     fetchHtmlContent();

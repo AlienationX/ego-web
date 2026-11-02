@@ -158,3 +158,13 @@ export function formatPreviewDate(date, isZh) {
     return `${week}, ${MONTH_NAMES_EN[date.getMonth()]} ${date.getDate()}`;
 }
 
+/**
+ * 打开法律协议页面（自动根据语言环境加载对应中英文页面）
+ * @param {'privacy' | 'terms' | 'vip' | string} type 协议类型或路径
+ */
+export function openLegalAgreement(type = 'privacy') {
+    uni.navigateTo({
+        url: `/pages/webview/webview?url=${encodeURIComponent(type)}`
+    });
+}
+

@@ -236,6 +236,7 @@ import { getStatusBarHeight } from "@/utils/layout.js";
 import { useTranslateParams } from "@/utils/i18n.js";
 import { CHANNEL } from "@/common/config.js";
 import { IS_DEVELOPMENT } from "@/utils/system.js";
+import { openLegalAgreement } from "@/utils/common.js";
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -288,12 +289,10 @@ const activePaymentMethod = computed(() => {
 });
 
 const openAgreement = (type) => {
-    let url = 'user_agreement';
-    if (type === 'vip') url = 'vip_agreement';
-    else if (type === 'privacy') url = 'privacy_agreement';
-    uni.navigateTo({
-        url: `/pages/webview/webview?url=${url}`,
-    });
+    let agreementType = 'terms';
+    if (type === 'vip') agreementType = 'vip';
+    else if (type === 'privacy') agreementType = 'privacy';
+    openLegalAgreement(agreementType);
 };
 
 const closeCheckout = () => {

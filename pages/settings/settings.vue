@@ -87,15 +87,15 @@
 
             <view class="about-legal">
                 <view class="about-legal__links">
-                    <text class="about-legal__link" @click="openHtmlFile('/privacy_agreement.html')">
+                    <text class="about-legal__link" @click="openLegalAgreement('privacy')">
                         {{ t('about.privacy') }}
                     </text>
                     <text class="about-legal__divider">|</text>
-                    <text class="about-legal__link" @click="openHtmlFile('/user_agreement.html')">
+                    <text class="about-legal__link" @click="openLegalAgreement('terms')">
                         {{ t('about.agreement') }}
                     </text>
                     <!-- <text class="about-legal__divider">|</text>
-                    <text class="about-legal__link" @click="openHtmlFile('/vip_agreement.html')">
+                    <text class="about-legal__link" @click="openLegalAgreement('vip')">
                         {{ t('about.vipAgreement') }}
                     </text> -->
                 </view>
@@ -191,15 +191,15 @@
                     <view class="about-legal">
                         <view style="height: 18rpx"></view>
                         <view class="about-legal__links">
-                            <text class="about-legal__link" @click="openHtmlFile('/vip_agreement.html')">
+                            <text class="about-legal__link" @click="openLegalAgreement('vip')">
                                 {{ t('about.vipAgreement') }}
                             </text>
                             <text class="about-legal__divider">|</text>
-                            <text class="about-legal__link" @click="openHtmlFile('/privacy_agreement.html')">
+                            <text class="about-legal__link" @click="openLegalAgreement('privacy')">
                                 {{ t('about.privacy') }}
                             </text>
                             <text class="about-legal__divider">|</text>
-                            <text class="about-legal__link" @click="openHtmlFile('/user_agreement.html')">
+                            <text class="about-legal__link" @click="openLegalAgreement('terms')">
                                 {{ t('about.agreement') }}
                             </text>
                         </view>
@@ -344,6 +344,7 @@ import {
     resolveAppLocale,
     useTranslateParams,
 } from '@/utils/i18n.js';
+import { openLegalAgreement } from '@/utils/common.js';
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -781,14 +782,14 @@ const sections = computed(() => {
                     icon: '/static/icons/lock.svg',
                     label: t('settings.items.privacy.label'),
                     sublabel: t('settings.items.privacy.sublabel'),
-                    action: () => openHtmlFile('/privacy_agreement.html'),
+                    action: () => openLegalAgreement('privacy'),
                 },
                 {
                     key: 'agreement',
                     icon: '/static/icons/wallet-bifold.svg',
                     label: t('settings.items.agreement.label'),
                     sublabel: t('settings.items.agreement.sublabel'),
-                    action: () => openHtmlFile('/user_agreement.html'),
+                    action: () => openLegalAgreement('terms'),
                 },
             ],
         },
@@ -1079,12 +1080,6 @@ async function clearCache() {
             icon: 'none',
         });
     }
-}
-
-function openHtmlFile(url) {
-    uni.navigateTo({
-        url: `/pages/webview/webview?url=${encodeURIComponent(url)}`,
-    });
 }
 
 function showIntroduction() {
