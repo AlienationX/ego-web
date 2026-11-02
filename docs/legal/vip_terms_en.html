@@ -12,28 +12,81 @@
             box-sizing: border-box;
         }
 
+        html {
+            scrollbar-gutter: stable;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.8;
             color: #1f2937;
             background-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
             max-width: 860px;
             margin: 0 auto;
             background-color: transparent;
-            padding: 24px 20px;
+            padding: 20px 20px 40px;
+        }
+
+        .lang-switch-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 36px;
+            margin-bottom: 8px;
+        }
+
+        .lang-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 32px;
+            padding: 0 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #4f46e5;
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-sizing: border-box;
+            line-height: 1;
+        }
+
+        .lang-switch-btn:hover {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            text-decoration: none;
+        }
+
+        .lang-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
         }
 
         h1 {
             color: #111827;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
-            margin: 16px 0 12px;
+            margin: 16px 0 14px;
             text-align: center;
             border-bottom: 1px solid #e5e7eb;
             padding-bottom: 16px;
+            line-height: 1.35;
+        }
+
+        .date {
+            color: #6b7280;
+            font-size: 13px;
+            text-align: right;
+            margin-bottom: 24px;
+            line-height: 1.6;
         }
 
         h2 {
@@ -44,11 +97,19 @@
             line-height: 1.4;
         }
 
+        h3 {
+            color: #1f2937;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 20px 0 10px;
+            line-height: 1.4;
+        }
+
         p {
             color: #374151;
             margin-bottom: 14px;
             font-size: 15px;
-            line-height: 1.75;
+            line-height: 1.8;
         }
 
         ul,
@@ -61,14 +122,7 @@
             color: #374151;
             margin-bottom: 8px;
             font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .date {
-            color: #6b7280;
-            font-size: 13px;
-            text-align: right;
-            margin-bottom: 24px;
+            line-height: 1.8;
         }
 
         .note {
@@ -79,6 +133,7 @@
             border-radius: 0 8px 8px 0;
             color: #4b5563;
             font-size: 14px;
+            line-height: 1.7;
         }
 
         .step-box {
@@ -104,6 +159,66 @@
             color: #4338ca;
         }
 
+        .highlight {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 16px 0 24px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            line-height: 1.6;
+            background-color: #ffffff;
+        }
+
+        th,
+        td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            color: rgba(21, 23, 28, 0.88);
+        }
+
+        td a {
+            color: #4f46e5;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        td a:hover {
+            color: #4338ca;
+        }
+
+        .sdk-tag {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
         @media (prefers-color-scheme: dark) {
             body {
                 background-color: #181818;
@@ -119,13 +234,18 @@
                 border-bottom-color: rgba(255, 255, 255, 0.12);
             }
 
-            h2 {
+            h2,
+            h3 {
                 color: #f9fafb;
             }
 
             p,
             li {
                 color: rgba(243, 244, 246, 0.88);
+            }
+
+            .date {
+                color: #9ca3af;
             }
 
             .note {
@@ -139,12 +259,50 @@
                 border-color: rgba(255, 255, 255, 0.1);
             }
 
-            .date {
-                color: #9ca3af;
+            .lang-switch-btn {
+                color: #a5b4fc;
+                background-color: rgba(99, 102, 241, 0.15);
+                border-color: rgba(99, 102, 241, 0.35);
+            }
+
+            .lang-switch-btn:hover {
+                background-color: rgba(99, 102, 241, 0.25);
+                color: #c7d2fe;
             }
 
             a {
                 color: #818cf8;
+            }
+
+            .highlight {
+                color: #ffffff;
+            }
+
+            table {
+                background-color: #1f1f1f;
+            }
+
+            th,
+            td {
+                border-color: rgba(255, 255, 255, 0.12);
+            }
+
+            th {
+                background-color: #2a2a2a;
+                color: #f7f7fb;
+            }
+
+            td {
+                color: rgba(247, 247, 251, 0.88);
+            }
+
+            td a {
+                color: #818cf8;
+            }
+
+            .sdk-tag {
+                background: #334155;
+                color: #cbd5e1;
             }
         }
     </style>
@@ -152,6 +310,16 @@
 
 <body>
     <div class="container">
+        <div class="lang-switch-bar">
+            <a href="vip_terms.html?lang=zh" class="lang-switch-btn">
+                <svg class="lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span>简体中文</span>
+            </a>
+        </div>
         <h1>VIP Subscription Terms</h1>
         <div class="date">Last Updated: October 2026 | Effective Date: October 2026</div>
 

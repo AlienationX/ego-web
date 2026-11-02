@@ -4,7 +4,19 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>隐私协议</title>
+    <title>隐私政策 - 本我壁纸</title>
+    <script>
+        (function () {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('lang') === 'zh') return;
+                var userLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+                if (userLang && !userLang.startsWith('zh')) {
+                    window.location.replace('privacy_en.html' + (window.location.hash || ''));
+                }
+            } catch (e) {}
+        })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -12,83 +24,178 @@
             box-sizing: border-box;
         }
 
+        html {
+            scrollbar-gutter: stable;
+        }
+
         body {
-            font-family: 'PingFang SC', '微软雅黑', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.8;
-            color: #333;
+            color: #1f2937;
             background-color: transparent;
+            -webkit-font-smoothing: antialiased;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 860px;
             margin: 0 auto;
             background-color: transparent;
-            padding: 20px;
+            padding: 20px 20px 40px;
+        }
+
+        .lang-switch-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 36px;
+            margin-bottom: 8px;
+        }
+
+        .lang-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 32px;
+            padding: 0 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #4f46e5;
+            background-color: #eef2ff;
+            border: 1px solid #c7d2fe;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-sizing: border-box;
+            line-height: 1;
+        }
+
+        .lang-switch-btn:hover {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            text-decoration: none;
+        }
+
+        .lang-icon {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
         }
 
         h1 {
-            color: #15171c;
+            color: #111827;
             font-size: 24px;
-            margin: 20px 0 16px;
+            font-weight: 700;
+            margin: 16px 0 14px;
             text-align: center;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #e5e7eb;
             padding-bottom: 16px;
+            line-height: 1.35;
+        }
+
+        .date {
+            color: #6b7280;
+            font-size: 13px;
+            text-align: right;
+            margin-bottom: 24px;
+            line-height: 1.6;
         }
 
         h2 {
-            color: #15171c;
-            font-size: 20px;
+            color: #111827;
+            font-size: 19px;
             font-weight: 700;
-            margin: 28px 0 16px;
+            margin: 28px 0 14px;
             line-height: 1.4;
         }
 
         h3 {
-            color: #15171c;
-            font-size: 17px;
+            color: #1f2937;
+            font-size: 16px;
             font-weight: 600;
-            margin: 22px 0 12px;
+            margin: 20px 0 10px;
             line-height: 1.4;
         }
 
         p {
-            color: rgba(21, 23, 28, 0.88);
-            margin-bottom: 16px;
+            color: #374151;
+            margin-bottom: 14px;
             font-size: 15px;
             line-height: 1.8;
         }
 
         ul,
         ol {
-            padding-left: 20px;
-            margin-left: 0;
+            padding-left: 24px;
             margin-bottom: 16px;
         }
 
         li {
-            color: rgba(21, 23, 28, 0.88);
+            color: #374151;
             margin-bottom: 8px;
             font-size: 15px;
             line-height: 1.8;
         }
 
         .note {
-            color: #7f8c8d;
+            background-color: #f3f4f6;
+            border-left: 4px solid #4f46e5;
+            padding: 14px 18px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+            color: #4b5563;
             font-size: 14px;
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #fdf6f6;
-            border-left: 3px solid #e74c3c;
+            line-height: 1.7;
         }
 
-        .date {
-            color: #95a5a6;
-            font-size: 14px;
-            text-align: right;
-            margin-bottom: 30px;
+        .step-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 16px 0;
         }
 
-        /* 响应式表格样式 */
+        .step-box ol {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+
+        a {
+            color: #4f46e5;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        a:hover {
+            color: #4338ca;
+        }
+
+        .highlight {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .step-box ol {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+
+        a {
+            color: #4f46e5;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        a:hover {
+            color: #4338ca;
+        }
+
+        .highlight {
+            font-weight: 600;
+            color: #111827;
+        }
+
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -124,13 +231,13 @@
         }
 
         td a {
-            color: #2563eb;
+            color: #4f46e5;
             text-decoration: underline;
             word-break: break-all;
         }
 
         td a:hover {
-            color: #1d4ed8;
+            color: #4338ca;
         }
 
         .sdk-tag {
@@ -147,7 +254,7 @@
         @media (prefers-color-scheme: dark) {
             body {
                 background-color: #181818;
-                color: #f7f7fb;
+                color: #f3f4f6;
             }
 
             .container {
@@ -155,21 +262,52 @@
             }
 
             h1 {
-                color: #f7f7fb;
-                border-bottom-color: rgba(255, 255, 255, 0.1);
+                color: #f9fafb;
+                border-bottom-color: rgba(255, 255, 255, 0.12);
             }
 
-            h2 {
-                color: #f7f7fb;
-            }
-
+            h2,
             h3 {
-                color: #f7f7fb;
+                color: #f9fafb;
             }
 
             p,
             li {
-                color: rgba(247, 247, 251, 0.88);
+                color: rgba(243, 244, 246, 0.88);
+            }
+
+            .date {
+                color: #9ca3af;
+            }
+
+            .note {
+                background-color: rgba(255, 255, 255, 0.06);
+                border-left-color: #6366f1;
+                color: rgba(243, 244, 246, 0.8);
+            }
+
+            .step-box {
+                background-color: rgba(255, 255, 255, 0.04);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .lang-switch-btn {
+                color: #a5b4fc;
+                background-color: rgba(99, 102, 241, 0.15);
+                border-color: rgba(99, 102, 241, 0.35);
+            }
+
+            .lang-switch-btn:hover {
+                background-color: rgba(99, 102, 241, 0.25);
+                color: #c7d2fe;
+            }
+
+            a {
+                color: #818cf8;
+            }
+
+            .highlight {
+                color: #ffffff;
             }
 
             table {
@@ -191,22 +329,12 @@
             }
 
             td a {
-                color: #60a5fa;
+                color: #818cf8;
             }
 
             .sdk-tag {
                 background: #334155;
                 color: #cbd5e1;
-            }
-
-            .note {
-                color: #94a3b8;
-                background-color: rgba(231, 76, 60, 0.1);
-                border-left-color: #e74c3c;
-            }
-
-            .date {
-                color: #64748b;
             }
         }
     </style>
@@ -214,8 +342,22 @@
 
 <body>
     <div class="container">
-        <h1>[本我壁纸] 隐私协议</h1>
-        <p class="date">生效日期：2026-08-19<br>更新日期：2026-08-19</p>
+        <div class="lang-switch-bar">
+            <a href="privacy_en.html" class="lang-switch-btn">
+                <svg class="lang-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span>English</span>
+            </a>
+        </div>
+        <h1>[本我壁纸] 隐私政策</h1>
+        <div class="date">生效日期：2026年08月19日 | 更新日期：2026年08月19日</div>
+
+        <div class="note">
+            <strong>【特别提示】</strong>欢迎使用 [本我壁纸]！我们高度重视您的隐私与个人信息保护。本隐私政策旨在向您说明我们如何收集、使用、存储及保护您的个人信息，请在使用前仔细阅读并充分理解。
+        </div>
 
         <h2>一、主体信息</h2>
         <p>
