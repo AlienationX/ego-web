@@ -122,34 +122,6 @@
             }
         },
         {
-            "path": "pages/access/access",
-            "style": {
-                "navigationBarTitleText": "Access-Key获取",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/auth/signup",
-            "style": {
-                "navigationBarTitleText": "注册",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/auth/signin",
-            "style": {
-                "navigationBarTitleText": "登录",
-                "navigationStyle": "custom"
-            }
-        },
-        {
-            "path": "pages/auth/forget-password",
-            "style": {
-                "navigationBarTitleText": "忘记密码",
-                "navigationStyle": "custom"
-            }
-        },
-        {
             "path": "pages/app/timeline",
             "style": {
                 "navigationBarTitleText": "时间轴",
@@ -171,13 +143,6 @@
                 "navigationBarTitleText": "Edit Cover",
                 "navigationStyle": "custom",
                 "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/member/payment",
-            "style": {
-                "navigationBarTitleText": "会员购买",
-                "navigationStyle": "custom"
             }
         },
         {
@@ -221,37 +186,6 @@
             }
         },
         {
-            "path": "pages/auth/change-password",
-            "style": {
-                "navigationBarTitleText": "Change Password",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/auth/deactivate",
-            "style": {
-                "navigationBarTitleText": "Deactivate Account",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/auth/logout",
-            "style": {
-                "navigationBarTitleText": "Logout",
-                "navigationStyle": "custom",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
-            "path": "pages/webview/webview",
-            "style": {
-                "navigationBarTitleText": "网页浏览",
-                "enablePullDownRefresh": false
-            }
-        },
-        {
             "path": "pages/creation/creation",
             "style": {
                 "navigationBarTitleText": "创作",
@@ -290,6 +224,92 @@
         }
     ],
     "subPackages": [
+        {
+            "root": "pages/auth",
+            "pages": [
+                {
+                    "path": "signup",
+                    "style": {
+                        "navigationBarTitleText": "注册",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "signin",
+                    "style": {
+                        "navigationBarTitleText": "登录",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "forget-password",
+                    "style": {
+                        "navigationBarTitleText": "忘记密码",
+                        "navigationStyle": "custom"
+                    }
+                },
+                {
+                    "path": "change-password",
+                    "style": {
+                        "navigationBarTitleText": "Change Password",
+                        "navigationStyle": "custom",
+                        "enablePullDownRefresh": false
+                    }
+                },
+                {
+                    "path": "deactivate",
+                    "style": {
+                        "navigationBarTitleText": "Deactivate Account",
+                        "navigationStyle": "custom",
+                        "enablePullDownRefresh": false
+                    }
+                },
+                {
+                    "path": "logout",
+                    "style": {
+                        "navigationBarTitleText": "Logout",
+                        "navigationStyle": "custom",
+                        "enablePullDownRefresh": false
+                    }
+                }
+            ]
+        },
+        {
+            "root": "pages/access",
+            "pages": [
+                {
+                    "path": "access",
+                    "style": {
+                        "navigationBarTitleText": "Access-Key获取",
+                        "navigationStyle": "custom"
+                    }
+                }
+            ]
+        },
+        {
+            "root": "pages/member",
+            "pages": [
+                {
+                    "path": "payment",
+                    "style": {
+                        "navigationBarTitleText": "会员购买",
+                        "navigationStyle": "custom"
+                    }
+                }
+            ]
+        },
+        {
+            "root": "pages/webview",
+            "pages": [
+                {
+                    "path": "webview",
+                    "style": {
+                        "navigationBarTitleText": "网页浏览",
+                        "enablePullDownRefresh": false
+                    }
+                }
+            ]
+        },
         {
             "root": "pages/settings",
             "pages": [

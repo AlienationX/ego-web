@@ -47,7 +47,7 @@
                                         'is-avatar-image': isAvatarMode
                                     }" @click="maskChange"
                                     @load="handleImageLoad(index, $event)" @error="handleImageLoad(index)"
-                                    :src="item.picurl" :mode="(isDesktopMode || isAvatarMode) ? 'aspectFit' : 'aspectFill'"></image>
+                                    :src="item.largePicurl || item.picurl" :mode="(isDesktopMode || isAvatarMode) ? 'aspectFit' : 'aspectFill'"></image>
                             </view>
                         </swiper-item>
                     </swiper>
@@ -57,7 +57,7 @@
                         :class="[tempClockStyle ? 'is-previewing-clock' : (isAvatarMode ? 'is-avatar-scene' : sceneAnimClass)]"
                         v-if="isSceneMounted || tempClockStyle || isAvatarMode">
                         <!-- 1. 灵动头像专属场景模拟器 (圆形/方形/社交名片) -->
-                        <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.picurl || ''" :show-controls="!maskState" :is-image-loaded="isImageLoaded(currentIndex)" @card-active-change="onAvatarCardActiveChange" />
+                        <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.largePicurl || currentInfo?.picurl || ''" :show-controls="!maskState" :is-image-loaded="isImageLoaded(currentIndex)" @card-active-change="onAvatarCardActiveChange" />
 
                         <!-- 2. PC 桌面横屏壁纸专属模拟器 (横屏旋转与全屏沉浸) -->
                         <desktop-preview-overlay v-else-if="isDesktopMode" :is-rotated="isLandscapeRotated" :show-controls="!maskState" @rotate-change="onDesktopRotateChange" />
@@ -639,7 +639,7 @@
         </uni-popup>
 
         <!-- 模态对话框与提示（放在最底层 DOM 确保层级最高） -->
-        <popup-ad-prompt ref="adPopup" :picurl="currentInfo.picurl" :id="currentInfo.id"></popup-ad-prompt>
+        <popup-ad-prompt ref="adPopup" :picurl="effectiveDownloadUrl" :id="currentInfo.id"></popup-ad-prompt>
 
         <!-- 通用导航对话框 -->
         <popup-navigation-dialog ref="navDialog" :title="dialogState.title" :description="dialogState.description"
@@ -1197,6 +1197,14 @@ const currentInfo = ref(null);
 const previewAdLoaded = ref(false);
 const previewAdFailed = ref(false);
 
+// ── 下载目标地址：会员专享 4K 无损原始图片，非会员下载 large 高清图片 (带 fallback) ──
+const effectiveDownloadUrl = computed(() => {
+    if (userStore.isVip) {
+        return currentInfo.value?.picurl || '';
+    }
+    return currentInfo.value?.largePicurl || currentInfo.value?.picurl || '';
+});
+
 // ── 全场景视觉资产模式判断 ──
 const isAvatarMode = computed(() => {
     const info = currentInfo.value;
@@ -1596,8 +1604,8 @@ const submitScore = async () => {
 function handleApplyWallpaper(itemInfo = null) {
     // #ifdef APP-PLUS
     if ((isAndroidApp && appStore.versionConfig?.set_wallpaper_enabled) || userStore.isDeveloper) {
-        // Android 端：唤起选单弹层，且开启了支付功能，且开启了可以直接设置为壁纸
-        uni.$emit('showWallpaperSheet', { picUrl: currentInfo.value.picurl, itemInfo });
+        // Android 端：唤起选单弹层，传入当前用户权限对应的下载图片地址
+        uni.$emit('showWallpaperSheet', { picUrl: effectiveDownloadUrl.value, itemInfo });
         return;
     }
     // #endif
@@ -1619,23 +1627,24 @@ const clickDownload = async () => {
     // #endif
 
     // #ifndef WEB
-    const picurl = currentInfo.value?.picurl;
-    if (!picurl) return;
+    // 会员下载 4K 无损原始图片，非会员下载 large 高清图片 (带 fallback)
+    const downloadUrl = effectiveDownloadUrl.value;
+    if (!downloadUrl) return;
 
-    // 0. 最高优先级：VIP 用户无视锁与广告，直接放行下载/设置
+    // 0. 最高优先级：VIP 用户无视锁与广告，直接放行下载/设置 (下载 4K 无损原图)
     if (userStore.isVip) {
-        downloadPic(picurl);
+        downloadPic(downloadUrl);
         incrementDownloads(currentInfo.value?.id);
         return;
     }
 
-    // 0.1 新人专属福利：前 3 次下载免看广告特权，直接极速下载保存
+    // 0.1 新人专属福利：前 3 次下载免看广告特权，直接极速下载保存 (非会员下载 large 高清图)
     if (isNewUserFreeBenefitAvailable()) {
         const remainingAfter = consumeNewUserFreeDownload();
         const tip = remainingAfter > 0
             ? tp('previewPage.newUserBenefitSuccess', { count: remainingAfter })
             : t('previewPage.newUserBenefitFinal');
-        downloadPic(picurl, tip);
+        downloadPic(downloadUrl, tip);
         incrementDownloads(currentInfo.value?.id);
         return;
     }
@@ -1644,9 +1653,9 @@ const clickDownload = async () => {
     const effectiveLevel = currentInfo.value.effective_access_level;
     const isLocked = effectiveLevel > 0;
 
-    // 1. 未锁壁纸 (is_locked === false) -> 直接调用插屏广告 showInterstitialAd 处理
+    // 1. 未锁壁纸 (is_locked === false) -> 直接调用插屏广告 showInterstitialAd 处理 (非会员下载 large 高清图)
     if (!isLocked) {
-        showInterstitialAd(picurl, {
+        showInterstitialAd(downloadUrl, {
             onSuccess: (url) => {
                 downloadPic(url);
                 incrementDownloads(currentInfo.value?.id);
@@ -1691,7 +1700,7 @@ const clickDownload = async () => {
             return;
         } else {
             // 【无支付且无广告】 -> 直接放行
-            downloadPic(picurl);
+            downloadPic(downloadUrl);
             incrementDownloads(currentInfo.value?.id);
             return;
         }
@@ -1742,7 +1751,7 @@ const clickDownload = async () => {
 
     // 异常情况或数据异常，未捕获 -> 直接放行
     console.warn('异常情况或数据异常，未捕获 -> 直接放行');
-    downloadPic(picurl);
+    downloadPic(downloadUrl);
     incrementDownloads(currentInfo.value?.id);
     // #endif
 };

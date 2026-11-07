@@ -15,6 +15,44 @@
         <!-- 滚动配置主体 -->
         <scroll-view class="config-scroll" scroll-y :show-scrollbar="false">
             <view class="config-content">
+                <!-- #ifdef MP-WEIXIN -->
+                <!-- 微信小程序端受限提示与推荐下载 App 横幅 -->
+                <view class="mp-notice-card">
+                    <view class="mp-notice-header">
+                        <view class="mp-icon-circle">
+                            <mdi-icon path="/static/icons/cellphone.svg" size="22px" color="#ffffff"></mdi-icon>
+                        </view>
+                        <view class="mp-notice-info">
+                            <view class="mp-title-row">
+                                <text class="mp-notice-title">{{ t('autoWallpaper.mpNoticeTitle') }}</text>
+                                <text class="mp-recommend-badge">{{ t('autoWallpaper.mpNoticeTag') }}</text>
+                            </view>
+                            <text class="mp-notice-desc">{{ t('autoWallpaper.mpNoticeDesc') }}</text>
+                        </view>
+                    </view>
+
+                    <view class="mp-notice-features">
+                        <view class="feature-tag">
+                            <mdi-icon path="/static/icons/check.svg" size="14px" color="#10b981"></mdi-icon>
+                            <text class="feature-text">{{ t('autoWallpaper.mpFeatureAndroid') }}</text>
+                        </view>
+                        <view class="feature-tag">
+                            <mdi-icon path="/static/icons/check.svg" size="14px" color="#10b981"></mdi-icon>
+                            <text class="feature-text">{{ t('autoWallpaper.mpFeatureIos') }}</text>
+                        </view>
+                        <view class="feature-tag is-unsupported">
+                            <mdi-icon path="/static/icons/close.svg" size="14px" color="#ef4444"></mdi-icon>
+                            <text class="feature-text feature-unsupported">{{ t('autoWallpaper.mpFeatureHarmony') }}</text>
+                        </view>
+                    </view>
+
+                    <view class="mp-notice-action" @click="handleDownloadAppTip">
+                        <mdi-icon path="/static/icons/rocket.svg" size="16px" color="#ffffff"></mdi-icon>
+                        <text class="mp-action-text">{{ t('autoWallpaper.mpNoticeBtn') }}</text>
+                    </view>
+                </view>
+                <!-- #endif -->
+
                 <!-- VIP 尊享特权徽章横幅 -->
                 <view class="vip-header-card" :class="{ 'is-vip': userStore.isVip }">
                     <view class="vip-badge-icon">
@@ -476,6 +514,15 @@ const copyFeedUrl = () => {
     });
 };
 
+const handleDownloadAppTip = () => {
+    uni.showModal({
+        title: t('autoWallpaper.mpDownloadModalTitle'),
+        content: t('autoWallpaper.mpDownloadModalContent'),
+        showCancel: false,
+        confirmText: t('common.confirm') || '我知道了',
+    });
+};
+
 const handleTestRotate = async () => {
     if (isTesting.value) return;
     isTesting.value = true;
@@ -673,6 +720,154 @@ const handleSaveConfig = async () => {
     flex-direction: column;
     gap: 24rpx;
     padding-bottom: 80rpx;
+}
+
+.mp-notice-card {
+    background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+    border: 1rpx solid #c7d2fe;
+    border-radius: 28rpx;
+    padding: 28rpx 30rpx;
+    display: flex;
+    flex-direction: column;
+    gap: 20rpx;
+    box-shadow: 0 4rpx 16rpx rgba(99, 102, 241, 0.08);
+
+    .theme-dark & {
+        background: linear-gradient(135deg, #1e1b4b 0%, #1e293b 100%);
+        border-color: rgba(199, 210, 254, 0.2);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
+    }
+
+    .mp-notice-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 20rpx;
+    }
+
+    .mp-icon-circle {
+        width: 68rpx;
+        height: 68rpx;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4rpx 12rpx rgba(79, 70, 229, 0.3);
+    }
+
+    .mp-notice-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8rpx;
+    }
+
+    .mp-title-row {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+        flex-wrap: wrap;
+    }
+
+    .mp-notice-title {
+        font-size: 28rpx;
+        font-weight: 700;
+        color: #1e1b4b;
+
+        .theme-dark & {
+            color: #e0e7ff;
+        }
+    }
+
+    .mp-recommend-badge {
+        font-size: 20rpx;
+        font-weight: 600;
+        color: #b45309;
+        background: #fef3c7;
+        padding: 4rpx 14rpx;
+        border-radius: 999rpx;
+
+        .theme-dark & {
+            color: #fbbf24;
+            background: rgba(245, 158, 11, 0.18);
+        }
+    }
+
+    .mp-notice-desc {
+        font-size: 24rpx;
+        line-height: 1.5;
+        color: #475569;
+
+        .theme-dark & {
+            color: #94a3b8;
+        }
+    }
+
+    .mp-notice-features {
+        display: flex;
+        flex-direction: column;
+        gap: 10rpx;
+        background: rgba(255, 255, 255, 0.7);
+        padding: 16rpx 20rpx;
+        border-radius: 18rpx;
+
+        .theme-dark & {
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .feature-tag {
+            display: flex;
+            align-items: center;
+            gap: 12rpx;
+
+            &.is-unsupported {
+                opacity: 0.9;
+            }
+        }
+
+        .feature-text {
+            font-size: 22rpx;
+            color: #334155;
+            font-weight: 500;
+
+            .theme-dark & {
+                color: #cbd5e1;
+            }
+
+            &.feature-unsupported {
+                color: #64748b;
+
+                .theme-dark & {
+                    color: #94a3b8;
+                }
+            }
+        }
+    }
+
+    .mp-notice-action {
+        height: 68rpx;
+        background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+        border-radius: 20rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12rpx;
+        box-shadow: 0 4rpx 14rpx rgba(79, 70, 229, 0.25);
+        cursor: pointer;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+
+        &:active {
+            opacity: 0.9;
+            transform: scale(0.99);
+        }
+
+        .mp-action-text {
+            font-size: 26rpx;
+            font-weight: 600;
+            color: #ffffff;
+        }
+    }
 }
 
 .vip-header-card {

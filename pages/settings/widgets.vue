@@ -40,7 +40,7 @@
                     <!-- 2x2 模拟真实小组件外观 -->
                     <view class="mockup-container">
                         <view class="mockup-2x2">
-                            <image class="mock-bg" :src="sampleWallUrl" mode="aspectFill"></image>
+                            <image class="mock-bg" :src="sampleWallUrl" mode="aspectFill" @error="handleImageError"></image>
                             <view class="mock-overlay"></view>
                             <view class="mock-pill">{{ locale === 'en' ? 'Daily Pick' : '每日灵感' }}</view>
                             <view class="mock-bottom">
@@ -74,7 +74,7 @@
                         <view class="mockup-4x2">
                             <!-- 左侧壁纸 -->
                             <view class="mock-left">
-                                <image class="mock-bg" :src="sampleWallUrl" mode="aspectFill"></image>
+                                <image class="mock-bg" :src="sampleWallUrl" mode="aspectFill" @error="handleImageError"></image>
                                 <view class="mock-overlay"></view>
                                 <view class="mock-pill-sm">{{ locale === 'en' ? 'Featured' : '精选' }}</view>
                                 <text class="mock-left-title">{{ wallTitle }}</text>
@@ -115,7 +115,7 @@
                     <!-- 4x4 模拟真实小组件外观 -->
                     <view class="mockup-container">
                         <view class="mockup-4x4">
-                            <image class="mock-bg" :src="sampleWallUrl" mode="aspectFill"></image>
+                            <image class="mock-bg" :src="sampleWallUrl" mode="aspectFill" @error="handleImageError"></image>
                             <view class="mock-overlay-deep"></view>
 
                             <!-- 顶部状态行 -->
@@ -193,6 +193,7 @@ const settingsStore = useSettingsStore();
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 
 const sampleWallUrl = ref('');
+const fallbackPicUrl = ref('');
 const wallTitle = ref(locale.value === 'en' ? 'Ego Wallpaper · Daily Pick' : '本我壁纸 · 灵感日签');
 const quoteText = ref(locale.value === 'en' ? 'Life is clear and bright, all things are lovely.' : '生活明朗，万物可爱，人间值得，未来可期。');
 const authorText = ref(locale.value === 'en' ? 'Wang Zengqi' : '汪曾祺');
@@ -208,12 +209,39 @@ const todayWeekday = ref(locale.value === 'en' ? weekdaysEnFull[now.getDay()] : 
 const todayWeekdayShort = ref(locale.value === 'en' ? weekdaysEn[now.getDay()] : weekdaysZh[now.getDay()]);
 const currentTime = ref(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
 
+// 智能适配图床与缩略图路径（兼容缺失 /wallpaper 路径或旧 pics 路径）
+function resolveWidgetImageUrl(data) {
+    if (!data) return '';
+    let rawUrl = data.medium_picurl || data.large_picurl || data.small_picurl || data.picurl || '';
+    if (!rawUrl) return '';
+
+    // 容错 1：缺少 /wallpaper/ 命名空间目录时自动补齐
+    if (rawUrl.includes('/media/pics/') || rawUrl.includes('/media//pics/')) {
+        rawUrl = rawUrl.replace(/\/media\/*pics\//, '/media/wallpaper/pics/');
+    }
+    // 容错 2：缩略图 webp 文件重定向到 thumbs 目录
+    if (rawUrl.includes('.webp') && rawUrl.includes('/wallpaper/pics/')) {
+        rawUrl = rawUrl.replace('/wallpaper/pics/', '/wallpaper/thumbs/');
+    }
+    return rawUrl;
+}
+
+const handleImageError = () => {
+    if (fallbackPicUrl.value && sampleWallUrl.value !== fallbackPicUrl.value) {
+        console.warn('Widget preview image failed, fallback to raw url:', fallbackPicUrl.value);
+        sampleWallUrl.value = fallbackPicUrl.value;
+    }
+};
+
 onMounted(async () => {
     try {
         const res = await apiGetWidgetDaily({ lang: locale.value });
         if (res && res.data) {
-            if (res.data.medium_picurl || res.data.small_picurl || res.data.picurl) {
-                sampleWallUrl.value = res.data.medium_picurl || res.data.small_picurl || res.data.picurl;
+            const rawOriginal = res.data.picurl || '';
+            fallbackPicUrl.value = rawOriginal.replace(/\/media\/*pics\//, '/media/wallpaper/pics/');
+            const resolved = resolveWidgetImageUrl(res.data);
+            if (resolved) {
+                sampleWallUrl.value = resolved;
             }
             if (res.data.title) wallTitle.value = res.data.title;
             if (res.data.quote) quoteText.value = res.data.quote;

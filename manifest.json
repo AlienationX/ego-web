@@ -2,8 +2,8 @@
     "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
     "description" : "探索壁纸，亦探索自我。",
-    "versionName" : "1.5.3",
-    "versionCode" : 153,
+    "versionName" : "1.5.4",
+    "versionCode" : 154,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
@@ -108,20 +108,8 @@
             },
             /* SDK配置 */
             "sdkConfigs" : {
-                "ad" : {
-                    "ks" : {},
-                    "gm" : {},
-                    "gdt" : {},
-                    "sigmob" : {},
-                    "bd" : {}
-                },
-                "oauth" : {
-                    "weixin" : {
-                        "appid" : "wx74c392f8525b9268",
-                        "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
-                    },
-                    "apple" : {}
-                },
+                "ad" : {},
+                "oauth" : {},
                 "push" : {},
                 "share" : {
                     "weixin" : {
@@ -132,11 +120,6 @@
                 "payment" : {
                     "alipay" : {
                         "__platform__" : [ "android" ]
-                    },
-                    "weixin" : {
-                        "__platform__" : [ "android" ],
-                        "appid" : "wx74c392f8525b9268",
-                        "UniversalLinks" : "https://static-mp-36059119-7390-44c6-8190-cc3527d1e745.next.bspapp.com/uni-universallinks/__UNI__098B24F/"
                     },
                     "appleiap" : {},
                     "google" : {}

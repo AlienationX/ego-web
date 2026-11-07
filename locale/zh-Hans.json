@@ -1479,7 +1479,16 @@
         "manageBoards": "去整理画板",
         "setAsRotateBoard": "设为轮播画板",
         "rotatingBadge": "正在轮播",
-        "setRotateSuccess": "已将该画板设为自动轮播源"
+        "setRotateSuccess": "已将该画板设为自动轮播源",
+        "mpNoticeTitle": "小程序端运行受限",
+        "mpNoticeTag": "推荐下载 APP",
+        "mpNoticeDesc": "受微信安全策略与沙箱限制，小程序无法调用系统壁纸接口或后台静默轮播。推荐下载 Android / iOS 官方 App 体验完整自动轮播功能（注：鸿蒙系统暂不支持此功能）。",
+        "mpFeatureAndroid": "Android：原生后台定时 / 亮屏无感静默轮播",
+        "mpFeatureIos": "iOS：系统级快捷指令自动化定时 / 锁屏换壁纸",
+        "mpFeatureHarmony": "鸿蒙（HarmonyOS）：受系统安全限制暂不支持",
+        "mpNoticeBtn": "获取官方 APP",
+        "mpDownloadModalTitle": "下载「本我壁纸」APP",
+        "mpDownloadModalContent": "请前往 App Store 或各大安卓应用商店搜索「本我壁纸」下载体验完整自动轮播功能（注：鸿蒙系统受安全限制暂不支持此功能）。"
     },
     "channels": {
         "mobile": "手机壁纸",

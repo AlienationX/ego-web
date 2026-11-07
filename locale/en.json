@@ -1479,7 +1479,16 @@
         "manageBoards": "Manage Boards",
         "setAsRotateBoard": "Set as Rotate Board",
         "rotatingBadge": "Rotating",
-        "setRotateSuccess": "Set as auto-rotate board successfully"
+        "setRotateSuccess": "Set as auto-rotate board successfully",
+        "mpNoticeTitle": "Mini Program Restricted",
+        "mpNoticeTag": "App Recommended",
+        "mpNoticeDesc": "Due to WeChat platform security restrictions, Mini Programs cannot change system wallpapers. Download the official Android / iOS App for full auto-rotation (Note: HarmonyOS is currently not supported).",
+        "mpFeatureAndroid": "Android: Background silent automated wallpaper rotation",
+        "mpFeatureIos": "iOS: System Shortcuts automation for scheduled wallpaper switching",
+        "mpFeatureHarmony": "HarmonyOS: Not currently supported due to system security policies",
+        "mpNoticeBtn": "Get Official App",
+        "mpDownloadModalTitle": "Download 'Ego Wallpaper' App",
+        "mpDownloadModalContent": "Search for 'Ego Wallpaper' in the App Store or major Android app stores to experience auto-rotation (Note: HarmonyOS is currently not supported)."
     },
     "channels": {
         "mobile": "Mobile",

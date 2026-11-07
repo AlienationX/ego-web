@@ -597,6 +597,7 @@ const menuGroups = computed(() => [
                 right_text: `${libraryStore.recentViewed.length}`,
                 click: toHistory,
             },
+            // #ifndef APP-HARMONY
             {
                 left_icon: '/static/icons/view-carousel.svg',
                 left_text: t('autoWallpaper.pageTitle'),
@@ -604,6 +605,7 @@ const menuGroups = computed(() => [
                 badge: 'vip',
                 click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
             },
+            // #endif
             {
                 left_icon: '/static/icons/widgets.svg',
                 left_text: t('widgets.title'),

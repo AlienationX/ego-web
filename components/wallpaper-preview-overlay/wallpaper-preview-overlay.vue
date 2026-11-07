@@ -95,7 +95,7 @@ const currentInfo = computed(() => {
 });
 
 const currentPicUrl = computed(() => {
-    return currentInfo.value?.picurl || currentInfo.value?.smallPicurl || '';
+    return currentInfo.value?.largePicurl || currentInfo.value?.picurl || currentInfo.value?.smallPicurl || '';
 });
 
 // ── 物理运动学几何计算 (FLIP 模式：构建高帧率硬件加速扩散与收缩轨迹) ──
@@ -322,9 +322,11 @@ const toggleFavorite = async () => {
     }
 };
 
-// ── 功能 ②：立即下载原图 ──
+// ── 功能 ②：立即下载（会员下载原图，非会员下载 large 高清图） ──
 const handleDownload = () => {
-    const url = currentInfo.value?.picurl || currentInfo.value?.smallPicurl;
+    const url = userStore.isVip
+        ? (currentInfo.value?.picurl || '')
+        : (currentInfo.value?.largePicurl || currentInfo.value?.picurl || '');
     if (!url) return;
     downloadPic(url);
 };

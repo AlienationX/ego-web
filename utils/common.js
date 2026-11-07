@@ -47,16 +47,20 @@ export function handlePicUrl(item, prefix = PICS_BASE_URL) {
     if (newItem.picurl) {
         const prefixedUrl = `${prefix}/${newItem.picurl}`;
         newItem.picurl = prefixedUrl;
-        newItem.smallPicurl = prefixedUrl.replace('.jpg', '_small.webp');
-        newItem.mediumPicurl = prefixedUrl.replace('.jpg', '_medium.webp');
+        // 将原图路径中的 /pics/ 映射为 /thumbs/ 目录
+        const thumbBaseUrl = prefixedUrl.replace(/(\/?)pics\//, '$1thumbs/');
+        newItem.smallPicurl = thumbBaseUrl.replace(/\.[^/.]+$/, '_small.webp');
+        newItem.mediumPicurl = thumbBaseUrl.replace(/\.[^/.]+$/, '_medium.webp');
+        newItem.largePicurl = thumbBaseUrl.replace(/\.[^/.]+$/, '_large.webp');
     }
 
     // 2. 处理专题封面图
     if (newItem.cover_url) {
         const prefixedCover = `${prefix}/${newItem.cover_url}`;
         newItem.cover_url = prefixedCover;
-        newItem.cover_small = prefixedCover.replace('.jpg', '_small.webp');
-        newItem.cover_medium = prefixedCover.replace('.jpg', '_medium.webp');
+        const thumbBaseCover = prefixedCover.replace(/(\/?)pics\//, '$1thumbs/');
+        newItem.cover_small = thumbBaseCover.replace(/\.[^/.]+$/, '_small.webp');
+        newItem.cover_medium = thumbBaseCover.replace(/\.[^/.]+$/, '_medium.webp');
     }
 
     // 3. 处理专题预览壁纸数组

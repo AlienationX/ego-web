@@ -1,64 +1,64 @@
 {
-    "version": "1",
-    "prompt": "template",
-    "title": "Privacy Policy and Terms of Service",
-    "titleLocales": {
-        "zh-Hans": "隐私政策和服务协议",
-        "en": "Privacy Policy and Terms of Service"
+    "version" : "1",
+    "prompt" : "template",
+    "title" : "Privacy Policy and Terms of Service",
+    "titleLocales" : {
+        "zh-Hans" : "隐私政策和服务协议",
+        "en" : "Privacy Policy and Terms of Service"
     },
-    "message": "　　Please read and understand the Privacy Policy and Terms of Service carefully before using Ego Wallpaper. To provide wallpaper services, we may collect device technical information (such as device model, OS version, unique pseudonymous identifiers, IP address) and operational logs for performance analysis and optimization.<br/>　　You can review the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a> for details. If you agree, please tap the button below to start using our services.",
-    "messageLocales": {
-        "zh-Hans": "　　请你务必审慎阅读、充分理解“隐私政策”和“服务协议”各条款，包括但不限于：为了更好的向你提供服务，我们需要收集你的设备信息，例如设备型号、操作系统版本、唯一设备标识符（如IMEI、Android ID）、IP地址、设备MAC地址、OAID（移动智能终端补充设备标识）等，和操作日志等信息用于分析、优化应用性能。<br/>　　你可阅读<a href=\"https://api.egofish.cn/media/wallpaper/privacy.html\">《隐私政策》</a>和<a href=\"https://api.egofish.cn/media/wallpaper/terms.html\">《服务协议》</a>了解详细信息。如果你同意，请点击下面按钮开始接受我们的服务。",
-        "en": "　　Please read and understand the Privacy Policy and Terms of Service carefully before using Ego Wallpaper. To provide wallpaper services, we may collect device technical information (such as device model, OS version, unique pseudonymous identifiers, IP address) and operational logs for performance analysis and optimization.<br/>　　You can review the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a> for details. If you agree, please tap the button below to start using our services."
+    "message" : "　　Please read and understand the Privacy Policy and Terms of Service carefully before using Ego Wallpaper. To provide wallpaper services, we may collect device technical information (such as device model, OS version, unique pseudonymous identifiers, IP address) and operational logs for performance analysis and optimization.<br/>　　You can review the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a> for details. If you agree, please tap the button below to start using our services.",
+    "messageLocales" : {
+        "zh-Hans" : "　　请你务必审慎阅读、充分理解“隐私政策”和“服务协议”各条款，包括但不限于：为了更好的向你提供服务，我们需要收集你的设备信息，例如设备型号、操作系统版本、唯一设备标识符（如IMEI、Android ID）、IP地址、设备MAC地址、OAID（移动智能终端补充设备标识）等，和操作日志等信息用于分析、优化应用性能。<br/>　　你可阅读<a href=\"https://api.egofish.cn/media/wallpaper/privacy.html\">《隐私政策》</a>和<a href=\"https://api.egofish.cn/media/wallpaper/terms.html\">《服务协议》</a>了解详细信息。如果你同意，请点击下面按钮开始接受我们的服务。",
+        "en" : "　　Please read and understand the Privacy Policy and Terms of Service carefully before using Ego Wallpaper. To provide wallpaper services, we may collect device technical information (such as device model, OS version, unique pseudonymous identifiers, IP address) and operational logs for performance analysis and optimization.<br/>　　You can review the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a> for details. If you agree, please tap the button below to start using our services."
     },
-    "buttonAccept": "Agree and Accept",
-    "buttonAcceptLocales": {
-        "zh-Hans": "同意并接受",
-        "en": "Agree and Accept"
+    "buttonAccept" : "Agree and Accept",
+    "buttonAcceptLocales" : {
+        "zh-Hans" : "同意并接受",
+        "en" : "Agree and Accept"
     },
-    "buttonRefuse": "Disagree",
-    "buttonRefuseLocales": {
-        "zh-Hans": "暂不同意",
-        "en": "Disagree"
+    "buttonRefuse" : "Disagree",
+    "buttonRefuseLocales" : {
+        "zh-Hans" : "暂不同意",
+        "en" : "Disagree"
     },
-    "hrefLoader": "system",
-    "backToExit": "false",
-    "second": {
-        "title": "Confirmation",
-        "titleLocales": {
-            "zh-Hans": "确认提示",
-            "en": "Confirmation"
+    "hrefLoader" : "system",
+    "backToExit" : "false",
+    "second" : {
+        "title" : "Confirmation",
+        "titleLocales" : {
+            "zh-Hans" : "确认提示",
+            "en" : "Confirmation"
         },
-        "message": "　　Before using the app, you need to agree to the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a>, otherwise the app will exit.",
-        "messageLocales": {
-            "zh-Hans": "　　进入应用前，你需先同意<a href=\"https://api.egofish.cn/media/wallpaper/privacy.html\">《隐私政策》</a>和<a href=\"https://api.egofish.cn/media/wallpaper/terms.html\">《服务协议》</a>，否则将退出应用。",
-            "en": "　　Before using the app, you need to agree to the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a>, otherwise the app will exit."
+        "message" : "　　Before using the app, you need to agree to the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a>, otherwise the app will exit.",
+        "messageLocales" : {
+            "zh-Hans" : "　　进入应用前，你需先同意<a href=\"https://api.egofish.cn/media/wallpaper/privacy.html\">《隐私政策》</a>和<a href=\"https://api.egofish.cn/media/wallpaper/terms.html\">《服务协议》</a>，否则将退出应用。",
+            "en" : "　　Before using the app, you need to agree to the <a href=\"https://api.egofish.cn/media/wallpaper/privacy_en.html\">《Privacy Policy》</a> and <a href=\"https://api.egofish.cn/media/wallpaper/terms_en.html\">《Terms of Service》</a>, otherwise the app will exit."
         },
-        "buttonAccept": "Agree and Continue",
-        "buttonAcceptLocales": {
-            "zh-Hans": "同意并继续",
-            "en": "Agree and Continue"
+        "buttonAccept" : "Agree and Continue",
+        "buttonAcceptLocales" : {
+            "zh-Hans" : "同意并继续",
+            "en" : "Agree and Continue"
         },
-        "buttonRefuse": "Exit",
-        "buttonRefuseLocales": {
-            "zh-Hans": "退出应用",
-            "en": "Exit"
+        "buttonRefuse" : "Exit",
+        "buttonRefuseLocales" : {
+            "zh-Hans" : "退出应用",
+            "en" : "Exit"
         }
     },
-    "disagreeMode": {
-        "support": false,
-        "loadNativePlugins": false,
-        "visitorEntry": false,
-        "showAlways": false
+    "disagreeMode" : {
+        "support" : false,
+        "loadNativePlugins" : false,
+        "visitorEntry" : false,
+        "showAlways" : false
     },
-    "styles": {
-        "backgroundColor": "#FFFFFF",
-        "borderRadius": "20px",
-        "buttonAccept": {
-            "color": "#0000ff"
+    "styles" : {
+        "backgroundColor" : "#FFFFFF",
+        "borderRadius" : "20px",
+        "buttonAccept" : {
+            "color" : "#0000ff"
         },
-        "buttonRefuse": {
-            "color": "#666666"
+        "buttonRefuse" : {
+            "color" : "#666666"
         }
     }
 }
