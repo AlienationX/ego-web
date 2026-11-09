@@ -5,12 +5,17 @@
         </view>
         <view class="empty-state__title">{{ title }}</view>
         <view v-if="description" class="empty-state__description">{{ description }}</view>
-        <button v-if="actionText" class="empty-state__action" @click="$emit('action')">{{ actionText }}</button>
+        <view v-if="actionText || secondaryActionText" class="empty-state__actions">
+            <button v-if="actionText" class="empty-state__action" @click="$emit('action')">{{ actionText }}</button>
+            <view v-if="secondaryActionText" class="empty-state__secondary" @click="$emit('secondary-action')">
+                {{ secondaryActionText }}
+            </view>
+        </view>
     </view>
 </template>
 
 <script setup>
-defineEmits(['action']);
+defineEmits(['action', 'secondary-action']);
 
 defineProps({
     iconPath: {
@@ -26,6 +31,10 @@ defineProps({
         default: '',
     },
     actionText: {
+        type: String,
+        default: '',
+    },
+    secondaryActionText: {
         type: String,
         default: '',
     },
@@ -81,8 +90,15 @@ defineProps({
     }
 }
 
-.empty-state__action {
+.empty-state__actions {
     margin-top: 38rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20rpx;
+}
+
+.empty-state__action {
     min-width: 260rpx;
     height: 82rpx;
     padding: 0 34rpx;
@@ -103,6 +119,22 @@ defineProps({
     .theme-dark & {
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
         color: var(--text-primary);
+    }
+}
+
+.empty-state__secondary {
+    font-size: 26rpx;
+    color: #64748b;
+    padding: 10rpx 20rpx;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:active {
+        opacity: 0.7;
+    }
+
+    .theme-dark & {
+        color: #94a3b8;
     }
 }
 </style>

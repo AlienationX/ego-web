@@ -612,12 +612,16 @@ const menuGroups = computed(() => [
                 right_text: '',
                 click: () => uni.navigateTo({ url: '/pages/settings/widgets' }),
             },
-            {
-                left_icon: '/static/icons/credit-card-chip.svg',
-                left_text: t('redeem.title'),
-                right_text: '',
-                click: openRedeemPopup,
-            },
+            ...(appStore.versionConfig?.pay_enabled
+                ? [
+                    {
+                        left_icon: '/static/icons/credit-card-chip.svg',
+                        left_text: t('redeem.title'),
+                        right_text: '',
+                        click: openRedeemPopup,
+                    },
+                ]
+                : []),
         ],
     },
     {
@@ -687,7 +691,7 @@ onShow(() => {
     isTabBarVisible.value = true;
 
     // 若从登录页登录成功返回且有暂存体验码，自动唤起兑换弹窗
-    if (userStore.isLoggedIn && uni.getStorageSync('pending_redeem_code')) {
+    if (appStore.versionConfig?.pay_enabled && userStore.isLoggedIn && uni.getStorageSync('pending_redeem_code')) {
         setTimeout(() => {
             openRedeemPopup();
         }, 350);

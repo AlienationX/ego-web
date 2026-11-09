@@ -24,7 +24,10 @@
                         </text>
                     </view>
 
-                    <!-- 场景 C：主页双 Tab 切换 (全部收藏 vs 灵感画板) -->
+                    <!-- 场景 C：主页双 Tab 切换 (全部收藏 vs 灵感画板) 或仅全部收藏标题 -->
+                    <view class="header-titles" v-else-if="!appStore.versionConfig?.pay_enabled">
+                        <text class="main-title">{{ t('board.allFavorites') }}</text>
+                    </view>
                     <view class="segment-tabs" v-else>
                         <view class="segment-pill" :class="{ 'is-active': activeTab === 'all' }"
                             @click="switchTab('all')">
@@ -93,10 +96,12 @@
 
                 <!-- 空状态展示 -->
                 <empty-state v-else-if="!isLoading && wallpaperList.length === 0" icon-path="/static/icons/heart.svg"
-                    :title="currentBoard ? t('board.emptyBoardHint') : t('favorite.empty')"
-                    :description="currentBoard ? '' : t('favorite.desc')"
-                    :action-text="currentBoard ? t('board.backToBoards') : t('favorite.goBrowse')"
-                    @action="currentBoard ? closeBoardDetail() : gotoHome()" />
+                    :title="currentBoard ? t('board.emptyDetailTitle') : t('favorite.empty')"
+                    :description="currentBoard ? t('board.emptyDetailDesc') : t('favorite.desc')"
+                    :action-text="currentBoard ? t('board.goToAllFavorites') : t('favorite.goBrowse')"
+                    :secondary-action-text="currentBoard ? t('board.backToBoards') : ''"
+                    @action="currentBoard ? goToAllFavorites() : gotoHome()"
+                    @secondary-action="closeBoardDetail" />
 
                 <!-- 实际内容展示区 -->
                 <view class="gallery-body" v-else>
@@ -204,8 +209,8 @@
                 </view>
 
                 <view class="batch-actions-right">
-                    <!-- 全部收藏模式：支持一键存入画板 -->
-                    <button v-if="!currentBoard" class="batch-add-board-btn" :disabled="selectedIds.size === 0"
+                    <!-- 全部收藏模式：支持一键存入画板 (受 pay_enabled 控制) -->
+                    <button v-if="!currentBoard && appStore.versionConfig?.pay_enabled" class="batch-add-board-btn" :disabled="selectedIds.size === 0"
                         @click="handleBatchAddToBoard">
                         <mdi-icon path="/static/icons/bookmark-multiple.svg" size="16px" color="#ffffff"></mdi-icon>
                         <text>{{ t('board.batchAddToBoard') }}</text>
@@ -244,7 +249,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -317,8 +322,20 @@ const isAllSelected = computed(() => {
 
 onMounted(() => {
     fetchFavoriteList(true);
-    fetchBoardsList();
+    if (appStore.versionConfig?.pay_enabled) {
+        fetchBoardsList();
+    }
 });
+
+watch(
+    () => appStore.versionConfig?.pay_enabled,
+    (val) => {
+        if (!val && activeTab.value === 'boards') {
+            switchTab('all');
+        }
+    },
+    { immediate: true }
+);
 
 const switchTab = (tab) => {
     if (activeTab.value === tab) return;
@@ -347,6 +364,14 @@ const closeBoardDetail = () => {
     isSelectMode.value = false;
     selectedIds.value.clear();
     fetchBoardsList();
+};
+
+const goToAllFavorites = () => {
+    currentBoard.value = null;
+    isSelectMode.value = false;
+    selectedIds.value.clear();
+    activeTab.value = 'all';
+    fetchFavoriteList(true);
 };
 
 const fetchBoardsList = async () => {

@@ -230,6 +230,7 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
+import { validateImageSecurity } from '@/utils/security.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
@@ -779,7 +780,14 @@ const pickLocalImage = () => {
         sizeType: ['compressed'],
         sourceType: ['album'],
         success: async (res) => {
-            localImage.value = res.tempFilePaths?.[0] || '';
+            const tempPath = res.tempFilePaths?.[0] || '';
+            // #ifdef MP-WEIXIN
+            const isSafe = await validateImageSecurity(tempPath);
+            if (!isSafe) {
+                return;
+            }
+            // #endif
+            localImage.value = tempPath;
             await onAnalyze();
         },
         fail: (err) => {

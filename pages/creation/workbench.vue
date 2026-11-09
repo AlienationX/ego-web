@@ -483,6 +483,7 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { executeWithAuth } from '@/utils/auth-action.js';
 import { saveImageToAlbum } from '@/utils/blur.js';
+import { validateTextSecurity, validateImageSecurity } from '@/utils/security.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -653,7 +654,7 @@ const cancelSubTool = () => {
 };
 
 // 应用抽屉修改
-const applySubTool = () => {
+const applySubTool = async () => {
     if (activeSubTool.value === 'crop') {
         Object.assign(currentCrop, tempCrop);
     } else if (activeSubTool.value === 'adjust') {
@@ -662,6 +663,10 @@ const applySubTool = () => {
         Object.assign(currentFilter, tempFilter);
     } else if (activeSubTool.value === 'text') {
         if (tempTextInput.value.trim()) {
+            // #ifdef MP-WEIXIN
+            const isSafe = await validateTextSecurity(tempTextInput.value.trim());
+            if (!isSafe) return;
+            // #endif
             textLayers.value.push({
                 id: `text_${Date.now()}`,
                 text: tempTextInput.value.trim(),

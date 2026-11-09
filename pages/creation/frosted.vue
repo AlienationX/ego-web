@@ -255,6 +255,7 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { renderFrostedWallpaperToCanvas, saveImageToAlbum } from '@/utils/blur.js';
 import { executeWithAuth } from '@/utils/auth-action.js';
+import { validateImageSecurity } from '@/utils/security.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -390,6 +391,11 @@ const handleSaveFrosted = async () => {
         return;
     }
     if (isSaving.value) return;
+
+    // #ifdef MP-WEIXIN
+    const isSafe = await validateImageSecurity(currentPicUrl.value);
+    if (!isSafe) return;
+    // #endif
 
     // #ifdef WEB
     await doRealSaveFrosted();

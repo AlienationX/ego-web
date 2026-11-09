@@ -112,6 +112,7 @@ import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { validateTextSecurity, validateImagesSecurityBatch } from '@/utils/security.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
@@ -203,8 +204,16 @@ const selectImage = (count) => {
         count: count,
         sizeType: ['compressed'],
         sourceType: ['camera', 'album'],
-        success: (res) => {
-            imageList.value.push(...res.tempFilePaths);
+        success: async (res) => {
+            const rawPaths = res.tempFilePaths || [];
+            // #ifdef MP-WEIXIN
+            const checkRes = await validateImagesSecurityBatch(rawPaths);
+            if (!checkRes.pass) return;
+            imageList.value.push(...checkRes.safePaths);
+            // #endif
+            // #ifndef MP-WEIXIN
+            imageList.value.push(...rawPaths);
+            // #endif
         },
         fail: (err) => {
             // console.log("XXXXX", err)
@@ -242,6 +251,15 @@ const handleSubmit = async () => {
         });
         return;
     }
+
+    // #ifdef MP-WEIXIN
+    const isContentSafe = await validateTextSecurity(feedbackForm.content.trim());
+    if (!isContentSafe) return;
+    if (imageList.value.length > 0) {
+        const checkRes = await validateImagesSecurityBatch(imageList.value);
+        if (!checkRes.pass) return;
+    }
+    // #endif
 
     if (feedbackForm.content.trim().length < 10) {
         uni.showToast({

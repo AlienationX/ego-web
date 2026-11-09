@@ -140,6 +140,7 @@ import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
 import { apiGetActions } from '@/api/wallpaper.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { validateImagesSecurityBatch } from '@/utils/security.js';
 
 const { t, tp } = useTranslateParams();
 const settingsStore = useSettingsStore();
@@ -287,8 +288,19 @@ const chooseFromAlbum = () => {
         count: remain,
         sizeType: ['original', 'compressed'],
         sourceType: ['album', 'camera'],
-        success: (res) => {
-            const paths = res.tempFilePaths || [];
+        success: async (res) => {
+            const rawPaths = res.tempFilePaths || [];
+            // #ifdef MP-WEIXIN
+            const checkRes = await validateImagesSecurityBatch(rawPaths);
+            if (!checkRes.pass) {
+                return;
+            }
+            const paths = checkRes.safePaths;
+            // #endif
+            // #ifndef MP-WEIXIN
+            const paths = rawPaths;
+            // #endif
+
             if (props.singleMode) {
                 currentSelected.value = paths.slice(0, 1);
                 albumImages.value = currentSelected.value;
@@ -358,7 +370,7 @@ const removeImage = (url) => {
 };
 
 // 确认提交
-const handleConfirm = () => {
+const handleConfirm = async () => {
     if (currentSelected.value.length === 0) {
         uni.showToast({
             title: t('puzzle.atLeastOne'),
@@ -366,6 +378,12 @@ const handleConfirm = () => {
         });
         return;
     }
+    // #ifdef MP-WEIXIN
+    const checkRes = await validateImagesSecurityBatch(currentSelected.value);
+    if (!checkRes.pass) {
+        return;
+    }
+    // #endif
     emit('confirm', [...currentSelected.value]);
     emit('update:visible', false);
 };

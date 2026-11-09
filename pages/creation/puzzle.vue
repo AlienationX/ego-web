@@ -292,6 +292,7 @@ import { useUserStore } from '@/stores/user.js';
 import { useAppStore } from '@/stores/app.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { executeWithAuth } from '@/utils/auth-action.js';
+import { validateImageSecurity } from '@/utils/security.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
@@ -1308,7 +1309,13 @@ const generateAndPreview = async () => {
                     destHeight: H,
                     fileType: 'jpg',
                     quality: 0.96,
-                    success: (res) => {
+                    success: async (res) => {
+                        // #ifdef MP-WEIXIN
+                        const isSafe = await validateImageSecurity(res.tempFilePath);
+                        if (!isSafe) {
+                            return;
+                        }
+                        // #endif
                         exportedImageUrl.value = res.tempFilePath;
                         showPreviewModal.value = true;
                     },
@@ -1376,6 +1383,11 @@ const doRealSaveToAlbum = (successTip = '') => {
 // 保存拼图权限判定（统一接入核心鉴权模块：VIP极速放行、扣除点数、能量不足看广告/VIP 4矩阵）
 const saveToAlbum = async () => {
     if (!exportedImageUrl.value) return;
+
+    // #ifdef MP-WEIXIN
+    const isSafe = await validateImageSecurity(exportedImageUrl.value);
+    if (!isSafe) return;
+    // #endif
 
     // #ifdef WEB
     doRealSaveToAlbum();

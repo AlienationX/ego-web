@@ -98,6 +98,7 @@ import { useUserStore } from '@/stores/user.js';
 import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { validateTextSecurity, validateImageSecurity } from '@/utils/security.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
 // #endif
@@ -195,9 +196,13 @@ const chooseAvatar = () => {
         count: 1,
         sizeType: ['compressed'],
         sourceType: ['album', 'camera'],
-        success: (res) => {
+        success: async (res) => {
             const file = res.tempFilePaths?.[0];
             if (!file) return;
+            // #ifdef MP-WEIXIN
+            const isSafe = await validateImageSecurity(file);
+            if (!isSafe) return;
+            // #endif
             form.avatar = file;
         },
         fail: (err) => {
@@ -217,6 +222,15 @@ const handleSave = async () => {
         uni.showToast({ title: t('editProfile.enterName'), icon: 'none' });
         return;
     }
+
+    // #ifdef MP-WEIXIN
+    const isNameSafe = await validateTextSecurity(form.nickname.trim());
+    if (!isNameSafe) return;
+    if (form.description.trim()) {
+        const isDescSafe = await validateTextSecurity(form.description.trim());
+        if (!isDescSafe) return;
+    }
+    // #endif
 
     try {
         const payload = {
