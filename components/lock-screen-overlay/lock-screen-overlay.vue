@@ -1,5 +1,5 @@
 <template>
-    <view class="lock-screen-wrapper" :class="[styleType]">
+    <view v-if="styleType !== 'none'" class="lock-screen-wrapper" :class="[styleType]">
         <template v-if="styleType === 'default'">
             <view class="time-container">{{ timeStr }}</view>
             <view class="date-container" v-if="dateStr">{{ dateStr }}</view>

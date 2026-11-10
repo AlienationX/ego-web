@@ -32,6 +32,7 @@ export const useAppStore = defineStore('app', () => {
             const res = await apiGetVersionConfig({ channel: CHANNEL });
             // console.log('fetchVersionConfig:', res);
             versionConfig.value = res.data;
+            console.log(versionConfig.value)
             uni.setStorageSync('version_config', versionConfig.value);
         } catch (e) {
             console.warn('Fetch version config failed, keep cached/default config:', e);

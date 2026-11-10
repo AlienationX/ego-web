@@ -1,7 +1,8 @@
 <template>
     <view class="signup-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
-            <uni-icons type="back" :color="backIconColor" size="20"></uni-icons>
+            <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                :color="settingsStore.isDark ? '#f4f8ff' : '#374151'"></mdi-icon>
         </view>
 
         <!-- 主要内容区域 -->
@@ -89,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { apiPostRegister, apiPostLogin } from '@/api/wallpaper.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
@@ -115,7 +116,14 @@ const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const isAgreed = ref(false);
 const isSubmitting = ref(false);
-const backTop = ref((getStatusBarHeight() || 0) + 10);
+const backTop = ref((getStatusBarHeight() || 0) + 6);
+
+onMounted(() => {
+    const sb = getStatusBarHeight();
+    if (sb > 0) {
+        backTop.value = sb + 6;
+    }
+});
 
 // 切换密码显示
 const togglePassword = () => {
@@ -311,19 +319,36 @@ const handleSignup = async () => {
 
 .back-btn {
     position: fixed;
-    left: 36rpx;
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: 16rpx;
-    background: var(--page-background-secondary);
+    left: 32rpx;
+    width: 74rpx;
+    height: 74rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 12;
-    transition: all 0.3s;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    z-index: 50;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+
     &:active {
-        background: var(--panel-background-strong);
+        opacity: 0.65;
         transform: scale(0.92);
+    }
+
+    .theme-light & {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+
+        &:active {
+            background: transparent;
+            opacity: 0.65;
+        }
     }
 }
 

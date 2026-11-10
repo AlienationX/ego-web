@@ -3,96 +3,131 @@
         <view class="status-holder" :style="{ height: `${statusBarHeight}px` }"></view>
         <view class="header">
             <view class="back-btn" @click="goBack">
-                <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
+                <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                    :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'"></mdi-icon>
             </view>
             <text class="header-title">{{ t('editProfile.title') }}</text>
             <view class="header-placeholder"></view>
         </view>
 
         <view class="content">
+            <!-- 头像编辑区 -->
             <view class="avatar-area">
-                <view class="avatar-wrap">
+                <view class="avatar-wrap" @click="chooseAvatar">
                     <image class="avatar" :src="form.avatar" mode="aspectFill"></image>
-                    <view class="camera-btn" @click="chooseAvatar">
-                        <uni-icons type="camera-filled" size="13" color="#fff"></uni-icons>
+                    <view class="camera-btn">
+                        <mdi-icon path="/static/icons/camera.svg" size="14px" color="#ffffff"></mdi-icon>
                     </view>
                 </view>
-                <text class="avatar-tip">{{ t('editProfile.changePhoto') }}</text>
+                <text class="avatar-tip" @click="chooseAvatar">{{ t('editProfile.changePhoto') }}</text>
             </view>
 
+            <!-- 基本信息卡片（原生简洁列表式） -->
             <view class="section-title">{{ t('editProfile.personalInfo') }}</view>
             <view class="card">
-                <view class="field">
-                    <text class="field-label">{{ t('editProfile.fullName') }}</text>
-                    <input v-model="form.nickname" class="field-input" :placeholder="t('editProfile.placeholders.fullName')" />
-                </view>
-                <view class="field">
-                    <text class="field-label">{{ t('editProfile.email') }}</text>
+                <!-- 昵称 -->
+                <view class="field-row">
+                    <text class="row-label">{{ t('editProfile.fullName') }}</text>
                     <input
-                        v-model="form.email"
-                        class="field-input"
-                        :placeholder="t('editProfile.placeholders.email')"
-                        disabled
+                        v-model="form.nickname"
+                        class="row-input"
+                        :placeholder="t('editProfile.placeholders.fullName')"
+                        placeholder-class="placeholder-style"
                     />
                 </view>
-                <view class="field">
-                    <text class="field-label">{{ t('editProfile.phone') }}</text>
+
+                <!-- 邮箱（只读） -->
+                <view class="field-row">
+                    <text class="row-label">{{ t('editProfile.email') }}</text>
+                    <view class="row-right">
+                        <text class="row-value muted">{{ form.email }}</text>
+                        <mdi-icon path="/static/icons/lock.svg" size="14px" :color="iconMutedColor" class="right-icon"></mdi-icon>
+                    </view>
+                </view>
+
+                <!-- 手机号 -->
+                <view class="field-row">
+                    <text class="row-label">{{ t('editProfile.phone') }}</text>
                     <input
                         v-model="form.phone_number"
-                        class="field-input"
+                        type="number"
+                        class="row-input"
                         :placeholder="t('editProfile.placeholders.phone')"
+                        placeholder-class="placeholder-style"
                     />
                 </view>
-                <view class="field">
-                    <text class="field-label">{{ t('editProfile.gender') }}</text>
-                    <picker :range="genderRange" :value="form.gender" @change="onGenderChange" class="field-picker-wrapper">
-                        <view class="picker-value">
-                            {{ genderRange[form.gender] || t('editProfile.genders.secret') }}
+
+                <!-- 性别 -->
+                <picker :range="genderRange" :value="form.gender" @change="onGenderChange" class="picker-row-wrap">
+                    <view class="field-row picker-row">
+                        <text class="row-label">{{ t('editProfile.gender') }}</text>
+                        <view class="row-right">
+                            <text class="row-value">{{ genderRange[form.gender] || t('editProfile.genders.secret') }}</text>
+                            <mdi-icon path="/static/icons/chevron-right.svg" size="16px" :color="iconMutedColor" class="right-icon"></mdi-icon>
                         </view>
-                    </picker>
-                </view>
-                <view class="field field-last">
-                    <text class="field-label">{{ t('editProfile.birthday') }}</text>
-                    <picker mode="date" :value="form.birthday" @change="onBirthdayChange" class="field-picker-wrapper">
-                        <view class="picker-value" :class="{ 'placeholder': !form.birthday }">
-                            {{ form.birthday || t('editProfile.placeholders.birthday') }}
+                    </view>
+                </picker>
+
+                <!-- 生日 -->
+                <picker mode="date" :value="form.birthday" @change="onBirthdayChange" class="picker-row-wrap">
+                    <view class="field-row picker-row field-row-last">
+                        <text class="row-label">{{ t('editProfile.birthday') }}</text>
+                        <view class="row-right">
+                            <text class="row-value" :class="{ placeholder: !form.birthday }">
+                                {{ form.birthday || t('editProfile.placeholders.birthday') }}
+                            </text>
+                            <mdi-icon path="/static/icons/chevron-right.svg" size="16px" :color="iconMutedColor" class="right-icon"></mdi-icon>
                         </view>
-                    </picker>
-                </view>
+                    </view>
+                </picker>
             </view>
 
+            <!-- 更多详情卡片 -->
             <view class="section-title">{{ t('editProfile.details') }}</view>
             <view class="card">
-                <view class="field" v-if="settingsStore.isAdmin">
-                    <text class="field-label">{{ t('editProfile.region') }}</text>
-                    <input v-model="form.region" class="field-input" :placeholder="t('editProfile.placeholders.region')" />
+                <!-- 地区（仅管理员可见） -->
+                <view class="field-row" v-if="settingsStore.isAdmin">
+                    <text class="row-label">{{ t('editProfile.region') }}</text>
+                    <input
+                        v-model="form.region"
+                        class="row-input"
+                        :placeholder="t('editProfile.placeholders.region')"
+                        placeholder-class="placeholder-style"
+                    />
                 </view>
-                <view class="field field-last">
-                    <text class="field-label">{{ t('editProfile.description') }}</text>
+
+                <!-- 个人签名/简介 -->
+                <view class="field-row field-row-last">
+                    <text class="row-label">{{ t('editProfile.description') }}</text>
                     <input
                         v-model="form.description"
-                        class="field-input"
+                        class="row-input"
                         :placeholder="t('editProfile.placeholders.description')"
+                        placeholder-class="placeholder-style"
                     />
-                    <!-- <textarea
-                        v-model="form.description"
-                        class="field-textarea"
-                        :placeholder="t('editProfile.placeholders.description')"
-                        rows="2"
-                    /> -->
                 </view>
             </view>
 
-            <button class="save-btn" @click="handleSave">
-                <uni-icons v-if="saved" type="checkmarkempty" size="16" color="#fff"></uni-icons>
-                <text>{{ saved ? t('editProfile.profileSaved') : t('editProfile.saveChanges') }}</text>
+            <button
+                class="save-btn"
+                :class="{ 'is-loading': isSaving, 'is-success': isSaved }"
+                :disabled="isSaving || isSaved"
+                @click="handleSave"
+            >
+                <view v-if="isSaving" class="btn-spinner"></view>
+                <view v-else-if="isSaved" class="success-icon-wrap">
+                    <mdi-icon path="/static/icons/check.svg" size="20px" color="#ffffff"></mdi-icon>
+                </view>
+                <text class="btn-text">
+                    {{ isSaved ? t('editProfile.profileSaved') : (isSaving ? (t('common.saving') || '保存中...') : t('editProfile.saveChanges')) }}
+                </text>
             </button>
         </view>
     </view>
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostProfile, apiUploadProfile } from '@/api/wallpaper.js';
@@ -107,8 +142,17 @@ const userStore = useUserStore();
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const backIconColor = computed(() => (settingsStore.isDark ? '#e5e7eb' : '#374151'));
+const iconMutedColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#9ca3af'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const saved = ref(false);
+const isSaving = ref(false);
+const isSaved = ref(false);
+
+onMounted(() => {
+    const sb = getStatusBarHeight();
+    if (sb > 0) {
+        statusBarHeight.value = sb;
+    }
+});
 
 const form = reactive({
     avatar: userStore.userinfo?.profile?.avatar || '/static/images/pics/default_avatar.svg',
@@ -165,10 +209,7 @@ const showPermissionModal = () => {
 const chooseAvatar = () => {
     // #ifdef APP-PLUS
     const channel = plus.runtime.channel;
-    console.log('channel', channel);
     if (channel === 'google') {
-        console.log('google');
-        // 由于受google play 照片和视频权限政策的影响，使用uni.chooseImage选择图片会调用READ_MEDIA_IMAGES/READ_MEDIA_VIDEO权限，该权限需在Google Play Console中申请
         chooseSystemMedia({
             count: 1,
             mediaType: ['image'],
@@ -178,9 +219,7 @@ const chooseAvatar = () => {
                 form.avatar = file;
             },
             fail: (err) => {
-                // 2101001 用户取消
                 if (err?.errCode === 2101001) return;
-                // 2101005 权限申请失败
                 if (err?.errCode === 2101005 || /permission|权限|denied|拒绝/i.test(err?.errMsg || '')) {
                     showPermissionModal();
                 } else {
@@ -218,6 +257,8 @@ const chooseAvatar = () => {
 };
 
 const handleSave = async () => {
+    if (isSaving.value || isSaved.value) return;
+
     if (!form.nickname.trim()) {
         uni.showToast({ title: t('editProfile.enterName'), icon: 'none' });
         return;
@@ -232,6 +273,8 @@ const handleSave = async () => {
     }
     // #endif
 
+    isSaving.value = true;
+
     try {
         const payload = {
             nickname: form.nickname.trim(),
@@ -243,7 +286,6 @@ const handleSave = async () => {
         };
 
         let res;
-        // 头像变更时优先走上传接口
         if (String(form.avatar || '').startsWith('http') || String(form.avatar || '').startsWith('/static/')) {
             res = await apiPostProfile(payload);
         } else {
@@ -253,7 +295,6 @@ const handleSave = async () => {
             });
         }
 
-        // 用后端返回的最新 profile 数据更新 store，避免本地临时路径污染
         const updatedProfile = res?.data || {};
         userStore.userinfo = {
             ...userStore.userinfo,
@@ -263,22 +304,24 @@ const handleSave = async () => {
             },
         };
 
-        // 重新拉取完整用户信息，刷新设置页头像等数据
         await userStore.setUserInfo();
 
-        // 显示成功提示
-        uni.showToast({
-            title: t('user.profile.saveSuccess'),
-            icon: 'none',
-        });
+        isSaving.value = false;
+        isSaved.value = true;
 
-        // 延迟返回上一页
+        // #ifdef APP-PLUS || MP-WEIXIN
+        try {
+            uni.vibrateShort({ type: 'light' });
+        } catch (e) {}
+        // #endif
+
         setTimeout(() => {
             uni.navigateBack({
                 fail: () => uni.reLaunch({ url: '/pages/settings/settings' }),
             });
-        }, 1000);
+        }, 750);
     } catch (error) {
+        isSaving.value = false;
         uni.showToast({
             title: t('editProfile.saveFailed'),
             icon: 'none',
@@ -307,22 +350,25 @@ const goBack = () => {
 
 .header {
     height: 112rpx;
-    background: var(--page-background);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 32rpx;
+    padding: 0 30rpx;
 }
 
 .back-btn {
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: 16rpx;
-    background: var(--page-background-secondary);
-    border: 2rpx solid var(--panel-border);
+    width: 60rpx;
+    height: 60rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:active {
+        opacity: 0.7;
+    }
 }
 
 .header-title {
@@ -334,8 +380,8 @@ const goBack = () => {
 }
 
 .header-placeholder {
-    width: 72rpx;
-    height: 72rpx;
+    width: 60rpx;
+    height: 60rpx;
 }
 
 .content {
@@ -349,43 +395,55 @@ const goBack = () => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 48rpx;
-    padding-bottom: 56rpx;
+    padding-top: 36rpx;
+    padding-bottom: 48rpx;
 }
 
 .avatar-wrap {
     position: relative;
+    cursor: pointer;
 }
 
 .avatar {
-    width: 176rpx;
-    height: 176rpx;
-    border-radius: 88rpx;
+    width: 180rpx;
+    height: 180rpx;
+    border-radius: 50%;
+    display: block;
 }
 
 .camera-btn {
     position: absolute;
-    right: 0;
-    bottom: 0;
+    right: 4rpx;
+    bottom: 4rpx;
     width: 56rpx;
     height: 56rpx;
-    border-radius: 28rpx;
+    border-radius: 50%;
     background: #e5322d;
-    border: 2px solid var(--page-background);
+    border: 4rpx solid var(--page-background);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.2s ease;
+
+    &:active {
+        transform: scale(0.92);
+    }
 }
 
 .avatar-tip {
     margin-top: 20rpx;
-    font-size: 24rpx;
+    font-size: 26rpx;
     color: #e5322d;
-    font-weight: 500;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:active {
+        opacity: 0.8;
+    }
 }
 
 .section-title {
-    padding: 0 32rpx;
+    padding: 0 30rpx;
     margin-bottom: 16rpx;
     font-size: 22rpx;
     font-weight: 600;
@@ -397,96 +455,205 @@ const goBack = () => {
 
 .card {
     background: var(--page-background-secondary);
-    border-radius: 24rpx;
-    border: 2rpx solid var(--panel-border);
-    margin: 0 32rpx 48rpx;
+    border-radius: 28rpx;
+    border: none;
+    box-shadow: none;
+    margin: 0 30rpx 40rpx;
     overflow: hidden;
 }
 
-.field {
-    padding: 24rpx 32rpx;
-    border-bottom: 2rpx solid var(--panel-border);
-}
-
-.field-last {
-    border-bottom: none;
-}
-
-.field-label {
+.picker-row-wrap {
+    width: 100%;
     display: block;
-    margin-bottom: 10rpx;
-    font-size: 22rpx;
-    font-weight: 600;
-    color: var(--text-tertiary);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
 }
 
-.field-input {
-    width: 100%;
-    font-size: 30rpx;
+.field-row {
+    position: relative;
+    min-height: 104rpx;
+    padding: 0 32rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24rpx;
+    border-bottom: 1rpx solid var(--panel-border);
+    box-sizing: border-box;
+    transition: background-color 0.15s ease;
+
+    &:active {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    &.field-row-last {
+        border-bottom: none;
+    }
+}
+
+.row-label {
+    font-size: 28rpx;
     font-weight: 500;
     color: var(--text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.row-input {
+    flex: 1;
+    height: 100%;
+    font-size: 28rpx;
+    color: var(--text-primary);
+    text-align: right;
     background: transparent;
+    caret-color: #e5322d;
 }
 
-.field-picker-wrapper {
-    width: 100%;
+.row-right {
+    display: flex;
+    align-items: center;
+    gap: 8rpx;
 }
 
-.picker-value {
-    font-size: 30rpx;
-    font-weight: 500;
+.row-value {
+    font-size: 28rpx;
     color: var(--text-primary);
-    
+
+    &.muted {
+        color: var(--text-tertiary);
+    }
+
     &.placeholder {
         color: var(--text-tertiary);
     }
 }
 
+.right-icon {
+    flex-shrink: 0;
+}
+
+:deep(.placeholder-style),
+.placeholder-style {
+    color: var(--text-tertiary);
+    font-size: 28rpx;
+    font-weight: 400;
+    text-align: right;
+}
+
+// ── 确认保存按钮与交互动画 ──
 .save-btn {
-    margin: 0 32rpx;
+    margin: 20rpx 30rpx 60rpx;
     height: 100rpx;
     border-radius: 24rpx;
     background: #e5322d;
-    color: #fff;
+    color: #ffffff;
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16rpx;
+    gap: 14rpx;
     font-size: 30rpx;
     font-weight: 600;
-}
-</style>
+    letter-spacing: 0.5rpx;
+    box-shadow: none;
+    transition: transform 0.25s ease, background-color 0.3s ease, opacity 0.2s ease;
 
-<style lang="scss" scoped>
-// ── 暗色模式覆盖 ──
-.theme-dark {
-    &.layout {
-        background: #111114;
-    }
-
-    .header {
-        background: #111114;
-    }
-
-    .back-btn {
-        background: rgba(255, 255, 255, 0.07);
+    &::after {
         border: none;
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
+    }
+
+    &:active:not(:disabled) {
+        transform: scale(0.97);
+        opacity: 0.88;
+    }
+
+    &.is-loading {
+        opacity: 0.85;
+        transform: scale(0.98);
+        cursor: not-allowed;
+    }
+
+    &.is-success {
+        background: #ef4444;
+        animation: saveSuccessPulse 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    }
+
+    .btn-spinner {
+        width: 32rpx;
+        height: 32rpx;
+        border: 4rpx solid rgba(255, 255, 255, 0.35);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: btnSpin 0.7s linear infinite;
+    }
+
+    .success-icon-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: successBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+}
+
+@keyframes btnSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes successBounce {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes saveSuccessPulse {
+    0% {
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+// ── 暗色模式适配 ──
+.theme-dark {
+    .header {
+        background: transparent;
     }
 
     .card {
         background: #1e1e22;
         border: none;
-        box-shadow:
-            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
-            0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+        box-shadow: none;
     }
 
-    .field {
-        border-bottom-color: rgba(255, 255, 255, 0.06);
+    .field-row {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+
+        &:active {
+            background: rgba(255, 255, 255, 0.03);
+        }
+    }
+
+    .save-btn {
+        background: #e5322d;
+        box-shadow: none;
+
+        &.is-success {
+            background: #ef4444;
+        }
     }
 }
 </style>

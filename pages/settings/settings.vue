@@ -1250,7 +1250,7 @@ function shareApp() {
 }
 
 .section-title {
-    padding: 0 36rpx;
+    padding: 0 30rpx;
     margin-bottom: 20rpx;
     font-size: 22rpx;
     font-weight: 600;
@@ -1261,11 +1261,12 @@ function shareApp() {
 }
 
 .card {
-    margin: 0 32rpx;
+    margin: 0 30rpx;
     background: var(--page-background-secondary);
-    border: 2rpx solid var(--panel-border);
-    border-radius: 24rpx;
+    border: none;
+    border-radius: 28rpx;
     overflow: hidden;
+    box-shadow: none;
 }
 
 .profile-card {
@@ -1273,7 +1274,7 @@ function shareApp() {
     display: flex;
     align-items: center;
     gap: 24rpx;
-    border-bottom: 2rpx solid var(--panel-border);
+    border-bottom: 1rpx solid var(--panel-border);
 }
 
 .avatar-wrap {
@@ -1320,11 +1321,31 @@ function shareApp() {
 .row {
     position: relative;
     min-height: 96rpx;
-    padding: 10rpx 24rpx;
-    border-bottom: 2rpx solid var(--panel-border);
+    padding: 10rpx 28rpx;
+    border-bottom: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: background 0.15s ease;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 92rpx;
+        right: 0;
+        height: 1rpx;
+        background: var(--panel-border, rgba(30, 41, 59, 0.05));
+        pointer-events: none;
+    }
+
+    &.row-last::after {
+        display: none;
+    }
+
+    &:active {
+        background: rgba(0, 0, 0, 0.025);
+    }
 
     button {
         position: absolute;
@@ -1977,46 +1998,35 @@ function shareApp() {
 // ─────────────────────────────────────────────
 .theme-dark {
 
-    // 页面背景：比 card 更深，形成"内容浮起"的沉层感
-    &.layout {
-        background: #111114;
-    }
-
-    .status-bar-bg {
-        background: #111114;
-    }
-
-    .header {
-        background: #111114;
-    }
-
-    // 返回按钮：毛玻璃质感，去掉描边
-    // .back-btn {
-    //     // background: rgba(255, 255, 255, 0.07);
-    //     // border: none;
-    //     box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
-    // }
-
     // section 标题：更克制的颜色
     .section-title {
         color: rgba(255, 255, 255, 0.35);
         letter-spacing: 0.1em;
     }
 
-    // card：比页面背景亮一个层级，无边框，轻微上浮阴影
+    // card：比页面背景亮一个层级，无边框，彻底扁平无阴影无外发光
     .card {
         background: #1e1e22;
         border: none;
-        box-shadow:
-            0 2rpx 0 rgba(255, 255, 255, 0.04) inset,
-            0 16rpx 40rpx rgba(0, 0, 0, 0.3);
+        box-shadow: none;
     }
 
-    // 头像区分隔线 → 用更暗的背景替代
+    // 头像区分隔线 → 纯粹扁平背景与细微分割线
     .profile-card {
         border-bottom: none;
         padding-bottom: 28rpx;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+        background: transparent;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 32rpx;
+            right: 0;
+            height: 1rpx;
+            background: rgba(255, 255, 255, 0.05);
+        }
     }
 
     .avatar-dot {
@@ -2032,7 +2042,7 @@ function shareApp() {
             content: '';
             position: absolute;
             bottom: 0;
-            left: 0; // left: 88rpx; 从 icon 右侧开始，对齐文字
+            left: 92rpx; // 避让左侧图标，对齐文字边缘
             right: 0;
             height: 1rpx;
             background: rgba(255, 255, 255, 0.05);

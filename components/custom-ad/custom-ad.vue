@@ -44,6 +44,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useUserStore } from '@/stores/user.js';
+import { useAppStore } from '@/stores/app.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { AD_CONFIG } from '@/common/config.js';
 
@@ -84,6 +85,7 @@ const props = defineProps({
 const emit = defineEmits(['load', 'error', 'close']);
 
 const userStore = useUserStore();
+const appStore = useAppStore();
 const settingsStore = useSettingsStore();
 
 const isLoaded = ref(false);
@@ -108,9 +110,10 @@ const effectiveAdpid = computed(() => {
         : AD_CONFIG.app?.customHorizontalAdpid;
 });
 
-// 是否满足基础展示条件（非 VIP 且对应端配置了广告位）
+// 是否满足基础展示条件（非 VIP、后台开启广告功能 且 对应端配置了广告位）
 const canShowAd = computed(() => {
     if (userStore.isVip) return false;
+    if (appStore.versionConfig?.ad_enabled === false) return false;
     // #ifdef MP-WEIXIN
     return !!effectiveUnitId.value;
     // #endif
@@ -150,12 +153,13 @@ const cardStyle = computed(() => {
     if (isFailed.value || isClosed.value) {
         return { display: 'none', height: '0px' };
     }
-    const style = {
-        borderRadius: props.borderRadius,
-    };
+    const style = {};
+    // #ifndef APP
+    style.borderRadius = props.borderRadius;
     if (props.background) {
         style.background = props.background;
     }
+    // #endif
     if (props.direction === 'vertical') {
         style.height = containerHeight.value;
     }
@@ -166,9 +170,6 @@ const cardStyle = computed(() => {
 const appAdStyle = computed(() => {
     const style = {
         width: '100%',
-        // APP 端 ad 是原生组件，父级 overflow:hidden 无法裁剪它；圆角必须直接设置在 ad 标签上
-        // （uni-app 会将样式同步到原生视图的 cornerRadius，部分版本生效，需真机验证）
-        borderRadius: props.borderRadius,
     };
     if (props.direction === 'vertical') {
         style.height = containerHeight.value;
@@ -367,9 +368,11 @@ defineExpose({
 
 .custom-ad-card {
     width: 100%;
-    overflow: hidden;
     line-height: 1;
-    // 基础面板底色与阴影（横版卡片/通栏使用）
+
+    // #ifndef APP
+    overflow: hidden;
+    // 基础面板底色与阴影（微信端横版卡片/通栏使用）
     background: rgba(24, 36, 49, 0.92);
     box-shadow:
         0 10rpx 24rpx rgba(0, 0, 0, 0.18),
@@ -379,6 +382,15 @@ defineExpose({
         background: #f8fafc;
         box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
     }
+    // #endif
+
+    // #ifdef APP
+    // APP 端原生广告直角平铺，去掉圆角容器与多余底色/阴影，避免原生直角图文产生毛边割裂
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: visible;
+    // #endif
 
     .custom-ad-content {
         width: 100% !important;

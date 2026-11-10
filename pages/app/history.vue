@@ -63,9 +63,13 @@
         </view>
 
         <view class="bottom-action-area" v-if="libraryStore.recentViewed.length">
-            <view class="bottom-blur-mask"></view>
-            <view class="clear-all-bar" @click="clearAllHistory">
-                <text class="clear-all-bar__text">{{ t('historyPage.clearAll') }}</text>
+            <view class="clear-floating-btn" @click="clearAllHistory">
+                <mdi-icon
+                    path="/static/icons/delete-empty.svg"
+                    size="18px"
+                    :color="settingsStore.isDark ? '#f87171' : '#ef4444'"
+                ></mdi-icon>
+                <text class="clear-floating-btn__text">{{ t('historyPage.clearAll') }}</text>
             </view>
         </view>
 
@@ -320,48 +324,59 @@ const clearAllHistory = () => {
     left: 0;
     right: 0;
     z-index: 99;
-    padding: 20rpx 30rpx;
-    padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-    pointer-events: none;
-}
-
-.bottom-blur-mask {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, var(--page-background) 60%, transparent 100%);
-    pointer-events: none;
-}
-
-.clear-all-bar {
-    position: relative;
-    pointer-events: auto;
-    height: 96rpx;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: calc(36rpx + env(safe-area-inset-bottom));
+    pointer-events: none;
+}
+
+.clear-floating-btn {
+    pointer-events: auto;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 12rpx;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    border-radius: 28rpx;
-    // box-shadow:
-    //     0 8rpx 32rpx rgba(239, 68, 68, 0.38),
-    //     0 2rpx 8rpx rgba(239, 68, 68, 0.18),
-    //     inset 0 1rpx 0 rgba(255, 255, 255, 0.18);
+    height: 76rpx;
+    padding: 0 40rpx;
+    border-radius: 999rpx;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1rpx solid rgba(239, 68, 68, 0.2);
+    box-shadow:
+        0 10rpx 32rpx rgba(0, 0, 0, 0.08),
+        0 2rpx 8rpx rgba(239, 68, 68, 0.08);
     transition:
-        transform 0.2s,
-        box-shadow 0.2s,
-        opacity 0.2s;
+        transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+        opacity 0.2s ease,
+        box-shadow 0.2s ease;
 
     &:active {
-        opacity: 0.88;
-        transform: scale(0.97);
-        box-shadow: 0 4rpx 16rpx rgba(239, 68, 68, 0.28);
+        opacity: 0.85;
+        transform: scale(0.94);
+        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
     }
 
     &__text {
         font-size: 28rpx;
-        font-weight: 700;
-        color: #ffffff;
-        letter-spacing: 2rpx;
+        font-weight: 600;
+        color: #ef4444;
+        letter-spacing: 0.5rpx;
+    }
+}
+
+.theme-dark {
+    .clear-floating-btn {
+        background: rgba(28, 28, 34, 0.78);
+        border: 1rpx solid rgba(248, 113, 113, 0.28);
+        box-shadow:
+            0 12rpx 36rpx rgba(0, 0, 0, 0.45),
+            0 2rpx 8rpx rgba(248, 113, 113, 0.1);
+
+        &__text {
+            color: #f87171;
+        }
     }
 }
 

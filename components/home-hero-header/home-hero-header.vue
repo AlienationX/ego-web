@@ -130,14 +130,19 @@ let foldTimer = null;
 const isEn = computed(() => locale.value === 'en');
 
 // 计算实际安全状态栏高度
+const internalStatusBarHeight = ref(getStatusBarHeight() || 0);
+
 const actualStatusBarHeight = computed(() => {
-    return props.statusBarHeight || getStatusBarHeight() || 0;
+    return props.statusBarHeight || internalStatusBarHeight.value || getStatusBarHeight() || 0;
 });
 
-// 计算顶部内边距：采用方案2（状态栏高度 + 4px微留白，H5保底10px）
+// 计算顶部内边距：结合 JS 测量高度与 CSS 环境变量 (var(--status-bar-height) 与 env(safe-area-inset-top)) 多重保底
 const headerPaddingTop = computed(() => {
     const sHeight = actualStatusBarHeight.value;
-    return `${sHeight > 0 ? sHeight + 4 : 10}px`;
+    if (sHeight > 0) {
+        return `max(${sHeight + 4}px, calc(var(--status-bar-height, 0px) + 4px), calc(env(safe-area-inset-top, 0px) + 4px))`;
+    }
+    return `max(calc(var(--status-bar-height, 0px) + 4px), calc(env(safe-area-inset-top, 0px) + 4px), 10px)`;
 });
 
 // 微信小程序右上角胶囊尺寸与定位
@@ -183,6 +188,7 @@ const updateCapsuleInfo = () => {
 updateCapsuleInfo();
 
 onMounted(() => {
+    internalStatusBarHeight.value = getStatusBarHeight() || 0;
     updateCapsuleInfo();
 });
 
@@ -304,7 +310,11 @@ const goTimeline = () => {
 
 <style lang="scss" scoped>
 .hero-header {
-    padding: 0 20rpx 0;
+    padding-left: 20rpx;
+    padding-right: 20rpx;
+    padding-bottom: 0;
+    padding-top: calc(max(var(--status-bar-height, 0px), env(safe-area-inset-top, 0px)) + 8rpx);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: 24rpx;

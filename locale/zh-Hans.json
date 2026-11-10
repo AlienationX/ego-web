@@ -23,6 +23,7 @@
     },
     "common": {
         "appName": "本我壁纸",
+        "processing": "处理中...",
         "all": "全部",
         "today": "今天",
         "yesterday": "昨天",
@@ -734,6 +735,7 @@
             "ios-classic": "iOS 经典",
             "ios-poster": "iOS 海报大字",
             "android-stock": "安卓原生",
+            "none": "无",
             "pixel-nine": "Pixel 9 巨幕",
             "hyperos-magazine": "澎湃杂志",
             "harmonyos": "鸿蒙圆润",
@@ -1270,20 +1272,22 @@
         "keep": "保留我的账号",
         "warningTitle": "此操作不可撤销",
         "warningDesc": "停用账号将立即暂停访问权限。数据将在 30 天后永久删除。",
+        "passwordLabel": "当前登录密码",
+        "passwordPlaceholder": "请输入当前登录密码以确认",
         "typeToConfirm": "输入“DEACTIVATE”以确认",
         "placeholder": "DEACTIVATE",
         "agree": "我已了解并确认停用当前账号。",
         "button": "停用我的账号",
         "cancel": "取消",
         "doneTitle": "账号已停用",
-        "doneDesc": "你的账号已进入停用流程，24 小时内会收到确认邮件。",
+        "doneDesc": "你的账号已进入停用流程，数据将保留 30 天。",
         "doneNextTitle": "接下来会发生",
         "done1": "访问权限将立即暂停",
         "done2": "数据保留 30 天",
-        "done3": "将发送确认邮件",
-        "done4": "联系支持可恢复",
+        "done3": "联系支持可恢复",
         "backSettings": "返回设置",
         "confirmContent": "确认现在停用账号吗？",
+        "deactivating": "停用中...",
         "success": "账号已停用"
     },
     "logoutPage": {
@@ -1292,6 +1296,7 @@
         "askDesc": "你将在当前设备退出账号登录，账号数据与设置将被保留。",
         "confirm": "确认退出",
         "cancel": "取消",
+        "loggingOut": "退出中...",
         "doneTitle": "你已退出登录",
         "doneDesc": "下次再见！你的数据和设置已安全保存。",
         "backSettings": "返回设置",
@@ -1323,6 +1328,12 @@
             "next": "新密码",
             "confirm": "确认新密码"
         },
+        "placeholders": {
+            "current": "请输入当前登录密码",
+            "next": "请输入新密码（至少8位）",
+            "confirm": "请再次输入新密码"
+        },
+        "saved": "密码已更新",
         "match": {
             "ok": "密码一致",
             "fail": "两次输入的密码不一致"

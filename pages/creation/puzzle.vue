@@ -1428,13 +1428,13 @@ const saveToAlbum = async () => {
     overflow: hidden;
     box-sizing: border-box;
 
+    background-color: var(--page-background);
+
     &.theme-light {
-        background-color: #f6f6f8;
         color: #0f172a;
     }
 
     &.theme-dark {
-        background-color: #121216;
         color: #f8fafc;
     }
 }

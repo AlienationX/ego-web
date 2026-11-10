@@ -23,6 +23,7 @@
     },
     "common": {
         "appName": "Ego Wallpapers",
+        "processing": "Processing...",
         "all": "All",
         "today": "Today",
         "yesterday": "Yesterday",
@@ -734,6 +735,7 @@
             "ios-classic": "iOS Classic",
             "ios-poster": "iOS Poster",
             "android-stock": "Android Stock",
+            "none": "None",
             "pixel-nine": "Pixel 9 Material",
             "hyperos-magazine": "HyperOS Mag",
             "harmonyos": "HarmonyOS",
@@ -1270,20 +1272,22 @@
         "keep": "Keep My Account",
         "warningTitle": "This action is irreversible",
         "warningDesc": "Deactivating your account will immediately suspend access. Data will be permanently deleted after 30 days.",
+        "passwordLabel": "Current Password",
+        "passwordPlaceholder": "Enter current password to confirm",
         "typeToConfirm": "Type “DEACTIVATE” to confirm",
         "placeholder": "DEACTIVATE",
         "agree": "I understand and confirm the deactivation.",
         "button": "Deactivate My Account",
         "cancel": "Cancel",
         "doneTitle": "Account Deactivated",
-        "doneDesc": "Your account has been scheduled for deactivation. You'll receive a confirmation email within 24 hours.",
+        "doneDesc": "Your account has been scheduled for deactivation. Data will be retained for 30 days.",
         "doneNextTitle": "What happens next?",
         "done1": "Access is suspended immediately",
         "done2": "Data retained for 30 days",
-        "done3": "Email confirmation will be sent",
-        "done4": "Contact support to reactivate",
+        "done3": "Contact support to reactivate",
         "backSettings": "Back to Settings",
         "confirmContent": "Are you sure you want to deactivate now?",
+        "deactivating": "Deactivating...",
         "success": "Account deactivated"
     },
     "logoutPage": {
@@ -1292,6 +1296,7 @@
         "askDesc": "You'll be signed out on this device. Your data and settings will remain saved.",
         "confirm": "Yes, Log Me Out",
         "cancel": "Cancel",
+        "loggingOut": "Logging out...",
         "doneTitle": "You've been logged out",
         "doneDesc": "See you next time! Your data and settings are safely stored.",
         "backSettings": "Back to Settings",
@@ -1323,6 +1328,12 @@
             "next": "New password",
             "confirm": "Confirm new password"
         },
+        "placeholders": {
+            "current": "Enter current login password",
+            "next": "Enter new password (min. 8 chars)",
+            "confirm": "Re-enter new password"
+        },
+        "saved": "Password updated",
         "match": {
             "ok": "Passwords match",
             "fail": "Passwords don't match"

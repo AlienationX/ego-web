@@ -927,12 +927,14 @@ onShow(() => {
             justify-content: space-between;
             align-items: center;
             margin-top: 30rpx;
-            padding: 20rpx 20rpx;
-            background: rgba($wp-theme-color, 0.05);
-            border-radius: 16rpx;
+            padding: 24rpx 28rpx;
+            background: var(--page-background-secondary);
+            border-radius: 28rpx;
             position: relative;
             z-index: 5;
             overflow: visible;
+            box-shadow: none;
+            border: none;
         }
 
         .vip-banner-card {
@@ -1070,24 +1072,24 @@ onShow(() => {
             align-items: center;
             gap: 6rpx;
             padding: 10rpx 24rpx;
-            background: rgba(40, 179, 137, 0.08);
+            background: rgba(40, 179, 137, 0.12);
             color: #28b389;
             font-size: 24rpx;
             font-weight: 600;
-            border-radius: 20rpx;
+            border-radius: 999rpx;
             cursor: pointer;
-            transition: all 0.3s;
-            border: 1rpx solid rgba(40, 179, 137, 0.2);
+            transition: all 0.25s ease;
+            border: none;
 
             &:active:not(.checked-in) {
-                background: rgba(40, 179, 137, 0.15);
-                transform: scale(0.95);
+                background: rgba(40, 179, 137, 0.2);
+                transform: scale(0.96);
             }
 
             &.checked-in {
-                background: rgba(100, 100, 100, 0.08);
-                color: #999;
-                border-color: rgba(100, 100, 100, 0.2);
+                background: rgba(120, 120, 120, 0.12);
+                color: var(--text-tertiary);
+                border: none;
                 cursor: not-allowed;
             }
         }
@@ -1435,8 +1437,9 @@ onShow(() => {
 .layout.theme-dark {
 
     .userInfo .checkin-section {
-        background: rgba(255, 255, 255, 0.04);
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
+        background: #1e1e22;
+        box-shadow: none;
+        border: none;
     }
 
     // stats 卡片：彻底扁平化，深色背景，无边框、无阴影、无外发光

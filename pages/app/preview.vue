@@ -395,8 +395,8 @@
             </view>
         </uni-popup>
 
-        <uni-popup ref="editPopup" type="bottom" :safe-area="false">
-            <view class="editPopup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
+        <uni-popup ref="editPopup" type="bottom" :safe-area="false" @change="onEditPopupChange">
+            <view v-if="showEditPopup" class="editPopup" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
                 <view class="popHeader">
                     <view></view>
                     <view class="title">{{ t('previewPage.adminEdit') }}</view>
@@ -410,11 +410,11 @@
                         <view class="row">
                             <view class="label">{{ t('previewPage.description') }}</view>
                             <textarea v-model="editForm.description" class="input-textarea"
-                                :auto-height="true"></textarea>
+                                :auto-height="true" :focus="false"></textarea>
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.tags') }}</view>
-                            <input v-model="editForm.tags" class="input" />
+                            <input v-model="editForm.tags" class="input" :focus="false" />
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.category') }}</view>
@@ -427,7 +427,7 @@
                         </view>
                         <view class="row">
                             <view class="label">{{ t('previewPage.publisher') }}</view>
-                            <input v-model="editForm.publisher" class="input" />
+                            <input v-model="editForm.publisher" class="input" :focus="false" />
                         </view>
                         <view class="row row-field">
                             <view class="label">{{ t('previewPage.score') }}</view>
@@ -439,11 +439,11 @@
                         <view class="row row-inline">
                             <view class="inline-item inline-item--metric">
                                 <view class="label">{{ t('previewPage.views') }}</view>
-                                <input v-model="editForm.views" class="input stat-input" type="number" />
+                                <input v-model="editForm.views" class="input stat-input" type="number" :focus="false" />
                             </view>
                             <view class="inline-item inline-item--metric">
                                 <view class="label">{{ t('previewPage.downloads') }}</view>
-                                <input v-model="editForm.downloads" class="input stat-input" type="number" />
+                                <input v-model="editForm.downloads" class="input stat-input" type="number" :focus="false" />
                             </view>
                         </view>
                         <view class="row row-inline">
@@ -504,6 +504,12 @@
                                     <template v-else-if="item.value === 'android-stock'">
                                         <view class="mc-time android-time">09:41</view>
                                         <view class="mc-date android-date">Tue, Oct 24</view>
+                                    </template>
+                                    <template v-else-if="item.value === 'none'">
+                                        <view class="mc-none">
+                                            <mdi-icon path="/static/icons/cancel.svg" size="24px"
+                                                :color="settingsStore.isDark ? '#71717a' : '#9ca3af'"></mdi-icon>
+                                        </view>
                                     </template>
                                     <template v-else-if="item.value === 'pixel-nine'">
                                         <view class="mc-time pixel-nine-time">
@@ -737,6 +743,7 @@ const clockStyles = computed(() => [
     { value: 'default', name: 'Default', isVip: false },
     { value: 'ios-classic', name: 'iOS', isVip: false },
     { value: 'android-stock', name: 'Android', isVip: false },
+    { value: 'none', name: 'None', isVip: false },
     { value: 'ios-poster', name: 'iOS Poster', isVip: true },
     { value: 'pixel-nine', name: 'Pixel 9', isVip: true },
     { value: 'hyperos-magazine', name: 'HyperOS', isVip: true },
@@ -1286,6 +1293,7 @@ const closeScore = () => {
 };
 
 const editPopup = ref(null);
+const showEditPopup = ref(false);
 const classifyList = ref([]);
 const accessLevelOptions = [
     { value: 0, label: '0. 免费壁纸' },
@@ -1323,11 +1331,19 @@ const openEdit = async () => {
         is_active: currentInfo.value.is_active === true || currentInfo.value.is_active === 1,
         access_level: currentInfo.value.access_level ?? (currentInfo.value.is_locked ? 1 : 0),
     };
-    editPopup.value.open();
+    showEditPopup.value = true;
+    editPopup.value?.open();
 };
 
 const closeEdit = () => {
-    editPopup.value.close();
+    editPopup.value?.close();
+    showEditPopup.value = false;
+};
+
+const onEditPopupChange = (e) => {
+    if (!e.show) {
+        showEditPopup.value = false;
+    }
 };
 
 const getAccessLevelLabel = (val) => {
@@ -3269,6 +3285,23 @@ const handleCopyWatermarkId = () => {
                     padding: 2rpx 10rpx;
                     border-radius: 12rpx;
                     z-index: 2;
+                }
+
+                &.none {
+                    .mini-clock-layout {
+                        top: 50% !important;
+                        transform: translateY(-56%) !important;
+                    }
+
+                    .mc-none {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        width: 72rpx;
+                        height: 72rpx;
+                        border-radius: 50%;
+                        background: rgba(120, 120, 128, 0.08);
+                    }
                 }
 
                 &.pixel-nine {

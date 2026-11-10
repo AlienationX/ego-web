@@ -4,7 +4,7 @@
         <view class="nav-header" :style="{ paddingTop: statusBarHeight + 'px' }">
             <view class="nav-bar">
                 <view class="back-btn" @click="handleBack">
-                    <mdi-icon path="/static/icons/arrow-left.svg" size="22px"
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
                         :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'"></mdi-icon>
                 </view>
                 <text class="nav-title">{{ t('autoWallpaper.pageTitle') }}</text>
@@ -252,7 +252,7 @@
 
         <!-- 轮播测试结果弹窗 -->
         <uni-popup ref="testPopup" type="center" :z-index="1000">
-            <view class="test-dialog-card" :class="{ 'theme-dark': settingsStore.isDark }" v-if="testResult">
+            <view class="test-dialog-card" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'" v-if="testResult">
                 <view class="test-dialog-header">
                     <text class="test-dialog-title">{{ t('autoWallpaper.testResultTitle') }}</text>
                     <view class="close-btn" @click="testPopup?.close()">
@@ -654,36 +654,29 @@ const handleSaveConfig = async () => {
 </script>
 
 <style lang="scss" scoped>
+@import '@/common/styles/theme-variables.scss';
+
 .layout {
     min-height: 100vh;
-    background: #f8fafc;
+    background: var(--page-background);
     display: flex;
     flex-direction: column;
-
-    &.theme-dark {
-        background: #0f172a;
-    }
 }
 
 .nav-header {
-    background: #ffffff;
-    border-bottom: 1rpx solid #e2e8f0;
+    background: var(--page-background);
+    border-bottom: none;
     position: sticky;
     top: 0;
     z-index: 100;
-
-    .theme-dark & {
-        background: #1e293b;
-        border-color: #334155;
-    }
 }
 
 .nav-bar {
-    height: 88rpx;
+    height: 112rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24rpx;
+    padding: 0 30rpx;
 
     .back-btn {
         width: 60rpx;
@@ -692,20 +685,24 @@ const handleSaveConfig = async () => {
         align-items: center;
         justify-content: center;
         cursor: pointer;
+        transition: opacity 0.2s ease;
+
+        &:active {
+            opacity: 0.7;
+        }
     }
 
     .nav-title {
-        font-size: 32rpx;
+        font-size: 36rpx;
         font-weight: 700;
-        color: #0f172a;
-
-        .theme-dark & {
-            color: #f8fafc;
-        }
+        color: var(--text-primary);
+        flex: 1;
+        text-align: center;
     }
 
     .nav-placeholder {
         width: 60rpx;
+        height: 60rpx;
     }
 }
 
@@ -723,20 +720,13 @@ const handleSaveConfig = async () => {
 }
 
 .mp-notice-card {
-    background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
-    border: 1rpx solid #c7d2fe;
+    background: var(--panel-background, rgba(120, 120, 128, 0.06));
     border-radius: 28rpx;
     padding: 28rpx 30rpx;
     display: flex;
     flex-direction: column;
     gap: 20rpx;
-    box-shadow: 0 4rpx 16rpx rgba(99, 102, 241, 0.08);
-
-    .theme-dark & {
-        background: linear-gradient(135deg, #1e1b4b 0%, #1e293b 100%);
-        border-color: rgba(199, 210, 254, 0.2);
-        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.25);
-    }
+    box-shadow: 0 4rpx 16rpx var(--shadow-color);
 
     .mp-notice-header {
         display: flex;
@@ -773,11 +763,7 @@ const handleSaveConfig = async () => {
     .mp-notice-title {
         font-size: 28rpx;
         font-weight: 700;
-        color: #1e1b4b;
-
-        .theme-dark & {
-            color: #e0e7ff;
-        }
+        color: var(--text-primary);
     }
 
     .mp-recommend-badge {
@@ -797,24 +783,16 @@ const handleSaveConfig = async () => {
     .mp-notice-desc {
         font-size: 24rpx;
         line-height: 1.5;
-        color: #475569;
-
-        .theme-dark & {
-            color: #94a3b8;
-        }
+        color: var(--text-tertiary);
     }
 
     .mp-notice-features {
         display: flex;
         flex-direction: column;
         gap: 10rpx;
-        background: rgba(255, 255, 255, 0.7);
+        background: var(--panel-background-strong, rgba(120, 120, 128, 0.08));
         padding: 16rpx 20rpx;
         border-radius: 18rpx;
-
-        .theme-dark & {
-            background: rgba(15, 23, 42, 0.5);
-        }
 
         .feature-tag {
             display: flex;
@@ -828,19 +806,11 @@ const handleSaveConfig = async () => {
 
         .feature-text {
             font-size: 22rpx;
-            color: #334155;
+            color: var(--text-secondary);
             font-weight: 500;
 
-            .theme-dark & {
-                color: #cbd5e1;
-            }
-
             &.feature-unsupported {
-                color: #64748b;
-
-                .theme-dark & {
-                    color: #94a3b8;
-                }
+                color: var(--text-tertiary);
             }
         }
     }
@@ -919,15 +889,11 @@ const handleSaveConfig = async () => {
 }
 
 .section-card {
-    background: #ffffff;
-    border-radius: 24rpx;
+    background: var(--panel-background, rgba(120, 120, 128, 0.06));
+    border-radius: 28rpx;
     padding: 28rpx;
-    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4rpx 16rpx var(--shadow-color);
     transition: opacity 0.2s ease;
-
-    .theme-dark & {
-        background: #1e293b;
-    }
 
     &.is-disabled {
         opacity: 0.45;
@@ -949,20 +915,12 @@ const handleSaveConfig = async () => {
         .setting-title {
             font-size: 30rpx;
             font-weight: 700;
-            color: #0f172a;
-
-            .theme-dark & {
-                color: #f8fafc;
-            }
+            color: var(--text-primary);
         }
 
         .setting-desc {
             font-size: 22rpx;
-            color: #64748b;
-
-            .theme-dark & {
-                color: #94a3b8;
-            }
+            color: var(--text-tertiary);
         }
     }
 }
@@ -970,13 +928,9 @@ const handleSaveConfig = async () => {
 .card-section-title {
     font-size: 28rpx;
     font-weight: 700;
-    color: #0f172a;
+    color: var(--text-primary);
     margin-bottom: 20rpx;
     display: block;
-
-    .theme-dark & {
-        color: #f8fafc;
-    }
 }
 
 .mode-cards {
@@ -991,23 +945,14 @@ const handleSaveConfig = async () => {
     gap: 20rpx;
     padding: 24rpx;
     border-radius: 20rpx;
-    background: #f8fafc;
+    background: var(--panel-background-strong, rgba(120, 120, 128, 0.08));
     border: 2rpx solid transparent;
     cursor: pointer;
     transition: all 0.2s ease;
 
-    .theme-dark & {
-        background: #0f172a;
-    }
-
     &.is-active {
         border-color: #4f46e5;
-        background: #eef2ff;
-
-        .theme-dark & {
-            background: rgba(79, 70, 229, 0.16);
-            border-color: #6366f1;
-        }
+        background: rgba(79, 70, 229, 0.1);
     }
 
     .mode-radio {
@@ -1017,15 +962,11 @@ const handleSaveConfig = async () => {
             width: 36rpx;
             height: 36rpx;
             border-radius: 50%;
-            border: 3rpx solid #cbd5e1;
+            border: 3rpx solid var(--panel-border, rgba(120, 120, 128, 0.3));
             box-sizing: border-box;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            .theme-dark & {
-                border-color: #475569;
-            }
 
             &.is-checked {
                 border-color: #4f46e5;
@@ -1043,21 +984,13 @@ const handleSaveConfig = async () => {
         .mode-name {
             font-size: 28rpx;
             font-weight: 700;
-            color: #0f172a;
-
-            .theme-dark & {
-                color: #f8fafc;
-            }
+            color: var(--text-primary);
         }
 
         .mode-desc {
             font-size: 22rpx;
-            color: #64748b;
+            color: var(--text-tertiary);
             line-height: 1.4;
-
-            .theme-dark & {
-                color: #94a3b8;
-            }
         }
 
         .board-action-row {
@@ -1074,21 +1007,13 @@ const handleSaveConfig = async () => {
             gap: 8rpx;
             padding: 10rpx 20rpx;
             border-radius: 24rpx;
-            background: #e2e8f0;
+            background: var(--panel-background-strong, rgba(120, 120, 128, 0.12));
             cursor: pointer;
-
-            .theme-dark & {
-                background: #334155;
-            }
 
             .board-pill-text {
                 font-size: 24rpx;
                 font-weight: 600;
                 color: #4f46e5;
-
-                .theme-dark & {
-                    color: #818cf8;
-                }
             }
         }
 
@@ -1100,18 +1025,10 @@ const handleSaveConfig = async () => {
             background: rgba(79, 70, 229, 0.08);
             cursor: pointer;
 
-            .theme-dark & {
-                background: rgba(99, 102, 241, 0.15);
-            }
-
             .manage-board-text {
                 font-size: 22rpx;
                 font-weight: 600;
                 color: #4f46e5;
-
-                .theme-dark & {
-                    color: #a5b4fc;
-                }
             }
 
             &:active {
@@ -1130,17 +1047,12 @@ const handleSaveConfig = async () => {
 .pill-btn {
     padding: 12rpx 28rpx;
     border-radius: 30rpx;
-    background: #f1f5f9;
+    background: var(--panel-background-strong, rgba(120, 120, 128, 0.1));
     font-size: 24rpx;
     font-weight: 600;
-    color: #64748b;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
-
-    .theme-dark & {
-        background: #0f172a;
-        color: #94a3b8;
-    }
 
     &.is-active {
         background: #4f46e5;
@@ -1150,8 +1062,8 @@ const handleSaveConfig = async () => {
 }
 
 .shortcuts-card {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    color: #f8fafc;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    color: #ffffff;
 
     .shortcuts-header {
         display: flex;
@@ -1162,7 +1074,7 @@ const handleSaveConfig = async () => {
             width: 48rpx;
             height: 48rpx;
             border-radius: 50%;
-            background: #334155;
+            background: rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1177,7 +1089,7 @@ const handleSaveConfig = async () => {
 
     .shortcuts-desc {
         font-size: 22rpx;
-        color: #94a3b8;
+        color: rgba(255, 255, 255, 0.85);
         margin-top: 12rpx;
         line-height: 1.5;
         display: block;
@@ -1185,13 +1097,13 @@ const handleSaveConfig = async () => {
 
     .token-box {
         margin-top: 20rpx;
-        background: rgba(15, 23, 42, 0.6);
+        background: rgba(0, 0, 0, 0.35);
         padding: 16rpx 20rpx;
         border-radius: 16rpx;
 
         .token-label {
             font-size: 20rpx;
-            color: #64748b;
+            color: rgba(255, 255, 255, 0.65);
             display: block;
         }
 
@@ -1262,20 +1174,12 @@ const handleSaveConfig = async () => {
             .test-title {
                 font-size: 28rpx;
                 font-weight: 700;
-                color: #0f172a;
-
-                .theme-dark & {
-                    color: #f8fafc;
-                }
+                color: var(--text-primary);
             }
 
             .test-desc {
                 font-size: 22rpx;
-                color: #64748b;
-
-                .theme-dark & {
-                    color: #94a3b8;
-                }
+                color: var(--text-tertiary);
             }
         }
     }
@@ -1283,16 +1187,13 @@ const handleSaveConfig = async () => {
 
 .test-dialog-card {
     width: 620rpx;
-    background: #ffffff;
+    background: var(--popup-background);
     border-radius: 32rpx;
     padding: 32rpx;
     display: flex;
     flex-direction: column;
     gap: 20rpx;
-
-    &.theme-dark {
-        background: #1e293b;
-    }
+    box-shadow: 0 16rpx 48rpx var(--popup-shadow);
 
     .test-dialog-header {
         display: flex;
@@ -1302,11 +1203,7 @@ const handleSaveConfig = async () => {
         .test-dialog-title {
             font-size: 30rpx;
             font-weight: 700;
-            color: #0f172a;
-
-            .theme-dark & {
-                color: #f8fafc;
-            }
+            color: var(--text-primary);
         }
 
         .close-btn {
@@ -1325,7 +1222,7 @@ const handleSaveConfig = async () => {
         height: 520rpx;
         border-radius: 20rpx;
         overflow: hidden;
-        background: #f1f5f9;
+        background: var(--page-background);
 
         .test-preview-img {
             width: 100%;
@@ -1355,20 +1252,12 @@ const handleSaveConfig = async () => {
         .detail-title {
             font-size: 28rpx;
             font-weight: 700;
-            color: #0f172a;
-
-            .theme-dark & {
-                color: #f8fafc;
-            }
+            color: var(--text-primary);
         }
 
         .detail-sub {
             font-size: 22rpx;
-            color: #64748b;
-
-            .theme-dark & {
-                color: #94a3b8;
-            }
+            color: var(--text-tertiary);
         }
     }
 
@@ -1420,6 +1309,12 @@ const handleSaveConfig = async () => {
         &:active {
             opacity: 0.9;
         }
+    }
+}
+
+.theme-dark {
+    .nav-header {
+        background: var(--page-background);
     }
 }
 </style>

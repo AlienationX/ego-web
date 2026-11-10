@@ -583,7 +583,7 @@
 
 <script setup>
 import { ref, computed, onMounted, reactive, watch } from 'vue';
-import { onShareAppMessage, onShareTimeline, onPageScroll, onReachBottom, onPullDownRefresh, onTabItemTap } from '@dcloudio/uni-app';
+import { onShareAppMessage, onShareTimeline, onPageScroll, onReachBottom, onPullDownRefresh, onTabItemTap, onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import {
@@ -1293,7 +1293,15 @@ const goSearchPage = () => {
     });
 };
 
+const refreshStatusBar = () => {
+    const sb = getStatusBarHeight();
+    if (sb > 0) {
+        statusBarHeight.value = sb;
+    }
+};
+
 onMounted(() => {
+    refreshStatusBar();
     // ── 优化：分优先级延时加载，错峰发请求，减少首屏并发竞争 ──
     // P1 立即：首屏可见的关键数据
     getBanner();
@@ -1317,6 +1325,10 @@ onMounted(() => {
     setTimeout(() => {
         getRandomRecommend();
     }, 2000);
+});
+
+onShow(() => {
+    refreshStatusBar();
 });
 // 分享给好友
 onShareAppMessage(() => ({

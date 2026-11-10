@@ -494,15 +494,15 @@ onLoad((options) => {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    background-color: var(--page-background);
     transition: background-color 0.3s ease;
     overflow: hidden;
 
     &.theme-light {
-        background-color: #f8fafc;
         color: #0f172a;
 
         .frosted-nav {
-            background-color: rgba(248, 250, 252, 0.92);
+            background-color: var(--page-background);
             border-bottom: 1rpx solid rgba(226, 232, 240, 0.8);
         }
 
@@ -557,11 +557,10 @@ onLoad((options) => {
     }
 
     &.theme-dark {
-        background-color: #0b0f19;
         color: #f8fafc;
 
         .frosted-nav {
-            background-color: rgba(11, 15, 25, 0.92);
+            background-color: var(--page-background);
             border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
         }
 

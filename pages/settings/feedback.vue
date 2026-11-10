@@ -1,106 +1,124 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <view class="header" :style="{ paddingTop: statusBarHeight + 'px', height: titleBarHeight + 'px' }">
-            <view class="header-inner" :style="{ height: titleBarHeight + 'px' }">
+        <!-- 沉浸式顶部导航栏 -->
+        <view class="nav-header" :style="{ paddingTop: statusBarHeight + 'px' }">
+            <view class="nav-bar">
                 <view class="back-btn" @click="goBack">
-                    <uni-icons type="back" size="18" :color="backIconColor"></uni-icons>
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                        :color="settingsStore.isDark ? '#e5e7eb' : '#1e293b'"></mdi-icon>
                 </view>
-                <text class="header-title">{{ t('feedback.title') }}</text>
-                <view class="header-placeholder"></view>
+                <text class="nav-title">{{ t('feedback.title') }}</text>
+                <view class="nav-placeholder"></view>
             </view>
         </view>
 
-        <view class="content">
-            <view class="section">
-                <text class="section-title">{{ t('feedback.type') }}</text>
-                <view class="chip-group">
-                    <view
-                        class="chip"
-                        :class="{ active: feedbackForm.type === t('feedback.typeBug') }"
-                        @click="selectType(t('feedback.typeBug'))"
-                    >
-                        {{ t('feedback.typeBug') }}
+        <!-- 滚动表单内容 -->
+        <scroll-view class="feedback-scroll" scroll-y :show-scrollbar="false">
+            <view class="feedback-content">
+                <!-- 反馈类型 -->
+                <view class="section">
+                    <view class="section-header">
+                        <text class="section-title">{{ t('feedback.type') }}</text>
                     </view>
-                    <view
-                        class="chip"
-                        :class="{ active: feedbackForm.type === t('feedback.typeSuggestion') }"
-                        @click="selectType(t('feedback.typeSuggestion'))"
-                    >
-                        {{ t('feedback.typeSuggestion') }}
-                    </view>
-                    <view
-                        class="chip"
-                        :class="{ active: feedbackForm.type === t('feedback.typeOther') }"
-                        @click="selectType(t('feedback.typeOther'))"
-                    >
-                        {{ t('feedback.typeOther') }}
+                    <view class="chip-group">
+                        <view
+                            v-for="item in feedbackTypes"
+                            :key="item"
+                            class="chip"
+                            :class="{ active: feedbackForm.type === item }"
+                            @click="selectType(item)"
+                        >
+                            <text class="chip-text">{{ item }}</text>
+                        </view>
                     </view>
                 </view>
-            </view>
 
-            <view class="section">
-                <text class="section-title">{{ t('feedback.content') }}</text>
-                <view class="card">
-                    <textarea
-                        class="textarea"
-                        v-model="feedbackForm.content"
-                        :placeholder="t('feedback.contentPlaceholder')"
-                        maxlength="500"
-                        :show-confirm-bar="false"
-                    ></textarea>
-                    <view class="char-row">
-                        <text class="char-count">{{ feedbackForm.content.length }}/500</text>
+                <!-- 反馈内容 -->
+                <view class="section">
+                    <view class="section-header">
+                        <text class="section-title">{{ t('feedback.content') }}</text>
+                        <text class="section-badge" :class="{ 'is-met': canSubmit }">
+                            {{ canSubmit ? `${feedbackForm.content.trim().length}/500` : `还需 ${10 - feedbackForm.content.trim().length} 字` }}
+                        </text>
+                    </view>
+                    <view class="flat-card" :class="{ 'is-focused': isContentFocused }">
+                        <textarea
+                            class="textarea"
+                            v-model="feedbackForm.content"
+                            :placeholder="t('feedback.contentPlaceholder')"
+                            placeholder-class="placeholder-text"
+                            maxlength="500"
+                            :show-confirm-bar="false"
+                            @focus="isContentFocused = true"
+                            @blur="isContentFocused = false"
+                        ></textarea>
                     </view>
                 </view>
-            </view>
 
-            <view class="section">
-                <text class="section-title">{{ t('feedback.images') }}</text>
-                <view class="card">
-                    <view class="image-list">
-                        <view class="image-item" v-for="(image, index) in imageList" :key="index">
-                            <image class="image-preview" :src="image" mode="aspectFill" @click="previewImage(index)"></image>
-                            <view class="image-delete" @click="removeImage(index)">
-                                <uni-icons type="close" size="14" color="#fff"></uni-icons>
+                <!-- 截图上传 -->
+                <view class="section">
+                    <view class="section-header">
+                        <text class="section-title">{{ t('feedback.images') }}</text>
+                        <text class="section-counter">{{ imageList.length }}/{{ maxImages }}</text>
+                    </view>
+                    <view class="image-grid">
+                        <view class="image-box" v-for="(image, index) in imageList" :key="index">
+                            <image class="image-thumb" :src="image" mode="aspectFill" @click="previewImage(index)"></image>
+                            <view class="image-del-btn" @click.stop="removeImage(index)">
+                                <mdi-icon path="/static/icons/close.svg" size="14px" color="#ffffff"></mdi-icon>
                             </view>
                         </view>
-                        <view class="image-add" v-if="imageList.length < maxImages" @click="chooseImage">
-                            <uni-icons type="plus" size="26" color="#9CA3AF"></uni-icons>
-                            <text class="add-text">{{ t('feedback.addImage') }}</text>
+                        <view class="image-add-box" v-if="imageList.length < maxImages" @click="chooseImage">
+                            <mdi-icon path="/static/icons/camera.svg" size="26px" :color="settingsStore.isDark ? '#6b7280' : '#9ca3af'"></mdi-icon>
+                            <text class="image-add-label">{{ t('feedback.addImage') }}</text>
                         </view>
                     </view>
-                    <view class="image-tip" v-if="imageList.length > 0">
+                    <text class="image-tip-text" v-if="imageList.length > 0">
                         {{ tp('feedback.imageTip', { count: imageList.length, max: maxImages }) }}
+                    </text>
+                </view>
+
+                <!-- 联系方式 -->
+                <view class="section">
+                    <view class="section-header">
+                        <text class="section-title">{{ t('feedback.contact') }}</text>
+                    </view>
+                    <view class="flat-card contact-card" :class="{ 'is-focused': isContactFocused }">
+                        <view class="contact-icon">
+                            <mdi-icon path="/static/icons/email.svg" size="18px" :color="settingsStore.isDark ? '#6b7280' : '#9ca3af'"></mdi-icon>
+                        </view>
+                        <input
+                            class="contact-input"
+                            v-model="feedbackForm.contact"
+                            :placeholder="t('feedback.contactPlaceholder')"
+                            placeholder-class="placeholder-text"
+                            type="text"
+                            :adjust-position="true"
+                            :hold-keyboard="false"
+                            @focus="isContactFocused = true"
+                            @blur="isContactFocused = false"
+                        />
                     </view>
                 </view>
-            </view>
 
-            <view class="section">
-                <text class="section-title">{{ t('feedback.contact') }}</text>
-                <view class="card">
-                    <input
-                        class="input"
-                        v-model="feedbackForm.contact"
-                        :placeholder="t('feedback.contactPlaceholder')"
-                        type="text"
-                        :adjust-position="true"
-                        :hold-keyboard="false"
-                    />
+                <!-- 提交按钮 -->
+                <view class="submit-section">
+                    <button
+                        class="submit-btn"
+                        :class="{ disabled: !canSubmit || isSubmitting }"
+                        :disabled="!canSubmit || isSubmitting"
+                        @click="handleSubmit"
+                    >
+                        <view class="submit-inner">
+                            <view v-if="isSubmitting" class="loading-spinner"></view>
+                            <text class="submit-text">
+                                {{ isSubmitting ? t('feedback.submitting') : t('feedback.submit') }}
+                            </text>
+                        </view>
+                    </button>
                 </view>
             </view>
-
-            <view class="submit-wrap">
-                <button
-                    class="submit-btn"
-                    :class="{ disabled: !canSubmit }"
-                    :disabled="!canSubmit"
-                    :loading="isSubmitting"
-                    @click="handleSubmit"
-                >
-                    {{ isSubmitting ? t('feedback.submitting') : t('feedback.submit') }}
-                </button>
-            </view>
-        </view>
+        </scroll-view>
     </view>
 </template>
 
@@ -110,7 +128,7 @@ import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
-import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
+import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { validateTextSecurity, validateImagesSecurityBatch } from '@/utils/security.js';
 // #ifdef APP-PLUS
@@ -121,10 +139,17 @@ const { t } = useI18n();
 const { tp } = useTranslateParams();
 const userStore = useUserStore();
 const settingsStore = useSettingsStore();
-const backIconColor = computed(() => (settingsStore.isDark ? '#e5e7eb' : '#374151'));
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const titleBarHeight = ref(getTitleBarHeight() || 44);
+const isContentFocused = ref(false);
+const isContactFocused = ref(false);
+
+const feedbackTypes = computed(() => [
+    t('feedback.typeBug'),
+    t('feedback.typeSuggestion'),
+    t('feedback.typeOther'),
+]);
+
 const feedbackForm = reactive({
     type: t('feedback.typeBug'),
     content: '',
@@ -140,7 +165,14 @@ const canSubmit = computed(() => {
 });
 
 const selectType = (type) => {
-    feedbackForm.type = type;
+    if (feedbackForm.type !== type) {
+        // #ifdef APP-PLUS || MP-WEIXIN
+        try {
+            uni.vibrateShort({ type: 'light' });
+        } catch (e) {}
+        // #endif
+        feedbackForm.type = type;
+    }
 };
 
 const chooseImage = () => {
@@ -177,7 +209,6 @@ const selectImage = (count) => {
     // #ifdef APP-PLUS
     const channel = plus.runtime.channel;
     if (channel === 'google') {
-        // 由于受google play 照片和视频权限政策的影响，使用uni.chooseImage选择图片会调用READ_MEDIA_IMAGES/READ_MEDIA_VIDEO权限，该权限需在Google Play Console中申请
         chooseSystemMedia({
             count: count,
             mediaType: ['image'],
@@ -185,14 +216,11 @@ const selectImage = (count) => {
                 imageList.value.push(...(res.filePaths || []));
             },
             fail: (err) => {
-                // 2101001	用户取消
                 if (err?.errCode === 2101001) return;
-
-                // 2101005	权限申请失败
                 if (err?.errCode === 2101005 || /permission|权限|denied|拒绝/i.test(err?.errMsg || '')) {
                     showPermissionModal();
                 } else {
-                    uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败'+JSON.stringify(err), icon: 'none' });
+                    uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败' + JSON.stringify(err), icon: 'none' });
                 }
             },
         });
@@ -216,7 +244,6 @@ const selectImage = (count) => {
             // #endif
         },
         fail: (err) => {
-            // console.log("XXXXX", err)
             if (err.errMsg && (err.errMsg.toLowerCase().includes('permission') || err.errMsg.includes('权限'))) {
                 showPermissionModal();
             } else {
@@ -269,6 +296,12 @@ const handleSubmit = async () => {
         return;
     }
 
+    // #ifdef APP-PLUS || MP-WEIXIN
+    try {
+        uni.vibrateShort({ type: 'medium' });
+    } catch (e) {}
+    // #endif
+
     isSubmitting.value = true;
 
     try {
@@ -295,6 +328,10 @@ const handleSubmit = async () => {
         feedbackForm.contact = userStore.userinfo?.email || '';
         feedbackForm.type = t('feedback.typeBug');
         imageList.value = [];
+        
+        setTimeout(() => {
+            goBack();
+        }, 1500);
     } catch (error) {
         console.error('提交反馈失败:', error);
         uni.showToast({
@@ -315,67 +352,99 @@ const handleSubmit = async () => {
     flex-direction: column;
 }
 
-.header {
+/* 顶部导航栏 (与 widgets.vue / rotate.vue 保持完全一致) */
+.nav-header {
     width: 100%;
     background: var(--page-background);
-    display: flex;
-    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.header-inner {
-    width: 100%;
-    padding: 0 32rpx;
+.nav-bar {
+    height: 100rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16rpx;
+    padding: 0 32rpx;
+
+    .back-btn {
+        width: 60rpx;
+        height: 60rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+
+        &:active {
+            opacity: 0.7;
+        }
+    }
+
+    .nav-title {
+        font-size: 34rpx;
+        font-weight: 700;
+        color: var(--text-primary);
+        flex: 1;
+        text-align: center;
+    }
+
+    .nav-placeholder {
+        width: 60rpx;
+        height: 60rpx;
+    }
 }
 
-.back-btn {
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: 16rpx;
-    background: var(--page-background-secondary);
-    border: 2rpx solid var(--panel-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.header-title {
+.feedback-scroll {
     flex: 1;
-    text-align: center;
-    font-size: 32rpx;
-    font-weight: 700;
-    color: var(--text-primary);
 }
 
-.header-placeholder {
-    width: 64rpx;
-    height: 64rpx;
-    flex-shrink: 0;
-}
-
-.content {
-    padding: 24rpx 32rpx 72rpx;
+.feedback-content {
+    padding: 24rpx 32rpx 80rpx;
+    display: flex;
+    flex-direction: column;
+    gap: 36rpx;
     box-sizing: border-box;
 }
 
+/* 分组标题与指示 */
 .section {
-    margin-bottom: 40rpx;
+    display: flex;
+    flex-direction: column;
+    gap: 16rpx;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4rpx;
 }
 
 .section-title {
-    display: block;
-    font-size: 22rpx;
+    font-size: 26rpx;
     font-weight: 600;
-    color: var(--text-tertiary);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    margin-bottom: 16rpx;
+    color: var(--text-secondary);
 }
 
+.section-badge {
+    font-size: 22rpx;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    transition: color 0.2s ease;
+
+    &.is-met {
+        color: #10b981;
+    }
+}
+
+.section-counter {
+    font-size: 22rpx;
+    color: var(--text-tertiary);
+}
+
+/* 扁平化药丸标签 */
 .chip-group {
     display: flex;
     flex-wrap: wrap;
@@ -383,137 +452,190 @@ const handleSubmit = async () => {
 }
 
 .chip {
-    height: 68rpx;
-    padding: 0 28rpx;
-    border-radius: 40rpx;
-    border: 2rpx solid var(--panel-border);
+    padding: 16rpx 32rpx;
+    border-radius: 999rpx;
     background: var(--page-background-secondary);
-    font-size: 26rpx;
-    color: var(--text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    .chip-text {
+        font-size: 26rpx;
+        font-weight: 500;
+        color: var(--text-secondary);
+        transition: color 0.2s ease;
+    }
+
+    &:active {
+        transform: scale(0.96);
+        opacity: 0.85;
+    }
+
+    &.active {
+        background: #e5322d;
+
+        .chip-text {
+            color: #ffffff;
+            font-weight: 600;
+        }
+    }
 }
 
-.chip.active {
-    background: #e5322d;
-    border-color: #e5322d;
-    color: #fff;
-    font-weight: 600;
-}
-
-.card {
+/* 扁平输入卡片 */
+.flat-card {
     background: var(--page-background-secondary);
-    border: 2rpx solid var(--panel-border);
     border-radius: 24rpx;
+    border: 2rpx solid transparent;
+    transition: border-color 0.2s ease, background 0.2s ease;
     overflow: hidden;
-    width: 100%;
     box-sizing: border-box;
+
+    &.is-focused {
+        border-color: #e5322d;
+    }
 }
 
 .textarea {
     width: 100%;
-    min-height: 320rpx;
+    min-height: 240rpx;
     border: none;
     background: transparent;
-    padding: 28rpx 32rpx;
+    padding: 24rpx 28rpx;
     font-size: 28rpx;
     color: var(--text-primary);
     line-height: 44rpx;
     box-sizing: border-box;
 }
 
-.char-row {
-    border-top: 2rpx solid var(--panel-border);
-    padding: 16rpx 32rpx;
-    display: flex;
-    justify-content: flex-end;
-}
-
-.char-count {
-    font-size: 22rpx;
+.placeholder-text {
     color: var(--text-tertiary);
+    font-size: 26rpx;
 }
 
-.image-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24rpx;
-    padding: 24rpx;
+/* 图片九宫格 */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16rpx;
 }
 
-.image-item,
-.image-add {
-    width: 176rpx;
-    height: 176rpx;
-    border-radius: 24rpx;
-    border: 2rpx dashed var(--panel-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.image-box {
     position: relative;
-    background: var(--panel-background);
-    overflow: hidden;
-}
-
-.image-item {
-    border-style: solid;
-    background: var(--page-background-secondary);
-}
-
-.image-preview {
     width: 100%;
-    height: 100%;
+    padding-bottom: 100%;
+    border-radius: 20rpx;
+    overflow: hidden;
+    background: var(--page-background-secondary);
+
+    .image-thumb {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .image-del-btn {
+        position: absolute;
+        top: 10rpx;
+        right: 10rpx;
+        width: 44rpx;
+        height: 44rpx;
+        border-radius: 22rpx;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8rpx);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+        transition: transform 0.15s ease;
+
+        &:active {
+            transform: scale(0.85);
+        }
+    }
 }
 
-.image-delete {
-    position: absolute;
-    top: 12rpx;
-    right: 12rpx;
-    width: 44rpx;
-    height: 44rpx;
-    border-radius: 22rpx;
-    background: rgba(0, 0, 0, 0.6);
+.image-add-box {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    border-radius: 20rpx;
+    background: var(--page-background-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &:active {
+        opacity: 0.8;
+        transform: scale(0.97);
+    }
+
+    // 内部定位使其居中
+    & > * {
+        position: absolute;
+    }
+
+    :deep(.mdi-icon) {
+        top: 32%;
+    }
+
+    .image-add-label {
+        bottom: 22%;
+        font-size: 22rpx;
+        font-weight: 500;
+        color: var(--text-tertiary);
+    }
+}
+
+.image-tip-text {
+    font-size: 22rpx;
+    color: var(--text-tertiary);
+    padding: 0 4rpx;
+}
+
+/* 联系方式输入框 */
+.contact-card {
+    display: flex;
+    align-items: center;
+    height: 96rpx;
+    padding: 0 24rpx;
+    gap: 16rpx;
+}
+
+.contact-icon {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.add-text {
-    font-size: 22rpx;
-    color: var(--text-tertiary);
-    margin-top: 12rpx;
-}
-
-.image-tip {
-    padding: 0 24rpx 24rpx;
-    font-size: 24rpx;
-    color: var(--text-tertiary);
-}
-
-.input {
-    width: 100%;
-    height: 92rpx;
+.contact-input {
+    flex: 1;
+    height: 100%;
     border: none;
     background: transparent;
-    padding: 0 32rpx;
     font-size: 28rpx;
     color: var(--text-primary);
     box-sizing: border-box;
-    display: block;
 }
 
-.submit-wrap {
-    margin: 32rpx 0;
+/* 提交按钮 */
+.submit-section {
+    margin-top: 24rpx;
     padding-bottom: env(safe-area-inset-bottom);
 }
 
 .submit-btn {
     width: 100%;
-    height: 100rpx;
+    height: 96rpx;
     border-radius: 24rpx;
     background: #e5322d;
-    color: #fff;
+    color: #ffffff;
     font-size: 30rpx;
     font-weight: 600;
     display: flex;
@@ -521,73 +643,61 @@ const handleSubmit = async () => {
     justify-content: center;
     margin: 0;
     padding: 0;
-    line-height: 1;
     box-sizing: border-box;
+    transition: all 0.2s ease;
+    cursor: pointer;
 
     &::after {
         border: none;
     }
+
+    &:active:not(.disabled) {
+        transform: scale(0.98);
+        opacity: 0.9;
+    }
+
+    &.disabled {
+        background: var(--page-background-secondary);
+        color: var(--text-tertiary);
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 }
 
-.submit-btn.disabled {
-    background: var(--panel-background);
-    color: var(--text-tertiary);
-    border: 2rpx solid var(--panel-border);
+.submit-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16rpx;
 }
-</style>
 
-<style lang="scss" scoped>
-// ── 暗色模式覆盖 ──
+.submit-text {
+    font-size: 30rpx;
+    font-weight: 600;
+}
+
+.loading-spinner {
+    width: 32rpx;
+    height: 32rpx;
+    border: 3rpx solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* 暗色模式微调 */
 .theme-dark {
-    &.layout {
-        background: #111114;
-    }
-
-    .header {
-        background: #111114;
-    }
-
-    .back-btn {
-        background: rgba(255, 255, 255, 0.07);
-        border: none;
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
-    }
-
-    .chip {
-        background: #1e1e22;
-        border: none;
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
-        color: rgba(255, 255, 255, 0.6);
-    }
-
-    .chip.active {
-        background: #e5322d;
-        box-shadow: 0 4rpx 16rpx rgba(229, 50, 45, 0.3);
-        color: #fff;
-    }
-
-    .card {
-        background: #1e1e22;
-        border: none;
-        box-shadow:
-            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
-            0 8rpx 24rpx rgba(0, 0, 0, 0.28);
-    }
-
-    .char-row {
-        border-top-color: rgba(255, 255, 255, 0.06);
-    }
-
-    .image-item,
-    .image-add {
-        background: rgba(255, 255, 255, 0.05);
-        border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .submit-btn.disabled {
-        background: rgba(255, 255, 255, 0.07);
-        border: none;
-        color: rgba(255, 255, 255, 0.3);
+    .flat-card {
+        background: var(--page-background-secondary);
     }
 }
 </style>

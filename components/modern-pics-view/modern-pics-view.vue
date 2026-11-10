@@ -129,6 +129,7 @@
                                         :class="{
                                             'is-ad-card': item.is_ad,
                                             'is-loaded': item.adLoaded,
+                                            'is-ad-error': item.is_ad && item.adError,
                                             'is-loading': !item.is_ad && !item.loaded && !item.loadError,
                                             'is-error': !item.is_ad && item.loadError
                                         }"
@@ -184,6 +185,7 @@
                                         :class="{
                                             'is-ad-card': item.is_ad,
                                             'is-loaded': item.adLoaded,
+                                            'is-ad-error': item.is_ad && item.adError,
                                             'is-loading': !item.is_ad && !item.loaded && !item.loadError,
                                             'is-error': !item.is_ad && item.loadError
                                         }"
@@ -301,6 +303,7 @@ const emit = defineEmits(['update', 'change', 'scroll']);
 const { locale } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+const appStore = useAppStore();
 
 const isEn = computed(() => locale.value === 'en');
 const currentIndex = ref(props.initialIndex);
@@ -330,6 +333,7 @@ const canToggleViewMode = computed(() => !isAvatarClassify.value && !isDesktopCl
 
 // 卡片广告位配置（网格通栏横版广告 / 瀑布流单列竖屏广告）
 const hasHorizontalAdConfig = computed(() => {
+    if (appStore.versionConfig?.ad_enabled === false) return false;
     // #ifdef MP-WEIXIN
     return !!AD_CONFIG.weixin?.customHorizontalUnitId;
     // #endif
@@ -342,6 +346,7 @@ const hasHorizontalAdConfig = computed(() => {
 });
 
 const hasVerticalAdConfig = computed(() => {
+    if (appStore.versionConfig?.ad_enabled === false) return false;
     // #ifdef MP-WEIXIN
     return !!AD_CONFIG.weixin?.customVerticalUnitId;
     // #endif
@@ -574,6 +579,12 @@ const onCustomAdError = (item, e) => {
         }
         item.adError = true;
         failedAdIds.add(item.id);
+        // 从各个 Tab 的左右列及网格列表中剔除该广告项，彻底杜绝空白卡片
+        tabStates.forEach(state => {
+            state.leftCol = state.leftCol.filter(i => i.id !== item.id);
+            state.rightCol = state.rightCol.filter(i => i.id !== item.id);
+            state.gridItems = state.gridItems.filter(i => i.id !== item.id);
+        });
     }
 };
 
@@ -582,6 +593,11 @@ const onCustomAdClose = (item, e) => {
     if (item?.id) {
         item.adError = true;
         failedAdIds.add(item.id);
+        tabStates.forEach(state => {
+            state.leftCol = state.leftCol.filter(i => i.id !== item.id);
+            state.rightCol = state.rightCol.filter(i => i.id !== item.id);
+            state.gridItems = state.gridItems.filter(i => i.id !== item.id);
+        });
     }
 };
 
@@ -794,7 +810,6 @@ const handleBackTop = () => {
 };
 
 const openPreview = (id, index) => {
-    const appStore = useAppStore();
     // 纯壁纸列表（过滤剔除广告对象）
     appStore.wallList = (tabStates[index].images || []).filter(item => !item.is_ad);
     const targetItem = tabStates[index].images.find(item => item.id === id);
@@ -803,8 +818,8 @@ const openPreview = (id, index) => {
     uni.navigateTo({ url: `/pages/app/preview?id=${id}${cType}` });
 };
 
-// 监听视图模式/列数/VIP 状态变更，重新排版
-watch(() => [isWaterfall.value, colCount.value, userStore.isVip], () => {
+// 监听视图模式/列数/VIP 状态/后台广告开关变更，重新排版
+watch(() => [isWaterfall.value, colCount.value, userStore.isVip, appStore.versionConfig?.ad_enabled], () => {
     tabStates.forEach((_, idx) => {
         rebuildDisplayData(idx);
     });

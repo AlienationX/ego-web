@@ -1067,13 +1067,13 @@ onUnmounted(() => {
     overflow: hidden;
     position: relative;
     user-select: none;
+    background-color: var(--page-background);
 
     &.theme-light {
-        background-color: #f1f5f9;
         color: #0f172a;
 
         .workbench-nav {
-            background-color: rgba(241, 245, 249, 0.95);
+            background-color: var(--page-background);
             border-bottom: 1rpx solid rgba(226, 232, 240, 0.8);
         }
 
@@ -1109,11 +1109,10 @@ onUnmounted(() => {
     }
 
     &.theme-dark {
-        background-color: #090d16;
         color: #f8fafc;
 
         .workbench-nav {
-            background-color: rgba(9, 13, 22, 0.95);
+            background-color: var(--page-background);
             border-bottom: 1rpx solid rgba(255, 255, 255, 0.08);
         }
 

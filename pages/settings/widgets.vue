@@ -368,7 +368,6 @@ const handleBack = () => {
         border-radius: 28rpx;
         padding: 30rpx 32rpx;
         box-shadow: 0 10rpx 28rpx rgba(49, 46, 129, 0.25);
-        border: 1rpx solid rgba(251, 191, 36, 0.2);
 
         .hero-content {
             display: flex;
@@ -411,7 +410,6 @@ const handleBack = () => {
         background: var(--panel-background, rgba(120, 120, 128, 0.06));
         border-radius: 28rpx;
         padding: 28rpx;
-        border: 1rpx solid var(--panel-border);
         display: flex;
         flex-direction: column;
         gap: 24rpx;
@@ -795,7 +793,6 @@ const handleBack = () => {
         background: var(--panel-background, rgba(120, 120, 128, 0.06));
         border-radius: 24rpx;
         padding: 26rpx;
-        border: 1rpx solid var(--panel-border);
         display: flex;
         flex-direction: column;
         gap: 16rpx;

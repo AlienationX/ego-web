@@ -232,10 +232,10 @@ const showComingSoon = () => {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    background-color: var(--page-background);
     transition: background-color 0.3s ease;
 
     &.theme-light {
-        background-color: #f7f7f9;
         color: #111827;
 
         .creation-header .title-text {
@@ -250,7 +250,6 @@ const showComingSoon = () => {
     }
 
     &.theme-dark {
-        background-color: #121216;
         color: #f8fafc;
 
         .creation-header .title-text {

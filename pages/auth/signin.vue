@@ -1,7 +1,8 @@
 <template>
     <view class="signin-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <view class="back-btn" :style="{ top: backTop + 'px' }" @click="goBack">
-            <uni-icons type="back" :color="backIconColor" size="20"></uni-icons>
+            <mdi-icon path="/static/icons/arrow-left.svg" size="20px"
+                :color="settingsStore.isDark ? '#f4f8ff' : '#374151'"></mdi-icon>
         </view>
 
         <!-- 内容区域 -->
@@ -197,7 +198,7 @@ const userStore = useUserStore();
 const settingsStore = useSettingsStore();
 const backIconColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#4a5670'));
 const iconMutedColor = computed(() => (settingsStore.isDark ? '#94a3b8' : '#94a3b8'));
-const backTop = ref((getStatusBarHeight() || 0) + 10);
+const backTop = ref((getStatusBarHeight() || 0) + 6);
 const REMEMBER_STORAGE_KEY = 'signinRemember';
 
 // 通用导航对话框控制
@@ -285,6 +286,10 @@ const handleTitleTap = () => {
 };
 
 onMounted(() => {
+    const sb = getStatusBarHeight();
+    if (sb > 0) {
+        backTop.value = sb + 6;
+    }
     // 1. 如果已登录，直接跳转到用户页
     if (userStore.isLoggedIn) {
         uni.reLaunch({ url: '/pages/user/user' });
@@ -729,20 +734,36 @@ const goBack = () => {
 
 .back-btn {
     position: fixed;
-    left: 36rpx;
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: 16rpx;
-    background: var(--page-background-secondary);
+    left: 32rpx;
+    width: 74rpx;
+    height: 74rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 12;
-    transition: all 0.3s;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    z-index: 50;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 
     &:active {
-        background: var(--panel-background-strong);
+        opacity: 0.65;
         transform: scale(0.92);
+    }
+
+    .theme-light & {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+
+        &:active {
+            background: transparent;
+            opacity: 0.65;
+        }
     }
 }
 

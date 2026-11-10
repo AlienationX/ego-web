@@ -3,7 +3,43 @@
 
 // 获取状态栏高度
 export const getStatusBarHeight = () => {
-    return uni.getWindowInfo().statusBarHeight || 0;
+    // 1. App 端优先通过 HTML5+ 原生对象获取最底层的真实状态栏高度
+    // #ifdef APP-PLUS
+    try {
+        if (typeof plus !== 'undefined' && plus.navigator) {
+            const plusH = plus.navigator.getStatusbarHeight();
+            if (typeof plusH === 'number' && plusH > 0) {
+                return plusH;
+            }
+        }
+    } catch (e) {}
+    // #endif
+
+    // 2. 优先通过 uni.getWindowInfo 获取
+    try {
+        if (typeof uni.getWindowInfo === 'function') {
+            const winInfo = uni.getWindowInfo();
+            if (winInfo && typeof winInfo.statusBarHeight === 'number' && winInfo.statusBarHeight > 0) {
+                return winInfo.statusBarHeight;
+            }
+            if (winInfo?.safeAreaInsets?.top && winInfo.safeAreaInsets.top > 0) {
+                return winInfo.safeAreaInsets.top;
+            }
+        }
+    } catch (e) {}
+
+    // 3. 回退尝试 uni.getSystemInfoSync()
+    try {
+        const sysInfo = uni.getSystemInfoSync();
+        if (sysInfo && typeof sysInfo.statusBarHeight === 'number' && sysInfo.statusBarHeight > 0) {
+            return sysInfo.statusBarHeight;
+        }
+        if (sysInfo?.safeAreaInsets?.top && sysInfo.safeAreaInsets.top > 0) {
+            return sysInfo.safeAreaInsets.top;
+        }
+    } catch (e) {}
+
+    return 0;
 };
 
 // 获取标题栏高度

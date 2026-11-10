@@ -315,9 +315,10 @@ export const apiPostResetPassword = (data = {}) => {
 };
 
 // 注销用户接口
-export const apiPostDeactivateUser = () => {
+export const apiPostDeactivateUser = (data = {}) => {
     return request({
         url: '/user/deactivate/',
+        data,
         method: 'POST',
         isAuth: true,
     });

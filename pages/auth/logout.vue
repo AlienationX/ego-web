@@ -5,7 +5,7 @@
         <template v-if="!loggedOut">
             <view class="header">
                 <view class="back-btn" @click="goBack">
-                    <mdi-icon path="/static/icons/arrow-left.svg" size="18px" :color="backIconColor"></mdi-icon>
+                    <mdi-icon path="/static/icons/arrow-left.svg" size="20px" :color="backIconColor"></mdi-icon>
                 </view>
                 <text class="header-title">{{ t('logoutPage.title') }}</text>
                 <view class="header-placeholder"></view>
@@ -29,11 +29,20 @@
                     </view>
 
                     <view class="btn-group">
-                        <button class="confirm-btn" @click="onConfirm">
-                            <mdi-icon path="/static/icons/exit-to-app.svg" size="20px" color="#fff"></mdi-icon>
-                            <text>{{ t('logoutPage.confirm') }}</text>
+                        <button
+                            class="confirm-btn"
+                            :class="{ 'is-loading': isSubmitting, 'is-success': isSuccess }"
+                            :disabled="isSubmitting || isSuccess"
+                            @click="onConfirm"
+                        >
+                            <view v-if="isSubmitting" class="btn-spinner"></view>
+                            <view v-else-if="isSuccess" class="success-icon-wrap">
+                                <mdi-icon path="/static/icons/check.svg" size="20px" color="#fff"></mdi-icon>
+                            </view>
+                            <mdi-icon v-else path="/static/icons/exit-to-app.svg" size="20px" color="#fff"></mdi-icon>
+                            <text>{{ isSuccess ? t('logoutPage.doneTitle') : (isSubmitting ? (t('logoutPage.loggingOut') || t('common.processing') || '退出中...') : t('logoutPage.confirm')) }}</text>
                         </button>
-                        <button class="cancel-btn" @click="goBack">{{ t('logoutPage.cancel') }}</button>
+                        <button class="cancel-btn" :disabled="isSubmitting || isSuccess" @click="goBack">{{ t('logoutPage.cancel') }}</button>
                     </view>
                 </view>
             </view>
@@ -52,7 +61,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user.js';
@@ -66,15 +75,44 @@ const settingsStore = useSettingsStore();
 const backIconColor = computed(() => (settingsStore.isDark ? '#e5e7eb' : '#374151'));
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const loggedOut = ref(false);
+const isSubmitting = ref(false);
+const isSuccess = ref(false);
+
+onMounted(() => {
+    const sb = getStatusBarHeight();
+    if (sb > 0) {
+        statusBarHeight.value = sb;
+    }
+});
 
 const profileName = computed(() => userStore.userinfo?.profile?.nickname || userStore.userinfo?.nickname || 'User');
 const profileShortName = computed(() => String(profileName.value || '').split(' ')[0] || 'User');
 const profileEmail = computed(() => userStore.userinfo?.email || 'user@example.com');
 const profileAvatar = computed(() => userStore.userinfo?.profile?.avatar);
 
-const onConfirm = () => {
+const onConfirm = async () => {
+    if (isSubmitting.value || isSuccess.value) return;
+    isSubmitting.value = true;
+
+    // 体验流畅过渡：400ms loading 动效
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    // 清理用户信息与授权
     userStore.clearUserData();
-    loggedOut.value = true;
+
+    isSubmitting.value = false;
+    isSuccess.value = true;
+
+    // #ifdef APP-PLUS || MP-WEIXIN
+    try {
+        uni.vibrateShort({ type: 'light' });
+    } catch (e) {}
+    // #endif
+
+    // 450ms 优雅淡入成功页
+    setTimeout(() => {
+        loggedOut.value = true;
+    }, 450);
 };
 
 const goBack = () => {
@@ -104,22 +142,25 @@ const backToUser = () => {
 
 .header {
     height: 112rpx;
-    background: var(--page-background);
+    background: transparent;
     display: flex;
     align-items: center;
-    padding: 0 32rpx;
+    padding: 0 30rpx;
     gap: 16rpx;
 }
 
 .back-btn {
-    width: 64rpx;
-    height: 64rpx;
-    border-radius: 16rpx;
-    background: var(--page-background-secondary);
-    border: 1px solid var(--panel-border);
+    width: 60rpx;
+    height: 60rpx;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+    &:active {
+        opacity: 0.7;
+    }
 }
 
 .header-title {
@@ -131,13 +172,13 @@ const backToUser = () => {
 }
 
 .header-placeholder {
-    width: 72rpx;
-    height: 72rpx;
+    width: 60rpx;
+    height: 60rpx;
 }
 
 .center-content {
-    padding: 48rpx;
-    padding-top: 120rpx;
+    padding: 48rpx 30rpx;
+    padding-top: 100rpx;
 }
 
 .panel {
@@ -150,15 +191,15 @@ const backToUser = () => {
 }
 
 .logout-icon-wrap {
-    width: 160rpx;
-    height: 160rpx;
+    width: 150rpx;
+    height: 150rpx;
     border-radius: 50%;
-    background: #fef2f2;
-    border: 4rpx solid #fecaca;
+    background: rgba(229, 50, 45, 0.08);
+    border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 48rpx;
+    margin-bottom: 44rpx;
     animation: popIcon 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
@@ -201,7 +242,7 @@ const backToUser = () => {
     color: var(--text-secondary);
     line-height: 44rpx;
     text-align: center;
-    margin-bottom: 64rpx;
+    margin-bottom: 56rpx;
 }
 
 .account-card {
@@ -209,13 +250,14 @@ const backToUser = () => {
     max-width: 100%;
     box-sizing: border-box;
     background: var(--page-background-secondary);
-    border-radius: 24rpx;
-    border: 1px solid var(--panel-border);
+    border-radius: 28rpx;
+    border: none;
+    box-shadow: none;
     padding: 28rpx 32rpx;
     display: flex;
     align-items: center;
     gap: 24rpx;
-    margin-bottom: 64rpx;
+    margin-bottom: 56rpx;
 }
 
 .avatar {
@@ -259,12 +301,39 @@ const backToUser = () => {
     align-items: center;
     justify-content: center;
     gap: 16rpx;
-    box-shadow: 0 8rpx 24rpx rgba(229, 50, 45, 0.25);
-    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: none;
+    transition: transform 0.25s ease, background-color 0.3s ease, opacity 0.2s ease;
 
-    &:active {
+    &:active:not(:disabled) {
         opacity: 0.88;
         transform: scale(0.97);
+    }
+
+    &.is-loading {
+        opacity: 0.85;
+        transform: scale(0.98);
+        cursor: not-allowed;
+    }
+
+    &.is-success {
+        background: #ef4444;
+        animation: saveSuccessPulse 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    }
+
+    .btn-spinner {
+        width: 32rpx;
+        height: 32rpx;
+        border: 4rpx solid rgba(255, 255, 255, 0.35);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: btnSpin 0.7s linear infinite;
+    }
+
+    .success-icon-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: successBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     &::after {
@@ -277,14 +346,15 @@ const backToUser = () => {
     height: 100rpx;
     border-radius: 24rpx;
     background: var(--page-background-secondary);
-    border: 2rpx solid var(--panel-border);
+    border: none;
+    box-shadow: none;
     color: var(--text-primary);
     font-size: 30rpx;
     font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.25s ease;
 
     &:active {
         opacity: 0.88;
@@ -302,7 +372,7 @@ const backToUser = () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 64rpx;
+    padding: 64rpx 30rpx;
     animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -318,6 +388,7 @@ const backToUser = () => {
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 20rpx;
+    animation: fadeSlideUp 0.45s 0.1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .success-desc {
@@ -326,6 +397,7 @@ const backToUser = () => {
     line-height: 44rpx;
     text-align: center;
     margin-bottom: 72rpx;
+    animation: fadeSlideUp 0.45s 0.2s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .back-user-btn {
@@ -340,8 +412,9 @@ const backToUser = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8rpx 24rpx rgba(229, 50, 45, 0.25);
-    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: none;
+    transition: all 0.25s ease;
+    animation: fadeSlideUp 0.45s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 
     &:active {
         opacity: 0.88;
@@ -352,42 +425,74 @@ const backToUser = () => {
         border: none;
     }
 }
-</style>
 
-<style lang="scss" scoped>
+@keyframes btnSpin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes successBounce {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes saveSuccessPulse {
+    0% {
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 // ── 暗色模式覆盖 ──
 .theme-dark {
-    &.layout {
-        background: #111114;
-    }
-
-    .header {
-        background: #111114;
-    }
-
-    .back-btn {
-        background: rgba(255, 255, 255, 0.07);
-        border: none;
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.08);
-    }
-
     .logout-icon-wrap {
         background: rgba(229, 50, 45, 0.12);
-        border-color: rgba(229, 50, 45, 0.24);
+        border: none;
     }
 
     .account-card {
         background: #1e1e22;
         border: none;
-        box-shadow:
-            inset 0 1rpx 0 rgba(255, 255, 255, 0.06),
-            0 8rpx 24rpx rgba(0, 0, 0, 0.28);
+        box-shadow: none;
     }
 
     .cancel-btn {
         background: #1e1e22;
         border: none;
-        box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.06);
+        box-shadow: none;
+
+        &:active {
+            background: rgba(255, 255, 255, 0.05);
+        }
     }
 }
 </style>
