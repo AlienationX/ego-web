@@ -185,6 +185,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
+import { onLoad } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { apiPostLogin, apiPostLoginByWechat, apiPostLoginByHuawei } from '@/api/wallpaper.js';
@@ -284,6 +285,13 @@ const handleTitleTap = () => {
         });
     }
 };
+
+onLoad((options) => {
+    if (options?.email) {
+        form.email = decodeURIComponent(options.email);
+        showEmailForm.value = true;
+    }
+});
 
 onMounted(() => {
     const sb = getStatusBarHeight();
