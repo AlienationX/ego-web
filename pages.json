@@ -5,9 +5,9 @@
             "path": "pages/app/index",
             "style": {
                 "navigationBarTitleText": "首页",
-                "navigationStyle": "custom", // 去掉顶部栏
-                "enablePullDownRefresh": false,
-                "onReachBottomDistance": 150
+                "navigationStyle": "custom",
+                "enablePullDownRefresh": false
+                // "onReachBottomDistance": 150
             }
         },
         {

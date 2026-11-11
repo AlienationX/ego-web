@@ -345,6 +345,7 @@ import {
     useTranslateParams,
 } from '@/utils/i18n.js';
 import { openLegalAgreement } from '@/utils/common.js';
+import { applyAppTheme } from '@/utils/theme.js';
 
 const { t, locale } = useI18n();
 const { tp } = useTranslateParams();
@@ -934,21 +935,8 @@ function selectTheme(theme) {
         settingsStore.osTheme = getSystemTheme();
     }
 
-    // #ifdef APP
-    // 更新原生UI风格，支持跟随系统主题auto、dark、light主题
-    plus.nativeUI.setUIStyle(theme);
-
-    // setUIStyle 会异步触发原生层重绘并重新显示被隐藏的原生 TabBar，同时可能破坏
-    // Android Edge-to-Edge 沉浸式布局。需要立即 + 延时多次压制，覆盖各平台的重绘时序。
-    const _suppressNativeTabBar = () => {
-        uni.hideTabBar({ animation: false, fail: () => {} });
-        setAndroidImmersive(settingsStore.isDark);
-    };
-    _suppressNativeTabBar();           // 立即
-    setTimeout(_suppressNativeTabBar, 80);   // 覆盖第一次异步重绘
-    setTimeout(_suppressNativeTabBar, 250);  // 覆盖较慢设备的延迟重绘
-    setTimeout(_suppressNativeTabBar, 500);  // 终极兜底
-    // #endif
+    // 全端同步状态栏、安全区与原生UI风格
+    applyAppTheme(theme);
 
     uni.showToast({
         title: t('settings.toast.themeChanged'),

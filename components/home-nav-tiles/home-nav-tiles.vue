@@ -24,7 +24,7 @@
                 <mdi-icon path="/static/icons/flash.svg" size="16px" :color="settingsStore.isDark ? '#f8fafc' : '#ffffff'"></mdi-icon>
             </view>
             <text class="pill-item__label">{{ isEn ? 'Recent' : '最新' }}</text>
-            <view v-if="statusStore.newWallpapersCount > 0" class="pill-item__badge">
+            <view v-if="statusStore.newWallpapersCount > 0" class="pill-item__badge" :class="{ 'is-single': statusStore.newWallpapersCount < 10 }">
                 <text class="badge-text">{{ newBadgeText }}</text>
             </view>
         </view>
@@ -183,6 +183,12 @@ const goSubjects = () => {
         box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.4);
         margin-left: 4rpx;
         flex-shrink: 0;
+
+        &.is-single {
+            width: 32rpx;
+            padding: 0;
+            border-radius: 50%;
+        }
 
         .badge-text {
             font-size: 19rpx;

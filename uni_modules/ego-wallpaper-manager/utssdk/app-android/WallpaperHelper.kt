@@ -13,11 +13,15 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.util.Log
+import androidx.work.Constraints
+import androidx.work.CoroutineWorker
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkerParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -27,6 +31,37 @@ import java.io.FileOutputStream
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.TimeUnit
+
+/**
+ * Android 官方推荐的 WorkManager 后台任务 Worker
+ * 即使 App 进程被杀死、手机进入 Doze 睡眠状态，系统底层也能定时拉起 Worker 执行壁纸更换
+ */
+class WallpaperRotateWorker(
+    appContext: Context,
+    workerParams: WorkerParameters
+) : CoroutineWorker(appContext, workerParams) {
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        Log.i("EgoWallpaperManager", "WallpaperRotateWorker triggered by WorkManager")
+        val status = WallpaperHelper.executeRotateFromWorker(applicationContext)
+        when (status) {
+            WallpaperHelper.RotateStatus.VIP_EXPIRED -> {
+                Log.w("EgoWallpaperManager", "Worker detected VIP expired, canceling periodic work")
+                WallpaperHelper.stopAutoRotate(applicationContext)
+                Result.failure()
+            }
+            WallpaperHelper.RotateStatus.SUCCESS -> {
+                Result.success()
+            }
+            WallpaperHelper.RotateStatus.NETWORK_ERROR -> {
+                Result.retry()
+            }
+            else -> {
+                Result.success()
+            }
+        }
+    }
+}
 
 object WallpaperHelper {
     private const val TAG = "EgoWallpaperManager"
@@ -37,9 +72,21 @@ object WallpaperHelper {
     private const val KEY_TARGET = "rotate_target"
     private const val KEY_WIFI_ONLY = "rotate_wifi_only"
     private const val CACHE_FILE_NAME = "ego_next_wallpaper_cache.jpg"
+    private const val WORK_NAME_PERIODIC = "ego_wallpaper_periodic_work"
+
+    enum class RotateStatus {
+        SUCCESS,
+        VIP_EXPIRED,
+        NETWORK_ERROR,
+        SKIPPED
+    }
+
+    private data class FetchFeedResult(
+        val status: RotateStatus,
+        val imageUrl: String
+    )
 
     private var screenReceiver: BroadcastReceiver? = null
-    private var periodicJob: Job? = null
     private var lastRotateTime: Long = 0L
     @Volatile
     private var isPrefetching = false
@@ -79,7 +126,7 @@ object WallpaperHelper {
     }
 
     /**
-     * 启动原生自动轮播服务（双缓冲预加载 + 熄屏无感切换）
+     * 启动原生自动轮播服务（双缓冲预加载 + 熄屏无感切换 + WorkManager 官方持久化后台任务）
      */
     fun startAutoRotate(
         context: Context,
@@ -98,12 +145,12 @@ object WallpaperHelper {
     }
 
     /**
-     * 停止自动轮播服务
+     * 停止自动轮播服务（注销广播 + 取消 WorkManager 任务 + 清除本地缓存）
      */
     fun stopAutoRotate(context: Context) {
         saveConfig(context, false, "", "", "", false)
         unregisterScreenReceiver(context)
-        stopPeriodicJob()
+        cancelWorkManager(context)
         clearCache(context)
         Log.i(TAG, "stopAutoRotate stopped")
     }
@@ -172,31 +219,120 @@ object WallpaperHelper {
         }
     }
 
+    /**
+     * 使用 Android 官方推荐的 WorkManager 进行后台持久化调度
+     * 具有系统级唤醒、Doze 低功耗待机穿透、防进程划掉能力
+     */
     private fun schedulePeriodicJobIfNeeded(context: Context) {
-        stopPeriodicJob()
         val prefs = getPrefs(context)
         val frequency = prefs.getString(KEY_FREQUENCY, "daily") ?: "daily"
-        if (frequency == "unlock") return
+        val wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, true)
 
-        val intervalMs = when (frequency) {
-            "1h" -> 60 * 60 * 1000L
-            "12h" -> 12 * 60 * 60 * 1000L
-            "daily" -> 24 * 60 * 60 * 1000L
-            else -> 24 * 60 * 60 * 1000L
-        }
+        try {
+            val workManager = WorkManager.getInstance(context)
 
-        periodicJob = CoroutineScope(Dispatchers.IO).launch {
-            while (isActive) {
-                delay(intervalMs)
-                Log.d(TAG, "Periodic rotate triggered after $intervalMs ms")
-                triggerRotate(context.applicationContext ?: context, false)
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
+                .setRequiresBatteryNotLow(true)
+                .build()
+
+            if (frequency == "unlock") {
+                // 亮屏模式：主要通过 ACTION_SCREEN_OFF 即时触发，
+                // 同时配置一个 6 小时周期 Worker 负责预加载下一张壁纸与保活补充缓存
+                val unlockWorker = PeriodicWorkRequestBuilder<WallpaperRotateWorker>(6, TimeUnit.HOURS)
+                    .setConstraints(constraints)
+                    .build()
+
+                workManager.enqueueUniquePeriodicWork(
+                    WORK_NAME_PERIODIC,
+                    ExistingPeriodicWorkPolicy.UPDATE,
+                    unlockWorker
+                )
+                Log.i(TAG, "WorkManager scheduled for unlock mode cache replenishment (6h)")
+                return
             }
+
+            val (interval, timeUnit) = when (frequency) {
+                "1h" -> Pair(1L, TimeUnit.HOURS)
+                "12h" -> Pair(12L, TimeUnit.HOURS)
+                "daily" -> Pair(24L, TimeUnit.HOURS)
+                else -> Pair(24L, TimeUnit.HOURS)
+            }
+
+            val periodicRequest = PeriodicWorkRequestBuilder<WallpaperRotateWorker>(interval, timeUnit)
+                .setConstraints(constraints)
+                .build()
+
+            workManager.enqueueUniquePeriodicWork(
+                WORK_NAME_PERIODIC,
+                ExistingPeriodicWorkPolicy.UPDATE,
+                periodicRequest
+            )
+            Log.i(TAG, "WorkManager periodic work scheduled: $interval $timeUnit (wifiOnly=$wifiOnly)")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to schedule WorkManager", e)
         }
     }
 
-    private fun stopPeriodicJob() {
-        periodicJob?.cancel()
-        periodicJob = null
+    private fun cancelWorkManager(context: Context) {
+        try {
+            WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME_PERIODIC)
+            Log.i(TAG, "WorkManager unique periodic work canceled")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to cancel WorkManager", e)
+        }
+    }
+
+    /**
+     * 供 WorkManager 调用的持久化壁纸更换执行入口
+     */
+    fun executeRotateFromWorker(context: Context): RotateStatus {
+        val prefs = getPrefs(context)
+        val enabled = prefs.getBoolean(KEY_ENABLED, false)
+        if (!enabled) return RotateStatus.SKIPPED
+
+        val feedUrl = prefs.getString(KEY_FEED_URL, "") ?: ""
+        if (feedUrl.isBlank()) return RotateStatus.SKIPPED
+
+        val wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, true)
+        val target = prefs.getString(KEY_TARGET, "lock") ?: "lock"
+
+        if (wifiOnly && !isWifiConnected(context)) {
+            Log.d(TAG, "executeRotateFromWorker: Wifi only enabled but not on wifi, skipped")
+            return RotateStatus.SKIPPED
+        }
+
+        try {
+            val cacheFile = getCacheFile(context)
+            if (cacheFile.exists() && cacheFile.length() > 0) {
+                val bitmap = BitmapFactory.decodeFile(cacheFile.absolutePath)
+                if (bitmap != null) {
+                    applyBitmapToWallpaper(context, bitmap, target)
+                    Log.i(TAG, "Worker applied wallpaper from local cache")
+                    cacheFile.delete()
+                }
+                prefetchNextWallpaper(context, feedUrl, wifiOnly)
+                return RotateStatus.SUCCESS
+            } else {
+                val fetchRes = fetchFeedImageUrl(context, feedUrl)
+                if (fetchRes.status == RotateStatus.VIP_EXPIRED) {
+                    return RotateStatus.VIP_EXPIRED
+                }
+                if (fetchRes.imageUrl.isNotBlank()) {
+                    val bitmap = downloadBitmap(fetchRes.imageUrl)
+                    if (bitmap != null) {
+                        applyBitmapToWallpaper(context, bitmap, target)
+                        Log.i(TAG, "Worker downloaded and applied online wallpaper: ${fetchRes.imageUrl}")
+                    }
+                    prefetchNextWallpaper(context, feedUrl, wifiOnly)
+                    return RotateStatus.SUCCESS
+                }
+                return fetchRes.status
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "executeRotateFromWorker failed", e)
+            return RotateStatus.NETWORK_ERROR
+        }
     }
 
     /**
@@ -240,12 +376,17 @@ object WallpaperHelper {
                         Log.d(TAG, "Wifi only enabled but not on wifi, skipped")
                         return@launch
                     }
-                    val imageUrl = fetchFeedImageUrl(feedUrl)
-                    if (imageUrl.isNotBlank()) {
-                        val bitmap = downloadBitmap(imageUrl)
+                    val fetchRes = fetchFeedImageUrl(context, feedUrl)
+                    if (fetchRes.status == RotateStatus.VIP_EXPIRED) {
+                        Log.w(TAG, "VIP expired during triggerRotate, stopping rotate service")
+                        stopAutoRotate(context)
+                        return@launch
+                    }
+                    if (fetchRes.imageUrl.isNotBlank()) {
+                        val bitmap = downloadBitmap(fetchRes.imageUrl)
                         if (bitmap != null) {
                             applyBitmapToWallpaper(context, bitmap, target)
-                            Log.i(TAG, "Rotated online (no cache): $imageUrl")
+                            Log.i(TAG, "Rotated online (no cache): ${fetchRes.imageUrl}")
                         }
                     }
                     prefetchNextWallpaper(context, feedUrl, wifiOnly)
@@ -271,12 +412,17 @@ object WallpaperHelper {
                     Log.d(TAG, "Prefetch skipped: not on wifi")
                     return@launch
                 }
-                val imageUrl = fetchFeedImageUrl(feedUrl)
-                if (imageUrl.isNotBlank()) {
+                val fetchRes = fetchFeedImageUrl(context, feedUrl)
+                if (fetchRes.status == RotateStatus.VIP_EXPIRED) {
+                    Log.w(TAG, "VIP expired during prefetch, stopping rotate service")
+                    stopAutoRotate(context)
+                    return@launch
+                }
+                if (fetchRes.imageUrl.isNotBlank()) {
                     val tempFile = File(context.cacheDir, "temp_rotate_prefetch_${System.currentTimeMillis()}.jpg")
                     var conn: HttpURLConnection? = null
                     try {
-                        val url = URL(imageUrl)
+                        val url = URL(fetchRes.imageUrl)
                         conn = (url.openConnection() as HttpURLConnection).apply {
                             doInput = true
                             connectTimeout = 15000
@@ -292,7 +438,7 @@ object WallpaperHelper {
                             if (tempFile.exists() && tempFile.length() > 0) {
                                 if (cacheFile.exists()) cacheFile.delete()
                                 tempFile.renameTo(cacheFile)
-                                Log.i(TAG, "Prefetched next wallpaper successfully to local cache: $imageUrl")
+                                Log.i(TAG, "Prefetched next wallpaper successfully to local cache: ${fetchRes.imageUrl}")
                             }
                         }
                     } finally {
@@ -407,7 +553,10 @@ object WallpaperHelper {
         }
     }
 
-    private fun fetchFeedImageUrl(feedUrl: String): String {
+    /**
+     * 请求 Feed 接口获取下一张壁纸图片 URL，且自动识别 403 VIP 到期并触发停止服务
+     */
+    private fun fetchFeedImageUrl(context: Context, feedUrl: String): FetchFeedResult {
         var conn: HttpURLConnection? = null
         return try {
             val url = URL(feedUrl)
@@ -417,6 +566,7 @@ object WallpaperHelper {
                 readTimeout = 10000
                 connect()
             }
+
             if (conn.responseCode == 200) {
                 val reader = BufferedReader(InputStreamReader(conn.inputStream))
                 val sb = StringBuilder()
@@ -428,10 +578,18 @@ object WallpaperHelper {
 
                 val json = JSONObject(sb.toString())
                 val data = json.optJSONObject("data")
-                data?.optString("image_url", "") ?: ""
+                val imgUrl = data?.optString("image_url", "") ?: ""
+                FetchFeedResult(RotateStatus.SUCCESS, imgUrl)
+            } else if (conn.responseCode == 403) {
+                // 收到 403 Forbidden（如 VIP 会员已过期）
+                Log.w(TAG, "Feed returned 403 Forbidden: VIP expired or unauthorized")
+                FetchFeedResult(RotateStatus.VIP_EXPIRED, "")
             } else {
-                ""
+                FetchFeedResult(RotateStatus.NETWORK_ERROR, "")
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "fetchFeedImageUrl failed", e)
+            FetchFeedResult(RotateStatus.NETWORK_ERROR, "")
         } finally {
             conn?.disconnect()
         }

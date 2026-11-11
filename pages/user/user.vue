@@ -598,13 +598,17 @@ const menuGroups = computed(() => [
                 click: toHistory,
             },
             // #ifndef APP-HARMONY
-            {
-                left_icon: '/static/icons/view-carousel.svg',
-                left_text: t('autoWallpaper.pageTitle'),
-                right_text: 'VIP',
-                badge: 'vip',
-                click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
-            },
+            ...(appStore.versionConfig?.pay_enabled
+                ? [
+                    {
+                        left_icon: '/static/icons/view-carousel.svg',
+                        left_text: t('autoWallpaper.pageTitle'),
+                        right_text: 'VIP',
+                        badge: 'vip',
+                        click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
+                    },
+                ]
+                : []),
             // #endif
             {
                 left_icon: '/static/icons/widgets.svg',

@@ -53,8 +53,9 @@
                 </view>
                 <!-- #endif -->
 
-                <!-- VIP 尊享特权徽章横幅 -->
-                <view class="vip-header-card" :class="{ 'is-vip': userStore.isVip }">
+                <!-- VIP 尊享特权徽章横幅 (VIP 专属功能) -->
+                <view class="vip-header-card" :class="{ 'is-vip': userStore.isVip }"
+                    @click="!userStore.isVip && uni.navigateTo({ url: '/pages/member/payment' })">
                     <view class="vip-badge-icon">
                         <mdi-icon path="/static/icons/crown-circle.svg" size="28px" color="#FBBF24"></mdi-icon>
                     </view>
@@ -291,6 +292,7 @@
 import { ref, computed, reactive, onMounted } from 'vue';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
+import { useAppStore } from '@/stores/app.js';
 import { useI18n } from 'vue-i18n';
 import { API_BASE_URL } from '@/common/config.js';
 import { apiGetRotateConfig, apiSaveRotateConfig, apiGetRotateFeed } from '@/api/member.js';
@@ -302,7 +304,10 @@ import PopupNavigationDialog from '@/components/popup-navigation-dialog/popup-na
 
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+const appStore = useAppStore();
 const { t } = useI18n();
+
+const isPayEnabled = computed(() => appStore.versionConfig?.pay_enabled === true);
 
 const statusBarHeight = ref(0);
 const saving = ref(false);
@@ -377,11 +382,32 @@ onMounted(async () => {
 });
 
 const loadConfig = async () => {
+    // 优先读取本地缓存兜底
+    const localConfig = uni.getStorageSync('auto_rotate_config');
+    if (localConfig) {
+        Object.assign(form.value, localConfig);
+    }
+
     if (!userStore.isLoggedIn && !userStore.userinfo?.id) return;
     try {
         const res = await apiGetRotateConfig();
         if (res?.data) {
             Object.assign(form.value, res.data);
+            uni.setStorageSync('auto_rotate_config', form.value);
+
+            // 会员过期处理：若开启支付且用户已不是 VIP，但后台配置仍为开启，则自动关闭并停用轮播
+            if (isPayEnabled.value && !userStore.isVip && form.value.enabled) {
+                form.value.enabled = false;
+                uni.setStorageSync('auto_rotate_config', form.value);
+                // #ifdef APP
+                stopAutoRotate();
+                // #endif
+                uni.showToast({
+                    title: '会员已到期，自动更换壁纸已暂停',
+                    icon: 'none',
+                    duration: 3000,
+                });
+            }
         }
     } catch (e) {
         console.error('Failed to load auto-rotate config', e);
@@ -429,7 +455,7 @@ const checkAuthAndVip = (onCancelCallback) => {
         return false;
     }
 
-    // 2. 已登录但非 VIP 拦截 -> 引导去开通 VIP
+    // 2. VIP 专属功能拦截 -> 非 VIP 引导去开通 VIP
     if (!userStore.isVip) {
         showNavDialog({
             title: t('common.tip'),
@@ -451,7 +477,7 @@ const checkAuthAndVip = (onCancelCallback) => {
     return true;
 };
 
-const onMasterSwitchChange = (e) => {
+const onMasterSwitchChange = async (e) => {
     const nextVal = e.detail.value;
     if (nextVal) {
         const passed = checkAuthAndVip(() => {
@@ -461,8 +487,15 @@ const onMasterSwitchChange = (e) => {
             resetSwitch();
             return;
         }
+        if (form.value.mode === 'board' && !form.value.board) {
+            uni.showToast({ title: '请先选择要轮播的画板', icon: 'none' });
+            resetSwitch();
+            return;
+        }
     }
     form.value.enabled = nextVal;
+    // 立即保存并启停原生服务，彻底解决总开关与底部保存按钮脱节的问题
+    await executeSaveConfig(false);
 };
 
 const onWifiSwitchChange = (e) => {
@@ -609,10 +642,15 @@ const applyWallpaperNative = () => {
     // #endif
 };
 
-const handleSaveConfig = async () => {
+const executeSaveConfig = async (showSuccessToast = true) => {
     if (form.value.enabled) {
         const passed = checkAuthAndVip();
-        if (!passed) return;
+        if (!passed) return false;
+
+        if (form.value.mode === 'board' && !form.value.board) {
+            uni.showToast({ title: '请先选择要轮播的画板', icon: 'none' });
+            return false;
+        }
     }
 
     saving.value = true;
@@ -631,6 +669,9 @@ const handleSaveConfig = async () => {
             form.value.rotate_token = saveRes.data.rotate_token;
         }
 
+        // 同步持久化至本地 Storage 兜底
+        uni.setStorageSync('auto_rotate_config', form.value);
+
         // #ifdef APP
         if (form.value.enabled) {
             startAutoRotate({
@@ -644,12 +685,27 @@ const handleSaveConfig = async () => {
         }
         // #endif
 
-        uni.showToast({ title: t('autoWallpaper.saveSuccess'), icon: 'none' });
+        if (showSuccessToast) {
+            uni.showToast({ title: t('autoWallpaper.saveSuccess'), icon: 'none' });
+        } else {
+            uni.showToast({
+                title: form.value.enabled ? '自动更换已开启' : '自动更换已关闭',
+                icon: 'none',
+            });
+        }
+        return true;
     } catch (e) {
+        // 接口失败也兜底保存本地配置
+        uni.setStorageSync('auto_rotate_config', form.value);
         uni.showToast({ title: t('autoWallpaper.saveFailed'), icon: 'none' });
+        return false;
     } finally {
         saving.value = false;
     }
+};
+
+const handleSaveConfig = () => {
+    executeSaveConfig(true);
 };
 </script>
 

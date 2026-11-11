@@ -11,7 +11,7 @@
         "themeLocation" : "theme.json",
         "softinputNavBar" : "none",
         "safearea" : {
-            "background" : "#ffffff",
+            "background" : "#eff1f5",
             "backgroundDark" : "#181818",
             "bottom" : {
                 "offset" : "none"

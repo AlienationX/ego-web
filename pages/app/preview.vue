@@ -655,6 +655,39 @@
 
         <!-- 存入画板弹窗 -->
         <popup-board-select ref="popupBoardSelectRef"></popup-board-select>
+
+        <!-- 下拉后右下角沉浸式悬浮快捷操作组（向上回顶 + 向左返回） -->
+        <view
+            v-if="showFabControls"
+            class="floating-nav-capsule"
+            :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
+        >
+            <view
+                class="fab-nav-btn"
+                hover-class="fab-nav-btn--active"
+                :hover-stay-time="100"
+                @click="scrollToTop"
+            >
+                <mdi-icon
+                    path="/static/icons/arrow-up.svg"
+                    size="20px"
+                    :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"
+                ></mdi-icon>
+            </view>
+            <view class="fab-nav-divider"></view>
+            <view
+                class="fab-nav-btn"
+                hover-class="fab-nav-btn--active"
+                :hover-stay-time="100"
+                @click="goBack"
+            >
+                <mdi-icon
+                    path="/static/icons/arrow-left.svg"
+                    size="20px"
+                    :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"
+                ></mdi-icon>
+            </view>
+        </view>
     </view>
 </template>
 
@@ -1047,6 +1080,15 @@ const disableSwipe = ref(false);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 // 顶部渐变羽化毛玻璃状态栏显示开关 (与 classify.vue / user.vue 一致)
 const isScrolled = ref(false);
+// 下拉浏览作品指标/推荐列表时，右下角悬浮快捷操作组（回到顶部 + 返回上一页）
+const showFabControls = ref(false);
+
+const scrollToTop = () => {
+    uni.pageScrollTo({
+        scrollTop: 0,
+        duration: 300,
+    });
+};
 
 // 页面级滚动：App 端原生广告无法在 scroll-view 内跟随滚动，因此预览页改用页面滚动
 onPageScroll((e) => {
@@ -1054,6 +1096,9 @@ onPageScroll((e) => {
 
     // 向上滑动浏览详情时，淡入渐变羽化毛玻璃
     isScrolled.value = scrollTop > 20;
+
+    // 滑动超过阈值（240px，首屏大图滑出大半进入详情流）时，显示悬浮快捷导航胶囊
+    showFabControls.value = scrollTop > 240;
 
     if (scrollTop > 40 && statusStore.appStatus && !statusStore.appStatus.hasSeenPreviewHint) {
         statusStore.appStatus.hasSeenPreviewHint = true;
@@ -4012,6 +4057,88 @@ $access-theme-primary: #3b82f6;
             display: none;
             border: none;
         }
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   右下角沉浸式悬浮快捷操作组 (向上回顶 + 向左返回)
+───────────────────────────────────────────────────────────── */
+.floating-nav-capsule {
+    position: fixed;
+    right: 32rpx;
+    bottom: calc(max(34px, env(safe-area-inset-bottom)) + 28rpx);
+    width: 84rpx;
+    border-radius: 42rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 998;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    pointer-events: auto;
+    animation: fabCapsulePop 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+
+    &.theme-dark {
+        background: rgba(28, 28, 34, 0.78);
+        border: 2rpx solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.45);
+
+        .fab-nav-divider {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .fab-nav-btn--active {
+            background: rgba(255, 255, 255, 0.12);
+        }
+    }
+
+    &.theme-light {
+        background: rgba(255, 255, 255, 0.85);
+        border: 2rpx solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.1);
+
+        .fab-nav-divider {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .fab-nav-btn--active {
+            background: rgba(0, 0, 0, 0.06);
+        }
+    }
+
+    .fab-nav-btn {
+        width: 84rpx;
+        height: 84rpx;
+        border-radius: 42rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+
+        &:active {
+            transform: scale(0.88);
+        }
+    }
+
+    .fab-nav-divider {
+        width: 48rpx;
+        height: 1rpx;
+        margin: 0 auto;
+    }
+}
+
+@keyframes fabCapsulePop {
+    from {
+        opacity: 0;
+        transform: scale(0.7) translateY(30rpx);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
 }
 </style>

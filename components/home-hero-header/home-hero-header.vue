@@ -27,7 +27,7 @@
                     :size="capsuleIconSize"
                     :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"
                 ></mdi-icon>
-                <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge">
+                <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge" :class="{ 'is-single': statusStore.newWallpapersCount < 10 }">
                     <text class="badge-num">{{ statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount }}</text>
                 </view>
             </view>
@@ -71,7 +71,7 @@
                 <!-- 铃铛按钮 (纯白浮岛圆球) -->
                 <view class="bell-btn" @click="emit('open-notifications')">
                     <mdi-icon path="/static/icons/bell.svg" size="20px" :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"></mdi-icon>
-                    <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge">
+                    <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge" :class="{ 'is-single': statusStore.newWallpapersCount < 10 }">
                         <text class="badge-num">{{ statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount }}</text>
                     </view>
                 </view>
@@ -539,15 +539,32 @@ const goTimeline = () => {
         color: #ffffff;
         font-size: 18rpx;
         font-weight: 700;
-        padding: 2rpx 8rpx;
-        border-radius: 20rpx;
-        border: 2rpx solid var(--page-background);
-        min-width: 24rpx;
-        text-align: center;
-        line-height: 1.2;
+        height: 32rpx;
+        min-width: 32rpx;
+        padding: 0 8rpx;
+        border-radius: 999rpx;
+        border: 3rpx solid var(--page-background);
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+
+        &.is-single {
+            width: 32rpx;
+            padding: 0;
+            border-radius: 50%;
+        }
+
+        .badge-num {
+            font-size: 18rpx;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+        }
 
         .theme-dark & {
-            border: none;
+            border-color: #222228;
         }
     }
 }

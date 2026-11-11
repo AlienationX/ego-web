@@ -35,6 +35,11 @@
  * 1. 苹果设备优先命中 -apple-system 与 PingFang SC（原汁原味 iOS 默认字体）；
  * 2. 安卓设备（小程序端/App端）自动跳过苹果私有字体，优先命中 Roboto（Pixel 英文）与 Noto Sans SC（Pixel 中文思源黑体）。
  */
+page {
+    background-color: var(--page-background, #181818);
+    min-height: 100%;
+}
+
 page, view, text, scroll-view, input, textarea, button {
     font-family:
         -apple-system,

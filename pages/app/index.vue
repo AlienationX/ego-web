@@ -598,6 +598,7 @@ import {
 import { handlePicUrl } from '@/utils/common.js';
 import { AD_CONFIG } from '@/common/config.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
+import { applyAppTheme } from '@/utils/theme.js';
 import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
@@ -1298,6 +1299,7 @@ const refreshStatusBar = () => {
     if (sb > 0) {
         statusBarHeight.value = sb;
     }
+    applyAppTheme(settingsStore.options.theme);
 };
 
 onMounted(() => {

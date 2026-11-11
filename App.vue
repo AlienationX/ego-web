@@ -1,6 +1,7 @@
 <script setup>
 import permissionListener from '@/uni_modules/c-permission-listener';
 import { writeAccessLog, setAndroidImmersive, handleDeepLink, isPCWechat } from '@/utils/system.js';
+import { applyAppTheme } from '@/utils/theme.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide, onReady, onPageShow } from '@dcloudio/uni-app';
 import { useSettingsStore, getSystemTheme } from '@/stores/settings.js';
@@ -44,9 +45,11 @@ if (isPCWechat()) {
 onLaunch((options) => {
     console.log('App Launch', options);
     checkPCPlatformIntercept(options);
-    // 优先执行布局设置。全面采用自定义 TabBar，冷启动第一时间隐藏原生 TabBar
-    uni.hideTabBar({ animation: false, fail: () => {} });
-    setAndroidImmersive(settingsStore.isDark);
+
+    // 初始化应用主题设置（支持 auto/light/dark，多端读取持久化存储）
+    const savedTheme = uni.getStorageSync('theme') || settingsStore.options.theme || 'auto';
+    settingsStore.options.theme = savedTheme;
+    applyAppTheme(savedTheme);
 
     // 检查是否已看过引导页。
     // TODO 目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
@@ -58,34 +61,12 @@ onLaunch((options) => {
     //     });
     // }
 
-    // 初始化应用主题设置（支持 auto/light/dark，多端读取持久化存储）
-    const savedTheme = uni.getStorageSync('theme') || settingsStore.options.theme || 'auto';
-    settingsStore.options.theme = savedTheme;
-    // #ifdef APP
-    plus.nativeUI.setUIStyle(savedTheme);
-    // #endif
-
     // 监控系统主题变化
     uni.onThemeChange((res) => {
         const newTheme = res?.theme || getSystemTheme();
         console.log('onThemeChange', newTheme);
         settingsStore.osTheme = newTheme;
-
-        // #ifdef APP
-        if (settingsStore.options.theme === 'auto') {
-            plus.nativeUI.setUIStyle('auto');
-        }
-        // #endif
-
-        // Android 系统在主题切换后会重置 Window Insets，需要立即+延时多次恢复沉浸式
-        const _applyLayout = () => {
-            uni.hideTabBar({ animation: false, fail: () => {} });
-            setAndroidImmersive(settingsStore.isDark);
-        };
-        _applyLayout();
-        setTimeout(_applyLayout, 80);
-        setTimeout(_applyLayout, 250);
-        setTimeout(_applyLayout, 500);
+        applyAppTheme(settingsStore.options.theme);
     });
 
     // 初始化应用语言（Android 修改系统语言会重启 App，这里负责正确初始化）
@@ -118,17 +99,15 @@ onLaunch((options) => {
 onShow((res) => {
     console.log('App Show', res);
     checkPCPlatformIntercept(res);
-    // 优先执行布局设置。全面采用自定义 TabBar，原生 TabBar 始终隐藏
-    uni.hideTabBar({ animation: false, fail: () => {} });
-    setAndroidImmersive(settingsStore.isDark);
-
-    handleDeepLink(res);
 
     // 切回前台时重新同步系统主题，解决后台切换系统深浅色无法感知的问题
     const latestOsTheme = getSystemTheme();
     if (settingsStore.osTheme !== latestOsTheme) {
         settingsStore.osTheme = latestOsTheme;
     }
+    applyAppTheme(settingsStore.options.theme);
+
+    handleDeepLink(res);
 
     // iOS/鸿蒙修改系统语言不重启 App，切回前台时通过 onShow 重新检测系统语言
     // 注：uni.onLocaleChange 只监听 uni.setLocale() 调用，无法感知系统设置变化
