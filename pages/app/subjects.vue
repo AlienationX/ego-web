@@ -209,7 +209,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted } from 'vue';
 import { onLoad, onShow, onPageScroll, onReachBottom, onPullDownRefresh } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetSubjects } from '@/api/wallpaper.js';
@@ -218,6 +218,7 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { AD_CONFIG } from '@/common/config.js';
+import { applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -237,9 +238,7 @@ const onCustomAdError = (item, e) => {
     console.warn('[Ad] 专题列表卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
         item.adError = true;
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-        }, 500);
+        failedAdIds.add(item.id);
     }
 };
 
@@ -248,9 +247,7 @@ const onCustomAdClose = (item, e) => {
     console.warn('[Ad] 专题列表卡片广告被关闭:', item?.id);
     if (item?.id) {
         item.adError = true;
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-        }, 500);
+        failedAdIds.add(item.id);
     }
 };
 
@@ -325,7 +322,13 @@ const displaySubjectsList = computed(() => {
         count++;
 
         // 每 AD_INTERVAL 个专题后穿插 1 个横版卡片广告
-        if (canShowAd && count > 0 && count % AD_INTERVAL === 0) {
+        // #ifdef APP
+        const shouldInsertAd = false;
+        // #endif
+        // #ifndef APP
+        const shouldInsertAd = canShowAd && count > 0 && count % AD_INTERVAL === 0;
+        // #endif
+        if (shouldInsertAd) {
             const adIndex = Math.floor(count / AD_INTERVAL);
             const adId = `subject_ad_${adIndex}`;
             if (!failedAdIds.has(adId)) {
@@ -422,6 +425,12 @@ onLoad((options) => {
         isFeaturedOnly.value = true;
     }
     fetchSubjects();
+});
+
+onMounted(() => {
+    // #ifdef APP-PLUS
+    applyAndroidEdgeToEdgeLayout();
+    // #endif
 });
 
 onShow(() => {
@@ -818,18 +827,8 @@ onShow(() => {
         justify-content: space-between;
 
         &:not(.is-loaded) {
-            position: absolute !important;
-            top: -9999rpx !important;
-            left: -9999rpx !important;
-            width: 0 !important;
-            height: 0 !important;
-            min-height: 0 !important;
-            max-height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
+            opacity: 0;
+            pointer-events: none;
         }
 
         &.is-error {

@@ -27,8 +27,8 @@
                     :size="capsuleIconSize"
                     :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"
                 ></mdi-icon>
-                <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge" :class="{ 'is-single': statusStore.newWallpapersCount < 10 }">
-                    <text class="badge-num">{{ statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount }}</text>
+                <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge" :class="{ 'is-single': isSingleBadge }">
+                    <text class="badge-num">{{ badgeText }}</text>
                 </view>
             </view>
         </view>
@@ -71,8 +71,8 @@
                 <!-- 铃铛按钮 (纯白浮岛圆球) -->
                 <view class="bell-btn" @click="emit('open-notifications')">
                     <mdi-icon path="/static/icons/bell.svg" size="20px" :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"></mdi-icon>
-                    <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge" :class="{ 'is-single': statusStore.newWallpapersCount < 10 }">
-                        <text class="badge-num">{{ statusStore.newWallpapersCount > 99 ? '99+' : statusStore.newWallpapersCount }}</text>
+                    <view v-if="statusStore.newWallpapersCount > 0" class="bell-badge" :class="{ 'is-single': isSingleBadge }">
+                        <text class="badge-num">{{ badgeText }}</text>
                     </view>
                 </view>
             </view>
@@ -255,6 +255,18 @@ const userTitleText = computed(() => {
 // 副标题描述 (引导探索美学灵感)
 const userSubText = computed(() => {
     return isEn.value ? 'What aesthetic fits you today?' : '今天想探索什么美学风格？';
+});
+
+// 今日上新未读数量计算属性
+const isSingleBadge = computed(() => {
+    const count = Number(statusStore.newWallpapersCount) || 0;
+    return count > 0 && count < 10;
+});
+
+const badgeText = computed(() => {
+    const count = Number(statusStore.newWallpapersCount) || 0;
+    if (count > 99) return '99+';
+    return count > 0 ? String(count) : '';
 });
 
 // 灵动微抽屉展开与吸入动效触发器 (停留 6s 后优雅推回收纳回铃铛)
@@ -533,27 +545,33 @@ const goTimeline = () => {
 
     .bell-badge {
         position: absolute;
-        top: -4rpx;
-        right: -4rpx;
+        top: -6rpx;
+        right: -6rpx;
         background: #ef4444;
         color: #ffffff;
         font-size: 18rpx;
         font-weight: 700;
-        height: 32rpx;
-        min-width: 32rpx;
+        height: 34rpx;
+        min-width: 34rpx;
         padding: 0 8rpx;
         border-radius: 999rpx;
-        border: 3rpx solid var(--page-background);
+        border: 3rpx solid #ffffff;
         box-sizing: border-box;
         display: flex;
         align-items: center;
         justify-content: center;
         line-height: 1;
+        z-index: 10;
+        box-shadow: 0 2rpx 8rpx rgba(239, 68, 68, 0.35);
 
         &.is-single {
-            width: 32rpx;
-            padding: 0;
-            border-radius: 50%;
+            width: 34rpx !important;
+            min-width: 34rpx !important;
+            max-width: 34rpx !important;
+            height: 34rpx !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            aspect-ratio: 1 / 1;
         }
 
         .badge-num {
@@ -561,6 +579,7 @@ const goTimeline = () => {
             font-weight: 700;
             line-height: 1;
             text-align: center;
+            display: block;
         }
 
         .theme-dark & {

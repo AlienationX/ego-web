@@ -461,18 +461,8 @@ onShow(() => {
     background: transparent;
 
     &:not(.is-loaded) {
-        position: absolute;
-        top: -9999rpx;
-        left: -9999rpx;
-        width: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        max-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+        opacity: 0;
+        pointer-events: none;
     }
 
     &.is-error {

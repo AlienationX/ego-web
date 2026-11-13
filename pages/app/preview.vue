@@ -692,11 +692,11 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, reactive, watch, onMounted, onUnmounted, isRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onPageScroll, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
-import { IS_INTERNATIONAL } from '@/utils/system.js';
+import { IS_INTERNATIONAL, applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { SERVICE_EMAIL } from '@/common/config.js';
 import { executeWithAuth } from '@/utils/auth-action.js';
@@ -800,6 +800,9 @@ const getInitialClockStyle = () => {
 const activeSessionClockStyle = ref(getInitialClockStyle());
 
 onMounted(() => {
+    // #ifdef APP-PLUS
+    applyAndroidEdgeToEdgeLayout();
+    // #endif
     activeSessionClockStyle.value = getInitialClockStyle();
     uni.$on('triggerClickDownload', clickDownload);
 });
@@ -1066,7 +1069,8 @@ const publishDateText = computed(() => {
 
 const classList = ref([]);
 const appStore = useAppStore();
-const wallList = appStore.wallList || [];
+const rawList = appStore.wallList || uni.getStorageSync('classList') || [];
+const wallList = isRef(rawList) ? rawList.value : (Array.isArray(rawList) ? rawList : []);
 classList.value = wallList.map((item) => {
     // 增加tags_list字段，将字符串转换成数组
     return {
@@ -1879,6 +1883,7 @@ const fetchSingleWallDetail = async (id) => {
 };
 
 onLoad(async (e) => {
+    console.log('[Preview Page] onLoad, id:', e?.id);
     currentId.value = e.id;
     disableSwipe.value = e.mode === 'recommend' || e.disableSwipe === '1';
 
@@ -3744,18 +3749,8 @@ const handleCopyWatermarkId = () => {
     line-height: 1;
 
     &:not(.is-loaded) {
-        position: absolute;
-        top: -9999rpx;
-        left: -9999rpx;
-        width: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        max-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+        opacity: 0;
+        pointer-events: none;
     }
 
     &.is-error {
@@ -4141,4 +4136,6 @@ $access-theme-primary: #3b82f6;
         transform: scale(1) translateY(0);
     }
 }
+
+
 </style>

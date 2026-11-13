@@ -28,7 +28,7 @@
 
             <!-- #ifdef APP -->
             <ad
-                v-if="effectiveAdpid && !isRemoved"
+                v-if="effectiveAdpid && !isRemoved && active"
                 class="custom-ad-content"
                 :adpid="effectiveAdpid"
                 :style="appAdStyle"
@@ -80,6 +80,11 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    // 控制是否处于激活状态（用于宿主页面 onHide/onShow 或转场时主动卸载原生组件避让）
+    active: {
+        type: Boolean,
+        default: true,
+    },
 });
 
 const emit = defineEmits(['load', 'error', 'close']);
@@ -118,7 +123,8 @@ const canShowAd = computed(() => {
     return !!effectiveUnitId.value;
     // #endif
     // #ifdef APP
-    return !!effectiveAdpid.value;
+    // App 端暂时完全关闭原生卡片广告，解决广告未填充3000ms超时与原生视图冲突
+    return false;
     // #endif
     // #ifndef MP-WEIXIN || APP
     return false;
@@ -166,13 +172,15 @@ const cardStyle = computed(() => {
     return style;
 });
 
-// App 端原生 ad 标签的具体样式（确保传递明确的高度值如 620rpx，避免原生 SDK 无法获取高度）
+// App 端原生 ad 标签的具体样式（确保传递明确的高度值，避免原生 SDK 无法获取高度而崩溃）
 const appAdStyle = computed(() => {
     const style = {
         width: '100%',
     };
     if (props.direction === 'vertical') {
         style.height = containerHeight.value;
+    } else {
+        style.minHeight = '180rpx';
     }
     return style;
 });
@@ -200,24 +208,19 @@ const handleLoad = (e) => {
 
 const handleError = (e) => {
     clearTimers();
-    // console.warn(`[CustomAd ${props.direction}] 广告加载失败/未填充:`, e?.detail || e);
     isFailed.value = true;
     isLoaded.value = false;
-    // 延迟 300ms 抛出 error 事件并卸载原生组件，彻底释放原生渲染层资源
-    noticeTimer = setTimeout(() => {
-        emit('error', e);
-        isRemoved.value = true;
-    }, 300);
+    // 关键修复：立即同步卸载 Android 原生组件，强制释放 Native Surface，杜绝透明层拦截点击与阻塞路由转场
+    isRemoved.value = true;
+    emit('error', e);
 };
 
 const handleClose = (e) => {
     clearTimers();
     isClosed.value = true;
     isLoaded.value = false;
-    noticeTimer = setTimeout(() => {
-        emit('close', e);
-        isRemoved.value = true;
-    }, 300);
+    isRemoved.value = true;
+    emit('close', e);
 };
 
 onMounted(() => {
@@ -249,36 +252,15 @@ defineExpose({
     display: block;
     box-sizing: border-box;
     line-height: 1;
+    position: relative;
 
     &:not(.is-loaded) {
-        position: absolute !important;
-        top: -9999rpx !important;
-        left: -9999rpx !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        width: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        max-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-
-        .custom-ad-card {
-            background: transparent !important;
-            box-shadow: none !important;
-            border: none !important;
-            width: 0 !important;
-            height: 0 !important;
-            min-height: 0 !important;
-            overflow: hidden !important;
-        }
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
 
     &.is-loaded {
-        position: relative;
-        top: 0;
-        left: 0;
         opacity: 1;
         transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     }
@@ -299,32 +281,16 @@ defineExpose({
     &--vertical {
         width: 100%;
         height: var(--ad-height, 620rpx);
+        min-height: var(--ad-height, 620rpx);
 
-        // 竖版广告加载中也占固定高度（覆盖上方 :not(.is-loaded) 的 height:0），仅隐藏原生组件、展示占位骨架
+        // 竖版广告无论加载前后均保持固定高度占位，避免瀑布流布局闪烁
         &:not(.is-loaded) {
-            position: relative !important;
-            top: 0 !important;
-            left: 0 !important;
             opacity: 1;
-            height: var(--ad-height, 620rpx) !important;
-            min-height: var(--ad-height, 620rpx) !important;
-            overflow: hidden !important;
+            pointer-events: auto;
 
-            .custom-ad-card {
-                width: 100% !important;
-                height: 100% !important;
-                min-height: 100% !important;
-            }
-
-            // 原生广告控件在未就绪前绝对定位至视口外，杜绝在骨架屏位置拦截触控
             .custom-ad-content {
-                position: absolute !important;
-                top: -9999rpx !important;
-                left: -9999rpx !important;
-                width: 0 !important;
-                height: 0 !important;
-                opacity: 0 !important;
-                pointer-events: none !important;
+                opacity: 0;
+                pointer-events: none;
             }
         }
 
@@ -336,14 +302,18 @@ defineExpose({
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
+            position: relative;
         }
 
         .custom-ad-content {
             width: 100% !important;
+            height: 100% !important;
             display: block;
         }
 
         .custom-ad-skeleton {
+            position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
             border-radius: 28rpx;
@@ -353,6 +323,7 @@ defineExpose({
                     rgba(148, 163, 184, 0.12) 75%);
             background-size: 200% 100%;
             animation: custom-ad-shimmer 1.6s infinite linear;
+            z-index: 1;
         }
     }
 }

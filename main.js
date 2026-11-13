@@ -48,6 +48,11 @@ export function createApp() {
     app.use(i18n);
     app.use(pinia);
     app.component('mdi-icon', MdiIcon);
+
+    app.config.errorHandler = (err, instance, info) => {
+        console.error('[Vue Global Error]', err, info);
+    };
+
     return {
         app,
         Pinia, // 此处必须将 Pinia 返回

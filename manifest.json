@@ -2,17 +2,20 @@
     "name" : "本我壁纸",
     "appid" : "__UNI__098B24F",
     "description" : "探索壁纸，亦探索自我。",
-    "versionName" : "1.5.4",
-    "versionCode" : 154,
+    "versionName" : "1.5.5",
+    "versionCode" : 155,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {
         "darkmode" : true,
         "themeLocation" : "theme.json",
         "softinputNavBar" : "none",
+        "statusbar" : {
+            "immersed" : "supportedDevice"
+        },
         "safearea" : {
-            "background" : "#eff1f5",
-            "backgroundDark" : "#181818",
+            "background" : "transparent",
+            "backgroundDark" : "transparent",
             "bottom" : {
                 "offset" : "none"
             }
@@ -78,7 +81,7 @@
                 ],
                 "abiFilters" : [ "arm64-v8a", "x86" ],
                 "minSdkVersion" : 24,
-                "targetSdkVersion" : 35,
+                "targetSdkVersion" : 36,
                 "immersed" : "edgeToEdge",
                 "resizableActivity" : true,
                 "schemes" : "egowall",
@@ -108,7 +111,20 @@
             },
             /* SDK配置 */
             "sdkConfigs" : {
-                "ad" : {},
+                "ad" : {
+                    "gdt" : {},
+                    "ks" : {},
+                    "sigmob" : {},
+                    "bd" : {},
+                    "gm" : {},
+                    "zy" : {},
+                    "bz" : {},
+                    "fl" : {},
+                    "yt" : {},
+                    "jt" : {},
+                    "wa" : {},
+                    "ms" : {}
+                },
                 "oauth" : {},
                 "push" : {},
                 "share" : {

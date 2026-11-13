@@ -24,7 +24,7 @@
                 <mdi-icon path="/static/icons/flash.svg" size="16px" :color="settingsStore.isDark ? '#f8fafc' : '#ffffff'"></mdi-icon>
             </view>
             <text class="pill-item__label">{{ isEn ? 'Recent' : '最新' }}</text>
-            <view v-if="statusStore.newWallpapersCount > 0" class="pill-item__badge" :class="{ 'is-single': statusStore.newWallpapersCount < 10 }">
+            <view v-if="statusStore.newWallpapersCount > 0" class="pill-item__badge" :class="{ 'is-single': isSingleBadge }">
                 <text class="badge-text">{{ newBadgeText }}</text>
             </view>
         </view>
@@ -55,6 +55,12 @@ const statusStore = useStatusStore();
 const settingsStore = useSettingsStore();
 
 const isEn = computed(() => locale.value === 'en');
+
+// 单数字判断计算属性
+const isSingleBadge = computed(() => {
+    const count = Number(statusStore.newWallpapersCount) || 0;
+    return count > 0 && count < 10;
+});
 
 // 今日上新徽标数字
 const newBadgeText = computed(() => {
@@ -168,7 +174,7 @@ const goSubjects = () => {
         white-space: nowrap;
     }
 
-    // 饱满圆润数字徽标 (高度充足，绝不挤扁)
+    // 饱满圆润数字徽标 (单数字绝对正圆，多数字胶囊圆润)
     &__badge {
         min-width: 32rpx;
         height: 32rpx;
@@ -185,9 +191,13 @@ const goSubjects = () => {
         flex-shrink: 0;
 
         &.is-single {
-            width: 32rpx;
-            padding: 0;
-            border-radius: 50%;
+            width: 32rpx !important;
+            min-width: 32rpx !important;
+            max-width: 32rpx !important;
+            height: 32rpx !important;
+            padding: 0 !important;
+            border-radius: 50% !important;
+            aspect-ratio: 1 / 1;
         }
 
         .badge-text {
@@ -195,6 +205,7 @@ const goSubjects = () => {
             font-weight: 800;
             line-height: 1;
             text-align: center;
+            display: block;
         }
     }
 }

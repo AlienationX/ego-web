@@ -201,15 +201,8 @@ watch(showAd, (visible) => {
     background: transparent;
 
     &:not(.is-loaded) {
-        position: absolute !important;
-        top: -9999rpx !important;
-        left: -9999rpx !important;
-        width: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
-        overflow: hidden !important;
+        opacity: 0;
+        pointer-events: none;
     }
 
     &.is-failed {
@@ -247,14 +240,8 @@ watch(showAd, (visible) => {
     }
 
     &:not(.is-loaded) {
-        position: absolute !important;
-        top: -9999rpx !important;
-        left: -9999rpx !important;
-        width: 0 !important;
-        height: 0 !important;
-        overflow: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+        opacity: 0;
+        pointer-events: none;
     }
 }
 </style>

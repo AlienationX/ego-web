@@ -3,7 +3,7 @@ import permissionListener from '@/uni_modules/c-permission-listener';
 import { writeAccessLog, setAndroidImmersive, handleDeepLink, isPCWechat } from '@/utils/system.js';
 import { applyAppTheme } from '@/utils/theme.js';
 import { permissionEnums } from '@/common/app_permission.js';
-import { onLaunch, onShow, onHide, onReady, onPageShow } from '@dcloudio/uni-app';
+import { onLaunch, onShow, onHide, onReady } from '@dcloudio/uni-app';
 import { useSettingsStore, getSystemTheme } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
 import { initAutoRotate } from '@/uni_modules/ego-wallpaper-manager';
@@ -42,6 +42,8 @@ if (isPCWechat()) {
 }
 // #endif
 
+
+
 onLaunch((options) => {
     console.log('App Launch', options);
     checkPCPlatformIntercept(options);
@@ -50,6 +52,10 @@ onLaunch((options) => {
     const savedTheme = uni.getStorageSync('theme') || settingsStore.options.theme || 'auto';
     settingsStore.options.theme = savedTheme;
     applyAppTheme(savedTheme);
+
+    // #ifdef APP-PLUS
+    setAndroidImmersive(settingsStore.isDark);
+    // #endif
 
     // 检查是否已看过引导页。
     // TODO 目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
@@ -109,6 +115,10 @@ onShow((res) => {
 
     handleDeepLink(res);
 
+    // #ifdef APP-PLUS
+    setAndroidImmersive(settingsStore.isDark);
+    // #endif
+
     // iOS/鸿蒙修改系统语言不重启 App，切回前台时通过 onShow 重新检测系统语言
     // 注：uni.onLocaleChange 只监听 uni.setLocale() 调用，无法感知系统设置变化
     const latestOsLang = uni.getDeviceInfo().osLanguage || uni.getAppBaseInfo().hostLanguage || 'en';
@@ -143,11 +153,7 @@ onHide(() => {
 });
 
 onReady(() => {
-  console.log('onReady')
-});
-
-onPageShow((res) => {
-  console.log('onPageShow', res)
+  console.log('onReady');
 });
 
 // export default {

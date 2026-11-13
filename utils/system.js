@@ -104,35 +104,41 @@ export function setAndroidImmersive(isDark = false) {
                                 plus.android.invoke(window_android, 'setStatusBarContrastEnforced', false);
                             }
 
-                            // 4. 全屏延伸与刘海屏/打孔屏完整穿透 (Android 9+)
+                            // 4. 关键：关闭 Decor 适应系统窗口，允许内容完全铺满屏幕 (Android 11+ Edge-to-Edge)
+                            if (sdkInt >= 30) {
+                                plus.android.invoke(window_android, 'setDecorFitsSystemWindows', false);
+                            }
+
+                            // 5. 全屏延伸与刘海屏/打孔屏完整穿透 (Android 9+)
                             if (sdkInt >= 28) {
-                                const lp = window_android.getAttributes();
+                                const lp = plus.android.invoke(window_android, 'getAttributes');
                                 if (lp) {
                                     const mode = sdkInt >= 30 ? 3 : 1; // LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
                                     plus.android.setAttribute(lp, 'layoutInDisplayCutoutMode', mode);
-                                    window_android.setAttributes(lp);
+                                    plus.android.invoke(window_android, 'setAttributes', lp);
                                 }
                             }
 
-                            // 5. 核心：穿透状态栏与导航手势栏 (Edge-to-Edge)
-                            const decorView = window_android.getDecorView();
-                            if (decorView) {
-                                let flags = 256 | 512 | 1024; // LAYOUT_STABLE | LAYOUT_HIDE_NAVIGATION | LAYOUT_FULLSCREEN
-                                if (!isDark && sdkInt >= 26) flags |= 16;   // SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                                if (!isDark && sdkInt >= 23) flags |= 8192; // SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                                plus.android.invoke(decorView, 'setSystemUiVisibility', flags);
-                            }
+                            // 6. 控制系统栏（状态栏与导航栏）图标深浅色及布局穿透标志位
+                            const decorView = plus.android.invoke(window_android, 'getDecorView');
+                            let sysUiFlags = 0x0100 | 0x0200 | 0x0400; // LAYOUT_STABLE | LAYOUT_FULLSCREEN | LAYOUT_HIDE_NAVIGATION
+                            if (!isDark && sdkInt >= 26) sysUiFlags |= 16;   // SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                            if (!isDark && sdkInt >= 23) sysUiFlags |= 8192; // SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 
-                            // 6. 现代 API 控制 Window Insets 和系统栏图标深浅色 (API 30+)
                             if (sdkInt >= 30) {
-                                plus.android.invoke(window_android, 'setDecorFitsSystemWindows', false);
                                 const insetsController = plus.android.invoke(window_android, 'getInsetsController');
                                 if (insetsController) {
-                                    const mask = 8 | 16; // STATUS_BARS | NAVIGATION_BARS
+                                    const mask = 8 | 16; // APPEARANCE_LIGHT_STATUS_BARS | APPEARANCE_LIGHT_NAVIGATION_BARS
                                     const appearance = isDark ? 0 : mask;
                                     plus.android.invoke(insetsController, 'setSystemBarsAppearance', appearance, mask);
                                 }
                             }
+                            if (decorView) {
+                                plus.android.invoke(decorView, 'setSystemUiVisibility', sysUiFlags);
+                            }
+
+                            // 触发 Edge-to-Edge 穿透与尺寸校验
+                            applyAndroidEdgeToEdgeLayout();
                         } catch (innerErr) {
                             console.log('setAndroidImmersive inner error:', innerErr);
                         }
@@ -147,6 +153,110 @@ export function setAndroidImmersive(isDark = false) {
 }
 
 /**
+ * 针对 Android 15/16 (API 35/36) 的全局 Edge-to-Edge 尺寸与容器激活辅助函数
+ * 1. 消除 AppCompat 在全面屏底部偶发生成的多余 63px 黑色遮罩条 (RelativeLayout)
+ * 2. 激活新打开二级页面因 Android 16 WindowInsets 机制导致尺寸挂起为 0x0 的 WebView 容器
+ * 3. 严格限定在 content 容器与浅层深度 (<=5)，零 requestLayout 损耗，绝不引起掉帧与路由卡顿
+ */
+export function applyAndroidEdgeToEdgeLayout() {
+    // #ifdef APP-PLUS
+    try {
+        if (plus.os.name !== 'Android') return;
+        const mainActivity = plus.android.runtimeMainActivity();
+        if (!mainActivity) return;
+
+        mainActivity.runOnUiThread(
+            plus.android.implements('java.lang.Runnable', {
+                run: function () {
+                    try {
+                        const win = plus.android.invoke(mainActivity, 'getWindow');
+                        if (!win) return;
+                        const decor = plus.android.invoke(win, 'getDecorView');
+                        if (!decor) return;
+
+                        const screenW = plus.android.invoke(decor, 'getWidth');
+                        const screenH = plus.android.invoke(decor, 'getHeight');
+                        if (!screenW || !screenH) return;
+
+                        const modeExactly = 0x40000000;
+
+                        // 1. 消除 AppCompat 底部生成的多余 63px 黑色保护遮罩条 (RelativeLayout)
+                        let decorCount = 0;
+                        try {
+                            decorCount = plus.android.invoke(decor, 'getChildCount') || 0;
+                        } catch (e) {}
+
+                        for (let i = 0; i < decorCount; i++) {
+                            try {
+                                const child = plus.android.invoke(decor, 'getChildAt', i);
+                                const clsObj = plus.android.invoke(child, 'getClass');
+                                const name = plus.android.invoke(clsObj, 'getName');
+                                if (name === 'android.widget.RelativeLayout') {
+                                    const ch = plus.android.invoke(child, 'getHeight');
+                                    if (ch > 0 && ch < 150) {
+                                        plus.android.invoke(child, 'setVisibility', 8); // View.GONE
+                                    }
+                                }
+                            } catch (e) {}
+                        }
+
+                        // 2. 激活二级页面中初始尺寸挂起为 0x0 的页面容器 (深度限定 <= 5，仅遍历页面级 ViewGroup)
+                        function fixContainer(v, depth) {
+                            if (!v || depth > 5) return;
+                            let w = 0, h = 0, vis = 0, cls = '';
+                            try {
+                                const clsObj = plus.android.invoke(v, 'getClass');
+                                cls = plus.android.invoke(clsObj, 'getSimpleName') || '';
+                                w = plus.android.invoke(v, 'getWidth');
+                                h = plus.android.invoke(v, 'getHeight');
+                                vis = plus.android.invoke(v, 'getVisibility');
+                            } catch (e) {
+                                return;
+                            }
+
+                            if (vis === 0 && (cls.includes('WebParentView') || cls.includes('PullToRefresh') || cls.includes('AbsoluteLayout') || cls.includes('SysWebView')) && (w === 0 || h === 0)) {
+                                try {
+                                    plus.android.invoke(v, 'measure', modeExactly | screenW, modeExactly | screenH);
+                                    plus.android.invoke(v, 'layout', 0, 0, screenW, screenH);
+                                } catch (e) {}
+                            }
+
+                            let count = 0;
+                            try { count = plus.android.invoke(v, 'getChildCount') || 0; } catch (e) {}
+                            for (let j = 0; j < count; j++) {
+                                try {
+                                    const c = plus.android.invoke(v, 'getChildAt', j);
+                                    fixContainer(c, depth + 1);
+                                } catch (e) {}
+                            }
+                        }
+
+                        const content = mainActivity.findViewById(16908290);
+                        if (content) {
+                            try {
+                                const lp = plus.android.invoke(content, 'getLayoutParams');
+                                if (lp) {
+                                    const h = plus.android.getAttribute(lp, 'height');
+                                    if (h !== screenH) {
+                                        plus.android.setAttribute(lp, 'height', screenH);
+                                        plus.android.invoke(content, 'setLayoutParams', lp);
+                                    }
+                                }
+                            } catch (e) {}
+                            fixContainer(content, 0);
+                        }
+                    } catch (innerErr) {}
+                }
+            })
+        );
+    } catch (e) {}
+    // #endif
+}
+
+export function ensureAppWindowLayout() {
+    applyAndroidEdgeToEdgeLayout();
+}
+
 /**
  * 处理 URL Scheme 及桌面小组件深度链接唤起 (支持 HarmonyOS, Android, iOS, H5, 小程序)
  */

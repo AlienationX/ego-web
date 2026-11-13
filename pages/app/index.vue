@@ -582,7 +582,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, reactive, watch } from 'vue';
+import { ref, computed, onMounted, reactive, watch, isRef } from 'vue';
 import { onShareAppMessage, onShareTimeline, onPageScroll, onReachBottom, onPullDownRefresh, onTabItemTap, onShow } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
@@ -724,16 +724,14 @@ const onCustomAdLoad = (item, e) => {
     }
 };
 
-// 广告错误回调 (优雅折叠消除白块与占位)
+// 广告错误回调 (安全剔除，绝不触发全量重排导致整页卡顿与 DOM 撕裂)
 const onCustomAdError = (item, e) => {
     console.warn('[Ad] 首页推荐竖屏卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
         item.adError = true;
-        // 关键防护：延迟 500ms 重排列，避免在当前同步事件中销毁 DOM 导致 uni-app-view 报 getBoundingClientRect null
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-            updateRecommendCols();
-        }, 500);
+        failedAdIds.add(item.id);
+        recommendLeftCol.value = recommendLeftCol.value.filter((i) => i.id !== item.id);
+        recommendRightCol.value = recommendRightCol.value.filter((i) => i.id !== item.id);
     }
 };
 
@@ -742,10 +740,9 @@ const onCustomAdClose = (item, e) => {
     console.warn('[Ad] 首页推荐竖屏卡片广告被关闭:', item?.id);
     if (item?.id) {
         item.adError = true;
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-            updateRecommendCols();
-        }, 500);
+        failedAdIds.add(item.id);
+        recommendLeftCol.value = recommendLeftCol.value.filter((i) => i.id !== item.id);
+        recommendRightCol.value = recommendRightCol.value.filter((i) => i.id !== item.id);
     }
 };
 
@@ -765,6 +762,12 @@ const updateRecommendCols = () => {
     hasVerticalAd = !!AD_CONFIG.app?.customVerticalAdpid;
     // #endif
     const canShowAd = !isVip && hasVerticalAd;
+
+    // App 端限制瀑布流最多挂载 3 个原生广告位，兼顾变现与原生图层稳定性；小程序端无上限
+    // #ifdef APP
+    const maxWaterfallAds = 3;
+    let insertedAdCount = 0;
+    // #endif
 
     const list = recommendWallpapers.value || [];
     for (let i = 0; i < list.length; i++) {
@@ -786,7 +789,17 @@ const updateRecommendCols = () => {
         count++;
 
         // 每 8 张壁纸后穿插 1 个单列竖屏原生模板卡片广告
-        if (canShowAd && count > 0 && count % AD_INTERVAL === 0) {
+        // #ifdef APP
+        // App 端完全不插入原生广告，避免未填充超时导致列表频繁重排
+        const shouldInsertAd = false;
+        // #endif
+        // #ifndef APP
+        const shouldInsertAd = canShowAd && count > 0 && count % AD_INTERVAL === 0;
+        // #endif
+        if (shouldInsertAd) {
+            // #ifdef APP
+            insertedAdCount++;
+            // #endif
             const adIndex = Math.floor(count / AD_INTERVAL);
             const adId = `home_rec_ad_${adIndex}`;
             if (!failedAdIds.has(adId)) {
@@ -1211,11 +1224,15 @@ const goBannerPreview = (data) => {
 };
 
 const goPreview = (id, data) => {
-    appStore.wallList = data;
-    uni.setStorageSync('classList', data);
+    const list = isRef(data) ? data.value : (Array.isArray(data) ? data : []);
+    appStore.wallList = list;
     uni.navigateTo({
         url: `/pages/app/preview?id=${id}`,
     });
+    // 异步静默持久化，不阻塞 JS 线程和跳转
+    try {
+        uni.setStorage({ key: 'classList', data: list });
+    } catch (e) {}
 };
 
 const goSearchByTag = (tag) => {
@@ -1332,6 +1349,7 @@ onMounted(() => {
 onShow(() => {
     refreshStatusBar();
 });
+
 // 分享给好友
 onShareAppMessage(() => ({
     title: '本我壁纸 - 探索壁纸，亦探索自我',
@@ -2884,18 +2902,8 @@ $sk-shine: rgba(148, 163, 184, 0.22);
     width: 100%;
 
     &:not(.is-loaded) {
-        position: absolute;
-        top: -9999rpx;
-        left: -9999rpx;
-        width: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        max-height: 0 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
+        opacity: 0;
+        pointer-events: none;
     }
 
     &.is-error {

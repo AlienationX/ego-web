@@ -338,7 +338,7 @@ const hasHorizontalAdConfig = computed(() => {
     return !!AD_CONFIG.weixin?.customHorizontalUnitId;
     // #endif
     // #ifdef APP
-    return !!AD_CONFIG.app?.customHorizontalAdpid;
+    return false;
     // #endif
     // #ifndef MP-WEIXIN || APP
     return false;
@@ -351,7 +351,7 @@ const hasVerticalAdConfig = computed(() => {
     return !!AD_CONFIG.weixin?.customVerticalUnitId;
     // #endif
     // #ifdef APP
-    return !!AD_CONFIG.app?.customVerticalAdpid;
+    return false;
     // #endif
     // #ifndef MP-WEIXIN || APP
     return false;
@@ -389,8 +389,13 @@ const topSpacerHeight = computed(() => props.showHeader ? props.headerHeight + p
 
 // 每 8 张壁纸后穿插 1 个原生模板广告
 const AD_INTERVAL = 8;
-// 单个列表最多展示的原生广告数量（提升上限，支持下滑持续穿插广告）
-const MAX_INLINE_ADS = 30;
+// 单个列表最多展示的原生广告数量（App 端限制 3 个，兼顾变现与性能；小程序端无上限）
+// #ifdef APP
+const MAX_INLINE_ADS = 3;
+// #endif
+// #ifndef APP
+const MAX_INLINE_ADS = Infinity;
+// #endif
 // 记录加载失败/无填充的原生广告 ID，确保数据层直接排除不展示
 const failedAdIds = reactive(new Set());
 // 记录已成功加载的广告 ID，确保在下滑分页重新计算布局时状态不丢失、老广告不坍塌
@@ -1134,11 +1139,9 @@ onShow(() => {
     }
 
     &.is-ad-card {
-        // 广告加载失败：折叠脱离文档流（唯一需要折叠的场景；加载中由 custom-ad 内部决定是否占位，避免瀑布流抖动）
+        // 广告加载失败：折叠脱离文档流
         &.is-ad-error {
-            position: absolute !important;
-            top: -9999rpx !important;
-            left: -9999rpx !important;
+            display: none !important;
             opacity: 0 !important;
             pointer-events: none !important;
             width: 0 !important;

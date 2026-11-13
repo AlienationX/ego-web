@@ -97,10 +97,10 @@ export const getTabBarHeight = () => {
         return 50 + safeBottom;
     }
 
-    // 悬浮胶囊模式：胶囊高 60px + 悬浮底距 18px + 缓冲 10px
+    // 悬浮胶囊模式：胶囊高 60px + 悬浮底距 (与 glass-tab-bar 的 max(34px, env(safe-area-inset-bottom)) 保持一致) + 缓冲间距
     const floatingBarHeight = 60;
-    const floatingBottomGap = 18;
-    return floatingBarHeight + floatingBottomGap + 10;
+    const floatingBottomGap = Math.max(34, safeBottom);
+    return floatingBarHeight + floatingBottomGap + 16;
 };
 
 // 获取头条左上角图标宽度

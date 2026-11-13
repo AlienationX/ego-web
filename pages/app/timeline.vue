@@ -174,6 +174,7 @@ import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { useStatusStore } from '@/stores/status.js';
 import { AD_CONFIG } from '@/common/config.js';
+import { applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
@@ -204,10 +205,7 @@ const onCustomAdError = (item, e) => {
     if (item?.id) {
         item.adError = true;
         loadedAdIds.delete(item.id);
-        // 关键防护：延迟 500ms 记录 failedAdIds，避免同步触发 computed 剔除数据销毁 DOM 导致 uni-app-view 报 getBoundingClientRect null
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-        }, 500);
+        failedAdIds.add(item.id);
     }
 };
 
@@ -217,9 +215,7 @@ const onCustomAdClose = (item, e) => {
     if (item?.id) {
         item.adError = true;
         loadedAdIds.delete(item.id);
-        setTimeout(() => {
-            failedAdIds.add(item.id);
-        }, 500);
+        failedAdIds.add(item.id);
     }
 };
 
@@ -235,6 +231,7 @@ const getLocalizedItem = (item) => {
 const unreadCount = ref(0);
 
 onLoad((options) => {
+    console.log('[Timeline Page] onLoad, options:', options);
     if (options?.unreadCount) {
         unreadCount.value = parseInt(options.unreadCount, 10);
     }
@@ -308,6 +305,12 @@ const monthGroups = computed(() => {
     const canShowAd = !isVip && hasAdConfig;
     let globalWallCount = 0;
 
+    // 限制单页原生广告上限（APP端限制3个；小程序端无上限）
+    // #ifdef APP
+    const maxTimelineAds = 3;
+    let currentAdCount = 0;
+    // #endif
+
     latestList.value.forEach((item, index) => {
         const date = toDate(item);
         const monthKey = getMonthKey(date);
@@ -366,7 +369,16 @@ const monthGroups = computed(() => {
         // 每 AD_INTERVAL 张壁纸后穿插 1 个卡片广告：
         // 如果位置在左侧 (currentCol === 0)，作为横版广告占整行 (两列)；
         // 如果位置在右侧 (currentCol === 1)，作为竖版广告占 1 列，与左侧壁纸并排填满当前行！
-        if (canShowAd && globalWallCount > 0 && globalWallCount % AD_INTERVAL === 0) {
+        // #ifdef APP
+        const shouldInsertAd = false;
+        // #endif
+        // #ifndef APP
+        const shouldInsertAd = canShowAd && globalWallCount > 0 && globalWallCount % AD_INTERVAL === 0;
+        // #endif
+        if (shouldInsertAd) {
+            // #ifdef APP
+            currentAdCount++;
+            // #endif
             const adIndex = Math.floor(globalWallCount / AD_INTERVAL);
             const adId = `timeline_ad_${adIndex}`;
             if (!failedAdIds.has(adId)) {
@@ -478,6 +490,9 @@ const scrollToTop = () => {
 };
 
 onMounted(() => {
+    // #ifdef APP-PLUS
+    applyAndroidEdgeToEdgeLayout();
+    // #endif
     if (!latestList.value.length) {
         getLatest();
     }
@@ -823,18 +838,8 @@ onShow(() => {
     transform: translateZ(0);
 
     &:not(.is-loaded) {
-        position: absolute;
-        top: -9999rpx;
-        left: -9999rpx;
         opacity: 0;
         pointer-events: none;
-        width: 0 !important;
-        height: 0 !important;
-        min-height: 0 !important;
-        max-height: 0 !important;
-        overflow: hidden !important;
-        margin: 0 !important;
-        padding: 0 !important;
     }
 
     &.is-error {

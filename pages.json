@@ -6,8 +6,15 @@
             "style": {
                 "navigationBarTitleText": "首页",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": false,
                 // "onReachBottomDistance": 150
+                "app-plus": {
+                    "safearea": {
+                        "bottom": {
+                            "offset": "none"
+                        }
+                    }
+                }
             }
         },
         {
@@ -31,7 +38,14 @@
             "style": {
                 "navigationBarTitleText": "分类",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": false,
+                "app-plus": {
+                    "safearea": {
+                        "bottom": {
+                            "offset": "none"
+                        }
+                    }
+                }
             }
         },
         {
@@ -39,7 +53,14 @@
             "style": {
                 "navigationBarTitleText": "我的",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": false,
+                "app-plus": {
+                    "safearea": {
+                        "bottom": {
+                            "offset": "none"
+                        }
+                    }
+                }
             }
         },
         {
@@ -79,7 +100,7 @@
             "style": {
                 "navigationBarTitleText": "专题策划",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": true
+                "enablePullDownRefresh": false
             }
         },
         {
@@ -95,7 +116,11 @@
             "style": {
                 "navigationBarTitleText": "预览",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": false
+                "enablePullDownRefresh": false,
+                "app-plus": {
+                    "animationType": "fade-in",
+                    "animationDuration": 160
+                }
             }
         },
         {
@@ -126,7 +151,7 @@
             "style": {
                 "navigationBarTitleText": "时间轴",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": true
+                "enablePullDownRefresh": false
             }
         },
         {
@@ -134,7 +159,7 @@
             "style": {
                 "navigationBarTitleText": "Top 10",
                 "navigationStyle": "custom",
-                "enablePullDownRefresh": true
+                "enablePullDownRefresh": false
             }
         },
         {
@@ -189,7 +214,14 @@
             "path": "pages/creation/creation",
             "style": {
                 "navigationBarTitleText": "创作",
-                "navigationStyle": "custom"
+                "navigationStyle": "custom",
+                "app-plus": {
+                    "safearea": {
+                        "bottom": {
+                            "offset": "none"
+                        }
+                    }
+                }
             }
         },
         {
@@ -434,7 +466,18 @@
         "navigationBarTextStyle": "@navigationBarTextStyle",
         "navigationBarTitleText": "本我壁纸",
         "navigationBarBackgroundColor": "@navigationBarBackgroundColor",
-        "backgroundColor": "@backgroundColor"
+        "backgroundColor": "@backgroundColor",
+        "app-plus": {
+            "animationType": "slide-in-right",
+            "animationDuration": 200,
+            "safearea": {
+                "background": "transparent",
+                "backgroundDark": "transparent",
+                "bottom": {
+                    "offset": "none"
+                }
+            }
+        }
     },
     "tabBar": {
         "custom": true,
