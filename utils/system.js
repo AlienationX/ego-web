@@ -36,10 +36,69 @@ export const isPCWechat = () => {
 
 // ── 以下为系统级功能（布局测量请用 @/utils/layout.js）──
 
+/**
+ * 获取 Android 原生物理导航栏/手势指示条高度（像素 px）
+ * 用于判定设备当前是否存在底部手势横条或虚拟按键导航栏
+ * @returns {number} 0 为无手势条/已隐藏/非Android，> 0 为真实物理像素高度
+ */
+export const getAndroidNativeNavBarHeight = () => {
+    // #ifdef APP-PLUS
+    try {
+        if (plus.os.name !== 'Android') return 0;
+        const mainActivity = plus.android.runtimeMainActivity();
+        if (!mainActivity) return 0;
+
+        const window = plus.android.invoke(mainActivity, 'getWindow');
+        if (!window) return 0;
+
+        const decorView = plus.android.invoke(window, 'getDecorView');
+        if (!decorView) return 0;
+
+        const Build = plus.android.importClass('android.os.Build');
+        const sdkInt = Build.VERSION.SDK_INT;
+
+        // 1. Android 11+ (API 30+) 使用 WindowInsets.Type.navigationBars() 精准获取
+        if (sdkInt >= 30) {
+            const rootInsets = plus.android.invoke(decorView, 'getRootWindowInsets');
+            if (rootInsets) {
+                // WindowInsets.Type.navigationBars() 常量值为 1 << 1 = 2
+                const navInsets = plus.android.invoke(rootInsets, 'getInsets', 2);
+                if (navInsets) {
+                    const bottom = plus.android.getAttribute(navInsets, 'bottom');
+                    return typeof bottom === 'number' ? bottom : 0;
+                }
+            }
+        }
+
+        // 2. Android 10 及以下回退：通过屏幕绝对高度(realMetrics) 与 可视窗口高度(metrics) 计算差值
+        plus.android.importClass('android.util.DisplayMetrics');
+        const realMetrics = plus.android.newObject('android.util.DisplayMetrics');
+        const appMetrics = plus.android.newObject('android.util.DisplayMetrics');
+
+        const windowManager = plus.android.invoke(mainActivity, 'getWindowManager');
+        const display = plus.android.invoke(windowManager, 'getDefaultDisplay');
+
+        plus.android.invoke(display, 'getRealMetrics', realMetrics);
+        plus.android.invoke(display, 'getMetrics', appMetrics);
+
+        const realHeight = plus.android.getAttribute(realMetrics, 'heightPixels');
+        const appHeight = plus.android.getAttribute(appMetrics, 'heightPixels');
+
+        const diff = (realHeight || 0) - (appHeight || 0);
+        return diff > 0 ? diff : 0;
+    } catch (e) {
+        console.warn('getAndroidNativeNavBarHeight error:', e);
+    }
+    // #endif
+    return 0;
+};
+
 export const writeAccessLog = async () => {
     console.log(app, 'app_info');
     console.log(device, 'device_info');
     console.log(uni.getWindowInfo(), 'window_info');
+    console.log(uni.getSystemInfoSync(), 'system_info');
+    console.log(getAndroidNativeNavBarHeight(), 'android_native_navbar_height:');
 
     // 开发环境下不统计访问日志
     if (IS_DEVELOPMENT) return;
@@ -153,10 +212,8 @@ export function setAndroidImmersive(isDark = false) {
 }
 
 /**
- * 针对 Android 15/16 (API 35/36) 的全局 Edge-to-Edge 尺寸与容器激活辅助函数
- * 1. 消除 AppCompat 在全面屏底部偶发生成的多余 63px 黑色遮罩条 (RelativeLayout)
- * 2. 激活新打开二级页面因 Android 16 WindowInsets 机制导致尺寸挂起为 0x0 的 WebView 容器
- * 3. 严格限定在 content 容器与浅层深度 (<=5)，零 requestLayout 损耗，绝不引起掉帧与路由卡顿
+ * 针对 Android 15/16 (API 35/36) 的全局 Edge-to-Edge 尺寸与遮罩清理辅助函数
+ * 消除 AppCompat 在全面屏底部偶发生成的多余 63px 黑色遮罩条 (RelativeLayout)
  */
 export function applyAndroidEdgeToEdgeLayout() {
     // #ifdef APP-PLUS
@@ -178,9 +235,7 @@ export function applyAndroidEdgeToEdgeLayout() {
                         const screenH = plus.android.invoke(decor, 'getHeight');
                         if (!screenW || !screenH) return;
 
-                        const modeExactly = 0x40000000;
-
-                        // 1. 消除 AppCompat 底部生成的多余 63px 黑色保护遮罩条 (RelativeLayout)
+                        // 1. 消除 AppCompat 底部生成的多余黑色保护遮罩条 (放宽至 260px，兼容 2K 屏与高 DPI)
                         let decorCount = 0;
                         try {
                             decorCount = plus.android.invoke(decor, 'getChildCount') || 0;
@@ -193,47 +248,20 @@ export function applyAndroidEdgeToEdgeLayout() {
                                 const name = plus.android.invoke(clsObj, 'getName');
                                 if (name === 'android.widget.RelativeLayout') {
                                     const ch = plus.android.invoke(child, 'getHeight');
-                                    if (ch > 0 && ch < 150) {
+                                    if (ch > 0 && ch < 260) {
                                         plus.android.invoke(child, 'setVisibility', 8); // View.GONE
                                     }
                                 }
                             } catch (e) {}
                         }
 
-                        // 2. 激活二级页面中初始尺寸挂起为 0x0 的页面容器 (深度限定 <= 5，仅遍历页面级 ViewGroup)
-                        function fixContainer(v, depth) {
-                            if (!v || depth > 5) return;
-                            let w = 0, h = 0, vis = 0, cls = '';
-                            try {
-                                const clsObj = plus.android.invoke(v, 'getClass');
-                                cls = plus.android.invoke(clsObj, 'getSimpleName') || '';
-                                w = plus.android.invoke(v, 'getWidth');
-                                h = plus.android.invoke(v, 'getHeight');
-                                vis = plus.android.invoke(v, 'getVisibility');
-                            } catch (e) {
-                                return;
-                            }
-
-                            if (vis === 0 && (cls.includes('WebParentView') || cls.includes('PullToRefresh') || cls.includes('AbsoluteLayout') || cls.includes('SysWebView')) && (w === 0 || h === 0)) {
-                                try {
-                                    plus.android.invoke(v, 'measure', modeExactly | screenW, modeExactly | screenH);
-                                    plus.android.invoke(v, 'layout', 0, 0, screenW, screenH);
-                                } catch (e) {}
-                            }
-
-                            let count = 0;
-                            try { count = plus.android.invoke(v, 'getChildCount') || 0; } catch (e) {}
-                            for (let j = 0; j < count; j++) {
-                                try {
-                                    const c = plus.android.invoke(v, 'getChildAt', j);
-                                    fixContainer(c, depth + 1);
-                                } catch (e) {}
-                            }
-                        }
-
+                        // 2. 将整个 Activity 的根容器 (android.R.id.content) 铺满至屏幕物理底部
+                        // 仅改变最外层父容器尺寸，让系统与 uni-app 自然排版，绝不直接碰触内部 WebView，零白屏风险
                         const content = mainActivity.findViewById(16908290);
                         if (content) {
                             try {
+                                plus.android.invoke(content, 'setFitsSystemWindows', false);
+                                plus.android.invoke(content, 'setPadding', 0, 0, 0, 0);
                                 const lp = plus.android.invoke(content, 'getLayoutParams');
                                 if (lp) {
                                     const h = plus.android.getAttribute(lp, 'height');
@@ -243,18 +271,14 @@ export function applyAndroidEdgeToEdgeLayout() {
                                     }
                                 }
                             } catch (e) {}
-                            fixContainer(content, 0);
                         }
+
                     } catch (innerErr) {}
                 }
             })
         );
     } catch (e) {}
     // #endif
-}
-
-export function ensureAppWindowLayout() {
-    applyAndroidEdgeToEdgeLayout();
 }
 
 /**

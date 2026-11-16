@@ -266,7 +266,6 @@ import { getStatusBarHeight } from '@/utils/layout.js';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
-import { applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
@@ -433,14 +432,7 @@ onPullDownRefresh(async () => {
     uni.stopPullDownRefresh();
 });
 
-onLoad((options) => {
-    console.log('[Top Page] onLoad, options:', options);
-});
-
-onMounted(() => {
-    // #ifdef APP-PLUS
-    applyAndroidEdgeToEdgeLayout();
-    // #endif
+onLoad(() => {
     if (!rankedList.value.length) {
         getTopList();
     }

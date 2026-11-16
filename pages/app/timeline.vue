@@ -174,7 +174,6 @@ import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { useStatusStore } from '@/stores/status.js';
 import { AD_CONFIG } from '@/common/config.js';
-import { applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const isScrolled = ref(false);
@@ -231,7 +230,6 @@ const getLocalizedItem = (item) => {
 const unreadCount = ref(0);
 
 onLoad((options) => {
-    console.log('[Timeline Page] onLoad, options:', options);
     if (options?.unreadCount) {
         unreadCount.value = parseInt(options.unreadCount, 10);
     }
@@ -490,9 +488,6 @@ const scrollToTop = () => {
 };
 
 onMounted(() => {
-    // #ifdef APP-PLUS
-    applyAndroidEdgeToEdgeLayout();
-    // #endif
     if (!latestList.value.length) {
         getLatest();
     }

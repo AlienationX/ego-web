@@ -369,7 +369,7 @@ const dateStr = computed(() => {
             margin-top: 20rpx;
 
             .ios-digit {
-                font-size: 300rpx;
+                font-size: 360rpx;
                 font-weight: 600;
                 letter-spacing: -2rpx;
                 color: rgba(255, 255, 255, 0.95);

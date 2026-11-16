@@ -696,7 +696,7 @@ import { ref, computed, reactive, watch, onMounted, onUnmounted, isRef } from 'v
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onPageScroll, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
-import { IS_INTERNATIONAL, applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
+import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { SERVICE_EMAIL } from '@/common/config.js';
 import { executeWithAuth } from '@/utils/auth-action.js';
@@ -800,9 +800,6 @@ const getInitialClockStyle = () => {
 const activeSessionClockStyle = ref(getInitialClockStyle());
 
 onMounted(() => {
-    // #ifdef APP-PLUS
-    applyAndroidEdgeToEdgeLayout();
-    // #endif
     activeSessionClockStyle.value = getInitialClockStyle();
     uni.$on('triggerClickDownload', clickDownload);
 });
@@ -1883,7 +1880,6 @@ const fetchSingleWallDetail = async (id) => {
 };
 
 onLoad(async (e) => {
-    console.log('[Preview Page] onLoad, id:', e?.id);
     currentId.value = e.id;
     disableSwipe.value = e.mode === 'recommend' || e.disableSwipe === '1';
 

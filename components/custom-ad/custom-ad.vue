@@ -25,18 +25,6 @@
                 @error="handleError"
             />
             <!-- #endif -->
-
-            <!-- #ifdef APP -->
-            <ad
-                v-if="effectiveAdpid && !isRemoved && active"
-                class="custom-ad-content"
-                :adpid="effectiveAdpid"
-                :style="appAdStyle"
-                @load="handleLoad"
-                @error="handleError"
-                @close="handleClose"
-            />
-            <!-- #endif -->
         </view>
     </view>
 </template>
@@ -65,7 +53,7 @@ const props = defineProps({
         type: String,
         default: '',
     },
-    // 手动指定的 App 广告位 ID（若不传则按 direction 自动从 AD_CONFIG.app 获取）
+    // 手动指定的 App 广告位 ID（保留兼顾历史调用兼容，App 端已彻底停用广告）
     adpid: {
         type: String,
         default: '',
@@ -80,7 +68,7 @@ const props = defineProps({
         type: String,
         default: '',
     },
-    // 控制是否处于激活状态（用于宿主页面 onHide/onShow 或转场时主动卸载原生组件避让）
+    // 控制是否处于激活状态（用于宿主页面 onHide/onShow 或转场时主动避让）
     active: {
         type: Boolean,
         default: true,
@@ -107,26 +95,14 @@ const effectiveUnitId = computed(() => {
         : AD_CONFIG.weixin?.customHorizontalUnitId;
 });
 
-// App 端生效 adpid
-const effectiveAdpid = computed(() => {
-    if (props.adpid) return props.adpid;
-    return props.direction === 'vertical'
-        ? AD_CONFIG.app?.customVerticalAdpid
-        : AD_CONFIG.app?.customHorizontalAdpid;
-});
-
-// 是否满足基础展示条件（非 VIP、后台开启广告功能 且 对应端配置了广告位）
+// 是否满足基础展示条件：仅在微信小程序端展示（非 VIP、后台开启广告功能 且 配置了广告位）
 const canShowAd = computed(() => {
+    // #ifdef MP-WEIXIN
     if (userStore.isVip) return false;
     if (appStore.versionConfig?.ad_enabled === false) return false;
-    // #ifdef MP-WEIXIN
     return !!effectiveUnitId.value;
     // #endif
-    // #ifdef APP
-    // App 端暂时完全关闭原生卡片广告，解决广告未填充3000ms超时与原生视图冲突
-    return false;
-    // #endif
-    // #ifndef MP-WEIXIN || APP
+    // #ifndef MP-WEIXIN
     return false;
     // #endif
 });
@@ -160,42 +136,22 @@ const cardStyle = computed(() => {
         return { display: 'none', height: '0px' };
     }
     const style = {};
-    // #ifndef APP
     style.borderRadius = props.borderRadius;
     if (props.background) {
         style.background = props.background;
     }
-    // #endif
     if (props.direction === 'vertical') {
         style.height = containerHeight.value;
-    }
-    return style;
-});
-
-// App 端原生 ad 标签的具体样式（确保传递明确的高度值，避免原生 SDK 无法获取高度而崩溃）
-const appAdStyle = computed(() => {
-    const style = {
-        width: '100%',
-    };
-    if (props.direction === 'vertical') {
-        style.height = containerHeight.value;
-    } else {
-        style.minHeight = '180rpx';
     }
     return style;
 });
 
 let noticeTimer = null;
-let timeoutTimer = null;
 
 const clearTimers = () => {
     if (noticeTimer) {
         clearTimeout(noticeTimer);
         noticeTimer = null;
-    }
-    if (timeoutTimer) {
-        clearTimeout(timeoutTimer);
-        timeoutTimer = null;
     }
 };
 
@@ -210,7 +166,7 @@ const handleError = (e) => {
     clearTimers();
     isFailed.value = true;
     isLoaded.value = false;
-    // 关键修复：立即同步卸载 Android 原生组件，强制释放 Native Surface，杜绝透明层拦截点击与阻塞路由转场
+    // 关键修复：立即同步卸载原生组件，强制释放 Native Surface，杜绝透明层拦截点击与阻塞路由转场
     isRemoved.value = true;
     emit('error', e);
 };
@@ -224,14 +180,13 @@ const handleClose = (e) => {
 };
 
 onMounted(() => {
-    // #ifdef APP
-    // 超时强制熔断器：APP 端若 3 秒内未触发 @load，视为加载失败/未填充，强制销毁原生组件以防原生视图阻断触控
-    timeoutTimer = setTimeout(() => {
-        if (!isLoaded.value && !isFailed.value && !isClosed.value) {
-            // console.warn(`[CustomAd ${props.direction}] 3000ms 加载超时，触发强制熔断与物理销毁`);
-            handleError({ detail: { errMsg: 'timeout 3000ms' } });
-        }
-    }, 3000);
+    // #ifndef MP-WEIXIN
+    // 非微信小程序平台（如 App、H5）彻底停用广告，立即触发 error 向上通知宿主容器卸载外层占位包裹
+    if (!canShowAd.value) {
+        isFailed.value = true;
+        isRemoved.value = true;
+        emit('error', { detail: { errMsg: 'ad disabled on non-weixin platform' } });
+    }
     // #endif
 });
 
@@ -340,8 +295,6 @@ defineExpose({
 .custom-ad-card {
     width: 100%;
     line-height: 1;
-
-    // #ifndef APP
     overflow: hidden;
     // 基础面板底色与阴影（微信端横版卡片/通栏使用）
     background: rgba(24, 36, 49, 0.92);
@@ -353,15 +306,6 @@ defineExpose({
         background: #f8fafc;
         box-shadow: 0 6rpx 18rpx rgba(15, 23, 42, 0.05);
     }
-    // #endif
-
-    // #ifdef APP
-    // APP 端原生广告直角平铺，去掉圆角容器与多余底色/阴影，避免原生直角图文产生毛边割裂
-    background: transparent !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-    overflow: visible;
-    // #endif
 
     .custom-ad-content {
         width: 100% !important;

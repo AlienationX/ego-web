@@ -218,7 +218,6 @@ import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
 import { AD_CONFIG } from '@/common/config.js';
-import { applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
 
 const { t, locale } = useI18n();
 const settingsStore = useSettingsStore();
@@ -425,12 +424,6 @@ onLoad((options) => {
         isFeaturedOnly.value = true;
     }
     fetchSubjects();
-});
-
-onMounted(() => {
-    // #ifdef APP-PLUS
-    applyAndroidEdgeToEdgeLayout();
-    // #endif
 });
 
 onShow(() => {

@@ -1,7 +1,7 @@
 <script setup>
 import permissionListener from '@/uni_modules/c-permission-listener';
-import { writeAccessLog, setAndroidImmersive, handleDeepLink, isPCWechat } from '@/utils/system.js';
-import { applyAppTheme } from '@/utils/theme.js';
+import { writeAccessLog, handleDeepLink, isPCWechat } from '@/utils/system.js';
+import { applyAppTheme, restoreStatusBarColor } from '@/utils/theme.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide, onReady } from '@dcloudio/uni-app';
 import { useSettingsStore, getSystemTheme } from '@/stores/settings.js';
@@ -53,10 +53,6 @@ onLaunch((options) => {
     settingsStore.options.theme = savedTheme;
     applyAppTheme(savedTheme);
 
-    // #ifdef APP-PLUS
-    setAndroidImmersive(settingsStore.isDark);
-    // #endif
-
     // 检查是否已看过引导页。
     // TODO 目前太慢，还没检查已经进入首页了，然后再跳转回来。且图片加载过慢，放到static中又影响打包大小
     // const hasSeenGuide = uni.getStorageSync('hasSeenGuide');
@@ -106,18 +102,18 @@ onShow((res) => {
     console.log('App Show', res);
     checkPCPlatformIntercept(res);
 
-    // 切回前台时重新同步系统主题，解决后台切换系统深浅色无法感知的问题
+    // 切回前台时重新同步系统主题：仅在随系统模式且系统深浅色发生改变时，才重新应用全局主题
     const latestOsTheme = getSystemTheme();
-    if (settingsStore.osTheme !== latestOsTheme) {
+    const isAuto = (settingsStore.options.theme || 'auto') === 'auto';
+    if (isAuto && settingsStore.osTheme !== latestOsTheme) {
         settingsStore.osTheme = latestOsTheme;
+        applyAppTheme('auto');
+    } else {
+        // 轻量恢复状态栏文字深浅色（无延时、零原生重排）
+        restoreStatusBarColor();
     }
-    applyAppTheme(settingsStore.options.theme);
 
     handleDeepLink(res);
-
-    // #ifdef APP-PLUS
-    setAndroidImmersive(settingsStore.isDark);
-    // #endif
 
     // iOS/鸿蒙修改系统语言不重启 App，切回前台时通过 onShow 重新检测系统语言
     // 注：uni.onLocaleChange 只监听 uni.setLocale() 调用，无法感知系统设置变化

@@ -92,21 +92,59 @@ export function syncSystemBars(isDark) {
     // #endif
 }
 
-/**
- * 应用主题并执行多阶段时序压制 (解决 App 启动及切换 UIStyle 时原生层重绘与延迟加载导致的白条)
- * @param {string} theme 'auto' | 'light' | 'dark'
- */
-export function applyAppTheme(theme) {
-    if (!theme) theme = 'auto';
-    const isDark = resolveIsDark(theme);
+let currentTheme = null;
+let currentIsDark = null;
+let syncTimer = null;
 
+/**
+ * 轻量恢复状态栏文字颜色（白字/黑字），供页面级即时复位调用，零延时、零原生重排开销
+ */
+export function restoreStatusBarColor() {
+    const theme = uni.getStorageSync('theme') || 'auto';
+    const isDark = resolveIsDark(theme);
     // #ifdef APP-PLUS
     try {
-        if (typeof plus !== 'undefined' && plus.nativeUI && plus.nativeUI.setUIStyle) {
-            plus.nativeUI.setUIStyle(theme);
+        if (typeof plus !== 'undefined' && plus.navigator && plus.navigator.setStatusBarStyle) {
+            plus.navigator.setStatusBarStyle(isDark ? 'light' : 'dark');
         }
     } catch (e) {}
     // #endif
+    // #ifdef MP-WEIXIN
+    try {
+        if (uni.setNavigationBarColor) {
+            uni.setNavigationBarColor({
+                frontColor: isDark ? '#ffffff' : '#000000',
+                backgroundColor: isDark ? '#181818' : '#eef1f4',
+                animation: { duration: 0 },
+                fail: () => {},
+            });
+        }
+    } catch (e) {}
+    // #endif
+}
+
+/**
+ * 应用全局主题并同步状态栏与原生层UI
+ * 采用状态守卫与单次防抖合并机制，杜绝暴力多次延时造成的首屏掉帧与线程竞争
+ * @param {string} theme 'auto' | 'light' | 'dark'
+ */
+export function applyAppTheme(theme = 'auto') {
+    if (!theme) theme = 'auto';
+    const isDark = resolveIsDark(theme);
+
+    // 状态守卫：仅在 theme 实际变化时才触发原生 setUIStyle
+    // #ifdef APP-PLUS
+    if (currentTheme !== theme) {
+        currentTheme = theme;
+        try {
+            if (typeof plus !== 'undefined' && plus.nativeUI && plus.nativeUI.setUIStyle) {
+                plus.nativeUI.setUIStyle(theme);
+            }
+        } catch (e) {}
+    }
+    // #endif
+
+    currentIsDark = isDark;
 
     // 压制原生层 TabBar 并同步状态栏
     const runSync = () => {
@@ -116,12 +154,20 @@ export function applyAppTheme(theme) {
         syncSystemBars(isDark);
     };
 
-    // 立即执行一次
+    // 1. 立即执行一次同步
     runSync();
 
-    // 延时多次执行：覆盖原生窗口异步挂载和生命周期重绘（80ms、250ms、500ms）
-    setTimeout(runSync, 80);
-    setTimeout(runSync, 250);
-    setTimeout(runSync, 500);
+    // 2. 清理旧任务，合并为单次安全延时（App 端覆盖异步窗口挂载重绘，替代 80ms/250ms/500ms 暴力连续执行）
+    if (syncTimer) {
+        clearTimeout(syncTimer);
+        syncTimer = null;
+    }
+
+    // #ifdef APP-PLUS
+    syncTimer = setTimeout(() => {
+        runSync();
+        syncTimer = null;
+    }, 150);
+    // #endif
 }
 
