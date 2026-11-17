@@ -1000,7 +1000,7 @@ function setPreviewType(type) {
     closePreviewTypePopup();
 }
 
-// 清理缓存白名单：严禁清除核心配置、登录凭据与新人福利标记
+// 清理缓存白名单：严禁清除核心配置与登录凭据
 const PRESERVED_STORAGE_KEYS = new Set([
     'user',                          // Pinia 用户状态与凭据
     'settings',                      // Pinia 系统全局配置
@@ -1008,7 +1008,6 @@ const PRESERVED_STORAGE_KEYS = new Set([
     'version_config',                // 版本配置
     'theme',                         // 深色/浅色主题设置
     'lang',                          // 语言设置
-    'new_user_free_downloads_used',  // 新用户前3次免广告下载计数（防止误清变回新人）
 ]);
 
 async function clearCache() {

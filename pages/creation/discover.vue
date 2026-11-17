@@ -91,12 +91,12 @@
                         <uni-icons type="image" size="16" color="#94a3b8"></uni-icons>
                     </view>
                     <view class="mini-info">
-                        <text class="mini-title">{{ isRunning ? $t('discover.analyzingMessage') : (currentImageTitle || '已选图片') }}</text>
+                        <text class="mini-title">{{ isRunning ? $t('discover.analyzingMessage') : (currentImageTitle || $t('discover.selectedImage')) }}</text>
                         <text v-if="isRunning" class="mini-badge-timer">{{ thinkingTime }}s</text>
                     </view>
                 </view>
                 <view class="mini-right">
-                    <text class="mini-action">{{ isRunning ? '分析中' : '更换图片' }}</text>
+                    <text class="mini-action">{{ isRunning ? $t('discover.analyzing') : $t('discover.changeImage') }}</text>
                     <uni-icons type="top" size="13" :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></uni-icons>
                 </view>
             </view>
@@ -184,7 +184,7 @@
                                 <image class="local-img-preview" :src="localImage" mode="aspectFill"></image>
                                 <view class="local-repick-badge">
                                     <uni-icons type="camera" size="12" color="#ffffff"></uni-icons>
-                                    <text class="badge-txt">更换图片</text>
+                                    <text class="badge-txt">{{ $t('discover.changeImage') }}</text>
                                 </view>
                             </view>
                             <view v-else class="local-placeholder">
@@ -193,7 +193,7 @@
                                 </view>
                                 <view class="uploader-info">
                                     <text class="uploader-primary">{{ $t('discover.pickLocalBtn') }}</text>
-                                    <text class="uploader-hint">选择本地壁纸进行性格与美学解析（VIP专享）</text>
+                                    <text class="uploader-hint">{{ $t('discover.localUploaderHint') }}</text>
                                 </view>
                             </view>
                         </view>
@@ -211,7 +211,7 @@
                         <rotate-loading v-if="isRunning" :size="32" color="#ffffff"></rotate-loading>
                         <uni-icons v-else type="sparkles" size="15" color="#ffffff"></uni-icons>
                         <text class="btn-caption">
-                            {{ isRunning ? `${$t('discover.analyzingMessage')} ${thinkingTime}s` : ($t('discover.analyzeBtn') || '开始深度美学探索') }}
+                            {{ isRunning ? `${$t('discover.analyzingMessage')} ${thinkingTime}s` : $t('discover.analyzeBtn') }}
                         </text>
                     </button>
                 </view>
@@ -322,9 +322,9 @@ const currentSelectedThumb = computed(() => {
 
 // 当前选中的图片标题或描述
 const currentImageTitle = computed(() => {
-    if (sourceMode.value === 'local') return '本地相册图片';
-    if (selectedItem.value) return '已选收藏壁纸';
-    return '未选择壁纸';
+    if (sourceMode.value === 'local') return t('discover.sourceLocalImage');
+    if (selectedItem.value) return t('discover.sourceFavoriteImage');
+    return t('discover.noImageSelected');
 });
 
 // 容器底部安全间距，确保对话滚动到底部不会被贴底面板遮挡
@@ -706,10 +706,10 @@ const createAiProfile = () => {
 
 const showPickerPermissionModal = () => {
     uni.showModal({
-        title: t('feedback.permissionTitle') || '需要访问相册',
-        content: t('feedback.permissionContent') || '为了选择本地图片，需要访问您的相册权限。请在设置中开启相册权限。',
-        confirmText: t('feedback.goToSettings') || '去设置',
-        cancelText: t('common.cancel') || '取消',
+        title: t('feedback.permissionTitle'),
+        content: t('feedback.permissionContent'),
+        confirmText: t('feedback.goToSettings'),
+        cancelText: t('common.cancel'),
         success: (res) => {
             if (res.confirm) {
                 // #ifdef APP
@@ -767,7 +767,7 @@ const pickLocalImage = () => {
                 if (err?.errCode === 2101005 || /permission|权限|denied|拒绝/i.test(err?.errMsg || '')) {
                     showPickerPermissionModal();
                 } else {
-                    uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
+                    uni.showToast({ title: t('feedback.imageSelectFailed'), icon: 'none' });
                 }
             },
         });
@@ -796,7 +796,7 @@ const pickLocalImage = () => {
             } else if (err?.errMsg && err.errMsg.includes('cancel')) {
                 // 用户取消，忽略
             } else {
-                uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
+                uni.showToast({ title: t('feedback.imageSelectFailed'), icon: 'none' });
             }
         },
     });

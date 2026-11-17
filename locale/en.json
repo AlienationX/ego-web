@@ -381,6 +381,7 @@
         "energySuccessTip": "1 energy point consumed",
         "adSuccessTip": "Ad completed, saving wallpaper now",
         "selectPhotoHint": "Please choose a wallpaper first",
+        "mockWeather": "26°C Sunny",
         "apps": {
             "wechat": "Chat",
             "photos": "Photos",
@@ -501,7 +502,8 @@
         "permissionTitle": "Need Photo Library Access",
         "permissionContent": "To upload feedback images, we need access to your photo library. Please enable photo library permission in Settings.",
         "goToSettings": "Go to Settings",
-        "imageSelectFailed": "Failed to select image"
+        "imageSelectFailed": "Failed to select image",
+        "needMoreChars": "{count} more characters"
     },
     "search": {
         "placeholder": "Search wallpapers...",
@@ -767,10 +769,7 @@
         "noAdSupportHint": "Ad unlock is unavailable. Upgrade to VIP to download.",
         "vipExclusiveTitle": "VIP Exclusive Wallpaper",
         "vipExclusiveHint": "This wallpaper is exclusive to VIP members. Upgrade to unlock unlimited downloads.",
-        "openVipNow": "Upgrade to VIP Now",
-        "newUserBenefitSuccess": "Newbie Perk: Ad-free download applied ({count} left)",
-        "newUserBenefitFinal": "Newbie Perk: Final ad-free download applied!",
-        "newUserFreeBadge": "Newbie Free"
+        "openVipNow": "Upgrade to VIP Now"
     },
     "membership": {
         "navTitle": "VIP Center",
@@ -953,7 +952,13 @@
         "localVipRequired": "Local image selection is VIP only. Go to membership now?",
         "empty": "No favorites yet. Add one first, then come back.",
         "goFavorite": "Go to Favorites",
-        "systemError": "System error, please try again later"
+        "systemError": "System error, please try again later",
+        "changeImage": "Change",
+        "localUploaderHint": "Select local wallpaper for personality & aesthetic analysis (VIP only)",
+        "sourceLocalImage": "Local Photo",
+        "sourceFavoriteImage": "Favorite Wallpaper",
+        "noImageSelected": "No Wallpaper Selected",
+        "selectedImage": "Selected Photo"
     },
     "about": {
         "title": "About Us",
@@ -1384,8 +1389,7 @@
         "vipRequiredTitle": "VIP Exclusive Feature",
         "vipRequiredHint": "Setting wallpaper directly is a VIP feature. Upgrade to VIP to enjoy unlimited access.",
         "setSuccess": "Wallpaper set successfully",
-        "setFailed": "Failed to set wallpaper, please try again",
-        "newUserFree": "Newbie Free"
+        "setFailed": "Failed to set wallpaper, please try again"
     },
     "board": {
         "boardsTitle": "Boards",
@@ -1558,7 +1562,7 @@
         "selectPhotos": "Select Photos",
         "freeStyle": "Free Collage",
         "nineStyle": "Journal Grid",
-        "selectedCount": "{count}/9 Selected",
+        "selectedCount": "{count}/{max} Selected",
         "startPuzzle": "Start Making",
         "limitReached": "You can select up to 9 photos",
         "atLeastOne": "Please select at least 1 photo",
@@ -1566,6 +1570,13 @@
         "deletePhoto": "Delete",
         "previewWallpaper": "Wallpaper Preview",
         "goFavorites": "Browse Wallpapers",
-        "noFavorites": "You have not favorited any wallpapers yet"
+        "noFavorites": "You have not favorited any wallpapers yet",
+        "loginToViewFavorites": "Please sign in to view your favorites",
+        "loginNow": "Sign In",
+        "albumSingleHint": "Select HD photos from your album",
+        "available": "available",
+        "localSelectedPhotos": "Selected Photos",
+        "selectWallpaper": "Select Wallpaper",
+        "albumSelectFailed": "Failed to select album photos"
     }
 }

@@ -1,9 +1,8 @@
 import { useUserStore } from '@/stores/user.js';
 import { useAppStore } from '@/stores/app.js';
-import { isNewUserFreeBenefitAvailable, consumeNewUserFreeDownload } from '@/utils/benefit.js';
 
 /**
- * 统一权限检查与动作执行器（VIP极速放行 -> 新人特权 -> 扣能量 -> 广告与VIP 4矩阵判定）
+ * 统一权限检查与动作执行器（VIP极速放行 -> 扣能量 -> 广告与VIP 4矩阵判定）
  * 
  * 广泛适用于：拼图保存、磨砂伴侣导出、时钟样式解锁等系统创作功能与高精资源下载
  * 
@@ -12,7 +11,6 @@ import { isNewUserFreeBenefitAvailable, consumeNewUserFreeDownload } from '@/uti
  * @param {number} [options.wallId=0] - 关联壁纸ID或创作资源ID
  * @param {string} [options.actionType='consume_feature'] - 能量消耗动作标识
  * @param {number} [options.costEnergy=1] - 所需消耗的能量点数，默认 1
- * @param {boolean} [options.allowNewUserBenefit=false] - 是否允许使用新人免广告下载特权，默认 false
  * @param {Function} options.onSuccess - 验证通过/扣能量完成/广告看完后的成功回调: ({ type, message }) => void
  * @param {Object} [options.customConfig] - 自定义弹窗标题及提示文案配置
  * @param {string} [options.customConfig.title] - 弹窗标题
@@ -29,7 +27,6 @@ export async function executeWithAuth(options = {}) {
         wallId = 0,
         actionType = 'consume_feature',
         costEnergy = 1,
-        allowNewUserBenefit = false,
         onSuccess,
         customConfig = {},
     } = options;
@@ -42,19 +39,6 @@ export async function executeWithAuth(options = {}) {
         onSuccess?.({
             type: 'vip',
             message: customConfig.vipSuccessTip || 'VIP 专属极速畅享',
-        });
-        return;
-    }
-
-    // 0.1 新人免广告特权判定（如果启用）
-    if (allowNewUserBenefit && isNewUserFreeBenefitAvailable()) {
-        const remainingAfter = consumeNewUserFreeDownload();
-        const tip = remainingAfter > 0
-            ? `新人专属免广告特权已生效（剩余${remainingAfter}次）`
-            : '新人专属免广告特权已生效';
-        onSuccess?.({
-            type: 'new_user',
-            message: tip,
         });
         return;
     }

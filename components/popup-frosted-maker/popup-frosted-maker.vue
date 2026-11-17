@@ -29,7 +29,7 @@
                             <!-- 顶部小组件栏 -->
                             <view class="mock-widget">
                                 <text class="mock-widget__date">09:41</text>
-                                <text class="mock-widget__weather">26°C 晴</text>
+                                <text class="mock-widget__weather">{{ t('frostedMaker.mockWeather') }}</text>
                             </view>
 
                             <!-- 桌面应用图标网格 -->

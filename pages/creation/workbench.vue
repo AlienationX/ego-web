@@ -902,7 +902,6 @@ const handleSaveWorkbench = () => {
         adPopup: adPopup.value,
         actionType: 'workbench_save',
         costEnergy: 1,
-        allowNewUserBenefit: false,
         onSuccess: async () => {
             await startCanvasExport();
         },

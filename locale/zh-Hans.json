@@ -381,6 +381,7 @@
         "energySuccessTip": "已消耗 1 点能量",
         "adSuccessTip": "广告观看完成，正在保存",
         "selectPhotoHint": "请先选择一张壁纸",
+        "mockWeather": "26°C 晴",
         "apps": {
             "wechat": "微信",
             "photos": "相册",
@@ -501,7 +502,8 @@
         "permissionTitle": "需要访问相册",
         "permissionContent": "为了上传反馈图片，需要访问您的相册权限。请在设置中开启相册权限。",
         "goToSettings": "去设置",
-        "imageSelectFailed": "选择图片失败"
+        "imageSelectFailed": "选择图片失败",
+        "needMoreChars": "还需 {count} 字"
     },
     "search": {
         "placeholder": "搜索壁纸...",
@@ -767,10 +769,7 @@
         "noAdSupportHint": "本平台暂不支持广告解锁，需开通会员解锁下载。",
         "vipExclusiveTitle": "VIP 专属壁纸",
         "vipExclusiveHint": "该壁纸为 VIP 专属高精资源，开通会员后可无限制一键下载全站壁纸。",
-        "openVipNow": "立即开通 VIP",
-        "newUserBenefitSuccess": "新人特权：已免广告极速下载（剩余 {count} 次）",
-        "newUserBenefitFinal": "新人特权：已免广告极速下载（新手特权已用完）",
-        "newUserFreeBadge": "新人免广"
+        "openVipNow": "立即开通 VIP"
     },
     "membership": {
         "navTitle": "会员中心",
@@ -953,7 +952,13 @@
         "localVipRequired": "本地选图仅会员可用，是否前往开通会员？",
         "empty": "你还没有收藏图片，先去收藏一张再来分析吧",
         "goFavorite": "去我的收藏",
-        "systemError": "系统错误，请稍后再试"
+        "systemError": "系统错误，请稍后再试",
+        "changeImage": "更换图片",
+        "localUploaderHint": "选择本地壁纸进行性格与美学解析（VIP专享）",
+        "sourceLocalImage": "本地相册图片",
+        "sourceFavoriteImage": "已选收藏壁纸",
+        "noImageSelected": "未选择壁纸",
+        "selectedImage": "已选图片"
     },
     "about": {
         "title": "关于我们",
@@ -1384,8 +1389,7 @@
         "vipRequiredTitle": "VIP 专属功能",
         "vipRequiredHint": "一键设置手机桌面与锁屏壁纸为 VIP 专属功能，开通会员后可无限次享用。",
         "setSuccess": "壁纸设置成功",
-        "setFailed": "壁纸设置失败，请重试",
-        "newUserFree": "新人免广"
+        "setFailed": "壁纸设置失败，请重试"
     },
     "board": {
         "boardsTitle": "灵感画板",
@@ -1558,7 +1562,7 @@
         "selectPhotos": "选择照片",
         "freeStyle": "自由拼图",
         "nineStyle": "九图手帐",
-        "selectedCount": "已选 {count}/9 张",
+        "selectedCount": "已选 {count}/{max} 张",
         "startPuzzle": "开始制作",
         "limitReached": "最多只能选择 9 张照片哦",
         "atLeastOne": "请至少选择 1 张照片",
@@ -1566,6 +1570,13 @@
         "deletePhoto": "删除照片",
         "previewWallpaper": "壁纸预览效果",
         "goFavorites": "去首页逛逛",
-        "noFavorites": "您还没有收藏任何壁纸哦"
+        "noFavorites": "您还没有收藏任何壁纸哦",
+        "loginToViewFavorites": "您还未登录，请先登录查看我的收藏",
+        "loginNow": "立即登录",
+        "albumSingleHint": "支持选择手机相册中的高清图片",
+        "available": "可选",
+        "localSelectedPhotos": "本地已选图片",
+        "selectWallpaper": "选择壁纸",
+        "albumSelectFailed": "选择相册失败"
     }
 }

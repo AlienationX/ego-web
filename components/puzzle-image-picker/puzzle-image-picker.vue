@@ -39,10 +39,10 @@
                     <!-- 1.1 未登录状态：提示去登录 -->
                     <view v-if="!userStore.isLoggedIn" class="empty-box">
                         <mdi-icon path="/static/icons/account-circle.svg" size="52px" :color="settingsStore.isDark ? '#475569' : '#cbd5e1'" />
-                        <text class="empty-text">您还未登录，请先登录查看我的收藏</text>
+                        <text class="empty-text">{{ t('puzzle.loginToViewFavorites') }}</text>
                         <view class="empty-action-group">
                             <view class="empty-action-btn" @click="toLogin">
-                                <text>立即登录</text>
+                                <text>{{ t('puzzle.loginNow') }}</text>
                             </view>
                         </view>
                     </view>
@@ -55,10 +55,10 @@
                     <!-- 1.3 登录后暂无收藏：提示去收藏 -->
                     <view v-else-if="favoriteList.length === 0" class="empty-box">
                         <mdi-icon path="/static/icons/heart-broken.svg" size="52px" :color="settingsStore.isDark ? '#475569' : '#cbd5e1'" />
-                        <text class="empty-text">{{ t('puzzle.noFavorites') || '您还没有收藏任何壁纸哦' }}</text>
+                        <text class="empty-text">{{ t('puzzle.noFavorites') }}</text>
                         <view class="empty-action-group">
                             <view class="empty-action-btn" @click="goFavorite">
-                                <text>{{ $t('discover.goFavorite') || '去我的收藏' }}</text>
+                                <text>{{ $t('discover.goFavorite') }}</text>
                             </view>
                         </view>
                     </view>
@@ -90,13 +90,13 @@
                         </view>
                         <text class="trigger-title">{{ t('puzzle.openAlbum') }}</text>
                         <text class="trigger-hint">
-                            {{ singleMode ? '支持选择手机相册中的高清图片' : `${t('puzzle.freeStyle')} (${maxCount - currentSelected.length} 可选)` }}
+                            {{ singleMode ? t('puzzle.albumSingleHint') : `${t('puzzle.freeStyle')} (${maxCount - currentSelected.length} ${t('puzzle.available')})` }}
                         </text>
                     </view>
 
                     <!-- 相册已选中的图片预览网格 -->
                     <view v-if="albumImages.length > 0" class="album-chosen-list">
-                        <text class="section-title">本地已选图片</text>
+                        <text class="section-title">{{ t('puzzle.localSelectedPhotos') }}</text>
                         <view class="chosen-grid">
                             <view
                                 v-for="(img, idx) in albumImages"
@@ -125,7 +125,7 @@
                         :class="{ 'is-disabled': currentSelected.length === 0 }"
                         @click="handleConfirm"
                     >
-                        <text class="btn-text">{{ singleMode ? '确定选择' : t('puzzle.startPuzzle') }}</text>
+                        <text class="btn-text">{{ singleMode ? t('common.confirm') : t('puzzle.startPuzzle') }}</text>
                     </view>
                 </view>
             </view>
@@ -175,9 +175,9 @@ const emit = defineEmits(['update:visible', 'confirm', 'cancel']);
 const displayTitle = computed(() => {
     if (props.title) return props.title;
     if (props.singleMode) {
-        return '选择壁纸';
+        return t('puzzle.selectWallpaper');
     }
-    return t('puzzle.selectPhotos') || '选择照片';
+    return t('puzzle.selectPhotos');
 });
 
 // 默认将「我的收藏」置于前面
@@ -189,7 +189,7 @@ const isLoadingFavorites = ref(false);
 
 // 兼容跨端动态计算已选数量文本
 const selectedCountText = computed(() => {
-    return `已选 ${currentSelected.value.length}/${props.maxCount} 张`;
+    return tp('puzzle.selectedCount', { count: currentSelected.value.length, max: props.maxCount });
 });
 
 // 跳转登录
@@ -316,7 +316,7 @@ const chooseFromAlbum = () => {
         fail: (err) => {
             if (err.errMsg && !err.errMsg.includes('cancel')) {
                 uni.showToast({
-                    title: '选择相册失败',
+                    title: t('puzzle.albumSelectFailed'),
                     icon: 'none',
                 });
             }

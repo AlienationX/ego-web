@@ -38,7 +38,7 @@
                     <view class="section-header">
                         <text class="section-title">{{ t('feedback.content') }}</text>
                         <text class="section-badge" :class="{ 'is-met': canSubmit }">
-                            {{ canSubmit ? `${feedbackForm.content.trim().length}/500` : `还需 ${10 - feedbackForm.content.trim().length} 字` }}
+                            {{ canSubmit ? `${feedbackForm.content.trim().length}/500` : tp('feedback.needMoreChars', { count: 10 - feedbackForm.content.trim().length }) }}
                         </text>
                     </view>
                     <view class="flat-card" :class="{ 'is-focused': isContentFocused }">
@@ -189,10 +189,10 @@ const chooseImage = () => {
 
 const showPermissionModal = () => {
     uni.showModal({
-        title: t('feedback.permissionTitle') || '需要访问相册',
-        content: t('feedback.permissionContent') || '为了选择本地图片，需要访问您的相册权限。请在设置中开启相册权限。',
-        confirmText: t('feedback.goToSettings') || '去设置',
-        cancelText: t('common.cancel') || '取消',
+        title: t('feedback.permissionTitle'),
+        content: t('feedback.permissionContent'),
+        confirmText: t('feedback.goToSettings'),
+        cancelText: t('common.cancel'),
         success: (res) => {
             if (res.confirm) {
                 uni.openAppAuthorizeSetting({
@@ -220,7 +220,7 @@ const selectImage = (count) => {
                 if (err?.errCode === 2101005 || /permission|权限|denied|拒绝/i.test(err?.errMsg || '')) {
                     showPermissionModal();
                 } else {
-                    uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败' + JSON.stringify(err), icon: 'none' });
+                    uni.showToast({ title: t('feedback.imageSelectFailed') + (err ? ' ' + JSON.stringify(err) : ''), icon: 'none' });
                 }
             },
         });
@@ -247,7 +247,7 @@ const selectImage = (count) => {
             if (err.errMsg && (err.errMsg.toLowerCase().includes('permission') || err.errMsg.includes('权限'))) {
                 showPermissionModal();
             } else {
-                uni.showToast({ title: t('feedback.imageSelectFailed') || '选择图片失败', icon: 'none' });
+                uni.showToast({ title: t('feedback.imageSelectFailed'), icon: 'none' });
             }
         },
     });

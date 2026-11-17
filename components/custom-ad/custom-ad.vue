@@ -153,7 +153,7 @@ const containerHeight = computed(() => {
     if (props.height) return props.height;
     if (props.direction === 'vertical') return '620rpx';
     // #ifdef APP
-    return '460rpx';
+    return '470rpx';
     // #endif
     // #ifndef APP
     return '380rpx';

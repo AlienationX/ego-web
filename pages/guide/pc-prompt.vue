@@ -1,79 +1,103 @@
 <template>
     <view class="pc-layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- 背景环境光装饰层 -->
-        <view class="ambient-glow ambient-glow--top"></view>
-        <view class="ambient-glow ambient-glow--bottom"></view>
+        <!-- 居中核心区域（完全扁平，无任何外层卡片边框及阴影） -->
+        <view class="pc-container">
+            <!-- 顶部应用标识 -->
+            <!-- <view class="pc-container__brand">
+                <image class="pc-container__logo" src="/static/logo.svg" mode="aspectFit" />
+                <text class="pc-container__brand-name">本我壁纸</text>
+            </view> -->
 
-        <!-- 居中核心卡片 -->
-        <view class="pc-card">
-            <!-- 顶部应用标识与徽章 -->
-            <view class="brand-row">
-                <image class="app-logo" src="/static/logo.svg" mode="aspectFit" />
-                <text class="app-name">{{ $t('common.appName') || '本我壁纸' }}</text>
-            </view>
-
-            <!-- 核心引导设备图标徽章 -->
-            <view class="device-badge">
-                <mdi-icon
-                    path="/static/icons/cellphone.svg"
-                    size="32px"
-                    :color="settingsStore.isDark ? '#818cf8' : '#4f46e5'"
-                ></mdi-icon>
-            </view>
-
-            <text class="title">请使用手机微信访问</text>
-            
-            <text class="subtitle">
-                本应用专为移动设备深度定制。<br />
-                为保证超高清原画浏览、灵动锁屏预览及一键设壁纸体验，请移步手机端微信使用。
+            <!-- 核心标题与引导文案 -->
+            <text class="pc-container__title">请使用手机微信访问</text>
+            <text class="pc-container__subtitle">
+                本应用专为移动设备深度定制，请移步手机端获得原画壁纸浏览与一键设置壁纸体验
             </text>
 
-            <!-- 小程序太阳码区域 -->
-            <view class="qrcode-wrapper">
-                <view class="qrcode-inner">
+            <!-- 方式一：直接扫码（无边框，干净纯粹） -->
+            <view class="pc-qrcode-section" @click="handlePreviewQrcode">
+                <view class="pc-qrcode-box">
                     <image
                         v-if="!qrcodeLoadError"
-                        class="qrcode-img"
-                        src="/static/images/mini-program-qrcode.png"
+                        class="pc-qrcode-img"
+                        :src="qrcodeUrl"
                         mode="aspectFit"
                         :show-menu-by-longpress="true"
                         @error="onQrcodeError"
                     />
-                    <!-- 若尚未放置实际小程序码图片时的优雅兜底图形 -->
-                    <view v-else class="qrcode-fallback">
-                        <image class="fallback-logo" src="/static/logo.svg" mode="aspectFit" />
-                        <text class="fallback-text">微信搜索</text>
-                        <text class="fallback-highlight">「本我壁纸」</text>
+                    <!-- 加载失败兜底图形 -->
+                    <view v-else class="pc-qrcode-fallback">
+                        <mdi-icon
+                            path="/static/icons/alert-circle.svg"
+                            size="36px"
+                            color="#94a3b8"
+                        />
+                        <text class="pc-qrcode-fallback__text">二维码加载失败，可使用下方搜索方式</text>
                     </view>
                 </view>
-
-                <text class="qrcode-tip">手机微信「扫一扫」立即进入</text>
+                <text class="pc-qrcode-tip">手机微信「扫一扫」立即进入</text>
+                <text class="pc-qrcode-subtip">点击可全屏查看二维码</text>
             </view>
 
-            <!-- 便捷复制按钮 -->
-            <view class="action-row">
-                <button class="copy-btn" @click="handleCopyName">
-                    <mdi-icon
-                        path="/static/icons/content-save.svg"
-                        size="16px"
-                        :color="settingsStore.isDark ? '#e2e8f0' : '#475569'"
-                    ></mdi-icon>
-                    <text class="copy-btn-text">复制小程序名称</text>
-                </button>
+            <!-- 扁平轻量分割线 -->
+            <view class="pc-divider">
+                <view class="pc-divider__line"></view>
+                <text class="pc-divider__text">或</text>
+                <view class="pc-divider__line"></view>
+            </view>
+
+            <!-- 方式二：搜索小程序名称 -->
+            <view class="pc-search-section">
+                <view class="pc-search-box" @click="handleCopyName">
+                    <view class="pc-search-box__left">
+                        <mdi-icon
+                            path="/static/icons/magnify.svg"
+                            size="18px"
+                            :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"
+                        />
+                        <text class="pc-search-box__label">微信搜索：</text>
+                        <text class="pc-search-box__name">本我壁纸</text>
+                    </view>
+                    <view class="pc-search-box__btn">
+                        <mdi-icon
+                            path="/static/icons/content-save.svg"
+                            size="14px"
+                            color="#ffffff"
+                        />
+                        <text class="pc-search-box__btn-text">复制名称</text>
+                    </view>
+                </view>
+                <text class="pc-search-tip">打开手机微信搜索「本我壁纸」进入体验</text>
             </view>
         </view>
     </view>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useSettingsStore } from '@/stores/settings.js';
+import { PICS_BASE_URL } from '@/common/config.js';
 
 const settingsStore = useSettingsStore();
 const qrcodeLoadError = ref(false);
 
+// 二维码图片完整地址
+const qrcodeUrl = computed(() => {
+    const base = (PICS_BASE_URL || '').replace(/\/+$/, '');
+    return `${base}/gh_1072957b53f6_258.jpg`;
+});
+
 const onQrcodeError = () => {
     qrcodeLoadError.value = true;
+};
+
+// 点击二维码放大全屏查看
+const handlePreviewQrcode = () => {
+    if (!qrcodeUrl.value || qrcodeLoadError.value) return;
+    uni.previewImage({
+        urls: [qrcodeUrl.value],
+        current: qrcodeUrl.value,
+    });
 };
 
 // 复制小程序名称，方便用户在手机微信直接搜索
@@ -94,238 +118,231 @@ const handleCopyName = () => {
 <style lang="scss" scoped>
 .pc-layout {
     width: 100vw;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: hidden;
-    background-color: var(--page-background, #f8fafc);
+    background-color: var(--page-background-secondary, #ffffff);
     box-sizing: border-box;
-    padding: 40rpx;
+    padding: 30rpx;
     transition: background-color 0.3s ease;
-}
-
-// ── 环境光装饰光晕 ──
-.ambient-glow {
-    position: absolute;
-    width: 600rpx;
-    height: 600rpx;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(120rpx);
-    opacity: 0.28;
-
-    &--top {
-        top: -100rpx;
-        left: 10%;
-        background: radial-gradient(circle, #6366f1 0%, transparent 70%);
-    }
-
-    &--bottom {
-        bottom: -100rpx;
-        right: 10%;
-        background: radial-gradient(circle, #ec4899 0%, transparent 70%);
-    }
 
     .theme-dark & {
-        opacity: 0.18;
+        background-color: var(--page-background, #181818);
     }
 }
 
-// ── 核心毛玻璃卡片 ──
-.pc-card {
-    position: relative;
-    z-index: 10;
+// ── 核心内容容器（纯扁平排版，无任何卡片外框、底色差与阴影） ──
+.pc-container {
     width: 100%;
-    max-width: 820rpx;
-    background: var(--panel-background, rgba(255, 255, 255, 0.9));
-    border-radius: 40rpx;
-    padding: 60rpx 48rpx 50rpx;
+    max-width: 600rpx;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     box-sizing: border-box;
-    box-shadow:
-        0 10rpx 30rpx rgba(0, 0, 0, 0.04),
-        0 30rpx 60rpx -10rpx rgba(15, 23, 42, 0.08);
-    border: 1rpx solid var(--panel-border, rgba(0, 0, 0, 0.06));
-    backdrop-filter: blur(24rpx);
-    -webkit-backdrop-filter: blur(24rpx);
 
-    .theme-dark & {
-        background: var(--panel-background, rgba(30, 41, 59, 0.85));
-        border: 1rpx solid rgba(255, 255, 255, 0.1);
-        box-shadow:
-            0 10rpx 30rpx rgba(0, 0, 0, 0.2),
-            0 30rpx 70rpx -10rpx rgba(0, 0, 0, 0.5);
+    &__brand {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+        margin-bottom: 40rpx;
     }
-}
 
-.brand-row {
-    display: flex;
-    align-items: center;
-    gap: 16rpx;
-    margin-bottom: 36rpx;
-
-    .app-logo {
+    &__logo {
         width: 48rpx;
         height: 48rpx;
-        border-radius: 12rpx;
+        border-radius: 10rpx;
     }
 
-    .app-name {
-        font-size: 28rpx;
+    &__brand-name {
+        font-size: 40rpx;
+        font-weight: 600;
+        letter-spacing: 0.5rpx;
+        color: var(--text-primary, #15171c);
+    }
+
+    &__title {
+        font-size: 34rpx;
         font-weight: 700;
-        letter-spacing: 1rpx;
-        color: var(--text-primary, #0f172a);
+        line-height: 1.35;
+        color: var(--text-primary, #15171c);
+        margin-bottom: 12rpx;
+    }
+
+    &__subtitle {
+        font-size: 23rpx;
+        line-height: 1.55;
+        color: var(--text-secondary, rgba(21, 23, 28, 0.65));
+        max-width: 520rpx;
+        margin-bottom: 120rpx;
     }
 }
 
-.device-badge {
-    width: 110rpx;
-    height: 110rpx;
-    border-radius: 50%;
-    background: rgba(79, 70, 229, 0.08);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 28rpx;
-
-    .theme-dark & {
-        background: rgba(129, 140, 248, 0.14);
-    }
-}
-
-.title {
-    font-size: 40rpx;
-    font-weight: 800;
-    line-height: 1.3;
-    color: var(--text-primary, #0f172a);
-    margin-bottom: 18rpx;
-}
-
-.subtitle {
-    font-size: 26rpx;
-    line-height: 1.65;
-    color: var(--text-secondary, #64748b);
-    max-width: 680rpx;
-    margin-bottom: 40rpx;
-}
-
-// ── 太阳码区域 ──
-.qrcode-wrapper {
+// ── 方式一：直接扫码（无边框、无底框） ──
+.pc-qrcode-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30rpx 36rpx 24rpx;
-    border-radius: 32rpx;
-    background: rgba(0, 0, 0, 0.02);
-    border: 1rpx dashed rgba(0, 0, 0, 0.08);
-    margin-bottom: 36rpx;
+    cursor: pointer;
+}
 
-    .theme-dark & {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1rpx dashed rgba(255, 255, 255, 0.12);
+.pc-qrcode-box {
+    width: 270rpx;
+    height: 270rpx;
+    border: none;
+    background: transparent;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18rpx;
+    transition: transform 0.2s ease;
+
+    &:active {
+        transform: scale(0.98);
     }
 
-    .qrcode-inner {
-        width: 300rpx;
-        height: 300rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 18rpx;
-    }
-
-    .qrcode-img {
+    .pc-qrcode-img {
         width: 100%;
         height: 100%;
-        border-radius: 20rpx;
+        border-radius: 14rpx;
+        display: block;
     }
 
-    .qrcode-fallback {
+    .pc-qrcode-fallback {
         width: 100%;
         height: 100%;
-        border-radius: 20rpx;
-        background: var(--panel-background, #ffffff);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 10rpx;
-        box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+        gap: 8rpx;
 
-        .fallback-logo {
-            width: 80rpx;
-            height: 80rpx;
-            border-radius: 16rpx;
-            margin-bottom: 8rpx;
+        &__text {
+            font-size: 20rpx;
+            color: var(--text-tertiary, #94a3b8);
+            text-align: center;
+            padding: 0 10rpx;
         }
-
-        .fallback-text {
-            font-size: 22rpx;
-            color: var(--text-secondary, #64748b);
-        }
-
-        .fallback-highlight {
-            font-size: 26rpx;
-            font-weight: 700;
-            color: #4f46e5;
-
-            .theme-dark & {
-                color: #818cf8;
-            }
-        }
-    }
-
-    .qrcode-tip {
-        font-size: 24rpx;
-        font-weight: 600;
-        color: var(--text-secondary, #64748b);
     }
 }
 
-// ── 复制按钮 ──
-.action-row {
-    width: 100%;
+.pc-qrcode-tip {
+    font-size: 25rpx;
+    font-weight: 600;
+    color: var(--text-primary, #15171c);
+    margin-bottom: 6rpx;
+}
+
+.pc-qrcode-subtip {
+    font-size: 21rpx;
+    color: var(--text-tertiary, rgba(21, 23, 28, 0.45));
+}
+
+// ── 扁平分割线 ──
+.pc-divider {
     display: flex;
+    align-items: center;
     justify-content: center;
+    width: 100%;
+    max-width: 460rpx;
+    margin: 32rpx 0 28rpx;
+    gap: 16rpx;
 
-    .copy-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12rpx;
-        padding: 0 36rpx;
-        height: 72rpx;
-        line-height: 72rpx;
-        border-radius: 999rpx;
-        background: rgba(0, 0, 0, 0.04);
-        border: 1rpx solid rgba(0, 0, 0, 0.06);
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:active {
-            transform: scale(0.97);
-            background: rgba(0, 0, 0, 0.08);
-        }
+    &__line {
+        flex: 1;
+        height: 1rpx;
+        background-color: var(--panel-border, rgba(0, 0, 0, 0.08));
 
         .theme-dark & {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1rpx solid rgba(255, 255, 255, 0.12);
-
-            &:active {
-                background: rgba(255, 255, 255, 0.14);
-            }
-        }
-
-        .copy-btn-text {
-            font-size: 24rpx;
-            font-weight: 600;
-            color: var(--text-primary, #0f172a);
+            background-color: var(--panel-border, rgba(255, 255, 255, 0.08));
         }
     }
+
+    &__text {
+        font-size: 22rpx;
+        font-weight: 500;
+        color: var(--text-tertiary, rgba(21, 23, 28, 0.4));
+    }
+}
+
+// ── 方式二：搜索小程序 ──
+.pc-search-section {
+    width: 100%;
+    max-width: 480rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pc-search-box {
+    width: 100%;
+    height: 76rpx;
+    background-color: rgba(0, 0, 0, 0.035);
+    border: none;
+    border-radius: 18rpx;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12rpx 0 20rpx;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:active {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+
+    .theme-dark & {
+        background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 10rpx;
+    }
+
+    &__label {
+        font-size: 23rpx;
+        color: var(--text-secondary, rgba(21, 23, 28, 0.65));
+    }
+
+    &__name {
+        font-size: 25rpx;
+        font-weight: 600;
+        color: var(--text-primary, #15171c);
+    }
+
+    &__btn {
+        height: 52rpx;
+        padding: 0 18rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6rpx;
+        background-color: #07c160;
+        border-radius: 12rpx;
+        cursor: pointer;
+        box-shadow: 0 2rpx 8rpx rgba(7, 193, 96, 0.2);
+
+        &-text {
+            font-size: 21rpx;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.4;
+        }
+    }
+}
+
+.pc-search-tip {
+    font-size: 21rpx;
+    color: var(--text-tertiary, rgba(21, 23, 28, 0.45));
+    margin-top: 14rpx;
 }
 </style>
