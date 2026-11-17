@@ -10,9 +10,10 @@ export const useAppStore = defineStore('app', () => {
     // 跨页面共享的分类列表，替代原来的 uni.setStorageSync('classifyList', list)
     const classifyList = ref([]);
 
-    // 版本与渠道功能配置（支持广告开关 ad_enabled、支付开关 pay_enabled）
+    // 版本与渠道功能配置（支持广告开关 ad_enabled、支付开关 pay_enabled、AI 功能开关 ai_enabled）
     const versionConfig = ref(
         uni.getStorageSync('version_config') || {
+            ai_enabled: true,
             ad_enabled: true,
             pay_enabled: true,
             set_wallpaper_enabled: true,

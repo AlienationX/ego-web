@@ -69,7 +69,7 @@
                             </view>
                         </view>
                         <view class="image-add-box" v-if="imageList.length < maxImages" @click="chooseImage">
-                            <mdi-icon path="/static/icons/camera.svg" size="26px" :color="settingsStore.isDark ? '#6b7280' : '#9ca3af'"></mdi-icon>
+                            <mdi-icon path="/static/icons/camera.svg" size="26px" :color="settingsStore.isDark ? '#9ca3af' : '#9ca3af'"></mdi-icon>
                             <text class="image-add-label">{{ t('feedback.addImage') }}</text>
                         </view>
                     </view>
@@ -85,7 +85,7 @@
                     </view>
                     <view class="flat-card contact-card" :class="{ 'is-focused': isContactFocused }">
                         <view class="contact-icon">
-                            <mdi-icon path="/static/icons/email.svg" size="18px" :color="settingsStore.isDark ? '#6b7280' : '#9ca3af'"></mdi-icon>
+                            <mdi-icon path="/static/icons/email.svg" size="18px" :color="settingsStore.isDark ? '#9ca3af' : '#9ca3af'"></mdi-icon>
                         </view>
                         <input
                             class="contact-input"
@@ -128,8 +128,10 @@ import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useUserStore } from '@/stores/user';
 import { apiPostFeedback, apiUploadFeedback } from '@/api/wallpaper.js';
+import { getDeviceId } from '@/api/request.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { CHANNEL } from '@/common/config.js';
 import { validateTextSecurity, validateImagesSecurityBatch } from '@/utils/security.js';
 // #ifdef APP-PLUS
 import { chooseSystemMedia } from '@/uni_modules/uni-chooseSystemImage';
@@ -306,6 +308,9 @@ const handleSubmit = async () => {
 
     try {
         const data = {
+            channel: CHANNEL,
+            device_id: getDeviceId(),
+            fb_type: feedbackForm.type,
             type: feedbackForm.type,
             content: feedbackForm.content.trim(),
             contact: feedbackForm.contact.trim(),
@@ -454,12 +459,14 @@ const handleSubmit = async () => {
 .chip {
     padding: 16rpx 32rpx;
     border-radius: 999rpx;
-    background: var(--page-background-secondary);
+    background: var(--panel-background-solid);
+    border: 2rpx solid var(--panel-border);
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
     cursor: pointer;
+    box-sizing: border-box;
 
     .chip-text {
         font-size: 26rpx;
@@ -475,6 +482,8 @@ const handleSubmit = async () => {
 
     &.active {
         background: #e5322d;
+        border-color: #e5322d;
+        box-shadow: 0 4rpx 14rpx rgba(229, 50, 45, 0.3);
 
         .chip-text {
             color: #ffffff;
@@ -485,15 +494,16 @@ const handleSubmit = async () => {
 
 /* 扁平输入卡片 */
 .flat-card {
-    background: var(--page-background-secondary);
+    background: var(--panel-background-solid);
     border-radius: 24rpx;
-    border: 2rpx solid transparent;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    border: 2rpx solid var(--panel-border);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
     overflow: hidden;
     box-sizing: border-box;
 
     &.is-focused {
         border-color: #e5322d;
+        box-shadow: 0 0 0 2rpx rgba(229, 50, 45, 0.2);
     }
 }
 
@@ -527,7 +537,9 @@ const handleSubmit = async () => {
     padding-bottom: 100%;
     border-radius: 20rpx;
     overflow: hidden;
-    background: var(--page-background-secondary);
+    background: var(--panel-background-solid);
+    border: 2rpx solid var(--panel-border);
+    box-sizing: border-box;
 
     .image-thumb {
         position: absolute;
@@ -563,13 +575,15 @@ const handleSubmit = async () => {
     width: 100%;
     padding-bottom: 100%;
     border-radius: 20rpx;
-    background: var(--page-background-secondary);
+    background: var(--panel-background-solid);
+    border: 2rpx dashed var(--panel-border);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 
     &:active {
         opacity: 0.8;
@@ -643,6 +657,7 @@ const handleSubmit = async () => {
     justify-content: center;
     margin: 0;
     padding: 0;
+    border: 2rpx solid transparent;
     box-sizing: border-box;
     transition: all 0.2s ease;
     cursor: pointer;
@@ -657,9 +672,10 @@ const handleSubmit = async () => {
     }
 
     &.disabled {
-        background: var(--page-background-secondary);
+        background: var(--panel-background-solid);
+        border: 2rpx solid var(--panel-border);
         color: var(--text-tertiary);
-        opacity: 0.6;
+        opacity: 0.85;
         cursor: not-allowed;
     }
 }
@@ -694,10 +710,123 @@ const handleSubmit = async () => {
     }
 }
 
-/* 暗色模式微调 */
+/* ── 暗色模式对比度增强 ── */
 .theme-dark {
+    .section-title {
+        color: #f1f5f9;
+    }
+
+    .chip {
+        background: #222228;
+        border-color: rgba(255, 255, 255, 0.14);
+
+        .chip-text {
+            color: #d1d5db;
+        }
+
+        &.active {
+            background: #e5322d;
+            border-color: #e5322d;
+            box-shadow: 0 4rpx 16rpx rgba(229, 50, 45, 0.35);
+
+            .chip-text {
+                color: #ffffff;
+            }
+        }
+    }
+
     .flat-card {
-        background: var(--page-background-secondary);
+        background: #222228;
+        border-color: rgba(255, 255, 255, 0.14);
+
+        &.is-focused {
+            background: #26262e;
+            border-color: #e5322d;
+            box-shadow: 0 0 0 2rpx rgba(229, 50, 45, 0.25);
+        }
+    }
+
+    .placeholder-text {
+        color: rgba(247, 247, 251, 0.4);
+    }
+
+    .image-add-box {
+        background: #222228;
+        border-color: rgba(255, 255, 255, 0.2);
+
+        .image-add-label {
+            color: #9ca3af;
+        }
+    }
+
+    .image-box {
+        border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .submit-btn.disabled {
+        background: #222228;
+        border-color: rgba(255, 255, 255, 0.12);
+        color: rgba(247, 247, 251, 0.38);
+        opacity: 1;
+    }
+}
+
+/* ── 浅色模式细节强化 ── */
+.theme-light {
+    .section-title {
+        color: #334155;
+    }
+
+    .chip {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.08);
+
+        .chip-text {
+            color: #475569;
+        }
+
+        &.active {
+            background: #e5322d;
+            border-color: #e5322d;
+
+            .chip-text {
+                color: #ffffff;
+            }
+        }
+    }
+
+    .flat-card {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.02);
+
+        &.is-focused {
+            border-color: #e5322d;
+        }
+    }
+
+    .placeholder-text {
+        color: #94a3b8;
+    }
+
+    .image-add-box {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.14);
+
+        .image-add-label {
+            color: #64748b;
+        }
+    }
+
+    .image-box {
+        border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    .submit-btn.disabled {
+        background: #f1f5f9;
+        border-color: #e2e8f0;
+        color: #94a3b8;
+        opacity: 1;
     }
 }
 </style>

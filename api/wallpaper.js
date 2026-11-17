@@ -1,4 +1,4 @@
-import { request, uploadRequest, streamRequest } from '@/api/request.js';
+import { request, uploadRequest, streamRequest, getDeviceId } from '@/api/request.js';
 import { CHANNEL } from '@/common/config.js';
 
 // 访问接口
@@ -221,11 +221,11 @@ export const apiPostEarnEnergy = (data = {}) => {
     });
 };
 
-// 反馈接口
+// 反馈接口（自动附加渠道与设备标识）
 export const apiPostFeedback = (data = {}) => {
     return request({
         url: '/feedback/',
-        data,
+        data: { channel: CHANNEL, device_id: getDeviceId(), ...data },
         method: 'POST',
     });
 };
@@ -239,7 +239,7 @@ export const apiGetVersionConfig = (data = {}) => {
     });
 };
 
-// 上传反馈图片
+// 上传反馈图片（自动附加渠道与设备标识）
 export const apiUploadFeedback = (data = {}) => {
     // uni.uploadFile 的 files 参数需要对象数组格式 [{name, uri}]
     const files = (data.images || []).map((uri) => ({
@@ -251,7 +251,7 @@ export const apiUploadFeedback = (data = {}) => {
     return uploadRequest({
         url: '/feedback/',
         files: files,
-        data: formData,
+        data: { channel: CHANNEL, device_id: getDeviceId(), ...formData },
     });
 };
 

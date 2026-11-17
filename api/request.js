@@ -23,7 +23,7 @@ const getRawToken = () => {
 // 获取或生成设备ID（首次写入后用内存缓存，避免每次请求读磁盘）
 let _deviceId = null;
 
-const getDeviceId = () => {
+export const getDeviceId = () => {
     if (_deviceId) return _deviceId;
 
     let deviceId = uni.getStorageSync('deviceId');

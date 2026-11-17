@@ -134,7 +134,7 @@
             </view>
 
             <!-- 5. 灵感美学探索 (原 discover 页面功能) -->
-            <view v-if="false" class="tool-card tool-card--explore" @click="goToDiscover">
+            <view v-if="isAiEnabled" class="tool-card tool-card--explore" @click="goToDiscover">
                 <view class="card-text-block">
                     <view class="explore-tag-row">
                         <text class="explore-badge">AI EXPLORE</text>
@@ -169,11 +169,15 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useUserStore } from '@/stores/user.js';
+import { useAppStore } from '@/stores/app.js';
 import { getStatusBarHeight, getTabBarHeight } from '@/utils/layout.js';
 
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 const userStore = useUserStore();
+const appStore = useAppStore();
+
+const isAiEnabled = computed(() => appStore.versionConfig?.ai_enabled !== false);
 
 const adLoaded = ref(false);
 const adFailed = ref(false);
@@ -203,6 +207,7 @@ const goToFrosted = () => {
 
 // 进入原 discover 美学探索功能
 const goToDiscover = () => {
+    if (!isAiEnabled.value) return;
     uni.navigateTo({
         url: '/pages/creation/discover',
     });
