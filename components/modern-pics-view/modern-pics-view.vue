@@ -94,7 +94,7 @@
 
                                     <!-- B. 正常壁纸卡片 -->
                                     <template v-else>
-                                        <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
+                                        <image class="card-img" :src="isDesktopClassify ? (item.mediumPicurl || item.smallPicurl) : item.smallPicurl" mode="aspectFill" lazy-load
                                             @load="onImageLoad(item)" @error="onImageError(item)" :class="{ 'is-loaded': item.loaded }"></image>
                                         <view class="card-overlay" v-if="showCardMeta"></view>
                                         <view class="card-meta" v-if="showCardMeta">
@@ -153,7 +153,7 @@
                                             </view>
                                         </template>
                                         <template v-else>
-                                            <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
+                                            <image class="card-img" :src="isDesktopClassify ? (item.mediumPicurl || item.smallPicurl) : item.smallPicurl" mode="aspectFill" lazy-load
                                                 @load="onImageLoad(item)" @error="onImageError(item)" :class="{ 'is-loaded': item.loaded }"></image>
                                             <view class="card-overlay" v-if="showCardMeta"></view>
                                             <view class="card-meta" v-if="showCardMeta">
@@ -209,7 +209,7 @@
                                             </view>
                                         </template>
                                         <template v-else>
-                                            <image class="card-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
+                                            <image class="card-img" :src="isDesktopClassify ? (item.mediumPicurl || item.smallPicurl) : item.smallPicurl" mode="aspectFill" lazy-load
                                                 @load="onImageLoad(item)" @error="onImageError(item)" :class="{ 'is-loaded': item.loaded }"></image>
                                             <view class="card-overlay" v-if="showCardMeta"></view>
                                             <view class="card-meta" v-if="showCardMeta">

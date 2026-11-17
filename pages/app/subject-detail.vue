@@ -79,7 +79,7 @@
                         <!-- 壁纸图片 (纯净全屏展示，无遮罩无多余文字) -->
                         <image
                             class="card-image"
-                            :src="item.picurl"
+                            :src="item.largePicurl || item.mediumPicurl"
                             mode="aspectFill"
                             lazy-load
                             @error="onImageError(item)"
@@ -138,6 +138,7 @@ import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
+import { PICS_BASE_URL } from '@/common/config.js';
 import { IS_INTERNATIONAL } from '@/utils/system.js';
 
 
@@ -206,7 +207,13 @@ const currentWallpaper = computed(() => {
 
 // 环境光背景图
 const currentWallpaperPic = computed(() => {
-    return currentWallpaper.value?.picurl || currentSubject.value?.cover_url || '';
+    return (
+        currentWallpaper.value?.largePicurl ||
+        currentWallpaper.value?.mediumPicurl ||
+        currentSubject.value?.cover_medium ||
+        currentSubject.value?.cover_url ||
+        ''
+    );
 });
 
 // 专题标题
@@ -266,13 +273,16 @@ const loadSubjectData = async (id) => {
             wallpaperList.value = rawList.map((item) => handlePicUrl(item));
         } else if (currentSubject.value?.preview_walls && currentSubject.value.preview_walls.length > 0) {
             // 兜底方案：如果分类列表接口暂无数据，使用专题自带的预览壁纸
-            wallpaperList.value = currentSubject.value.preview_walls.map((url, idx) => ({
-                id: `preview-${idx}`,
-                picurl: url,
-                score: 5,
-                width: 1290,
-                height: 2796,
-            }));
+            wallpaperList.value = currentSubject.value.preview_walls.map((url, idx) => {
+                const rawPath = url.replace(new RegExp(`^${PICS_BASE_URL}/?`), '');
+                return handlePicUrl({
+                    id: `preview-${idx}`,
+                    picurl: rawPath,
+                    score: 5,
+                    width: 1290,
+                    height: 2796,
+                });
+            });
         }
     } catch (err) {
         console.error('Failed to load subject gallery data:', err);

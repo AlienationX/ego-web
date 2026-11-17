@@ -95,7 +95,7 @@ const currentInfo = computed(() => {
 });
 
 const currentPicUrl = computed(() => {
-    return currentInfo.value?.largePicurl || currentInfo.value?.picurl || currentInfo.value?.smallPicurl || '';
+    return currentInfo.value?.largePicurl || currentInfo.value?.mediumPicurl || currentInfo.value?.smallPicurl || '';
 });
 
 // ── 物理运动学几何计算 (FLIP 模式：构建高帧率硬件加速扩散与收缩轨迹) ──

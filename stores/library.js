@@ -29,6 +29,8 @@ const normalizeWall = (wall = {}) => {
         id: wall.id,
         picurl: wall.picurl || '',
         smallPicurl: wall.smallPicurl || '',
+        mediumPicurl: wall.mediumPicurl || '',
+        largePicurl: wall.largePicurl || '',
         description: wall.description || '',
         description_en: wall.description_en || '',
         classify_name: wall.classify_name || '',

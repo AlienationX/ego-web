@@ -36,7 +36,7 @@
                             <view class="journal-card" @click="goPreview(item)">
                                 <!-- Cinematic Image Header -->
                                 <view class="card-hero">
-                                    <image class="hero-image" :src="item.mediumPicurl || item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                                    <image class="hero-image" :src="item.mediumPicurl" mode="aspectFill"></image>
                                     <view class="hero-overlay"></view>
                                     
                                     <!-- Massive Score -->

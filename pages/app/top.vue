@@ -60,7 +60,7 @@
                         >
                             <image
                                 class="hero-card__image"
-                                :src="rankedList[0].mediumPicurl || rankedList[0].picurl"
+                                :src="rankedList[0].mediumPicurl"
                                 mode="aspectFill"
                             ></image>
                             <view class="hero-card__overlay"></view>
@@ -96,7 +96,7 @@
                             >
                                 <image
                                     class="hero-card__image"
-                                    :src="item.mediumPicurl || item.smallPicurl || item.picurl"
+                                    :src="item.mediumPicurl || item.smallPicurl"
                                     mode="aspectFill"
                                 ></image>
                                 <view class="hero-card__overlay hero-card__overlay--soft"></view>
@@ -152,7 +152,7 @@
                                     <view class="rank-item__media">
                                         <image
                                             class="rank-item__thumb"
-                                            :src="item.smallPicurl || item.picurl"
+                                            :src="item.smallPicurl"
                                             mode="aspectFill"
                                         ></image>
                                         <view class="rank-item__index">{{ idx + 4 }}</view>

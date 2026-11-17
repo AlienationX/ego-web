@@ -108,7 +108,7 @@
                                         :style="{ '--card-delay': `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s`, animationDelay: `${(idx < 8 ? (idx * 0.20 + 0.18) : 0)}s` }"
                                         @click="goPreview(item.id)">
                                         <image class="timeline-card__image"
-                                            :src="item._wallIdx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl"
+                                            :src="item._wallIdx === 0 ? item.mediumPicurl : item.smallPicurl"
                                             mode="aspectFill" lazy-load></image>
                                         <view class="timeline-card__lock" v-if="item.is_locked">
                                             <uni-icons type="locked-filled" size="18" color="#F9E9B5"></uni-icons>

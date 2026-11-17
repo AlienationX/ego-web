@@ -291,7 +291,7 @@ const heroImage = computed(() => {
     }
     // 优先级 2: 列表首图 (classList)
     if (classList.value?.[0]?.picurl) {
-        return classList.value[0].mediumPicurl || classList.value[0].picurl;
+        return classList.value[0].mediumPicurl || '';
     }
     // 优先级 3: 默认图
     return '';

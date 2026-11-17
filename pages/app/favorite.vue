@@ -142,7 +142,7 @@
                                 'in-select-mode': isSelectMode
                             }" v-for="(item, index) in leftCol" :key="item.id + '-l-' + index"
                                 @click="handleCardClick(item)" @longpress="handleCardLongPress(item)">
-                                <image class="card-img" :src="item.smallPicurl || item.picurl" mode="widthFix" lazy-load
+                                <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
                                     @load="onImageLoad(item, $event)" :class="{ 'is-loaded': item.loaded }"></image>
 
                                 <!-- 常规模式：心形红点 (仅在全部收藏模式下显示) -->
@@ -167,7 +167,7 @@
                                 'in-select-mode': isSelectMode
                             }" v-for="(item, index) in rightCol" :key="item.id + '-r-' + index"
                                 @click="handleCardClick(item)" @longpress="handleCardLongPress(item)">
-                                <image class="card-img" :src="item.smallPicurl || item.picurl" mode="widthFix" lazy-load
+                                <image class="card-img" :src="item.smallPicurl" mode="widthFix" lazy-load
                                     @load="onImageLoad(item, $event)" :class="{ 'is-loaded': item.loaded }"></image>
 
                                 <!-- 常规模式：心形红点 (仅在全部收藏模式下显示) -->

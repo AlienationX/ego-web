@@ -29,7 +29,7 @@
             @touchmove.stop.prevent>
             <view class="quick-look-card" :class="{ 'is-active': activeQuickLookItem }" @click.stop
                 v-if="activeQuickLookItem">
-                <image class="quick-look-pic" :src="activeQuickLookItem.mediumPicurl || activeQuickLookItem.picurl"
+                <image class="quick-look-pic" :src="activeQuickLookItem.mediumPicurl"
                     mode="aspectFill"></image>
                 <view class="quick-look-overlay">
                     <view class="quick-look-header">

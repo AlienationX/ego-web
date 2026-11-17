@@ -17,7 +17,7 @@
                 <view class="frosted-maker__preview-area">
                     <view class="frosted-maker__phone-frame">
                         <!-- 背景壁纸与实时 CSS 模糊滤镜 -->
-                        <image class="frosted-maker__preview-img" :src="picurl" mode="aspectFill"
+                        <image class="frosted-maker__preview-img" :src="displayPreviewUrl" mode="aspectFill"
                             :style="previewFilterStyle"></image>
 
                         <!-- 暗度遮罩层 -->
@@ -151,11 +151,17 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    previewUrl: {
+        type: String,
+        default: '',
+    },
     id: {
         type: [Number, String],
         default: '',
     },
 });
+
+const displayPreviewUrl = computed(() => props.previewUrl || props.picurl);
 
 const emit = defineEmits(['saveSuccess', 'requireVip']);
 

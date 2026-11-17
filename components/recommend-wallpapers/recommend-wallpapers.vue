@@ -18,7 +18,7 @@
         <view v-else class="recommend-list">
             <template v-for="(item, idx) in list" :key="item.id">
                 <view class="recommend-card" @click="openPreview(item)">
-                    <image class="recommend-card__image" :src="item.smallPicurl || item.picurl" mode="aspectFill"></image>
+                    <image class="recommend-card__image" :src="item.smallPicurl" mode="aspectFill"></image>
                     <view class="recommend-card__body">
                         <!-- <view v-if="item.reason" class="recommend-card__reason">{{ item.reason }}</view> -->
                         <view class="recommend-card__title">{{ getLocalizedItem(item).description || `#${item.id}` }}</view>

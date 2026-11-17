@@ -261,7 +261,7 @@ const loadFavorites = async () => {
             return {
                 id: item.id || item._id,
                 // 用于界面网格卡片缩略图预览（轻量极速加载）
-                thumbUrl: parsed.smallPicurl || parsed.picurl,
+                thumbUrl: parsed.smallPicurl || '',
                 // 用于实际拼图画布与高清合成的原图 URL（优先使用高清无损大图，兼容性更佳）
                 url: parsed.picurl || parsed.smallPicurl,
             };

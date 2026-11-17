@@ -63,7 +63,7 @@
                             'in-select-mode': isSelectMode
                         }" v-for="(item, index) in wallpaperList" :key="item.id + '-' + index"
                             @click="handleCardClick(item)" @longpress="handleCardLongPress(item)">
-                            <image class="album-img" :src="item.smallPicurl || item.picurl" mode="aspectFill" lazy-load
+                            <image class="album-img" :src="item.smallPicurl" mode="aspectFill" lazy-load
                                 @load="item.loaded = true" :class="{ 'is-loaded': item.loaded }"></image>
 
                             <!-- 多选模式：勾选复选圆圈 -->

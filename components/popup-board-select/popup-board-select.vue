@@ -78,8 +78,12 @@ const { t, tp } = useTranslateParams();
 
 const formatImgUrl = (url) => {
     if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    return `${PICS_BASE_URL}/${url.replace(/^\/+/, '')}`;
+    let fullUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `${PICS_BASE_URL}/${url.replace(/^\/+/, '')}`;
+    // 画板选择弹窗卡片缩略图属于小图，转换为 _small.webp
+    if (fullUrl.includes('/pics/')) {
+        fullUrl = fullUrl.replace(/(\/?)pics\//, '$1thumbs/').replace(/\.[^/.]+$/, '_small.webp');
+    }
+    return fullUrl;
 };
 
 const popup = ref(null);

@@ -47,7 +47,7 @@
                                         'is-avatar-image': isAvatarMode
                                     }" @click="maskChange"
                                     @load="handleImageLoad(index, $event)" @error="handleImageLoad(index)"
-                                    :src="item.largePicurl || item.picurl" :mode="(isDesktopMode || isAvatarMode) ? 'aspectFit' : 'aspectFill'"></image>
+                                    :src="item.largePicurl || item.mediumPicurl" :mode="(isDesktopMode || isAvatarMode) ? 'aspectFit' : 'aspectFill'"></image>
                             </view>
                         </swiper-item>
                     </swiper>
@@ -57,7 +57,7 @@
                         :class="[tempClockStyle ? 'is-previewing-clock' : (isAvatarMode ? 'is-avatar-scene' : sceneAnimClass)]"
                         v-if="isSceneMounted || tempClockStyle || isAvatarMode">
                         <!-- 1. 灵动头像专属场景模拟器 (圆形/方形/社交名片) -->
-                        <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.largePicurl || currentInfo?.picurl || ''" :show-controls="!maskState" :is-image-loaded="isImageLoaded(currentIndex)" @card-active-change="onAvatarCardActiveChange" />
+                        <avatar-preview-overlay v-if="isAvatarMode" :avatarUrl="currentInfo?.largePicurl || currentInfo?.mediumPicurl || ''" :show-controls="!maskState" :is-image-loaded="isImageLoaded(currentIndex)" @card-active-change="onAvatarCardActiveChange" />
 
                         <!-- 2. PC 桌面横屏壁纸专属模拟器 (横屏旋转与全屏沉浸) -->
                         <desktop-preview-overlay v-else-if="isDesktopMode" :is-rotated="isLandscapeRotated" :show-controls="!maskState" @rotate-change="onDesktopRotateChange" />
@@ -578,13 +578,14 @@
         </uni-popup>
 
         <!-- 主屏磨砂伴侣弹窗组件 -->
-        <popup-frosted-maker ref="frostedMakerPopup" :picurl="currentInfo?.picurl || currentInfo?.smallPicurl"
+        <popup-frosted-maker ref="frostedMakerPopup" :picurl="currentInfo?.picurl"
+            :preview-url="currentInfo?.largePicurl || currentInfo?.mediumPicurl"
             :id="currentInfo?.id" @requireVip="onFrostedRequireVip" />
 
         <!-- 底部分享弹窗组件 -->
         <share-sheet ref="shareSheetRef" :title="t('common.share')"
             :share-title="getLocalizedItem(currentInfo).description || t('common.appName')"
-            :share-summary="t('about.introText')" :share-image="currentInfo?.smallPicurl || currentInfo?.picurl"
+            :share-summary="t('about.introText')" :share-image="currentInfo?.mediumPicurl || currentInfo?.smallPicurl"
             :share-url="shareUrl">
         </share-sheet>
 

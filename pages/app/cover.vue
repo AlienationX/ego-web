@@ -63,10 +63,10 @@
                             v-for="item in classifyImages"
                             :key="item.id"
                             class="image-card"
-                            :class="{ active: draftCoverUrl === (item.mediumPicurl || item.picurl) }"
+                            :class="{ active: draftCoverUrl === (item.mediumPicurl || '') }"
                             @click="selectCover(item)"
                         >
-                            <image class="image-card__thumb" :src="item.smallPicurl || item.mediumPicurl || item.picurl" mode="aspectFill"></image>
+                            <image class="image-card__thumb" :src="item.smallPicurl || item.mediumPicurl || ''" mode="aspectFill"></image>
                             <view class="image-card__meta">
                                 <view class="image-card__id">#{{ item.id }}</view>
                                 <view class="image-card__score">评分 {{ item.score ?? '--' }}</view>
@@ -252,8 +252,8 @@ const selectClassify = async (classifyId) => {
     if (selectedClassifyId.value === classifyId && classifyImages.value.length) return;
     selectedClassifyId.value = classifyId;
     const current = classifyList.value.find((item) => item.id === classifyId);
-    originalCoverUrl.value = current?.mediumPicurl || current?.picurl || '';
-    draftCoverUrl.value = current?.mediumPicurl || current?.picurl || '';
+    originalCoverUrl.value = current?.mediumPicurl || '';
+    draftCoverUrl.value = current?.mediumPicurl || '';
     draftCoverPicUrl.value = current?.picurl || '';
     await getClassifyImages(classifyId);
 };
@@ -270,7 +270,7 @@ const loadMoreImages = () => {
 };
 
 const selectCover = (item) => {
-    draftCoverUrl.value = item.mediumPicurl || item.picurl;
+    draftCoverUrl.value = item.mediumPicurl || '';
     draftCoverPicUrl.value = item.picurl;
 };
 
@@ -278,7 +278,7 @@ const getPreviewCover = (item) => {
     if (item.id === selectedClassifyId.value && draftCoverUrl.value) {
         return draftCoverUrl.value;
     }
-    return item.mediumPicurl || item.picurl;
+    return item.mediumPicurl || '';
 };
 
 const saveCover = async () => {

@@ -155,7 +155,7 @@
                                 >
                                     <image
                                         class="fav-img"
-                                        :src="item.smallPicurl || item.picurl"
+                                        :src="item.smallPicurl"
                                         mode="aspectFill"
                                         lazy-load
                                     />
@@ -317,7 +317,7 @@ const islandBottom = computed(() => 0);
 // 当前选中的缩略图（用于折叠迷你条极简展示）
 const currentSelectedThumb = computed(() => {
     if (sourceMode.value === 'local') return localImage.value;
-    return selectedItem.value?.smallPicurl || selectedItem.value?.picurl || '';
+    return selectedItem.value?.smallPicurl || '';
 });
 
 // 当前选中的图片标题或描述
@@ -811,8 +811,11 @@ const onAnalyze = async () => {
     pickerOpen.value = false;
 
     const currentImage =
-        sourceMode.value === 'local' ? localImage.value : selectedItem.value?.smallPicurl || selectedItem.value?.picurl || '';
-    const currentPicUrl = sourceMode.value === 'local' ? localImage.value : selectedItem.value?.picurl || '';
+        sourceMode.value === 'local' ? localImage.value : selectedItem.value?.smallPicurl || '';
+    const currentPicUrl =
+        sourceMode.value === 'local'
+            ? localImage.value
+            : selectedItem.value?.largePicurl || selectedItem.value?.mediumPicurl || selectedItem.value?.smallPicurl || '';
 
     console.log('>>> currentPicUrl', currentPicUrl);
 

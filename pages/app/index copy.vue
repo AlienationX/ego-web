@@ -114,7 +114,7 @@
                             :class="{ 'is-hero': idx === 0 }" hover-class="box--active" :hover-stay-time="150"
                             @click="goPreview(item.id, randomDailyList)">
                             <image class="box-image"
-                                :src="idx === 0 ? item.mediumPicurl || item.picurl : item.smallPicurl" mode="aspectFill"
+                                :src="idx === 0 ? item.mediumPicurl : item.smallPicurl" mode="aspectFill"
                                 lazy-load fade-in @load="idx === 0 ? (heroImageLoaded = true) : null"></image>
                             <block v-if="idx === 0">
                                 <view class="box-hero-overlay" :class="{ 'is-visible': heroImageLoaded }"></view>
@@ -425,7 +425,7 @@
                             <template v-else>
                                 <image
                                     class="waterfall-card__img"
-                                    :src="item.smallPicurl || item.picurl"
+                                    :src="item.smallPicurl"
                                     mode="aspectFill"
                                     lazy-load
                                     @load="onImageLoad(item)"
@@ -491,7 +491,7 @@
                             <template v-else>
                                 <image
                                     class="waterfall-card__img"
-                                    :src="item.smallPicurl || item.picurl"
+                                    :src="item.smallPicurl"
                                     mode="aspectFill"
                                     lazy-load
                                     @load="onImageLoad(item)"
