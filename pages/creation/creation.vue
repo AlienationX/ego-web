@@ -826,10 +826,19 @@ const showComingSoon = () => {
 .creation-flow-ad-wrap {
     width: 100%;
     box-sizing: border-box;
+    /* #ifdef APP */
+    // 扩展 14rpx 抵消原生广告自带内边距，使图文与 tool-card 左右边缘精确对齐
+    margin: -10rpx -14rpx;
+    width: calc(100% + 28rpx);
+    /* #endif */
+    /* #ifndef APP */
+    margin: 0;
+    /* #endif */
 
-    &:not(.is-loaded) {
-        opacity: 0;
-        pointer-events: none;
+    custom-ad,
+    :deep(custom-ad) {
+        width: 100% !important;
+        display: block !important;
     }
 
     &.is-error {

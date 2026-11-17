@@ -760,13 +760,7 @@ const updateRecommendCols = () => {
     // #ifdef APP
     hasVerticalAd = !!AD_CONFIG.app?.customVerticalAdpid;
     // #endif
-    const canShowAd = !isVip && hasVerticalAd;
-
-    // App 端限制瀑布流最多挂载 3 个原生广告位，兼顾变现与原生图层稳定性；小程序端无上限
-    // #ifdef APP
-    const maxWaterfallAds = 3;
-    let insertedAdCount = 0;
-    // #endif
+    const canShowAd = !isVip && hasVerticalAd && appStore.versionConfig?.ad_enabled !== false;
 
     const list = recommendWallpapers.value || [];
     for (let i = 0; i < list.length; i++) {
@@ -788,17 +782,8 @@ const updateRecommendCols = () => {
         count++;
 
         // 每 8 张壁纸后穿插 1 个单列竖屏原生模板卡片广告
-        // #ifdef APP
-        // App 端完全不插入原生广告，避免未填充超时导致列表频繁重排
-        const shouldInsertAd = false;
-        // #endif
-        // #ifndef APP
         const shouldInsertAd = canShowAd && count > 0 && count % AD_INTERVAL === 0;
-        // #endif
         if (shouldInsertAd) {
-            // #ifdef APP
-            insertedAdCount++;
-            // #endif
             const adIndex = Math.floor(count / AD_INTERVAL);
             const adId = `home_rec_ad_${adIndex}`;
             if (!failedAdIds.has(adId)) {
@@ -827,8 +812,8 @@ const updateRecommendCols = () => {
     recommendRightHeight.value = rightH;
 };
 
-// 监听 VIP 状态变化，实时重新平衡分发广告
-watch(() => userStore.isVip, () => {
+// 监听 VIP 状态与后台广告开关变化，实时重新平衡分发广告
+watch(() => [userStore.isVip, appStore.versionConfig?.ad_enabled], () => {
     updateRecommendCols();
 });
 
@@ -2890,14 +2875,22 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
 // ── 首页横版原生信息流广告卡片 ──
 .home-flow-ad-wrap {
+    /* #ifdef APP */
+    // 抵消原生广告自带约 14rpx 内边距，使图文与左右两侧 20rpx 边距严格对齐
+    padding: 0 6rpx;
+    margin: -10rpx 0 20rpx;
+    /* #endif */
+    /* #ifndef APP */
     padding: 0 20rpx;
     margin: -4rpx 0 26rpx;
+    /* #endif */
     box-sizing: border-box;
     width: 100%;
 
-    &:not(.is-loaded) {
-        opacity: 0;
-        pointer-events: none;
+    custom-ad,
+    :deep(custom-ad) {
+        width: 100% !important;
+        display: block !important;
     }
 
     &.is-error {

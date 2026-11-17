@@ -203,8 +203,38 @@
             </view>
         </view>
 
-        <!-- 底部向上返回顶部按钮 (下滑半屏后浮现) -->
-        <fab-back-top :show="showScrollTop" :embedded="false" @click="scrollToTop" />
+        <!-- 下拉后右下角沉浸式悬浮快捷操作组（向上回顶 + 向左返回） -->
+        <view
+            v-if="showScrollTop"
+            class="floating-nav-capsule"
+            :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'"
+        >
+            <view
+                class="fab-nav-btn"
+                hover-class="fab-nav-btn--active"
+                :hover-stay-time="100"
+                @click="scrollToTop"
+            >
+                <mdi-icon
+                    path="/static/icons/arrow-up.svg"
+                    size="20px"
+                    :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"
+                ></mdi-icon>
+            </view>
+            <view class="fab-nav-divider"></view>
+            <view
+                class="fab-nav-btn"
+                hover-class="fab-nav-btn--active"
+                :hover-stay-time="100"
+                @click="goBack"
+            >
+                <mdi-icon
+                    path="/static/icons/arrow-left.svg"
+                    size="20px"
+                    :color="settingsStore.isDark ? '#f7f7fb' : '#1e293b'"
+                ></mdi-icon>
+            </view>
+        </view>
     </view>
 </template>
 
@@ -321,12 +351,7 @@ const displaySubjectsList = computed(() => {
         count++;
 
         // 每 AD_INTERVAL 个专题后穿插 1 个横版卡片广告
-        // #ifdef APP
-        const shouldInsertAd = false;
-        // #endif
-        // #ifndef APP
         const shouldInsertAd = canShowAd && count > 0 && count % AD_INTERVAL === 0;
-        // #endif
         if (shouldInsertAd) {
             const adIndex = Math.floor(count / AD_INTERVAL);
             const adId = `subject_ad_${adIndex}`;
@@ -815,14 +840,10 @@ onShow(() => {
     gap: 24rpx;
 
     &--ad {
-        min-height: 540rpx;
         cursor: default;
-        justify-content: space-between;
-
-        &:not(.is-loaded) {
-            opacity: 0;
-            pointer-events: none;
-        }
+        min-height: auto;
+        padding: 32rpx;
+        gap: 16rpx;
 
         &.is-error {
             display: none !important;
@@ -840,17 +861,34 @@ onShow(() => {
 
         .subject-card__ad-container {
             width: 100%;
+            /* #ifdef APP */
+            display: block;
+            // 抵消卡片内边距与原生广告自带内边距，使广告内部素材与卡片头部 SPONSORED 标签两端严格齐平
+            margin: -10rpx -42rpx -8rpx;
+            width: calc(100% + 84rpx);
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            overflow: visible;
+
+            :deep(.custom-ad-skeleton) {
+                width: calc(100% - 84rpx) !important;
+                margin: 0 auto !important;
+            }
+            /* #endif */
+            /* #ifndef APP */
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: 0;
             border-radius: 20rpx;
             overflow: hidden;
+            background: var(--page-background-secondary);
+            box-shadow: 0 6rpx 16rpx var(--shadow-color);
             transform: translateZ(0);
             -webkit-mask-image: -webkit-radial-gradient(white, black);
             mask-image: radial-gradient(white, black);
-            background: var(--page-background-secondary);
-            box-shadow: 0 6rpx 16rpx var(--shadow-color);
-            margin: auto 0;
+            /* #endif */
 
             .ad-inner-clip {
                 width: 100%;
@@ -859,6 +897,12 @@ onShow(() => {
                 transform: translateZ(0);
                 -webkit-mask-image: -webkit-radial-gradient(white, black);
                 mask-image: radial-gradient(white, black);
+            }
+
+            custom-ad,
+            :deep(custom-ad) {
+                width: 100% !important;
+                display: block !important;
             }
 
             ad-custom,
@@ -1227,6 +1271,88 @@ onShow(() => {
         color: var(--text-tertiary);
         opacity: 0.6;
         letter-spacing: 1rpx;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   右下角沉浸式悬浮快捷操作组 (向上回顶 + 向左返回，与 preview.vue 统一)
+───────────────────────────────────────────────────────────── */
+.floating-nav-capsule {
+    position: fixed;
+    right: 32rpx;
+    bottom: calc(max(34px, env(safe-area-inset-bottom)) + 28rpx);
+    width: 84rpx;
+    border-radius: 42rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 998;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    pointer-events: auto;
+    animation: fabCapsulePop 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+
+    &.theme-dark {
+        background: rgba(28, 28, 34, 0.78);
+        border: 2rpx solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.45);
+
+        .fab-nav-divider {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .fab-nav-btn--active {
+            background: rgba(255, 255, 255, 0.12);
+        }
+    }
+
+    &.theme-light {
+        background: rgba(255, 255, 255, 0.85);
+        border: 2rpx solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.1);
+
+        .fab-nav-divider {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .fab-nav-btn--active {
+            background: rgba(0, 0, 0, 0.06);
+        }
+    }
+
+    .fab-nav-btn {
+        width: 84rpx;
+        height: 84rpx;
+        border-radius: 42rpx;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+
+        &:active {
+            transform: scale(0.88);
+        }
+    }
+
+    .fab-nav-divider {
+        width: 48rpx;
+        height: 1rpx;
+        margin: 0 auto;
+    }
+}
+
+@keyframes fabCapsulePop {
+    from {
+        opacity: 0;
+        transform: scale(0.7) translateY(30rpx);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
     }
 }
 </style>

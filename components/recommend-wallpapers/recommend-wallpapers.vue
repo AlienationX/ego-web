@@ -409,16 +409,24 @@ watch(
 // ── 推荐列表流原生模板卡片广告 ──
 .recommend-ad-wrap {
     width: 100%;
+    /* #ifdef APP */
+    // 抵消原生广告自带约 14rpx 内边距，与列表项两端严格齐平
+    margin: -8rpx -14rpx;
+    width: calc(100% + 28rpx);
+    /* #endif */
+    /* #ifndef APP */
     margin: 0;
+    /* #endif */
     padding: 0;
     display: flex;
     justify-content: center;
     box-sizing: border-box;
     line-height: 1;
 
-    &:not(.is-loaded) {
-        opacity: 0;
-        pointer-events: none;
+    custom-ad,
+    :deep(custom-ad) {
+        width: 100% !important;
+        display: block !important;
     }
 }
 

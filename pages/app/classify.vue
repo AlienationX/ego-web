@@ -111,6 +111,7 @@ const isAdError = ref(false);
 
 const canShowAd = computed(() => {
     if (userStore.isVip) return false;
+    if (appStore.versionConfig?.ad_enabled === false) return false;
     // #ifdef MP-WEIXIN
     return !!AD_CONFIG.weixin?.customHorizontalUnitId;
     // #endif
@@ -453,16 +454,25 @@ onShow(() => {
     }
 }
 
-// ── 分类页横版原生广告卡片：未加载成功时脱离文档流零占位，加载成功后平滑展开 ──
+// ── 分类页横版原生广告卡片 ──
 .classify-ad-wrap {
     width: 100%;
     box-sizing: border-box;
+    /* #ifdef APP */
+    // 抵消原生广告自带约 14rpx 内边距，使图文与分类网格两端严格齐平
+    padding: 0 6rpx;
+    margin: 4rpx 0;
+    /* #endif */
+    /* #ifndef APP */
     padding: 0 20rpx;
+    margin: 10rpx 0;
+    /* #endif */
     background: transparent;
 
-    &:not(.is-loaded) {
-        opacity: 0;
-        pointer-events: none;
+    custom-ad,
+    :deep(custom-ad) {
+        width: 100% !important;
+        display: block !important;
     }
 
     &.is-error {
@@ -476,8 +486,6 @@ onShow(() => {
     &.is-loaded {
         position: relative;
         opacity: 1;
-        margin-top: 10rpx;
-        margin-bottom: 10rpx;
         animation: classifyFadeSlide 0.4s ease both;
     }
 }

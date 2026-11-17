@@ -3739,14 +3739,22 @@ const handleCopyWatermarkId = () => {
 // ── 作品参数面板下方原生模板卡片广告位（红框区域） ──
 .preview-meta-ad-wrap {
     width: 100%;
+    /* #ifdef APP */
+    // 抵消原生广告自带约 14rpx 内边距，使图文与左右两侧 24rpx 边距严格对齐
+    padding: 0 10rpx;
+    margin: 6rpx 0 16rpx;
+    /* #endif */
+    /* #ifndef APP */
     padding: 0 24rpx;
     margin: 10rpx 0 16rpx;
+    /* #endif */
     box-sizing: border-box;
     line-height: 1;
 
-    &:not(.is-loaded) {
-        opacity: 0;
-        pointer-events: none;
+    custom-ad,
+    :deep(custom-ad) {
+        width: 100% !important;
+        display: block !important;
     }
 
     &.is-error {

@@ -235,22 +235,38 @@
                 <text class="capsule-label">{{ $t('top10.tabs.downloads') }}</text>
             </view>
 
-            <!-- 回到顶部动态展开区 (下滑时优雅淡入展开，回顶后自动收起) -->
+            <!-- 快捷操作展开区 (下滑时优雅淡入展开：向上回顶 + 向左返回) -->
             <view
                 class="capsule-action"
                 :class="{ 'is-visible': showScrollTop }"
                 hover-class="none"
                 :hover-stop-propagation="true"
-                @click="scrollToTop"
             >
                 <view class="capsule-divider"></view>
-                <view class="capsule-item capsule-item--top">
-                    <uni-icons
-                        class="capsule-icon"
-                        type="arrow-up"
-                        size="16"
+                <view
+                    class="capsule-item capsule-item--icon"
+                    hover-class="capsule-item--active"
+                    :hover-stay-time="100"
+                    @click="scrollToTop"
+                >
+                    <mdi-icon
+                        path="/static/icons/arrow-up.svg"
+                        size="17px"
                         :color="settingsStore.isDark ? '#cbd5e1' : '#334155'"
-                    ></uni-icons>
+                    ></mdi-icon>
+                </view>
+                <view class="capsule-divider"></view>
+                <view
+                    class="capsule-item capsule-item--icon"
+                    hover-class="capsule-item--active"
+                    :hover-stay-time="100"
+                    @click="goBack"
+                >
+                    <mdi-icon
+                        path="/static/icons/arrow-left.svg"
+                        size="17px"
+                        :color="settingsStore.isDark ? '#cbd5e1' : '#334155'"
+                    ></mdi-icon>
                 </view>
             </view>
         </view>
@@ -684,7 +700,7 @@ onShow(() => {
         }
     }
 
-    &--top {
+    &--icon {
         width: 60rpx;
         height: 60rpx;
         padding: 0;
@@ -693,6 +709,11 @@ onShow(() => {
 
         .theme-light & {
             background: rgba(0, 0, 0, 0.04);
+        }
+
+        &--active, &:active {
+            transform: scale(0.90);
+            background: rgba(43, 140, 238, 0.20);
         }
     }
 }
@@ -709,7 +730,7 @@ onShow(() => {
     }
 }
 
-/* 动态回顶按钮部分 (仅在向下滚动后平滑展开，未滚动时零宽度隐藏) */
+/* 动态操作区 (仅在向下滚动后平滑展开回顶与返回，未滚动时零宽度隐藏) */
 .capsule-action {
     display: flex;
     align-items: center;
@@ -724,7 +745,7 @@ onShow(() => {
         transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
 
     &.is-visible {
-        max-width: 120rpx;
+        max-width: 220rpx;
         opacity: 1;
         transform: scale(1) translateX(0);
         pointer-events: auto;
@@ -1221,18 +1242,25 @@ onShow(() => {
     }
 }
 
-// ── 横版原生广告位卡片：未加载成功时脱离文档流零占位，加载成功后平滑展开 ──
+// ── 横版原生广告位卡片 ──
 .top10-ad-wrap {
+    /* #ifdef APP */
+    // 黄金位广告：抵消上方 hero-section 的偏大间隙，并向左右各扩展 14rpx 抵消原生广告自带内边距，使图文与上方卡片 2/3 左右两端严格对齐
+    margin: -16rpx -14rpx 10rpx;
+    width: calc(100% + 28rpx);
+    /* #endif */
+    /* #ifndef APP */
+    margin: 0 0 24rpx;
     width: 100%;
-    margin: 0 0 36rpx;
-    display: flex;
-    justify-content: center;
+    /* #endif */
+    display: block;
     box-sizing: border-box;
     line-height: 1;
 
-    &:not(.is-loaded) {
-        opacity: 0;
-        pointer-events: none;
+    custom-ad,
+    :deep(custom-ad) {
+        width: 100% !important;
+        display: block !important;
     }
 
     &.is-error {
@@ -1250,7 +1278,14 @@ onShow(() => {
     }
 
     &--inline {
+        /* #ifdef APP */
+        margin: -8rpx -14rpx;
+        width: calc(100% + 28rpx);
+        /* #endif */
+        /* #ifndef APP */
         margin: 0;
+        width: 100%;
+        /* #endif */
         padding: 0;
     }
 }

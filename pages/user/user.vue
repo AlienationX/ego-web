@@ -144,15 +144,15 @@
 
                 <!-- 我的页面横版原生广告卡片 -->
                 <view
-                    v-if="!adFailed"
+                    v-if="!isAdRemoved"
                     class="user-flow-ad-wrap"
                     :class="{ 'is-loaded': adLoaded, 'is-error': adFailed }"
                 >
                     <custom-ad
-                        border-radius="20rpx"
+                        border-radius="28rpx"
                         @load="adLoaded = true"
-                        @error="adFailed = true"
-                        @close="adFailed = true"
+                        @error="handleAdError"
+                        @close="handleAdError"
                     />
                 </view>
 
@@ -245,6 +245,14 @@ const settingsStore = useSettingsStore();
 
 const adLoaded = ref(false);
 const adFailed = ref(false);
+const isAdRemoved = ref(false);
+
+const handleAdError = () => {
+    adFailed.value = true;
+    setTimeout(() => {
+        isAdRemoved.value = true;
+    }, 400);
+};
 
 
 const userPaddingBottom = computed(() => {
@@ -1265,22 +1273,39 @@ onShow(() => {
 
     // ── 我的页面横版原生信息流广告卡片 ──
     .user-flow-ad-wrap {
+        /* #ifdef APP */
+        // 原生广告组件自带约 14rpx 内边距，收紧外层 padding 使图文与 30rpx 边距的上下卡片严格视觉对齐
+        padding: 0 16rpx;
+        margin-top: -10rpx;
+        margin-bottom: 14rpx;
+        /* #endif */
+        /* #ifndef APP */
         padding: 0 30rpx;
         margin-bottom: 24rpx;
+        /* #endif */
         box-sizing: border-box;
         width: 100%;
+        max-height: 600rpx;
+        overflow: hidden;
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.25s ease,
+                    margin 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                    padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
-        &:not(.is-loaded) {
-            opacity: 0;
-            pointer-events: none;
+        custom-ad,
+        :deep(custom-ad) {
+            width: 100% !important;
+            display: block !important;
         }
 
         &.is-error {
-            display: none !important;
-            width: 0 !important;
-            height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
+            max-height: 0 !important;
+            opacity: 0 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            pointer-events: none !important;
         }
 
         .user-flow-ad-card {
