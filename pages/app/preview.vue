@@ -224,7 +224,7 @@
                 <view
                     v-if="!previewAdFailed"
                     class="preview-meta-ad-wrap"
-                    :class="{ 'is-loaded': previewAdLoaded, 'is-error': previewAdFailed }"
+                    :class="{ 'is-loaded': previewAdLoaded, 'is-error': previewAdFailed, 'is-international': IS_INTERNATIONAL }"
                 >
                     <custom-ad
                         direction="horizontal"
@@ -697,9 +697,8 @@ import { ref, computed, reactive, watch, onMounted, onUnmounted, isRef } from 'v
 import { useI18n } from 'vue-i18n';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { onLoad, onUnload, onPageScroll, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
-import { IS_INTERNATIONAL } from '@/utils/system.js';
 import { getStatusBarHeight } from '@/utils/layout.js';
-import { SERVICE_EMAIL } from '@/common/config.js';
+import { SERVICE_EMAIL, IS_INTERNATIONAL } from '@/common/config.js';
 import { executeWithAuth } from '@/utils/auth-action.js';
 import {
     apiPostIncrementViews,
@@ -3729,9 +3728,14 @@ const handleCopyWatermarkId = () => {
 .preview-meta-ad-wrap {
     width: 100%;
     /* #ifdef APP */
-    // 抵消原生广告自带约 14rpx 内边距，使图文与左右两侧 24rpx 边距严格对齐
+    // 抵消国内原生广告自带约 14rpx 内边距，使图文与左右两侧 24rpx 边距严格对齐
     padding: 0 10rpx;
     margin: 6rpx 0 16rpx;
+
+    &.is-international {
+        // 国际版 Google AdMob 无内置 14rpx 内边距，使用与推荐列表一致的标准 24rpx 边距
+        padding: 0 24rpx;
+    }
     /* #endif */
     /* #ifndef APP */
     padding: 0 24rpx;

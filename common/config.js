@@ -34,7 +34,7 @@ export const VIDEO_REWARD_ENERGY = 3;
 // 渠道标识（避免在 system.js / wallpaper.js 间循环引用，统一放这里）
 let _channel = 'unknown';
 // #ifdef APP
-_channel = plus.runtime.channel || 'app';
+_channel = (typeof plus !== 'undefined' && plus.runtime && plus.runtime.channel) || 'app';
 // #endif
 // #ifdef APP-HARMONY
 _channel = 'huawei';
@@ -43,6 +43,13 @@ _channel = 'huawei';
 _channel = 'wechat';
 // #endif
 export const CHANNEL = _channel;
+
+/**
+ * 国际版/海外版标识（目前主要指 Google Play 渠道包）
+ * 业务逻辑中推荐优先使用 IS_INTERNATIONAL，语义明确且便于未来扩展其他海外渠道
+ */
+// export const IS_INTERNATIONAL = _channel === 'google';
+export const IS_INTERNATIONAL = true;
 // ─────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────

@@ -247,7 +247,39 @@ export const uploadRequest = (config = {}) => {
             header: { ...setHeader(config.isAuth || false), ...config.header },
             formData: config.data || {},
             success: (res) => {
-                resolve(res.data); // 成功返回数据
+                let data = res.data;
+                if (typeof data === 'string') {
+                    try {
+                        data = JSON.parse(data);
+                    } catch (e) {
+                        if (res.statusCode < 200 || res.statusCode >= 300) {
+                            const err = { code: res.statusCode, message: data || '上传失败' };
+                            showRequestFeedback(err, config);
+                            reject(err);
+                            return;
+                        }
+                    }
+                }
+
+                // HTTP 状态码校验 (非 2xx 视为失败)
+                if (res.statusCode < 200 || res.statusCode >= 300) {
+                    const err = data && typeof data === 'object' ? data : { code: res.statusCode, message: '服务器异常' };
+                    showRequestFeedback(err, config);
+                    reject(err);
+                    return;
+                }
+
+                // 统一接口业务状态码校验 (code 为 200/201/0 表示成功)
+                if (data && typeof data === 'object' && 'code' in data) {
+                    const code = Number(data.code);
+                    if (code !== 200 && code !== 201 && code !== 0) {
+                        showRequestFeedback(data, config);
+                        reject(data);
+                        return;
+                    }
+                }
+
+                resolve(data); // 成功返回解析后的数据对象
             },
             fail: (err) => {
                 showRequestFeedback(err, config);

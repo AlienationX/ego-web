@@ -240,19 +240,47 @@ export const apiGetVersionConfig = (data = {}) => {
 };
 
 // 上传反馈图片（自动附加渠道与设备标识）
-export const apiUploadFeedback = (data = {}) => {
-    // uni.uploadFile 的 files 参数需要对象数组格式 [{name, uri}]
-    const files = (data.images || []).map((uri) => ({
-        name: 'images',
+export const apiUploadFeedback = async (data = {}) => {
+    const images = data.images || [];
+    const { images: _, ...formData } = data;
+
+    // #ifdef MP-WEIXIN
+    // 微信小程序原生 uploadFile 不支持 files 批量上传参数，先通过上传接口逐张上传再统一提交
+    if (images.length > 0) {
+        const uploadPromises = images.map((uri) => {
+            return uploadRequest({
+                url: '/feedback/upload_image/',
+                filePath: uri,
+                name: 'image',
+            });
+        });
+        const uploadResults = await Promise.all(uploadPromises);
+        const uploadedImages = [];
+        uploadResults.forEach((res) => {
+            const list = res?.data?.images || res?.images || [];
+            uploadedImages.push(...list);
+        });
+        return apiPostFeedback({
+            ...formData,
+            images: uploadedImages,
+        });
+    }
+    return apiPostFeedback(formData);
+    // #endif
+
+    // #ifndef MP-WEIXIN
+    // App / H5 端使用 files 批量上传：为每个文件指定独立 name 键名 (images_0, images_1...)
+    // 解决 App 端 plus.uploader 内部以 name 为 key 导致同名文件覆盖只上传 1 张图片的严重 Bug
+    const files = images.map((uri, index) => ({
+        name: `images_${index}`,
         uri: uri,
     }));
-    // 从 formData 中移除 images（blob URL 字符串），真实文件通过 files 上传
-    const { images, ...formData } = data;
     return uploadRequest({
         url: '/feedback/',
         files: files,
         data: { channel: CHANNEL, device_id: getDeviceId(), ...formData },
     });
+    // #endif
 };
 
 // 用户操作接口（自动附加渠道标识）

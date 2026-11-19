@@ -112,18 +112,14 @@
             /* SDK配置 */
             "sdkConfigs" : {
                 "ad" : {
-                    "gdt" : {},
-                    "ks" : {},
-                    "sigmob" : {},
-                    "bd" : {},
-                    "gm" : {},
-                    "zy" : {},
-                    "bz" : {},
-                    "fl" : {},
-                    "yt" : {},
-                    "jt" : {},
-                    "wa" : {},
-                    "ms" : {}
+                    "gg" : {},
+                    "pg" : {},
+                    "unity" : {},
+                    "liftoff" : {},
+                    "inmobi" : {},
+                    "ironsource" : {},
+                    "mintegral" : {},
+                    "applovin" : {}
                 },
                 "oauth" : {},
                 "push" : {},

@@ -1244,15 +1244,8 @@ onShow(() => {
 
 // ── 横版原生广告位卡片 ──
 .top10-ad-wrap {
-    /* #ifdef APP */
-    // 黄金位广告：抵消上方 hero-section 的偏大间隙，并向左右各扩展 14rpx 抵消原生广告自带内边距，使图文与上方卡片 2/3 左右两端严格对齐
-    margin: -16rpx -14rpx 10rpx;
-    width: calc(100% + 28rpx);
-    /* #endif */
-    /* #ifndef APP */
-    margin: 0 0 24rpx;
+    margin: -10rpx 0 20rpx;
     width: 100%;
-    /* #endif */
     display: block;
     box-sizing: border-box;
     line-height: 1;
@@ -1279,13 +1272,12 @@ onShow(() => {
 
     &--inline {
         /* #ifdef APP */
-        margin: -8rpx -14rpx;
-        width: calc(100% + 28rpx);
+        margin: -4rpx 0 -12rpx;
         /* #endif */
         /* #ifndef APP */
         margin: 0;
-        width: 100%;
         /* #endif */
+        width: 100%;
         padding: 0;
     }
 }

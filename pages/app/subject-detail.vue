@@ -138,8 +138,7 @@ import { useAppStore } from '@/stores/app.js';
 import { useUserStore } from '@/stores/user.js';
 import { getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
 import { handlePicUrl } from '@/utils/common.js';
-import { PICS_BASE_URL } from '@/common/config.js';
-import { IS_INTERNATIONAL } from '@/utils/system.js';
+import { PICS_BASE_URL, IS_INTERNATIONAL } from '@/common/config.js';
 
 
 const { t, locale } = useI18n();

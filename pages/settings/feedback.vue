@@ -105,8 +105,13 @@
                 <view class="submit-section">
                     <button
                         class="submit-btn"
-                        :class="{ disabled: !canSubmit || isSubmitting }"
-                        :disabled="!canSubmit || isSubmitting"
+                        :class="{
+                            'is-ready': canSubmit && !isSubmitting,
+                            'is-disabled': !canSubmit && !isSubmitting,
+                            'is-submitting': isSubmitting,
+                            'is-shake': isShaking,
+                        }"
+                        :disabled="isSubmitting"
                         @click="handleSubmit"
                     >
                         <view class="submit-inner">
@@ -161,10 +166,18 @@ const feedbackForm = reactive({
 const imageList = ref([]);
 const maxImages = 9;
 const isSubmitting = ref(false);
+const isShaking = ref(false);
 
 const canSubmit = computed(() => {
     return feedbackForm.content.trim().length >= 10;
 });
+
+const triggerShake = () => {
+    isShaking.value = true;
+    setTimeout(() => {
+        isShaking.value = false;
+    }, 450);
+};
 
 const selectType = (type) => {
     if (feedbackForm.type !== type) {
@@ -273,30 +286,49 @@ const goBack = () => {
 };
 
 const handleSubmit = async () => {
-    if (!feedbackForm.content.trim()) {
+    if (isSubmitting.value) return;
+
+    const trimmedContent = feedbackForm.content.trim();
+
+    if (!trimmedContent) {
+        // #ifdef APP-PLUS || MP-WEIXIN
+        try {
+            uni.vibrateShort({ type: 'light' });
+        } catch (e) {}
+        // #endif
+        triggerShake();
         uni.showToast({
             title: t('feedback.contentRequired'),
             icon: 'none',
         });
+        isContentFocused.value = true;
+        return;
+    }
+
+    if (trimmedContent.length < 10) {
+        // #ifdef APP-PLUS || MP-WEIXIN
+        try {
+            uni.vibrateShort({ type: 'light' });
+        } catch (e) {}
+        // #endif
+        triggerShake();
+        const needCount = 10 - trimmedContent.length;
+        uni.showToast({
+            title: tp('feedback.needMoreChars', { count: needCount }),
+            icon: 'none',
+        });
+        isContentFocused.value = true;
         return;
     }
 
     // #ifdef MP-WEIXIN
-    const isContentSafe = await validateTextSecurity(feedbackForm.content.trim());
+    const isContentSafe = await validateTextSecurity(trimmedContent);
     if (!isContentSafe) return;
     if (imageList.value.length > 0) {
         const checkRes = await validateImagesSecurityBatch(imageList.value);
         if (!checkRes.pass) return;
     }
     // #endif
-
-    if (feedbackForm.content.trim().length < 10) {
-        uni.showToast({
-            title: t('feedback.contentMinLength'),
-            icon: 'none',
-        });
-        return;
-    }
 
     // #ifdef APP-PLUS || MP-WEIXIN
     try {
@@ -312,7 +344,7 @@ const handleSubmit = async () => {
             device_id: getDeviceId(),
             fb_type: feedbackForm.type,
             type: feedbackForm.type,
-            content: feedbackForm.content.trim(),
+            content: trimmedContent,
             contact: feedbackForm.contact.trim(),
         };
 
@@ -323,9 +355,15 @@ const handleSubmit = async () => {
             await apiPostFeedback(data);
         }
 
+        // #ifdef APP-PLUS || MP-WEIXIN
+        try {
+            uni.vibrateShort({ type: 'heavy' });
+        } catch (e) {}
+        // #endif
+
         uni.showToast({
             title: t('feedback.submitSuccess'),
-            icon: 'success',
+            icon: 'none',
             duration: 2000,
         });
 
@@ -333,14 +371,14 @@ const handleSubmit = async () => {
         feedbackForm.contact = userStore.userinfo?.email || '';
         feedbackForm.type = t('feedback.typeBug');
         imageList.value = [];
-        
+
         setTimeout(() => {
             goBack();
         }, 1500);
     } catch (error) {
         console.error('提交反馈失败:', error);
         uni.showToast({
-            title: t('feedback.submitFailed'),
+            title: error?.message || error?.detail || t('feedback.submitFailed'),
             icon: 'none',
         });
     } finally {
@@ -640,16 +678,14 @@ const handleSubmit = async () => {
 
 /* 提交按钮 */
 .submit-section {
-    margin-top: 24rpx;
-    padding-bottom: env(safe-area-inset-bottom);
+    margin-top: 32rpx;
+    padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
 }
 
 .submit-btn {
     width: 100%;
-    height: 96rpx;
-    border-radius: 24rpx;
-    background: #e5322d;
-    color: #ffffff;
+    height: 98rpx;
+    border-radius: 28rpx;
     font-size: 30rpx;
     font-weight: 600;
     display: flex;
@@ -657,26 +693,61 @@ const handleSubmit = async () => {
     justify-content: center;
     margin: 0;
     padding: 0;
-    border: 2rpx solid transparent;
+    border: none;
     box-sizing: border-box;
-    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                background 0.25s ease,
+                opacity 0.22s ease;
     cursor: pointer;
 
     &::after {
         border: none;
     }
 
-    &:active:not(.disabled) {
-        transform: scale(0.98);
-        opacity: 0.9;
+    // 可提交状态：活力品牌红渐变 + 柔和光晕
+    &.is-ready {
+        background: linear-gradient(135deg, #e5322d 0%, #ea2e29 100%);
+        color: #ffffff;
+        box-shadow: 0 8rpx 24rpx rgba(229, 50, 45, 0.35), 0 2rpx 8rpx rgba(229, 50, 45, 0.18);
+
+        &:active {
+            transform: scale(0.975);
+            opacity: 0.92;
+            box-shadow: 0 4rpx 12rpx rgba(229, 50, 45, 0.25);
+        }
     }
 
-    &.disabled {
+    // 提交中状态：保持鲜明品牌色，不泛白！加入呼吸微光晕与精致转圈
+    &.is-submitting {
+        background: linear-gradient(135deg, #e5322d 0%, #d82b26 100%) !important;
+        border-color: transparent !important;
+        color: #ffffff !important;
+        box-shadow: 0 8rpx 28rpx rgba(229, 50, 45, 0.45) !important;
+        cursor: not-allowed;
+        pointer-events: none;
+        animation: submitPulse 1.8s infinite ease-in-out;
+    }
+
+    // 未达标禁用状态：清晰低饱和卡片风格
+    &.is-disabled {
         background: var(--panel-background-solid);
         border: 2rpx solid var(--panel-border);
         color: var(--text-tertiary);
-        opacity: 0.85;
-        cursor: not-allowed;
+        box-shadow: none;
+        cursor: pointer;
+
+        &:active {
+            transform: scale(0.985);
+            opacity: 0.8;
+        }
+    }
+
+    // 点击未满足条件的抖动反馈动画
+    &.is-shake {
+        animation: btnShake 0.4s ease-in-out;
     }
 }
 
@@ -685,28 +756,51 @@ const handleSubmit = async () => {
     align-items: center;
     justify-content: center;
     gap: 16rpx;
+    line-height: 1;
 }
 
 .submit-text {
     font-size: 30rpx;
     font-weight: 600;
+    letter-spacing: 1rpx;
 }
 
 .loading-spinner {
     width: 32rpx;
     height: 32rpx;
-    border: 3rpx solid rgba(255, 255, 255, 0.3);
+    border: 3.5rpx solid rgba(255, 255, 255, 0.35);
     border-top-color: #ffffff;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: btnSpin 0.75s linear infinite;
 }
 
-@keyframes spin {
-    from {
+@keyframes btnSpin {
+    0% {
         transform: rotate(0deg);
     }
-    to {
+    100% {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes submitPulse {
+    0%, 100% {
+        box-shadow: 0 8rpx 24rpx rgba(229, 50, 45, 0.35);
+    }
+    50% {
+        box-shadow: 0 12rpx 36rpx rgba(229, 50, 45, 0.60);
+    }
+}
+
+@keyframes btnShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    20%, 60% {
+        transform: translateX(-10rpx);
+    }
+    40%, 80% {
+        transform: translateX(10rpx);
     }
 }
 
@@ -763,11 +857,11 @@ const handleSubmit = async () => {
         border-color: rgba(255, 255, 255, 0.14);
     }
 
-    .submit-btn.disabled {
-        background: #222228;
-        border-color: rgba(255, 255, 255, 0.12);
-        color: rgba(247, 247, 251, 0.38);
-        opacity: 1;
+    .submit-btn.is-disabled {
+        background: #202026;
+        border: 2rpx solid rgba(255, 255, 255, 0.12);
+        color: rgba(247, 247, 251, 0.36);
+        box-shadow: none;
     }
 }
 
@@ -822,11 +916,11 @@ const handleSubmit = async () => {
         border-color: rgba(0, 0, 0, 0.08);
     }
 
-    .submit-btn.disabled {
+    .submit-btn.is-disabled {
         background: #f1f5f9;
-        border-color: #e2e8f0;
+        border: 2rpx solid #e2e8f0;
         color: #94a3b8;
-        opacity: 1;
+        box-shadow: none;
     }
 }
 </style>

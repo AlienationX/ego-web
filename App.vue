@@ -1,6 +1,6 @@
 <script setup>
 import permissionListener from '@/uni_modules/c-permission-listener';
-import { writeAccessLog, handleDeepLink, isPCWechat } from '@/utils/system.js';
+import { writeAccessLog, handleDeepLink, isPCWechat, applyAndroidEdgeToEdgeLayout } from '@/utils/system.js';
 import { applyAppTheme, restoreStatusBarColor } from '@/utils/theme.js';
 import { permissionEnums } from '@/common/app_permission.js';
 import { onLaunch, onShow, onHide, onReady } from '@dcloudio/uni-app';
@@ -112,6 +112,10 @@ onShow((res) => {
         // 轻量恢复状态栏文字深浅色（无延时、零原生重排）
         restoreStatusBarColor();
     }
+
+    // #ifdef APP-PLUS
+    applyAndroidEdgeToEdgeLayout();
+    // #endif
 
     handleDeepLink(res);
 

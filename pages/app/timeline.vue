@@ -851,14 +851,7 @@ onShow(() => {
 
 .timeline-ad-card {
     width: 100%;
-    /* #ifndef APP */
     border-radius: 28rpx;
-    overflow: hidden;
-    /* #endif */
-    /* #ifdef APP */
-    border-radius: 0;
-    overflow: visible;
-    /* #endif */
     background: transparent;
     transform: translateZ(0);
 
@@ -879,15 +872,8 @@ onShow(() => {
     &--horizontal {
         position: relative;
         grid-column: 1 / -1;
-        /* #ifdef APP */
-        // 抵消原生广告自带约 14rpx 内边距，使通栏广告左右与双列壁纸两端严格齐平，上下与网格 gap: 20rpx 一致
-        margin: -6rpx -14rpx;
-        width: calc(100% + 28rpx);
-        /* #endif */
-        /* #ifndef APP */
         width: 100%;
         margin: 0;
-        /* #endif */
     }
 
     &--vertical {

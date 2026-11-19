@@ -5,7 +5,12 @@
         :class="[
             `custom-ad-container--${direction}`,
             settingsStore.isDark ? 'theme-dark' : 'theme-light',
-            { 'is-loaded': isLoaded, 'is-failed': isFailed, 'is-closed': isClosed }
+            {
+                'is-loaded': isLoaded,
+                'is-failed': isFailed,
+                'is-closed': isClosed,
+                'is-international': IS_INTERNATIONAL
+            }
         ]"
         :style="containerStyle"
     >
@@ -55,7 +60,7 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user.js';
 import { useAppStore } from '@/stores/app.js';
 import { useSettingsStore } from '@/stores/settings.js';
-import { AD_CONFIG } from '@/common/config.js';
+import { AD_CONFIG, IS_INTERNATIONAL } from '@/common/config.js';
 
 const props = defineProps({
     // 广告方向/形态：horizontal（横版/网格通栏）、vertical（竖版/单列）
@@ -148,10 +153,12 @@ const canShowAd = computed(() => {
 
 // 计算容器与占位高度：
 // - 竖屏默认 620rpx
-// - 横屏：微信小程序端标准为 380rpx；App 端原生模板（16:9 视频 + 标题 + 按钮动作条 + SDK 内边距）为 472rpx，精准匹配杜绝抖动
+// - 横屏：微信小程序端与国内 App 端大卡片标准为 380rpx；
+//   国际版（Google AdMob 自适应横版/Native Express 模板，左图标中文字右按钮）：精准匹配 212rpx，彻底消除黑边空隙与抖动
 const containerHeight = computed(() => {
     if (props.height) return props.height;
     if (props.direction === 'vertical') return '620rpx';
+    if (IS_INTERNATIONAL) return '212rpx';
     return '380rpx';
 });
 
@@ -180,14 +187,11 @@ const containerStyle = computed(() => {
 });
 
 const skeletonStyle = computed(() => {
-    const style = {
+    return {
         width: '100%',
+        height: containerHeight.value,
         borderRadius: props.borderRadius || '28rpx',
     };
-    // #ifndef APP
-    style.height = containerHeight.value;
-    // #endif
-    return style;
 });
 
 const cardStyle = computed(() => {
@@ -382,6 +386,11 @@ defineExpose({
         height: var(--ad-height, 380rpx) !important;
         min-height: var(--ad-height, 380rpx) !important;
     }
+
+    .custom-ad-container--horizontal.is-international & {
+        height: var(--ad-height, 212rpx) !important;
+        min-height: var(--ad-height, 212rpx) !important;
+    }
     /* #endif */
 
     // 当真实广告触发 @load 后，骨架垫底作为底座，延迟渐隐并淡出，杜绝原生组件准备期透明空洞
@@ -475,12 +484,20 @@ defineExpose({
     box-shadow: none !important;
     overflow: hidden;
 
-    .custom-ad-container--horizontal & {
+    .custom-ad-container--horizontal:not(.is-international) & {
         overflow: hidden;
-        // 原生广告 SDK 模板内部自带约 14rpx 透明内边距，向左右外扩 14rpx 精准抵消，使图文素材两端对齐宿主容器
+        // 国内版原生广告 SDK 模板（穿山甲/优量汇）内部自带约 14rpx 透明内边距，向左右外扩 14rpx 精准抵消，使图文素材两端对齐宿主容器
         width: calc(100% + 28rpx) !important;
         margin-left: -14rpx !important;
         margin-right: -14rpx !important;
+    }
+
+    .custom-ad-container--horizontal.is-international & {
+        overflow: hidden;
+        // 国际版 Google AdMob 自适应横版模板无 14rpx 内边距，100% 居中贴合宿主容器
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
     /* #endif */
 

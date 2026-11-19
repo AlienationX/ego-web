@@ -12,7 +12,6 @@ export const IS_DEVELOPMENT =
     (app.uniPlatform === 'mp-weixin' && device.deviceBrand === 'devtools') ||
     device.deviceModel?.startsWith('sdk');
 
-export const IS_INTERNATIONAL = typeof plus !== 'undefined' ? plus.runtime.channel === 'google' : false;
 
 /**
  * 判定当前是否运行在微信小程序 PC 桌面客户端（Windows 或 Mac）
@@ -136,9 +135,6 @@ export function setAndroidImmersive(isDark = false) {
             const mainActivity = plus.android.runtimeMainActivity();
             if (!mainActivity) return;
 
-            // 仅在存在底部导航栏/手势指示条遮罩（高度 > 0）时才执行
-            if (getAndroidNativeNavBarHeight() <= 0) return;
-
             // 切换到 Android UI 主线程执行，确保窗口布局参数安全生效
             mainActivity.runOnUiThread(
                 plus.android.implements('java.lang.Runnable', {
@@ -235,48 +231,85 @@ export function applyAndroidEdgeToEdgeLayout() {
                         const decor = plus.android.invoke(win, 'getDecorView');
                         if (!decor) return;
 
-                        const screenW = plus.android.invoke(decor, 'getWidth');
-                        const screenH = plus.android.invoke(decor, 'getHeight');
-                        if (!screenW || !screenH) return;
-
-                        // 1. 消除 AppCompat 底部生成的多余黑色保护遮罩条 (放宽至 260px，兼容 2K 屏与高 DPI)
-                        let decorCount = 0;
-                        try {
-                            decorCount = plus.android.invoke(decor, 'getChildCount') || 0;
-                        } catch (e) {}
-
-                        for (let i = 0; i < decorCount; i++) {
+                        const executeFix = () => {
                             try {
-                                const child = plus.android.invoke(decor, 'getChildAt', i);
-                                const clsObj = plus.android.invoke(child, 'getClass');
-                                const name = plus.android.invoke(clsObj, 'getName');
-                                if (name === 'android.widget.RelativeLayout') {
-                                    const ch = plus.android.invoke(child, 'getHeight');
-                                    if (ch > 0 && ch < 260) {
-                                        plus.android.invoke(child, 'setVisibility', 8); // View.GONE
-                                    }
-                                }
-                            } catch (e) {}
-                        }
+                                // 1. 物理屏幕高度强力兜底，彻底杜绝 screenH 为 0
+                                let screenH = plus.android.invoke(decor, 'getHeight');
+                                let screenW = plus.android.invoke(decor, 'getWidth');
 
-                        // 2. 将整个 Activity 的根容器 (android.R.id.content) 铺满至屏幕物理底部
-                        // 仅改变最外层父容器尺寸，让系统与 uni-app 自然排版，绝不直接碰触内部 WebView，零白屏风险
-                        const content = mainActivity.findViewById(16908290);
-                        if (content) {
-                            try {
-                                plus.android.invoke(content, 'setFitsSystemWindows', false);
-                                plus.android.invoke(content, 'setPadding', 0, 0, 0, 0);
-                                const lp = plus.android.invoke(content, 'getLayoutParams');
-                                if (lp) {
-                                    const h = plus.android.getAttribute(lp, 'height');
-                                    if (h !== screenH) {
-                                        plus.android.setAttribute(lp, 'height', screenH);
-                                        plus.android.invoke(content, 'setLayoutParams', lp);
-                                    }
+                                if (!screenH || screenH <= 0) {
+                                    plus.android.importClass('android.util.DisplayMetrics');
+                                    const realMetrics = plus.android.newObject('android.util.DisplayMetrics');
+                                    const windowManager = plus.android.invoke(mainActivity, 'getWindowManager');
+                                    const display = plus.android.invoke(windowManager, 'getDefaultDisplay');
+                                    plus.android.invoke(display, 'getRealMetrics', realMetrics);
+                                    screenH = plus.android.getAttribute(realMetrics, 'heightPixels');
+                                    screenW = plus.android.getAttribute(realMetrics, 'widthPixels');
                                 }
-                            } catch (e) {}
-                        }
 
+                                if (!screenH || screenH <= 0) return;
+
+                                // 2. 消除 AppCompat 底部生成的多余黑色保护遮罩条 (放宽至 260px，兼容 2K 屏与高 DPI)
+                                let decorCount = 0;
+                                try {
+                                    decorCount = plus.android.invoke(decor, 'getChildCount') || 0;
+                                } catch (e) {}
+
+                                for (let i = 0; i < decorCount; i++) {
+                                    try {
+                                        const child = plus.android.invoke(decor, 'getChildAt', i);
+                                        const clsObj = plus.android.invoke(child, 'getClass');
+                                        const name = plus.android.invoke(clsObj, 'getName');
+                                        if (name === 'android.widget.RelativeLayout') {
+                                            const ch = plus.android.invoke(child, 'getHeight');
+                                            if (ch < 260) {
+                                                plus.android.invoke(child, 'setVisibility', 8); // View.GONE
+                                            }
+                                        }
+                                    } catch (e) {}
+                                }
+
+                                // 3. 将整个 Activity 的根容器 (android.R.id.content) 铺满至屏幕物理底部
+                                const content = mainActivity.findViewById(16908290);
+                                if (content) {
+                                    try {
+                                        plus.android.invoke(content, 'setFitsSystemWindows', false);
+                                        plus.android.invoke(content, 'setPadding', 0, 0, 0, 0);
+                                        const lp = plus.android.invoke(content, 'getLayoutParams');
+                                        if (lp) {
+                                            const h = plus.android.getAttribute(lp, 'height');
+                                            if (h !== screenH) {
+                                                plus.android.setAttribute(lp, 'height', screenH);
+                                                plus.android.invoke(content, 'setLayoutParams', lp);
+                                            }
+                                        }
+                                    } catch (e) {}
+                                }
+
+                                // 4. 协同通知当前 Webview 贴底 0px、高度 100%
+                                try {
+                                    if (typeof plus !== 'undefined' && plus.webview) {
+                                        const currentWv = plus.webview.currentWebview();
+                                        if (currentWv && currentWv.setStyle) {
+                                            currentWv.setStyle({
+                                                bottom: '0px',
+                                                height: '100%',
+                                            });
+                                        }
+                                    }
+                                } catch (e) {}
+                            } catch (e) {}
+                        };
+
+                        // 立即执行一次
+                        executeFix();
+
+                        // 并在 Android 视图完成排版(Layout)后通过原生 post 精准复核一次
+                        decor.post(
+                            plus.android.implements('java.lang.Runnable', {
+                                run: executeFix,
+                            })
+                        );
                     } catch (innerErr) {}
                 }
             })

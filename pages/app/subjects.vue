@@ -843,7 +843,17 @@ onShow(() => {
         cursor: default;
         min-height: auto;
         padding: 32rpx;
-        gap: 16rpx;
+        gap: 10rpx;
+        transition: padding 0.3s ease;
+
+        &.is-loaded {
+            /* #ifdef APP */
+            padding-bottom: 16rpx;
+            /* #endif */
+            /* #ifndef APP */
+            padding-bottom: 24rpx;
+            /* #endif */
+        }
 
         &.is-error {
             display: none !important;
@@ -859,58 +869,28 @@ onShow(() => {
             box-shadow: 0 12rpx 36rpx var(--shadow-color) !important;
         }
 
+        .subject-card__header {
+            .subject-card__badge-row {
+                margin-bottom: 0;
+            }
+        }
+
         .subject-card__ad-container {
             width: 100%;
             /* #ifdef APP */
-            display: block;
-            // 抵消卡片内边距与原生广告自带内边距，使广告内部素材与卡片头部 SPONSORED 标签两端严格齐平
-            margin: -10rpx -42rpx -8rpx;
-            width: calc(100% + 84rpx);
-            border-radius: 0;
-            background: transparent;
-            box-shadow: none;
-            overflow: visible;
-
-            :deep(.custom-ad-skeleton) {
-                width: calc(100% - 84rpx) !important;
-                margin: 0 auto !important;
-            }
+            margin: -6rpx 0 0;
             /* #endif */
             /* #ifndef APP */
-            display: flex;
-            align-items: center;
-            justify-content: center;
             margin: 0;
-            border-radius: 20rpx;
-            overflow: hidden;
-            background: var(--page-background-secondary);
-            box-shadow: 0 6rpx 16rpx var(--shadow-color);
-            transform: translateZ(0);
-            -webkit-mask-image: -webkit-radial-gradient(white, black);
-            mask-image: radial-gradient(white, black);
             /* #endif */
-
-            .ad-inner-clip {
-                width: 100%;
-                border-radius: 20rpx;
-                overflow: hidden;
-                transform: translateZ(0);
-                -webkit-mask-image: -webkit-radial-gradient(white, black);
-                mask-image: radial-gradient(white, black);
-            }
+            background: transparent;
+            box-sizing: border-box;
+            overflow: visible;
 
             custom-ad,
             :deep(custom-ad) {
                 width: 100% !important;
                 display: block !important;
-            }
-
-            ad-custom,
-            :deep(ad-custom) {
-                width: 100%;
-                border-radius: 20rpx;
-                overflow: hidden;
-                display: block;
             }
         }
     }
