@@ -1,23 +1,23 @@
 <template>
     <view
-        v-if="showAd && !isError && !isRemoved"
+        v-if="showAd && !isError && !isRemoved && visible"
         class="custom-ad-container"
         :class="[
             isFixed ? 'is-fixed' : '',
             settingsStore.isDark ? 'theme-dark' : 'theme-light',
-            { 'is-loaded': isLoaded, 'is-failed': isError }
+            { 'is-loaded': isLoaded, 'is-failed': isError || !visible }
         ]"
         :style="containerStyle"
     >
         <!-- #ifdef APP -->
-        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }">
-            <ad :adpid="adpid" @load="onload" @close="onclose" @error="onerror"></ad>
+        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }" v-if="visible && !isRemoved">
+            <ad v-if="visible && !isRemoved" :adpid="adpid" @load="onload" @close="onclose" @error="onerror"></ad>
         </view>
         <!-- #endif -->
 
         <!-- #ifdef MP-WEIXIN -->
-        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }">
-            <ad :unit-id="unitId" ad-intervals="30" @load="onload" @close="onclose" @error="onerror"></ad>
+        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }" v-if="visible && !isRemoved">
+            <ad v-if="visible && !isRemoved" :unit-id="unitId" ad-intervals="30" @load="onload" @close="onclose" @error="onerror"></ad>
         </view>
         <!-- #endif -->
     </view>
@@ -51,6 +51,10 @@ const props = defineProps({
     hasTabBar: {
         type: Boolean,
         default: false,
+    },
+    visible: {
+        type: Boolean,
+        default: true,
     },
     background: {
         type: String,
@@ -178,14 +182,29 @@ onMounted(() => {
 
 onUnmounted(() => {
     clearTimers();
+    isLoaded.value = false;
+    isRemoved.value = true;
+    updateHeight(0);
 });
 
-watch(showAd, (visible) => {
-    if (!visible) {
+watch(() => props.visible, (val) => {
+    if (!val) {
+        clearTimers();
+        isLoaded.value = false;
+        isRemoved.value = true;
+        updateHeight(0);
+    } else {
+        isRemoved.value = false;
+        isError.value = false;
+    }
+});
+
+watch(showAd, (visibleVal) => {
+    if (!visibleVal) {
         clearTimers();
         isLoaded.value = false;
         isError.value = false;
-        isRemoved.value = false;
+        isRemoved.value = true;
         updateHeight(0);
     }
 });

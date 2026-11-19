@@ -152,12 +152,7 @@ const canShowAd = computed(() => {
 const containerHeight = computed(() => {
     if (props.height) return props.height;
     if (props.direction === 'vertical') return '620rpx';
-    // #ifdef APP
-    return '470rpx';
-    // #endif
-    // #ifndef APP
     return '380rpx';
-    // #endif
 });
 
 const containerStyle = computed(() => {
@@ -199,9 +194,10 @@ const cardStyle = computed(() => {
     if (isFailed.value || isClosed.value) {
         return { display: 'none', height: '0px' };
     }
-    const style = {};
+    const style = {
+        borderRadius: props.borderRadius || '28rpx',
+    };
     // #ifndef APP
-    style.borderRadius = props.borderRadius;
     if (props.background) {
         style.background = props.background;
     }
@@ -382,12 +378,9 @@ defineExpose({
 
     /* #ifdef APP */
     .custom-ad-container--horizontal & {
-        // App 端横版广告位外层通常向左右各扩展 14rpx，因此骨架卡片向内收缩 14rpx，精准匹配真实广告素材宽度；
-        // 同时原生模板内部上下各存在约 12rpx 间距，内收卡片高度以严格对齐真实广告物料边缘
-        margin: 12rpx auto;
-        width: calc(100% - 28rpx) !important;
-        height: calc(var(--ad-height, 472rpx) - 24rpx) !important;
-        min-height: calc(var(--ad-height, 472rpx) - 24rpx) !important;
+        width: 100% !important;
+        height: var(--ad-height, 380rpx) !important;
+        min-height: var(--ad-height, 380rpx) !important;
     }
     /* #endif */
 
@@ -404,17 +397,6 @@ defineExpose({
         z-index: 1;
         opacity: 0;
         transition: opacity 0.5s ease 0.4s;
-
-        /* #ifdef APP */
-        .custom-ad-container--horizontal & {
-            left: 14rpx;
-            right: 14rpx;
-            width: calc(100% - 28rpx) !important;
-            margin: 12rpx auto !important;
-            height: calc(100% - 24rpx) !important;
-            min-height: calc(100% - 24rpx) !important;
-        }
-        /* #endif */
     }
 
     background: linear-gradient(
@@ -488,15 +470,17 @@ defineExpose({
     /* #endif */
 
     /* #ifdef APP */
-    // APP 端原生广告直角平铺，彻底去除外层嵌套容器的背景与阴影，避免形成空隙黑边
+    // APP 端原生广告底座透明
     background: transparent !important;
     box-shadow: none !important;
-    border-radius: 0 !important;
-    overflow: visible;
+    overflow: hidden;
 
     .custom-ad-container--horizontal & {
-        overflow: visible;
-        width: 100%;
+        overflow: hidden;
+        // 原生广告 SDK 模板内部自带约 14rpx 透明内边距，向左右外扩 14rpx 精准抵消，使图文素材两端对齐宿主容器
+        width: calc(100% + 28rpx) !important;
+        margin-left: -14rpx !important;
+        margin-right: -14rpx !important;
     }
     /* #endif */
 
@@ -505,6 +489,7 @@ defineExpose({
         overflow: hidden;
         display: block;
         line-height: 1;
+        border-radius: inherit;
     }
 }
 </style>

@@ -2,8 +2,8 @@
     <view class="modern-pics-container" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
         <!-- 头部导航 (Tabs + 工具栏) -->
         <view v-if="shouldShowHeader" class="header-bar" :style="{
-            transform: `translateY(${Math.max(stickyTop, headerHeight - headerScrollTop)}px)`,
-            top: 0,
+            position: 'sticky',
+            top: `${stickyTop}px`,
             zIndex: 100,
         }">
             <scroll-view v-if="tabs.length > 1" scroll-x class="tabs-scroll" show-scrollbar="false"
@@ -31,18 +31,17 @@
             </view>
         </view>
 
-        <!-- 内容区域 -->
-        <swiper class="content-swiper" :current="currentIndex" @change="onSwiperChange" duration="300">
-            <swiper-item v-for="(tab, index) in tabs" :key="index">
-                <scroll-view scroll-y class="tab-scroll-view" show-scrollbar="false"
-                    :scroll-into-view="tabStates[index].scrollIntoViewId" @scroll="onScroll($event, index)"
-                    @scrolltolower="onReachLower(index)">
-                    <view class="scroll-content" :style="{ minHeight: `calc(100% + ${headerHeight}px)` }">
-                        <view :id="`tab-top-anchor-${index}`" class="top-spacer"
-                            :style="{ height: topSpacerHeight + 'px' }"></view>
-
-                        <!-- 骨架屏加载态 -->
-                        <view v-if="tabStates[index].isLoading && tabStates[index].images.length === 0"
+        <!-- 内容主体区域 (页面级自然流排版，支持多 Tab 状态缓存与切换) -->
+        <view class="modern-pics-body">
+            <view
+                v-for="(tab, index) in tabs"
+                :key="index"
+                v-show="currentIndex === index"
+                class="tab-pane"
+            >
+                <view class="scroll-content">
+                    <!-- 骨架屏加载态 -->
+                    <view v-if="tabStates[index].isLoading && tabStates[index].images.length === 0"
                             class="skeleton-wrapper">
                             <view class="sk-grid" v-if="!isWaterfall">
                                 <view v-for="i in 8" :key="i" class="sk-card"></view>
@@ -247,11 +246,10 @@
 
                         <view class="safe-area-bottom" :style="{ height: `${bottomSafeSpace}rpx` }"></view>
                     </view>
-                </scroll-view>
-            </swiper-item>
-        </swiper>
+                </view>
+            </view>
 
-        <!-- 空状态 overlay（absolute 覆盖，不受 scroll-view 内布局影响） -->
+        <!-- 空状态 overlay -->
         <view class="empty-overlay"
             v-if="!tabStates[currentIndex]?.isLoading && tabStates[currentIndex]?.images.length === 0 && tabStates[currentIndex]?.hasLoaded">
             <slot name="empty" :index="currentIndex">
@@ -263,7 +261,7 @@
         </view>
 
         <!-- 返回顶部悬浮按钮 -->
-        <fab-back-top :show="tabStates[currentIndex]?.showBackTop" :embedded="props.embedded"
+        <fab-back-top :show="showBackTop" :embedded="props.embedded"
             :ad-height="props.adHeight" @click="handleBackTop" />
     </view>
 </template>
@@ -763,32 +761,28 @@ const handleTabClick = (index) => {
             fetchData(index, true);
         }
     }
+    emit('change', { index, isDateAsc: dateSortAsc.value });
 };
 
 const toggleViewMode = () => {
     settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
 };
 
-const onSwiperChange = (e) => {
-    currentIndex.value = e.detail.current;
-    // 懒加载：首次进入该 tab 且未加载数据时触发拉取
-    const state = tabStates[currentIndex.value];
-    if (state && state.images.length === 0 && !state.isLoading) {
-        fetchData(currentIndex.value, true);
-    }
-    emit('change', currentIndex.value);
-    emit('update', { images: state.images, index: currentIndex.value });
-};
+const showBackTop = ref(false);
 
 const onScroll = (e, index) => {
-    const st = e.detail.scrollTop;
+    const st = e.detail?.scrollTop ?? e.scrollTop ?? 0;
     tabStates[index].oldScrollTop = st;
-    tabStates[index].showBackTop = st > 400;
+    showBackTop.value = st > 400;
 
     if (index === currentIndex.value) {
-        headerScrollTop.value = Math.min(st, props.headerHeight);
+        headerScrollTop.value = Math.min(st, props.headerHeight || 0);
         emit('scroll', { scrollTop: st, index });
     }
+};
+
+const onPageScroll = (e) => {
+    onScroll(e, currentIndex.value);
 };
 
 const onReachLower = (index) => {
@@ -798,16 +792,30 @@ const onReachLower = (index) => {
     }
 };
 
-const handleBackTop = () => {
-    const idx = currentIndex.value;
-    const state = tabStates[idx];
-    // 用 scroll-into-view 跳到顶部锚点，无需操控响应式 scrollTop
-    state.scrollIntoViewId = `tab-top-anchor-${idx}`;
-    state.oldScrollTop = 0;
-    state.showBackTop = false;
-    // 跳转生效后清空，避免再次触发
-    setTimeout(() => { state.scrollIntoViewId = ''; }, 100);
+const loadMore = () => {
+    onReachLower(currentIndex.value);
 };
+
+const handleBackTop = () => {
+    showBackTop.value = false;
+    uni.pageScrollTo({
+        scrollTop: 0,
+        duration: 300,
+    });
+};
+
+defineExpose({
+    loadMore,
+    onPageScroll,
+    onReachLower,
+    currentIndex,
+    tabStates,
+    handleTabClick,
+    toggleViewMode,
+    isWaterfall,
+    canToggleViewMode,
+    dateSortAsc,
+});
 
 const openPreview = (id, index) => {
     // 纯壁纸列表（过滤剔除广告对象）
@@ -849,7 +857,6 @@ onShow(() => {
 .modern-pics-container {
     position: relative;
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
     background: var(--page-background);
@@ -858,7 +865,7 @@ onShow(() => {
 
 /* 头部 Header (沉浸式毛玻璃 Tabs 工具栏) */
 .header-bar {
-    position: absolute;
+    position: sticky;
     width: 100%;
     height: 88rpx;
     display: flex;
@@ -868,7 +875,7 @@ onShow(() => {
     -webkit-backdrop-filter: blur(28rpx) saturate(180%);
     border-bottom: none;
     box-shadow: none;
-    will-change: transform;
+    z-index: 100;
 
     .theme-light & {
         background: rgba(238, 241, 244, 0.85);
@@ -981,21 +988,22 @@ onShow(() => {
     }
 }
 
-/* 核心内容区 */
-.content-swiper {
-    flex: 1;
+/* 核心内容区 (页面级自然流排版) */
+.modern-pics-body {
     width: 100%;
-    height: 100%;
+    position: relative;
 }
 
-.tab-scroll-view {
-    height: 100%;
+.tab-pane {
     width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .scroll-content {
     display: flex;
     flex-direction: column;
+    width: 100%;
 }
 
 .gallery-wrapper {
@@ -1103,15 +1111,43 @@ onShow(() => {
 
         &.is-ad-card {
             grid-column: 1 / -1;
-            width: 100%;
+            /* #ifdef APP */
+            // App 端原生广告组件自带约 20rpx 左右内边距，反向扩展 20rpx 贴平双列网格边缘，上下微调抵消内边距以与 gap: 20rpx 齐平
+            margin: -8rpx -20rpx -18rpx !important;
+            width: calc(100% + 40rpx) !important;
+            height: auto;
+            min-height: 0;
+            background: transparent !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            overflow: visible !important;
+            display: block;
+            padding: 0 !important;
+            box-sizing: border-box;
+
+            .ad-custom-card {
+                border-radius: 0 !important;
+                overflow: visible !important;
+            }
+
+            :deep(.custom-ad-skeleton) {
+                width: calc(100% - 40rpx) !important;
+                margin: 12rpx auto !important;
+            }
+            /* #endif */
+            /* #ifndef APP */
+            width: 100% !important;
             height: auto;
             min-height: 0;
             background: transparent;
             box-shadow: none;
+            border-radius: 28rpx;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box;
+            /* #endif */
         }
     }
 
@@ -1124,24 +1160,28 @@ onShow(() => {
 
         &.is-ad-card {
             aspect-ratio: auto !important;
-            width: 100%;
+            width: 100% !important;
             height: auto;
             min-height: 0;
             background: transparent;
             box-shadow: none;
-            /* #ifdef APP */
-            // 抵消原生广告自带约 14rpx 内边距，使网格通栏广告两端严格对齐
-            margin: -6rpx -14rpx;
-            width: calc(100% + 28rpx) !important;
-            overflow: visible;
-            /* #endif */
-            /* #ifndef APP */
+            border-radius: 28rpx;
             overflow: hidden;
-            /* #endif */
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box;
         }
     }
 
     &.is-ad-card {
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        /* #ifdef APP */
+        border-radius: 0 !important;
+        overflow: visible !important;
+        /* #endif */
+
         // 广告加载失败：折叠脱离文档流
         &.is-ad-error {
             display: none !important;
@@ -1166,8 +1206,14 @@ onShow(() => {
 
         .ad-custom-card {
             width: 100%;
+            /* #ifndef APP */
             border-radius: 28rpx;
             overflow: hidden;
+            /* #endif */
+            /* #ifdef APP */
+            border-radius: 0 !important;
+            overflow: visible !important;
+            /* #endif */
 
             custom-ad,
             :deep(custom-ad) {

@@ -458,15 +458,8 @@ onShow(() => {
 .classify-ad-wrap {
     width: 100%;
     box-sizing: border-box;
-    /* #ifdef APP */
-    // 抵消原生广告自带约 14rpx 内边距，使图文与分类网格两端严格齐平
-    padding: 0 6rpx;
-    margin: 4rpx 0;
-    /* #endif */
-    /* #ifndef APP */
     padding: 0 20rpx;
     margin: 10rpx 0;
-    /* #endif */
     background: transparent;
 
     custom-ad,

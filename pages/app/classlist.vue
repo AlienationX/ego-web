@@ -1,6 +1,6 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- 顶部常驻导航栏：毛玻璃背景渐变 + 优雅自适应返回/搜索 + 标题微升就位 -->
+        <!-- 顶部常驻导航栏：毛玻璃背景渐变 + 单行一体化常驻吸顶 -->
         <view class="top-shell">
             <!-- 毛玻璃半透明背景层，随滚动平滑展现 -->
             <view
@@ -11,7 +11,7 @@
             ></view>
 
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
-            <view class="topbar" :style="{ height: `${titleBarHeight}px` }">
+            <view class="topbar" :style="topbarStyle">
                 <view class="topbar__left">
                     <view
                         class="topbar__back"
@@ -29,17 +29,47 @@
                     </view>
                 </view>
                 <view class="topbar__actions">
+                    <!-- 单行一体化排序胶囊 -->
+                    <view
+                        class="topbar__sort"
+                        :class="{ 'is-solid': topbarProgress > 0.6 }"
+                        @click="toggleSortMenu"
+                    >
+                        <text class="topbar__sort-text">{{ currentSortLabel }}</text>
+                        <mdi-icon
+                            :path="isSortMenuOpen ? '/static/icons/chevron-up.svg' : '/static/icons/chevron-down.svg'"
+                            size="12px"
+                            :color="actionIconColor"
+                        ></mdi-icon>
+                    </view>
+
+                    <!-- 单行一体化视图模式切换 (网格 / 瀑布流) -->
+                    <view
+                        class="topbar__icon"
+                        :class="{ 'is-solid': topbarProgress > 0.6 }"
+                        @click="toggleViewMode"
+                    >
+                        <mdi-icon
+                            :path="!isWaterfall ? '/static/icons/view-grid.svg' : '/static/icons/view-dashboard.svg'"
+                            size="18px"
+                            :color="actionIconColor"
+                        ></mdi-icon>
+                    </view>
+
+                    <!-- 搜索按钮 -->
                     <view
                         class="topbar__icon"
                         :class="{ 'is-solid': topbarProgress > 0.6 }"
                         @click="goSearch"
                     >
-                        <uni-icons
-                            type="search"
-                            size="18"
+                        <mdi-icon
+                            path="/static/icons/magnify.svg"
+                            size="18px"
                             :color="actionIconColor"
-                        ></uni-icons>
+                        ></mdi-icon>
                     </view>
+
+                    <!-- 管理员更多按钮 -->
                     <view
                         class="topbar__icon"
                         :class="{ 'is-solid': topbarProgress > 0.6 }"
@@ -55,24 +85,41 @@
             </view>
         </view>
 
-        <!-- 瀑布流/网格内容区域 -->
-        <view class="content-wrapper" :style="contentWrapperStyle">
-            <modern-pics-view
-                v-if="tabs.length > 0"
-                :show-header="true"
-                :tabs="tabs"
-                api-type="classList"
-                :header-height="heroHeightPx"
-                :tabs-height="44"
-                :sticky-top="navBarHeight"
-                :classify-type="currentClassify?.classify_type"
-                @update="onListUpdate"
-                @scroll="onScroll"
-            ></modern-pics-view>
+        <!-- 排序气泡下拉菜单独立浮层（置于页面顶层，杜绝点击穿透与父级溢出截断） -->
+        <view v-if="isSortMenuOpen" class="sort-popover-layer">
+            <!-- 全屏透明点击遮罩 -->
+            <view class="sort-popover-mask" @click="closeSortMenu"></view>
+            <!-- 气泡下拉菜单本体 -->
+            <view class="sort-popover" :style="sortPopoverStyle" @click.stop>
+                <view
+                    v-for="(item, idx) in sortOptions"
+                    :key="idx"
+                    class="sort-popover__item"
+                    :class="{ 'is-active': currentTabIndex === idx }"
+                    @click.stop="selectSort(idx)"
+                >
+                    <text class="sort-popover__label">{{ item.label }}</text>
+                    <view class="sort-popover__indicator">
+                        <template v-if="item.isDate && currentTabIndex === idx">
+                            <mdi-icon
+                                :path="dateSortAsc ? '/static/icons/arrow-up.svg' : '/static/icons/arrow-down.svg'"
+                                size="14px"
+                                :color="activeSortColor"
+                            ></mdi-icon>
+                        </template>
+                        <mdi-icon
+                            v-else-if="currentTabIndex === idx"
+                            path="/static/icons/check.svg"
+                            size="16px"
+                            :color="activeSortColor"
+                        ></mdi-icon>
+                    </view>
+                </view>
+            </view>
         </view>
 
-        <!-- Hero 区域：视差慢滑 + 下拉拉伸 + 文字升腾淡出 -->
-        <view class="hero" :style="heroContainerStyle">
+        <!-- Hero 区域：保留 560rpx 封面大图 (视差慢滑 + 文字升腾淡出) -->
+        <view class="hero">
             <image
                 class="hero__image"
                 :src="heroImage"
@@ -86,12 +133,29 @@
                 <view class="hero__desc">{{ heroDesc }}</view>
             </view>
         </view>
+
+        <!-- 瀑布流/网格内容区域 (单行一体化，去除冗余吸顶双层 Header) -->
+        <view class="content-wrapper">
+            <modern-pics-view
+                v-if="tabs.length > 0"
+                ref="picsViewRef"
+                :show-header="false"
+                :tabs="tabs"
+                api-type="classList"
+                :header-height="0"
+                :tabs-height="0"
+                :sticky-top="0"
+                :classify-type="currentClassify?.classify_type"
+                @update="onListUpdate"
+                @change="onTabChange"
+            ></modern-pics-view>
+        </view>
     </view>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { onLoad, onUnload, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
+import { onLoad, onUnload, onShareAppMessage, onShareTimeline, onReachBottom, onPageScroll } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { apiGetClassify } from '@/api/wallpaper.js';
 import { gotoHome, handlePicUrl } from '@/utils/common.js';
@@ -119,13 +183,14 @@ const currentClassify = ref(null);
 const classList = ref([]);
 const currentId = ref('');
 
+const picsViewRef = ref(null);
+
+onReachBottom(() => {
+    picsViewRef.value?.loadMore();
+});
+
 const onListUpdate = (e) => {
     classList.value = e.images;
-};
-
-const onScroll = (e) => {
-    const scrollTop = e.scrollTop;
-    headerScrollTop.value = Math.min(scrollTop, heroHeightPx);
 };
 
 const tabs = computed(() => {
@@ -150,6 +215,7 @@ const tabs = computed(() => {
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(44);
 const navBarHeight = ref(88);
+const capsuleWidth = ref(87);
 
 const updateNavMetrics = () => {
     let sHeight = getStatusBarHeight() || 0;
@@ -161,6 +227,7 @@ const updateNavMetrics = () => {
         if (uni.getMenuButtonBoundingClientRect) {
             const menu = uni.getMenuButtonBoundingClientRect();
             if (menu && menu.top && menu.height) {
+                capsuleWidth.value = menu.width || 87;
                 sHeight = menu.top > 0 ? (sHeight || (menu.top - 4)) : sHeight;
                 const topGap = Math.max(6, menu.top - sHeight);
                 const bottomGap = Math.max(8, topGap);
@@ -178,10 +245,100 @@ const updateNavMetrics = () => {
 
 updateNavMetrics();
 
+const topbarStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    const pr = capsuleWidth.value > 0 ? capsuleWidth.value + 12 : 100;
+    return {
+        height: `${titleBarHeight.value}px`,
+        paddingRight: `${pr}px`,
+    };
+    // #endif
+    // #ifndef MP-WEIXIN
+    return {
+        height: `${titleBarHeight.value}px`,
+    };
+    // #endif
+});
+
+// ── 单行一体化排序与视图模式 ──
+const currentTabIndex = ref(0);
+const dateSortAsc = ref(false);
+const isSortMenuOpen = ref(false);
+
+const sortOptions = computed(() => [
+    { label: t('common.random') || '随机', isDate: false },
+    { label: t('common.score') || '评分', isDate: false },
+    { label: t('common.publishDate') || '最新', isDate: true },
+]);
+
+const currentSortLabel = computed(() => {
+    const item = sortOptions.value[currentTabIndex.value];
+    if (!item) return '';
+    if (item.isDate) {
+        return item.label + (dateSortAsc.value ? ' ↑' : ' ↓');
+    }
+    return item.label;
+});
+
+const toggleSortMenu = () => {
+    isSortMenuOpen.value = !isSortMenuOpen.value;
+};
+
+const closeSortMenu = () => {
+    isSortMenuOpen.value = false;
+};
+
+const selectSort = (idx) => {
+    if (currentTabIndex.value === idx) {
+        if (sortOptions.value[idx].isDate) {
+            dateSortAsc.value = !dateSortAsc.value;
+            picsViewRef.value?.handleTabClick(idx);
+        }
+    } else {
+        currentTabIndex.value = idx;
+        picsViewRef.value?.handleTabClick(idx);
+    }
+    closeSortMenu();
+};
+
+const onTabChange = (e) => {
+    if (e && typeof e.index === 'number') {
+        currentTabIndex.value = e.index;
+        if (typeof e.isDateAsc === 'boolean') {
+            dateSortAsc.value = e.isDateAsc;
+        }
+    }
+};
+
+const isWaterfall = computed(() => settingsStore.options.view !== 'window');
+const toggleViewMode = () => {
+    settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
+};
+
+const activeSortColor = computed(() => '#619aef');
+
+const sortPopoverStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    const rightOffset = capsuleWidth.value > 0 ? capsuleWidth.value + 16 : 100;
+    return {
+        top: `${navBarHeight.value + 6}px`,
+        right: `${rightOffset}px`,
+    };
+    // #endif
+    // #ifndef MP-WEIXIN
+    return {
+        top: `${navBarHeight.value + 6}px`,
+        right: '24rpx',
+    };
+    // #endif
+});
+
+onPageScroll((e) => {
+    headerScrollTop.value = Math.max(0, e.scrollTop || 0);
+    picsViewRef.value?.onPageScroll(e);
+});
+
 const heroHeightPx = uni.upx2px(560);
-const contentWrapperStyle = computed(() => ({
-    paddingBottom: '0px',
-}));
 
 // 当 Tabs 触顶吸附的临界滚动距离
 const collapseDistance = computed(() => Math.max(1, heroHeightPx - navBarHeight.value));
@@ -223,17 +380,6 @@ const topbarTitleStyle = computed(() => {
         opacity: progress,
         transform: `translate3d(0, ${translateY}px, 0)`,
         pointerEvents: progress > 0.2 ? 'auto' : 'none',
-    };
-});
-
-// Hero 容器位移
-const heroContainerStyle = computed(() => {
-    const scroll = headerScrollTop.value;
-    const translateY = scroll > 0 ? -scroll : 0;
-    return {
-        transform: `translate3d(0, ${translateY}px, 0)`,
-        // 完全被顶栏覆盖后隐藏，避免层级穿透与重绘
-        opacity: scroll >= collapseDistance.value + 40 ? 0 : 1,
     };
 });
 
@@ -381,8 +527,7 @@ onShareTimeline(() => {
 .layout {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
     background: var(--page-background);
 }
 
@@ -442,30 +587,131 @@ onShareTimeline(() => {
 .topbar__icon {
     width: 64rpx;
     height: 64rpx;
-    border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(10, 14, 21, 0.44);
+    background: transparent !important;
     border: none !important;
-    box-shadow: none;
-    backdrop-filter: blur(14rpx);
-    -webkit-backdrop-filter: blur(14rpx);
-    transition: background 0.22s ease, transform 0.15s ease;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.15s ease;
 
     &:active {
+        opacity: 0.5;
         transform: scale(0.92);
     }
+}
 
-    // 吸顶后的柔和背景胶囊：保留之前的半透明背景，移除边框
-    &.is-solid {
-        background: rgba(255, 255, 255, 0.08);
-        border: none !important;
+.topbar__sort {
+    height: 64rpx;
+    padding: 0 16rpx;
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.15s ease;
 
-        .theme-light & {
-            background: rgba(0, 0, 0, 0.04);
-            border: none !important;
+    &:active {
+        opacity: 0.55;
+        transform: scale(0.94);
+    }
+
+    .topbar__sort-text {
+        font-size: 26rpx;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.92);
+        white-space: nowrap;
+
+        .theme-light .is-solid & {
+            color: var(--text-primary);
         }
+    }
+}
+
+/* 排序气泡下拉菜单浮层 (独立置于全屏顶层，杜绝点击失效与穿透) */
+.sort-popover-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+.sort-popover-mask {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.001); // 微透明保障移动端触摸精准捕获
+}
+
+.sort-popover {
+    position: absolute;
+    z-index: 2;
+    min-width: 230rpx;
+    padding: 12rpx;
+    border-radius: 24rpx;
+    background: var(--popup-background);
+    border: 1rpx solid var(--popup-border);
+    box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(36rpx);
+    -webkit-backdrop-filter: blur(36rpx);
+    animation: popover-fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top right;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 72rpx;
+        padding: 0 20rpx;
+        border-radius: 16rpx;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+
+        &:active {
+            background: rgba(0, 0, 0, 0.04);
+            .theme-dark & {
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+
+        &.is-active {
+            background: rgba(97, 154, 239, 0.12);
+
+            .sort-popover__label {
+                color: #619aef;
+                font-weight: 600;
+            }
+        }
+    }
+
+    &__label {
+        font-size: 26rpx;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    &__indicator {
+        display: flex;
+        align-items: center;
+        margin-left: 16rpx;
+    }
+}
+
+@keyframes popover-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8rpx) scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -491,23 +737,17 @@ onShareTimeline(() => {
 }
 
 .content-wrapper {
-    flex: 1;
-    min-height: 0;
     width: 100%;
     position: relative;
-    overflow: hidden;
+    box-sizing: border-box;
 }
 
 .hero {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
     height: 560rpx;
     z-index: 10;
-    pointer-events: none;
     overflow: hidden;
-    will-change: transform, opacity;
 }
 
 .hero__image {

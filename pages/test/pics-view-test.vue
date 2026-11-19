@@ -17,26 +17,8 @@
             </view>
         </view>
 
-        <!-- 内容区域 -->
-        <view class="content-wrapper">
-            <modern-pics-view
-                v-if="tabs.length > 0"
-                :show-header="true"
-                :tabs="tabs"
-                api-type="classList"
-                :header-height="heroHeightPx"
-                :tabs-height="44"
-                :sticky-top="navBarHeight"
-                @update="onListUpdate"
-                @scroll="onScroll"
-            ></modern-pics-view>
-        </view>
-
-        <!-- Hero 区域 (模拟 classlist 的 hero，测试 z-index 遮挡) -->
-        <view
-            class="hero"
-            :style="{ transform: `translateY(${-headerScrollTop}px)`, opacity: 1 - headerScrollTop / heroHeightPx }"
-        >
+        <!-- Hero 区域 (模拟 classlist 的 hero) -->
+        <view class="hero">
             <view class="hero__bg"></view>
             <view class="hero__overlay"></view>
             <view class="hero__back" :style="{ top: `${statusBarHeight + 12}px` }" @click="goBack">
@@ -45,8 +27,23 @@
             <view class="hero__content">
                 <view class="hero__badge">测试页面</view>
                 <view class="hero__title">瀑布流点击测试</view>
-                <view class="hero__desc">验证 header-bar pointer-events 修复是否生效</view>
+                <view class="hero__desc">验证页面级滚动与 header-bar 吸顶</view>
             </view>
+        </view>
+
+        <!-- 内容区域 -->
+        <view class="content-wrapper">
+            <modern-pics-view
+                v-if="tabs.length > 0"
+                ref="picsViewRef"
+                :show-header="true"
+                :tabs="tabs"
+                api-type="classList"
+                :header-height="0"
+                :tabs-height="44"
+                :sticky-top="navBarHeight"
+                @update="onListUpdate"
+            ></modern-pics-view>
         </view>
 
         <!-- 调试信息面板 -->
@@ -84,6 +81,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { onReachBottom, onPageScroll } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/layout.js';
@@ -91,8 +89,18 @@ import { getNavBarHeight, getStatusBarHeight, getTitleBarHeight } from '@/utils/
 const { t } = useI18n();
 const settingsStore = useSettingsStore();
 
+const picsViewRef = ref(null);
 const headerScrollTop = ref(0);
 const classList = ref([]);
+
+onReachBottom(() => {
+    picsViewRef.value?.loadMore();
+});
+
+onPageScroll((e) => {
+    headerScrollTop.value = Math.max(0, e.scrollTop || 0);
+    picsViewRef.value?.onPageScroll(e);
+});
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const titleBarHeight = ref(getTitleBarHeight() || 44);
@@ -178,8 +186,7 @@ const tabs = computed(() => [
 .layout {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
     background: #0b1017;
 
     &.theme-light {
@@ -256,22 +263,18 @@ const tabs = computed(() => [
 }
 
 .content-wrapper {
-    flex: 1;
-    min-height: 0;
+    width: 100%;
     position: relative;
-    overflow: hidden;
+    box-sizing: border-box;
 }
 
 // ── Hero ──
 .hero {
-    position: absolute;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
     height: 560rpx;
     z-index: 10;
-    pointer-events: none;
-    will-change: transform, opacity;
+    overflow: hidden;
 }
 
 .hero__bg {

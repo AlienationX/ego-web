@@ -1,47 +1,100 @@
 <template>
     <view class="layout" :class="settingsStore.isDark ? 'theme-dark' : 'theme-light'">
-        <!-- 统一固定在顶部的毛玻璃搜索外壳 -->
+        <!-- 统一固定在顶部的毛玻璃搜索外壳 (单行一体化常驻吸顶) -->
         <view class="search-top-wrapper" :class="{ 'is-exploring': showWordBoard }">
             <view class="search-top-bg"></view>
             <view class="status-bar-bg" :style="{ height: `${statusBarHeight}px` }"></view>
             <!-- #ifdef MP-WEIXIN -->
-            <!-- 微信小程序端：双行优雅布局 (第1行纯净返回键与胶囊水平居中对齐，第2行全宽白底大圆角搜索卡片) -->
-            <view class="mp-search-container">
-                <!-- 第 1 行：导航行 (左侧扁平纯净返回键，右侧胶囊自然对齐，中间留白不再放置冗余标题) -->
-                <view class="mp-nav-bar" :style="{ height: `${capsuleRowHeight}px` }">
-                    <view class="nav-back-btn nav-back-btn--flat" @click="goBack">
-                        <mdi-icon
-                            path="/static/icons/arrow-left.svg"
-                            size="22px"
-                            :color="backIconColor"
-                        ></mdi-icon>
-                    </view>
-                </view>
-
-                <!-- 第 2 行：独立全宽搜索框行 (位于胶囊正下方，样式与首页搜索框 1:1 统一) -->
-                <view class="mp-search-field-row">
-                    <view class="search-box search-box--full">
-                        <view class="search-box__left">
+            <!-- 微信小程序端：未搜索时双行探索，搜索结果时单行一体化对齐胶囊 -->
+            <view class="mp-search-container" :class="{ 'is-result': !showWordBoard }">
+                <template v-if="showWordBoard">
+                    <!-- 探索态第 1 行：导航行 (左侧扁平返回键，右侧胶囊对齐) -->
+                    <view class="mp-nav-bar" :style="{ height: `${capsuleRowHeight}px` }">
+                        <view class="nav-back-btn nav-back-btn--flat" @click="goBack">
                             <mdi-icon
-                                path="/static/icons/magnify.svg"
-                                size="20px"
-                                :color="searchIconColor"
+                                path="/static/icons/arrow-left.svg"
+                                size="22px"
+                                :color="backIconColor"
                             ></mdi-icon>
-                            <input
-                                v-model="queryParams.keyword"
-                                class="search-box__input"
-                                :placeholder="searchPlaceholder"
-                                :placeholder-style="placeholderStyle"
-                                confirm-type="search"
-                                @confirm="onSearch"
-                                @input="onInput"
-                            />
-                        </view>
-                        <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
-                            <uni-icons type="clear" size="18" :color="clearIconColor"></uni-icons>
                         </view>
                     </view>
-                </view>
+
+                    <!-- 探索态第 2 行：独立全宽搜索框行 -->
+                    <view class="mp-search-field-row">
+                        <view class="search-box search-box--full">
+                            <view class="search-box__left">
+                                <mdi-icon
+                                    path="/static/icons/magnify.svg"
+                                    size="20px"
+                                    :color="searchIconColor"
+                                ></mdi-icon>
+                                <input
+                                    v-model="queryParams.keyword"
+                                    class="search-box__input"
+                                    :placeholder="searchPlaceholder"
+                                    :placeholder-style="placeholderStyle"
+                                    confirm-type="search"
+                                    @confirm="onSearch"
+                                    @input="onInput"
+                                />
+                            </view>
+                            <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
+                                <uni-icons type="clear" size="18" :color="clearIconColor"></uni-icons>
+                            </view>
+                        </view>
+                    </view>
+                </template>
+
+                <!-- 搜索结果态：单行一体化，避让微信胶囊 -->
+                <template v-else>
+                    <view class="search-shell search-shell--mp" :style="mpSearchShellStyle">
+                        <view class="nav-back-btn nav-back-btn--flat" @click="goBack">
+                            <mdi-icon
+                                path="/static/icons/arrow-left.svg"
+                                size="20px"
+                                :color="backIconColor"
+                            ></mdi-icon>
+                        </view>
+                        <view class="search-box search-box--shell search-box--compact">
+                            <view class="search-box__left">
+                                <mdi-icon
+                                    path="/static/icons/magnify.svg"
+                                    size="18px"
+                                    :color="searchIconColor"
+                                ></mdi-icon>
+                                <input
+                                    v-model="queryParams.keyword"
+                                    class="search-box__input"
+                                    :placeholder="searchPlaceholder"
+                                    :placeholder-style="placeholderStyle"
+                                    confirm-type="search"
+                                    @confirm="onSearch"
+                                    @input="onInput"
+                                />
+                            </view>
+                            <view v-if="queryParams.keyword" class="search-box__clear" @click="clearKeyword">
+                                <uni-icons type="clear" size="16" :color="clearIconColor"></uni-icons>
+                            </view>
+                        </view>
+                        <!-- 排序触发器 -->
+                        <view class="sort-trigger" @click="toggleSortMenu">
+                            <text class="sort-trigger__text">{{ currentSortLabel }}</text>
+                            <mdi-icon
+                                :path="isSortMenuOpen ? '/static/icons/chevron-up.svg' : '/static/icons/chevron-down.svg'"
+                                size="12px"
+                                :color="triggerIconColor"
+                            ></mdi-icon>
+                        </view>
+                        <!-- 视图切换 -->
+                        <view class="view-toggle-btn" @click="toggleViewMode">
+                            <mdi-icon
+                                :path="!isWaterfall ? '/static/icons/view-grid.svg' : '/static/icons/view-dashboard.svg'"
+                                size="16px"
+                                :color="triggerIconColor"
+                            ></mdi-icon>
+                        </view>
+                    </view>
+                </template>
             </view>
             <!-- #endif -->
 
@@ -55,7 +108,7 @@
                         :color="backIconColor"
                     ></mdi-icon>
                 </view>
-                <view class="search-box search-box--shell">
+                <view class="search-box search-box--shell" :class="{ 'search-box--compact': !showWordBoard }">
                     <view class="search-box__left">
                         <mdi-icon
                             path="/static/icons/magnify.svg"
@@ -76,8 +129,59 @@
                         <uni-icons type="clear" size="18" :color="clearIconColor"></uni-icons>
                     </view>
                 </view>
+                <!-- 仅在搜索结果态展现一体化排序与视图切换 -->
+                <template v-if="!showWordBoard">
+                    <view class="sort-trigger" @click="toggleSortMenu">
+                        <text class="sort-trigger__text">{{ currentSortLabel }}</text>
+                        <mdi-icon
+                            :path="isSortMenuOpen ? '/static/icons/chevron-up.svg' : '/static/icons/chevron-down.svg'"
+                            size="14px"
+                            :color="triggerIconColor"
+                        ></mdi-icon>
+                    </view>
+                    <view class="view-toggle-btn" @click="toggleViewMode">
+                        <mdi-icon
+                            :path="!isWaterfall ? '/static/icons/view-grid.svg' : '/static/icons/view-dashboard.svg'"
+                            size="18px"
+                            :color="triggerIconColor"
+                        ></mdi-icon>
+                    </view>
+                </template>
             </view>
             <!-- #endif -->
+        </view>
+
+        <!-- 排序气泡下拉菜单独立浮层（置于页面顶层，杜绝点击穿透与父级溢出截断） -->
+        <view v-if="isSortMenuOpen" class="sort-popover-layer">
+            <!-- 全屏透明点击遮罩 -->
+            <view class="sort-popover-mask" @click="closeSortMenu"></view>
+            <!-- 气泡下拉菜单本体 -->
+            <view class="sort-popover" :style="sortPopoverStyle" @click.stop>
+                <view
+                    v-for="(item, idx) in sortOptions"
+                    :key="idx"
+                    class="sort-popover__item"
+                    :class="{ 'is-active': currentTabIndex === idx }"
+                    @click.stop="selectSort(idx)"
+                >
+                    <text class="sort-popover__label">{{ item.label }}</text>
+                    <view class="sort-popover__indicator">
+                        <template v-if="item.isDate && currentTabIndex === idx">
+                            <mdi-icon
+                                :path="dateSortAsc ? '/static/icons/arrow-up.svg' : '/static/icons/arrow-down.svg'"
+                                size="14px"
+                                :color="activeSortColor"
+                            ></mdi-icon>
+                        </template>
+                        <mdi-icon
+                            v-else-if="currentTabIndex === idx"
+                            path="/static/icons/check.svg"
+                            size="16px"
+                            :color="activeSortColor"
+                        ></mdi-icon>
+                    </view>
+                </view>
+            </view>
         </view>
 
         <!-- 探索面板（未搜索状态展示） -->
@@ -126,16 +230,18 @@
             </view>
         </view>
 
-        <!-- 搜索结果列表（全屏容器，贯穿穿透吸顶） -->
-        <view v-else class="list-container">
+        <!-- 搜索结果列表（页面级自然流排版，单行一体化沉浸呈现） -->
+        <view v-else class="list-container" :style="{ paddingTop: `${navBarHeight}px` }">
             <modern-pics-view
-                :show-header="true"
+                ref="picsViewRef"
+                :show-header="false"
                 :tabs="tabs"
                 api-type="search"
                 :hide-header-if-empty="true"
-                :header-height="navBarHeight"
-                :tabs-height="44"
-                :sticky-top="navBarHeight"
+                :header-height="0"
+                :tabs-height="0"
+                :sticky-top="0"
+                @change="onTabChange"
             >
                 <template #empty>
                     <view class="noResult">
@@ -150,14 +256,14 @@
             </modern-pics-view>
         </view>
 
-        <!-- 吸底广告（搜索前在热词与历史面板展示，搜索后进入结果页隐藏） -->
-        <custom-ad-banner v-if="showWordBoard" @height-change="onAdHeightChange"></custom-ad-banner>
+        <!-- 吸底广告（仅在未搜索的热词与历史面板展示，搜索后彻底移除） -->
+        <custom-ad-banner v-if="showWordBoard" :visible="showWordBoard" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { onLoad, onUnload } from '@dcloudio/uni-app';
+import { onLoad, onUnload, onReachBottom, onPageScroll } from '@dcloudio/uni-app';
 import { useI18n } from 'vue-i18n';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -194,10 +300,10 @@ const updateCapsuleMetrics = () => {
                 const topGap = Math.max(4, menuBtn.top - sHeight);
                 capsuleRowHeight.value = capsuleHeight.value + topGap * 2;
 
-                // 微信第2行：独立全宽搜索框行高度 (44px 卡片 + 12px 上下间距)
+                // 微信探索态第2行：独立全宽搜索框行高度 (44px 卡片 + 12px 上下间距)
                 searchRowHeight.value = 56;
 
-                // 微信端总高度 = 胶囊行高度 + 独立搜索框行高度
+                // 微信探索态总高度 = 胶囊行高度 + 独立搜索框行高度
                 titleBarHeight.value = capsuleRowHeight.value + searchRowHeight.value;
                 return;
             }
@@ -211,11 +317,32 @@ const updateCapsuleMetrics = () => {
 
 updateCapsuleMetrics();
 
-const navBarHeight = computed(() => statusBarHeight.value + titleBarHeight.value);
+// 动态有效导航栏高度：微信端搜索结果态变为单行 capsuleRowHeight
+const effectiveTitleBarHeight = computed(() => {
+    // #ifdef MP-WEIXIN
+    if (showWordBoard.value) {
+        return capsuleRowHeight.value + searchRowHeight.value;
+    }
+    return capsuleRowHeight.value;
+    // #endif
+    // #ifndef MP-WEIXIN
+    return 44;
+    // #endif
+});
+
+const navBarHeight = computed(() => statusBarHeight.value + effectiveTitleBarHeight.value);
 
 const searchShellStyle = computed(() => ({
-    height: `${titleBarHeight.value}px`,
+    height: '44px',
 }));
+
+const mpSearchShellStyle = computed(() => {
+    const pr = capsuleWidth.value > 0 ? capsuleWidth.value + 12 : 100;
+    return {
+        height: `${capsuleRowHeight.value}px`,
+        paddingRight: `${pr}px`,
+    };
+});
 
 const backIconColor = computed(() => {
     return settingsStore.isDark ? '#f8fbff' : '#1e293b';
@@ -228,6 +355,12 @@ const searchIconColor = computed(() => {
 const clearIconColor = computed(() => {
     return settingsStore.isDark ? 'rgba(247, 247, 251, 0.45)' : 'rgba(30, 41, 59, 0.45)';
 });
+
+const triggerIconColor = computed(() => {
+    return settingsStore.isDark ? 'rgba(247, 247, 251, 0.78)' : '#334155';
+});
+
+const activeSortColor = computed(() => '#619aef');
 
 const searchPlaceholder = computed(() => {
     return t('search.placeholder') || t('common.search') || '搜索壁纸、分类、标签...';
@@ -249,6 +382,86 @@ const searchHistory = ref(uni.getStorageSync('searchHistory') || []);
 const showWordBoard = ref(true);
 const lastSearchedKeyword = ref('');
 const isEditingHistory = ref(false);
+const picsViewRef = ref(null);
+
+// ── 单行一体化排序与视图模式 ──
+const currentTabIndex = ref(0);
+const dateSortAsc = ref(false);
+const isSortMenuOpen = ref(false);
+
+const sortOptions = computed(() => [
+    { label: t('common.random') || '随机', isDate: false },
+    { label: t('common.score') || '评分', isDate: false },
+    { label: t('common.publishDate') || '最新', isDate: true },
+]);
+
+const currentSortLabel = computed(() => {
+    const item = sortOptions.value[currentTabIndex.value];
+    if (!item) return '';
+    if (item.isDate) {
+        return item.label + (dateSortAsc.value ? ' ↑' : ' ↓');
+    }
+    return item.label;
+});
+
+const toggleSortMenu = () => {
+    isSortMenuOpen.value = !isSortMenuOpen.value;
+};
+
+const closeSortMenu = () => {
+    isSortMenuOpen.value = false;
+};
+
+const selectSort = (idx) => {
+    if (currentTabIndex.value === idx) {
+        if (sortOptions.value[idx].isDate) {
+            dateSortAsc.value = !dateSortAsc.value;
+            picsViewRef.value?.handleTabClick(idx);
+        }
+    } else {
+        currentTabIndex.value = idx;
+        picsViewRef.value?.handleTabClick(idx);
+    }
+    closeSortMenu();
+};
+
+const onTabChange = (e) => {
+    if (e && typeof e.index === 'number') {
+        currentTabIndex.value = e.index;
+        if (typeof e.isDateAsc === 'boolean') {
+            dateSortAsc.value = e.isDateAsc;
+        }
+    }
+};
+
+const isWaterfall = computed(() => settingsStore.options.view !== 'window');
+const toggleViewMode = () => {
+    settingsStore.options.view = settingsStore.options.view === 'window' ? 'waterfall' : 'window';
+};
+
+const sortPopoverStyle = computed(() => {
+    // #ifdef MP-WEIXIN
+    const rightOffset = capsuleWidth.value > 0 ? capsuleWidth.value + 16 : 100;
+    return {
+        top: `${navBarHeight.value + 6}px`,
+        right: `${rightOffset}px`,
+    };
+    // #endif
+    // #ifndef MP-WEIXIN
+    return {
+        top: `${navBarHeight.value + 6}px`,
+        right: '24rpx',
+    };
+    // #endif
+});
+
+onReachBottom(() => {
+    picsViewRef.value?.loadMore();
+});
+
+onPageScroll((e) => {
+    picsViewRef.value?.onPageScroll(e);
+});
 
 const toggleEditHistory = () => {
     isEditingHistory.value = !isEditingHistory.value;
@@ -328,7 +541,7 @@ const onSearch = () => {
     searchHistory.value = [...new Set([keyword, ...searchHistory.value])].slice(0, 20);
     uni.setStorageSync('searchHistory', searchHistory.value);
 
-    init(keyword);
+    init(keyword, false);
     searchData();
 };
 
@@ -417,8 +630,7 @@ onUnload(() => {
 
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+    min-height: 100vh;
     background: var(--page-background);
 }
 
@@ -432,27 +644,23 @@ onUnload(() => {
 
 .search-top-bg {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: -4rpx; // 扩展 4rpx，彻底消除与吸顶 Tabs Bar 拼接处 WebKit 亚像素缝隙产生的暗线
+    inset: 0;
     z-index: 0;
-    background: rgba(238, 241, 244, 0.85);
-    backdrop-filter: blur(28rpx) saturate(180%);
-    -webkit-backdrop-filter: blur(28rpx) saturate(180%);
-    border-bottom: none;
-    box-shadow: none;
+    backdrop-filter: blur(32rpx) saturate(180%);
+    -webkit-backdrop-filter: blur(32rpx) saturate(180%);
+    border: none !important;
+    box-shadow: none !important;
 
     .theme-light & {
         background: rgba(238, 241, 244, 0.85);
-        border-bottom: none;
-        box-shadow: none;
+        border: none !important;
+        box-shadow: none !important;
     }
 
     .theme-dark & {
         background: rgba(24, 24, 24, 0.85);
-        border-bottom: none;
-        box-shadow: none;
+        border: none !important;
+        box-shadow: none !important;
     }
 }
 
@@ -496,6 +704,140 @@ onUnload(() => {
     box-sizing: border-box;
     height: 88rpx;
     min-height: 88rpx;
+
+    &--mp {
+        width: 100%;
+        gap: 12rpx;
+        padding-left: 20rpx;
+    }
+}
+
+/* 排序触发按钮 (纯净扁平化，去除厚重胶囊底板) */
+.sort-trigger {
+    display: flex;
+    align-items: center;
+    gap: 6rpx;
+    height: 64rpx;
+    padding: 0 16rpx;
+    border-radius: 999rpx;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &:active {
+        opacity: 0.55;
+        transform: scale(0.94);
+    }
+
+    &__text {
+        font-size: 26rpx;
+        font-weight: 500;
+        color: var(--text-primary);
+        white-space: nowrap;
+    }
+}
+
+/* 视图模式切换按钮 (纯净扁平纯图标，无背景无边框) */
+.view-toggle-btn {
+    width: 64rpx;
+    height: 64rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &:active {
+        opacity: 0.5;
+        transform: scale(0.92);
+    }
+}
+
+/* 排序气泡下拉菜单浮层 (独立置于全屏顶层，杜绝点击失效与穿透) */
+.sort-popover-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: auto;
+}
+
+.sort-popover-mask {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.001); // 微透明保障移动端触摸精准捕获
+}
+
+.sort-popover {
+    position: absolute;
+    z-index: 2;
+    min-width: 230rpx;
+    padding: 12rpx;
+    border-radius: 24rpx;
+    background: var(--popup-background);
+    border: 1rpx solid var(--popup-border);
+    box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(36rpx);
+    -webkit-backdrop-filter: blur(36rpx);
+    animation: popover-fade-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: top right;
+
+    &__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 72rpx;
+        padding: 0 20rpx;
+        border-radius: 16rpx;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+
+        &:active {
+            background: rgba(0, 0, 0, 0.04);
+            .theme-dark & {
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+
+        &.is-active {
+            background: rgba(97, 154, 239, 0.12);
+
+            .sort-popover__label {
+                color: #619aef;
+                font-weight: 600;
+            }
+        }
+    }
+
+    &__label {
+        font-size: 26rpx;
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    &__indicator {
+        display: flex;
+        align-items: center;
+        margin-left: 16rpx;
+    }
+}
+
+@keyframes popover-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-8rpx) scale(0.94);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* 纯净扁平返回按钮 (无背景、无边框、无阴影，仅留纯图标与交互透明度反馈) */
@@ -527,98 +869,89 @@ onUnload(() => {
 
 .explore-wrap {
     flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    box-sizing: border-box;
     background: var(--page-background);
 }
 
 .list-container {
-    position: absolute;
-    inset: 0;
+    position: relative;
     width: 100%;
-    height: 100%;
-    overflow: hidden;
+    min-height: 100vh;
+    box-sizing: border-box;
     background: var(--page-background);
 }
 
 .list-container :deep(.empty-overlay) {
-    top: 154px;
-    /* 让出顶部搜索栏和 tabs 的高度 */
+    top: 40rpx;
 }
 
-/* 微信端独立全宽搜索卡片 (与首页 home-hero-header 样式质感 1:1 统一) */
+/* 微信端独立全宽搜索卡片 (扁平极简风格) */
 .search-box--full {
     width: 100%;
-    height: 88rpx;
-    min-height: 88rpx;
-    border-radius: 30rpx;
+    height: 84rpx;
+    min-height: 84rpx;
+    border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 20rpx 0 28rpx;
     box-sizing: border-box;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: all 0.2s ease;
 
     .theme-light & {
-        background: #ffffff;
-        border: 1rpx solid rgba(30, 41, 59, 0.06);
-        box-shadow: 0 6rpx 24rpx rgba(15, 23, 42, 0.04);
+        background: rgba(0, 0, 0, 0.04);
+        border: 1rpx solid rgba(0, 0, 0, 0.04);
+        box-shadow: none;
     }
 
     .theme-dark & {
-        background: #222228;
-        border: 1rpx solid rgba(255, 255, 255, 0.06);
-        box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1rpx solid rgba(255, 255, 255, 0.05);
+        box-shadow: none;
     }
 
     &:focus-within {
-        .theme-light & {
-            border-color: rgba(97, 154, 239, 0.45);
-            box-shadow: 0 8rpx 28rpx rgba(97, 154, 239, 0.12);
-        }
-        .theme-dark & {
-            border-color: rgba(97, 154, 239, 0.45);
-            box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.4);
-        }
+        border-color: rgba(97, 154, 239, 0.5);
+        box-shadow: none !important;
     }
 }
 
-/* APP端单行搜索卡片 */
+/* APP端单行搜索卡片 (扁平极简风格) */
 .search-box--shell {
     flex: 1;
     min-width: 0;
-    height: 80rpx;
-    min-height: 80rpx;
-    border-radius: 26rpx;
+    height: 76rpx;
+    min-height: 76rpx;
+    border-radius: 999rpx;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0 20rpx 0 24rpx;
     box-sizing: border-box;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.2, 0.9, 0.3, 1);
+
+    &.search-box--compact {
+        height: 64rpx;
+        min-height: 64rpx;
+        padding: 0 16rpx 0 20rpx;
+    }
 
     .theme-light & {
-        background: #ffffff;
-        border: 1rpx solid rgba(30, 41, 59, 0.06);
-        box-shadow: 0 4rpx 20rpx rgba(15, 23, 42, 0.04);
+        background: rgba(0, 0, 0, 0.04);
+        border: 1rpx solid rgba(0, 0, 0, 0.04);
+        box-shadow: none;
     }
 
     .theme-dark & {
-        background: #222228;
-        border: 1rpx solid rgba(255, 255, 255, 0.06);
-        box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+        border: 1rpx solid rgba(255, 255, 255, 0.05);
+        box-shadow: none;
     }
 
     &:focus-within {
-        .theme-light & {
-            border-color: rgba(97, 154, 239, 0.45);
-            box-shadow: 0 6rpx 24rpx rgba(97, 154, 239, 0.12);
-        }
-        .theme-dark & {
-            border-color: rgba(97, 154, 239, 0.45);
-            box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.4);
-        }
+        border-color: rgba(97, 154, 239, 0.5);
+        box-shadow: none !important;
     }
 }
 

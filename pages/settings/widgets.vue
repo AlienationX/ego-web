@@ -170,6 +170,10 @@
                         <text class="faq-q">{{ t('widgets.faqAutoStartTitle') }}</text>
                         <text class="faq-a">{{ t('widgets.faqAutoStartDesc') }}</text>
                     </view>
+                    <view class="faq-item">
+                        <text class="faq-q">{{ t('widgets.faqIosTitle') }}</text>
+                        <text class="faq-a">{{ t('widgets.faqIosDesc') }}</text>
+                    </view>
                 </view>
             </view>
             <view class="safe-area-bottom"></view>
@@ -259,6 +263,18 @@ onMounted(async () => {
 });
 
 const handleAddWidget = (size) => {
+    // #ifdef APP-PLUS
+    if (uni.getSystemInfoSync().osName === 'ios') {
+        uni.showModal({
+            title: t('widgets.iosNoticeTitle'),
+            content: t('widgets.iosNoticeDesc'),
+            showCancel: false,
+            confirmText: t('common.confirm') || '知道了',
+        });
+        return;
+    }
+    // #endif
+
     // #ifdef APP-PLUS || APP-HARMONY
     requestPinWidget({
         size,
@@ -284,7 +300,7 @@ const handleAddWidget = (size) => {
     // #ifndef APP-PLUS || APP-HARMONY
     uni.showModal({
         title: t('common.tip') || '提示',
-        content: '桌面小组件目前专为 Android / HarmonyOS App 端提供，请在手机客户端中一键添加到手机桌面体验！',
+        content: '桌面小组件目前专为手机客户端提供，请在手机 App 中体验！',
         showCancel: false,
     });
     // #endif
@@ -475,7 +491,6 @@ const handleBack = () => {
                 color: #ffffff;
                 font-size: 18rpx;
                 font-weight: 700;
-                border: 1rpx solid rgba(255, 255, 255, 0.2);
             }
 
             .mock-bottom {
@@ -673,7 +688,6 @@ const handleBack = () => {
                     color: #ffffff;
                     font-size: 20rpx;
                     font-weight: 700;
-                    border: 1rpx solid rgba(255, 255, 255, 0.2);
                 }
 
                 .mock-date-pill {
@@ -683,7 +697,6 @@ const handleBack = () => {
                     backdrop-filter: blur(8px);
                     color: #e5e7eb;
                     font-size: 20rpx;
-                    border: 1rpx solid rgba(255, 255, 255, 0.2);
                 }
             }
 
@@ -727,7 +740,6 @@ const handleBack = () => {
                 border-radius: 36rpx;
                 background: rgba(0, 0, 0, 0.55);
                 backdrop-filter: blur(12px);
-                border: 1rpx solid rgba(255, 255, 255, 0.2);
                 display: flex;
                 align-items: center;
 

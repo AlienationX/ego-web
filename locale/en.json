@@ -655,9 +655,13 @@
         "pinSuccess": "Pin widget request sent to launcher",
         "manualAddTitle": "Widget / Card Setup Guide",
         "manualAddDesc": "You can long-press any empty space on your home screen or swipe up the app icon -> tap Widgets / Service Cards -> find Ego Wallpapers to add.",
-        "faqTitle": "Tips & Background Settings",
+        "faqTitle": "Tips & FAQ",
         "faqAutoStartTitle": "Widget not updating automatically?",
-        "faqAutoStartDesc": "Some Android OS restrict background tasks. Go to Phone Settings -> Apps -> Ego Wallpapers, and enable 'Autostart' and 'Allow background activity' to ensure smooth daily updates."
+        "faqAutoStartDesc": "Some Android OS restrict background tasks. Go to Phone Settings -> Apps -> Ego Wallpapers, and enable 'Autostart' and 'Allow background activity' to ensure smooth daily updates.",
+        "iosNoticeTitle": "iOS Widget Notice",
+        "iosNoticeDesc": "Apple iOS requires adding widgets manually from your home screen (Long-press home screen -> Tap '+' in top-left corner). The native iOS WidgetKit extension is currently in active development for the next update.",
+        "faqIosTitle": "Why can't I add widgets directly inside the app on iOS?",
+        "faqIosDesc": "Apple iOS guidelines do not allow applications to pin widgets directly to the home screen. On iPhone, you need to long-press any empty space on your home screen, tap the '+' button in the top left corner, and search for Ego Wallpapers. The iOS WidgetKit extension is currently under development."
     },
     "previewPage": {
         "wallpaperInfo": "Wallpaper Information",

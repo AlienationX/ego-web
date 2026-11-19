@@ -181,7 +181,6 @@ struct DailyCard4x4 {
         .height(42)
         .backgroundColor('rgba(0, 0, 0, 0.45)')
         .borderRadius(21)
-        .border({ width: 1, color: 'rgba(255, 255, 255, 0.15)' })
       }
       .width('100%')
       .padding({ left: 14, right: 14, bottom: 14 })

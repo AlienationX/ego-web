@@ -1273,16 +1273,8 @@ onShow(() => {
 
     // ── 我的页面横版原生信息流广告卡片 ──
     .user-flow-ad-wrap {
-        /* #ifdef APP */
-        // 原生广告组件自带约 14rpx 内边距，收紧外层 padding 使图文与 30rpx 边距的上下卡片严格视觉对齐
-        padding: 0 16rpx;
-        margin-top: -10rpx;
-        margin-bottom: 14rpx;
-        /* #endif */
-        /* #ifndef APP */
         padding: 0 30rpx;
         margin-bottom: 24rpx;
-        /* #endif */
         box-sizing: border-box;
         width: 100%;
         max-height: 600rpx;

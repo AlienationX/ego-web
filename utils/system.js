@@ -136,6 +136,9 @@ export function setAndroidImmersive(isDark = false) {
             const mainActivity = plus.android.runtimeMainActivity();
             if (!mainActivity) return;
 
+            // 仅在存在底部导航栏/手势指示条遮罩（高度 > 0）时才执行
+            if (getAndroidNativeNavBarHeight() <= 0) return;
+
             // 切换到 Android UI 主线程执行，确保窗口布局参数安全生效
             mainActivity.runOnUiThread(
                 plus.android.implements('java.lang.Runnable', {
@@ -219,6 +222,7 @@ export function applyAndroidEdgeToEdgeLayout() {
     // #ifdef APP-PLUS
     try {
         if (plus.os.name !== 'Android') return;
+
         const mainActivity = plus.android.runtimeMainActivity();
         if (!mainActivity) return;
 

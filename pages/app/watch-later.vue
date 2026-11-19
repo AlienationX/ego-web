@@ -50,7 +50,7 @@ const clearWatchLater = () => {
 }
 
 .content-wrapper {
-    height: calc(100vh - 120rpx);
+    min-height: calc(100vh - 120rpx);
     display: flex;
     flex-direction: column;
 }

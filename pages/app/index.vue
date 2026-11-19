@@ -2875,15 +2875,8 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
 // ── 首页横版原生信息流广告卡片 ──
 .home-flow-ad-wrap {
-    /* #ifdef APP */
-    // 抵消原生广告自带约 14rpx 内边距，使图文与左右两侧 20rpx 边距严格对齐
-    padding: 0 6rpx;
-    margin: -10rpx 0 20rpx;
-    /* #endif */
-    /* #ifndef APP */
     padding: 0 20rpx;
     margin: -4rpx 0 26rpx;
-    /* #endif */
     box-sizing: border-box;
     width: 100%;
 
