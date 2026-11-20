@@ -182,7 +182,7 @@ const containerStyle = computed(() => {
     }
     return {
         '--ad-height': containerHeight.value,
-        minHeight: containerHeight.value,
+        minHeight: isLoaded.value ? 'auto' : containerHeight.value,
     };
 });
 
@@ -220,7 +220,7 @@ const appAdStyle = computed(() => {
     if (props.direction === 'vertical') {
         style.height = containerHeight.value;
     } else {
-        style.minHeight = containerHeight.value;
+        style.minHeight = isLoaded.value ? 'auto' : containerHeight.value;
     }
     return style;
 });
@@ -454,6 +454,8 @@ defineExpose({
     line-height: 1;
     position: relative;
     z-index: 2;
+    border-radius: inherit;
+    transform: translateZ(0);
 
     &.is-hidden {
         position: absolute !important;

@@ -109,7 +109,7 @@
                         <view class="sk-card sk-card--hero"></view>
                         <view v-for="i in 4" :key="i" class="sk-card"></view>
                     </view>
-                    <scroll-view v-else scroll-x class="home-scroll" show-scrollbar="false">
+                    <scroll-view v-else scroll-x class="home-scroll" :class="{ 'is-stagger-entering': isDailyStaggerEntering }" show-scrollbar="false">
                         <view class="box" v-for="(item, idx) in randomDailyList" :key="item.id"
                             :class="{ 'is-hero': idx === 0 }" hover-class="box--active" :hover-stay-time="150"
                             @click="goPreview(item.id, randomDailyList)">
@@ -118,6 +118,7 @@
                                 lazy-load fade-in @load="idx === 0 ? (heroImageLoaded = true) : null"></image>
                             <block v-if="idx === 0">
                                 <view class="box-hero-overlay" :class="{ 'is-visible': heroImageLoaded }"></view>
+                                <view class="box-hero-shimmer" :class="{ 'is-visible': heroImageLoaded }"></view>
                                 <view class="box-hero-content" :class="{ 'is-visible': heroImageLoaded }">
                                     <view class="day-tag">{{ todayDate }}</view>
                                     <view class="pick-text">PICK OF THE DAY</view>
@@ -233,6 +234,12 @@
                             :hover-stay-time="150" @click="goPreview(item.id, desktopList)">
                             <image class="desktop-image" :src="item.smallPicurl" mode="aspectFill" lazy-load fade-in>
                             </image>
+                            <view class="desktop-badge">
+                                <text class="desktop-badge__icon">4K</text>
+                                <text class="desktop-badge__text">ULTRA HD</text>
+                            </view>
+                            <view class="desktop-glare"></view>
+                            <view class="desktop-overlay"></view>
                         </view>
                     </scroll-view>
                 </view>
@@ -887,7 +894,15 @@ const getWallTag = (item) => {
 
 const currentBanner = ref(0);
 const onBannerChange = (e) => {
-    currentBanner.value = Number(e?.detail?.current || 0);
+    const nextIdx = Number(e?.detail?.current || 0);
+    if (currentBanner.value !== nextIdx) {
+        currentBanner.value = nextIdx;
+        // #ifdef MP-WEIXIN || APP-PLUS
+        try {
+            uni.vibrateShort({ type: 'light' });
+        } catch (err) {}
+        // #endif
+    }
 };
 
 // ── 优化4：today 只构造一次，避免模板重渲染时反复 new Date() ──
@@ -1246,6 +1261,7 @@ const goClassifyType = (type) => {
 };
 
 const isRefreshing = ref(false);
+const isDailyStaggerEntering = ref(false);
 
 const refreshRandom = async () => {
     if (isRefreshing.value) return;
@@ -1253,6 +1269,15 @@ const refreshRandom = async () => {
     heroImageLoaded.value = false;
     try {
         await Promise.all([getRandomDay(), getRandomRecommend()]);
+        isDailyStaggerEntering.value = true;
+        // #ifdef MP-WEIXIN || APP-PLUS
+        try {
+            uni.vibrateShort({ type: 'light' });
+        } catch (err) {}
+        // #endif
+        setTimeout(() => {
+            isDailyStaggerEntering.value = false;
+        }, 500);
     } catch (e) {
         console.error('Refresh random error:', e);
     } finally {
@@ -1406,7 +1431,7 @@ onShareTimeline(() => ({
         box-sizing: border-box;
     }
 
-    // 统一左右安全边距为 20rpx，与搜索框、3个按钮卡片以及 select 板块完全对齐
+    // 统一左右安全边距为 20rpx，与搜索框、3个按钮卡片以及 select 板块完全严格对齐
     .banner-swiper-item {
         padding: 0 20rpx;
         box-sizing: border-box;
@@ -1471,6 +1496,21 @@ onShareTimeline(() => ({
             .banner-card__target,
             .banner-card__meta-chip {
                 border: none;
+            }
+        }
+
+        &--active {
+            .banner-card__tag-row {
+                animation: bannerItemRise 0.45s cubic-bezier(0.25, 1, 0.5, 1) 0.04s both;
+            }
+            .banner-card__title {
+                animation: bannerItemRise 0.45s cubic-bezier(0.25, 1, 0.5, 1) 0.08s both;
+            }
+            .banner-card__desc {
+                animation: bannerItemRise 0.45s cubic-bezier(0.25, 1, 0.5, 1) 0.12s both;
+            }
+            .banner-card__meta {
+                animation: bannerItemRise 0.45s cubic-bezier(0.25, 1, 0.5, 1) 0.16s both;
             }
         }
 
@@ -1999,6 +2039,22 @@ onShareTimeline(() => ({
                 background: transparent;
             }
 
+            // 换一批时子卡片依次波浪弹入入场动画
+            &.is-stagger-entering {
+                .box {
+                    animation: staggerCardSlide 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+
+                    &:nth-child(1) { animation-delay: 0.02s; }
+                    &:nth-child(2) { animation-delay: 0.06s; }
+                    &:nth-child(3) { animation-delay: 0.10s; }
+                    &:nth-child(4) { animation-delay: 0.14s; }
+                    &:nth-child(5) { animation-delay: 0.18s; }
+                    &:nth-child(6) { animation-delay: 0.22s; }
+                    &:nth-child(7) { animation-delay: 0.26s; }
+                    &:nth-child(8) { animation-delay: 0.30s; }
+                }
+            }
+
             .box {
                 width: 280rpx;
                 height: calc(100% - 50rpx);
@@ -2012,7 +2068,6 @@ onShareTimeline(() => ({
                 overflow: hidden;
                 border-radius: 28rpx;
                 box-sizing: border-box;
-                // box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.34);
                 box-shadow: none;
 
                 &:first-child {
@@ -2021,7 +2076,7 @@ onShareTimeline(() => ({
 
                 &--active,
                 &:active {
-                    transform: scale(0.94) !important;
+                    transform: scale(0.95) !important;
                     filter: brightness(0.92);
                 }
 
@@ -2092,17 +2147,16 @@ onShareTimeline(() => ({
                     box-shadow: none;
                 }
 
-                &--active,
-                &:active {
-                    transform: scale(0.97) !important;
-                    filter: brightness(0.9) !important;
-                }
-
                 // Hero mode
                 &.is-hero {
                     width: 460rpx;
                     height: calc(100% - 50rpx);
                     padding-bottom: 0;
+                    box-shadow: 0 10rpx 28rpx -6rpx rgba(15, 23, 42, 0.12);
+
+                    .theme-dark & {
+                        box-shadow: 0 14rpx 36rpx -6rpx rgba(0, 0, 0, 0.5);
+                    }
 
                     &::before {
                         bottom: 0;
@@ -2974,9 +3028,13 @@ $sk-shine: rgba(148, 163, 184, 0.22);
             overflow: hidden;
             border-radius: 28rpx;
             box-sizing: border-box;
-            box-shadow: none;
-            transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.12s ease;
-            will-change: transform, filter;
+            box-shadow: 0 10rpx 28rpx -6rpx rgba(15, 23, 42, 0.12), 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+            transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.25s ease;
+            will-change: transform;
+
+            .theme-dark & {
+                box-shadow: 0 14rpx 36rpx -6rpx rgba(0, 0, 0, 0.55);
+            }
 
             &:first-child {
                 margin-left: 20rpx;
@@ -2984,8 +3042,11 @@ $sk-shine: rgba(148, 163, 184, 0.22);
 
             &--active,
             &:active {
-                transform: scale(0.96) !important;
-                filter: brightness(0.92);
+                transform: scale(0.97) !important;
+
+                .desktop-image {
+                    transform: scale(1.06);
+                }
             }
 
             .desktop-image {
@@ -2994,8 +3055,116 @@ $sk-shine: rgba(148, 163, 184, 0.22);
                 border-radius: 28rpx;
                 display: block;
                 object-fit: cover;
+                transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+                will-change: transform;
+            }
+
+            .desktop-badge {
+                position: absolute;
+                top: 16rpx;
+                left: 16rpx;
+                z-index: 2;
+                display: inline-flex;
+                align-items: center;
+                gap: 6rpx;
+                padding: 6rpx 14rpx;
+                border-radius: 999rpx;
+                background: rgba(15, 23, 42, 0.55);
+                backdrop-filter: blur(12rpx);
+                -webkit-backdrop-filter: blur(12rpx);
+                border: 1rpx solid rgba(255, 255, 255, 0.18);
+                box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
+                pointer-events: none;
+
+                .theme-dark & {
+                    border: none;
+                }
+
+                &__icon {
+                    font-size: 18rpx;
+                    font-weight: 900;
+                    color: #38bdf8;
+                    letter-spacing: 0.5rpx;
+                    line-height: 1;
+                }
+
+                &__text {
+                    font-size: 16rpx;
+                    font-weight: 800;
+                    color: #f8fafc;
+                    letter-spacing: 1.5rpx;
+                    line-height: 1;
+                }
+            }
+
+            .desktop-glare {
+                position: absolute;
+                top: -100%;
+                left: -100%;
+                width: 80rpx;
+                height: 300%;
+                background: linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0) 100%
+                );
+                transform: rotate(30deg);
+                pointer-events: none;
+                z-index: 2;
+                animation: desktopGlareSweep 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            }
+
+            .desktop-overlay {
+                position: absolute;
+                inset: 0;
+                border-radius: 28rpx;
+                background: linear-gradient(180deg, rgba(0, 0, 0, 0) 65%, rgba(0, 0, 0, 0.45) 100%);
+                pointer-events: none;
+                z-index: 1;
             }
         }
+    }
+}
+
+// ── 交互高级动画关键帧 ──
+@keyframes bannerItemRise {
+    from {
+        opacity: 0.2;
+        transform: translateY(14rpx);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes desktopGlareSweep {
+    0%, 65% {
+        transform: rotate(30deg) translate3d(-350rpx, 0, 0);
+        opacity: 0;
+    }
+    70% {
+        opacity: 1;
+    }
+    85% {
+        transform: rotate(30deg) translate3d(850rpx, 0, 0);
+        opacity: 0;
+    }
+    100% {
+        transform: rotate(30deg) translate3d(850rpx, 0, 0);
+        opacity: 0;
+    }
+}
+
+@keyframes staggerCardSlide {
+    from {
+        opacity: 0.25;
+        transform: translateY(22rpx) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 </style>

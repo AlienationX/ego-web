@@ -842,13 +842,13 @@ onShow(() => {
     &--ad {
         cursor: default;
         min-height: auto;
-        padding: 32rpx;
-        gap: 10rpx;
+        padding: 28rpx 32rpx;
+        gap: 0;
         transition: padding 0.3s ease;
 
         &.is-loaded {
             /* #ifdef APP */
-            padding-bottom: 16rpx;
+            padding-bottom: 24rpx;
             /* #endif */
             /* #ifndef APP */
             padding-bottom: 24rpx;
@@ -877,12 +877,7 @@ onShow(() => {
 
         .subject-card__ad-container {
             width: 100%;
-            /* #ifdef APP */
-            margin: -6rpx 0 0;
-            /* #endif */
-            /* #ifndef APP */
-            margin: 0;
-            /* #endif */
+            margin: 20rpx 0 0;
             background: transparent;
             box-sizing: border-box;
             overflow: visible;

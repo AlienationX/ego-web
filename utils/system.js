@@ -129,6 +129,8 @@ export const writeAccessLog = async () => {
  * @param {boolean} isDark 是否为深色模式
  */
 export function setAndroidImmersive(isDark = false) {
+
+    return;
     // #ifdef APP-PLUS
     try {
         if (plus.os.name === 'Android') {

@@ -39,10 +39,11 @@
                 <view
                     class="recommend-ad-wrap"
                     v-if="(idx + 1) % 8 === 0 && canShowCustomAd && !failedListAds.has(idx)"
-                    :class="{ 'is-loaded': loadedListAds.has(idx) }"
+                    :class="{ 'is-loaded': loadedListAds.has(idx), 'is-international': IS_INTERNATIONAL }"
                 >
                     <custom-ad
                         direction="horizontal"
+                        border-radius="28rpx"
                         @load="loadedListAds.add(idx)"
                         @error="failedListAds.add(idx)"
                         @close="failedListAds.add(idx)"
@@ -63,7 +64,7 @@ import { useLibraryStore } from '@/stores/library.js';
 import { useUserStore } from '@/stores/user.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
-import { AD_CONFIG } from '@/common/config.js';
+import { AD_CONFIG, IS_INTERNATIONAL } from '@/common/config.js';
 
 const props = defineProps({
     currentInfo: {
@@ -410,18 +411,28 @@ watch(
 .recommend-ad-wrap {
     width: 100%;
     /* #ifdef APP */
-    // 抵消原生广告自带约 14rpx 内边距，与列表项两端严格齐平
+    // 国内版原生模板自带约 14rpx 透明内边距，向外扩展 14rpx 精准对齐
     margin: -8rpx -14rpx;
     width: calc(100% + 28rpx);
+
+    &.is-international {
+        // 国际版 Google AdMob 无透明内边距，保持 100% 容器宽度与正常间距
+        margin: 0 !important;
+        width: 100% !important;
+    }
     /* #endif */
     /* #ifndef APP */
     margin: 0;
+    width: 100%;
     /* #endif */
     padding: 0;
     display: flex;
     justify-content: center;
     box-sizing: border-box;
     line-height: 1;
+    border-radius: 28rpx;
+    overflow: hidden;
+    transform: translateZ(0);
 
     custom-ad,
     :deep(custom-ad) {
