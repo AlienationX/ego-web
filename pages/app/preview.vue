@@ -222,7 +222,6 @@
 
                 <!-- 作品参数面板下方横版卡片广告 -->
                 <view
-                    v-if="!previewAdFailed"
                     class="preview-meta-ad-wrap"
                     :class="{ 'is-loaded': previewAdLoaded, 'is-error': previewAdFailed, 'is-international': IS_INTERNATIONAL }"
                 >

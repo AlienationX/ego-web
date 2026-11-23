@@ -201,7 +201,6 @@
 
             <!-- 首页推荐流横版原生广告卡片 -->
             <view
-                v-if="!homeAdFailed"
                 class="home-flow-ad-wrap"
                 :class="{ 'is-loaded': homeAdLoaded, 'is-error': homeAdFailed }"
             >
@@ -730,14 +729,12 @@ const onCustomAdLoad = (item, e) => {
     }
 };
 
-// 广告错误回调 (安全剔除，绝不触发全量重排导致整页卡顿与 DOM 撕裂)
+// 广告错误回调 (通过 CSS .is-ad-error 优雅折叠隐藏，杜绝数组重排与 DOM 拔除引发的 getBoundingClientRect 报错)
 const onCustomAdError = (item, e) => {
     console.warn('[Ad] 首页推荐竖屏卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
         item.adError = true;
         failedAdIds.add(item.id);
-        recommendLeftCol.value = recommendLeftCol.value.filter((i) => i.id !== item.id);
-        recommendRightCol.value = recommendRightCol.value.filter((i) => i.id !== item.id);
     }
 };
 
@@ -747,8 +744,6 @@ const onCustomAdClose = (item, e) => {
     if (item?.id) {
         item.adError = true;
         failedAdIds.add(item.id);
-        recommendLeftCol.value = recommendLeftCol.value.filter((i) => i.id !== item.id);
-        recommendRightCol.value = recommendRightCol.value.filter((i) => i.id !== item.id);
     }
 };
 
@@ -793,23 +788,24 @@ const updateRecommendCols = () => {
         if (shouldInsertAd) {
             const adIndex = Math.floor(count / AD_INTERVAL);
             const adId = `home_rec_ad_${adIndex}`;
-            if (!failedAdIds.has(adId)) {
-                const isLoadedAlready = loadedAdIds.has(adId);
-                const adItem = {
-                    is_ad: true,
-                    id: adId,
-                    adLoaded: isLoadedAlready,
-                    adError: false,
-                };
-                // 广告始终按固定高度参与左右列平衡（加载中显示骨架占位、加载成功替换内容，高度不变，避免布局抖动）
-                const adVirtualHeight = 150;
-                if (leftH <= rightH) {
-                    left.push(adItem);
-                    leftH += adVirtualHeight;
-                } else {
-                    right.push(adItem);
-                    rightH += adVirtualHeight;
-                }
+            const isLoadedAlready = loadedAdIds.has(adId);
+            const isFailedAlready = failedAdIds.has(adId);
+            const adItem = {
+                is_ad: true,
+                id: adId,
+                adLoaded: isLoadedAlready,
+                adError: isFailedAlready,
+            };
+            // 广告始终按固定高度参与左右列平衡（加载中骨架占位、成功替换内容、失败CSS优雅折叠）
+            // 核心关键：绝不能因为失败就把广告项从数组中剔除！否则 Vue 会卸载组件引发 uni-app 底层 RAF 访问 null.getBoundingClientRect 崩溃
+            // 同时保留虚拟高度参与平衡，确保上拉分页时旧卡片不会因高度差跨列跳动
+            const adVirtualHeight = 150;
+            if (leftH <= rightH) {
+                left.push(adItem);
+                leftH += adVirtualHeight;
+            } else {
+                right.push(adItem);
+                rightH += adVirtualHeight;
             }
         }
     }

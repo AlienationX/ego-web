@@ -114,7 +114,7 @@ onShow((res) => {
     }
 
     // #ifdef APP-PLUS
-    applyAndroidEdgeToEdgeLayout();
+    // applyAndroidEdgeToEdgeLayout();
     // #endif
 
     handleDeepLink(res);

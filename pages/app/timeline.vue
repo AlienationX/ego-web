@@ -85,7 +85,6 @@
                                 <!-- A. 穿插的卡片广告：左侧横版占两列通栏，右侧竖版占单列并排 -->
                                 <template v-if="item.is_ad">
                                     <view
-                                        v-if="!item.adError"
                                         class="timeline-ad-card"
                                         :class="[
                                             item.is_horizontal ? 'timeline-ad-card--horizontal' : 'timeline-ad-card--vertical',
@@ -403,18 +402,16 @@ const monthGroups = computed(() => {
             currentAdCount++;
             const adIndex = Math.floor(globalWallCount / AD_INTERVAL);
             const adId = `timeline_ad_${adIndex}`;
-            if (!failedAdIds.has(adId)) {
-                const isHorizontal = targetDay.currentCol === 0;
-                targetDay.items.push({
-                    is_ad: true,
-                    is_horizontal: isHorizontal,
-                    id: adId,
-                    adLoaded: loadedAdIds.has(adId),
-                    adError: false,
-                });
-                // 广告占满后 (横版通栏占整行，竖版补齐右列)，当前行均已满，下一张壁纸均从新行左侧 0 开始
-                targetDay.currentCol = 0;
-            }
+            const isHorizontal = targetDay.currentCol === 0;
+            targetDay.items.push({
+                is_ad: true,
+                is_horizontal: isHorizontal,
+                id: adId,
+                adLoaded: loadedAdIds.has(adId),
+                adError: failedAdIds.has(adId),
+            });
+            // 广告占满后 (横版通栏占整行，竖版补齐右列)，当前行均已满，下一张壁纸均从新行左侧 0 开始
+            targetDay.currentCol = 0;
         }
     });
 
@@ -862,11 +859,22 @@ onShow(() => {
     }
 
     &.is-error {
-        display: none !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 0 !important;
         height: 0 !important;
         min-height: 0 !important;
+        max-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+        overflow: hidden !important;
     }
 
     &--horizontal {

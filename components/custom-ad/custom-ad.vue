@@ -1,6 +1,6 @@
 <template>
     <view
-        v-if="canShowAd && !isDestroyed"
+        v-if="canShowAd"
         class="custom-ad-container"
         :class="[
             `custom-ad-container--${direction}`,
@@ -31,7 +31,7 @@
         >
             <!-- #ifdef MP-WEIXIN -->
             <ad-custom
-                v-if="effectiveUnitId && !isRemoved"
+                v-if="effectiveUnitId"
                 class="custom-ad-content"
                 :unit-id="effectiveUnitId"
                 @load="handleLoad"
@@ -41,7 +41,7 @@
 
             <!-- #ifdef APP -->
             <ad
-                v-if="effectiveAdpid && !isRemoved && active"
+                v-if="effectiveAdpid && active"
                 class="custom-ad-content"
                 :adpid="effectiveAdpid"
                 :style="appAdStyle"
@@ -264,12 +264,9 @@ const handleError = (e) => {
     clearTimers();
     isFailed.value = true;
     isLoaded.value = false;
-    // 关键修复：立即同步卸载原生组件，强制释放 Native Surface，杜绝透明层拦截点击与阻塞路由转场
-    isRemoved.value = true;
-    // 待 380ms 优雅折叠收起动画播放完毕后再完全移除容器节点
-    destroyTimer = setTimeout(() => {
-        isDestroyed.value = true;
-    }, 380);
+    // 关键修复：不再同步通过 v-if="!isRemoved" 强制拔除 <ad> 原生节点
+    // 规避 uni-app-view.umd.js 视图层内部 updateview / RAF 回调访问 null.getBoundingClientRect 抛出异常
+    // 容器与卡片已通过 .is-failed 和 display: none 实现了 0 尺寸完全折叠隐藏与事件穿透 (pointer-events: none)
     emit('error', e);
 };
 
@@ -277,24 +274,18 @@ const handleClose = (e) => {
     clearTimers();
     isClosed.value = true;
     isLoaded.value = false;
-    isRemoved.value = true;
-    destroyTimer = setTimeout(() => {
-        isDestroyed.value = true;
-    }, 380);
     emit('close', e);
 };
 
 onMounted(() => {
     if (!canShowAd.value) {
         isFailed.value = true;
-        isRemoved.value = true;
-        isDestroyed.value = true;
         emit('error', { detail: { errMsg: 'ad disabled on current platform' } });
         return;
     }
 
     // #ifdef APP
-    // 超时强制熔断器：APP 端若 3 秒内未触发 @load，视为加载失败/未填充，强制销毁原生组件以防原生视图阻断触控
+    // 超时强制熔断器：APP 端若 3 秒内未触发 @load，视为加载失败/未填充
     timeoutTimer = setTimeout(() => {
         if (!isLoaded.value && !isFailed.value && !isClosed.value) {
             handleError({ detail: { errMsg: 'timeout 3000ms' } });

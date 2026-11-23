@@ -1,6 +1,6 @@
 <template>
     <view
-        v-if="showAd && !isError && !isRemoved && visible"
+        v-if="showAd"
         class="custom-ad-container"
         :class="[
             isFixed ? 'is-fixed' : '',
@@ -10,14 +10,14 @@
         :style="containerStyle"
     >
         <!-- #ifdef APP -->
-        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }" v-if="visible && !isRemoved">
-            <ad v-if="visible && !isRemoved" :adpid="adpid" @load="onload" @close="onclose" @error="onerror"></ad>
+        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }">
+            <ad :adpid="adpid" @load="onload" @close="onclose" @error="onerror"></ad>
         </view>
         <!-- #endif -->
 
         <!-- #ifdef MP-WEIXIN -->
-        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }" v-if="visible && !isRemoved">
-            <ad v-if="visible && !isRemoved" :unit-id="unitId" ad-intervals="30" @load="onload" @close="onclose" @error="onerror"></ad>
+        <view class="ad-wrapper" :class="{ 'is-loaded': isLoaded }">
+            <ad :unit-id="unitId" ad-intervals="30" @load="onload" @close="onclose" @error="onerror"></ad>
         </view>
         <!-- #endif -->
     </view>
@@ -151,10 +151,7 @@ const onclose = (e) => {
     updateHeight(0);
     isError.value = true;
     isLoaded.value = false;
-    bannerTimer = setTimeout(() => {
-        emit('close', e);
-        isRemoved.value = true;
-    }, 300);
+    emit('close', e);
 };
 
 const onerror = (e) => {
@@ -162,10 +159,7 @@ const onerror = (e) => {
     updateHeight(0);
     isError.value = true;
     isLoaded.value = false;
-    bannerTimer = setTimeout(() => {
-        emit('error', e);
-        isRemoved.value = true;
-    }, 300);
+    emit('error', e);
 };
 
 onMounted(() => {

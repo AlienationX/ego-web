@@ -28,172 +28,336 @@
                     <text class="hero-header__desc">{{ metricDescription }}</text>
                 </view>
 
-                <!-- 骨架屏 -->
-                <view v-if="loading" class="skeleton-wrap">
-                    <!-- 大卡骨架 -->
-                    <view class="skeleton-hero-first"></view>
-                    <!-- 两小卡骨架 -->
-                    <view class="skeleton-hero-grid">
-                        <view class="skeleton-hero-secondary"></view>
-                        <view class="skeleton-hero-secondary"></view>
-                    </view>
-                    <!-- 列表项骨架 -->
-                    <view class="skeleton-rank-list">
-                        <view v-for="i in 4" :key="i" class="skeleton-rank-item">
-                            <view class="skeleton-rank-thumb"></view>
-                            <view class="skeleton-rank-body">
-                                <view class="skeleton-rank-title"></view>
-                                <view class="skeleton-rank-title skeleton-rank-title--short"></view>
-                                <view class="skeleton-rank-meta"></view>
-                            </view>
+                <!-- 模式 1: 最多浏览 (Views) 面板 -->
+                <view v-show="activeMetric === 'views'" class="metric-panel">
+                    <!-- 骨架屏 -->
+                    <view v-if="viewsLoading && !viewsList.length" class="skeleton-wrap">
+                        <view class="skeleton-hero-first"></view>
+                        <view class="skeleton-hero-grid">
+                            <view class="skeleton-hero-secondary"></view>
+                            <view class="skeleton-hero-secondary"></view>
                         </view>
-                    </view>
-                </view>
-
-                <template v-else-if="rankedList.length">
-                    <view class="hero-section">
-                        <view
-                            class="hero-card hero-card--first"
-                            :key="`${activeMetric}-${rankedList[0].id}`"
-                            :style="{ animationDelay: '0.20s' }"
-                            @click="goPreview(rankedList[0].id)"
-                        >
-                            <image
-                                class="hero-card__image"
-                                :src="rankedList[0].mediumPicurl"
-                                mode="aspectFill"
-                            ></image>
-                            <view class="hero-card__overlay"></view>
-                            <view class="hero-card__rank hero-card__rank--first">1</view>
-                            <view class="hero-card__content">
-                                <view class="hero-card__tag">{{ $t('top10.heroTag') }}</view>
-                                <view class="hero-card__title">{{
-                                    getLocalizedItem(rankedList[0]).description ||
-                                    getLocalizedItem(rankedList[0]).classify_name ||
-                                    rankedList[0].id
-                                }}</view>
-                                <view class="hero-card__meta">
-                                    <view class="hero-card__meta-item">
-                                        <mdi-icon path="/static/icons/fire.svg" size="14" color="#cbd5e1"></mdi-icon>
-                                        <text>{{ formatCount(rankedList[0].views) }}</text>
-                                    </view>
-                                    <view class="hero-card__meta-item">
-                                        <mdi-icon path="/static/icons/download.svg" size="14" color="#cbd5e1"></mdi-icon>
-                                        <text>{{ formatCount(rankedList[0].downloads) }}</text>
-                                    </view>
+                        <view class="skeleton-rank-list">
+                            <view v-for="i in 4" :key="i" class="skeleton-rank-item">
+                                <view class="skeleton-rank-thumb"></view>
+                                <view class="skeleton-rank-body">
+                                    <view class="skeleton-rank-title"></view>
+                                    <view class="skeleton-rank-title skeleton-rank-title--short"></view>
+                                    <view class="skeleton-rank-meta"></view>
                                 </view>
                             </view>
                         </view>
+                    </view>
 
-                        <view class="hero-grid" v-if="rankedList.length > 1">
+                    <template v-else-if="viewsList.length">
+                        <view class="hero-section">
                             <view
-                                v-for="(item, idx) in rankedList.slice(1, 3)"
-                                :key="`${activeMetric}-${item.id}`"
-                                class="hero-card hero-card--secondary"
-                                :class="idx === 0 ? 'hero-card--second' : 'hero-card--third'"
-                                :style="{ animationDelay: `${0.42 + idx * 0.20}s` }"
-                                @click="goPreview(item.id)"
+                                class="hero-card hero-card--first"
+                                :style="{ animationDelay: '0.20s' }"
+                                @click="goPreview(viewsList[0].id, viewsList)"
                             >
                                 <image
                                     class="hero-card__image"
-                                    :src="item.mediumPicurl || item.smallPicurl"
+                                    :src="viewsList[0].mediumPicurl"
                                     mode="aspectFill"
                                 ></image>
-                                <view class="hero-card__overlay hero-card__overlay--soft"></view>
-                                <view class="hero-card__rank" :class="idx === 0 ? 'hero-card__rank--second' : 'hero-card__rank--third'">{{
-                                    idx + 2
-                                }}</view>
-                                <view class="hero-card__content hero-card__content--compact">
-                                    <view class="hero-card__title hero-card__title--compact">
-                                        {{
-                                            getLocalizedItem(item).description ||
-                                            getLocalizedItem(item).classify_name ||
-                                            item.id
-                                        }}
+                                <view class="hero-card__overlay"></view>
+                                <view class="hero-card__rank hero-card__rank--first">1</view>
+                                <view class="hero-card__content">
+                                    <view class="hero-card__tag">{{ $t('top10.heroTag') }}</view>
+                                    <view class="hero-card__title">{{
+                                        getLocalizedItem(viewsList[0]).description ||
+                                        getLocalizedItem(viewsList[0]).classify_name ||
+                                        viewsList[0].id
+                                    }}</view>
+                                    <view class="hero-card__meta">
+                                        <view class="hero-card__meta-item">
+                                            <mdi-icon path="/static/icons/fire.svg" size="14" color="#cbd5e1"></mdi-icon>
+                                            <text>{{ formatCount(viewsList[0].views) }}</text>
+                                        </view>
+                                        <view class="hero-card__meta-item">
+                                            <mdi-icon path="/static/icons/download.svg" size="14" color="#cbd5e1"></mdi-icon>
+                                            <text>{{ formatCount(viewsList[0].downloads) }}</text>
+                                        </view>
                                     </view>
-                                    <view class="hero-card__sub">{{ formatMetric(item) }}</view>
+                                </view>
+                            </view>
+
+                            <view class="hero-grid" v-if="viewsList.length > 1">
+                                <view
+                                    v-for="(item, idx) in viewsList.slice(1, 3)"
+                                    :key="'v-sec-' + item.id"
+                                    class="hero-card hero-card--secondary"
+                                    :class="idx === 0 ? 'hero-card--second' : 'hero-card--third'"
+                                    :style="{ animationDelay: `${0.42 + idx * 0.20}s` }"
+                                    @click="goPreview(item.id, viewsList)"
+                                >
+                                    <image
+                                        class="hero-card__image"
+                                        :src="item.mediumPicurl || item.smallPicurl"
+                                        mode="aspectFill"
+                                    ></image>
+                                    <view class="hero-card__overlay hero-card__overlay--soft"></view>
+                                    <view class="hero-card__rank" :class="idx === 0 ? 'hero-card__rank--second' : 'hero-card__rank--third'">{{
+                                        idx + 2
+                                    }}</view>
+                                    <view class="hero-card__content hero-card__content--compact">
+                                        <view class="hero-card__title hero-card__title--compact">
+                                            {{
+                                                getLocalizedItem(item).description ||
+                                                getLocalizedItem(item).classify_name ||
+                                                item.id
+                                            }}
+                                        </view>
+                                        <view class="hero-card__sub">{{ formatMetric(item, 'views') }}</view>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+
+                        <!-- 通栏横版原生卡片广告 (TOP 3 之后黄金位) -->
+                        <view
+                            class="top10-ad-wrap"
+                            :class="{ 'is-loaded': heroAdLoadedViews, 'is-error': heroAdFailedViews }"
+                        >
+                            <custom-ad
+                                border-radius="28rpx"
+                                @load="heroAdLoadedViews = true"
+                                @error="heroAdFailedViews = true"
+                                @close="heroAdFailedViews = true"
+                            />
+                        </view>
+
+                        <view class="rank-section" v-if="viewsList.length > 3">
+                            <view class="rank-section__title">
+                                {{ $t('top10.listTitle') }}
+                                <view class="rank-section__line"></view>
+                            </view>
+
+                            <view class="rank-list">
+                                <template
+                                    v-for="(item, idx) in viewsList.slice(3)"
+                                    :key="'v-' + item.id"
+                                >
+                                    <view
+                                        class="rank-item"
+                                        :style="{ animationDelay: `${0.78 + idx * 0.14}s` }"
+                                        hover-class="none"
+                                        :hover-stop-propagation="true"
+                                        @click="goPreview(item.id, viewsList)"
+                                    >
+                                        <view class="rank-item__media">
+                                            <image
+                                                class="rank-item__thumb"
+                                                :src="item.smallPicurl"
+                                                mode="aspectFill"
+                                            ></image>
+                                            <view class="rank-item__index">{{ idx + 4 }}</view>
+                                        </view>
+                                        <view class="rank-item__body">
+                                            <view class="rank-item__title">{{
+                                                getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id
+                                            }}</view>
+                                            <view class="rank-item__meta">
+                                                <text class="rank-item__category">{{
+                                                    getLocalizedItem(item).classify_name || $t('top10.wallpaper')
+                                                }}</text>
+                                                <text class="rank-item__metric">{{ formatMetric(item, 'views') }}</text>
+                                            </view>
+                                        </view>
+                                        <view class="rank-item__action">
+                                            <uni-icons type="right" size="16" color="#9fb4d1"></uni-icons>
+                                        </view>
+                                    </view>
+
+                                    <!-- 榜单次级展位：每 8 个项穿插一个原生卡片广告 ((idx + 1) % 8 === 0) -->
+                                    <view
+                                        class="top10-ad-wrap top10-ad-wrap--inline"
+                                        v-if="(idx + 1) % 8 === 0"
+                                        :class="{ 'is-loaded': loadedAdsViews.has(idx), 'is-error': failedAdsViews.has(idx) }"
+                                    >
+                                        <custom-ad
+                                            border-radius="28rpx"
+                                            @load="loadedAdsViews.add(idx)"
+                                            @error="failedAdsViews.add(idx)"
+                                            @close="failedAdsViews.add(idx)"
+                                        />
+                                    </view>
+                                </template>
+                            </view>
+                        </view>
+                    </template>
+
+                    <view v-else class="top10-empty">
+                        <view class="top10-empty__title">{{ $t('top10.empty') }}</view>
+                        <view class="top10-empty__desc">{{ $t('top10.emptyDesc') }}</view>
+                    </view>
+                </view>
+
+                <!-- 模式 2: 最多下载 (Downloads) 面板 -->
+                <view v-show="activeMetric === 'downloads'" class="metric-panel">
+                    <!-- 骨架屏 -->
+                    <view v-if="downloadsLoading && !downloadsList.length" class="skeleton-wrap">
+                        <view class="skeleton-hero-first"></view>
+                        <view class="skeleton-hero-grid">
+                            <view class="skeleton-hero-secondary"></view>
+                            <view class="skeleton-hero-secondary"></view>
+                        </view>
+                        <view class="skeleton-rank-list">
+                            <view v-for="i in 4" :key="i" class="skeleton-rank-item">
+                                <view class="skeleton-rank-thumb"></view>
+                                <view class="skeleton-rank-body">
+                                    <view class="skeleton-rank-title"></view>
+                                    <view class="skeleton-rank-title skeleton-rank-title--short"></view>
+                                    <view class="skeleton-rank-meta"></view>
                                 </view>
                             </view>
                         </view>
                     </view>
 
-                    <!-- 通栏横版原生卡片广告 (TOP 3 之后黄金位) -->
-                    <view
-                        v-if="!heroAdFailed"
-                        class="top10-ad-wrap"
-                        :class="{ 'is-loaded': heroAdLoaded, 'is-error': heroAdFailed }"
-                    >
-                        <custom-ad
-                            border-radius="28rpx"
-                            @load="heroAdLoaded = true"
-                            @error="heroAdFailed = true"
-                            @close="heroAdFailed = true"
-                        />
-                    </view>
-
-                    <view class="rank-section" v-if="rankedList.length > 3">
-                        <view class="rank-section__title">
-                            {{ $t('top10.listTitle') }}
-                            <view class="rank-section__line"></view>
-                        </view>
-
-                        <view class="rank-list">
-                            <template
-                                v-for="(item, idx) in rankedList.slice(3)"
-                                :key="`${activeMetric}-${item.id}`"
+                    <template v-else-if="downloadsList.length">
+                        <view class="hero-section">
+                            <view
+                                class="hero-card hero-card--first"
+                                :style="{ animationDelay: '0.20s' }"
+                                @click="goPreview(downloadsList[0].id, downloadsList)"
                             >
-                                <view
-                                    class="rank-item"
-                                    :style="{ animationDelay: `${0.78 + idx * 0.14}s` }"
-                                    hover-class="none"
-                                    :hover-stop-propagation="true"
-                                    @click="goPreview(item.id)"
-                                >
-                                    <view class="rank-item__media">
-                                        <image
-                                            class="rank-item__thumb"
-                                            :src="item.smallPicurl"
-                                            mode="aspectFill"
-                                        ></image>
-                                        <view class="rank-item__index">{{ idx + 4 }}</view>
-                                    </view>
-                                    <view class="rank-item__body">
-                                        <view class="rank-item__title">{{
-                                            getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id
-                                        }}</view>
-                                        <view class="rank-item__meta">
-                                            <text class="rank-item__category">{{
-                                                getLocalizedItem(item).classify_name || $t('top10.wallpaper')
-                                            }}</text>
-                                            <text class="rank-item__metric">{{ formatMetric(item) }}</text>
+                                <image
+                                    class="hero-card__image"
+                                    :src="downloadsList[0].mediumPicurl"
+                                    mode="aspectFill"
+                                ></image>
+                                <view class="hero-card__overlay"></view>
+                                <view class="hero-card__rank hero-card__rank--first">1</view>
+                                <view class="hero-card__content">
+                                    <view class="hero-card__tag">{{ $t('top10.heroTag') }}</view>
+                                    <view class="hero-card__title">{{
+                                        getLocalizedItem(downloadsList[0]).description ||
+                                        getLocalizedItem(downloadsList[0]).classify_name ||
+                                        downloadsList[0].id
+                                    }}</view>
+                                    <view class="hero-card__meta">
+                                        <view class="hero-card__meta-item">
+                                            <mdi-icon path="/static/icons/fire.svg" size="14" color="#cbd5e1"></mdi-icon>
+                                            <text>{{ formatCount(downloadsList[0].views) }}</text>
+                                        </view>
+                                        <view class="hero-card__meta-item">
+                                            <mdi-icon path="/static/icons/download.svg" size="14" color="#cbd5e1"></mdi-icon>
+                                            <text>{{ formatCount(downloadsList[0].downloads) }}</text>
                                         </view>
                                     </view>
-                                    <view class="rank-item__action">
-                                        <uni-icons type="right" size="16" color="#9fb4d1"></uni-icons>
+                                </view>
+                            </view>
+
+                            <view class="hero-grid" v-if="downloadsList.length > 1">
+                                <view
+                                    v-for="(item, idx) in downloadsList.slice(1, 3)"
+                                    :key="'d-sec-' + item.id"
+                                    class="hero-card hero-card--secondary"
+                                    :class="idx === 0 ? 'hero-card--second' : 'hero-card--third'"
+                                    :style="{ animationDelay: `${0.42 + idx * 0.20}s` }"
+                                    @click="goPreview(item.id, downloadsList)"
+                                >
+                                    <image
+                                        class="hero-card__image"
+                                        :src="item.mediumPicurl || item.smallPicurl"
+                                        mode="aspectFill"
+                                    ></image>
+                                    <view class="hero-card__overlay hero-card__overlay--soft"></view>
+                                    <view class="hero-card__rank" :class="idx === 0 ? 'hero-card__rank--second' : 'hero-card__rank--third'">{{
+                                        idx + 2
+                                    }}</view>
+                                    <view class="hero-card__content hero-card__content--compact">
+                                        <view class="hero-card__title hero-card__title--compact">
+                                            {{
+                                                getLocalizedItem(item).description ||
+                                                getLocalizedItem(item).classify_name ||
+                                                item.id
+                                            }}
+                                        </view>
+                                        <view class="hero-card__sub">{{ formatMetric(item, 'downloads') }}</view>
                                     </view>
                                 </view>
-
-                                <!-- 榜单次级展位：每 8 个项穿插一个原生卡片广告 ((idx + 1) % 8 === 0) -->
-                                <view
-                                    class="top10-ad-wrap top10-ad-wrap--inline"
-                                    v-if="(idx + 1) % 8 === 0 && !failedListAds.has(idx)"
-                                    :class="{ 'is-loaded': loadedListAds.has(idx) }"
-                                >
-                                    <custom-ad
-                                        border-radius="28rpx"
-                                        @load="loadedListAds.add(idx)"
-                                        @error="failedListAds.add(idx)"
-                                        @close="failedListAds.add(idx)"
-                                    />
-                                </view>
-                            </template>
+                            </view>
                         </view>
-                    </view>
-                </template>
 
-                <view v-else class="top10-empty">
-                    <view class="top10-empty__title">{{ $t('top10.empty') }}</view>
-                    <view class="top10-empty__desc">{{ $t('top10.emptyDesc') }}</view>
+                        <!-- 通栏横版原生卡片广告 (TOP 3 之后黄金位) -->
+                        <view
+                            class="top10-ad-wrap"
+                            :class="{ 'is-loaded': heroAdLoadedDownloads, 'is-error': heroAdFailedDownloads }"
+                        >
+                            <custom-ad
+                                border-radius="28rpx"
+                                @load="heroAdLoadedDownloads = true"
+                                @error="heroAdFailedDownloads = true"
+                                @close="heroAdFailedDownloads = true"
+                            />
+                        </view>
+
+                        <view class="rank-section" v-if="downloadsList.length > 3">
+                            <view class="rank-section__title">
+                                {{ $t('top10.listTitle') }}
+                                <view class="rank-section__line"></view>
+                            </view>
+
+                            <view class="rank-list">
+                                <template
+                                    v-for="(item, idx) in downloadsList.slice(3)"
+                                    :key="'d-' + item.id"
+                                >
+                                    <view
+                                        class="rank-item"
+                                        :style="{ animationDelay: `${0.78 + idx * 0.14}s` }"
+                                        hover-class="none"
+                                        :hover-stop-propagation="true"
+                                        @click="goPreview(item.id, downloadsList)"
+                                    >
+                                        <view class="rank-item__media">
+                                            <image
+                                                class="rank-item__thumb"
+                                                :src="item.smallPicurl"
+                                                mode="aspectFill"
+                                            ></image>
+                                            <view class="rank-item__index">{{ idx + 4 }}</view>
+                                        </view>
+                                        <view class="rank-item__body">
+                                            <view class="rank-item__title">{{
+                                                getLocalizedItem(item).description || getLocalizedItem(item).classify_name || item.id
+                                            }}</view>
+                                            <view class="rank-item__meta">
+                                                <text class="rank-item__category">{{
+                                                    getLocalizedItem(item).classify_name || $t('top10.wallpaper')
+                                                }}</text>
+                                                <text class="rank-item__metric">{{ formatMetric(item, 'downloads') }}</text>
+                                            </view>
+                                        </view>
+                                        <view class="rank-item__action">
+                                            <uni-icons type="right" size="16" color="#9fb4d1"></uni-icons>
+                                        </view>
+                                    </view>
+
+                                    <!-- 榜单次级展位：每 8 个项穿插一个原生卡片广告 ((idx + 1) % 8 === 0) -->
+                                    <view
+                                        class="top10-ad-wrap top10-ad-wrap--inline"
+                                        v-if="(idx + 1) % 8 === 0"
+                                        :class="{ 'is-loaded': loadedAdsDownloads.has(idx), 'is-error': failedAdsDownloads.has(idx) }"
+                                    >
+                                        <custom-ad
+                                            border-radius="28rpx"
+                                            @load="loadedAdsDownloads.add(idx)"
+                                            @error="failedAdsDownloads.add(idx)"
+                                            @close="failedAdsDownloads.add(idx)"
+                                        />
+                                    </view>
+                                </template>
+                            </view>
+                        </view>
+                    </template>
+
+                    <view v-else class="top10-empty">
+                        <view class="top10-empty__title">{{ $t('top10.empty') }}</view>
+                        <view class="top10-empty__desc">{{ $t('top10.emptyDesc') }}</view>
+                    </view>
                 </view>
             </view>
 
@@ -325,74 +489,70 @@ const scrollToTop = () => {
 };
 
 const activeMetric = ref('views');
-const loading = ref(false);
-const rankedList = ref([]);
 
-const heroAdLoaded = ref(false);
-const heroAdFailed = ref(false);
-const loadedListAds = reactive(new Set());
-const failedListAds = reactive(new Set());
+const viewsList = ref([]);
+const viewsLoading = ref(false);
 
-const resetAdsState = () => {
-    heroAdLoaded.value = false;
-    heroAdFailed.value = false;
-    loadedListAds.clear();
-    failedListAds.clear();
-};
+const downloadsList = ref([]);
+const downloadsLoading = ref(false);
 
-const cache = {
-    views: null,
-    downloads: null,
-};
+const heroAdLoadedViews = ref(false);
+const heroAdFailedViews = ref(false);
+const loadedAdsViews = reactive(new Set());
+const failedAdsViews = reactive(new Set());
+
+const heroAdLoadedDownloads = ref(false);
+const heroAdFailedDownloads = ref(false);
+const loadedAdsDownloads = reactive(new Set());
+const failedAdsDownloads = reactive(new Set());
 
 const metricBadge = computed(() => (activeMetric.value === 'views' ? t('top10.badgeViews') : t('top10.badgeDownloads')));
 const metricDescription = computed(() => (activeMetric.value === 'views' ? t('top10.descViews') : t('top10.descDownloads')));
 
-const getTopList = async () => {
-    const metric = activeMetric.value;
+const fetchMetricList = async (metric, isRefresh = false) => {
+    const isViews = metric === 'views';
+    const targetList = isViews ? viewsList : downloadsList;
+    const targetLoading = isViews ? viewsLoading : downloadsLoading;
 
-    if (cache[metric]) {
-        rankedList.value = cache[metric];
-        return;
+    if (targetLoading.value) return;
+    if (!isRefresh && targetList.value.length > 0) return;
+
+    if (!targetList.value.length) {
+        targetLoading.value = true;
     }
-
-    loading.value = true;
     try {
         const res = await apiGetTopWall({
-            type: metric === 'views' ? 'views' : 'downloads',
+            type: isViews ? 'views' : 'downloads',
             n: 20,
         });
         const list = (res.data || [])
             .map((item) => handlePicUrl(item))
             .sort((a, b) => {
-                const aValue = Number(metric === 'views' ? a.views : a.downloads) || 0;
-                const bValue = Number(metric === 'views' ? b.views : b.downloads) || 0;
+                const aValue = Number(isViews ? a.views : a.downloads) || 0;
+                const bValue = Number(isViews ? b.views : b.downloads) || 0;
                 return bValue - aValue;
             })
             .slice(0, 20);
 
-        cache[metric] = list;
-        rankedList.value = list;
+        targetList.value = list;
     } catch (error) {
-        rankedList.value = [];
+        if (!targetList.value.length) {
+            targetList.value = [];
+        }
     } finally {
-        loading.value = false;
+        targetLoading.value = false;
     }
 };
 
-const switchMetric = async (metric) => {
+const switchMetric = (metric) => {
     if (activeMetric.value === metric) {
         scrollToTop();
         return;
     }
     activeMetric.value = metric;
     scrollToTop();
-    resetAdsState();
-    if (cache[metric]) {
-        rankedList.value = cache[metric];
-    } else {
-        rankedList.value = [];
-        await getTopList();
+    if (metric === 'downloads' && !downloadsList.value.length && !downloadsLoading.value) {
+        fetchMetricList('downloads');
     }
 };
 
@@ -419,14 +579,15 @@ const formatCount = (value) => {
     return `${num}`;
 };
 
-const formatMetric = (item) => {
-    const count = activeMetric.value === 'views' ? item.views : item.downloads;
-    return `${formatCount(count)} ${activeMetric.value === 'views' ? t('top10.metricViews') : t('top10.metricDownloads')}`;
+const formatMetric = (item, metric = activeMetric.value) => {
+    const isViews = metric === 'views';
+    const count = isViews ? item.views : item.downloads;
+    return `${formatCount(count)} ${isViews ? t('top10.metricViews') : t('top10.metricDownloads')}`;
 };
 
-const goPreview = (id) => {
+const goPreview = (id, list) => {
     const appStore = useAppStore();
-    appStore.wallList = rankedList.value;
+    appStore.wallList = list || (activeMetric.value === 'views' ? viewsList.value : downloadsList.value);
     uni.navigateTo({
         url: `/pages/app/preview?id=${id}`,
     });
@@ -441,17 +602,14 @@ const goBack = () => {
 };
 
 onPullDownRefresh(async () => {
-    cache.views = null;
-    cache.downloads = null;
-    resetAdsState();
-    await getTopList();
+    await fetchMetricList(activeMetric.value, true);
     uni.stopPullDownRefresh();
 });
 
-onLoad(() => {
-    if (!rankedList.value.length) {
-        getTopList();
-    }
+onLoad(async () => {
+    await fetchMetricList('views');
+    // 静默预加载 downloads，确保用户点击切换时瞬间呈现，零白屏零等待
+    fetchMetricList('downloads');
 });
 
 onShow(() => {
@@ -1257,11 +1415,22 @@ onShow(() => {
     }
 
     &.is-error {
-        display: none !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
         width: 0 !important;
         height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+        overflow: hidden !important;
     }
 
     &.is-loaded {
@@ -1326,6 +1495,10 @@ onShow(() => {
         background-size: 200% 100%;
         animation: top10-shimmer 1.6s infinite linear;
     }
+}
+
+.metric-panel {
+    width: 100%;
 }
 
 .skeleton-wrap {

@@ -185,7 +185,7 @@
         </view>
 
         <!-- 探索面板（未搜索状态展示） -->
-        <view v-if="showWordBoard" class="explore-wrap" :style="exploreWrapStyle">
+        <view v-show="showWordBoard" class="explore-wrap" :style="exploreWrapStyle">
             <view class="search-top-fill" :style="{ height: `${navBarHeight}px` }"></view>
             <view class="explore-board">
                 <view class="section-head">
@@ -231,7 +231,7 @@
         </view>
 
         <!-- 搜索结果列表（页面级自然流排版，单行一体化沉浸呈现） -->
-        <view v-else class="list-container" :style="{ paddingTop: `${navBarHeight}px` }">
+        <view v-show="!showWordBoard" class="list-container" :style="{ paddingTop: `${navBarHeight}px` }">
             <modern-pics-view
                 ref="picsViewRef"
                 :show-header="false"
@@ -256,8 +256,8 @@
             </modern-pics-view>
         </view>
 
-        <!-- 吸底广告（仅在未搜索的热词与历史面板展示，搜索后彻底移除） -->
-        <custom-ad-banner v-if="showWordBoard" :visible="showWordBoard" @height-change="onAdHeightChange"></custom-ad-banner>
+        <!-- 吸底广告（未搜索时展示，搜索结果展示时通过 visible 隐藏，永不卸载以防底层 RAF 崩溃） -->
+        <custom-ad-banner :visible="showWordBoard" @height-change="onAdHeightChange"></custom-ad-banner>
     </view>
 </template>
 

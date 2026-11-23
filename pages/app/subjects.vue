@@ -109,7 +109,6 @@
                     <!-- A. 穿插的原生模板横版卡片广告 (标准卡片外壳包裹，实现与普通专题卡片等高与风格统一) -->
                     <template v-if="item.is_ad">
                         <view
-                            v-if="!item.adError"
                             class="subject-card subject-card--ad"
                             :class="{ 'is-loaded': item.adLoaded, 'is-error': item.adError }"
                         >
@@ -355,14 +354,12 @@ const displaySubjectsList = computed(() => {
         if (shouldInsertAd) {
             const adIndex = Math.floor(count / AD_INTERVAL);
             const adId = `subject_ad_${adIndex}`;
-            if (!failedAdIds.has(adId)) {
-                list.push({
-                    is_ad: true,
-                    id: adId,
-                    adLoaded: false,
-                    adError: false,
-                });
-            }
+            list.push({
+                is_ad: true,
+                id: adId,
+                adLoaded: false,
+                adError: failedAdIds.has(adId),
+            });
         }
     }
     return list;
@@ -856,12 +853,22 @@ onShow(() => {
         }
 
         &.is-error {
-            display: none !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
             width: 0 !important;
             height: 0 !important;
             min-height: 0 !important;
+            max-height: 0 !important;
             margin: 0 !important;
             padding: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+            overflow: hidden !important;
         }
 
         &:active {

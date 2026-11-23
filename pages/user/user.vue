@@ -144,7 +144,6 @@
 
                 <!-- 我的页面横版原生广告卡片 -->
                 <view
-                    v-if="!isAdRemoved"
                     class="user-flow-ad-wrap"
                     :class="{ 'is-loaded': adLoaded, 'is-error': adFailed }"
                 >
@@ -245,13 +244,9 @@ const settingsStore = useSettingsStore();
 
 const adLoaded = ref(false);
 const adFailed = ref(false);
-const isAdRemoved = ref(false);
 
 const handleAdError = () => {
     adFailed.value = true;
-    setTimeout(() => {
-        isAdRemoved.value = true;
-    }, 400);
 };
 
 

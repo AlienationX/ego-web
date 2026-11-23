@@ -38,8 +38,12 @@
                 <!-- 推荐列表流：每 8 个项穿插一个横版卡片广告 -->
                 <view
                     class="recommend-ad-wrap"
-                    v-if="(idx + 1) % 8 === 0 && canShowCustomAd && !failedListAds.has(idx)"
-                    :class="{ 'is-loaded': loadedListAds.has(idx), 'is-international': IS_INTERNATIONAL }"
+                    v-if="(idx + 1) % 8 === 0 && canShowCustomAd"
+                    :class="{
+                        'is-loaded': loadedListAds.has(idx),
+                        'is-error': failedListAds.has(idx),
+                        'is-international': IS_INTERNATIONAL
+                    }"
                 >
                     <custom-ad
                         direction="horizontal"
@@ -438,6 +442,25 @@ watch(
     :deep(custom-ad) {
         width: 100% !important;
         display: block !important;
+    }
+
+    &.is-error {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        visibility: hidden !important;
+        overflow: hidden !important;
     }
 }
 

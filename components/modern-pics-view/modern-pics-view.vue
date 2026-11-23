@@ -65,7 +65,7 @@
                             <!-- 模式 1: 网格视图 (CSS Grid) -->
                             <view class="grid-layout"
                                 :class="{ 'is-single-col': isDesktopClassify, 'is-avatar': isAvatarClassify }"
-                                :style="gridStyle" v-if="!isWaterfall">
+                                :style="gridStyle" v-show="!isWaterfall">
                                 <view
                                     class="modern-card grid-card"
                                     :class="{
@@ -81,7 +81,7 @@
                                 >
                                     <!-- A. 穿插的卡片广告 (横跨整行通栏展示，宽度>200px满足微信规范) -->
                                     <template v-if="item.is_ad">
-                                        <view class="ad-custom-card" v-if="!item.adError">
+                                        <view class="ad-custom-card">
                                             <custom-ad
                                                 direction="horizontal"
                                                 @load="onCustomAdLoad(item, $event)"
@@ -120,7 +120,7 @@
                             </view>
 
                             <!-- 模式 2: 真实的双列动态平衡瀑布流 (电脑壁纸单列通栏展示) -->
-                            <view class="waterfall-layout" :class="{ 'is-single-col': isDesktopClassify }" v-else>
+                            <view class="waterfall-layout" :class="{ 'is-single-col': isDesktopClassify }" v-show="isWaterfall">
                                 <!-- 左列 -->
                                 <view class="waterfall-col">
                                     <view
@@ -138,7 +138,7 @@
                                         @click="!item.is_ad && openPreview(item.id, index)"
                                     >
                                         <template v-if="item.is_ad">
-                                            <view class="ad-custom-card" v-if="!item.adError">
+                                            <view class="ad-custom-card">
                                                 <custom-ad
                                                     direction="vertical"
                                                     @load="onCustomAdLoad(item, $event)"
@@ -194,7 +194,7 @@
                                         @click="!item.is_ad && openPreview(item.id, index)"
                                     >
                                         <template v-if="item.is_ad">
-                                            <view class="ad-custom-card" v-if="!item.adError">
+                                            <view class="ad-custom-card">
                                                 <custom-ad
                                                     direction="vertical"
                                                     @load="onCustomAdLoad(item, $event)"
@@ -469,15 +469,13 @@ const appendDisplayData = (index, newItems, baseOffset = -1) => {
             if (state.gridAdCount < MAX_INLINE_ADS) {
                 state.gridAdCount++;
                 const adId = `grid_ad_${index}_${state.gridAdCount}`;
-                if (!failedAdIds.has(adId)) {
-                    state.gridItems.push({
-                        is_ad: true,
-                        id: adId,
-                        _uniqueKey: adId,
-                        adLoaded: loadedAdIds.has(adId),
-                        adError: false,
-                    });
-                }
+                state.gridItems.push({
+                    is_ad: true,
+                    id: adId,
+                    _uniqueKey: adId,
+                    adLoaded: loadedAdIds.has(adId),
+                    adError: failedAdIds.has(adId),
+                });
             }
         }
 
@@ -502,23 +500,21 @@ const appendDisplayData = (index, newItems, baseOffset = -1) => {
             if (state.wfAdCount < MAX_INLINE_ADS) {
                 state.wfAdCount++;
                 const adId = `wf_ad_${index}_${state.wfAdCount}`;
-                if (!failedAdIds.has(adId)) {
-                    const isAlreadyLoaded = loadedAdIds.has(adId);
-                    const adItem = {
-                        is_ad: true,
-                        id: adId,
-                        _uniqueKey: adId,
-                        adLoaded: isAlreadyLoaded,
-                        adError: false,
-                    };
-                    const adRatio = 1.8; // 竖屏原生模板卡片预估高宽比 (1:1.8)
-                    if (state.leftH <= state.rightH) {
-                        state.leftCol.push(adItem);
-                        state.leftH += adRatio;
-                    } else {
-                        state.rightCol.push(adItem);
-                        state.rightH += adRatio;
-                    }
+                const isAlreadyLoaded = loadedAdIds.has(adId);
+                const adItem = {
+                    is_ad: true,
+                    id: adId,
+                    _uniqueKey: adId,
+                    adLoaded: isAlreadyLoaded,
+                    adError: failedAdIds.has(adId),
+                };
+                const adRatio = 1.8; // 竖屏原生模板卡片预估高宽比 (1:1.8)
+                if (state.leftH <= state.rightH) {
+                    state.leftCol.push(adItem);
+                    state.leftH += adRatio;
+                } else {
+                    state.rightCol.push(adItem);
+                    state.rightH += adRatio;
                 }
             }
         }
@@ -568,7 +564,7 @@ const onCustomAdLoad = (item, e) => {
     }
 };
 
-// 原生模板广告错误回调 (优雅折叠消除白块与占位，绝不重算影响老数据排版)
+// 原生模板广告错误回调 (通过 CSS .is-ad-error 优雅折叠隐藏，杜绝数组重排与 DOM 拔除引发的 getBoundingClientRect 报错)
 const onCustomAdError = (item, e) => {
     console.warn('[Ad] 原生模板卡片广告加载失败/未填充:', item?.id, e?.detail);
     if (item?.id) {
@@ -577,12 +573,6 @@ const onCustomAdError = (item, e) => {
         }
         item.adError = true;
         failedAdIds.add(item.id);
-        // 从各个 Tab 的左右列及网格列表中剔除该广告项，彻底杜绝空白卡片
-        tabStates.forEach(state => {
-            state.leftCol = state.leftCol.filter(i => i.id !== item.id);
-            state.rightCol = state.rightCol.filter(i => i.id !== item.id);
-            state.gridItems = state.gridItems.filter(i => i.id !== item.id);
-        });
     }
 };
 
@@ -591,11 +581,6 @@ const onCustomAdClose = (item, e) => {
     if (item?.id) {
         item.adError = true;
         failedAdIds.add(item.id);
-        tabStates.forEach(state => {
-            state.leftCol = state.leftCol.filter(i => i.id !== item.id);
-            state.rightCol = state.rightCol.filter(i => i.id !== item.id);
-            state.gridItems = state.gridItems.filter(i => i.id !== item.id);
-        });
     }
 };
 
@@ -826,8 +811,8 @@ const openPreview = (id, index) => {
     uni.navigateTo({ url: `/pages/app/preview?id=${id}${cType}` });
 };
 
-// 监听视图模式/列数/VIP 状态/后台广告开关变更，重新排版
-watch(() => [isWaterfall.value, colCount.value, userStore.isVip, appStore.versionConfig?.ad_enabled], () => {
+// 监听列数/VIP 状态/后台广告开关变更，重新排版 (视图模式切换无需重新排版，gridItems 与瀑布流双列独立持久化)
+watch(() => [colCount.value, userStore.isVip, appStore.versionConfig?.ad_enabled], () => {
     tabStates.forEach((_, idx) => {
         rebuildDisplayData(idx);
     });
@@ -1184,9 +1169,12 @@ onShow(() => {
 
         // 广告加载失败：折叠脱离文档流
         &.is-ad-error {
-            display: none !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
             opacity: 0 !important;
             pointer-events: none !important;
+            visibility: hidden !important;
             width: 0 !important;
             height: 0 !important;
             min-height: 0 !important;
@@ -1195,6 +1183,8 @@ onShow(() => {
             margin: 0 !important;
             padding: 0 !important;
             border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
         }
 
         // 加载中与加载成功都占位：竖版加载中内部显示骨架，成功后替换为广告，高度一致

@@ -97,7 +97,6 @@
 
             <!-- 创作页横版原生广告卡片 -->
             <view
-                v-if="!adFailed"
                 class="creation-flow-ad-wrap"
                 :class="{ 'is-loaded': adLoaded, 'is-error': adFailed }"
             >
