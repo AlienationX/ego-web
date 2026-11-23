@@ -48,6 +48,26 @@ onLaunch((options) => {
     console.log('App Launch', options);
     checkPCPlatformIntercept(options);
 
+    uni.hideTabBar({animation: false, fail: () => {}});
+
+    // #ifdef APP-PLUS
+    if (plus.os.name === 'Android') {
+        ['navigateTo', 'redirectTo', 'reLaunch', 'switchTab', 'navigateBack'].forEach((method) => {
+            uni.addInterceptor(method, {
+                complete() {
+                    setTimeout(() => {
+                        applyAndroidEdgeToEdgeLayout();
+                    }, 50);
+                    setTimeout(() => {
+                        applyAndroidEdgeToEdgeLayout();
+                    }, 200);
+                },
+            });
+        });
+        applyAndroidEdgeToEdgeLayout();
+    }
+    // #endif
+
     // 初始化应用主题设置（支持 auto/light/dark，多端读取持久化存储）
     const savedTheme = uni.getStorageSync('theme') || settingsStore.options.theme || 'auto';
     settingsStore.options.theme = savedTheme;
@@ -114,7 +134,7 @@ onShow((res) => {
     }
 
     // #ifdef APP-PLUS
-    // applyAndroidEdgeToEdgeLayout();
+    applyAndroidEdgeToEdgeLayout();
     // #endif
 
     handleDeepLink(res);

@@ -436,11 +436,9 @@
         "navigationBarBackgroundColor": "@navigationBarBackgroundColor",
         "backgroundColor": "@backgroundColor",
         "app-plus": {
-            "animationType": "slide-in-right",
-            "animationDuration": 200,
+            // "animationType": "slide-in-right",
+            // "animationDuration": 200,
             "safearea": {
-                "background": "transparent",
-                "backgroundDark": "transparent",
                 "bottom": {
                     "offset": "none"
                 }

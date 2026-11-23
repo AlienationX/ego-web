@@ -129,9 +129,11 @@ export const writeAccessLog = async () => {
  * @param {boolean} isDark 是否为深色模式
  */
 export function setAndroidImmersive(isDark = false) {
-
-    return;
     // #ifdef APP-PLUS
+
+    // 如果没有 手势指示条高度 则跳过，无需设置
+    // if (getAndroidNativeNavBarHeight() <= 0) return;
+
     try {
         if (plus.os.name === 'Android') {
             const mainActivity = plus.android.runtimeMainActivity();
@@ -235,23 +237,7 @@ export function applyAndroidEdgeToEdgeLayout() {
 
                         const executeFix = () => {
                             try {
-                                // 1. 物理屏幕高度强力兜底，彻底杜绝 screenH 为 0
-                                let screenH = plus.android.invoke(decor, 'getHeight');
-                                let screenW = plus.android.invoke(decor, 'getWidth');
-
-                                if (!screenH || screenH <= 0) {
-                                    plus.android.importClass('android.util.DisplayMetrics');
-                                    const realMetrics = plus.android.newObject('android.util.DisplayMetrics');
-                                    const windowManager = plus.android.invoke(mainActivity, 'getWindowManager');
-                                    const display = plus.android.invoke(windowManager, 'getDefaultDisplay');
-                                    plus.android.invoke(display, 'getRealMetrics', realMetrics);
-                                    screenH = plus.android.getAttribute(realMetrics, 'heightPixels');
-                                    screenW = plus.android.getAttribute(realMetrics, 'widthPixels');
-                                }
-
-                                if (!screenH || screenH <= 0) return;
-
-                                // 2. 消除 AppCompat 底部生成的多余黑色保护遮罩条 (放宽至 260px，兼容 2K 屏与高 DPI)
+                                // 1. 消除 AppCompat 底部生成的多余黑色保护遮罩条 (放宽至 260px，兼容 2K 屏与高 DPI)
                                 let decorCount = 0;
                                 try {
                                     decorCount = plus.android.invoke(decor, 'getChildCount') || 0;
@@ -264,54 +250,92 @@ export function applyAndroidEdgeToEdgeLayout() {
                                         const name = plus.android.invoke(clsObj, 'getName');
                                         if (name === 'android.widget.RelativeLayout') {
                                             const ch = plus.android.invoke(child, 'getHeight');
-                                            if (ch < 260) {
+                                            if (ch > 0 && ch < 260) {
                                                 plus.android.invoke(child, 'setVisibility', 8); // View.GONE
                                             }
                                         }
                                     } catch (e) {}
                                 }
 
-                                // 3. 将整个 Activity 的根容器 (android.R.id.content) 铺满至屏幕物理底部
+                                // 2. 确保 Activity 根容器 (android.R.id.content) 零内边距并撑满物理全屏
+                                let screenH = plus.android.invoke(decor, 'getHeight');
+                                if (!screenH || screenH <= 0) {
+                                    plus.android.importClass('android.util.DisplayMetrics');
+                                    const realMetrics = plus.android.newObject('android.util.DisplayMetrics');
+                                    const windowManager = plus.android.invoke(mainActivity, 'getWindowManager');
+                                    const display = plus.android.invoke(windowManager, 'getDefaultDisplay');
+                                    plus.android.invoke(display, 'getRealMetrics', realMetrics);
+                                    screenH = plus.android.getAttribute(realMetrics, 'heightPixels');
+                                }
+
                                 const content = mainActivity.findViewById(16908290);
-                                if (content) {
+                                if (content && screenH > 0) {
                                     try {
                                         plus.android.invoke(content, 'setFitsSystemWindows', false);
                                         plus.android.invoke(content, 'setPadding', 0, 0, 0, 0);
                                         const lp = plus.android.invoke(content, 'getLayoutParams');
                                         if (lp) {
                                             const h = plus.android.getAttribute(lp, 'height');
+                                            // 严格幂等防抖保护：仅在高度不等于屏幕物理高度时才设置一次，绝不在跳转时频繁触发 requestLayout
                                             if (h !== screenH) {
                                                 plus.android.setAttribute(lp, 'height', screenH);
                                                 plus.android.invoke(content, 'setLayoutParams', lp);
                                             }
                                         }
                                     } catch (e) {}
-                                }
 
-                                // 4. 协同通知当前 Webview 贴底 0px、高度 100%
-                                try {
-                                    if (typeof plus !== 'undefined' && plus.webview) {
-                                        const currentWv = plus.webview.currentWebview();
-                                        if (currentWv && currentWv.setStyle) {
-                                            currentWv.setStyle({
-                                                bottom: '0px',
-                                                height: '100%',
-                                            });
+                                    // 3. 激活新打开二级页面因 Android 16 WindowInsets 机制导致尺寸挂起为 0x0 的 WebView 容器
+                                    try {
+                                        let screenW = plus.android.invoke(decor, 'getWidth');
+                                        if (!screenW || screenW <= 0) {
+                                            plus.android.importClass('android.util.DisplayMetrics');
+                                            const realMetrics = plus.android.newObject('android.util.DisplayMetrics');
+                                            const windowManager = plus.android.invoke(mainActivity, 'getWindowManager');
+                                            const display = plus.android.invoke(windowManager, 'getDefaultDisplay');
+                                            plus.android.invoke(display, 'getRealMetrics', realMetrics);
+                                            screenW = plus.android.getAttribute(realMetrics, 'widthPixels');
                                         }
-                                    }
-                                } catch (e) {}
+
+                                        if (screenW > 0 && screenH > 0) {
+                                            const modeExactly = 0x40000000;
+                                            const fixContainer = (v, depth) => {
+                                                if (!v || depth > 6) return;
+                                                let w = 0, h = 0, vis = 0, cls = '';
+                                                try {
+                                                    const clsObj = plus.android.invoke(v, 'getClass');
+                                                    cls = plus.android.invoke(clsObj, 'getSimpleName') || '';
+                                                    w = plus.android.invoke(v, 'getWidth');
+                                                    h = plus.android.invoke(v, 'getHeight');
+                                                    vis = plus.android.invoke(v, 'getVisibility');
+                                                } catch (e) {
+                                                    return;
+                                                }
+
+                                                if (vis === 0 && (w === 0 || h === 0) && (cls.includes('WebParentView') || cls.includes('PullToRefresh') || cls.includes('AbsoluteLayout') || cls.includes('SysWebView'))) {
+                                                    try {
+                                                        plus.android.invoke(v, 'measure', modeExactly | screenW, modeExactly | screenH);
+                                                        plus.android.invoke(v, 'layout', 0, 0, screenW, screenH);
+                                                    } catch (e) {}
+                                                }
+
+                                                let count = 0;
+                                                try { count = plus.android.invoke(v, 'getChildCount') || 0; } catch (e) {}
+                                                for (let j = 0; j < count; j++) {
+                                                    try {
+                                                        const c = plus.android.invoke(v, 'getChildAt', j);
+                                                        fixContainer(c, depth + 1);
+                                                    } catch (e) {}
+                                                }
+                                            };
+                                            fixContainer(content, 0);
+                                        }
+                                    } catch (e) {}
+                                }
                             } catch (e) {}
                         };
 
                         // 立即执行一次
                         executeFix();
-
-                        // 并在 Android 视图完成排版(Layout)后通过原生 post 精准复核一次
-                        decor.post(
-                            plus.android.implements('java.lang.Runnable', {
-                                run: executeFix,
-                            })
-                        );
                     } catch (innerErr) {}
                 }
             })

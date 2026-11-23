@@ -1266,6 +1266,17 @@ onShow(() => {
         }
     }
 
+    @keyframes userAdEntrance {
+        0% {
+            opacity: 0;
+            transform: translate3d(0, 24rpx, 0);
+        }
+        100% {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
     // ── 我的页面横版原生信息流广告卡片 ──
     .user-flow-ad-wrap {
         padding: 0 30rpx;
@@ -1274,6 +1285,8 @@ onShow(() => {
         width: 100%;
         max-height: 600rpx;
         overflow: hidden;
+        animation: userAdEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+        will-change: opacity, transform;
         transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
                     opacity 0.25s ease,
                     margin 0.35s cubic-bezier(0.4, 0, 0.2, 1),
@@ -1286,6 +1299,7 @@ onShow(() => {
         }
 
         &.is-error {
+            animation: none !important;
             max-height: 0 !important;
             opacity: 0 !important;
             margin-top: 0 !important;
@@ -1293,6 +1307,12 @@ onShow(() => {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
             pointer-events: none !important;
+        }
+
+        &.is-loaded {
+            position: relative;
+            opacity: 1;
+            animation: userAdFadeIn 0.35s ease both;
         }
 
         .user-flow-ad-card {
@@ -1311,6 +1331,17 @@ onShow(() => {
                 width: 100% !important;
                 display: block !important;
             }
+        }
+    }
+
+    @keyframes userAdFadeIn {
+        0% {
+            opacity: 0.6;
+            transform: scale(0.99);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
         }
     }
 

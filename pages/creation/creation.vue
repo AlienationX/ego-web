@@ -831,6 +831,12 @@ const showComingSoon = () => {
     width: 100%;
     box-sizing: border-box;
     margin: 0;
+    animation-name: cardEntrance;
+    animation-duration: 1.4s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-delay: 0.6s;
+    animation-fill-mode: both;
+    will-change: opacity, transform;
 
     custom-ad,
     :deep(custom-ad) {
@@ -844,6 +850,13 @@ const showComingSoon = () => {
         height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        animation: none !important;
+    }
+
+    &.is-loaded {
+        position: relative;
+        opacity: 1;
+        animation: creationAdFadeIn 0.35s ease both;
     }
 
     .creation-flow-ad-card {
@@ -861,6 +874,17 @@ const showComingSoon = () => {
             width: 100% !important;
             display: block !important;
         }
+    }
+}
+
+@keyframes creationAdFadeIn {
+    0% {
+        opacity: 0.7;
+        transform: scale(0.99);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 </style>

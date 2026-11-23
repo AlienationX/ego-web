@@ -461,6 +461,8 @@ onShow(() => {
     padding: 0 20rpx;
     margin: 10rpx 0;
     background: transparent;
+    animation: classifyFadeSlide 1.42s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+    will-change: opacity, transform;
 
     custom-ad,
     :deep(custom-ad) {
@@ -474,12 +476,24 @@ onShow(() => {
         height: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
+        animation: none !important;
     }
 
     &.is-loaded {
         position: relative;
         opacity: 1;
-        animation: classifyFadeSlide 0.4s ease both;
+        animation: classifyAdFadeIn 0.35s ease both;
+    }
+}
+
+@keyframes classifyAdFadeIn {
+    0% {
+        opacity: 0.6;
+        transform: scale(0.99);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
     }
 }
 </style>
