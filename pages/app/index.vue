@@ -893,11 +893,6 @@ const onBannerChange = (e) => {
     const nextIdx = Number(e?.detail?.current || 0);
     if (currentBanner.value !== nextIdx) {
         currentBanner.value = nextIdx;
-        // #ifdef MP-WEIXIN || APP-PLUS
-        try {
-            uni.vibrateShort({ type: 'light' });
-        } catch (err) {}
-        // #endif
     }
 };
 
@@ -1266,11 +1261,6 @@ const refreshRandom = async () => {
     try {
         await Promise.all([getRandomDay(), getRandomRecommend()]);
         isDailyStaggerEntering.value = true;
-        // #ifdef MP-WEIXIN || APP-PLUS
-        try {
-            uni.vibrateShort({ type: 'light' });
-        } catch (err) {}
-        // #endif
         setTimeout(() => {
             isDailyStaggerEntering.value = false;
         }, 500);

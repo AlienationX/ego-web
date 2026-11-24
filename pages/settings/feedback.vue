@@ -181,11 +181,6 @@ const triggerShake = () => {
 
 const selectType = (type) => {
     if (feedbackForm.type !== type) {
-        // #ifdef APP-PLUS || MP-WEIXIN
-        try {
-            uni.vibrateShort({ type: 'light' });
-        } catch (e) {}
-        // #endif
         feedbackForm.type = type;
     }
 };
@@ -328,12 +323,6 @@ const handleSubmit = async () => {
         const checkRes = await validateImagesSecurityBatch(imageList.value);
         if (!checkRes.pass) return;
     }
-    // #endif
-
-    // #ifdef APP-PLUS || MP-WEIXIN
-    try {
-        uni.vibrateShort({ type: 'medium' });
-    } catch (e) {}
     // #endif
 
     isSubmitting.value = true;
