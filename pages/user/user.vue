@@ -262,7 +262,22 @@ const appStore = useAppStore();
 const hasCheckedInToday = ref(false);
 const statusBarHeight = ref(getStatusBarHeight() || 0);
 const tabBarHeight = ref(getTabBarHeight() || 0);
-const userHeaderPaddingTop = computed(() => (statusBarHeight.value > 0 ? statusBarHeight.value + 4 : 10));
+const userHeaderPaddingTop = computed(() => {
+    // #ifdef MP-WEIXIN
+    try {
+        if (uni.getMenuButtonBoundingClientRect) {
+            const menuBtn = uni.getMenuButtonBoundingClientRect();
+            if (menuBtn && menuBtn.top) {
+                return menuBtn.top + 2;
+            }
+        }
+    } catch (e) {}
+    // #endif
+
+    // #ifndef MP-WEIXIN
+    return statusBarHeight.value > 0 ? statusBarHeight.value + 14 : 24;
+    // #endif
+});
 
 // ── 广告高度，控制底部留白 ──
 const adHeight = ref(0);
@@ -600,19 +615,6 @@ const menuGroups = computed(() => [
                 right_text: `${libraryStore.recentViewed.length}`,
                 click: toHistory,
             },
-            // #ifndef APP-HARMONY
-            ...(appStore.versionConfig?.pay_enabled
-                ? [
-                    {
-                        left_icon: '/static/icons/view-carousel.svg',
-                        left_text: t('autoWallpaper.pageTitle'),
-                        right_text: 'VIP',
-                        badge: 'vip',
-                        click: () => uni.navigateTo({ url: '/pages/settings/rotate' }),
-                    },
-                ]
-                : []),
-            // #endif
             {
                 left_icon: '/static/icons/widgets.svg',
                 left_text: t('widgets.title'),
@@ -763,6 +765,10 @@ onShow(() => {
             display: flex;
             align-items: flex-start;
             gap: 24rpx;
+            /* #ifdef MP-WEIXIN */
+            padding-right: 180rpx;
+            box-sizing: border-box;
+            /* #endif */
             position: relative;
             z-index: 1;
         }

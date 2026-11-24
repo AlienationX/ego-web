@@ -136,13 +136,22 @@ const actualStatusBarHeight = computed(() => {
     return props.statusBarHeight || internalStatusBarHeight.value || getStatusBarHeight() || 0;
 });
 
-// 计算顶部内边距：结合 JS 测量高度与 CSS 环境变量 (var(--status-bar-height) 与 env(safe-area-inset-top)) 多重保底
+// 计算顶部内边距：多端差异化适配
+// 微信端以胶囊顶部精确对齐，App端遵循海外标杆大厂规范保留 14px 开阔呼吸留白
 const headerPaddingTop = computed(() => {
+    // #ifdef MP-WEIXIN
+    if (capsuleInfo.value?.top) {
+        return `${capsuleInfo.value.top}px`;
+    }
+    // #endif
+
+    // #ifndef MP-WEIXIN
     const sHeight = actualStatusBarHeight.value;
     if (sHeight > 0) {
-        return `max(${sHeight + 4}px, calc(var(--status-bar-height, 0px) + 4px), calc(env(safe-area-inset-top, 0px) + 4px))`;
+        return `max(${sHeight + 14}px, calc(var(--status-bar-height, 0px) + 14px), calc(env(safe-area-inset-top, 0px) + 14px))`;
     }
-    return `max(calc(var(--status-bar-height, 0px) + 4px), calc(env(safe-area-inset-top, 0px) + 4px), 10px)`;
+    return `max(calc(var(--status-bar-height, 0px) + 14px), calc(env(safe-area-inset-top, 0px) + 14px), 24px)`;
+    // #endif
 });
 
 // 微信小程序右上角胶囊尺寸与定位

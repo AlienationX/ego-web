@@ -48,8 +48,8 @@ export const CHANNEL = _channel;
  * 国际版/海外版标识（目前主要指 Google Play 渠道包）
  * 业务逻辑中推荐优先使用 IS_INTERNATIONAL，语义明确且便于未来扩展其他海外渠道
  */
-// export const IS_INTERNATIONAL = _channel === 'google';
-export const IS_INTERNATIONAL = true;
+export const IS_INTERNATIONAL = _channel === 'google';
+// export const IS_INTERNATIONAL = true;
 // ─────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────

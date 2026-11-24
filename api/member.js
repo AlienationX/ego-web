@@ -32,6 +32,6 @@ export const apiGetRotateFeed = (data = {}) => {
         url: '/rotate/feed/',
         data,
         method: 'GET',
-        isAuth: true,
+        isAuth: false,
     });
 };

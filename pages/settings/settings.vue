@@ -889,21 +889,21 @@ function handleClick(item) {
 }
 
 function goBack() {
-    // switchTab 返回时 uni-app 会短暂唤醒原生 TabBar，需要在跳转前后压制
-    uni.hideTabBar({ animation: false, fail: () => {} });
-    // #ifdef APP-PLUS
-    setAndroidImmersive(settingsStore.isDark);
-    // #endif
+    // // switchTab 返回时 uni-app 会短暂唤醒原生 TabBar，需要在跳转前后压制
+    // uni.hideTabBar({ animation: false, fail: () => {} });
+    // // #ifdef APP-PLUS
+    // setAndroidImmersive(settingsStore.isDark);
+    // // #endif
     uni.switchTab({
         url: '/pages/user/user',
-        success: () => {
-            // 跳转成功后再压一次（原生层可能在 switchTab 完成后才重绘 TabBar）
-            uni.hideTabBar({ animation: false, fail: () => {} });
-            // #ifdef APP-PLUS
-            setAndroidImmersive(settingsStore.isDark);
-            // #endif
-        },
-        fail: () => uni.redirectTo({ url: '/pages/settings/settings' }),
+        // success: () => {
+        //     // 跳转成功后再压一次（原生层可能在 switchTab 完成后才重绘 TabBar）
+        //     uni.hideTabBar({ animation: false, fail: () => {} });
+        //     // #ifdef APP-PLUS
+        //     setAndroidImmersive(settingsStore.isDark);
+        //     // #endif
+        // },
+        // fail: () => uni.redirectTo({ url: '/pages/settings/settings' }),
     });
 }
 

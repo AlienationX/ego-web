@@ -149,7 +149,22 @@ const userStore = useUserStore();
 
 
 const statusBarHeight = ref(getStatusBarHeight() || 0);
-const heroTopPadding = computed(() => (statusBarHeight.value > 0 ? statusBarHeight.value + 4 : 10));
+const heroTopPadding = computed(() => {
+    // #ifdef MP-WEIXIN
+    try {
+        if (uni.getMenuButtonBoundingClientRect) {
+            const menuBtn = uni.getMenuButtonBoundingClientRect();
+            if (menuBtn && menuBtn.top) {
+                return menuBtn.top + 2;
+            }
+        }
+    } catch (e) {}
+    // #endif
+
+    // #ifndef MP-WEIXIN
+    return statusBarHeight.value > 0 ? statusBarHeight.value + 16 : 24;
+    // #endif
+});
 const appStore = useAppStore();
 const classifyList = computed({
     get: () => appStore.classifyList,
@@ -266,6 +281,11 @@ onShow(() => {
     overflow: hidden; // 防止内部子元素负 margin 撑出滚动条
 
     .hero-header {
+        /* #ifdef MP-WEIXIN */
+        padding-right: 180rpx;
+        box-sizing: border-box;
+        /* #endif */
+
         .title-group {
             display: flex;
             flex-direction: column;

@@ -58,9 +58,9 @@ onLaunch((options) => {
                     setTimeout(() => {
                         applyAndroidEdgeToEdgeLayout();
                     }, 50);
-                    setTimeout(() => {
-                        applyAndroidEdgeToEdgeLayout();
-                    }, 200);
+                    // setTimeout(() => {
+                    //     applyAndroidEdgeToEdgeLayout();
+                    // }, 200);
                 },
             });
         });

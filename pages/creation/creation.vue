@@ -183,7 +183,22 @@ const adFailed = ref(false);
 
 
 const statusBarHeight = computed(() => getStatusBarHeight() || 0);
-const headerPaddingTop = computed(() => (statusBarHeight.value > 0 ? statusBarHeight.value + 4 : 10));
+const headerPaddingTop = computed(() => {
+    // #ifdef MP-WEIXIN
+    try {
+        if (uni.getMenuButtonBoundingClientRect) {
+            const menuBtn = uni.getMenuButtonBoundingClientRect();
+            if (menuBtn && menuBtn.top) {
+                return menuBtn.top + 2;
+            }
+        }
+    } catch (e) {}
+    // #endif
+
+    // #ifndef MP-WEIXIN
+    return statusBarHeight.value > 0 ? statusBarHeight.value + 16 : 24;
+    // #endif
+});
 
 const pagePaddingBottom = computed(() => {
     const baseTabSpace = getTabBarHeight();
@@ -274,6 +289,9 @@ const showComingSoon = () => {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    /* #ifdef MP-WEIXIN */
+    padding-right: 180rpx;
+    /* #endif */
 
     .header-main {
         display: flex;

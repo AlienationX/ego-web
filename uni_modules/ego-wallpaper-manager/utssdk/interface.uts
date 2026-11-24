@@ -13,6 +13,9 @@ export type AutoRotateOptions = {
     frequency?: string;
     target?: SetWallpaperTarget;
     wifiOnly?: boolean;
+    mode?: string;
+    lightWallpaperUrl?: string;
+    darkWallpaperUrl?: string;
     success?: (res: any) => void;
     fail?: (err: any) => void;
     complete?: () => void;

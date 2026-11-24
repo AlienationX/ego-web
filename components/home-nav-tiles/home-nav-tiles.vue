@@ -41,6 +41,24 @@
             </view>
             <text class="pill-item__label">{{ isEn ? 'Specials' : '专题策划' }}</text>
         </view>
+
+        <!-- 4. 自动换壁纸 (鸿蒙端安全隐藏) -->
+        <!-- #ifndef APP-HARMONY -->
+        <view
+            class="pill-item pill-item--rotate"
+            hover-class="pill-item--active"
+            :hover-stay-time="120"
+            @click="goRotate"
+        >
+            <view class="pill-item__icon">
+                <mdi-icon path="/static/icons/view-carousel.svg" size="16px" :color="settingsStore.isDark ? '#f8fafc' : '#ffffff'"></mdi-icon>
+            </view>
+            <text class="pill-item__label">{{ isEn ? 'Auto Wall' : '自动壁纸' }}</text>
+            <view v-if="appStore.versionConfig?.pay_enabled" class="pill-item__vip-badge">
+                <mdi-icon path="/static/icons/crown-circle.svg" size="13px" color="#FBBF24"></mdi-icon>
+            </view>
+        </view>
+        <!-- #endif -->
     </view>
 </template>
 
@@ -49,10 +67,12 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStatusStore } from '@/stores/status.js';
 import { useSettingsStore } from '@/stores/settings.js';
+import { useAppStore } from '@/stores/app.js';
 
 const { t, locale } = useI18n();
 const statusStore = useStatusStore();
 const settingsStore = useSettingsStore();
+const appStore = useAppStore();
 
 const isEn = computed(() => locale.value === 'en');
 
@@ -86,10 +106,16 @@ const goSubjects = () => {
         url: '/pages/app/subjects',
     });
 };
+
+const goRotate = () => {
+    uni.navigateTo({
+        url: '/pages/settings/rotate',
+    });
+};
 </script>
 
 <style lang="scss" scoped>
-// 放置在搜索框正下方，左右内边距保持 20rpx 与全站严格对齐，左对齐紧凑排开
+// 放置在搜索框正下方，左右内边距保持 20rpx 与全站严格对齐，左对齐紧凑排开，支持小屏幕横滑
 .nav-pills-bar {
     display: flex;
     align-items: center;
@@ -98,6 +124,14 @@ const goSubjects = () => {
     padding: 24rpx 20rpx 26rpx;
     box-sizing: border-box;
     width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+        display: none;
+        width: 0;
+        height: 0;
+    }
 }
 
 // 统一黑色药丸胶囊样式：无选中态区分、非等宽自适应、左对齐
@@ -172,6 +206,15 @@ const goSubjects = () => {
         letter-spacing: 0rpx;
         line-height: 1;
         white-space: nowrap;
+    }
+
+    &__vip-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 2rpx;
+        flex-shrink: 0;
+        line-height: 1;
     }
 
     // 饱满圆润数字徽标 (单数字绝对正圆，多数字胶囊圆润)

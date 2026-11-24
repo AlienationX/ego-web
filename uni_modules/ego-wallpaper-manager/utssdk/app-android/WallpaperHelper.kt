@@ -43,6 +43,13 @@ class WallpaperRotateWorker(
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         Log.i("EgoWallpaperManager", "WallpaperRotateWorker triggered by WorkManager")
+        val prefs = applicationContext.getSharedPreferences("ego_wallpaper_rotate_prefs", Context.MODE_PRIVATE)
+        val mode = prefs.getString("rotate_mode", "board") ?: "board"
+        if (mode == "theme") {
+            WallpaperHelper.checkAndApplyThemeWallpaperIfNeeded(applicationContext)
+            return@withContext Result.success()
+        }
+
         val status = WallpaperHelper.executeRotateFromWorker(applicationContext)
         when (status) {
             WallpaperHelper.RotateStatus.VIP_EXPIRED -> {
@@ -71,6 +78,10 @@ object WallpaperHelper {
     private const val KEY_FREQUENCY = "rotate_frequency"
     private const val KEY_TARGET = "rotate_target"
     private const val KEY_WIFI_ONLY = "rotate_wifi_only"
+    private const val KEY_MODE = "rotate_mode"
+    private const val KEY_LIGHT_WALLPAPER = "rotate_light_wallpaper_url"
+    private const val KEY_DARK_WALLPAPER = "rotate_dark_wallpaper_url"
+    private const val KEY_LAST_THEME = "rotate_last_applied_theme"
     private const val CACHE_FILE_NAME = "ego_next_wallpaper_cache.jpg"
     private const val WORK_NAME_PERIODIC = "ego_wallpaper_periodic_work"
 
@@ -126,8 +137,34 @@ object WallpaperHelper {
     }
 
     /**
-     * 启动原生自动轮播服务（双缓冲预加载 + 熄屏无感切换 + WorkManager 官方持久化后台任务）
+     * 启动原生自动轮播服务（支持三大模式：每日必应、深浅双色自适应、画板自定义轮播）
      */
+    fun startAutoRotate(
+        context: Context,
+        feedUrl: String,
+        frequency: String,
+        target: String,
+        wifiOnly: Boolean,
+        mode: String = "board",
+        lightWallpaperUrl: String = "",
+        darkWallpaperUrl: String = ""
+    ) {
+        saveConfig(context, true, feedUrl, frequency, target, wifiOnly, mode, lightWallpaperUrl, darkWallpaperUrl)
+        registerScreenReceiverIfNeeded(context)
+        schedulePeriodicJobIfNeeded(context)
+
+        if (mode == "theme") {
+            // 深浅双色模式：立即检查系统外观并无感自适应应用
+            checkAndApplyThemeWallpaperIfNeeded(context)
+        } else {
+            // 画板或必应模式：在后台预拉取下一张壁纸，准备好本地高速缓存
+            if (feedUrl.isNotBlank()) {
+                prefetchNextWallpaper(context, feedUrl, wifiOnly)
+            }
+        }
+        Log.i(TAG, "startAutoRotate started: mode=$mode, freq=$frequency, target=$target, wifiOnly=$wifiOnly")
+    }
+
     fun startAutoRotate(
         context: Context,
         feedUrl: String,
@@ -135,20 +172,15 @@ object WallpaperHelper {
         target: String,
         wifiOnly: Boolean
     ) {
-        saveConfig(context, true, feedUrl, frequency, target, wifiOnly)
-        registerScreenReceiverIfNeeded(context)
-        schedulePeriodicJobIfNeeded(context)
-
-        // 启动时立即在后台预拉取下一张壁纸，准备好本地高速缓存
-        prefetchNextWallpaper(context, feedUrl, wifiOnly)
-        Log.i(TAG, "startAutoRotate started: freq=$frequency, target=$target, wifiOnly=$wifiOnly")
+        startAutoRotate(context, feedUrl, frequency, target, wifiOnly, "board", "", "")
     }
 
     /**
      * 停止自动轮播服务（注销广播 + 取消 WorkManager 任务 + 清除本地缓存）
      */
     fun stopAutoRotate(context: Context) {
-        saveConfig(context, false, "", "", "", false)
+        saveConfig(context, false, "", "", "", false, "board", "", "")
+        getPrefs(context).edit().remove(KEY_LAST_THEME).apply()
         unregisterScreenReceiver(context)
         cancelWorkManager(context)
         clearCache(context)
@@ -162,46 +194,128 @@ object WallpaperHelper {
         val prefs = getPrefs(context)
         val enabled = prefs.getBoolean(KEY_ENABLED, false)
         if (enabled) {
+            val mode = prefs.getString(KEY_MODE, "board") ?: "board"
             val feedUrl = prefs.getString(KEY_FEED_URL, "") ?: ""
             val wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, true)
 
             registerScreenReceiverIfNeeded(context)
             schedulePeriodicJobIfNeeded(context)
 
-            // 检查若本地无预加载缓存，立即在后台补充预拉取
-            val cacheFile = getCacheFile(context)
-            if (!cacheFile.exists() && feedUrl.isNotBlank()) {
-                prefetchNextWallpaper(context, feedUrl, wifiOnly)
+            if (mode == "theme") {
+                checkAndApplyThemeWallpaperIfNeeded(context)
+            } else {
+                val cacheFile = getCacheFile(context)
+                if (!cacheFile.exists() && feedUrl.isNotBlank()) {
+                    prefetchNextWallpaper(context, feedUrl, wifiOnly)
+                }
             }
-            Log.i(TAG, "init: Restored auto rotate service from prefs")
+            Log.i(TAG, "init: Restored auto rotate service from prefs (mode=$mode)")
         }
+    }
+
+    /**
+     * 检测 Android 系统当前是否为深色模式 (Dark Theme)
+     */
+    fun isSystemDarkMode(context: Context): Boolean {
+        val uiMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        return uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+    }
+
+    /**
+     * 从本地文件路径或网络 URL 解码并应用系统壁纸
+     */
+    fun applyWallpaperByUrlOrPath(context: Context, urlOrPath: String, target: String) {
+        if (urlOrPath.isBlank()) return
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val bitmap: Bitmap? = if (urlOrPath.startsWith("http://") || urlOrPath.startsWith("https://")) {
+                    downloadBitmap(urlOrPath)
+                } else {
+                    val cleanPath = urlOrPath.replace("file://", "")
+                    BitmapFactory.decodeFile(cleanPath)
+                }
+                if (bitmap != null) {
+                    applyBitmapToWallpaper(context, bitmap, target)
+                    Log.i(TAG, "applyWallpaperByUrlOrPath succeeded: $urlOrPath")
+                } else {
+                    Log.w(TAG, "applyWallpaperByUrlOrPath failed to decode bitmap: $urlOrPath")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "applyWallpaperByUrlOrPath error", e)
+            }
+        }
+    }
+
+    /**
+     * 深浅双色模式自适应检测与静默切换（无需打开 App，由屏幕广播与 WorkManager 在后台静默触发）
+     */
+    fun checkAndApplyThemeWallpaperIfNeeded(context: Context): Boolean {
+        val prefs = getPrefs(context)
+        val enabled = prefs.getBoolean(KEY_ENABLED, false)
+        if (!enabled) return false
+
+        val mode = prefs.getString(KEY_MODE, "board") ?: "board"
+        if (mode != "theme") return false
+
+        val isDark = isSystemDarkMode(context)
+        val currentTheme = if (isDark) "dark" else "light"
+        val lastTheme = prefs.getString(KEY_LAST_THEME, "")
+        val target = prefs.getString(KEY_TARGET, "lock") ?: "lock"
+
+        if (currentTheme != lastTheme) {
+            val targetWallUrl = if (isDark) {
+                prefs.getString(KEY_DARK_WALLPAPER, "") ?: ""
+            } else {
+                prefs.getString(KEY_LIGHT_WALLPAPER, "") ?: ""
+            }
+
+            if (targetWallUrl.isNotBlank()) {
+                Log.i(TAG, "Auto switching theme wallpaper: from '$lastTheme' to '$currentTheme' (isDark=$isDark)")
+                applyWallpaperByUrlOrPath(context, targetWallUrl, target)
+                prefs.edit().putString(KEY_LAST_THEME, currentTheme).apply()
+                return true
+            }
+        }
+        return false
     }
 
     private fun registerScreenReceiverIfNeeded(context: Context) {
         val prefs = getPrefs(context)
+        val mode = prefs.getString(KEY_MODE, "board") ?: "board"
         val frequency = prefs.getString(KEY_FREQUENCY, "unlock") ?: "unlock"
-        if (frequency != "unlock") {
+        val needReceiver = (mode == "theme") || (frequency == "unlock")
+
+        if (!needReceiver) {
             unregisterScreenReceiver(context)
             return
         }
 
         if (screenReceiver == null) {
             val filter = IntentFilter().apply {
-                // 仅监听熄屏事件：在黑屏瞬间静默应用已预加载的壁纸，亮屏时稳定展示且绝不二次切换
+                // 监听熄屏与点亮解锁事件：在黑屏或解锁瞬间自动完成壁纸核对与静默应用，绝不给用户闪烁或卡顿感
                 addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_USER_PRESENT)
             }
             screenReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, intent: Intent?) {
                     val action = intent?.action
-                    if (action == Intent.ACTION_SCREEN_OFF) {
+                    val appContext = context.applicationContext ?: context
+                    val currentPrefs = getPrefs(appContext)
+                    val currentMode = currentPrefs.getString(KEY_MODE, "board") ?: "board"
+
+                    if (currentMode == "theme") {
+                        // 深浅双色模式：熄屏或解锁屏幕瞬间，自动核对当前系统深浅色，并在切换时0延迟静默应用壁纸！
+                        checkAndApplyThemeWallpaperIfNeeded(appContext)
+                    } else if (action == Intent.ACTION_SCREEN_OFF) {
                         Log.d(TAG, "Screen OFF received: silently applying next cached wallpaper")
-                        triggerRotate(context.applicationContext ?: context, true)
+                        triggerRotate(appContext, true)
                     }
                 }
             }
             try {
                 context.applicationContext.registerReceiver(screenReceiver, filter)
-                Log.i(TAG, "ScreenStateReceiver registered for ACTION_SCREEN_OFF")
+                Log.i(TAG, "ScreenStateReceiver registered (mode=$mode, frequency=$frequency)")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to register screen receiver", e)
             }
@@ -225,11 +339,25 @@ object WallpaperHelper {
      */
     private fun schedulePeriodicJobIfNeeded(context: Context) {
         val prefs = getPrefs(context)
+        val mode = prefs.getString(KEY_MODE, "board") ?: "board"
         val frequency = prefs.getString(KEY_FREQUENCY, "daily") ?: "daily"
         val wifiOnly = prefs.getBoolean(KEY_WIFI_ONLY, true)
 
         try {
             val workManager = WorkManager.getInstance(context)
+
+            if (mode == "theme") {
+                // 深浅双色自适应模式：配置 2 小时周期的轻量兜底 Worker，无任何网络消耗，仅校准深浅色壁纸
+                val themeWorker = PeriodicWorkRequestBuilder<WallpaperRotateWorker>(2, TimeUnit.HOURS)
+                    .build()
+                workManager.enqueueUniquePeriodicWork(
+                    WORK_NAME_PERIODIC,
+                    ExistingPeriodicWorkPolicy.UPDATE,
+                    themeWorker
+                )
+                Log.i(TAG, "WorkManager scheduled for theme mode check (2h)")
+                return
+            }
 
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(if (wifiOnly) NetworkType.UNMETERED else NetworkType.CONNECTED)
@@ -619,7 +747,10 @@ object WallpaperHelper {
         feedUrl: String,
         frequency: String,
         target: String,
-        wifiOnly: Boolean
+        wifiOnly: Boolean,
+        mode: String = "board",
+        lightWallpaperUrl: String = "",
+        darkWallpaperUrl: String = ""
     ) {
         getPrefs(context).edit().apply {
             putBoolean(KEY_ENABLED, enabled)
@@ -627,6 +758,9 @@ object WallpaperHelper {
             putString(KEY_FREQUENCY, frequency)
             putString(KEY_TARGET, target)
             putBoolean(KEY_WIFI_ONLY, wifiOnly)
+            putString(KEY_MODE, mode)
+            putString(KEY_LIGHT_WALLPAPER, lightWallpaperUrl)
+            putString(KEY_DARK_WALLPAPER, darkWallpaperUrl)
             apply()
         }
     }
