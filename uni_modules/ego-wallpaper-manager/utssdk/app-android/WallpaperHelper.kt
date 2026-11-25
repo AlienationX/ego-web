@@ -154,8 +154,8 @@ object WallpaperHelper {
         schedulePeriodicJobIfNeeded(context)
 
         if (mode == "theme") {
-            // 深浅双色模式：立即检查系统外观并无感自适应应用
-            checkAndApplyThemeWallpaperIfNeeded(context)
+            // 深浅双色模式：立即检查系统外观并强制应用当前外观壁纸
+            checkAndApplyThemeWallpaperIfNeeded(context, force = true)
         } else {
             // 画板或必应模式：在后台预拉取下一张壁纸，准备好本地高速缓存
             if (feedUrl.isNotBlank()) {
@@ -217,6 +217,15 @@ object WallpaperHelper {
      * 检测 Android 系统当前是否为深色模式 (Dark Theme)
      */
     fun isSystemDarkMode(context: Context): Boolean {
+        try {
+            val uiModeManager = context.getSystemService(Context.UI_MODE_SERVICE) as? android.app.UiModeManager
+            if (uiModeManager != null) {
+                if (uiModeManager.nightMode == android.app.UiModeManager.MODE_NIGHT_YES) return true
+                if (uiModeManager.nightMode == android.app.UiModeManager.MODE_NIGHT_NO) return false
+            }
+        } catch (e: Exception) {
+            // ignore
+        }
         val uiMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
         return uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
     }
@@ -249,7 +258,7 @@ object WallpaperHelper {
     /**
      * 深浅双色模式自适应检测与静默切换（无需打开 App，由屏幕广播与 WorkManager 在后台静默触发）
      */
-    fun checkAndApplyThemeWallpaperIfNeeded(context: Context): Boolean {
+    fun checkAndApplyThemeWallpaperIfNeeded(context: Context, force: Boolean = false): Boolean {
         val prefs = getPrefs(context)
         val enabled = prefs.getBoolean(KEY_ENABLED, false)
         if (!enabled) return false
@@ -262,7 +271,7 @@ object WallpaperHelper {
         val lastTheme = prefs.getString(KEY_LAST_THEME, "")
         val target = prefs.getString(KEY_TARGET, "lock") ?: "lock"
 
-        if (currentTheme != lastTheme) {
+        if (force || currentTheme != lastTheme) {
             val targetWallUrl = if (isDark) {
                 prefs.getString(KEY_DARK_WALLPAPER, "") ?: ""
             } else {
@@ -270,7 +279,7 @@ object WallpaperHelper {
             }
 
             if (targetWallUrl.isNotBlank()) {
-                Log.i(TAG, "Auto switching theme wallpaper: from '$lastTheme' to '$currentTheme' (isDark=$isDark)")
+                Log.i(TAG, "Auto switching theme wallpaper (force=$force): from '$lastTheme' to '$currentTheme' (isDark=$isDark)")
                 applyWallpaperByUrlOrPath(context, targetWallUrl, target)
                 prefs.edit().putString(KEY_LAST_THEME, currentTheme).apply()
                 return true

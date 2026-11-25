@@ -30,6 +30,11 @@
                     <mdi-icon path="/static/icons/folder-plus-outline.svg" size="36px"
                         :color="settingsStore.isDark ? '#4b5563' : '#cbd5e1'"></mdi-icon>
                     <text class="empty-text">{{ t('board.noBoardsYet') }}</text>
+                    <text class="empty-sub-text">快去「我的收藏」将心仪壁纸添加到画板中吧</text>
+                    <button class="empty-action-btn" @click="goToFavoritePage">
+                        <mdi-icon path="/static/icons/bookmark-multiple.svg" size="15px" color="#ffffff"></mdi-icon>
+                        <text class="btn-text">前往「我的收藏」添加壁纸</text>
+                    </button>
                 </view>
 
                 <view v-else class="board-items">
@@ -126,8 +131,33 @@ const loadBoards = async () => {
     }
 };
 
+const goToFavoritePage = () => {
+    close();
+    uni.navigateTo({
+        url: '/pages/app/favorite?tab=boards',
+    });
+};
+
 const selectBoard = async (board) => {
     if (!targetWallIds.value.length) {
+        if (!board.items_count || board.items_count === 0) {
+            uni.showModal({
+                title: '画板为空',
+                content: `画板「${board.name}」内暂无壁纸，是否前往「我的收藏」添加壁纸？`,
+                confirmText: '去添加壁纸',
+                cancelText: '仍然选择',
+                success: (modalRes) => {
+                    if (modalRes.confirm) {
+                        close();
+                        uni.navigateTo({ url: '/pages/app/favorite?tab=boards' });
+                    } else {
+                        emit('saved', { board, wallIds: [] });
+                        close();
+                    }
+                },
+            });
+            return;
+        }
         emit('saved', { board, wallIds: [] });
         close();
         return;
@@ -177,14 +207,27 @@ const handleCreateConfirm = async (name) => {
             wall_ids: targetWallIds.value,
         });
         uni.hideLoading();
+        emit('created', res?.data);
+        if (!targetWallIds.value.length && res?.data) {
+            emit('saved', { board: res.data, wallIds: [] });
+            close();
+            uni.showModal({
+                title: '画板创建成功',
+                content: `画板「${trimmed}」已创建，当前为空，是否前往「我的收藏」添加壁纸？`,
+                confirmText: '去添加壁纸',
+                cancelText: '稍后再去',
+                success: (modalRes) => {
+                    if (modalRes.confirm) {
+                        uni.navigateTo({ url: '/pages/app/favorite?tab=boards' });
+                    }
+                },
+            });
+            return;
+        }
         uni.showToast({
             title: t('board.createSuccess'),
             icon: 'none',
         });
-        emit('created', res?.data);
-        if (!targetWallIds.value.length && res?.data) {
-            emit('saved', { board: res.data, wallIds: [] });
-        }
         close();
     } catch (e) {
         uni.hideLoading();
@@ -293,6 +336,33 @@ defineExpose({
     .empty-text {
         font-size: 26rpx;
         color: #94a3b8;
+    }
+
+    .empty-sub-text {
+        font-size: 22rpx;
+        color: #94a3b8;
+        text-align: center;
+        max-width: 480rpx;
+    }
+
+    .empty-action-btn {
+        margin-top: 12rpx;
+        height: 72rpx;
+        padding: 0 32rpx;
+        border-radius: 999rpx;
+        background: #4f46e5;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10rpx;
+        box-shadow: 0 4rpx 14rpx rgba(79, 70, 229, 0.3);
+
+        .btn-text {
+            font-size: 24rpx;
+            font-weight: 600;
+            color: #ffffff;
+        }
     }
 }
 

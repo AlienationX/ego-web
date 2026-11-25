@@ -263,17 +263,82 @@
 
                         <!-- 画板轮播模式专属 Feed -->
                         <view v-else-if="form.mode === 'board'" class="mode-panel">
-                            <view class="panel-row" @click="openBoardPicker">
-                                <view class="row-left">
-                                    <text class="row-title">轮播画板</text>
-                                    <text class="row-desc">从你的收藏画板中按策略轮播</text>
+                            <!-- 画板面板头部与快捷管理 -->
+                            <view class="board-section-header">
+                                <view class="header-left">
+                                    <text class="header-title">选择轮播画板</text>
+                                    <text class="header-sub">点击画板直接设为轮播源</text>
                                 </view>
-                                <view class="board-picker-trigger">
-                                    <text class="trigger-text" :class="{ 'is-selected': selectedBoardName }">
-                                        {{ selectedBoardName || t('autoWallpaper.pickBoardPlaceholder') }}
-                                    </text>
-                                    <mdi-icon path="/static/icons/chevron-right.svg" size="15px"
-                                        :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></mdi-icon>
+                                <view class="header-right-action" @click="goToFavoriteWithTab('boards')">
+                                    <mdi-icon path="/static/icons/bookmark-multiple.svg" size="14px" color="#6366f1"></mdi-icon>
+                                    <text class="action-text">去「我的收藏」添加</text>
+                                    <mdi-icon path="/static/icons/chevron-right.svg" size="13px" color="#6366f1"></mdi-icon>
+                                </view>
+                            </view>
+
+                            <!-- 场景 1：无任何画板 -->
+                            <view v-if="boardsList.length === 0" class="board-empty-card">
+                                <view class="empty-icon-box">
+                                    <mdi-icon path="/static/icons/folder-plus-outline.svg" size="28px" color="#6366f1"></mdi-icon>
+                                </view>
+                                <view class="empty-text-wrap">
+                                    <text class="empty-title">您还没有创建收藏画板</text>
+                                    <text class="empty-desc">前往「我的收藏」创建画板并归类心仪壁纸，即可在此开启专属轮播！</text>
+                                </view>
+                                <button class="empty-btn" @click="goToFavoriteWithTab('boards')">
+                                    <mdi-icon path="/static/icons/plus.svg" size="15px" color="#ffffff"></mdi-icon>
+                                    <text class="btn-text">前往「我的收藏」添加壁纸</text>
+                                </button>
+                            </view>
+
+                            <!-- 场景 2：直接平铺展示所有收藏画板 -->
+                            <view v-else class="board-cards-container">
+                                <scroll-view class="board-cards-scroll" scroll-x :show-scrollbar="false">
+                                    <view class="board-cards-list">
+                                        <view class="board-card-item" v-for="b in boardsList" :key="b.id"
+                                            :class="{ 'is-selected': form.board === b.id }"
+                                            @click="handleQuickSelectBoard(b)">
+                                            <view class="card-thumb-wrap">
+                                                <image v-if="formatBoardCover(b)" class="cover-image" :src="formatBoardCover(b)" mode="aspectFill"></image>
+                                                <view v-else class="empty-cover-thumb">
+                                                    <mdi-icon path="/static/icons/image-outline.svg" size="22px"
+                                                        :color="settingsStore.isDark ? '#64748b' : '#94a3b8'"></mdi-icon>
+                                                </view>
+                                                <view v-if="form.board === b.id" class="card-check-badge">
+                                                    <mdi-icon path="/static/icons/check.svg" size="11px" color="#ffffff"></mdi-icon>
+                                                </view>
+                                            </view>
+                                            <view class="card-meta">
+                                                <text class="card-name">{{ b.name }}</text>
+                                                <text class="card-count" :class="{ 'is-zero': !b.items_count }">
+                                                    {{ b.items_count ? `${b.items_count} 张壁纸` : '暂无壁纸' }}
+                                                </text>
+                                            </view>
+                                        </view>
+
+                                        <!-- 新建/添加壁纸快捷卡片 -->
+                                        <view class="board-card-item card-item-add" @click="goToFavoriteWithTab('boards')">
+                                            <view class="add-thumb-wrap">
+                                                <mdi-icon path="/static/icons/plus.svg" size="22px" color="#6366f1"></mdi-icon>
+                                            </view>
+                                            <view class="card-meta">
+                                                <text class="card-name">添加壁纸</text>
+                                                <text class="card-count">去我的收藏</text>
+                                            </view>
+                                        </view>
+                                    </view>
+                                </scroll-view>
+
+                                <!-- 所选画板为空时的友好引导横条 -->
+                                <view v-if="isCurrentBoardEmpty" class="selected-empty-warning" @click="goToFavoriteWithTab('boards')">
+                                    <view class="warning-left">
+                                        <mdi-icon path="/static/icons/information-symbol.svg" size="15px" color="#f59e0b"></mdi-icon>
+                                        <text class="warning-text">画板「{{ form.board_name }}」暂无壁纸</text>
+                                    </view>
+                                    <view class="warning-action">
+                                        <text class="action-text">去添加壁纸</text>
+                                        <mdi-icon path="/static/icons/chevron-right.svg" size="13px" color="#f59e0b"></mdi-icon>
+                                    </view>
                                 </view>
                             </view>
 
@@ -502,18 +567,82 @@
 
                         <!-- Tab 3: 自定义画板轮播专属配置 -->
                         <view v-else-if="form.mode === 'board'" class="mode-panel mode-panel--board">
-                            <!-- 画板选择项 -->
-                            <view class="panel-row" @click="openBoardPicker">
-                                <view class="row-left">
-                                    <text class="row-title">轮播画板</text>
-                                    <text class="row-desc">从你的收藏画板中按策略定时更换</text>
+                            <!-- 画板面板头部与快捷管理 -->
+                            <view class="board-section-header">
+                                <view class="header-left">
+                                    <text class="header-title">选择轮播画板</text>
+                                    <text class="header-sub">点击画板直接设为轮播源</text>
                                 </view>
-                                <view class="row-right board-picker-trigger">
-                                    <text class="trigger-text" :class="{ 'is-selected': selectedBoardName }">
-                                        {{ selectedBoardName || t('autoWallpaper.pickBoardPlaceholder') }}
-                                    </text>
-                                    <mdi-icon path="/static/icons/chevron-right.svg" size="16px"
-                                        :color="settingsStore.isDark ? '#94a3b8' : '#64748b'"></mdi-icon>
+                                <view class="header-right-action" @click="goToFavoriteWithTab('boards')">
+                                    <mdi-icon path="/static/icons/bookmark-multiple.svg" size="14px" color="#6366f1"></mdi-icon>
+                                    <text class="action-text">去「我的收藏」添加</text>
+                                    <mdi-icon path="/static/icons/chevron-right.svg" size="13px" color="#6366f1"></mdi-icon>
+                                </view>
+                            </view>
+
+                            <!-- 场景 1：无任何画板 -->
+                            <view v-if="boardsList.length === 0" class="board-empty-card">
+                                <view class="empty-icon-box">
+                                    <mdi-icon path="/static/icons/folder-plus-outline.svg" size="28px" color="#6366f1"></mdi-icon>
+                                </view>
+                                <view class="empty-text-wrap">
+                                    <text class="empty-title">您还没有创建收藏画板</text>
+                                    <text class="empty-desc">前往「我的收藏」创建画板并归类心仪壁纸，即可在此开启专属轮播！</text>
+                                </view>
+                                <button class="empty-btn" @click="goToFavoriteWithTab('boards')">
+                                    <mdi-icon path="/static/icons/plus.svg" size="15px" color="#ffffff"></mdi-icon>
+                                    <text class="btn-text">前往「我的收藏」添加壁纸</text>
+                                </button>
+                            </view>
+
+                            <!-- 场景 2：直接平铺展示所有收藏画板 -->
+                            <view v-else class="board-cards-container">
+                                <scroll-view class="board-cards-scroll" scroll-x :show-scrollbar="false">
+                                    <view class="board-cards-list">
+                                        <view class="board-card-item" v-for="b in boardsList" :key="b.id"
+                                            :class="{ 'is-selected': form.board === b.id }"
+                                            @click="handleQuickSelectBoard(b)">
+                                            <view class="card-thumb-wrap">
+                                                <image v-if="formatBoardCover(b)" class="cover-image" :src="formatBoardCover(b)" mode="aspectFill"></image>
+                                                <view v-else class="empty-cover-thumb">
+                                                    <mdi-icon path="/static/icons/image-outline.svg" size="22px"
+                                                        :color="settingsStore.isDark ? '#64748b' : '#94a3b8'"></mdi-icon>
+                                                </view>
+                                                <view v-if="form.board === b.id" class="card-check-badge">
+                                                    <mdi-icon path="/static/icons/check.svg" size="11px" color="#ffffff"></mdi-icon>
+                                                </view>
+                                            </view>
+                                            <view class="card-meta">
+                                                <text class="card-name">{{ b.name }}</text>
+                                                <text class="card-count" :class="{ 'is-zero': !b.items_count }">
+                                                    {{ b.items_count ? `${b.items_count} 张壁纸` : '暂无壁纸' }}
+                                                </text>
+                                            </view>
+                                        </view>
+
+                                        <!-- 新建/添加壁纸快捷卡片 -->
+                                        <view class="board-card-item card-item-add" @click="goToFavoriteWithTab('boards')">
+                                            <view class="add-thumb-wrap">
+                                                <mdi-icon path="/static/icons/plus.svg" size="22px" color="#6366f1"></mdi-icon>
+                                            </view>
+                                            <view class="card-meta">
+                                                <text class="card-name">添加壁纸</text>
+                                                <text class="card-count">去我的收藏</text>
+                                            </view>
+                                        </view>
+                                    </view>
+                                </scroll-view>
+
+                                <!-- 所选画板为空时的友好引导横条 -->
+                                <view v-if="isCurrentBoardEmpty" class="selected-empty-warning" @click="goToFavoriteWithTab('boards')">
+                                    <view class="warning-left">
+                                        <mdi-icon path="/static/icons/information-symbol.svg" size="15px" color="#f59e0b"></mdi-icon>
+                                        <text class="warning-text">画板「{{ form.board_name }}」暂无壁纸</text>
+                                    </view>
+                                    <view class="warning-action">
+                                        <text class="action-text">去添加壁纸</text>
+                                        <mdi-icon path="/static/icons/chevron-right.svg" size="13px" color="#f59e0b"></mdi-icon>
+                                    </view>
                                 </view>
                             </view>
 
@@ -806,6 +935,49 @@ const darkFeedUrl = computed(() => {
     return `${feedUrl.value}&theme=dark`;
 });
 
+// 格式化画板封面图片
+const formatBoardCover = (board) => {
+    if (board?.preview_images && board.preview_images[0]) {
+        let u = board.preview_images[0];
+        let full = u.startsWith('http://') || u.startsWith('https://') ? u : `${PICS_BASE_URL}/${u.replace(/^\/+/, '')}`;
+        if (full.includes('/pics/')) {
+            full = full.replace(/(\/?)pics\//, '$1thumbs/').replace(/\.[^/.]+$/, '_small.webp');
+        }
+        return full;
+    }
+    return '';
+};
+
+// 当前选中的画板对象
+const currentSelectedBoard = computed(() => {
+    if (!form.value.board) return null;
+    return boardsList.value.find((b) => b.id === form.value.board) || null;
+});
+
+// 当前画板是否为空
+const isCurrentBoardEmpty = computed(() => {
+    if (!currentSelectedBoard.value) return false;
+    return !currentSelectedBoard.value.items_count || currentSelectedBoard.value.items_count === 0;
+});
+
+// 快速在页面卡片上点击切换画板
+const handleQuickSelectBoard = (b) => {
+    form.value.board = b.id;
+    form.value.board_name = b.name;
+    if (!b.items_count || b.items_count === 0) {
+        uni.showToast({ title: `已选「${b.name}」，当前画板暂无壁纸`, icon: 'none' });
+    } else {
+        uni.showToast({ title: `已选择画板「${b.name}」`, icon: 'none' });
+    }
+};
+
+// 跳转到我的收藏页面
+const goToFavoriteWithTab = (tab = 'boards') => {
+    uni.navigateTo({
+        url: `/pages/app/favorite?tab=${tab}`,
+    });
+};
+
 // 前端时区转换：后端统一返回标准 UTC 时间，由前端直接解析转换为用户手机本地时区时间展示
 const formatRotateTime = (timeStr) => {
     if (!timeStr) return '';
@@ -1095,8 +1267,13 @@ const pickFromAlbum = (slot) => {
         sourceType: ['album'],
         sizeType: ['original'],
         success: (res) => {
-            const tempFilePath = res.tempFilePaths?.[0];
+            let tempFilePath = res.tempFilePaths?.[0];
             if (tempFilePath) {
+                // #ifdef APP-PLUS
+                try {
+                    tempFilePath = plus.io.convertLocalFileSystemURL(tempFilePath);
+                } catch (e) {}
+                // #endif
                 onWallpaperSelected({
                     slot,
                     wallpaper: {
@@ -1183,6 +1360,7 @@ const handleTestRotate = async () => {
         const res = await apiGetRotateFeed({
             token: form.value.rotate_token || '',
             mode: form.value.mode || 'bing',
+            board_id: form.value.board || '',
         });
         uni.hideLoading();
         if (res?.data) {
@@ -1327,14 +1505,23 @@ const executeSaveConfig = async (showSuccessToast = true) => {
         // #ifdef APP
         if (currentPlatform.value === 'android') {
             if (form.value.enabled) {
+                const formatWallUrl = (wall) => {
+                    if (!wall?.url) return '';
+                    let u = wall.url;
+                    if (u.startsWith('http://') || u.startsWith('https://') || u.startsWith('file://') || u.startsWith('/')) {
+                        return u;
+                    }
+                    return `${PICS_BASE_URL}/${u.replace(/^\/+/, '')}`;
+                };
+
                 startAutoRotate({
                     feedUrl: feedUrl.value,
                     frequency: form.value.frequency || 'unlock',
                     target: form.value.target || 'lock',
                     wifiOnly: form.value.wifi_only !== false,
                     mode: form.value.mode,
-                    lightWallpaperUrl: form.value.light_wallpaper?.url || '',
-                    darkWallpaperUrl: form.value.dark_wallpaper?.url || '',
+                    lightWallpaperUrl: formatWallUrl(form.value.light_wallpaper),
+                    darkWallpaperUrl: formatWallUrl(form.value.dark_wallpaper),
                 });
             } else {
                 stopAutoRotate();
@@ -2315,6 +2502,281 @@ const handleSaveConfig = () => {
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
+            }
+        }
+    }
+
+    /* 画板面板头部与快捷管理 */
+    .board-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 4rpx 0 16rpx;
+
+        .header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4rpx;
+
+            .header-title {
+                font-size: 28rpx;
+                font-weight: 700;
+                color: var(--text-primary);
+            }
+
+            .header-sub {
+                font-size: 22rpx;
+                color: var(--text-tertiary);
+            }
+        }
+
+        .header-right-action {
+            display: flex;
+            align-items: center;
+            gap: 6rpx;
+            padding: 8rpx 18rpx;
+            border-radius: 999rpx;
+            background: rgba(99, 102, 241, 0.08);
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+
+            &:active {
+                opacity: 0.8;
+            }
+
+            .action-text {
+                font-size: 22rpx;
+                font-weight: 600;
+                color: #6366f1;
+            }
+        }
+    }
+
+    /* 空画板引导大卡片 */
+    .board-empty-card {
+        padding: 40rpx 30rpx;
+        border-radius: 24rpx;
+        background: var(--panel-background-strong, rgba(120, 120, 128, 0.08));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 16rpx;
+        margin: 10rpx 0 16rpx;
+
+        .empty-icon-box {
+            width: 72rpx;
+            height: 72rpx;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-text-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8rpx;
+
+            .empty-title {
+                font-size: 28rpx;
+                font-weight: 700;
+                color: var(--text-primary);
+            }
+
+            .empty-desc {
+                font-size: 22rpx;
+                color: var(--text-tertiary);
+                line-height: 1.45;
+                max-width: 480rpx;
+            }
+        }
+
+        .empty-btn {
+            margin-top: 10rpx;
+            height: 76rpx;
+            padding: 0 36rpx;
+            border-radius: 999rpx;
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10rpx;
+            box-shadow: 0 4rpx 14rpx rgba(79, 70, 229, 0.3);
+
+            .btn-text {
+                font-size: 24rpx;
+                font-weight: 600;
+                color: #ffffff;
+            }
+        }
+    }
+
+    /* 画板直接平铺横滑容器 */
+    .board-cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 16rpx;
+        margin-bottom: 8rpx;
+
+        .board-cards-scroll {
+            width: 100%;
+            white-space: nowrap;
+        }
+
+        .board-cards-list {
+            display: inline-flex;
+            gap: 16rpx;
+            padding: 6rpx 4rpx 12rpx;
+
+            .board-card-item {
+                width: 180rpx;
+                flex-shrink: 0;
+                background: var(--panel-background-strong, rgba(120, 120, 128, 0.08));
+                border-radius: 20rpx;
+                padding: 12rpx;
+                display: flex;
+                flex-direction: column;
+                gap: 10rpx;
+                cursor: pointer;
+                border: 2rpx solid transparent;
+                transition: all 0.2s ease;
+                box-sizing: border-box;
+
+                &:active {
+                    transform: scale(0.97);
+                }
+
+                &.is-selected {
+                    border-color: #4f46e5;
+                    background: rgba(99, 102, 241, 0.08);
+                    box-shadow: 0 4rpx 14rpx rgba(79, 70, 229, 0.25);
+                }
+
+                .card-thumb-wrap {
+                    width: 100%;
+                    height: 140rpx;
+                    border-radius: 14rpx;
+                    overflow: hidden;
+                    position: relative;
+                    background: rgba(0, 0, 0, 0.06);
+
+                    .cover-image {
+                        width: 100%;
+                        height: 100%;
+                        display: block;
+                    }
+
+                    .empty-cover-thumb {
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .card-check-badge {
+                        position: absolute;
+                        top: 8rpx;
+                        right: 8rpx;
+                        width: 32rpx;
+                        height: 32rpx;
+                        border-radius: 50%;
+                        background: #4f46e5;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.3);
+                    }
+                }
+
+                .card-meta {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4rpx;
+
+                    .card-name {
+                        font-size: 24rpx;
+                        font-weight: 700;
+                        color: var(--text-primary);
+                        overflow: hidden;
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                    }
+
+                    .card-count {
+                        font-size: 20rpx;
+                        color: var(--text-tertiary);
+
+                        &.is-zero {
+                            color: #f59e0b;
+                        }
+                    }
+                }
+
+                &.card-item-add {
+                    border: 2rpx dashed rgba(99, 102, 241, 0.35);
+                    background: rgba(99, 102, 241, 0.04);
+                    align-items: center;
+                    justify-content: center;
+
+                    .add-thumb-wrap {
+                        width: 100%;
+                        height: 140rpx;
+                        border-radius: 14rpx;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .card-meta {
+                        align-items: center;
+                        text-align: center;
+
+                        .card-name {
+                            color: #4f46e5;
+                        }
+                    }
+                }
+            }
+        }
+
+        /* 选中的画板为空时的友好警告条 */
+        .selected-empty-warning {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14rpx 20rpx;
+            border-radius: 16rpx;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1rpx solid rgba(245, 158, 11, 0.25);
+            cursor: pointer;
+
+            .warning-left {
+                display: flex;
+                align-items: center;
+                gap: 10rpx;
+                flex: 1;
+
+                .warning-text {
+                    font-size: 22rpx;
+                    color: #d97706;
+                    font-weight: 500;
+                }
+            }
+
+            .warning-action {
+                display: flex;
+                align-items: center;
+                gap: 4rpx;
+                flex-shrink: 0;
+
+                .action-text {
+                    font-size: 22rpx;
+                    font-weight: 700;
+                    color: #d97706;
+                }
             }
         }
     }

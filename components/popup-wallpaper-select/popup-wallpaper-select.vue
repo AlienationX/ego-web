@@ -83,6 +83,9 @@
                             <mdi-icon path="/static/icons/image-outline.svg" size="36px"
                                 :color="settingsStore.isDark ? '#4b5563' : '#cbd5e1'"></mdi-icon>
                             <text class="empty-text">画板内暂无壁纸</text>
+                            <button class="empty-action-btn" @click="goToFavoritePage">
+                                前往「我的收藏」添加壁纸
+                            </button>
                         </view>
                         <view v-else class="wall-grid">
                             <view class="wall-card" v-for="item in boardWallList" :key="item.id" @click="handleSelectWallpaper(item)">
@@ -103,6 +106,9 @@
                             <mdi-icon path="/static/icons/folder-plus-outline.svg" size="36px"
                                 :color="settingsStore.isDark ? '#4b5563' : '#cbd5e1'"></mdi-icon>
                             <text class="empty-text">您还没有创建画板</text>
+                            <button class="empty-action-btn" @click="goToFavoritePage">
+                                前往「我的收藏」创建画板
+                            </button>
                         </view>
                         <view v-else class="board-items-wrap">
                             <view class="board-item-pill" v-for="b in boardsList" :key="b.id" @click="handlePickBoard(b)">
@@ -305,6 +311,13 @@ const onReachBottom = () => {
     if (activeTab.value === 'favorite' && !noMoreFav.value) {
         loadFavorites(false);
     }
+};
+
+const goToFavoritePage = () => {
+    close();
+    uni.navigateTo({
+        url: '/pages/app/favorite?tab=boards',
+    });
 };
 
 defineExpose({
@@ -608,6 +621,21 @@ defineExpose({
     .empty-text {
         font-size: 22rpx;
         color: var(--text-tertiary, #94a3b8);
+    }
+
+    .empty-action-btn {
+        margin-top: 12rpx;
+        height: 64rpx;
+        padding: 0 28rpx;
+        border-radius: 999rpx;
+        background: #4f46e5;
+        color: #ffffff;
+        font-size: 22rpx;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4rpx 12rpx rgba(79, 70, 229, 0.28);
     }
 }
 

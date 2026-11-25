@@ -250,6 +250,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { onLoad } from '@dcloudio/uni-app';
 import { useTranslateParams } from '@/utils/i18n.js';
 import { useSettingsStore } from '@/stores/settings.js';
 import { useAppStore } from '@/stores/app.js';
@@ -320,8 +321,16 @@ const isAllSelected = computed(() => {
     return wallpaperList.value.length > 0 && selectedIds.value.size === wallpaperList.value.length;
 });
 
+onLoad((options) => {
+    if (options?.tab === 'boards') {
+        switchTab('boards');
+    }
+});
+
 onMounted(() => {
-    fetchFavoriteList(true);
+    if (activeTab.value === 'all') {
+        fetchFavoriteList(true);
+    }
     if (appStore.versionConfig?.pay_enabled) {
         fetchBoardsList();
     }
